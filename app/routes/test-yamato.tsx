@@ -1,6 +1,7 @@
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
-import { YamatoChat } from "../components/YamatoChat"; // ★YamatoChatコンポーネントをインポート
+import { useState } from "react";
+import { YamatoChat } from "../components/YamatoChat";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,12 +10,18 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+// サポートするアプリタイプの型定義
+type AppType = "concierge" | "writing" | "oral" | "general";
+
 export default function TestYamatoPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
   // === 合言葉を tssk224 に設定 ===
   const SECRET_TOKEN = "tssk224";
+
+  // ★修正1: useState に正しく型を指定
+  const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
 
   // トークンが一致しない場合はアクセス権なし画面を返す
   if (token !== SECRET_TOKEN) {
@@ -31,22 +38,70 @@ export default function TestYamatoPage() {
     );
   }
 
+  // ★修正2: as const を付与して型エラーを回避
+  const appConfig: Record<AppType, { name: string; greeting: string }> = {
+    concierge: {
+      name: "Yamato Concierge (LP案内役)",
+      greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
+    },
+    writing: {
+      name: "VCEライティングヤマト",
+      greeting: "Hello, my friend! 🌟 Welcome to your VCE Japanese writing practice session! Please upload your handwritten text or type your response.",
+    },
+    oral: {
+      name: "VCE口頭試験ヤマト",
+      greeting: "Hello, my friend! 🌟 Welcome to your VCE Oral Exam practice room. Are you ready for Section 1 General Conversation or Section 2 Detailed Study?",
+    },
+    general: {
+      name: "一般学習ヤマト",
+      greeting: "Hello, my friend! 🌟 Welcome! What would you like to learn about the Japanese language or culture today?",
+    },
+  };
+
+  const currentConfig = appConfig[activeAppType];
+
   // 以降は合言葉が一致した場合のみレンダリングされるテスト画面
   return (
     <div className="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative p-8">
-      {/* ページ本体のプレースホルダー */}
-      <main className="max-w-2xl mx-auto my-auto text-center bg-white border border-slate-200 rounded-2xl p-10 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900 mb-3">🇯🇵 ヤマト AI 独立APIテストページ</h1>
-        <p className="text-slate-600 text-sm leading-relaxed">
-          右下に常駐しているAIヤマトのチャット窓から、独立APIサーバー（<code>api.jptutoraiyamato.com/chat</code>）を通じたソクラテス式対話の動作テストを行えます。
-        </p>
+      {/* ページ本体のヘッダー・切り替えUI */}
+      <main className="max-w-2xl mx-auto w-full my-auto space-y-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center">
+          <h1 className="text-2xl font-bold text-slate-900 mb-3">🇯🇵 ヤマト AI 独立APIテスト画面</h1>
+          <p className="text-slate-600 text-sm leading-relaxed mb-6">
+            右下に常駐しているAIヤマトのチャット窓、または以下の切り替えパネルから、各ペルソナ（appType）の動作テストを行えます。
+          </p>
+
+          {/* モード切り替えタブ・ボタン群 */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {(["concierge", "writing", "oral", "general"] as const).map((type) => (
+              <button
+                key={type}
+                onClick={() => setActiveAppType(type)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
+                  activeAppType === type
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {type === "concierge" && "👋 LP Concierge"}
+                {type === "writing" && "✍️ VCE Writing"}
+                {type === "oral" && "🎤 VCE Oral"}
+                {type === "general" && "🌟 General"}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-4 text-xs text-slate-400">
+            Current active appType: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{activeAppType}</code>
+          </div>
+        </div>
       </main>
 
-      {/* ★ ここで「箱（YamatoChat）」を配置し、テスト用のソフト（名前や初期メッセージ）を流し込む */}
+      {/* ★修正3: YamatoChat に appType を渡す */}
       <YamatoChat 
-        characterName="【実験中】新キャラヤマト"
-        initialGreeting="こんにちは！新しいテンションのテスト中だよ。何でも聞いてね！"
-        systemPrompt="test-character-v1"
+        appType={activeAppType}
+        characterName={currentConfig.name}
+        initialGreeting={currentConfig.greeting}
       />
 
       <footer className="text-center text-xs text-slate-400 mt-8">

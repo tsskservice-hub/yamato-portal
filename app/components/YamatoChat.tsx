@@ -6,11 +6,12 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// 外部から受け取るプロパティ（Props）の型定義
-type YamatoChatProps = {
+// 外部から受け取るプロパティ（Props）の型定義に appType を追加
+export type YamatoChatProps = {
   characterName?: string;        // チャット窓のタイトルに表示する名前
-  initialGreeting?: string;     // 最初の一言メッセージ
-  systemPrompt?: string;        // キャラクター固有の指示（将来の拡張用）
+  initialGreeting?: string;      // 最初の一言メッセージ
+  systemPrompt?: string;         // キャラクター固有の指示（将来の拡張用）
+  appType?: "concierge" | "writing" | "oral" | "general" | string; // ★ 追加
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -24,6 +25,7 @@ export function YamatoChat({
   characterName = "ヤマト AI",
   initialGreeting = "こんにちは！日本語Tutor AI ヤマトです。何か話しかけてみてくださいね！",
   systemPrompt = "",
+  appType = "general", // ★ デフォルト値を設定
 }: YamatoChatProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(true);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -78,7 +80,7 @@ export function YamatoChat({
     try {
       // 🎨 チェックが入っている場合のみ、 visualPrompt を構築
       const visualPrompt = needsVisual
-        ? `Educational instructional diagram and visual aid for VCE Japanese high school students explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
+        ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
@@ -88,8 +90,8 @@ export function YamatoChat({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
-          userNickname: "テスト生徒さん",
-          appType: "general",
+          userNickname: "テストゲストさん",
+          appType: appType, // ★ プロパティで受け取った appType をバックエンドへ動的送信
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt, 
           requestVisualAid: needsVisual, // 🎨 バックエンドへ requestVisualAid フラグを確実送信
@@ -184,7 +186,7 @@ export function YamatoChat({
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed mb-3 shrink-0">
-                接続先: <code>api.jptutoraiyamato.com/chat</code>
+                接続先: <code>api.jptutoraiyamato.com/chat</code> (Mode: <code>{appType}</code>)
               </p>
 
               {/* 学習ペース選択UI */}
@@ -312,3 +314,5 @@ export function YamatoChat({
     </>
   );
 }
+
+export default YamatoChat;
