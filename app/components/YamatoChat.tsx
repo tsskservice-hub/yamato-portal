@@ -41,10 +41,10 @@ export function YamatoChat({
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
 
-  // 🎨 ユーザーが明示的に図解・イラスト生成を要求するためのチェックボックス用ステート
+  // 🎨 [開発中につき一時非表示] ユーザーが明示的に図解・イラスト生成を要求するためのチェックボックス用ステート
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
 
-  // 🔍 拡大表示（モーダル）用のステート
+  // 🔍 [開発中につき一時非表示] 拡大表示（モーダル）用のステート
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   const toggleAiFullscreen = async () => {
@@ -92,7 +92,7 @@ export function YamatoChat({
     if (!tutorInput.trim() || isTutorLoading) return;
 
     const userMsg = tutorInput.trim();
-    const needsVisual = requestVisualAid; // 🎨 チェック状態を保持
+    const needsVisual = requestVisualAid; // 🎨 チェック状態を保持（現在は常時falseですが将来有効化可能）
 
     setTutorInput("");
     setRequestVisualAid(false); // 送信後にチェックを自動リセット
@@ -102,7 +102,7 @@ export function YamatoChat({
     setIsTutorLoading(true);
 
     try {
-      // 🎨 チェックが入っている場合のみ、 visualPrompt を構築
+      // 🎨 チェックが入っている場合のみ、 visualPrompt を構築（将来の再開用にロジック維持）
       const visualPrompt = needsVisual
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
@@ -248,7 +248,8 @@ export function YamatoChat({
                       ) : (
                         <div className="space-y-2">
                           <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                          {/* 🎨 インライン表示される生成画像（クリックで拡大可能） */}
+                          {/* 🎨 [開発中につき一時非表示] インライン表示される生成画像（将来有効化する場合はコメントアウトを解除してください） */}
+                          {/* 
                           {msg.imageUrl && (
                             <div className="mt-2 rounded-lg overflow-hidden border border-emerald-200 bg-emerald-50/50 p-1">
                               <img
@@ -263,19 +264,21 @@ export function YamatoChat({
                               </p>
                             </div>
                           )}
+                          */}
                         </div>
                       )}
                     </div>
                   </div>
                 ))}
                 {isTutorLoading && (
-                  <div className="text-xs text-slate-500 italic">🤖 ヤマトが考えています (and creating visual illustration)...</div>
+                  <div className="text-xs text-slate-500 italic">🤖 ヤマトが考えています...</div>
                 )}
               </div>
 
               {/* 入力フォーム & 図解生成チェックボックス */}
               <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                {/* 🎨 ユーザーが明示的に図解を要求するためのチェックボックス */}
+                {/* 🎨 [開発中につき一時非表示] ユーザーが明示的に図解を要求するためのチェックボックス（将来有効化する場合はコメントアウトを解除してください） */}
+                {/* 
                 <div className="flex items-center gap-2 px-1">
                   <label className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 cursor-pointer select-none">
                     <input
@@ -288,6 +291,7 @@ export function YamatoChat({
                     <span>🎨 explain with diagrams and illustrations</span>
                   </label>
                 </div>
+                */}
 
                 <div className="flex gap-2">
                   <input
@@ -312,7 +316,8 @@ export function YamatoChat({
         )}
       </aside>
 
-      {/* 🔍 画像拡大表示用モーダル（Lightbox） */}
+      {/* 🔍 [開発中につき一時非表示] 画像拡大表示用モーダル（Lightbox） */}
+      {/* 
       {modalImageSrc && (
         <div 
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
@@ -335,6 +340,7 @@ export function YamatoChat({
           </div>
         </div>
       )}
+      */}
     </>
   );
 }
