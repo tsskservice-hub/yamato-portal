@@ -7,10 +7,11 @@ import {
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/cloudflare";
 
-// Tailwind CSS やスタイルシートの読み込み設定
-import "./tailwind.css"; // もしくはご自身のCSSファイル名に合わせて調整してください
+// Vite の URL インポート機能を使用して Tailwind CSS を確実に読み込む
+import stylesheet from "./tailwind.css?url";
 
 export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: stylesheet },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
