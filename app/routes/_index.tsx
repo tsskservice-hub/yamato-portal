@@ -804,10 +804,10 @@ export default function Home() {
             className={`bg-white border-2 border-emerald-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto [transform:rotate(180deg)]"
+                : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
             }`}
           >
-            <div className={`w-full h-full flex flex-col ${!isAiFullscreen ? "[transform:rotate(180deg)]" : ""}`}>
+            <div className="w-full h-full flex flex-col">
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <h3 className="text-sm font-bold text-emerald-900 flex items-center gap-2 m-0">
                   <span>🤖</span> 日本語Tutor AI Yamato

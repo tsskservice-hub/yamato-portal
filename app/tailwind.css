@@ -5,6 +5,7 @@
 /* カスタムスクロールバーや必要に応じたグローバル設定 */
 @layer base {
   body {
-    @antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
