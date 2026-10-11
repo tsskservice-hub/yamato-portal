@@ -5,6 +5,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [
     remix({
+      // Cloudflare Pages 向けのプリセット（ssr）を指定
+      ssr: true,
       future: {
         v3_fetcherPersist: true,
         v3_relativeSplatPath: true,
@@ -15,6 +17,6 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   ssr: {
-    target: "node",
+    target: "webworker",
   },
 });
