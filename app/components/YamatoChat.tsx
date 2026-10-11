@@ -63,7 +63,7 @@ export function YamatoChat({
     }
   };
 
-  // 💡 ESCキーやブラウザ側の全画面解除に対応するためのイベントリスナー
+  // 💡 ESCキーやブラウザ側の全画面解除に確実に対応し、元のデフォルトの大きさに戻す
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
