@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "remix vite:dev",
-    "build": "remix vite:build",
-    "start": "wrangler pages dev ./build/client"
+    "build": "remix vite:build && npx esbuild server.ts --bundle --format=esm --platform=browser --external:@cloudflare/* --external:@remix-run/* --external:react --external:react-dom --outfile=functions/[[path]].js",
+    "start": "npm run build && wrangler pages dev build/client"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260702.1",
