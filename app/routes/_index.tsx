@@ -354,6 +354,7 @@ export default function Home() {
             <span className="font-extrabold tracking-tight text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               JP Tutor AI <span className="text-xs uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold ml-1">Yamato</span>
             </span>
+
           </div>
 
           <div className="flex items-center space-x-3">
@@ -391,9 +392,9 @@ export default function Home() {
               </>
             )}
 
-            <button className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all ${isDarkMode ? 'border-slate-700 hover:bg-slate-800 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700'}`}>
+            <Link to="/prices" className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all ${isDarkMode ? 'border-slate-700 hover:bg-slate-800 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700'}`}>
               Pricing & Plans
-            </button>
+            </Link>
 
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
@@ -507,26 +508,26 @@ export default function Home() {
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
             <div className="space-y-4">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Free Plan</span>
-            <div>
-                <span className="text-4xl font-black">$0</span>
-                <span className="text-xs text-slate-500 ml-1">/ forever</span>
-            </div>
-            <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-              Daily 5 Credits <span className="text-[10px] text-orange-500 font-normal">(Promo: 2 + 3 Free)</span>
-            </div>
-            <p className="text-xs text-slate-500">Recharged daily upon login. Enjoy basic chat, traditional games, and Genkoyoshi editor tools.</p>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-              <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Daily Login Credits</span></li>
-              <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Free Traditional Games & Tools</span></li>
-            </ul>
+          <div>
+              <span className="text-4xl font-black">$0</span>
+              <span className="text-xs text-slate-500 ml-1">/ forever</span>
           </div>
-          <button 
-            onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
-            className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          >
-            Get Started Free
-          </button>
+          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+            Daily 5 Credits <span className="text-[10px] text-orange-500 font-normal">(Promo: 2 + 3 Free)</span>
+          </div>
+          <p className="text-xs text-slate-500">Recharged daily upon login. Enjoy basic chat, traditional games, and Genkoyoshi editor tools.</p>
+          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+            <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Daily Login Credits</span></li>
+            <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Free Traditional Games & Tools</span></li>
+          </ul>
         </div>
+        <button 
+          onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
+          className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        >
+          Get Started Free
+        </button>
+      </div>
 
           {/* Starter Pack */}
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
@@ -635,92 +636,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* 1. eoy-oral-drill */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                <Mic className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-base">EOY Oral Drill</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Module</span>
-              <Link to="/eoy-oral-drill" className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                <span>Open Page</span> <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-
-          {/* 2. eoy-oral-elaborate */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-                <Mic className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-base">EOY Oral Elaboration</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Module</span>
-              <Link to="/eoy-oral-elaborate" className="text-indigo-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                <span>Open Page</span> <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-
-          {/* 3. eoy-oral-mock */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
-                <Mic className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-base">EOY Oral Mock Exam</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Module</span>
-              <Link to="/eoy-oral-mock" className="text-purple-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                <span>Open Page</span> <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-
-          {/* 4. eoy-writing */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-pink-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-600 flex items-center justify-center">
-                <FileText className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-base">EOY Writing Exam Tutor</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Module</span>
-              <Link to="/eoy-writing" className="text-pink-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                <span>Open Page</span> <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-
-          {/* 5. game-igo */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-emerald-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                <Gamepad2 className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-base">Go (Igo) Mini Game</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Mini Game</span>
-              <Link to="/game-igo" className="text-emerald-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                <span>Open Game</span> <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-
-          {/* 6. genkoyoshi-editor */}
+          {/* 1. genkoyoshi-editor (Active / First) */}
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-amber-500/50 transition-colors`}>
             <div className="space-y-4">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
@@ -737,37 +653,111 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 7. oral-exam-questions */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
+          {/* 2. eoy-oral-drill (Coming Soon) */}
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
             <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                <FileText className="w-5 h-5" />
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <Mic className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h3 className="font-bold text-base">EOY Oral Drill</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Module</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          {/* 3. eoy-oral-elaborate (Coming Soon) */}
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                  <Mic className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h3 className="font-bold text-base">EOY Oral Elaboration</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Module</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          {/* 4. eoy-oral-mock (Coming Soon) */}
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
+                  <Mic className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h3 className="font-bold text-base">EOY Oral Mock Exam</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Module</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          {/* 5. eoy-writing (Coming Soon) */}
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-600 flex items-center justify-center">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h3 className="font-bold text-base">EOY Writing Exam Tutor</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Module</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          {/* 6. game-igo (Coming Soon) */}
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <Gamepad2 className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h3 className="font-bold text-base">Go (Igo) Mini Game</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Mini Game</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          {/* 7. oral-exam-questions (Coming Soon) */}
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
               </div>
               <h3 className="font-bold text-base">Oral Exam Questions</h3>
               <p className="text-xs text-slate-500 leading-relaxed">Curated database of official and practice VCE oral examination questions with audio samples.</p>
             </div>
             <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
               <span className="text-slate-400 font-medium">Reference</span>
-              <Link to="/oral-exam-questions" className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                <span>View Questions</span> <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-
-          {/* 8. prices */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-purple-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
-                <Coins className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-base">Pricing & Plans Page</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Dedicated standalone pricing and credit pack selection page with detailed feature breakdowns.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Billing</span>
-              <Link to="/prices" className="text-purple-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                <span>View Pricing</span> <ArrowRight className="w-3 h-3" />
-              </Link>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
             </div>
           </div>
         </div>
@@ -810,8 +800,8 @@ export default function Home() {
             ref={aiChatRef}
             className={`bg-white border-2 border-emerald-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
-              ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-              : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
+                ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
+                : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
             }`}
           >
             <div className="w-full h-full flex flex-col">
@@ -837,16 +827,16 @@ export default function Home() {
                       setIsAiTutorOpen(false);
                       setIsAiFullscreen(false);
                     }}
-                  className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
-                >
-                  ✕ Close
-                </button>
+                    className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
+                  >
+                    ✕ Close
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed mb-3 shrink-0">
-              Ask questions about Japanese language, grammar, kanji, or culture!
-            </p>
+              <p className="text-xs text-slate-600 leading-relaxed mb-3 shrink-0">
+                Ask questions about Japanese language, grammar, kanji, or culture!
+              </p>
 
             {/* 学習レベル選択UI */}
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
@@ -859,8 +849,8 @@ export default function Home() {
                     onClick={() => setTutorLevel(level)}
                     className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition ${
                       tutorLevel === level
-                      ? "bg-emerald-600 text-white shadow-xs"
-                      : "text-slate-600 hover:text-emerald-700"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-600 hover:text-emerald-700"
                     }`}
                   >
                     {level}
@@ -879,8 +869,8 @@ export default function Home() {
                   <div
                     className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
                       msg.role === "user"
-                      ? "bg-emerald-600 text-white rounded-br-xs"
-                      : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                        ? "bg-emerald-600 text-white rounded-br-xs"
+                        : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
                     }`}
                   >
                     {msg.role === "user" ? (
@@ -912,7 +902,7 @@ export default function Home() {
               ))}
               {isTutorLoading && (
                   <div className="text-xs text-slate-500 italic">🤖 AI Yamato is thinking (and creating visual illustration)...</div>
-              )}
+            )}
           </div>
 
           {/* 入力フォーム & 図解生成チェックボックス */}
@@ -925,29 +915,29 @@ export default function Home() {
                   onChange={(e) => setRequestVisualAid(e.target.checked)}
                   disabled={isTutorLoading}
                   className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
-              />
+                />
                 <span>🎨 explain with diagrams and illustrations</span>
-            </label>
-          </div>
+              </label>
+            </div>
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={tutorInput}
-              onChange={(e) => setTutorInput(e.target.value)}
-              placeholder="Ask AI tutor anything..."
-              disabled={isTutorLoading}
-              className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
-          />
-          <button
-            type="submit"
-            disabled={isTutorLoading || !tutorInput.trim()}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
-        >
-          Send
-        </button>
-      </div>
-      </form>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={tutorInput}
+                onChange={(e) => setTutorInput(e.target.value)}
+                placeholder="Ask AI tutor anything..."
+                disabled={isTutorLoading}
+                className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
+              />
+              <button
+                type="submit"
+                disabled={isTutorLoading || !tutorInput.trim()}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                Send
+              </button>
+            </div>
+          </form>
     </div>
   </div>
   )}
