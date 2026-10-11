@@ -442,7 +442,7 @@ export default function Home() {
               </div>
               <div className="text-xs text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-md">
                 Step {currentStep + 1} / {DEMO_CONVERSATIONS.length}
-            </div>
+              </div>
           </div>
 
           <div className="flex items-center justify-between bg-slate-500/5 p-2.5 rounded-xl mb-4 text-xs font-medium">
@@ -478,17 +478,17 @@ export default function Home() {
             <div className="flex items-center space-x-2 text-xs text-slate-500 px-2 text-center sm:text-left">
               <span>🚀</span>
             <span>Want to ask Yamato your own questions?</span>
+            </div>
+            <button 
+              onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <span>Launch App (Free Register)</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button 
-            onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
-          >
-            <span>Launch App (Free Register)</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
         </div>
-      </div>
-    </section>
+      </section>
 
       {/* 3. Pricing & Credit Packs */}
       <section className="space-y-12 text-center">
@@ -499,7 +499,7 @@ export default function Home() {
           {/* Limited Time Campaign Banner */}
           <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
             <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-bounce" />
-            <span>Limited-Time Campaign (Until October 29): All paid credit packs are doubled in value! Boost your learning today.</span>
+            <span>Limited-Time Campaign (Until October 29): Paid packs include bonus credits useable until October 29! Standard base credits are unexpired.</span>
           </div>
         </div>
 
@@ -538,7 +538,7 @@ export default function Home() {
               <span className="text-xs text-slate-500 ml-1">AUD</span>
           </div>
           <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-            2,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">1,000</span> <span className="text-[10px] text-orange-500 font-bold">(2x Promo!)</span>
+            2,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">1,000</span> <span className="text-[10px] text-orange-500 font-bold">(1,000 unexpired + 1,000 bonus until Oct 29)</span>
           </div>
           <p className="text-xs text-slate-500">Great for beginners. Ideal for a few essay corrections or voice roleplay sessions.</p>
           <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -558,17 +558,17 @@ export default function Home() {
 
           {/* Standard Pack */}
           <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
             Most Popular
         </div>
         <div className="space-y-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Standard Pack</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Standard Pack</span>
         <div>
             <span className="text-4xl font-black">$25</span>
             <span className="text-xs text-slate-500 ml-1">AUD</span>
         </div>
         <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-          5,600 Credits <span className="text-[10px] text-slate-400 line-through font-normal">2,800</span> <span className="text-[10px] text-orange-500 font-bold">(2x Promo!)</span>
+          5,600 Credits <span className="text-[10px] text-slate-400 line-through font-normal">2,800</span> <span className="text-[10px] text-orange-500 font-bold">(2,800 unexpired + 2,800 bonus until Oct 29)</span>
         </div>
         <p className="text-xs text-slate-500">Our most popular choice. Perfect for regular study routines and test preparation.</p>
         <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -595,7 +595,7 @@ export default function Home() {
             <span className="text-xs text-slate-500 ml-1">AUD</span>
         </div>
         <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold">
-          12,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">6,000</span> <span className="text-[10px] text-orange-500 font-bold">(2x Promo!)</span>
+          12,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">6,000</span> <span className="text-[10px] text-orange-500 font-bold">(6,000 unexpired + 6,000 bonus until Oct 29)</span>
         </div>
         <p className="text-xs text-slate-500">For heavy users and premium-intensive drills. Maximum value with doubled bonus credits.</p>
         <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -763,14 +763,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Bottom Play & Learn Badge Bar */}
-      <div className="flex justify-center">
-        <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-sm">
-          <Gamepad2 className="w-4 h-4" />
-          <span>Play & Learn</span>
-        </div>
-      </div>
-
     </main>
 
       {/* 🤖 右下常駐エリア（AIチューター窓 & 上に戻るボタンを一体化して配置） */}
@@ -902,46 +894,46 @@ export default function Home() {
               ))}
               {isTutorLoading && (
                   <div className="text-xs text-slate-500 italic">🤖 AI Yamato is thinking (and creating visual illustration)...</div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* 入力フォーム & 図解生成チェックボックス */}
-          <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-            <div className="flex items-center gap-2 px-1">
-              <label className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 cursor-pointer select-none">
+            {/* 入力フォーム & 図解生成チェックボックス */}
+            <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
+              <div className="flex items-center gap-2 px-1">
+                <label className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={requestVisualAid}
+                    onChange={(e) => setRequestVisualAid(e.target.checked)}
+                    disabled={isTutorLoading}
+                    className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
+                  />
+                  <span>🎨 explain with diagrams and illustrations</span>
+                </label>
+              </div>
+
+              <div className="flex gap-2">
                 <input
-                  type="checkbox"
-                  checked={requestVisualAid}
-                  onChange={(e) => setRequestVisualAid(e.target.checked)}
+                  type="text"
+                  value={tutorInput}
+                  onChange={(e) => setTutorInput(e.target.value)}
+                  placeholder="Ask AI tutor anything..."
                   disabled={isTutorLoading}
-                  className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
+                  className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
                 />
-                <span>🎨 explain with diagrams and illustrations</span>
-              </label>
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={tutorInput}
-                onChange={(e) => setTutorInput(e.target.value)}
-                placeholder="Ask AI tutor anything..."
-                disabled={isTutorLoading}
-                className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
-              />
-              <button
-                type="submit"
-                disabled={isTutorLoading || !tutorInput.trim()}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
-              >
-                Send
-              </button>
-            </div>
-          </form>
-    </div>
-  </div>
-  )}
-</aside>
+                <button
+                  type="submit"
+                  disabled={isTutorLoading || !tutorInput.trim()}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
+        </div>
+      </div>
+      )}
+    </aside>
 
       {/* 画像拡大表示用モーダル（Lightbox） */}
       {modalImageSrc && (
@@ -973,7 +965,7 @@ export default function Home() {
           <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
             <button 
               onClick={() => setIsAuthModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/10 transition-colors text-slate-400 cursor-pointer"
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
