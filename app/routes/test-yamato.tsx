@@ -76,12 +76,19 @@ export default function TestYamatoPage() {
         }),
       });
 
-      if (!response.ok) {
-        const errData = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(errData?.error || "独立APIサーバーとの通信に失敗しました。");
+      const responseText = await response.text();
+      
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseErr) {
+        throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
-      const data = (await response.json()) as { reply?: string; imageUrl?: string };
+      if (!response.ok) {
+        throw new Error(data?.error || `APIエラー (${response.status})`);
+      }
+
       const replyText = data.reply || "お返事がうまく取得できませんでした。";
       const sanitizedReply = sanitizeAiOutput(replyText);
 
