@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type ChatMessage = {
   role: "assistant" | "user";
@@ -11,7 +11,7 @@ export type YamatoChatProps = {
   characterName?: string;        // チャット窓のタイトルに表示する名前
   initialGreeting?: string;      // 最初の一言メッセージ
   systemPrompt?: string;         // キャラクター固有の指示（将来の拡張用）
-  appType?: "concierge" | "writing" | "oral" | "general" | string; // ★ 追加
+  appType?: "concierge" | "writing" | "oral" | "general" | string; 
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -25,7 +25,7 @@ export function YamatoChat({
   characterName = "ヤマト AI",
   initialGreeting = "こんにちは！日本語Tutor AI ヤマトです。何か話しかけてみてくださいね！",
   systemPrompt = "",
-  appType = "general", // ★ デフォルト値を設定
+  appType = "general",
 }: YamatoChatProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(true);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -63,6 +63,30 @@ export function YamatoChat({
     }
   };
 
+  // 💡 ESCキーやブラウザ側の全画面解除に対応するためのイベントリスナー
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsAiFullscreen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+        setIsAiFullscreen(false);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
@@ -91,10 +115,10 @@ export function YamatoChat({
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
           userNickname: "テストゲストさん",
-          appType: appType, // ★ プロパティで受け取った appType をバックエンドへ動的送信
+          appType: appType,
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt, 
-          requestVisualAid: needsVisual, // 🎨 バックエンドへ requestVisualAid フラグを確実送信
+          requestVisualAid: needsVisual,
         }),
       });
 
@@ -112,7 +136,7 @@ export function YamatoChat({
       }
 
       const replyText = data.reply || "お返事がうまく取得できませんでした。";
-      const imageUrl = data.imageUrl; // 💡 生成画像URL
+      const imageUrl = data.imageUrl;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
       setTutorMessages([
