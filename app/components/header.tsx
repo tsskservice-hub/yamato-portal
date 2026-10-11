@@ -19,9 +19,6 @@ export function Header({ title = "AI Yamato Japanese Hub" }: HeaderProps) {
           />
           <div>
             <span className="font-bold text-lg text-slate-900 tracking-tight">{title}</span>
-            <span className="hidden sm:inline-block ml-2 text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
-              app.jptutoraiyamato.com
-            </span>
           </div>
         </Link>
 
