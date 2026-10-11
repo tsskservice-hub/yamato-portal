@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* カスタムスクロールバーや必要に応じたグローバル設定 */
+@layer base {
+  body {
+    @antialiased;
+  }
+}
