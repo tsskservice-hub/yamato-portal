@@ -415,7 +415,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
          
-        {/* 2. Hero Section with Typing Auto Demo */}
+        {/* 2. Hero Section with YamatoChat-style Auto Demo */}
         <section className="text-center space-y-6 max-w-4xl mx-auto">
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
             <Award className="w-3.5 h-3.5 text-blue-600" />
@@ -433,69 +433,72 @@ export default function Home() {
             Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
           </p>
 
-          <div className={`mt-8 p-4 sm:p-6 rounded-2xl border shadow-2xl backdrop-blur-sm ${isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-700/20">
+          <div className={`mt-8 p-5 sm:p-6 rounded-2xl border-2 border-emerald-300 shadow-2xl backdrop-blur-sm text-left ${isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white'}`}>
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold">侍</div>
-                <span className="font-bold text-sm">AI Yamato (Auto Demo)</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-medium animate-pulse">● Live Demo</span>
+                <span className="text-base">🤖</span>
+                <span className="font-bold text-sm text-emerald-900 dark:text-emerald-200">日本語Tutor AI ヤマト (Auto Demo)</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold animate-pulse">● Live Demo</span>
               </div>
-              <div className="text-xs text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-md">
+              <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-medium">
                 Step {currentStep + 1} / {DEMO_CONVERSATIONS.length}
               </div>
-          </div>
+            </div>
 
-          <div className="flex items-center justify-between bg-slate-500/5 p-2.5 rounded-xl mb-4 text-xs font-medium">
-              <span className="text-slate-500">Auto Playback Preview</span>
-              <div className="flex space-x-1 bg-slate-500/10 p-1 rounded-lg">
-                <span className="px-3 py-1 rounded bg-blue-600 text-white shadow-sm">Zero API Cost</span>
+            {/* 学習ペース表示モック */}
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-2.5 mb-4 flex items-center justify-between">
+              <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">Learning Pace (Demo)</span>
+              <div className="inline-flex rounded-lg bg-white dark:bg-slate-900 p-0.5 shadow-xs border border-emerald-200 dark:border-emerald-800">
+                <span className="px-2.5 py-1 rounded-md text-[10px] font-bold capitalize bg-emerald-600 text-white shadow-xs">normal</span>
               </div>
-          </div>
+            </div>
 
-          {/* User Message Bubble */}
-          <div className="flex justify-end mb-4">
-            <div className="max-w-[85%] p-3.5 rounded-2xl rounded-tr-sm text-xs sm:text-sm shadow-sm text-left bg-blue-600 text-white font-medium">
-              <p>{displayedUserText}
-                <span className="inline-block w-1.5 h-3 ml-0.5 bg-white animate-pulse"></span>
-              </p>
+            {/* チャット履歴風プレビューエリア */}
+            <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 mb-4 min-h-[160px] flex flex-col justify-center">
+              {/* User Message Bubble */}
+              <div className="flex justify-end">
+                <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-emerald-600 text-white font-medium">
+                  <p>{displayedUserText}
+                    <span className="inline-block w-1.5 h-3 ml-0.5 bg-white animate-pulse"></span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Yamato Response Bubble */}
+              <div className="flex justify-start">
+                <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
+                  <p>
+                    {displayedYamatoText}
+                    {isTypingYamato && displayedYamatoText.length < DEMO_CONVERSATIONS[currentStep].yamato.length && (
+                      <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-emerald-500 animate-pulse"></span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3 bg-emerald-50/50 dark:bg-emerald-950/20 text-sm gap-3">
+              <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
+                <span>✨</span>
+                <span>ヤマトに自分の質問をしてみませんか？</span>
+              </div>
+              <button 
+                onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
+              >
+                <span>アプリを試す（無料登録）</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
-
-          {/* Yamato Response Bubble */}
-          <div className={`p-4 rounded-xl flex items-start space-x-3 mb-4 text-left ${isDarkMode ? 'bg-slate-800/60' : 'bg-blue-50/50'}`}>
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white text-xs">侍</div>
-            <div className="text-sm space-y-1">
-              <p className="font-medium leading-relaxed">
-                {displayedYamatoText}
-                {isTypingYamato && displayedYamatoText.length < DEMO_CONVERSATIONS[currentStep].yamato.length && (
-                  <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-500 animate-pulse"></span>
-                )}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-between border border-slate-500/30 rounded-xl p-3 bg-slate-500/5 text-sm gap-3">
-            <div className="flex items-center space-x-2 text-xs text-slate-500 px-2 text-center sm:text-left">
-              <span>🚀</span>
-            <span>Want to ask Yamato your own questions?</span>
-            </div>
-            <button 
-              onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <span>Launch App (Free Register)</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </section>
+        </section>
 
       {/* 3. Pricing & Credit Packs */}
       <section className="space-y-12 text-center">
         <div className="space-y-4 max-w-3xl mx-auto">
           <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
           <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
-          
+           
           {/* Limited Time Campaign Banner */}
           <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
             <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-bounce" />
@@ -533,28 +536,28 @@ export default function Home() {
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
           <div className="space-y-4">
             <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Starter Pack</span>
-          <div>
+        <div>
               <span className="text-4xl font-black">$10</span>
               <span className="text-xs text-slate-500 ml-1">AUD</span>
-          </div>
-          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-            2,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">1,000</span> <span className="text-[10px] text-orange-500 font-bold">(1,000 unexpired + 1,000 bonus until Oct 29)</span>
-          </div>
-          <p className="text-xs text-slate-500">Great for beginners. Ideal for a few essay corrections or voice roleplay sessions.</p>
-          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+        </div>
+        <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+          2,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">1,000</span> <span className="text-[10px] text-orange-500 font-bold">(1,000 unexpired + 1,000 bonus until Oct 29)</span>
+        </div>
+        <p className="text-xs text-slate-500">Great for beginners. Ideal for a few essay corrections or voice roleplay sessions.</p>
+        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
             <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Standard AI Chat & Q&A</span></li>
             <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Pay-as-you-go flexibility</span></li>
-          </ul>
-        </div>
-        <button 
-          onClick={() => handleCheckout(STRIPE_PRICES.starter)} 
-          disabled={checkoutLoadingPriceId === STRIPE_PRICES.starter}
-          className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-        >
-          {checkoutLoadingPriceId === STRIPE_PRICES.starter && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-          <span>Buy Starter Pack</span>
-        </button>
+        </ul>
       </div>
+      <button 
+        onClick={() => handleCheckout(STRIPE_PRICES.starter)} 
+        disabled={checkoutLoadingPriceId === STRIPE_PRICES.starter}
+        className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+      >
+        {checkoutLoadingPriceId === STRIPE_PRICES.starter && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+        <span>Buy Starter Pack</span>
+      </button>
+    </div>
 
           {/* Standard Pack */}
           <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
@@ -930,8 +933,8 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          </div>
         </div>
-      </div>
       )}
     </aside>
 
