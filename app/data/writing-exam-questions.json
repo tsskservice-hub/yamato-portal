@@ -1,0 +1,882 @@
+[
+  {
+    "id": 1,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "You are an exchange student at a sister school in Japan. Write a speech script in Japanese for the whole school assembly, explaining how Australian high school students participate in volunteer activities during their holidays and after school, and what they gain from these experiences.",
+    "japanese": "日本の姉妹校の<ruby>全校<rt>ぜんこう</rt></ruby><ruby>集会<rt>しゅうかい</rt></ruby>で、オーストラリアの高校生が休みの日や<ruby>放課後<rt>ほうかご</rt></ruby>にどのようにボランティア活動に<ruby>参加<rt>さんか</rt></ruby>しているか、またそこから何を学ぶかについて<ruby>説明<rt>せつめい</rt></ruby>するスピーチの<ruby>原稿<rt>げんこう</rt></ruby>を書きなさい。",
+    "japanese_original": "日本の姉妹校の全校集会で、オーストラリアの高校生が休みの日や放課後にどのようにボランティア活動に参加しているか、またそこから何を学ぶかについて説明するスピーチの原稿を書きなさい。"
+  },
+  {
+    "id": 2,
+    "category": "Informative",
+    "textType": "Article",
+    "english": "Write an article in Japanese for the online newsletter of your Japanese sister school, introducing the culture and art of Australia’s Indigenous peoples and explaining why it is important for young people to learn about them.",
+    "japanese": "日本の姉妹校のオンラインニュースレターのために、オーストラリアの<ruby>先住民<rt>せんじゅうみん</rt></ruby>族の<ruby>文化<rt>ぶんか</rt></ruby>やアートについて<ruby>紹介<rt>しょうかい</rt></ruby>し、<ruby>若<rt>わか</rt></ruby>い人がそれらを学ぶことがなぜ<ruby>大切<rt>たいせつ</rt></ruby>か<ruby>説明<rt>せつめい</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "日本の姉妹校のオンラインニュースレターのために、オーストラリアの先住民族の文化やアートについて紹介し、若い人がそれらを学ぶことがなぜ大切か説明する記事を書きなさい。"
+  },
+  {
+    "id": 3,
+    "category": "Informative",
+    "textType": "Email",
+    "english": "Write an email to a friend in Japan who is planning to come to Australia for a short-term study exchange, explaining what kind of clothes they should bring and what the local climate is like.",
+    "japanese": "日本からオーストラリアに<ruby>短期<rt>たんき</rt></ruby><ruby>留学<rt>りゅうがく</rt></ruby>する<ruby>予定<rt>よてい</rt></ruby>の友人に、どのような<ruby>服<rt>ふく</rt></ruby>を持ってくればよいか、また<ruby>現地<rt>げんち</rt></ruby>の<ruby>気候<rt>きこう</rt></ruby>について<ruby>説明<rt>せつめい</rt></ruby>するメールを書きなさい。",
+    "japanese_original": "日本からオーストラリアに短期留学する予定の友人に、どのような服を持ってくればよいか、また現地の気候について説明するメールを書きなさい。"
+  },
+  {
+    "id": 4,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "Deliver a speech to your entire school about the privacy issues teenagers face when using social media and how to use it safely.",
+    "japanese": "高校生がソーシャルメディアを使うときにぶつかるプライバシーの<ruby>問題<rt>もんだい</rt></ruby>と、<ruby>安全<rt>あんぜん</rt></ruby>に使う<ruby>方法<rt>ほうほう</rt></ruby>について学校のみんなの前で話すスピーチを書きなさい。",
+    "japanese_original": "高校生がソーシャルメディアを使うときにぶつかるプライバシーの問題と、安全に使う方法について学校のみんなの前で話すスピーチを書きなさい。"
+  },
+  {
+    "id": 5,
+    "category": "Informative",
+    "textType": "Report",
+    "english": "Write a report on how Japanese pop culture has influenced the lifestyles and interests of teenagers in Australia.",
+    "japanese": "日本のポップカルチャーがオーストラリアの<ruby>若者<rt>わかもの</rt></ruby>の生活や<ruby>興味<rt>きょうみ</rt></ruby>にどのような<ruby>影響<rt>えいきょう</rt></ruby>を<ruby>与<rt>あた</rt></ruby>えたかについてのレポートを書きなさい。",
+    "japanese_original": "日本のポップカルチャーがオーストラリアの若者の生活や興味にどのような影響を与えたかについてのレポートを書きなさい。"
+  },
+  {
+    "id": 6,
+    "category": "Informative",
+    "textType": "Email",
+    "english": "Write an email to a Japanese friend who is torn between university and a gap year after graduation, offering advice based on your own thoughts and experiences.",
+    "japanese": "<ruby>卒業<rt>そつぎょう</rt></ruby>してから大学に行くかギャップイヤーにするかで<ruby>迷<rt>まよ</rt></ruby>っている日本の友人に、自分の<ruby>経験<rt>けいけん</rt></ruby>や考えをもとにアドバイスをするメールを書きなさい。",
+    "japanese_original": "卒業してから大学に行くかギャップイヤーにするかで迷っている日本の友人に、自分の経験や考えをもとにアドバイスをするメールを書きなさい。"
+  },
+  {
+    "id": 7,
+    "category": "Informative",
+    "textType": "Email",
+    "english": "Write an email to a Japanese friend introducing the charms of a nature-rich national park in Australia and inviting them to go camping together during the next holiday.",
+    "japanese": "日本の友人に、オーストラリアの<ruby>自然<rt>しぜん</rt></ruby>が<ruby>豊<rt>ゆた</rt></ruby>かな国立<ruby>公園<rt>こうえん</rt></ruby>の<ruby>魅力<rt>みりょく</rt></ruby>を<ruby>紹介<rt>しょうかい</rt></ruby>し、次の休みに<ruby>一緒<rt>いっしょ</rt></ruby>にキャンプに行かないかと<ruby>誘<rt>さそ</rt></ruby>うメールを書きなさい。",
+    "japanese_original": "日本の友人に、オーストラリアの自然が豊かな国立公園の魅力を紹介し、次の休みに一緒にキャンプに行かないかと誘うメールを書きなさい。"
+  },
+  {
+    "id": 8,
+    "category": "Informative",
+    "textType": "Email",
+    "english": "Write an email to your family in Japan describing the unique neighbors and atmosphere around your newly moved house.",
+    "japanese": "新しく<ruby>引っ越<rt>ひっこ</rt></ruby>した家のまわりにいる<ruby>面白<rt>おもしろ</rt></ruby>い近所の人たちや、<ruby>街<rt>まち</rt></ruby>の<ruby>雰囲気<rt>ふんいき</rt></ruby>について日本の家族に<ruby>伝<rt>つた</rt></ruby>えるメールを書きなさい。",
+    "japanese_original": "新しく引っ越した家のまわりにいる面白い近所の人たちや、街の雰囲気について日本の家族に伝えるメールを書きなさい。"
+  },
+  {
+    "id": 9,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "Deliver a speech to the morning assembly explaining how Australian families practice energy and water saving methods at home.",
+    "japanese": "オーストラリアの<ruby>家庭<rt>かてい</rt></ruby>で、どのように電気や水を<ruby>節約<rt>せつやく</rt></ruby>しているか<ruby>説明<rt>せつめい</rt></ruby>する<ruby>朝礼<rt>ちょうれい</rt></ruby>のスピーチを書きなさい。",
+    "japanese_original": "オーストラリアの家庭で、どのように電気や水を節約しているか説明する朝礼のスピーチを書きなさい。"
+  },
+  {
+    "id": 10,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "Deliver a speech to your class comparing the typical daily schedule and annual events of high school students in Australia and Japan.",
+    "japanese": "日本とオーストラリアの高校生の毎日のスケジュールや年間の行事の<ruby>違<rt>ちが</rt></ruby>いについて<ruby>説明<rt>せつめい</rt></ruby>するスピーチを書きなさい。",
+    "japanese_original": "日本とオーストラリアの高校生の毎日のスケジュールや年間の行事の違いについて説明するスピーチを書きなさい。"
+  },
+  {
+    "id": 11,
+    "category": "Informative",
+    "textType": "Report",
+    "english": "Write a report summarizing the achievements of a local sports club and its contribution to the health and wellbeing of local residents.",
+    "japanese": "<ruby>地元<rt>じもと</rt></ruby>のスポーツクラブの活動と、<ruby>地域<rt>ちいき</rt></ruby>の人たちの<ruby>健康<rt>けんこう</rt></ruby>や生活への<ruby>貢献<rt>こうけん</rt></ruby>についてまとめたレポートを書きなさい。",
+    "japanese_original": "地元のスポーツクラブの活動と、地域の人たちの健康や生活への貢献についてまとめたレポートを書きなさい。"
+  },
+  {
+    "id": 12,
+    "category": "Informative",
+    "textType": "Article",
+    "english": "Write an informative article outlining the manners tourists should follow to protect Australia's beautiful natural environment.",
+    "japanese": "オーストラリアの<ruby>美<rt>うつく</rt></ruby>しい<ruby>自然<rt>しぜん</rt></ruby>を<ruby>守<rt>まも</rt></ruby>るために、旅行<ruby>者<rt>しゃ</rt></ruby>が<ruby>守<rt>まも</rt></ruby>るべきマナーについてまとめた<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "オーストラリアの美しい自然を守るために、旅行者が守るべきマナーについてまとめた記事を書きなさい。"
+  },
+  {
+    "id": 13,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "Deliver a speech introducing the value and community benefits of a newly opened community center in your town.",
+    "japanese": "自分の町に新しくできたコミュニティセンターの使い道や、<ruby>地域<rt>ちいき</rt></ruby>にとってのよさについて<ruby>紹介<rt>しょうかい</rt></ruby>するスピーチを書きなさい。",
+    "japanese_original": "自分の町に新しくできたコミュニティセンターの使い道や、地域にとってのよさについて紹介するスピーチを書きなさい。"
+  },
+  {
+    "id": 14,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "Deliver a speech to Year 10 students encouraging them to continue studying Japanese up to Year 12 by highlighting its long-term benefits.",
+    "japanese": "10年生に<ruby>向<rt>む</rt></ruby>けて、12年生まで日本語の勉強を<ruby>続<rt>つづ</rt></ruby>けることの<ruby>良<rt>よ</rt></ruby>さを<ruby>伝<rt>つた</rt></ruby>えて、がんばるようにすすめるスピーチを書きなさい。",
+    "japanese_original": "10年生に向けて、12年生まで日本語の勉強を続けることの良さを伝えて、がんばるようにすすめるスピーチを書きなさい。"
+  },
+  {
+    "id": 15,
+    "category": "Informative",
+    "textType": "Report",
+    "english": "Write a report for your teacher explaining Japanese food customs and table manners you learned during your year-long stay in Japan.",
+    "japanese": "日本に一年間いたときに学んだ、日本の食<ruby>習慣<rt>しゅうかん</rt></ruby>や食事のマナーについてくわしく<ruby>説明<rt>せつめい</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "日本に一年間いたときに学んだ、日本の食習慣や食事のマナーについてくわしく説明するレポートを書きなさい。"
+  },
+  {
+    "id": 16,
+    "category": "Informative",
+    "textType": "Article",
+    "english": "Write an article introducing public transport systems in Melbourne and giving useful tips for foreign visitors on how to use them easily.",
+    "japanese": "メルボルンの<ruby>公共<rt>こうきょう</rt></ruby><ruby>交通<rt>こうつう</rt></ruby><ruby>機関<rt>きかん</rt></ruby>について<ruby>紹介<rt>しょうかい</rt></ruby>し、外国からの旅行<ruby>者<rt>しゃ</rt></ruby>が<ruby>簡単<rt>かんたん</rt></ruby>に<ruby>利用<rt>りよう</rt></ruby>するための<ruby>便利<rt>べんり</rt></ruby>なコツをまとめた<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "メルボルンの公共交通機関について紹介し、外国からの旅行者が簡単に利用するための便利なコツをまとめた記事を書きなさい。"
+  },
+  {
+    "id": 17,
+    "category": "Informative",
+    "textType": "Report",
+    "english": "Write a report explaining how local councils in Australia manage waste recycling and what citizens are expected to do.",
+    "japanese": "オーストラリアの<ruby>地域<rt>ちいき</rt></ruby>社会がどのようにゴミのリサイクルを<ruby>管理<rt>かんり</rt></ruby>しているか、また<ruby>市民<rt>しみん</rt></ruby>に何が<ruby>求<rt>もと</rt></ruby>められているかについて<ruby>説明<rt>せつめい</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "オーストラリアの地域社会がどのようにゴミのリサイクルを管理しているか、また市民に何が求められているかについて説明するレポートを書きなさい。"
+  },
+  {
+    "id": 18,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "Deliver a speech introducing popular traditional Australian foods and modern cafe culture to Japanese exchange students.",
+    "japanese": "日本の<ruby>留学生<rt>りゅうがくせい</rt></ruby>に<ruby>向<rt>む</rt></ruby>けて、オーストラリアの<ruby>伝統<rt>でんとう</rt></ruby><ruby>的<rt>てき</rt></ruby>な食べ物や<ruby>現代<rt>げんだい</rt></ruby>のカフェ<ruby>文化<rt>ぶんか</rt></ruby>について<ruby>紹介<rt>しょうかい</rt></ruby>するスピーチを書きなさい。",
+    "japanese_original": "日本の留学生に向けて、オーストラリアの伝統的な食べ物や現代のカフェ文化について紹介するスピーチを書きなさい。"
+  },
+  {
+    "id": 19,
+    "category": "Informative",
+    "textType": "Article",
+    "english": "Write an article introducing unique Australian wildlife and the protection efforts being made in national parks.",
+    "japanese": "オーストラリアのユニークな<ruby>野生<rt>やせい</rt></ruby>動物と、国立<ruby>公園<rt>こうえん</rt></ruby>で行われている<ruby>保護<rt>ほご</rt></ruby>の<ruby>取り組<rt>とりく</rt></ruby>みについて<ruby>紹介<rt>しょうかい</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "オーストラリアのユニークな野生動物と、国立公園で行われている保護の取り組みについて紹介する記事を書きなさい。"
+  },
+  {
+    "id": 20,
+    "category": "Informative",
+    "textType": "Report",
+    "english": "Write a report detailing the history and cultural significance of major annual festivals held in Melbourne.",
+    "japanese": "メルボルンで<ruby>開<rt>ひら</rt></ruby>かれる<ruby>主<rt>おも</rt></ruby>な年間行事の<ruby>歴史<rt>れきし</rt></ruby>や<ruby>文化<rt>ぶんか</rt></ruby><ruby>的<rt>てき</rt></ruby>な<ruby>意味<rt>いみ</rt></ruby>についてくわしく<ruby>説明<rt>せつめい</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "メルボルンで開かれる主な年間行事の歴史や文化的な意味についてくわしく説明するレポートを書きなさい。"
+  },
+  {
+    "id": 21,
+    "category": "Informative",
+    "textType": "Email",
+    "english": "Write an email to a pen pal in Japan explaining the seasonal changes and weather patterns in Melbourne throughout the year.",
+    "japanese": "日本のペンフレンドに、一年を<ruby>通<rt>とお</rt></ruby>したメルボルンの<ruby>季節<rt>きせつ</rt></ruby>の<ruby>変化<rt>へんか</rt></ruby>や天気の<ruby>特徴<rt>とくちょう</rt></ruby>について<ruby>説明<rt>せつめい</rt></ruby>するメールを書きなさい。",
+    "japanese_original": "日本のペンフレンドに、一年を通したメルボルンの季節の変化や天気の特徴について説明するメールを書きなさい。"
+  },
+  {
+    "id": 22,
+    "category": "Informative",
+    "textType": "Speech",
+    "english": "Deliver a speech explaining the history and rules of Australian Rules Football (AFL) to students who have never seen it before.",
+    "japanese": "オーストラリアンフットボール（AFL）を見たことがない人に<ruby>向<rt>む</rt></ruby>けて、その<ruby>歴史<rt>れきし</rt></ruby>やルールについて<ruby>説明<rt>せつめい</rt></ruby>するスピーチを書きなさい。",
+    "japanese_original": "オーストラリアンフットボール（AFL）を見たことがない人に向けて、その歴史やルールについて説明するスピーチを書きなさい。"
+  },
+  {
+    "id": 23,
+    "category": "Informative",
+    "textType": "Report",
+    "english": "Write a report on how part-time job culture works for high school students in Australia, including typical roles and working hours.",
+    "japanese": "オーストラリアの高校生のアルバイト<ruby>文化<rt>ぶんか</rt></ruby>について、<ruby>主<rt>おも</rt></ruby>な仕事や働く時間を<ruby>含<rt>ふく</rt></ruby>めて<ruby>説明<rt>せつめい</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "オーストラリアの高校生のアルバイト文化について、主な仕事や働く時間を含めて説明するレポートを書きなさい。"
+  },
+  {
+    "id": 24,
+    "category": "Evaluative",
+    "textType": "Report",
+    "english": "Write an evaluative report in Japanese addressed to the school librarian and your Japanese teacher, analyzing the advantages and disadvantages of high school students using 'e-books' for school assignments and reading.",
+    "japanese": "学校の<ruby>図書館<rt>としょかん</rt></ruby>長と日本語の先生に<ruby>向<rt>む</rt></ruby>けて、高校生が<ruby>課題<rt>かだい</rt></ruby>や読書のために電子<ruby>書籍<rt>しょせき</rt></ruby>を使うことの<ruby>良<rt>よ</rt></ruby>い点と<ruby>悪<rt>わる</rt></ruby>い点を<ruby>分析<rt>ぶんせき</rt></ruby>して<ruby>評価<rt>ひょうか</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "学校の図書館長と日本語の先生に向けて、高校生が課題や読書のために電子書籍を使うことの良い点と悪い点を分析して評価するレポートを書きなさい。"
+  },
+  {
+    "id": 25,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an evaluative article in Japanese for a Japanese-language newspaper in Melbourne, assessing the pros and cons of the convenient services and products provided by convenience stores in Japan based on your experiences.",
+    "japanese": "メルボルンの日本語の新聞の<ruby>読者<rt>どくしゃ</rt></ruby>に<ruby>向<rt>む</rt></ruby>けて、日本にいたときに<ruby>利用<rt>りよう</rt></ruby>したコンビニの<ruby>便利<rt>べんり</rt></ruby>なサービスや<ruby>商品<rt>しょうひん</rt></ruby>の長所と<ruby>短所<rt>たんしょ</rt></ruby>をいろいろな<ruby>方向<rt>ほうこう</rt></ruby>から<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "メルボルンの日本語の新聞の読者に向けて、日本にいたときに利用したコンビニの便利なサービスや商品の長所と短所をいろいろな方向から評価する記事を書きなさい。"
+  },
+  {
+    "id": 26,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating the advantages and disadvantages of making school uniforms mandatory in Australian schools.",
+    "japanese": "オーストラリアの学校で<ruby>制服<rt>せいふく</rt></ruby>を着ることが<ruby>義務<rt>ぎむ</rt></ruby>になっていることの、メリットとデメリットを<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "オーストラリアの学校で制服を着ることが義務になっていることの、メリットとデメリットを評価する記事を書きなさい。"
+  },
+  {
+    "id": 27,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating the convenience of digital payments compared to the enduring value of using cash in a cashless society.",
+    "japanese": "キャッシュレス社会の中で、<ruby>現金<rt>げんきん</rt></ruby>を使うよさとデジタル<ruby>払<rt>はら</rt></ruby>いの<ruby>便利<rt>べんり</rt></ruby>さをくらべて<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "キャッシュレス社会の中で、現金を使うよさとデジタル払いの便利さをくらべて評価する記事を書きなさい。"
+  },
+  {
+    "id": 28,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a detailed review of a newly opened authentic Japanese restaurant in your local town, evaluating its food, service, and atmosphere.",
+    "japanese": "<ruby>地元<rt>じもと</rt></ruby>の町に新しくできた<ruby>本格<rt>ほんかく</rt></ruby><ruby>的<rt>てき</rt></ruby>な日本食レストランに行って書いた、<ruby>料理<rt>りょうり</rt></ruby>やサービス、<ruby>雰囲気<rt>ふんいき</rt></ruby>についてのくわしいレビューを書きなさい。",
+    "japanese_original": "地元の町に新しくできた本格的な日本食レストランに行って書いた、料理やサービス、雰囲気についてのくわしいレビューを書きなさい。"
+  },
+  {
+    "id": 29,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a comparative review of long-distance trains and domestic flights in Australia, evaluating their comfort, cost, and convenience for travelers.",
+    "japanese": "オーストラリアで旅行するときに乗った<ruby>長距離<rt>ちょうきょり</rt></ruby><ruby>列車<rt>れっしゃ</rt></ruby>と<ruby>国内線<rt>こくないせん</rt></ruby>の<ruby>飛行機<rt>ひこうき</rt></ruby>について、<ruby>快適<rt>かいてき</rt></ruby>さや<ruby>費用<rt>ひよう</rt></ruby>、<ruby>便利<rt>べんり</rt></ruby>さをくらべて<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "オーストラリアで旅行するときに乗った長距離列車と国内線の飛行機について、快適さや費用、便利さをくらべて評価する記事を書きなさい。"
+  },
+  {
+    "id": 30,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a critical review evaluating the functionality and educational effectiveness of popular online learning platforms and language apps.",
+    "japanese": "人気があるオンラインの学習プラットフォームや語学アプリの<ruby>機能<rt>きのう</rt></ruby>や学習への<ruby>効果<rt>こうか</rt></ruby>について<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "人気があるオンラインの学習プラットフォームや語学アプリの機能や学習への効果について評価する記事を書きなさい。"
+  },
+  {
+    "id": 31,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review of a newly opened eco-friendly cafe in your city, evaluating its environmental philosophy and the quality of its food and service.",
+    "japanese": "<ruby>市内<rt>しない</rt></ruby>で<ruby>話題<rt>わだい</rt></ruby>になっている<ruby>環境<rt>かんきょう</rt></ruby>にやさしいカフェの考え方や、<ruby>料理<rt>りょうり</rt></ruby>とサービスの<ruby>質<rt>しつ</rt></ruby>のよさについて<ruby>評価<rt>ひょうか</rt></ruby>するレビューを書きなさい。",
+    "japanese_original": "市内で話題になっている環境にやさしいカフェの考え方や、料理とサービスの質のよさについて評価するレビューを書きなさい。"
+  },
+  {
+    "id": 32,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review evaluating the convenience of self-checkout systems at Australian supermarkets and their impact on customer satisfaction.",
+    "japanese": "オーストラリアのスーパーにあるセルフレジの使いやすさと、<ruby>お客<rt>おきゃく</rt></ruby>さんの<ruby>満足<rt>まんぞく</rt></ruby><ruby>度<rt>ど</rt></ruby>について<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "オーストラリアのスーパーにあるセルフレジの使いやすさと、お客さんの満足度について評価する記事を書きなさい。"
+  },
+  {
+    "id": 33,
+    "category": "Evaluative",
+    "textType": "Email",
+    "english": "Write an email exchanging opinions with a Japanese friend on whether a city full of theme parks or a city with vast nature is better for a graduation trip destination.",
+    "japanese": "<ruby>卒業<rt>そつぎょう</rt></ruby>旅行の行き先として、テーマパークが多い都会と広い<ruby>自然<rt>しぜん</rt></ruby>がある町のどちらがよいか、日本の友人と<ruby>意見<rt>いけん</rt></ruby>をかわすメールを書きなさい。",
+    "japanese_original": "卒業旅行の行き先として、テーマパークが多い都会と広い自然がある町のどちらがよいか、日本の友人と意見をかわすメールを書きなさい。"
+  },
+  {
+    "id": 34,
+    "category": "Evaluative",
+    "textType": "Report",
+    "english": "Write a report evaluating the advantages and disadvantages of online classes versus face-to-face classes from a student's perspective.",
+    "japanese": "オンラインの<ruby>授業<rt>じゅぎょう</rt></ruby>と<ruby>対面<rt>たいめん</rt></ruby>での<ruby>授業<rt>じゅぎょう</rt></ruby>のそれぞれの<ruby>良<rt>よ</rt></ruby>い点と<ruby>悪<rt>わる</rt></ruby>い点を、<ruby>生徒<rt>せいと</rt></ruby>の<ruby>目線<rt>めせん</rt></ruby>から<ruby>客観<rt>きゃっかん</rt></ruby><ruby>的<rt>てき</rt></ruby>に<ruby>評価<rt>ひょうか</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "オンラインの授業と対面での授業のそれぞれの良い点と悪い点を、生徒の目線から客観的に評価するレポートを書きなさい。"
+  },
+  {
+    "id": 35,
+    "category": "Evaluative",
+    "textType": "Report",
+    "english": "Write an evaluative report on how the rapid spread of AI will impact future school education and human employment.",
+    "japanese": "AIが<ruby>急<rt>きゅう</rt></ruby>に広がることが、これからの学校<ruby>教育<rt>きょういく</rt></ruby>や人間の仕事にどのような<ruby>影響<rt>えいきょう</rt></ruby>を<ruby>与<rt>あた</rt></ruby>えるかについての<ruby>評価<rt>ひょうか</rt></ruby>レポートを書きなさい。",
+    "japanese_original": "AIが急に広がることが、これからの学校教育や人間の仕事にどのような影響を与えるかについての評価レポートを書きなさい。"
+  },
+  {
+    "id": 36,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article discussing the pros and cons of newly introduced school social media rules in terms of balancing student freedom and discipline.",
+    "japanese": "新しくできた学校のソーシャルメディアのルールについて、<ruby>生徒<rt>せいと</rt></ruby>の<ruby>自由<rt>じゆう</rt></ruby>と<ruby>規律<rt>きりつ</rt></ruby>のバランスという点からその<ruby>是非<rt>ぜひ</rt></ruby>を<ruby>論<rt>ろん</rt></ruby>じる<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "新しくできた学校のソーシャルメディアのルールについて、生徒の自由と規律のバランスという点からその是非を論じる記事を書きなさい。"
+  },
+  {
+    "id": 37,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating and comparing university education and vocational training/employment as career paths after high school graduation.",
+    "japanese": "高校を<ruby>卒業<rt>そつぎょう</rt></ruby>したあとの<ruby>進路<rt>しんろ</rt></ruby>として、大学<ruby>進学<rt>しんがく</rt></ruby>と<ruby>専門<rt>せんもん</rt></ruby>学校や<ruby>就職<rt>しゅうしょく</rt></ruby>をくらべて<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "高校を卒業したあとの進路として、大学進学と専門学校や就職をくらべて評価する記事を書きなさい。"
+  },
+  {
+    "id": 38,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating the advantages and disadvantages of high school seniors driving their own cars to school.",
+    "japanese": "12年生が自分で車を<ruby>運転<rt>うんてん</rt></ruby>して学校に<ruby>通<rt>かよ</rt></ruby>うことについて、その<ruby>良<rt>よ</rt></ruby>い点と<ruby>悪<rt>わる</rt></ruby>い点を<ruby>評価<rt>ひょうか</rt></ruby>して自分の<ruby>意見<rt>いけん</rt></ruby>をまとめた<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "12年生が自分で車を運転して学校に通うことについて、その良い点と悪い点を評価して自分の意見をまとめた記事を書きなさい。"
+  },
+  {
+    "id": 39,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review of a newly opened local sports gym, evaluating its exercise equipment, membership pricing, and support systems for high school students.",
+    "japanese": "学校の近くに新しくできたスポーツジムの<ruby>機械<rt>きかい</rt></ruby>、<ruby>料金<rt>りょうきん</rt></ruby>プラン、高校生<ruby>向<rt>む</rt></ruby>けのサポートについてくわしく<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "学校の近くに新しくできたスポーツジムの機械、料金プラン、高校生向けのサポートについてくわしく評価する記事を書きなさい。"
+  },
+  {
+    "id": 40,
+    "category": "Evaluative",
+    "textType": "Report",
+    "english": "Write a report analyzing the convenience and etiquette challenges of shared electric bicycles ('dockless e-bikes') becoming popular on city streets.",
+    "japanese": "<ruby>街<rt>まち</rt></ruby>中で<ruby>増<rt>ふ</rt></ruby>えている電動シェアサイクルの<ruby>便利<rt>べんり</rt></ruby>さと、マナーについての<ruby>問題<rt>もんだい</rt></ruby>点を<ruby>分析<rt>ぶんせき</rt></ruby>した<ruby>評価<rt>ひょうか</rt></ruby>レポートを書きなさい。",
+    "japanese_original": "街中で増えている電動シェアサイクルの便利さと、マナーについての問題点を分析した評価レポートを書きなさい。"
+  },
+  {
+    "id": 41,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review of a special exhibition at your local art museum, evaluating the quality of the exhibits, clarity of explanations, and overall atmosphere.",
+    "japanese": "<ruby>地元<rt>じもと</rt></ruby>の<ruby>美術館<rt>びじゅつかん</rt></ruby>の<ruby>特別<rt>とくべつ</rt></ruby><ruby>展<rt>てん</rt></ruby>について<ruby>評価<rt>ひょうか</rt></ruby>するレビューを書きなさい。",
+    "japanese_original": "地元の美術館の特別展について評価するレビューを書きなさい。"
+  },
+  {
+    "id": 42,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a film review evaluating the messaging, direction, and educational impact of a recently trending environmental documentary.",
+    "japanese": "<ruby>最近<rt>さいきん</rt></ruby><ruby>増<rt>ふ</rt></ruby>えている<ruby>環境<rt>かんきょう</rt></ruby><ruby>保護<rt>ほご</rt></ruby>についてのドキュメンタリー<ruby>映画<rt>えいが</rt></ruby>のメッセージや、つくりかたについて<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>映画<rt>えいが</rt></ruby>のレビューを書きなさい。",
+    "japanese_original": "最近増えている環境保護についてのドキュメンタリー映画のメッセージや、つくりかたについて評価する映画のレビューを書きなさい。"
+  },
+  {
+    "id": 43,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review evaluating the support quality and reliability of a homestay agency from the perspective of a student who used it during study abroad.",
+    "japanese": "<ruby>留学<rt>りゅうがく</rt></ruby>のときに<ruby>利用<rt>りよう</rt></ruby>したホームステイの会社のサポートや<ruby>信頼<rt>しんらい</rt></ruby>できるかということについて、<ruby>実際<rt>じっさい</rt></ruby>に<ruby>利用<rt>りよう</rt></ruby>した学生の<ruby>目線<rt>めせん</rt></ruby>から<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "留学のときに利用したホームステイの会社のサポートや信頼できるかということについて、実際に利用した学生の目線から評価する記事を書きなさい。"
+  },
+  {
+    "id": 44,
+    "category": "Evaluative",
+    "textType": "Report",
+    "english": "Write a report evaluating the accuracy and the degree of human-like communication shown by AI concierge robots newly introduced in a shopping mall.",
+    "japanese": "ショッピングモールに新しく入ったAIの<ruby>案内<rt>あんない</rt></ruby>ロボットの<ruby>正確<rt>せいかく</rt></ruby>さと、人間とのコミュニケーションの<ruby>度合<rt>どあ</rt></ruby>いについて<ruby>評価<rt>ひょうか</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "ショッピングモールに新しく入ったAIの案内ロボットの正確さと、人間とのコミュニケーションの度合いについて評価するレポートを書きなさい。"
+  },
+  {
+    "id": 45,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating the updated facilities of a local public swimming pool and fitness center and how well they serve the local community.",
+    "japanese": "新しくなった<ruby>地元<rt>じもと</rt></ruby>の<ruby>市民<rt>しみん</rt></ruby>プールやフィットネスセンターの<ruby>設備<rt>せつび</rt></ruby>と、<ruby>地域<rt>ちいき</rt></ruby>の人たちへの<ruby>役立<rt>やくだ</rt></ruby>ち方について<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "新しくなった地元の市民プールやフィットネスセンターの設備と、地域の人たちへの役立ち方について評価する記事を書きなさい。"
+  },
+  {
+    "id": 46,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a critical article on the growing spread of eco-friendly electric vehicles (EVs) and evaluate how convenient they are for everyday drivers.",
+    "japanese": "<ruby>街<rt>まち</rt></ruby>で見かけるようになった<ruby>環境<rt>かんきょう</rt></ruby>にやさしい電気自動車の広がりと、ふだん<ruby>運転<rt>うんてん</rt></ruby>する人にとっての<ruby>便利<rt>べんり</rt></ruby>さについて<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "街で見かけるようになった環境にやさしい電気自動車の広がりと、ふだん運転する人にとっての便利さについて評価する記事を書きなさい。"
+  },
+  {
+    "id": 47,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review evaluating the entertainment value and educational benefits of trending Japanese learning or cultural podcast programs from a listener's perspective.",
+    "japanese": "<ruby>最近<rt>さいきん</rt></ruby><ruby>話題<rt>わだい</rt></ruby>の日本語学習や<ruby>文化<rt>ぶんか</rt></ruby>を<ruby>紹介<rt>しょうかい</rt></ruby>するポッドキャスト<ruby>番組<rt>ばんぐみ</rt></ruby>の<ruby>面白<rt>おもしろ</rt></ruby>さと学ぶ<ruby>価値<rt>かち</rt></ruby>について、聞く人の<ruby>目線<rt>めせん</rt></ruby>からレビューしなさい。",
+    "japanese_original": "最近話題の日本語学習や文化を紹介するポッドキャスト番組の面白さと学ぶ価値について、聞く人の目線からレビューしなさい。"
+  },
+  {
+    "id": 48,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review evaluating the quality, service, and atmosphere of a newly opened Japanese restaurant called 'Haruya' based on your actual dining experience.",
+    "japanese": "<ruby>地元<rt>じもと</rt></ruby>に新しくできた日本食レストラン「はる屋」に行った<ruby>経験<rt>けいけん</rt></ruby>をもとに、<ruby>料理<rt>りょうり</rt></ruby>の<ruby>味<rt>あじ</rt></ruby>やサービスの<ruby>良<rt>よ</rt></ruby>い点と<ruby>直<rt>なお</rt></ruby>したほうがよい点をくわしく<ruby>評価<rt>ひょうか</rt></ruby>するレビューを書きなさい。",
+    "japanese_original": "地元に新しくできた日本食レストラン「はる屋」に行った経験をもとに、料理の味やサービスの良い点と直したほうがよい点をくわしく評価するレビューを書きなさい。"
+  },
+  {
+    "id": 49,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating the advantages and disadvantages of obtaining a driver's license as a high school student in Australia.",
+    "japanese": "オーストラリアの高校生が<ruby>運転<rt>うんてん</rt></ruby><ruby>免許<rt>めんきょ</rt></ruby>を<ruby>取<rt>と</rt></ruby>ることの長所と<ruby>短所<rt>たんしょ</rt></ruby>を<ruby>評価<rt>ひょうか</rt></ruby>し、社会への<ruby>影響<rt>えいきょう</rt></ruby>を考える<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "オーストラリアの高校生が運転免許を取ることの長所と短所を評価し、社会への影響を考える記事を書きなさい。"
+  },
+  {
+    "id": 50,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating the pros and cons of teenagers using smartphones and the internet in their daily lives and study habits.",
+    "japanese": "スマホやインターネットが今の高校生のふだんの生活や勉強にどのような<ruby>影響<rt>えいきょう</rt></ruby>をあたえているかについて<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "スマホやインターネットが今の高校生のふだんの生活や勉強にどのような影響をあたえているかについて評価する記事を書きなさい。"
+  },
+  {
+    "id": 51,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write a review evaluating the pros and cons of online shopping based on its booming popularity among consumers in Melbourne.",
+    "japanese": "ネット<ruby>通販<rt>つうはん</rt></ruby>が広がっていることが社会に<ruby>与<rt>あた</rt></ruby>える<ruby>影響<rt>えいきょう</rt></ruby>について、ネットショッピングの<ruby>良<rt>よ</rt></ruby>い点と<ruby>悪<rt>わる</rt></ruby>い点をいろいろな<ruby>角度<rt>かくど</rt></ruby>から<ruby>分析<rt>ぶんせき</rt></ruby>して<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "ネット通販が広がっていることが社会に与える影響について、ネットショッピングの良い点と悪い点をいろいろな角度から分析して評価する記事を書きなさい。"
+  },
+  {
+    "id": 52,
+    "category": "Evaluative",
+    "textType": "Report",
+    "english": "Write a report evaluating the service quality, comfort, and pros and cons of taking the inaugural flight of a new Japanese airline from Melbourne to Tokyo.",
+    "japanese": "新しい日本の<ruby>航空<rt>こうくう</rt></ruby>会社の<ruby>最初<rt>さいしょ</rt></ruby>の<ruby>便<rt>びん</rt></ruby>でメルボルンから東京へ<ruby>飛<rt>と</rt></ruby>んだときの、サービスのよさや<ruby>快適<rt>かいてき</rt></ruby>さ、<ruby>良<rt>よ</rt></ruby>い点と<ruby>悪<rt>わる</rt></ruby>い点を<ruby>評価<rt>ひょうか</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "新しい日本の航空会社の最初の便でメルボルンから東京へ飛んだときの、サービスのよさや快適さ、良い点と悪い点を評価するレポートを書きなさい。"
+  },
+  {
+    "id": 53,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an evaluative article discussing whether high-tech machines like computers and home appliances have truly made human life happier.",
+    "japanese": "コンピュータや家電などのハイテクな<ruby>機械<rt>きかい</rt></ruby>は<ruby>本当<rt>ほんとう</rt></ruby>に人間の生活を<ruby>幸<rt>しあわ</rt></ruby>せにしたかというテーマについて、メリットとデメリットから<ruby>冷静<rt>れいせい</rt></ruby>に<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "コンピュータや家電などのハイテクな機械は本当に人間の生活を幸せにしたかというテーマについて、メリットとデメリットから冷静に評価する記事を書きなさい。"
+  },
+  {
+    "id": 54,
+    "category": "Evaluative",
+    "textType": "Article",
+    "english": "Write an article evaluating the impact of part-time jobs on high school students' academic performance and time management skills.",
+    "japanese": "アルバイトが高校生の勉強や時間の<ruby>管理<rt>かんり</rt></ruby>にどのような<ruby>影響<rt>えいきょう</rt></ruby>をあたえているかについて、<ruby>良<rt>よ</rt></ruby>い<ruby>面<rt>めん</rt></ruby>と<ruby>悪<rt>わる</rt></ruby>い<ruby>面<rt>めん</rt></ruby>を<ruby>評価<rt>ひょうか</rt></ruby>する<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "アルバイトが高校生の勉強や時間の管理にどのような影響をあたえているかについて、良い面と悪い面を評価する記事を書きなさい。"
+  },
+  {
+    "id": 55,
+    "category": "Evaluative",
+    "textType": "Report",
+    "english": "Write a report evaluating the pros and cons of introducing a four-day school week for senior high school students.",
+    "japanese": "高校の<ruby>上級生<rt>じょうきゅうせい</rt></ruby>を<ruby>対象<rt>たいしょう</rt></ruby>に週4日<ruby>登校<rt>とうこう</rt></ruby>の<ruby>制度<rt>せいど</rt></ruby>を<ruby>導入<rt>どうにゅう</rt></ruby>することのメリットとデメリットについて<ruby>評価<rt>ひょうか</rt></ruby>するレポートを書きなさい。",
+    "japanese_original": "高校の上級生を対象に週4日登校の制度を導入することのメリットとデメリットについて評価するレポートを書きなさい。"
+  },
+  {
+    "id": 56,
+    "category": "Persuasive",
+    "textType": "Speech",
+    "english": "Write a persuasive speech script in Japanese addressed to the school council members and the principal, arguing why the school should completely eliminate single-use plastics and urging everyone to adopt eco-friendly habits like bringing reusable bags and bottles.",
+    "japanese": "学校の<ruby>代表<rt>だいひょう</rt></ruby>や校長先生の前で、<ruby>使い捨<rt>つかいす</rt></ruby>てのプラスチックをすべてなくすべきだと<ruby>訴<rt>うった</rt></ruby>え、エコバッグや<ruby>水筒<rt>すいとう</rt></ruby>を持ってくることを強くすすめるスピーチの<ruby>原稿<rt>げんこう</rt></ruby>を書きなさい。",
+    "japanese_original": "学校の代表や校長先生の前で、使い捨てのプラスチックをすべてなくすべきだと訴え、エコバッグや水筒を持ってくることを強くすすめるスピーチの原稿を書きなさい。"
+  },
+  {
+    "id": 57,
+    "category": "Persuasive",
+    "textType": "Essay",
+    "english": "Write a persuasive essay in Japanese for your Japanese teacher, discussing the serious negative impacts of sleep deprivation on high school students physical/mental health and learning efficiency, and arguing for the urgent need to improve sleep habits.",
+    "japanese": "高校生の<ruby>睡眠<rt>すいみん</rt></ruby><ruby>不足<rt>ふそく</rt></ruby>が<ruby>心<rt>こころ</rt></ruby>や体の<ruby>健康<rt>けんこう</rt></ruby>、勉強の<ruby>効率<rt>こうりつ</rt></ruby>に<ruby>与<rt>あた</rt></ruby>える<ruby>深刻<rt>しんこく</rt></ruby>な<ruby>悪影響<rt>あくえいきょう</rt></ruby>について書き、生活<ruby>習慣<rt>しゅうかん</rt></ruby>をすぐによくすることがいかに<ruby>大切<rt>たいせつ</rt></ruby>かについて自分の<ruby>主張<rt>しゅちょう</rt></ruby>をまとめた作文を書きなさい。",
+    "japanese_original": "高校生の睡眠不足が心や体の健康、勉強の効率に与える深刻な悪影響について書き、生活習慣をすぐによくすることがいかに大切かについて自分の主張をまとめた作文を書きなさい。"
+  },
+  {
+    "id": 58,
+    "category": "Persuasive",
+    "textType": "Letter",
+    "english": "Write a letter to a close friend who is hesitant to join the school's 'Digital Detox Week,' persuading them of the benefits of participating and encouraging them to join.",
+    "japanese": "学校のデジタルデトックス週間に<ruby>参加<rt>さんか</rt></ruby>するか<ruby>迷<rt>まよ</rt></ruby>っている<ruby>友達<rt>ともだち</rt></ruby>に、<ruby>参加<rt>さんか</rt></ruby>するメリットを<ruby>伝<rt>つた</rt></ruby>えていっしょに<ruby>参加<rt>さんか</rt></ruby>しようと強くすすめる手紙を書きなさい。",
+    "japanese_original": "学校のデジタルデトックス週間に参加するか迷っている友達に、参加するメリットを伝えていっしょに参加しようと強くすすめる手紙を書きなさい。"
+  },
+  {
+    "id": 59,
+    "category": "Persuasive",
+    "textType": "Email",
+    "english": "Write an email to apply to be a buddy for an exchange student coming from your sister school in Japan, explaining your hospitality and suitability for the role.",
+    "japanese": "日本の姉妹校から来る<ruby>留学生<rt>りゅうがくせい</rt></ruby>の<ruby>お世話<rt>おせわ</rt></ruby><ruby>係<rt>がかり</rt></ruby>に<ruby>立候補<rt>りっこうほ</rt></ruby>するため、自分がその<ruby>役割<rt>やくわり</rt></ruby>に<ruby>向<rt>む</rt></ruby>いている<ruby>理由<rt>りゆう</rt></ruby>をアピールするメールを書きなさい。",
+    "japanese_original": "日本の姉妹校から来る留学生のお世話係に立候補するため、自分がその役割に向いている理由をアピールするメールを書きなさい。"
+  },
+  {
+    "id": 60,
+    "category": "Persuasive",
+    "textType": "Speech",
+    "english": "Deliver a speech to the school assembly arguing that teenage participation in volunteer work is essential for future career development.",
+    "japanese": "<ruby>若<rt>わか</rt></ruby>い人がボランティア活動に<ruby>参加<rt>さんか</rt></ruby>することは<ruby>将来<rt>しょうらい</rt></ruby>の仕事のためにとても<ruby>大切<rt>たいせつ</rt></ruby>であるというテーマでスピーチを書きなさい。",
+    "japanese_original": "若い人がボランティア活動に参加することは将来の仕事のためにとても大切であるというテーマでスピーチを書きなさい。"
+  },
+  {
+    "id": 61,
+    "category": "Persuasive",
+    "textType": "Email",
+    "english": "Write an email to a friend who replied that they are 'too busy to join' a local volunteer cleanup, persuading them that even a short participation is worthwhile.",
+    "japanese": "<ruby>地元<rt>じもと</rt></ruby>のボランティアの<ruby>掃除<rt>そうじ</rt></ruby>に<ruby>誘<rt>さそ</rt></ruby>ったところ<ruby>忙<rt>いそが</rt></ruby>しいから<ruby>断<rt>ことわ</rt></ruby>りたいと<ruby>返事<rt>へんじ</rt></ruby>をした<ruby>友達<rt>ともだち</rt></ruby>に、少しの時間だけでも<ruby>参加<rt>さんか</rt></ruby>する<ruby>価値<rt>かち</rt></ruby>があることを<ruby>伝<rt>つた</rt></ruby>えるメールを書きなさい。",
+    "japanese_original": "地元のボランティアの掃除に誘ったところ忙しいから断りたいと返事をした友達に、少しの時間だけでも参加する価値があることを伝えるメールを書きなさい。"
+  },
+  {
+    "id": 62,
+    "category": "Persuasive",
+    "textType": "Letter",
+    "english": "Write a letter to a local community leader proposing the setup of a Japanese cultural food stall at the upcoming international food festival.",
+    "japanese": "<ruby>地域<rt>ちいき</rt></ruby>でひらかれるお<ruby>祭<rt>まつ</rt></ruby>りで日本<ruby>文化<rt>ぶんか</rt></ruby>の食べ物のブースを出そうと<ruby>地域<rt>ちいき</rt></ruby>の人に<ruby>お願<rt>おねが</rt></ruby>いする手紙を書きなさい。",
+    "japanese_original": "地域でひらかれるお祭りで日本文化の食べ物のブースを出そうと地域の人にお願いする手紙を書きなさい。"
+  },
+  {
+    "id": 63,
+    "category": "Persuasive",
+    "textType": "Letter",
+    "english": "Write a letter to your school librarian politely and persuasively requesting them to introduce more Japanese novels and magazines to the library.",
+    "japanese": "学校の<ruby>図書館<rt>としょかん</rt></ruby>に日本語の<ruby>小説<rt>しょうせつ</rt></ruby>や<ruby>雑誌<rt>ざっし</rt></ruby>をもっと<ruby>置<rt>お</rt></ruby>いてほしいと、<ruby>図書館<rt>としょかん</rt></ruby>の先生に<ruby>熱心<rt>ねっしん</rt></ruby>に<ruby>お願<rt>おねが</rt></ruby>いする手紙を書きなさい。",
+    "japanese_original": "学校の図書館に日本語の小説や雑誌をもっと置いてほしいと、図書館の先生に熱心にお願いする手紙を書きなさい。"
+  },
+  {
+    "id": 64,
+    "category": "Persuasive",
+    "textType": "Letter",
+    "english": "Write a letter to local shop owners calling for their cooperation in an eco-project aimed at reducing plastic waste in your local neighborhood.",
+    "japanese": "<ruby>地域<rt>ちいき</rt></ruby>の店の人たちにプラスチックのゴミをへらすエコのプロジェクトに<ruby>協力<rt>きょうりょく</rt></ruby>してもらうよう<ruby>呼<rt>よ</rt></ruby>びかける手紙を書きなさい。",
+    "japanese_original": "地域の店の人たちにプラスチックのゴミをへらすエコのプロジェクトに協力してもらうよう呼びかける手紙を書きなさい。"
+  },
+  {
+    "id": 65,
+    "category": "Persuasive",
+    "textType": "Speech",
+    "english": "Deliver a speech as a student representative to the entire school calling for cooperation on a school-wide food waste reduction plan.",
+    "japanese": "学校<ruby>全体<rt>ぜんたい</rt></ruby>で<ruby>取り組<rt>とりく</rt></ruby>む食べ物のムダをなくす<ruby>計画<rt>けいかく</rt></ruby>について、<ruby>生徒<rt>せいと</rt></ruby>の<ruby>代表<rt>だいひょう</rt></ruby>として<ruby>全校<rt>ぜんこう</rt></ruby><ruby>生徒<rt>せいと</rt></ruby>に<ruby>協力<rt>きょうりょく</rt></ruby>を<ruby>呼<rt>よ</rt></ruby>びかけるスピーチを書きなさい。",
+    "japanese_original": "学校全体で取り組む食べ物のムダをなくす計画について、生徒の代表として全校生徒に協力を呼びかけるスピーチを書きなさい。"
+  },
+  {
+    "id": 66,
+    "category": "Persuasive",
+    "textType": "Article",
+    "english": "Write an article discussing the importance of incorporating Indigenous Australian (Aboriginal) culture and art into the school education system.",
+    "japanese": "オーストラリアの<ruby>先住民<rt>せんじゅうみん</rt></ruby>族の<ruby>文化<rt>ぶんか</rt></ruby>やアートを学校の<ruby>教育<rt>きょういく</rt></ruby>に<ruby>取り入<rt>とりい</rt></ruby>れることがなぜ<ruby>大切<rt>たいせつ</rt></ruby>かについて書く<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "オーストラリアの先住民族の文化やアートを学校の教育に取り入れることがなぜ大切かについて書く記事を書きなさい。"
+  },
+  {
+    "id": 67,
+    "category": "Persuasive",
+    "textType": "Speech",
+    "english": "Deliver a speech at a Japanese speech contest arguing that learning a foreign language holds a value far beyond a mere communication tool.",
+    "japanese": "外国語を学ぶことはただのコミュニケーションの<ruby>道具<rt>どうぐ</rt></ruby><ruby>以上<rt>いじょう</rt></ruby>の<ruby>価値<rt>かち</rt></ruby>があるというテーマで日本語を勉強する<ruby>意味<rt>いみ</rt></ruby>を<ruby>熱<rt>あつ</rt></ruby>く話すスピーチを書きなさい。",
+    "japanese_original": "外国語を学ぶことはただのコミュニケーションの道具以上の価値があるというテーマで日本語を勉強する意味を熱く話すスピーチを書きなさい。"
+  },
+  {
+    "id": 68,
+    "category": "Persuasive",
+    "textType": "Letter",
+    "english": "Write a letter to the local council arguing for the creation of more bicycle lanes to ensure safer commuting for students.",
+    "japanese": "<ruby>生徒<rt>せいと</rt></ruby>が<ruby>安全<rt>あんぜん</rt></ruby>に<ruby>通学<rt>つうがく</rt></ruby>できるように<ruby>自転車<rt>じてんしゃ</rt></ruby><ruby>専用<rt>せんよう</rt></ruby>の道をもっと<ruby>増<rt>ふ</rt></ruby>やすよう、<ruby>市役所<rt>しやくしょ</rt></ruby>に強く<ruby>お願<rt>おねが</rt></ruby>いする手紙を書きなさい。",
+    "japanese_original": "生徒が安全に通学できるように自転車専用の道をもっと増やすよう、市役所に強くお願いする手紙を書きなさい。"
+  },
+  {
+    "id": 69,
+    "category": "Persuasive",
+    "textType": "Speech",
+    "english": "Deliver a speech arguing that high schools should incorporate practical financial literacy classes into their curriculum.",
+    "japanese": "高校で<ruby>実用<rt>じつよう</rt></ruby><ruby>的<rt>てき</rt></ruby>なお金の<ruby>管理<rt>かんり</rt></ruby>についての<ruby>授業<rt>じゅぎょう</rt></ruby>を<ruby>必修<rt>ひっしゅう</rt></ruby><ruby>科目<rt>かもく</rt></ruby>にすべきだと<ruby>訴<rt>うった</rt></ruby>えるスピーチを書きなさい。",
+    "japanese_original": "高校で実用的なお金の管理についての授業を必修科目にすべきだと訴えるスピーチを書きなさい。"
+  },
+  {
+    "id": 70,
+    "category": "Persuasive",
+    "textType": "Article",
+    "english": "Write an article persuading readers that regular physical exercise is essential not only for physical health but also for mental wellbeing.",
+    "japanese": "毎日の<ruby>適度<rt>てきど</rt></ruby>な<ruby>運動<rt>うんどう</rt></ruby>が体の<ruby>健康<rt>けんこう</rt></ruby>だけでなく<ruby>心<rt>こころ</rt></ruby>の<ruby>健康<rt>けんこう</rt></ruby>にとってもいかに<ruby>大切<rt>たいせつ</rt></ruby>かを<ruby>読者<rt>どくしゃ</rt></ruby>に強く<ruby>訴<rt>うった</rt></ruby>える<ruby>記事<rt>きじ</rt></ruby>を書きなさい。",
+    "japanese_original": "毎日の適度な運動が体の健康だけでなく心の健康にとってもいかに大切かを読者に強く訴える記事を書きなさい。"
+  },
+  {
+    "id": 71,
+    "category": "Persuasive",
+    "textType": "Email",
+    "english": "Write an email to persuade the school principal to approve a student-led fundraising event for environmental protection.",
+    "japanese": "<ruby>環境<rt>かんきょう</rt></ruby><ruby>保護<rt>ほご</rt></ruby>のための<ruby>募金<rt>ぼきん</rt></ruby>活動を学校で行う<ruby>許可<rt>きょか</rt></ruby>を校長先生にもらうため、<ruby>熱意<rt>ねつい</rt></ruby>を<ruby>伝<rt>つた</rt></ruby>えて<ruby>納得<rt>なっとく</rt></ruby>してもらうメールを書きなさい。",
+    "japanese_original": "環境保護のための募金活動を学校で行う許可を校長先生にもらうため、熱意を伝えて納得してもらうメールを書きなさい。"
+  },
+  {
+    "id": 72,
+    "category": "Personal",
+    "textType": "Letter",
+    "english": "Write a personal letter in Japanese to your host family in Japan after returning to Australia, updating them on your life and expressing your gratitude for their support and the things you learned during your stay.",
+    "japanese": "オーストラリアの自分の家に<ruby>戻<rt>もど</rt></ruby>ったあと日本で<ruby>お世話<rt>おせわ</rt></ruby>になったホストファミリーに<ruby>最近<rt>さいきん</rt></ruby>の<ruby>様子<rt>ようす</rt></ruby>と<ruby>感謝<rt>かんしゃ</rt></ruby>の気持ちを<ruby>伝<rt>つた</rt></ruby>える手紙を書きなさい。",
+    "japanese_original": "オーストラリアの自分の家に戻ったあと日本でお世話になったホストファミリーに最近の様子と感謝の気持ちを伝える手紙を書きなさい。"
+  },
+  {
+    "id": 73,
+    "category": "Personal",
+    "textType": "Journal",
+    "english": "Write a journal entry in Japanese reflecting on your experiences, challenges, and personal growth since you started volunteering to teach Japanese to local children last month.",
+    "japanese": "先月から近所の子どもたちに日本語を教えるボランティアを始めてから<ruby>感<rt>かん</rt></ruby>じた<ruby>大変<rt>たいへん</rt></ruby>なことや自分の<ruby>成長<rt>せいちょう</rt></ruby>について<ruby>振り返<rt>ふりかえ</rt></ruby>る<ruby>日記<rt>にっき</rt></ruby>を書きなさい。",
+    "japanese_original": "先月から近所の子どもたちに日本語を教えるボランティアを始めてから感じた大変なことや自分の成長について振り返る日記を書きなさい。"
+  },
+  {
+    "id": 74,
+    "category": "Personal",
+    "textType": "Letter",
+    "english": "Write a letter to your host family expressing your gratitude for their birthday and describing the experience of cooking a traditional dish for them.",
+    "japanese": "ホストファミリーの<ruby>誕生<rt>たんじょう</rt></ruby>日に手作りの<ruby>料理<rt>りょうり</rt></ruby>をごちそうしたときのエピソードと家族への<ruby>感謝<rt>かんしゃ</rt></ruby>の気持ちを書いた手紙を書きなさい。",
+    "japanese_original": "ホストファミリーの誕生日に手作りの料理をごちそうしたときのエピソードと家族への感謝の気持ちを書いた手紙を書きなさい。"
+  },
+  {
+    "id": 75,
+    "category": "Personal",
+    "textType": "Letter",
+    "english": "Write a letter to your parents in Japan, reflecting on the challenges and growth you have experienced halfway through your study abroad program.",
+    "japanese": "<ruby>留学<rt>りゅうがく</rt></ruby>生活のちょうど<ruby>真ん中<rt>まんなか</rt></ruby>の<ruby>時期<rt>じき</rt></ruby>をむかえこれまでの<ruby>苦労<rt>くろう</rt></ruby>と<ruby>成長<rt>せいちょう</rt></ruby>を<ruby>振り返<rt>ふりかえ</rt></ruby>りながら日本の<ruby>両親<rt>りょうしん</rt></ruby>に<ruby>最近<rt>さいきん</rt></ruby>の<ruby>様子<rt>ようす</rt></ruby>を<ruby>伝<rt>つた</rt></ruby>える手紙を書きなさい。",
+    "japanese_original": "留学生活のちょうど真ん中の時期をむかえこれまでの苦労と成長を振り返りながら日本の両親に最近の様子を伝える手紙を書きなさい。"
+  },
+  {
+    "id": 76,
+    "category": "Personal",
+    "textType": "Essay",
+    "english": "Write an essay about the most difficult challenge you have faced in your life and how you overcame it with the help of those around you.",
+    "japanese": "これまでの人生で一番<ruby>大変<rt>たいへん</rt></ruby>だったことに<ruby>立ち向<rt>たちむ</rt></ruby>かいまわりの人たちの<ruby>助<rt>たす</rt></ruby>けを<ruby>借<rt>か</rt></ruby>りながら乗りこえた<ruby>経験<rt>けいけん</rt></ruby>についての作文を書きなさい。",
+    "japanese_original": "これまでの人生で一番大変だったことに立ち向かいまわりの人たちの助けを借りながら乗りこえた経験についての作文を書きなさい。"
+  },
+  {
+    "id": 77,
+    "category": "Personal",
+    "textType": "Journal",
+    "english": "Write a journal entry on the first night after finishing your work experience placement, expressing both the harshness of the job and your sense of achievement.",
+    "japanese": "<ruby>職場<rt>しょくば</rt></ruby>の<ruby>体験<rt>たいけん</rt></ruby>を終えた<ruby>最初<rt>さいしょ</rt></ruby>の夜仕事の<ruby>大変<rt>たいへん</rt></ruby>さと<ruby>やり遂<rt>やりと</rt></ruby>げたという気持ちを<ruby>素直<rt>すなお</rt></ruby>に書いた<ruby>日記<rt>にっき</rt></ruby>を書きなさい。",
+    "japanese_original": "職場の体験を終えた最初の夜仕事の大変さとやり遂げたという気持ちを素直に書いた日記を書きなさい。"
+  },
+  {
+    "id": 78,
+    "category": "Personal",
+    "textType": "Essay",
+    "english": "Write an essay about a special person who has had the greatest impact on your life, detailing specific memories you share with them.",
+    "japanese": "自分の人生に一番大きな<ruby>影響<rt>えいきょう</rt></ruby>を<ruby>与<rt>あた</rt></ruby>えてくれた<ruby>特別<rt>とくべつ</rt></ruby>な人との思い出やその人から学んだことについての作文を書きなさい。",
+    "japanese_original": "自分の人生に一番大きな影響を与えてくれた特別な人との思い出やその人から学んだことについての作文を書きなさい。"
+  },
+  {
+    "id": 79,
+    "category": "Personal",
+    "textType": "Journal",
+    "english": "Write a New Year's Eve journal entry reflecting on the goals you set at the beginning of the year, your current progress, and the lessons you have learned.",
+    "japanese": "年の<ruby>初<rt>はじ</rt></ruby>めにたてた<ruby>目標<rt>もくひょう</rt></ruby>がどうなっているかこれまでの<ruby>失敗<rt>しっぱい</rt></ruby>や学びを<ruby>振り返<rt>ふりかえ</rt></ruby>る<ruby>大晦日<rt>おおみそか</rt></ruby>の<ruby>日記<rt>にっき</rt></ruby>を書きなさい。",
+    "japanese_original": "年の初めにたてた目標がどうなっているかこれまでの失敗や学びを振り返る大晦日の日記を書きなさい。"
+  },
+  {
+    "id": 80,
+    "category": "Personal",
+    "textType": "Journal",
+    "english": "Write a journal entry expressing your mixed feelings and anxiety as you approach the end of your high school life and face important career decisions.",
+    "japanese": "高校生活の終わりが近づき<ruby>将来<rt>しょうらい</rt></ruby>の<ruby>進路<rt>しんろ</rt></ruby>を<ruby>決<rt>き</rt></ruby>めることへの<ruby>不安<rt>ふあん</rt></ruby>やいろいろな気持ちを書いた<ruby>日記<rt>にっき</rt></ruby>を書きなさい。",
+    "japanese_original": "高校生活の終わりが近づき将来の進路を決めることへの不安やいろいろな気持ちを書いた日記を書きなさい。"
+  },
+  {
+    "id": 81,
+    "category": "Personal",
+    "textType": "Letter",
+    "english": "Write a letter to your teacher in Japan sharing your online participation experience in a Japanese university open campus and your strong desire to study in Japan in the future.",
+    "japanese": "日本の大学のオープンキャンパスにオンラインで<ruby>参加<rt>さんか</rt></ruby>した<ruby>感想<rt>かんそう</rt></ruby>と<ruby>将来<rt>しょうらい</rt></ruby>日本で勉強したいという強い気持ちを日本の先生に<ruby>伝<rt>つた</rt></ruby>える手紙を書きなさい。",
+    "japanese_original": "日本の大学のオープンキャンパスにオンラインで参加した感想と将来日本で勉強したいという強い気持ちを日本の先生に伝える手紙を書きなさい。"
+  },
+  {
+    "id": 82,
+    "category": "Personal",
+    "textType": "Letter",
+    "english": "Write a letter of gratitude to your host mother who kindly looked after you when you fell ill during your study abroad, describing how you are feeling now.",
+    "japanese": "<ruby>留学<rt>りゅうがく</rt></ruby>中に病気になったときにていねいに<ruby>看病<rt>かんびょう</rt></ruby>してくれたホストマザーに<ruby>感謝<rt>かんしゃ</rt></ruby>の気持ちと今の元気な<ruby>様子<rt>ようす</rt></ruby>を<ruby>伝<rt>つた</rt></ruby>える手紙を書きなさい。",
+    "japanese_original": "留学中に病気になったときにていねいに看病してくれたホストマザーに感謝の気持ちと今の元気な様子を伝える手紙を書きなさい。"
+  },
+  {
+    "id": 83,
+    "category": "Personal",
+    "textType": "Email",
+    "english": "Write an email to your workplace manager asking to adjust your shifts so that you can focus more on your studies as a part-time worker.",
+    "japanese": "アルバイトをしている<ruby>職場<rt>しょくば</rt></ruby>の店長に勉強に<ruby>集中<rt>しゅうちゅう</rt></ruby>するためにシフトを<ruby>変<rt>か</rt></ruby>えてほしいと<ruby>お願<rt>おねが</rt></ruby>いするメールを書きなさい。",
+    "japanese_original": "アルバイトをしている職場の店長に勉強に集中するためにシフトを変えてほしいとお願いするメールを書きなさい。"
+  },
+  {
+    "id": 84,
+    "category": "Personal",
+    "textType": "Letter",
+    "english": "Write a letter to your family and friends expressing gratitude for their support and sharing your future aspirations after winning a prize in a Japanese speech contest.",
+    "japanese": "日本語のスピーチ大会で<ruby>入賞<rt>にゅうしょう</rt></ruby>した自分を<ruby>応援<rt>おうえん</rt></ruby>してくれた家族や<ruby>友達<rt>ともだち</rt></ruby>に<ruby>感謝<rt>かんしゃ</rt></ruby>とこれからの<ruby>目標<rt>もくひょう</rt></ruby>を<ruby>伝<rt>つた</rt></ruby>える手紙を書きなさい。",
+    "japanese_original": "日本語のスピーチ大会で入賞した自分を応援してくれた家族や友達に感謝とこれからの目標を伝える手紙を書きなさい。"
+  },
+  {
+    "id": 85,
+    "category": "Personal",
+    "textType": "Email",
+    "english": "Write an email to a close friend in Japan who is far away, offering warm and practical advice and encouraging words in response to their worries.",
+    "japanese": "<ruby>遠<rt>とお</rt></ruby>くにいる日本の<ruby>友達<rt>ともだち</rt></ruby>から<ruby>届<rt>とど</rt></ruby>いた<ruby>悩<rt>なや</rt></ruby>みの<ruby>相談<rt>そうだん</rt></ruby><ruby>に対<rt>にたい</rt></ruby>してあたたかいアドバイスと<ruby>励<rt>はげ</rt></ruby>ましの<ruby>言葉<rt>ことば</rt></ruby>を<ruby>送<rt>おく</rt></ruby>るメールを書きなさい。",
+    "japanese_original": "遠くにいる日本の友達から届いた悩みの相談に対してあたたかいアドバイスと励ましの言葉を送るメールを書きなさい。"
+  },
+  {
+    "id": 86,
+    "category": "Personal",
+    "textType": "Email",
+    "english": "Write an email to a friend you met through a Japanese cultural exchange program, proposing that you continue your communication in Japanese.",
+    "japanese": "日本の<ruby>文化<rt>ぶんか</rt></ruby>を<ruby>体験<rt>たいけん</rt></ruby>するプログラムで<ruby>知り合<rt>しりあ</rt></ruby>った<ruby>友達<rt>ともだち</rt></ruby>にこれからも日本語で<ruby>連絡<rt>れんらく</rt></ruby>を<ruby>続<rt>つづ</rt></ruby>けようと<ruby>提案<rt>ていあん</rt></ruby>するメールを書きなさい。",
+    "japanese_original": "日本の文化を体験するプログラムで知り合った友達にこれからも日本語で連絡を続けようと提案するメールを書きなさい。"
+  },
+  {
+    "id": 87,
+    "category": "Personal",
+    "textType": "Letter",
+    "english": "Write a letter to your grandparents sharing the joy of winning a prize in a photography contest, which is one of your favorite hobbies.",
+    "japanese": "自分の<ruby>趣味<rt>しゅみ</rt></ruby>である<ruby>写真<rt>しゃしん</rt></ruby>のコンテストで<ruby>賞<rt>しょう</rt></ruby>をもらった<ruby>喜<rt>よろこ</rt></ruby>びをいつも<ruby>応援<rt>おうえん</rt></ruby>してくれているおじいさんとおばあちゃんに<ruby>伝<rt>つた</rt></ruby>える手紙を書きなさい。",
+    "japanese_original": "自分の趣味である写真のコンテストで賞をもらった喜びをいつも応援してくれているおじいさんとおばあちゃんに伝える手紙を書きなさい。"
+  },
+  {
+    "id": 88,
+    "category": "Personal",
+    "textType": "Journal",
+    "english": "Write a journal entry recording the mental stress and pressure you felt during the VCE exam period, and how you encouraged yourself.",
+    "japanese": "テストの<ruby>時期<rt>じき</rt></ruby>に<ruby>感<rt>かん</rt></ruby>じたプレッシャーとそれに<ruby>負<rt>ま</rt></ruby>けないように自分で自分を<ruby>励<rt>はげ</rt></ruby>ましたときの気持ちを<ruby>記録<rt>きろく</rt></ruby>した<ruby>日記<rt>にっき</rt></ruby>を書きなさい。",
+    "japanese_original": "テストの時期に感じたプレッシャーとそれに負けないように自分で自分を励ましたときの気持ちを記録した日記を書きなさい。"
+  },
+  {
+    "id": 89,
+    "category": "Personal",
+    "textType": "Essay",
+    "english": "Write an essay reflecting on the emotional changes you experienced by looking at photographs from a family trip you took during your childhood.",
+    "japanese": "<ruby>子供<rt>こども</rt></ruby>のころに行った家族旅行の<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>見返<rt>みかえ</rt></ruby>してそのころと今の気持ちの<ruby>変化<rt>へんか</rt></ruby>について<ruby>振り返<rt>ふりかえ</rt></ruby>る作文を書きなさい。",
+    "japanese_original": "子供のころに行った家族旅行の写真を見返してそのころと今の気持ちの変化について振り返る作文を書きなさい。"
+  },
+  {
+    "id": 90,
+    "category": "Personal",
+    "textType": "Essay",
+    "english": "Write an essay about a club activity you have dedicated yourself to for years, reflecting on the hard work, sense of achievement, and impact it had on you.",
+    "japanese": "長いあいだ<ruby>一生懸命<rt>いっしょうけんめい</rt></ruby>つづけてきたクラブ活動を<ruby>引退<rt>いんたい</rt></ruby>する日にこれまでの<ruby>努力<rt>どりょく</rt></ruby>と<ruby>仲間<rt>なかま</rt></ruby>への<ruby>感謝<rt>かんしゃ</rt></ruby>の気持ちを書いた作文を書きなさい。",
+    "japanese_original": "長いあいだ一生懸命つづけてきたクラブ活動を引退する日にこれまでの努力と仲間への感謝の気持ちを書いた作文を書きなさい。"
+  },
+  {
+    "id": 91,
+    "category": "Personal",
+    "textType": "Account",
+    "english": "Write a personal account detailing a major cultural misunderstanding you faced during a homestay in Japan and the emotional conflict you overcame.",
+    "japanese": "日本でのホームステイのとき<ruby>文化<rt>ぶんか</rt></ruby>の<ruby>違<rt>ちが</rt></ruby>いから大きな<ruby>誤解<rt>ごかい</rt></ruby>をしてしまいそれを乗りこえるまでに自分が<ruby>感<rt>かん</rt></ruby>じたことについての<ruby>体験<rt>たいけん</rt></ruby><ruby>談<rt>だん</rt></ruby>を書きなさい。",
+    "japanese_original": "日本でのホームステイのとき文化の違いから大きな誤解をしてしまいそれを乗りこえるまでに自分が感じたことについての体験談を書きなさい。"
+  },
+  {
+    "id": 92,
+    "category": "Personal",
+    "textType": "Journal",
+    "english": "Write a reflective journal entry in a quiet school library, deeply contemplating your future dreams and how you want to live your life.",
+    "japanese": "<ruby>放課後<rt>ほうかご</rt></ruby>の<ruby>静<rt>しず</rt></ruby>かな<ruby>図書館<rt>としょかん</rt></ruby>で<ruby>将来<rt>しょうらい</rt></ruby>の<ruby>夢<rt>ゆめ</rt></ruby>や自分の生き方について<ruby>深<rt>ふか</rt></ruby>く考えたときの気持ちを書いた<ruby>日記<rt>にっき</rt></ruby>を書きなさい。",
+    "japanese_original": "放課後の静かな図書館で将来の夢や自分の生き方について深く考えたときの気持ちを書いた日記を書きなさい。"
+  },
+  {
+    "id": 93,
+    "category": "Personal",
+    "textType": "Essay",
+    "english": "Write an essay about a time you experienced the truth behind the saying 'failure is stepping stone to success,' detailing how you recovered from a big mistake.",
+    "japanese": "<ruby>失敗<rt>しっぱい</rt></ruby>は<ruby>成功<rt>せいこう</rt></ruby>のもとという<ruby>言葉<rt>ことば</rt></ruby>を<ruby>本当<rt>ほんとう</rt></ruby>にそうだと思った<ruby>昔<rt>むかし</rt></ruby>の大きな<ruby>失敗<rt>しっぱい</rt></ruby>とそこから<ruby>立ち直<rt>たちなお</rt></ruby>った<ruby>経験<rt>けいけん</rt></ruby>についての作文を書きなさい。",
+    "japanese_original": "失敗は成功のもとという言葉を本当にそうだと思った昔の大きな失敗とそこから立ち直った経験についての作文を書きなさい。"
+  },
+  {
+    "id": 94,
+    "category": "Personal",
+    "textType": "Journal",
+    "english": "Write a journal entry capturing the feelings of loneliness and excitement you experienced while waiting in an airport lobby for your first solo trip abroad.",
+    "japanese": "<ruby>初<rt>はじ</rt></ruby>めてひとりで海外旅行に出発するため<ruby>空港<rt>くうこう</rt></ruby>のロビーで待っているときに<ruby>感<rt>かん</rt></ruby>じた<ruby>寂<rt>さび</rt></ruby>しさとワクワクした気持ちを書いた<ruby>日記<rt>にっき</rt></ruby>を書きなさい。",
+    "japanese_original": "初めてひとりで海外旅行に出発するため空港のロビーで待っているときに感じた寂しさとワクワクした気持ちを書いた日記を書きなさい。"
+  },
+  {
+    "id": 95,
+    "category": "Personal",
+    "textType": "Essay",
+    "english": "Write a reflective essay about the scenery of summer vacations spent at your grandparents' house and the timeless teachings that still stay with you.",
+    "japanese": "<ruby>祖父母<rt>そふぼ</rt></ruby>の家で<ruby>過<rt>す</rt></ruby>ごした<ruby>昔<rt>むかし</rt></ruby>の夏休みの思い出と今でも自分の中にある<ruby>大切<rt>たいせつ</rt></ruby>な教えについて<ruby>振り返<rt>ふりかえ</rt></ruby>る作文を書きなさい。",
+    "japanese_original": "祖父母の家で過ごした昔の夏休みの思い出と今でも自分の中にある大切な教えについて振り返る作文を書きなさい。"
+  },
+  {
+    "id": 96,
+    "category": "Personal",
+    "textType": "Essay",
+    "english": "Write an essay about taking on a major responsibility in a school project and experiencing personal growth through battling the immense pressure.",
+    "japanese": "学校のプロジェクトで大きな仕事をまかされプレッシャーと<ruby>戦<rt>たたか</rt></ruby>いながら<ruby>やり遂<rt>やりと</rt></ruby>げたことで自分が<ruby>成長<rt>せいちょう</rt></ruby>した<ruby>経験<rt>けいけん</rt></ruby>についての作文を書きなさい。",
+    "japanese_original": "学校のプロジェクトで大きな仕事をまかされプレッシャーと戦いながらやり遂げたことで自分が成長した経験についての作文を書きなさい。"
+  },
+  {
+    "id": 97,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write an imaginative story in Japanese for a short story writing contest aimed at young readers, beginning with finding an unfamiliar ticket in the gap of an old bookshelf in a library and boarding a train to an unexpected world.",
+    "japanese": "<ruby>図書館<rt>としょかん</rt></ruby>の古い<ruby>本棚<rt>ほんだな</rt></ruby>のすきまから見たこともない<ruby>切符<rt>きっぷ</rt></ruby>を見つけて、その電車に乗ったことで思いがけない<ruby>世界<rt>せかい</rt></ruby>に行ってしまったという<ruby>若<rt>わか</rt></ruby>い人<ruby>向<rt>む</rt></ruby>けの物語を書きなさい。",
+    "japanese_original": "図書館の古い本棚のすきまから見たこともない切符を見つけて、その電車に乗ったことで思いがけない世界に行ってしまったという若い人向けの物語を書きなさい。"
+  },
+  {
+    "id": 98,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write an imaginative story in Japanese for a youth magazine, centered around meditating on a garden stone in an old temple in Kyoto, which suddenly causes you to time-slip and encounter people from the Heian period.",
+    "japanese": "京都の古いお寺の<ruby>庭<rt>にわ</rt></ruby>の<ruby>石<rt>いし</rt></ruby>に<ruby>座<rt>すわ</rt></ruby>って目を<ruby>閉<rt>と</rt></ruby>じていたら<ruby>突然<rt>とつぜん</rt></ruby>タイムスリップして<ruby>平安<rt>へいあん</rt></ruby><ruby>時代<rt>じだい</rt></ruby>の人たちに出会ったという<ruby>不思議<rt>ふしぎ</rt></ruby>な<ruby>体験<rt>たいけん</rt></ruby>についての物語を<ruby>若<rt>わか</rt></ruby>い人<ruby>向<rt>む</rt></ruby>けに書きなさい。",
+    "japanese_original": "京都の古いお寺の庭の石に座って目を閉じていたら突然タイムスリップして平安時代の人たちに出会ったという不思議な体験についての物語を若い人向けに書きなさい。"
+  },
+  {
+    "id": 99,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a children's story about a little koala that gets lost in the Australian bush and uses its wits to find its way back home to its family.",
+    "japanese": "オーストラリアの<ruby>森<rt>もり</rt></ruby>の中で<ruby>迷子<rt>まいご</rt></ruby>になってしまった小さなコアラが<ruby>知恵<rt>ちえ</rt></ruby>を働かせて家族のところへ帰る<ruby>子供<rt>こども</rt></ruby><ruby>向<rt>む</rt></ruby>けの物語を書きなさい。",
+    "japanese_original": "オーストラリアの森の中で迷子になってしまった小さなコアラが知恵を働かせて家族のところへ帰る子供向けの物語を書きなさい。"
+  },
+  {
+    "id": 100,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a sci-fi story about a protagonist who accidentally time-travels from the present day to the year 2100 and must navigate a world of flying cars and robots.",
+    "japanese": "<ruby>現代<rt>げんだい</rt></ruby>から<ruby>偶然<rt>ぐうぜん</rt></ruby>2100年の<ruby>未来<rt>みらい</rt></ruby>にタイムスリップしてしまった<ruby>主人公<rt>しゅじんこう</rt></ruby>が<ruby>空<rt>そら</rt></ruby>を<ruby>飛<rt>と</rt></ruby>ぶ車やロボットばかりの<ruby>世界<rt>せかい</rt></ruby>で<ruby>生き抜<rt>いきぬ</rt></ruby>くSFの物語を書きなさい。",
+    "japanese_original": "現代から偶然2100年の未来にタイムスリップしてしまった主人公が空を飛ぶ車やロボットばかりの世界で生き抜くSFの物語を書きなさい。"
+  },
+  {
+    "id": 101,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a narrative from the perspective of an old leather wallet left behind on a train, describing its humorous adventure until it is picked up by a new owner.",
+    "japanese": "電車の中に<ruby>忘<rt>わす</rt></ruby>れられた古い<ruby>革<rt>かわ</rt></ruby>の<ruby>財布<rt>さいふ</rt></ruby>の<ruby>目線<rt>めせん</rt></ruby>から新しい<ruby>持ち主<rt>もちぬし</rt></ruby>に<ruby>拾<rt>ひろ</rt></ruby>われるまでの<ruby>面白<rt>おもしろ</rt></ruby>い<ruby>冒険<rt>ぼうけん</rt></ruby>の物語を書きなさい。",
+    "japanese_original": "電車の中に忘れられた古い革の財布の目線から新しい持ち主に拾われるまでの面白い冒険の物語を書きなさい。"
+  },
+  {
+    "id": 102,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a story about waking up one morning to find that your ears have turned into cat ears and you are suddenly able to understand and speak with cats.",
+    "japanese": "ある朝<ruby>起<rt>お</rt></ruby>きたら自分の耳が<ruby>猫<rt>ねこ</rt></ruby>のようになっていて話す<ruby>猫<rt>ねこ</rt></ruby>たちと会話ができるようになったという<ruby>不思議<rt>ふしぎ</rt></ruby>な朝の物語を書きなさい。",
+    "japanese_original": "ある朝起きたら自分の耳が猫のようになっていて話す猫たちと会話ができるようになったという不思議な朝の物語を書きなさい。"
+  },
+  {
+    "id": 103,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a story about a monkey soaking in a hot spring who begins to observe and deeply contemplate human nature from an unique animal viewpoint.",
+    "japanese": "<ruby>温泉<rt>おんせん</rt></ruby>にゆっくり入っている一<ruby>匹<rt>ひき</rt></ruby>のサルが人間たちの<ruby>様子<rt>ようす</rt></ruby>を動物ならではの<ruby>目線<rt>めせん</rt></ruby>で<ruby>深<rt>ふか</rt></ruby>く<ruby>観察<rt>かんさつ</rt></ruby>している物語を書きなさい。",
+    "japanese_original": "温泉にゆっくり入っている一匹のサルが人間たちの様子を動物ならではの目線で深く観察している物語を書きなさい。"
+  },
+  {
+    "id": 104,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a story about discovering a tiny, hidden door behind the bookshelf and opening it to find a whole miniature world waiting for you.",
+    "japanese": "<ruby>本棚<rt>ほんだな</rt></ruby>の<ruby>奥<rt>おく</rt></ruby>に小さなドアを見つけ<ruby>勇気<rt>ゆうき</rt></ruby>を出して<ruby>開<rt>あ</rt></ruby>けた先で広がっていた小さなおもちゃのような<ruby>世界<rt>せかい</rt></ruby>の物語を書きなさい。",
+    "japanese_original": "本棚の奥に小さなドアを見つけ勇気を出して開けた先で広がっていた小さなおもちゃのような世界の物語を書きなさい。"
+  },
+  {
+    "id": 105,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a narrative about a high school student who suddenly becomes able to hear the voices of all animals and plants around them, resulting in a chaotic day.",
+    "japanese": "ある日<ruby>突然<rt>とつぜん</rt></ruby>まわりにいるすべての動物や<ruby>植物<rt>しょくぶつ</rt></ruby>の<ruby>声<rt>こえ</rt></ruby>が聞こえるようになった高校生が<ruby>体験<rt>たいけん</rt></ruby>するにぎやかな一日の物語を書きなさい。",
+    "japanese_original": "ある日突然まわりにいるすべての動物や植物の声が聞こえるようになった高校生が体験するにぎやかな一日の物語を書きなさい。"
+  },
+  {
+    "id": 106,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a story about a secret midnight gathering in an art museum where the characters inside the paintings come alive and discuss their worlds.",
+    "japanese": "<ruby>真夜中<rt>まよなか</rt></ruby>の<ruby>美術館<rt>びじゅつかん</rt></ruby>で<ruby>絵<rt>え</rt></ruby>の中の人たちが動き出し自分たちの<ruby>世界<rt>せかい</rt></ruby>について<ruby>話し合<rt>はなしあ</rt></ruby>う<ruby>秘密<rt>ひみつ</rt></ruby>の夜会についての物語を書きなさい。",
+    "japanese_original": "真夜中の美術館で絵の中の人たちが動き出し自分たちの世界について話し合う秘密の夜会についての物語を書きなさい。"
+  },
+  {
+    "id": 107,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a narrative about reading an old letter found inside a glass bottle on the beach, only to realize it was written by a girl your age fifty years ago.",
+    "japanese": "<ruby>海辺<rt>うみべ</rt></ruby>の<ruby>砂浜<rt>すなはま</rt></ruby>で<ruby>拾<rt>ひろ</rt></ruby>ったガラスびんの中に入っていた古い手紙を読んだところ50年前の自分と同じ年の女の子からのメッセージだったという物語を書きなさい。",
+    "japanese_original": "海辺の砂浜で拾ったガラスびんの中に入っていた古い手紙を読んだところ50年前の自分と同じ年の女の子からのメッセージだったという物語を書きなさい。"
+  },
+  {
+    "id": 108,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a sci-fi survival story about a pair of scientists whose time machine malfunctions, stranding them in a prehistoric era where dinosaurs roam.",
+    "japanese": "タイムマシンがこわれて<ruby>恐竜<rt>きょうりゅう</rt></ruby>が歩き回る<ruby>大昔<rt>おおむかし</rt></ruby>の<ruby>時代<rt>じだい</rt></ruby>に<ruby>取り残<rt>とりのこ</rt></ruby>されてしまった<ruby>科学<rt>かがく</rt></ruby><ruby>者<rt>しゃ</rt></ruby>ふたりのハラハラするサバイバルの物語を書きなさい。",
+    "japanese_original": "タイムマシンがこわれて恐竜が歩き回る大昔の時代に取り残されてしまった科学者ふたりのハラハラするサバイバルの物語を書きなさい。"
+  },
+  {
+    "id": 109,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a humorous story about a pet dog that secretly manages a local bakery while its owners are away at work.",
+    "japanese": "<ruby>飼い主<rt>かいぬし</rt></ruby>が仕事に出かけているあいだに、<ruby>飼い犬<rt>かいいぬ</rt></ruby>がこっそりパン屋を<ruby>経営<rt>けいえい</rt></ruby>していたというユーモアあふれる物語を書きなさい。",
+    "japanese_original": "飼い主が仕事に出かけているあいだに、飼い犬がこっそりパン屋を経営していたというユーモアあふれる物語を書きなさい。"
+  },
+  {
+    "id": 110,
+    "category": "Imaginative",
+    "textType": "Story",
+    "english": "Write a story about a forgotten toy in the attic that decides to embark on a great adventure to find the child who once played with it.",
+    "japanese": "<ruby>屋根裏<rt>やねうら</rt></ruby><ruby>部屋<rt>へや</rt></ruby>で<ruby>忘<rt>わす</rt></ruby>れられていたおもちゃが、<ruby>昔<rt>むかし</rt></ruby><ruby>遊<rt>あそ</rt></ruby>んでくれた<ruby>子供<rt>こども</rt></ruby>を<ruby>探<rt>さが</rt></ruby>すために<ruby>壮大<rt>そうだい</rt></ruby>な<ruby>冒険<rt>ぼうけん</rt></ruby>に出るという<ruby>感動<rt>かんどう</rt></ruby><ruby>的<rt>てき</rt></ruby>な物語を書きなさい。",
+    "japanese_original": "屋根裏部屋で忘れられていたおもちゃが、昔遊んでくれた子供を探すために壮大な冒険に出るという感動的な物語を書きなさい。"
+  }
+]

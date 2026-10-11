@@ -1,0 +1,232 @@
+{
+  "Article": {
+    "title": "Article (<ruby>記事<rt>きじ</rt></ruby>)",
+    "purpose": "Articles are used to inform, persuade, or entertain readers through a structured publication format.",
+    "structure": [
+      "Items you should include: Title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Plain style in general, Polite style is also acceptable"
+    ],
+    "sampleImage": "/article.pdf",
+    "title_original": "Article (記事)",
+    "purpose_original": "Articles are used to inform, persuade, or entertain readers through a structured publication format.",
+    "structure_original": [
+      "Items you should include: Title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Plain style in general, Polite style is also acceptable"
+    ]
+  },
+  "Email": {
+    "title": "Email (Eメール)",
+    "purpose": "Emails are used to quickly convey a message, consultation, or advice to a specific recipient more casually or formally than a letter.",
+    "structure": [
+      "Items you should include: Name of the recipient, Subject line, Main text, Last line, Name of the sender",
+      "Sentence style: Polite style or, Plain style depending on the relationship"
+    ],
+    "sampleImage": "/email.pdf",
+    "title_original": "Email (Eメール)",
+    "purpose_original": "Emails are used to quickly convey a message, consultation, or advice to a specific recipient more casually or formally than a letter.",
+    "structure_original": [
+      "Items you should include: Name of the recipient, Subject line, Main text, Last line, Name of the sender",
+      "Sentence style: Polite style or, Plain style depending on the relationship"
+    ]
+  },
+  "Essay": {
+    "title": "Essay (作文)",
+    "purpose": "Essays are used to present and logically argue your own thoughts or reflections on a given theme through structured paragraphs.",
+    "structure": [
+      "Items you should include: Topic, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ],
+    "sampleImage": "/essay.pdf",
+    "title_original": "Essay (作文)",
+    "purpose_original": "Essays are used to present and logically argue your own thoughts or reflections on a given theme through structured paragraphs.",
+    "structure_original": [
+      "Items you should include: Topic, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ]
+  },
+  "Journal": {
+    "title": "Journal, Diary Entry (<ruby>日記<rt>にっき</rt></ruby>)",
+    "purpose": "Journals are used to personally record daily events, changes in mood, reflections, and future plans.",
+    "structure": [
+      "Items you should include: Month, date, day of the week, Weather",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Plain style in general as you write to yourself"
+    ],
+    "sampleImage": "/journal.pdf",
+    "title_original": "Journal, Diary Entry (日記)",
+    "purpose_original": "Journals are used to personally record daily events, changes in mood, reflections, and future plans.",
+    "structure_original": [
+      "Items you should include: Month, date, day of the week, Weather",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Plain style in general as you write to yourself"
+    ]
+  },
+  "Message": {
+    "title": "Message (<ruby>伝言<rt>でんごん</rt></ruby>、メッセージ)",
+    "purpose": "Messages are used to leave brief, concise information or instructions for someone who is absent.",
+    "structure": [
+      "Items you should include: Name of addressee, Content, Date and time, Name of addressor (fictional)",
+      "Sentence style: Polite style or, Plain style depending on recipient"
+    ],
+    "title_original": "Message (伝言、メッセージ)",
+    "purpose_original": "Messages are used to leave brief, concise information or instructions for someone who is absent.",
+    "structure_original": [
+      "Items you should include: Name of addressee, Content, Date and time, Name of addressor (fictional)",
+      "Sentence style: Polite style or, Plain style depending on recipient"
+    ]
+  },
+  "Account": {
+    "title": "Personal Account (<ruby>体験<rt>たいけん</rt></ruby><ruby>談<rt>だん</rt></ruby>)",
+    "purpose": "Personal accounts are used to describe a personal experience, including challenges faced and the process of overcoming them.",
+    "structure": [
+      "Items you should include: Title, Name of author (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ],
+    "sampleImage": "/personal_account.pdf",
+    "title_original": "Personal Account (体験談)",
+    "purpose_original": "Personal accounts are used to describe a personal experience, including challenges faced and the process of overcoming them.",
+    "structure_original": [
+      "Items you should include: Title, Name of author (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ]
+  },
+  "Letter": {
+    "title": "Personal Letter (手紙)",
+    "purpose": "Personal letters are used to share updates, express gratitude, or maintain personal connections with a recipient.",
+    "structure": [
+      "Items you should include: Date, Starting line, Name of the addressee, Signing off at the end, Name of the sender",
+      "Content: Introduction, Body of the letter, Conclusion",
+      "Sentence style: Polite style or, Plain style depending on the relationship"
+    ],
+    "sampleImage": "/letter.pdf",
+    "title_original": "Personal Letter (手紙)",
+    "purpose_original": "Personal letters are used to share updates, express gratitude, or maintain personal connections with a recipient.",
+    "structure_original": [
+      "Items you should include: Date, Starting line, Name of the addressee, Signing off at the end, Name of the sender",
+      "Content: Introduction, Body of the letter, Conclusion",
+      "Sentence style: Polite style or, Plain style depending on the relationship"
+    ]
+  },
+  "Report": {
+    "title": "Report - Research, Analysis (レポート)",
+    "purpose": "Reports are used to organize and present research findings, objective analyses, or facts clearly.",
+    "structure": [
+      "Items you should include: Title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ],
+    "sampleImage": "/report.pdf",
+    "title_original": "Report - Research, Analysis (レポート)",
+    "purpose_original": "Reports are used to organize and present research findings, objective analyses, or facts clearly.",
+    "structure_original": [
+      "Items you should include: Title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ]
+  },
+  "Official Report": {
+    "title": "Report - Official, Business (<ruby>報告<rt>ほうこく</rt></ruby>書)",
+    "purpose": "Official reports are used to communicate factual investigation results or business activities within an organization.",
+    "structure": [
+      "Items you should include: Topic / title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ],
+    "title_original": "Report - Official, Business (報告書)",
+    "purpose_original": "Official reports are used to communicate factual investigation results or business activities within an organization.",
+    "structure_original": [
+      "Items you should include: Topic / title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ]
+  },
+  "Review": {
+    "title": "Review (<ruby>批評<rt>ひひょう</rt></ruby>)",
+    "purpose": "Reviews are used to evaluate books, movies, products, or performances and provide an informed opinion to readers.",
+    "structure": [
+      "Items you should include: Title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ],
+    "title_original": "Review (批評)",
+    "purpose_original": "Reviews are used to evaluate books, movies, products, or performances and provide an informed opinion to readers.",
+    "structure_original": [
+      "Items you should include: Title, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ]
+  },
+  "Speech": {
+    "title": "Speech Script（スピーチの<ruby>原稿<rt>げんこう</rt></ruby>）",
+    "purpose": "Speeches are used to directly communicate opinions or information to a live audience.",
+    "structure": [
+      "Items you should include: Title, Greeting（e.g. こんにちは。）, Introduction to the topic（e.g. ～について話したいと思います。）, Body of the speech, Closing expression（e.g. ありがとうございました。）",
+      "Sentence style: Polite style"
+    ],
+    "sampleImage": "/speech_script.pdf",
+    "title_original": "Speech Script（スピーチの原稿）",
+    "purpose_original": "Speeches are used to directly communicate opinions or information to a live audience.",
+    "structure_original": [
+      "Items you should include: Title, Greeting（e.g. こんにちは。）, Introduction to the topic（e.g. ～について話したいと思います。）, Body of the speech, Closing expression（e.g. ありがとうございました。）",
+      "Sentence style: Polite style"
+    ]
+  },
+  "Story": {
+    "title": "Story (物語)",
+    "purpose": "Stories are used to write imaginative narratives featuring characters, settings, and a dynamic plot.",
+    "structure": [
+      "Items you should include: Title, Author's name (fictional), A clear plot and character development",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Plain style or, Polite style"
+    ],
+    "sampleImage": "/story.pdf",
+    "title_original": "Story (物語)",
+    "purpose_original": "Stories are used to write imaginative narratives featuring characters, settings, and a dynamic plot.",
+    "structure_original": [
+      "Items you should include: Title, Author's name (fictional), A clear plot and character development",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Plain style or, Polite style"
+    ]
+  },
+  "Summary": {
+    "title": "Summary（まとめ）",
+    "purpose": "Summaries are used to concisely condense the main points and arguments of a source text or data.",
+    "structure": [
+      "Items you should include: Topic, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ],
+    "title_original": "Summary（まとめ）",
+    "purpose_original": "Summaries are used to concisely condense the main points and arguments of a source text or data.",
+    "structure_original": [
+      "Items you should include: Topic, Author's name (fictional)",
+      "Content: Introduction, Body, Conclusion",
+      "Sentence style: Polite style or, Plain style"
+    ]
+  },
+  "Genkooyooshi": {
+    "title": "Genkooyooshi Usage Guide",
+    "purpose": "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkooyooshi. Refer to each text type for details.",
+    "structure": [
+      "Title (Line 1): Leave 3 spaces at the beginning, then write the title",
+      "Name (Line 2): Write at the end, leaving the last square blank",
+      "Main Text:",
+      "Square Usage:"
+    ],
+    "sampleImage": "/genkoyoshi.pdf",
+    "title_original": "Genkooyooshi Usage Guide",
+    "purpose_original": "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkooyooshi. Refer to each text type for details.",
+    "structure_original": [
+      "Title (Line 1): Leave 3 spaces at the beginning, then write the title",
+      "Name (Line 2): Write at the end, leaving the last square blank",
+      "Main Text:",
+      "Square Usage:"
+    ]
+  }
+}
