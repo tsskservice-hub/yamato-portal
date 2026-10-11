@@ -8,7 +8,7 @@ type ChatMessage = {
 
 // 外部から受け取るプロパティ（Props）の型定義
 type YamatoChatProps = {
-  characterName?: string;       // チャット窓のタイトルに表示する名前
+  characterName?: string;        // チャット窓のタイトルに表示する名前
   initialGreeting?: string;     // 最初の一言メッセージ
   systemPrompt?: string;        // キャラクター固有の指示（将来の拡張用）
 };
@@ -91,7 +91,8 @@ export function YamatoChat({
           userNickname: "テスト生徒さん",
           appType: "general",
           systemPrompt: systemPrompt,
-          visualPrompt: visualPrompt, // 🎨 バックエンドへ visualPrompt を送信
+          visualPrompt: visualPrompt, 
+          requestVisualAid: needsVisual, // 🎨 バックエンドへ requestVisualAid フラグを確実送信
         }),
       });
 
