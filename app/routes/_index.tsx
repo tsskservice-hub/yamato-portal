@@ -763,6 +763,23 @@ export default function Home() {
                 </Link>
               </div>
             </div>
+
+            {/* 9. test-yamato (追加) */}
+            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-cyan-500/50 transition-colors`}>
+              <div className="space-y-4">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-base">Test Yamato Sandbox</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">Experimental testing playground for trying out new AI Yamato features, UI widgets, and prompt flows.</p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-medium">Sandbox</span>
+                <Link to="/test-yamato" className="text-cyan-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                  <span>Open Sandbox</span> <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
