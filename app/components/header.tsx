@@ -2,7 +2,11 @@ import React from 'react';
 import { Link } from '@remix-run/react';
 import { Coins, User } from 'lucide-react';
 
-export function Header() {
+type HeaderProps = {
+  title?: string;
+};
+
+export function Header({ title = "AI Yamato Japanese Hub" }: HeaderProps) {
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -14,7 +18,7 @@ export function Header() {
             className="w-10 h-10 object-contain rounded-xl shadow-sm group-hover:scale-105 transition-transform" 
           />
           <div>
-            <span className="font-bold text-lg text-slate-900 tracking-tight">AI Yamato Japanese Hub</span>
+            <span className="font-bold text-lg text-slate-900 tracking-tight">{title}</span>
             <span className="hidden sm:inline-block ml-2 text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
               app.jptutoraiyamato.com
             </span>

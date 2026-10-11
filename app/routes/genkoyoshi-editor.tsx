@@ -7,7 +7,7 @@ type Item =
   | { type: "char"; value: string }
   | { type: "co"; main: string; sub: string };
 
-// ページトップへ戻るボタン（単独で動作するように内部コンポーネントとして定義）
+// ページトップへ戻るボタン（右上固定に変更）
 function ScrollTopButton() {
   const [visible, setVisible] = useState(false);
 
@@ -32,7 +32,7 @@ function ScrollTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 left-6 z-40 bg-slate-800 hover:bg-slate-700 text-white p-3 rounded-full shadow-lg transition cursor-pointer text-xs font-bold"
+      className="fixed top-6 right-6 z-40 bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-full shadow-lg transition cursor-pointer text-xs font-bold"
       title="ページトップへ戻る"
     >
       ▲ Top
@@ -374,33 +374,6 @@ export default function GenkoyoshiEditor() {
           color: #555;
         }
 
-        .genko-cta-box {
-          margin-top: 25px;
-          padding: 15px;
-          background-color: #eef6ff;
-          border: 1px solid #b6d4fe;
-          border-radius: 6px;
-        }
-
-        .genko-cta-box h3 {
-          margin-top: 0;
-          font-size: 1rem;
-          color: #004085;
-        }
-
-        .genko-cta-box p {
-          font-size: 0.85rem;
-          color: #333;
-          margin-bottom: 10px;
-        }
-
-        .genko-cta-link {
-          display: inline-block;
-          font-weight: bold;
-          color: #0066cc;
-          text-decoration: underline;
-        }
-
         .genko-sheet {
           background: #fff;
           border: 1px solid #ccc;
@@ -493,7 +466,6 @@ export default function GenkoyoshiEditor() {
           header,
           .genko-editor-pane,
           .genko-btn-container,
-          .genko-cta-box,
           aside {
             display: none !important;
           }
@@ -510,8 +482,11 @@ export default function GenkoyoshiEditor() {
         }
       `}</style>
 
-      {/* ⬅️ ② 共通ヘッダーコンポーネントを配置 */}
-      <Header />
+      {/* 🚀 ページ右上固定の上戻りボタン */}
+      <ScrollTopButton />
+
+      {/* ヘルパータイトルを Genkoyoshi Editor に指定 */}
+      <Header title="Genkoyoshi Editor" />
 
       <div className="genko-container mt-6">
         <div className="genko-editor-pane">
@@ -569,16 +544,6 @@ export default function GenkoyoshiEditor() {
               消す
             </button>
           </div>
-
-          <div className="genko-cta-box" id="vce-app">
-            <h3>Ready for your Exam Writing?</h3>
-            <p>
-              Don't leave your marks to chance! Power up your writing prep with instant checks, grammar feedback, and scoring tips.
-            </p>
-            <a href="#" className="genko-cta-link">
-              Discover AI Writing Tutor &rarr;
-            </a>
-          </div>
         </div>
 
         <div className="genko-preview-pane">
@@ -622,9 +587,6 @@ export default function GenkoyoshiEditor() {
           </div>
         </div>
       </div>
-
-      {/* 🚀 上戻りボタン */}
-      <ScrollTopButton />
 
       {/* 🤖 右下常駐・折りたたみ式 AIチューター常駐窓 */}
       <aside aria-label="AI Tutor" className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
