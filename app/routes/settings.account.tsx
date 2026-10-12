@@ -4,16 +4,27 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
 
-// Loader: ログイン中のユーザー情報を実際のSupabaseから取得
-export async function loader({ request }: LoaderFunctionArgs) {
-  const { supabase, headers } = createServerSupabaseClient(request);
+// Loader: ログイン状態の確認 ＆ マジックリンクからのコールバック処理
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { supabase, headers } = createServerSupabaseClient(request, context);
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+
+  // もしSupabaseからのコールバック（code）が含まれている場合は、セッションに交換する
+  if (code) {
+    await supabase.auth.exchangeCodeForSession(code);
+    // codeパラメータを消してリダイレクト（クリーンなURLにする）
+    return redirect("/settings/account", { headers });
+  }
+
+  // 現在のログインユーザーを取得
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
     return redirect("/login", { headers });
   }
 
-  // profiles テーブルなどからプランやクレジット情報を取得（必要に応じてテーブル名やカラム名を合わせてください）
+  // profiles テーブルなどからプランやクレジット情報を取得（必要に応じて調整）
   const { data: profile } = await supabase
     .from("profiles")
     .select("credits, plan")
@@ -29,7 +40,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 // Action: アカウントの完全削除処理
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
@@ -39,22 +50,20 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
     }
 
-    const { supabase, headers } = createServerSupabaseClient(request);
+    const { supabase, headers } = createServerSupabaseClient(request, context);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
     }
 
-    // 特権権限（Service Role）を用いて auth.users から完全に削除
-    const supabaseAdmin = createAdminSupabaseClient();
+    const supabaseAdmin = createAdminSupabaseClient(context);
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
       return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
     }
 
-    // 削除成功時はセッションCookieをクリアしてトップへリダイレクト
     return redirect("/", {
       headers: {
         ...Object.fromEntries(headers.entries()),
