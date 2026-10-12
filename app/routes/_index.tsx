@@ -23,7 +23,7 @@ import { supabase } from '../lib/supabaseClient';
 import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
 
 export const STRIPE_PRICES = {
-  starter: 'price_1UDmkoZZJezqyZ9eR0I8cvUk', // 1つ目のファイルで定義されていた実際のID
+  starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // 1つ目のファイルで定義されていた実際のID
   standard: 'price_1xxxx_standard',          // 必要に応じてStripeの正しいPrice IDに変更してください
   pro: 'price_1xxxx_pro',                    // 必要に応じてStripeの正しいPrice IDに変更してください
 };
