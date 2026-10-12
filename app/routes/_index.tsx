@@ -23,9 +23,9 @@ import { supabase } from '../lib/supabaseClient';
 import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
 
 export const STRIPE_PRICES = {
-  starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk',
-  standard: 'price_1xxxx_standard',
-  pro: 'price_1xxxx_pro',
+  starter: 'price_1UDmkoZZJezqyZ9eR0I8cvUk', // 1つ目のファイルで定義されていた実際のID
+  standard: 'price_1xxxx_standard',          // 必要に応じてStripeの正しいPrice IDに変更してください
+  pro: 'price_1xxxx_pro',                    // 必要に応じてStripeの正しいPrice IDに変更してください
 };
 
 // Auto demo conversations in English
@@ -312,7 +312,8 @@ export default function Home() {
     try {
       setCheckoutLoadingPriceId(priceId);
 
-      const response = await fetch('/api/create-checkout-session', {
+      // functions/api/checkout.ts に合わせたエンドポイントへ修正
+      const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -354,7 +355,6 @@ export default function Home() {
             <span className="font-extrabold tracking-tight text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               JP Tutor AI <span className="text-xs uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold ml-1">Yamato</span>
             </span>
-
           </div>
 
           <div className="flex items-center space-x-3">
