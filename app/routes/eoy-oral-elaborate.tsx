@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import oralExamQuestionsData from "../data/oral-exam-questions.json";
-import { Header } from "../components/header";
+import PageLayout from "../components/PageLayout";
 
 export const meta: MetaFunction = () => {
   return [
@@ -541,453 +541,451 @@ export default function ElaborateDrillMode() {
   };
 
   return (
-    <div className="bg-purple-50 min-h-screen text-slate-800 font-sans pb-16 relative">
-      <style>{`
-        @keyframes rotate-border {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .glow-border-btn {
-          position: relative;
-          background-color: #0d9488;
-          color: white;
-          border-radius: 12px;
-          background-clip: padding-box;
-          border: 3px solid transparent;
-        }
-        .glow-border-btn::before {
-          content: '';
-          position: absolute;
-          inset: -3px;
-          border-radius: 14px;
-          background: linear-gradient(90deg, #2dd4bf, #f59e0b, #3b82f6, #2dd4bf);
-          background-size: 300% 300%;
-          animation: rotate-border 2.5s linear infinite;
-          z-index: -1;
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-        }
-      `}</style>
+    <PageLayout>
+      <div className="bg-purple-50 min-h-screen text-slate-800 font-sans pb-16 relative">
+        <style>{`
+          @keyframes rotate-border {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+          .glow-border-btn {
+            position: relative;
+            background-color: #0d9488;
+            color: white;
+            border-radius: 12px;
+            background-clip: padding-box;
+            border: 3px solid transparent;
+          }
+          .glow-border-btn::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 14px;
+            background: linear-gradient(90deg, #2dd4bf, #f59e0b, #3b82f6, #2dd4bf);
+            background-size: 300% 300%;
+            animation: rotate-border 2.5s linear infinite;
+            z-index: -1;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+          }
+        `}</style>
 
-      {/* ⬅️ ② 共通ヘッダーコンポーネントを配置 */}
-      <Header />
-
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-        <div className="bg-white border-2 border-purple-300 rounded-2xl p-6 shadow-md">
-          <h2 className="text-lg font-bold text-slate-900 mb-2">💡 Study Tips for Elaborate Drill</h2>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            Practice responding to questions tailored to your proficiency level by <strong>expanding and enriching your answers using multiple sentences</strong> (elaborating), rather than just single words. Spoken answers are transcribed automatically—review and edit if needed before sending! (Press <strong>Spacebar</strong> to toggle recording!)
-          </p>
-        </div>
-
-        <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-md space-y-6">
-          <div className="space-y-3">
-            <h3 className="text-md font-bold text-slate-900 border-b pb-2">🎯 Select Level</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { id: "level1", label: "🌱 Level 1 (Foundation)" },
-                { id: "level2", label: "🌿 Level 2 (Standard)" },
-                { id: "level3", label: "🌳 Level 3 (Advanced)" },
-              ].map((lvl) => (
-                <button
-                  key={lvl.id}
-                  type="button"
-                  onClick={() => setSelectedLevel(lvl.id)}
-                  disabled={isPracticing}
-                  className={`p-3 rounded-xl border text-sm font-bold transition cursor-pointer ${
-                    selectedLevel === lvl.id
-                      ? "bg-purple-300 text-purple-950 border-purple-400 shadow-xs"
-                      : "bg-purple-50/60 text-slate-700 border-purple-200 hover:bg-purple-100"
-                  }`}
-                >
-                  {lvl.label}
-                </button>
-              ))}
-            </div>
+        <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+          <div className="bg-white border-2 border-purple-300 rounded-2xl p-6 shadow-md">
+            <h2 className="text-lg font-bold text-slate-900 mb-2">💡 Study Tips for Elaborate Drill</h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Practice responding to questions tailored to your proficiency level by <strong>expanding and enriching your answers using multiple sentences</strong> (elaborating), rather than just single words. Spoken answers are transcribed automatically—review and edit if needed before sending! (Press <strong>Spacebar</strong> to toggle recording!)
+            </p>
           </div>
 
-          <div className="space-y-3 pt-2 border-t">
-            <h3 className="text-md font-bold text-slate-900 border-b pb-2">📂 Select Section / Source</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                { id: "beforeSec1", label: "Before Sec 1" },
-                { id: "sec1", label: "Section 1" },
-                { id: "sec2", label: "Section 2" },
-                { id: "afterSec2", label: "After Sec 2" },
-              ].map((sec) => (
-                <button
-                  key={sec.id}
-                  type="button"
-                  onClick={() => setSelectedSection(sec.id)}
-                  disabled={isPracticing}
-                  className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                    selectedSection === sec.id
-                      ? "bg-purple-300 text-purple-950 border-purple-400 shadow-xs"
-                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                  }`}
-                >
-                  {sec.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {selectedSection === "sec1" && (
-            <div className="space-y-3 pt-2 border-t">
-              <div className="flex justify-between items-center flex-wrap gap-2">
-                <h3 className="text-md font-bold text-slate-900">🏷 Filter Topics ({selectedTopics.length} selected)</h3>
-                <div className="space-x-2">
+          <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-md space-y-6">
+            <div className="space-y-3">
+              <h3 className="text-md font-bold text-slate-900 border-b pb-2">🎯 Select Level</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { id: "level1", label: "🌱 Level 1 (Foundation)" },
+                  { id: "level2", label: "🌿 Level 2 (Standard)" },
+                  { id: "level3", label: "🌳 Level 3 (Advanced)" },
+                ].map((lvl) => (
                   <button
+                    key={lvl.id}
                     type="button"
-                    onClick={handleSelectAllTopics}
+                    onClick={() => setSelectedLevel(lvl.id)}
                     disabled={isPracticing}
-                    className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold px-3 py-1 rounded transition cursor-pointer"
+                    className={`p-3 rounded-xl border text-sm font-bold transition cursor-pointer ${
+                      selectedLevel === lvl.id
+                        ? "bg-purple-300 text-purple-950 border-purple-400 shadow-xs"
+                        : "bg-purple-50/60 text-slate-700 border-purple-200 hover:bg-purple-100"
+                    }`}
                   >
-                    Select All
+                    {lvl.label}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleDeselectAllTopics}
-                    disabled={isPracticing}
-                    className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1 rounded transition cursor-pointer"
-                  >
-                    Deselect All
-                  </button>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {availableSec1Topics.map((top) => {
-                  const isSelected = selectedTopics.includes(top);
-                  return (
-                    <button
-                      key={top}
-                      type="button"
-                      onClick={() => handleTopicClick(top)}
-                      disabled={isPracticing}
-                      className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition cursor-pointer ${
-                        isSelected ? "bg-purple-300 text-purple-950 border-purple-400 shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-purple-50"
-                      }`}
-                    >
-                      {isSelected ? "✓ " : ""}{top}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-bold text-slate-700">Order Mode:</span>
-              <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                <input type="radio" name="orderMode" checked={orderMode === "sequential"} onChange={() => setOrderMode("sequential")} disabled={isPracticing} /> Sequential
-              </label>
-              <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                <input type="radio" name="orderMode" checked={orderMode === "random"} onChange={() => setOrderMode("random")} disabled={isPracticing} /> Random
-              </label>
-            </div>
-
-            <button
-              type="button"
-              onClick={startDrillPractice}
-              disabled={isPracticing}
-              className="w-full sm:w-auto bg-purple-300 hover:bg-purple-400 disabled:bg-slate-300 text-purple-950 border border-purple-400 font-bold px-6 py-3 rounded-xl shadow-xs transition cursor-pointer"
-            >
-              🚀 Start Drill with Selected Range
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-md space-y-4">
-          <h3 className="text-md font-bold text-slate-900 border-b pb-2">2. Conversation Practice with AI Yamato!🎙️</h3>
-
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 h-96 overflow-y-auto space-y-3">
-            {chatMessages.map((msg, idx) => (
-              <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                <div className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                  msg.role === "user" ? "bg-teal-600 text-white rounded-br-xs" : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-sm"
-                }`}>
-                  {msg.isHtml ? <div dangerouslySetInnerHTML={{ __html: msg.content }} /> : msg.content}
-                </div>
-              </div>
-            ))}
-            {isLoading && <div className="text-xs text-slate-500 italic">AI is analyzing your elaborate answer...</div>}
-          </div>
-
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between gap-3 p-3 bg-purple-50 border border-purple-200 rounded-xl flex-wrap">
-              <div className="flex-1 flex items-center gap-2 justify-center sm:justify-start flex-wrap">
-                {!isRecording ? (
-                  <button
-                    type="button"
-                    onClick={startRecording}
-                    disabled={!isPracticing || isLoading || isWaitingForNext}
-                    className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 text-white font-bold px-6 py-3 rounded-full shadow-md transition cursor-pointer text-sm"
-                  >
-                    <span>🎙️</span> Recording <span className="text-xs bg-rose-800 px-2 py-0.5 rounded-full opacity-90">[Spacebar]</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={stopRecording}
-                    className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-3 rounded-full shadow-md transition animate-pulse cursor-pointer text-sm"
-                  >
-                    <span>⏹</span> Stop Recording <span className="text-xs bg-amber-700 px-2 py-0.5 rounded-full opacity-90">[Spacebar]</span>
-                  </button>
-                )}
-
-                {isPracticing && activeQuestions[currentQuestionIndex] && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const currentQ = activeQuestions[currentQuestionIndex];
-                      if (currentQ) playTTS(currentQ.text_original || currentQ.text);
-                    }}
-                    disabled={isLoading}
-                    className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-3 rounded-full shadow-md transition text-sm cursor-pointer"
-                  >
-                    <span>🔊</span> Repeat Q
-                  </button>
-                )}
-              </div>
-
-              <div className="flex justify-center sm:justify-end min-w-[120px]">
-                {isWaitingForNext && (
-                  <button type="button" onClick={proceedToNextQuestion} className="glow-border-btn font-bold px-6 py-3 rounded-xl text-sm shadow-lg transition cursor-pointer">
-                    ➡ Proceed
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder={isWaitingForNext ? "Please click 'Proceed' above" : isPracticing ? "Type or record your answer..." : "Start drill above first..."}
-                disabled={!isPracticing || isLoading || isWaitingForNext}
-                className="flex-grow p-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 focus:outline-none disabled:bg-slate-150"
-              />
-              <button
-                type="submit"
-                disabled={!isPracticing || isLoading || !inputMessage.trim() || isWaitingForNext}
-                className="bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 text-white font-bold px-6 py-3 rounded-xl transition text-sm shrink-0 cursor-pointer"
-              >
-                Send
-              </button>
-            </form>
-          </div>
-        </div>
-      </main>
-
-      {/* 🤖 右下常駐エリア（AIチューター窓） */}
-      <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-        {!isAiTutorOpen ? (
-          <button
-            type="button"
-            onClick={() => setIsAiTutorOpen(true)}
-            className="bg-purple-700 hover:bg-purple-800 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
-          >
-            <span>🤖</span>
-            <span>AI Yamato</span>
-          </button>
-        ) : (
-          <div
-            ref={aiChatRef}
-            className={`bg-white border-2 border-purple-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
-              isAiFullscreen
-                ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                : "w-80 sm:w-96 h-[560px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto [transform:rotate(180deg)]"
-            }`}
-          >
-            <div className={`w-full h-full flex flex-col ${!isAiFullscreen ? "[transform:rotate(180deg)]" : ""}`}>
-              <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-                <h3 className="text-sm font-bold text-purple-900 flex items-center gap-2 m-0">
-                  <span>🤖</span> 日本語Tutor AI Yamato
-                </h3>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={toggleAiFullscreen}
-                    className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
-                    title={isAiFullscreen ? "元の大きさに戻す" : "デバイスの画面に合わせて最大化"}
-                  >
-                    {isAiFullscreen ? "🗗 縮小" : "🗖 最大化"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (document.fullscreenElement) {
-                        document.exitFullscreen().catch(() => {});
-                      }
-                      setIsAiTutorOpen(false);
-                      setIsAiFullscreen(false);
-                    }}
-                    className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
-                  >
-                    ✕ Close
-                  </button>
-                </div>
-              </div>
-
-              <p className="text-xs text-slate-600 leading-relaxed mb-3 shrink-0">
-                Ask questions about grammar, or get study advice!
-              </p>
-
-              <div className="bg-purple-50 border border-purple-200 rounded-xl p-2.5 mb-2 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-purple-900">Learning Pace</span>
-                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-purple-200">
-                  {(['steady', 'normal', 'accelerated'] as const).map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setTutorLevel(level)}
-                      className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition cursor-pointer ${
-                        tutorLevel === level
-                          ? "bg-purple-700 text-white shadow-xs"
-                          : "text-slate-600 hover:text-purple-800"
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-slate-700">Font Size</span>
-                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
-                  {(
-                    [
-                      { key: 'sm', label: '小' },
-                      { key: 'base', label: '中' },
-                      { key: 'lg', label: '大' },
-                      { key: 'xl', label: '特大' },
-                    ] as const
-                  ).map((size) => (
-                    <button
-                      key={size.key}
-                      type="button"
-                      onClick={() => setChatFontSize(size.key)}
-                      className={`px-2 py-1 rounded-md text-[10px] font-bold transition cursor-pointer ${
-                        chatFontSize === size.key
-                          ? "bg-purple-700 text-white shadow-xs"
-                          : "text-slate-600 hover:text-purple-800"
-                      }`}
-                    >
-                      {size.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
-                {tutorMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                  >
-                    <div
-                      className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
-                        msg.role === 'user'
-                          ? "bg-purple-700 text-white rounded-br-xs"
-                          : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
-                      }`}
-                    >
-                      {msg.role === 'user' ? (
-                        msg.content
-                      ) : (
-                        <div className="space-y-2">
-                          <div
-                            className="ai-markdown-content overflow-x-auto"
-                            dangerouslySetInnerHTML={{ __html: msg.content }}
-                          />
-                          {msg.imageUrl && (
-                            <div className="mt-2 rounded-lg overflow-hidden border border-purple-200 bg-purple-50/50 p-1">
-                              <img
-                                src={msg.imageUrl}
-                                alt="AI Yamato Visual Explanation"
-                                onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                className="w-full h-auto rounded-md object-contain max-h-48 cursor-pointer hover:opacity-95 transition"
-                                title="クリックして画像を拡大"
-                              />
-                              <p className="text-[10px] text-purple-900 text-center mt-1 font-medium cursor-pointer" onClick={() => setModalImageSrc(msg.imageUrl || null)}>
-                                ✨ ヤマト特製図解・イラスト（クリックして拡大）
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 ))}
-                {isTutorLoading && (
-                  <div className="text-slate-500 italic">🤖 AI Yamato is thinking (and creating visual illustration)...</div>
-                )}
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2 border-t">
+              <h3 className="text-md font-bold text-slate-900 border-b pb-2">📂 Select Section / Source</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: "beforeSec1", label: "Before Sec 1" },
+                  { id: "sec1", label: "Section 1" },
+                  { id: "sec2", label: "Section 2" },
+                  { id: "afterSec2", label: "After Sec 2" },
+                ].map((sec) => (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    onClick={() => setSelectedSection(sec.id)}
+                    disabled={isPracticing}
+                    className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                      selectedSection === sec.id
+                        ? "bg-purple-300 text-purple-950 border-purple-400 shadow-xs"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    {sec.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {selectedSection === "sec1" && (
+              <div className="space-y-3 pt-2 border-t">
+                <div className="flex justify-between items-center flex-wrap gap-2">
+                  <h3 className="text-md font-bold text-slate-900">🏷 Filter Topics ({selectedTopics.length} selected)</h3>
+                  <div className="space-x-2">
+                    <button
+                      type="button"
+                      onClick={handleSelectAllTopics}
+                      disabled={isPracticing}
+                      className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold px-3 py-1 rounded transition cursor-pointer"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeselectAllTopics}
+                      disabled={isPracticing}
+                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1 rounded transition cursor-pointer"
+                    >
+                      Deselect All
+                    </button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableSec1Topics.map((top) => {
+                    const isSelected = selectedTopics.includes(top);
+                    return (
+                      <button
+                        key={top}
+                        type="button"
+                        onClick={() => handleTopicClick(top)}
+                        disabled={isPracticing}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition cursor-pointer ${
+                          isSelected ? "bg-purple-300 text-purple-950 border-purple-400 shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-purple-50"
+                        }`}
+                      >
+                        {isSelected ? "✓ " : ""}{top}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-bold text-slate-700">Order Mode:</span>
+                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                  <input type="radio" name="orderMode" checked={orderMode === "sequential"} onChange={() => setOrderMode("sequential")} disabled={isPracticing} /> Sequential
+                </label>
+                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                  <input type="radio" name="orderMode" checked={orderMode === "random"} onChange={() => setOrderMode("random")} disabled={isPracticing} /> Random
+                </label>
               </div>
 
-              <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                <div className="flex items-center gap-2 px-1">
-                  <label className="flex items-center gap-1.5 text-[11px] font-bold text-purple-900 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={requestVisualAid}
-                      onChange={(e) => setRequestVisualAid(e.target.checked)}
-                      disabled={isTutorLoading}
-                      className="rounded border-purple-300 text-purple-700 focus:ring-purple-500 w-3.5 h-3.5 cursor-pointer"
-                    />
-                    <span>🎨 explain with diagrams and illustrations</span>
-                  </label>
+              <button
+                type="button"
+                onClick={startDrillPractice}
+                disabled={isPracticing}
+                className="w-full sm:w-auto bg-purple-300 hover:bg-purple-400 disabled:bg-slate-300 text-purple-950 border border-purple-400 font-bold px-6 py-3 rounded-xl shadow-xs transition cursor-pointer"
+              >
+                🚀 Start Drill with Selected Range
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white border border-purple-200 rounded-2xl p-6 shadow-md space-y-4">
+            <h3 className="text-md font-bold text-slate-900 border-b pb-2">2. Conversation Practice with AI Yamato!🎙️</h3>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 h-96 overflow-y-auto space-y-3">
+              {chatMessages.map((msg, idx) => (
+                <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                  <div className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                    msg.role === "user" ? "bg-teal-600 text-white rounded-br-xs" : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-sm"
+                  }`}>
+                    {msg.isHtml ? <div dangerouslySetInnerHTML={{ __html: msg.content }} /> : msg.content}
+                  </div>
+                </div>
+              ))}
+              {isLoading && <div className="text-xs text-slate-500 italic">AI is analyzing your elaborate answer...</div>}
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between gap-3 p-3 bg-purple-50 border border-purple-200 rounded-xl flex-wrap">
+                <div className="flex-1 flex items-center gap-2 justify-center sm:justify-start flex-wrap">
+                  {!isRecording ? (
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      disabled={!isPracticing || isLoading || isWaitingForNext}
+                      className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 text-white font-bold px-6 py-3 rounded-full shadow-md transition cursor-pointer text-sm"
+                    >
+                      <span>🎙️</span> Recording <span className="text-xs bg-rose-800 px-2 py-0.5 rounded-full opacity-90">[Spacebar]</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={stopRecording}
+                      className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-3 rounded-full shadow-md transition animate-pulse cursor-pointer text-sm"
+                    >
+                      <span>⏹</span> Stop Recording <span className="text-xs bg-amber-700 px-2 py-0.5 rounded-full opacity-90">[Spacebar]</span>
+                    </button>
+                  )}
+
+                  {isPracticing && activeQuestions[currentQuestionIndex] && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentQ = activeQuestions[currentQuestionIndex];
+                        if (currentQ) playTTS(currentQ.text_original || currentQ.text);
+                      }}
+                      disabled={isLoading}
+                      className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-3 rounded-full shadow-md transition text-sm cursor-pointer"
+                    >
+                      <span>🔊</span> Repeat Q
+                    </button>
+                  )}
                 </div>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={tutorInput}
-                    onChange={(e) => setTutorInput(e.target.value)}
-                    placeholder="Ask AI tutor anything..."
-                    disabled={isTutorLoading}
-                    className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50/50"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isTutorLoading || !tutorInput.trim()}
-                    className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
-                  >
-                    Send
-                  </button>
+                <div className="flex justify-center sm:justify-end min-w-[120px]">
+                  {isWaitingForNext && (
+                    <button type="button" onClick={proceedToNextQuestion} className="glow-border-btn font-bold px-6 py-3 rounded-xl text-sm shadow-lg transition cursor-pointer">
+                      ➡ Proceed
+                    </button>
+                  )}
                 </div>
+              </div>
+
+              <form onSubmit={handleSendMessage} className="flex gap-2">
+                <input
+                  type="text"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder={isWaitingForNext ? "Please click 'Proceed' above" : isPracticing ? "Type or record your answer..." : "Start drill above first..."}
+                  disabled={!isPracticing || isLoading || isWaitingForNext}
+                  className="flex-grow p-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 focus:outline-none disabled:bg-slate-150"
+                />
+                <button
+                  type="submit"
+                  disabled={!isPracticing || isLoading || !inputMessage.trim() || isWaitingForNext}
+                  className="bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 text-white font-bold px-6 py-3 rounded-xl transition text-sm shrink-0 cursor-pointer"
+                >
+                  Send
+                </button>
               </form>
             </div>
           </div>
-        )}
-      </aside>
+        </main>
 
-      {modalImageSrc && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
-          onClick={() => setModalImageSrc(null)}
-        >
-          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-2xl p-2 shadow-2xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+        <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+          {!isAiTutorOpen ? (
             <button
               type="button"
-              onClick={() => setModalImageSrc(null)}
-              className="absolute top-3 right-3 bg-slate-800/70 hover:bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition cursor-pointer z-10"
+              onClick={() => setIsAiTutorOpen(true)}
+              className="bg-purple-700 hover:bg-purple-800 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
             >
-              ✕
+              <span>🤖</span>
+              <span>AI Yamato</span>
             </button>
-            <img
-              src={modalImageSrc}
-              alt="Enlarged AI Yamato Visual"
-              className="max-w-full max-h-[80vh] rounded-lg object-contain"
-            />
-            <p className="text-xs text-slate-600 mt-2 font-medium">✨ AI Yamato 特製図解・イラスト（拡大表示）</p>
+          ) : (
+            <div
+              ref={aiChatRef}
+              className={`bg-white border-2 border-purple-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+                isAiFullscreen
+                  ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
+                  : "w-80 sm:w-96 h-[560px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto [transform:rotate(180deg)]"
+              }`}
+            >
+              <div className={`w-full h-full flex flex-col ${!isAiFullscreen ? "[transform:rotate(180deg)]" : ""}`}>
+                <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
+                  <h3 className="text-sm font-bold text-purple-900 flex items-center gap-2 m-0">
+                    <span>🤖</span> 日本語Tutor AI Yamato
+                  </h3>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={toggleAiFullscreen}
+                      className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
+                      title={isAiFullscreen ? "元の大きさに戻す" : "デバイスの画面に合わせて最大化"}
+                    >
+                      {isAiFullscreen ? "🗗 縮小" : "🗖 最大化"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (document.fullscreenElement) {
+                          document.exitFullscreen().catch(() => {});
+                        }
+                        setIsAiTutorOpen(false);
+                        setIsAiFullscreen(false);
+                      }}
+                      className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
+                    >
+                      ✕ Close
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed mb-3 shrink-0">
+                  Ask questions about grammar, or get study advice!
+                </p>
+
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-2.5 mb-2 flex items-center justify-between shrink-0">
+                  <span className="text-xs font-bold text-purple-900">Learning Pace</span>
+                  <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-purple-200">
+                    {(['steady', 'normal', 'accelerated'] as const).map((level) => (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setTutorLevel(level)}
+                        className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition cursor-pointer ${
+                          tutorLevel === level
+                            ? "bg-purple-700 text-white shadow-xs"
+                            : "text-slate-600 hover:text-purple-800"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-slate-100 border border-slate-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
+                  <span className="text-xs font-bold text-slate-700">Font Size</span>
+                  <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
+                    {(
+                      [
+                        { key: 'sm', label: '小' },
+                        { key: 'base', label: '中' },
+                        { key: 'lg', label: '大' },
+                        { key: 'xl', label: '特大' },
+                      ] as const
+                    ).map((size) => (
+                      <button
+                        key={size.key}
+                        type="button"
+                        onClick={() => setChatFontSize(size.key)}
+                        className={`px-2 py-1 rounded-md text-[10px] font-bold transition cursor-pointer ${
+                          chatFontSize === size.key
+                            ? "bg-purple-700 text-white shadow-xs"
+                            : "text-slate-600 hover:text-purple-800"
+                        }`}
+                      >
+                        {size.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
+                  {tutorMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                    >
+                      <div
+                        className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
+                          msg.role === 'user'
+                            ? "bg-purple-700 text-white rounded-br-xs"
+                            : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                        }`}
+                      >
+                        {msg.role === 'user' ? (
+                          msg.content
+                        ) : (
+                          <div className="space-y-2">
+                            <div
+                              className="ai-markdown-content overflow-x-auto"
+                              dangerouslySetInnerHTML={{ __html: msg.content }}
+                            />
+                            {msg.imageUrl && (
+                              <div className="mt-2 rounded-lg overflow-hidden border border-purple-200 bg-purple-50/50 p-1">
+                                <img
+                                  src={msg.imageUrl}
+                                  alt="AI Yamato Visual Explanation"
+                                  onClick={() => setModalImageSrc(msg.imageUrl || null)}
+                                  className="w-full h-auto rounded-md object-contain max-h-48 cursor-pointer hover:opacity-95 transition"
+                                  title="クリックして画像を拡大"
+                                />
+                                <p className="text-[10px] text-purple-900 text-center mt-1 font-medium cursor-pointer" onClick={() => setModalImageSrc(msg.imageUrl || null)}>
+                                  ✨ ヤマト特製図解・イラスト（クリックして拡大）
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {isTutorLoading && (
+                    <div className="text-slate-500 italic">🤖 AI Yamato is thinking (and creating visual illustration)...</div>
+                  )}
+                </div>
+
+                <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
+                  <div className="flex items-center gap-2 px-1">
+                    <label className="flex items-center gap-1.5 text-[11px] font-bold text-purple-900 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={requestVisualAid}
+                        onChange={(e) => setRequestVisualAid(e.target.checked)}
+                        disabled={isTutorLoading}
+                        className="rounded border-purple-300 text-purple-700 focus:ring-purple-500 w-3.5 h-3.5 cursor-pointer"
+                      />
+                      <span>🎨 explain with diagrams and illustrations</span>
+                    </label>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={tutorInput}
+                      onChange={(e) => setTutorInput(e.target.value)}
+                      placeholder="Ask AI tutor anything..."
+                      disabled={isTutorLoading}
+                      className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50/50"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isTutorLoading || !tutorInput.trim()}
+                      className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      Send
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </aside>
+
+        {modalImageSrc && (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
+            onClick={() => setModalImageSrc(null)}
+          >
+            <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-2xl p-2 shadow-2xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => setModalImageSrc(null)}
+                className="absolute top-3 right-3 bg-slate-800/70 hover:bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition cursor-pointer z-10"
+              >
+                ✕
+              </button>
+              <img
+                src={modalImageSrc}
+                alt="Enlarged AI Yamato Visual"
+                className="max-w-full max-h-[80vh] rounded-lg object-contain"
+              />
+              <p className="text-xs text-slate-600 mt-2 font-medium">✨ AI Yamato 特製図解・イラスト（拡大表示）</p>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </PageLayout>
   );
 }

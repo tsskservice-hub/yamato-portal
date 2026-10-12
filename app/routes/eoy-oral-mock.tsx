@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
-import { Header } from "../components/header";
+import PageLayout from "../components/PageLayout";
 
 export const meta: MetaFunction = () => {
   return [
@@ -912,698 +912,695 @@ export default function MockOralMode() {
   };
 
   return (
-    // ⬅️ ② 全体を囲む親要素を `bg-slate-50 min-h-screen text-slate-800 font-sans relative` に統一
-    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans relative pb-16">
-      <style>{`
-        @keyframes avatar-pulse {
-          0%, 100% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.3); }
-          50% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.6); }
-        }
-        .avatar-glow {
-          animation: avatar-pulse 3s infinite ease-in-out;
-        }
-      `}</style>
+    <PageLayout>
+      <div className="bg-slate-50 min-h-screen text-slate-800 font-sans relative pb-16">
+        <style>{`
+          @keyframes avatar-pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.6); }
+          }
+          .avatar-glow {
+            animation: avatar-pulse 3s infinite ease-in-out;
+          }
+        `}</style>
 
-      {/* ⬅️ ③ 共通ヘッダーコンポーネントを一番上に配置 */}
-      <Header />
-
-      {/* ⬅️ ④ メインコンテンツ */}
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {examPhase === "config" && (
-          <div className="bg-white border-2 border-blue-300 rounded-2xl p-6 shadow-md space-y-6">
-            <div className="space-y-2 border-b border-blue-200 pb-4">
-              <h2 className="text-xl font-bold text-slate-900">Mock Oral Settings</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Practice in an authentic exam environment with topic deep-dive rotation and AI examiner dialogue. Choose your preferred question source below to begin.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">📌 Question Source Mode:</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    { id: "curriculum", title: "🏫 AI Yamato Questions", desc: "Use question pools by teaching experts."},
-                    { id: "custom", title: "👤 My Custom Questions", desc: "Practice with your saved questions." },
-                    { id: "free", title: "🌟 AI Ad-lib Free Mode", desc: "AI dynamically generates questions under VCE rules." },
-                  ].map((mode) => (
-                    <button
-                      key={mode.id}
-                      type="button"
-                      onClick={() => setQuestionSource(mode.id as any)}
-                      className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                        questionSource === mode.id
-                          ? "bg-blue-300 text-slate-900 border-blue-400 font-bold shadow-sm"
-                          : "bg-blue-50/60 text-slate-700 border-blue-200 hover:bg-blue-100"
-                      }`}
-                    >
-                      <div>
-                        <div className="font-bold text-sm">{mode.title}</div>
-                        <div className={`text-[11px] mt-1 leading-tight ${questionSource === mode.id ? "text-slate-800" : "text-slate-500"}`}>
-                          {mode.desc}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+        <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+          {examPhase === "config" && (
+            <div className="bg-white border-2 border-blue-300 rounded-2xl p-6 shadow-md space-y-6">
+              <div className="space-y-2 border-b border-blue-200 pb-4">
+                <h2 className="text-xl font-bold text-slate-900">Mock Oral Settings</h2>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Practice in an authentic exam environment with topic deep-dive rotation and AI examiner dialogue. Choose your preferred question source below to begin.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">🎯 Difficulty Level:</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { id: "steady", label: "🌱 Steady (Foundation)" },
-                    { id: "normal", label: "🌿 Normal (Standard)" },
-                    { id: "accelerated", label: "🌳 Accelerated (Advanced)" },
-                  ].map((lvl) => (
-                    <button
-                      key={lvl.id}
-                      type="button"
-                      onClick={() => setSelectedLevel(lvl.id)}
-                      className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                        selectedLevel === lvl.id
-                          ? "bg-blue-300 text-slate-900 border-blue-400 shadow-sm"
-                          : "bg-blue-50/60 text-slate-700 border-blue-200 hover:bg-blue-100"
-                      }`}
-                    >
-                      {lvl.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">🔊 Examiner Speech Speed: <span className="text-blue-700">{aiSpeed}x</span></label>
-                <input
-                  type="range"
-                  min="0.8"
-                  max="1.2"
-                  step="0.05"
-                  value={aiSpeed}
-                  onChange={(e) => setAiSpeed(parseFloat(e.target.value))}
-                  className="w-full accent-blue-300 cursor-pointer"
-                />
-                <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-                  <span>Slow (0.8x)</span>
-                  <span>Normal (1.0x)</span>
-                  <span>Fast (1.2x)</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">⏱ Exam Section & Format:</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setExamType("sec1")}
-                    className={`p-4 rounded-xl border text-left transition cursor-pointer ${
-                      examType === "sec1" ? "bg-blue-300 text-slate-900 border-blue-400 shadow-sm font-bold" : "bg-blue-50/60 border-blue-200 text-slate-700 hover:bg-blue-100"
-                    }`}
-                  >
-                    <div className="font-bold text-sm">Section 1 Intensive (~7 Mins target)</div>
-                    <div className="text-xs mt-1 opacity-90">General interview and Personal World questions.</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setExamType("sec1_2")}
-                    className={`p-4 rounded-xl border text-left transition cursor-pointer ${
-                      examType === "sec1_2" ? "bg-blue-300 text-slate-900 border-blue-400 shadow-sm font-bold" : "bg-blue-50/60 border-blue-200 text-slate-700 hover:bg-blue-100"
-                    }`}
-                  >
-                    <div className="font-bold text-sm">Section 1 + 2 Full Mock (~15 Mins target)</div>
-                    <div className="text-xs mt-1 opacity-90">Comprehensive exam including personal interview and Detailed Study discussion.</div>
-                  </button>
-                </div>
-              </div>
-
-              {examType === "sec1_2" && (
-                <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 space-y-2">
-                  <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                    <span>🖼️</span> Section 2 Detailed Study Support Material (Optional Photo / Image):
-                  </label>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    Upload your Detailed Study support photo/image. The AI examiner will examine the visual details and ask targeted questions based on it during Section 2!
-                  </p>
-                  <div className="flex items-center gap-3 pt-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="text-xs text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
-                    />
-                    {isCompressingImage && <span className="text-xs text-blue-600 font-bold animate-pulse">Compressing...</span>}
-                    {supportImageBase64 && !isCompressingImage && <span className="text-xs text-emerald-600 font-bold">✅ Photo Ready ({imageFileName || "Attached"})</span>}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-4 border-t border-blue-200 flex justify-end">
-              <button
-                type="button"
-                onClick={startMockOral}
-                disabled={isLoadingCustom || isCompressingImage}
-                className="bg-blue-300 hover:bg-blue-400 text-slate-900 font-bold px-8 py-3.5 rounded-xl shadow-md transition cursor-pointer text-sm disabled:opacity-50"
-              >
-                {isLoadingCustom ? "⏳ Loading Custom Questions..." : "🚀 Start Mock Oral"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {examPhase === "examining" && (
-          <div className="space-y-6">
-            <div className="bg-white border border-blue-200 rounded-2xl p-5 shadow-md flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-14 h-14 rounded-full border-2 flex items-center justify-center text-2xl relative ${isRecording ? "bg-rose-100 border-rose-500 animate-pulse" : "bg-blue-100 border-blue-500 avatar-glow"}`}>
-                  <span>{isRecording ? "🎙" : "🧑‍🏫"}</span>
-                  <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${isRecording ? "bg-rose-500 animate-ping" : "bg-blue-500"}`}></span>
-                </div>
+              <div className="space-y-4">
                 <div>
-                  <div className="text-xs text-slate-500 font-semibold">
-                    AI Yamato Examiner • <span className="text-blue-700 font-bold">Mock Exam Mode ({questionSource.toUpperCase()})</span>
-                  </div>
-                  <div className="text-sm font-bold text-slate-900">
-                    {isRecording ? "🔴 Recording (Speak now / Press [Space] to submit)" : isLoading ? "⏳ AI Scoring & Generating Response..." : "🟢 Ready"}
+                  <label className="block text-xs font-bold text-slate-700 mb-2">📌 Question Source Mode:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                      { id: "curriculum", title: "🏫 AI Yamato Questions", desc: "Use question pools by teaching experts."},
+                      { id: "custom", title: "👤 My Custom Questions", desc: "Practice with your saved questions." },
+                      { id: "free", title: "🌟 AI Ad-lib Free Mode", desc: "AI dynamically generates questions under VCE rules." },
+                    ].map((mode) => (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        onClick={() => setQuestionSource(mode.id as any)}
+                        className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                          questionSource === mode.id
+                            ? "bg-blue-300 text-slate-900 border-blue-400 font-bold shadow-sm"
+                            : "bg-blue-50/60 text-slate-700 border-blue-200 hover:bg-blue-100"
+                        }`}
+                      >
+                        <div>
+                          <div className="font-bold text-sm">{mode.title}</div>
+                          <div className={`text-[11px] mt-1 leading-tight ${questionSource === mode.id ? "text-slate-800" : "text-slate-500"}`}>
+                            {mode.desc}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="bg-white border border-blue-200 rounded-2xl p-6 shadow-md space-y-4 relative">
-              <div className="text-xs font-bold text-slate-600 border-b border-blue-200 pb-2 flex justify-between items-center">
-                <span>VCE Oral Exam Simulation (Deep-Dive Topic Rotation)</span>
-              </div>
-
-              <div ref={chatContainerRef} className="bg-slate-50 border border-slate-200 rounded-xl p-4 h-80 overflow-y-auto space-y-3">
-                {chatMessages.map((msg, idx) => (
-                  <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                    <div
-                      className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                        msg.role === "user"
-                          ? "bg-blue-600 text-white rounded-br-xs"
-                          : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
-                      }`}
-                      dangerouslySetInnerHTML={{ __html: msg.content }}
-                    />
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">🎯 Difficulty Level:</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { id: "steady", label: "🌱 Steady (Foundation)" },
+                      { id: "normal", label: "🌿 Normal (Standard)" },
+                      { id: "accelerated", label: "🌳 Accelerated (Advanced)" },
+                    ].map((lvl) => (
+                      <button
+                        key={lvl.id}
+                        type="button"
+                        onClick={() => setSelectedLevel(lvl.id)}
+                        className={`p-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                          selectedLevel === lvl.id
+                            ? "bg-blue-300 text-slate-900 border-blue-400 shadow-sm"
+                            : "bg-blue-50/60 text-slate-700 border-blue-200 hover:bg-blue-100"
+                        }`}
+                      >
+                        {lvl.label}
+                      </button>
+                    ))}
                   </div>
-                ))}
-                {isLoading && (
-                  <div className="text-xs text-blue-700 font-bold bg-blue-50 p-3 rounded-xl border border-blue-200 animate-pulse text-center">
-                    ⏳ Generating Response...
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">🔊 Examiner Speech Speed: <span className="text-blue-700">{aiSpeed}x</span></label>
+                  <input
+                    type="range"
+                    min="0.8"
+                    max="1.2"
+                    step="0.05"
+                    value={aiSpeed}
+                    onChange={(e) => setAiSpeed(parseFloat(e.target.value))}
+                    className="w-full accent-blue-300 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                    <span>Slow (0.8x)</span>
+                    <span>Normal (1.0x)</span>
+                    <span>Fast (1.2x)</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">⏱ Exam Section & Format:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setExamType("sec1")}
+                      className={`p-4 rounded-xl border text-left transition cursor-pointer ${
+                        examType === "sec1" ? "bg-blue-300 text-slate-900 border-blue-400 shadow-sm font-bold" : "bg-blue-50/60 border-blue-200 text-slate-700 hover:bg-blue-100"
+                      }`}
+                    >
+                      <div className="font-bold text-sm">Section 1 Intensive (~7 Mins target)</div>
+                      <div className="text-xs mt-1 opacity-90">General interview and Personal World questions.</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setExamType("sec1_2")}
+                      className={`p-4 rounded-xl border text-left transition cursor-pointer ${
+                        examType === "sec1_2" ? "bg-blue-300 text-slate-900 border-blue-400 shadow-sm font-bold" : "bg-blue-50/60 border-blue-200 text-slate-700 hover:bg-blue-100"
+                      }`}
+                    >
+                      <div className="font-bold text-sm">Section 1 + 2 Full Mock (~15 Mins target)</div>
+                      <div className="text-xs mt-1 opacity-90">Comprehensive exam including personal interview and Detailed Study discussion.</div>
+                    </button>
+                  </div>
+                </div>
+
+                {examType === "sec1_2" && (
+                  <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 space-y-2">
+                    <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                      <span>🖼️</span> Section 2 Detailed Study Support Material (Optional Photo / Image):
+                    </label>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      Upload your Detailed Study support photo/image. The AI examiner will examine the visual details and ask targeted questions based on it during Section 2!
+                    </p>
+                    <div className="flex items-center gap-3 pt-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="text-xs text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+                      />
+                      {isCompressingImage && <span className="text-xs text-blue-600 font-bold animate-pulse">Compressing...</span>}
+                      {supportImageBase64 && !isCompressingImage && <span className="text-xs text-emerald-600 font-bold">✅ Photo Ready ({imageFileName || "Attached"})</span>}
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs">
-                  <span className="text-slate-600 font-medium">
-                    💡 *Tip: You can also use the Space key to start and stop recording!*
-                  </span>
-
-                  {!isRecording ? (
-                    <button
-                      type="button"
-                      onClick={startRecording}
-                      disabled={isLoading}
-                      className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg shadow transition cursor-pointer shrink-0"
-                    >
-                      🎙 Start Recording
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={stopRecording}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow transition animate-pulse cursor-pointer shrink-0"
-                    >
-                      ⏹ Stop & Submit
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 pt-3 border-t border-blue-200">
-                <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border shadow-xs transition ${
-                  elapsedSeconds >= 420 
-                    ? "bg-rose-100 border-rose-400 animate-pulse" 
-                    : "bg-blue-50 border-blue-200"
-                }`}>
-                  <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1">
-                    {elapsedSeconds >= 420 ? "⚠ Target 7m Reached:" : "Elapsed Time:"}
-                  </span>
-                  <span className={`text-sm font-mono font-bold ${
-                    elapsedSeconds >= 420 ? "text-rose-700" : "text-blue-700"
-                  }`}>
-                    {formatTime(elapsedSeconds)}
-                  </span>
-                </div>
-
+              <div className="pt-4 border-t border-blue-200 flex justify-end">
                 <button
                   type="button"
-                  onClick={finishExam}
-                  disabled={isLoading}
-                  className="bg-slate-800 hover:bg-slate-900 text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer shadow disabled:opacity-50"
+                  onClick={startMockOral}
+                  disabled={isLoadingCustom || isCompressingImage}
+                  className="bg-blue-300 hover:bg-blue-400 text-slate-900 font-bold px-8 py-3.5 rounded-xl shadow-md transition cursor-pointer text-sm disabled:opacity-50"
                 >
-                  🏁 Finish Exam & Get Report
+                  {isLoadingCustom ? "⏳ Loading Custom Questions..." : "🚀 Start Mock Oral"}
                 </button>
               </div>
+            </div>
+          )}
 
-              <div className="pt-2 text-xs text-slate-500">
-                <span>*The timer counts up from zero. Topics rotate for natural deep-diving. Click "Finish Exam" when ready.</span>
+          {examPhase === "examining" && (
+            <div className="space-y-6">
+              <div className="bg-white border border-blue-200 rounded-2xl p-5 shadow-md flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-14 h-14 rounded-full border-2 flex items-center justify-center text-2xl relative ${isRecording ? "bg-rose-100 border-rose-500 animate-pulse" : "bg-blue-100 border-blue-500 avatar-glow"}`}>
+                    <span>{isRecording ? "🎙" : "🧑‍🏫"}</span>
+                    <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${isRecording ? "bg-rose-500 animate-ping" : "bg-blue-500"}`}></span>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 font-semibold">
+                      AI Yamato Examiner • <span className="text-blue-700 font-bold">Mock Exam Mode ({questionSource.toUpperCase()})</span>
+                    </div>
+                    <div className="text-sm font-bold text-slate-900">
+                      {isRecording ? "🔴 Recording (Speak now / Press [Space] to submit)" : isLoading ? "⏳ AI Scoring & Generating Response..." : "🟢 Ready"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-blue-200 rounded-2xl p-6 shadow-md space-y-4 relative">
+                <div className="text-xs font-bold text-slate-600 border-b border-blue-200 pb-2 flex justify-between items-center">
+                  <span>VCE Oral Exam Simulation (Deep-Dive Topic Rotation)</span>
+                </div>
+
+                <div ref={chatContainerRef} className="bg-slate-50 border border-slate-200 rounded-xl p-4 h-80 overflow-y-auto space-y-3">
+                  {chatMessages.map((msg, idx) => (
+                    <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                      <div
+                        className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                          msg.role === "user"
+                            ? "bg-blue-600 text-white rounded-br-xs"
+                            : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                        }`}
+                        dangerouslySetInnerHTML={{ __html: msg.content }}
+                      />
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="text-xs text-blue-700 font-bold bg-blue-50 p-3 rounded-xl border border-blue-200 animate-pulse text-center">
+                      ⏳ Generating Response...
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs">
+                    <span className="text-slate-600 font-medium">
+                      💡 *Tip: You can also use the Space key to start and stop recording!*
+                    </span>
+
+                    {!isRecording ? (
+                      <button
+                        type="button"
+                        onClick={startRecording}
+                        disabled={isLoading}
+                        className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg shadow transition cursor-pointer shrink-0"
+                      >
+                        🎙 Start Recording
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={stopRecording}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow transition animate-pulse cursor-pointer shrink-0"
+                      >
+                        ⏹ Stop & Submit
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 pt-3 border-t border-blue-200">
+                  <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border shadow-xs transition ${
+                    elapsedSeconds >= 420 
+                      ? "bg-rose-100 border-rose-400 animate-pulse" 
+                      : "bg-blue-50 border-blue-200"
+                  }`}>
+                    <span className="text-[11px] text-slate-600 font-bold uppercase tracking-wider flex items-center gap-1">
+                      {elapsedSeconds >= 420 ? "⚠ Target 7m Reached:" : "Elapsed Time:"}
+                    </span>
+                    <span className={`text-sm font-mono font-bold ${
+                      elapsedSeconds >= 420 ? "text-rose-700" : "text-blue-700"
+                    }`}>
+                      {formatTime(elapsedSeconds)}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={finishExam}
+                    disabled={isLoading}
+                    className="bg-slate-800 hover:bg-slate-900 text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer shadow disabled:opacity-50"
+                  >
+                    🏁 Finish Exam & Get Report
+                  </button>
+                </div>
+
+                <div className="pt-2 text-xs text-slate-500">
+                  <span>*The timer counts up from zero. Topics rotate for natural deep-diving. Click "Finish Exam" when ready.</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {examPhase === "result" && examResult && (() => {
+            const speed = examResult.fluencyMetrics.avgSpeechRateCPS;
+            const chars = examResult.fluencyMetrics.totalOutputChars;
+            const isFast = speed > 2.5;
+            const isMany = chars > 300;
+
+            let quadrantId = 4;
+            if (isFast && isMany) quadrantId = 1;
+            else if (!isFast && isMany) quadrantId = 2;
+            else if (isFast && !isMany) quadrantId = 3;
+            else quadrantId = 4;
+
+            return (
+              <div className="bg-white border border-blue-200 rounded-2xl p-6 shadow-md space-y-6">
+                <div className="border-b border-blue-200 pb-4 flex justify-between items-center flex-wrap gap-2">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">
+                    🎉 Mock Oral Comprehensive Report {examType === "sec1" ? "for Section 1" : "for Section 1 & 2"}
+                    </h2>
+                    <p className="text-xs text-slate-600 mt-1">
+                    VCE Japanese Mock Oral Assessment Summary ({examType === "sec1" ? "Section 1 Intensive" : "Section 1 + 2 Full Mock"})
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <div className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                    <span>📊</span> Assessment Breakdown Metrics (Net Speaking Time Base):
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-3 sm:col-span-2">
+                      <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
+                        <span className="text-xl">📖</span>
+                        <span>Grammar & Vocabulary (VCE Checklist Matching)</span>
+                      </div>
+                      <div>
+                        {renderTenScaleStarRating(examResult.grammarScore)}
+                      </div>
+
+                      <div className="pt-2 border-t border-blue-100 space-y-2">
+                        <div className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                          <span>✨ Detected VCE Grammar & Expressions Used:</span>
+                        </div>
+                        {examResult.detectedGrammarItems && examResult.detectedGrammarItems.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {examResult.detectedGrammarItems.map((item, index) => (
+                              <div key={index} className="bg-blue-50 border border-blue-300 rounded-lg p-2 text-xs text-slate-800 space-y-0.5 flex-1 min-w-[200px] shadow-xs">
+                                <div className="font-bold text-blue-800 flex items-center justify-between">
+                                  <span>{item.pattern}</span>
+                                  <span className="text-[10px] text-slate-500 font-normal">{item.category}</span>
+                                </div>
+                                {item.exampleUsed && (
+                                  <div className="text-[11px] text-slate-600 italic">
+                                    「{item.exampleUsed}」
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            No specific VCE checklist grammar patterns were explicitly identified, or responses were too brief. Try incorporating more diverse sentence structures next time!
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2 sm:col-span-2">
+                      <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
+                        <span className="text-xl">💬</span>
+                        <span>Elaboration</span>
+                      </div>
+                      <div>
+                        {renderTenScaleStarRating(examResult.elaborationScore)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-xs space-y-1.5">
+                      <div className="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-1.5">
+                        <span className="flex items-center gap-1.5">⏱️ Elapsed Time</span>
+                        <button
+                          type="button"
+                          onClick={() => setModalContent({
+                            title: "Elapsed Time",
+                            text: "The total duration of your mock oral session from start to finish, including examiner questions and system pauses."
+                          })}
+                          className="text-blue-700 underline text-[10px] font-bold cursor-pointer"
+                        >
+                          Note
+                        </button>
+                      </div>
+                      <div className="text-sm font-mono font-bold text-slate-900 pt-0.5">
+                        {Math.floor(examResult.totalTimeSec / 60)}m {examResult.totalTimeSec % 60}s
+                      </div>
+                    </div>
+
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-xs space-y-1.5">
+                      <div className="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-1.5">
+                        <span className="flex items-center gap-1.5">📣 Speaking Time</span>
+                        <button
+                          type="button"
+                          onClick={() => setModalContent({
+                            title: "Actual Speaking Time",
+                            text: "The total cumulative time you spent actively recording and speaking answers into the microphone during the session."
+                          })}
+                          className="text-blue-700 underline text-[10px] font-bold cursor-pointer"
+                        >
+                          Note
+                        </button>
+                      </div>
+                      <div className="text-sm font-mono font-bold text-blue-700 pt-0.5">
+                        {Math.floor(examResult.actualSpeakingSec / 60)}m {examResult.actualSpeakingSec % 60}s
+                      </div>
+                    </div>
+
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-xs space-y-1.5">
+                      <div className="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-1.5">
+                        <span className="flex items-center gap-1.5">🧠 Thinking Time</span>
+                        <button
+                          type="button"
+                          onClick={() => setModalContent({
+                            title: "Thinking Time",
+                            text: "The time spent pondering or hesitating before your responses, calculated by subtracting your active speaking time from your net turn time."
+                          })}
+                          className="text-blue-700 underline text-[10px] font-bold cursor-pointer"
+                        >
+                          Note
+                        </button>
+                      </div>
+                      <div className="text-sm font-mono font-bold text-blue-800 pt-0.5">
+                        {Math.floor(examResult.thinkingSec / 60)}m {examResult.thinkingSec % 60}s
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
+                      <div className="text-base font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xl">🗣</span>
+                          <span>Speech Speed</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setModalContent({
+                            title: "Speech Speed & Fluency",
+                            text: "Measures how smoothly and continuously you speak without excessive pausing. A natural pace (2.5 - 4.5 chars/sec) shows confidence and linguistic automaticity."
+                          })}
+                          className="text-blue-700 underline text-xs font-bold cursor-pointer"
+                        >
+                          Note
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-2 pt-1">
+                        <div className="text-sm font-bold text-slate-900">
+                          {examResult.fluencyMetrics.avgSpeechRateCPS} characters / sec
+                        </div>
+
+                        <div className="space-y-1.5 pt-1">
+                          <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
+                            examResult.fluencyMetrics.avgSpeechRateCPS <= 2.5
+                              ? "bg-blue-100 border-blue-400 font-bold text-blue-900 shadow-xs"
+                              : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
+                          }`}>
+                            <span>🐢 Deliberate Pace</span>
+                            <span className="font-mono text-[11px]">&le; 2.5 chars/sec</span>
+                          </div>
+
+                          <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
+                            examResult.fluencyMetrics.avgSpeechRateCPS > 2.5 && examResult.fluencyMetrics.avgSpeechRateCPS < 4.5
+                              ? "bg-emerald-100 border-emerald-400 font-bold text-emerald-900 shadow-xs"
+                              : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
+                          }`}>
+                            <span>👍 Natural Pace</span>
+                            <span className="font-mono text-[11px]">2.5 - 4.5 chars/sec</span>
+                          </div>
+
+                          <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
+                            examResult.fluencyMetrics.avgSpeechRateCPS >= 4.5
+                              ? "bg-rose-100 border-rose-400 font-bold text-rose-900 shadow-xs"
+                              : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
+                          }`}>
+                            <span>⚡ Fast Pace</span>
+                            <span className="font-mono text-[11px]">&ge; 4.5 chars/sec</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 pt-1">
+                        <span>Target Reference: 3.0 - 4.5 characters / sec</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-3">
+                      <div className="text-base font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xl">📝</span>
+                          <span>Total Output Volume</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setModalContent({
+                            title: "Total Output Volume & Elaboration",
+                            text: "Measures the depth and amount of information in your responses. VCE assessment criteria require you to elaborate fully with reasons and examples rather than giving brief, single-sentence answers."
+                          })}
+                          className="text-blue-700 underline text-xs font-bold cursor-pointer"
+                        >
+                          Note
+                        </button>
+                      </div>
+
+                      <div className="space-y-2 pt-1">
+                        <div className="text-sm font-bold text-slate-900">
+                          {examResult.fluencyMetrics.totalOutputChars} characters spoken
+                        </div>
+
+                        <div className="space-y-1.5 pt-1">
+                          <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
+                            examResult.fluencyMetrics.totalOutputChars < 150
+                              ? "bg-rose-100 border-rose-400 font-bold text-rose-900 shadow-xs"
+                              : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
+                          }`}>
+                            <span>🛑 Brief / Too Short</span>
+                            <span className="font-mono text-[11px]">&lt; 150 chars</span>
+                          </div>
+
+                          <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
+                            examResult.fluencyMetrics.totalOutputChars >= 150 && examResult.fluencyMetrics.totalOutputChars < 300
+                              ? "bg-blue-100 border-blue-400 font-bold text-blue-900 shadow-xs"
+                              : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
+                          }`}>
+                            <span>🌿 Moderate Elaboration</span>
+                            <span className="font-mono text-[11px]">150 - 300 chars</span>
+                          </div>
+
+                          <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
+                            examResult.fluencyMetrics.totalOutputChars >= 300
+                              ? "bg-emerald-100 border-emerald-400 font-bold text-emerald-900 shadow-xs"
+                              : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
+                          }`}>
+                            <span>🌟 Rich Elaboration (Goal)</span>
+                            <span className="font-mono text-[11px]">&ge; 300 chars</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 pt-0.5">
+                        <span>Target Reference: &ge; 300 characters</span>
+                      </div>
+
+                      <details className="group pt-2 border-t border-blue-100">
+                        <summary className="text-xs font-bold text-blue-700 cursor-pointer hover:underline flex items-center justify-between">
+                          <span>🎙️ View My Spoken Transcript</span>
+                          <span className="transition group-open:rotate-180">▼</span>
+                        </summary>
+                        <div className="mt-2 max-h-48 overflow-y-auto space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-700">
+                          {chatMessages.filter(msg => msg.role === "user").length > 0 ? (
+                            chatMessages
+                              .filter(msg => msg.role === "user")
+                              .map((msg, i) => (
+                                <div key={i} className="border-b border-slate-200 pb-2 last:border-b-0 last:pb-0">
+                                  <div className="font-bold text-[10px] text-blue-800 mb-0.5">Response #{i + 1}</div>
+                                  <div className="leading-relaxed">{msg.content}</div>
+                                </div>
+                              ))
+                          ) : (
+                            <div className="text-slate-400 italic">No user speech recorded.</div>
+                          )}
+                        </div>
+                      </details>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border-2 border-blue-300 rounded-2xl p-6 shadow-sm space-y-4">
+                    <div className="flex justify-between items-center border-b border-blue-200 pb-3 flex-wrap gap-2">
+                      <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <span className="text-lg">🗺️</span>
+                        <span>Your Speaking Style Matrix (Speed vs. Volume)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setModalContent({
+                          title: "Speaking Style Matrix Guide",
+                          text: "This 2x2 matrix maps your speech speed against your total output volume to help you identify your current speaking pattern. Your goal as a VCE student is to reach Quadrant 1 (Fast & Many), where you speak fluently and elaborate extensively."
+                        })}
+                        className="text-xs text-blue-700 font-bold underline cursor-pointer"
+                      >
+                        Note
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Based on your net speech rate and total output volume, your current performance falls into one of the four categories below:
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                      <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 1 ? "bg-emerald-50 border-emerald-500 shadow-md ring-2 ring-emerald-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-sm text-emerald-900">🌟 Quadrant 1: Fast & Many (Goal)</span>
+                          {quadrantId === 1 && <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
+                        </div>
+                        <div className="text-xs text-slate-700 leading-relaxed">
+                          High speed and rich elaboration. You speak smoothly and provide detailed explanations with examples.
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 2 ? "bg-blue-50 border-blue-500 shadow-md ring-2 ring-blue-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-sm text-blue-900">🐢 Quadrant 2: Slow & Many</span>
+                          {quadrantId === 2 && <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
+                        </div>
+                        <div className="text-xs text-slate-700 leading-relaxed">
+                          You want to say a lot, but you pause frequently to search for vocabulary or grammar.
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 3 ? "bg-blue-50 border-blue-500 shadow-md ring-2 ring-blue-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-sm text-blue-900">⚡ Quadrant 3: Fast & Few</span>
+                          {quadrantId === 3 && <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
+                        </div>
+                        <div className="text-xs text-slate-700 leading-relaxed">
+                          Quick, snappy answers, but too brief ("Yes/No" style). Lacks elaboration.
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 4 ? "bg-rose-50 border-rose-500 shadow-md ring-2 ring-rose-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-sm text-rose-900">🛑 Quadrant 4: Slow & Few</span>
+                          {quadrantId === 4 && <span className="text-[10px] bg-rose-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
+                        </div>
+                        <div className="text-xs text-slate-700 leading-relaxed">
+                          Struggling with both speed and volume. Long silences and short sentences.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <div className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                    <span>📋</span> Examiner's Feedback & Advice:
+                  </div>
+
+                  <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
+                    <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
+                      <span className="text-xl">📊</span>
+                      <span>Performance Overview</span>
+                    </div>
+                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pt-1">
+                      {examResult.performanceOverview}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
+                    <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
+                      <span className="text-xl">⚠️</span>
+                      <span>Key Weaknesses & Hesitation Analysis</span>
+                    </div>
+                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pt-1">
+                      {examResult.weaknessesAnalysis}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
+                    <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
+                      <span className="text-xl">🎯</span>
+                      <span>Action Plan for Real VCE Exam</span>
+                    </div>
+                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pt-1">
+                      {examResult.actionPlan}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-blue-200 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setExamPhase("config")}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl text-sm transition cursor-pointer"
+                  >
+                    🔄 Retake Mock Oral
+                  </button>
+                  <a
+                    href="/dashboard"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition cursor-pointer shadow"
+                  >
+                    🏠 Return to Dashboard
+                  </a>
+                </div>
+              </div>
+            );
+          })()}
+        </main>
+
+        {modalContent && (
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+            <div className="bg-white border-2 border-blue-300 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+              <div className="flex justify-between items-center border-b border-blue-200 pb-3">
+                <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
+                  <span>ℹ</span> {modalContent.title}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setModalContent(null)}
+                  className="text-slate-400 hover:text-slate-700 font-bold text-lg cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                {modalContent.text}
+              </p>
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setModalContent(null)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-xl transition cursor-pointer shadow"
+                >
+                  Got it
+                </button>
               </div>
             </div>
           </div>
         )}
-
-        {examPhase === "result" && examResult && (() => {
-          const speed = examResult.fluencyMetrics.avgSpeechRateCPS;
-          const chars = examResult.fluencyMetrics.totalOutputChars;
-          const isFast = speed > 2.5;
-          const isMany = chars > 300;
-
-          let quadrantId = 4;
-          if (isFast && isMany) quadrantId = 1;
-          else if (!isFast && isMany) quadrantId = 2;
-          else if (isFast && !isMany) quadrantId = 3;
-          else quadrantId = 4;
-
-          return (
-            <div className="bg-white border border-blue-200 rounded-2xl p-6 shadow-md space-y-6">
-              <div className="border-b border-blue-200 pb-4 flex justify-between items-center flex-wrap gap-2">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">
-                  🎉 Mock Oral Comprehensive Report {examType === "sec1" ? "for Section 1" : "for Section 1 & 2"}
-                  </h2>
-                  <p className="text-xs text-slate-600 mt-1">
-                  VCE Japanese Mock Oral Assessment Summary ({examType === "sec1" ? "Section 1 Intensive" : "Section 1 + 2 Full Mock"})
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-2">
-                <div className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
-                  <span>📊</span> Assessment Breakdown Metrics (Net Speaking Time Base):
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-3 sm:col-span-2">
-                    <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
-                      <span className="text-xl">📖</span>
-                      <span>Grammar & Vocabulary (VCE Checklist Matching)</span>
-                    </div>
-                    <div>
-                      {renderTenScaleStarRating(examResult.grammarScore)}
-                    </div>
-
-                    <div className="pt-2 border-t border-blue-100 space-y-2">
-                      <div className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                        <span>✨ Detected VCE Grammar & Expressions Used:</span>
-                      </div>
-                      {examResult.detectedGrammarItems && examResult.detectedGrammarItems.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {examResult.detectedGrammarItems.map((item, index) => (
-                            <div key={index} className="bg-blue-50 border border-blue-300 rounded-lg p-2 text-xs text-slate-800 space-y-0.5 flex-1 min-w-[200px] shadow-xs">
-                              <div className="font-bold text-blue-800 flex items-center justify-between">
-                                <span>{item.pattern}</span>
-                                <span className="text-[10px] text-slate-500 font-normal">{item.category}</span>
-                              </div>
-                              {item.exampleUsed && (
-                                <div className="text-[11px] text-slate-600 italic">
-                                  「{item.exampleUsed}」
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-lg border border-slate-200">
-                          No specific VCE checklist grammar patterns were explicitly identified, or responses were too brief. Try incorporating more diverse sentence structures next time!
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2 sm:col-span-2">
-                    <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
-                      <span className="text-xl">💬</span>
-                      <span>Elaboration</span>
-                    </div>
-                    <div>
-                      {renderTenScaleStarRating(examResult.elaborationScore)}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-xs space-y-1.5">
-                    <div className="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-1.5">
-                      <span className="flex items-center gap-1.5">⏱️ Elapsed Time</span>
-                      <button
-                        type="button"
-                        onClick={() => setModalContent({
-                          title: "Elapsed Time",
-                          text: "The total duration of your mock oral session from start to finish, including examiner questions and system pauses."
-                        })}
-                        className="text-blue-700 underline text-[10px] font-bold cursor-pointer"
-                      >
-                        Note
-                      </button>
-                    </div>
-                    <div className="text-sm font-mono font-bold text-slate-900 pt-0.5">
-                      {Math.floor(examResult.totalTimeSec / 60)}m {examResult.totalTimeSec % 60}s
-                    </div>
-                  </div>
-
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-xs space-y-1.5">
-                    <div className="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-1.5">
-                      <span className="flex items-center gap-1.5">📣 Speaking Time</span>
-                      <button
-                        type="button"
-                        onClick={() => setModalContent({
-                          title: "Actual Speaking Time",
-                          text: "The total cumulative time you spent actively recording and speaking answers into the microphone during the session."
-                        })}
-                        className="text-blue-700 underline text-[10px] font-bold cursor-pointer"
-                      >
-                        Note
-                      </button>
-                    </div>
-                    <div className="text-sm font-mono font-bold text-blue-700 pt-0.5">
-                      {Math.floor(examResult.actualSpeakingSec / 60)}m {examResult.actualSpeakingSec % 60}s
-                    </div>
-                  </div>
-
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-xs space-y-1.5">
-                    <div className="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-1.5">
-                      <span className="flex items-center gap-1.5">🧠 Thinking Time</span>
-                      <button
-                        type="button"
-                        onClick={() => setModalContent({
-                          title: "Thinking Time",
-                          text: "The time spent pondering or hesitating before your responses, calculated by subtracting your active speaking time from your net turn time."
-                        })}
-                        className="text-blue-700 underline text-[10px] font-bold cursor-pointer"
-                      >
-                        Note
-                      </button>
-                    </div>
-                    <div className="text-sm font-mono font-bold text-blue-800 pt-0.5">
-                      {Math.floor(examResult.thinkingSec / 60)}m {examResult.thinkingSec % 60}s
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
-                    <div className="text-base font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-xl">🗣</span>
-                        <span>Speech Speed</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setModalContent({
-                          title: "Speech Speed & Fluency",
-                          text: "Measures how smoothly and continuously you speak without excessive pausing. A natural pace (2.5 - 4.5 chars/sec) shows confidence and linguistic automaticity."
-                        })}
-                        className="text-blue-700 underline text-xs font-bold cursor-pointer"
-                      >
-                        Note
-                      </button>
-                    </div>
-                    
-                    <div className="space-y-2 pt-1">
-                      <div className="text-sm font-bold text-slate-900">
-                        {examResult.fluencyMetrics.avgSpeechRateCPS} characters / sec
-                      </div>
-
-                      <div className="space-y-1.5 pt-1">
-                        <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
-                          examResult.fluencyMetrics.avgSpeechRateCPS <= 2.5
-                            ? "bg-blue-100 border-blue-400 font-bold text-blue-900 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
-                        }`}>
-                          <span>🐢 Deliberate Pace</span>
-                          <span className="font-mono text-[11px]">&le; 2.5 chars/sec</span>
-                        </div>
-
-                        <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
-                          examResult.fluencyMetrics.avgSpeechRateCPS > 2.5 && examResult.fluencyMetrics.avgSpeechRateCPS < 4.5
-                            ? "bg-emerald-100 border-emerald-400 font-bold text-emerald-900 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
-                        }`}>
-                          <span>👍 Natural Pace</span>
-                          <span className="font-mono text-[11px]">2.5 - 4.5 chars/sec</span>
-                        </div>
-
-                        <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
-                          examResult.fluencyMetrics.avgSpeechRateCPS >= 4.5
-                            ? "bg-rose-100 border-rose-400 font-bold text-rose-900 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
-                        }`}>
-                          <span>⚡ Fast Pace</span>
-                          <span className="font-mono text-[11px]">&ge; 4.5 chars/sec</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-[11px] text-slate-500 pt-1">
-                      <span>Target Reference: 3.0 - 4.5 characters / sec</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-3">
-                    <div className="text-base font-bold text-slate-900 flex items-center justify-between border-b border-blue-100 pb-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-xl">📝</span>
-                        <span>Total Output Volume</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setModalContent({
-                          title: "Total Output Volume & Elaboration",
-                          text: "Measures the depth and amount of information in your responses. VCE assessment criteria require you to elaborate fully with reasons and examples rather than giving brief, single-sentence answers."
-                        })}
-                        className="text-blue-700 underline text-xs font-bold cursor-pointer"
-                      >
-                        Note
-                      </button>
-                    </div>
-
-                    <div className="space-y-2 pt-1">
-                      <div className="text-sm font-bold text-slate-900">
-                        {examResult.fluencyMetrics.totalOutputChars} characters spoken
-                      </div>
-
-                      <div className="space-y-1.5 pt-1">
-                        <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
-                          examResult.fluencyMetrics.totalOutputChars < 150
-                            ? "bg-rose-100 border-rose-400 font-bold text-rose-900 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
-                        }`}>
-                          <span>🛑 Brief / Too Short</span>
-                          <span className="font-mono text-[11px]">&lt; 150 chars</span>
-                        </div>
-
-                        <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
-                          examResult.fluencyMetrics.totalOutputChars >= 150 && examResult.fluencyMetrics.totalOutputChars < 300
-                            ? "bg-blue-100 border-blue-400 font-bold text-blue-900 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
-                        }`}>
-                          <span>🌿 Moderate Elaboration</span>
-                          <span className="font-mono text-[11px]">150 - 300 chars</span>
-                        </div>
-
-                        <div className={`p-2 rounded-lg text-xs flex items-center justify-between border transition ${
-                          examResult.fluencyMetrics.totalOutputChars >= 300
-                            ? "bg-emerald-100 border-emerald-400 font-bold text-emerald-900 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-400 opacity-60"
-                        }`}>
-                          <span>🌟 Rich Elaboration (Goal)</span>
-                          <span className="font-mono text-[11px]">&ge; 300 chars</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-[11px] text-slate-500 pt-0.5">
-                      <span>Target Reference: &ge; 300 characters</span>
-                    </div>
-
-                    <details className="group pt-2 border-t border-blue-100">
-                      <summary className="text-xs font-bold text-blue-700 cursor-pointer hover:underline flex items-center justify-between">
-                        <span>🎙️ View My Spoken Transcript</span>
-                        <span className="transition group-open:rotate-180">▼</span>
-                      </summary>
-                      <div className="mt-2 max-h-48 overflow-y-auto space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-700">
-                        {chatMessages.filter(msg => msg.role === "user").length > 0 ? (
-                          chatMessages
-                            .filter(msg => msg.role === "user")
-                            .map((msg, i) => (
-                              <div key={i} className="border-b border-slate-200 pb-2 last:border-b-0 last:pb-0">
-                                <div className="font-bold text-[10px] text-blue-800 mb-0.5">Response #{i + 1}</div>
-                                <div className="leading-relaxed">{msg.content}</div>
-                              </div>
-                            ))
-                        ) : (
-                          <div className="text-slate-400 italic">No user speech recorded.</div>
-                        )}
-                      </div>
-                    </details>
-                  </div>
-                </div>
-
-                <div className="bg-white border-2 border-blue-300 rounded-2xl p-6 shadow-sm space-y-4">
-                  <div className="flex justify-between items-center border-b border-blue-200 pb-3 flex-wrap gap-2">
-                    <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                      <span className="text-lg">🗺️</span>
-                      <span>Your Speaking Style Matrix (Speed vs. Volume)</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setModalContent({
-                        title: "Speaking Style Matrix Guide",
-                        text: "This 2x2 matrix maps your speech speed against your total output volume to help you identify your current speaking pattern. Your goal as a VCE student is to reach Quadrant 1 (Fast & Many), where you speak fluently and elaborate extensively."
-                      })}
-                      className="text-xs text-blue-700 font-bold underline cursor-pointer"
-                    >
-                      Note
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Based on your net speech rate and total output volume, your current performance falls into one of the four categories below:
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                    <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 1 ? "bg-emerald-50 border-emerald-500 shadow-md ring-2 ring-emerald-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm text-emerald-900">🌟 Quadrant 1: Fast & Many (Goal)</span>
-                        {quadrantId === 1 && <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
-                      </div>
-                      <div className="text-xs text-slate-700 leading-relaxed">
-                        High speed and rich elaboration. You speak smoothly and provide detailed explanations with examples.
-                      </div>
-                    </div>
-
-                    <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 2 ? "bg-blue-50 border-blue-500 shadow-md ring-2 ring-blue-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm text-blue-900">🐢 Quadrant 2: Slow & Many</span>
-                        {quadrantId === 2 && <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
-                      </div>
-                      <div className="text-xs text-slate-700 leading-relaxed">
-                        You want to say a lot, but you pause frequently to search for vocabulary or grammar.
-                      </div>
-                    </div>
-
-                    <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 3 ? "bg-blue-50 border-blue-500 shadow-md ring-2 ring-blue-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm text-blue-900">⚡ Quadrant 3: Fast & Few</span>
-                        {quadrantId === 3 && <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
-                      </div>
-                      <div className="text-xs text-slate-700 leading-relaxed">
-                        Quick, snappy answers, but too brief ("Yes/No" style). Lacks elaboration.
-                      </div>
-                    </div>
-
-                    <div className={`p-4 rounded-xl border-2 transition ${quadrantId === 4 ? "bg-rose-50 border-rose-500 shadow-md ring-2 ring-rose-400" : "bg-slate-50/60 border-slate-200 opacity-60"}`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm text-rose-900">🛑 Quadrant 4: Slow & Few</span>
-                        {quadrantId === 4 && <span className="text-[10px] bg-rose-600 text-white font-bold px-2 py-0.5 rounded-full">📍 You Are Here</span>}
-                      </div>
-                      <div className="text-xs text-slate-700 leading-relaxed">
-                        Struggling with both speed and volume. Long silences and short sentences.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-2">
-                <div className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
-                  <span>📋</span> Examiner's Feedback & Advice:
-                </div>
-
-                <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
-                  <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
-                    <span className="text-xl">📊</span>
-                    <span>Performance Overview</span>
-                  </div>
-                  <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pt-1">
-                    {examResult.performanceOverview}
-                  </div>
-                </div>
-
-                <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
-                  <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
-                    <span className="text-xl">⚠️</span>
-                    <span>Key Weaknesses & Hesitation Analysis</span>
-                  </div>
-                  <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pt-1">
-                    {examResult.weaknessesAnalysis}
-                  </div>
-                </div>
-
-                <div className="bg-white border-2 border-blue-200 rounded-xl p-5 shadow-xs space-y-2">
-                  <div className="text-base font-bold text-slate-900 flex items-center gap-2.5 border-b border-blue-100 pb-2">
-                    <span className="text-xl">🎯</span>
-                    <span>Action Plan for Real VCE Exam</span>
-                  </div>
-                  <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap pt-1">
-                    {examResult.actionPlan}
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-blue-200 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setExamPhase("config")}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl text-sm transition cursor-pointer"
-                >
-                  🔄 Retake Mock Oral
-                </button>
-                <a
-                  href="/dashboard"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition cursor-pointer shadow"
-                >
-                  🏠 Return to Dashboard
-                </a>
-              </div>
-            </div>
-          );
-        })()}
-      </main>
-
-      {modalContent && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white border-2 border-blue-300 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-blue-200 pb-3">
-              <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                <span>ℹ</span> {modalContent.title}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setModalContent(null)}
-                className="text-slate-400 hover:text-slate-700 font-bold text-lg cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="text-sm text-slate-700 leading-relaxed">
-              {modalContent.text}
-            </p>
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setModalContent(null)}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-xl transition cursor-pointer shadow"
-              >
-                Got it
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </PageLayout>
   );
 }

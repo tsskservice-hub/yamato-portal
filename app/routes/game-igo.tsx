@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import type { MetaFunction } from "@remix-run/react";
-import { Header } from "../components/header";
+import PageLayout from "../components/PageLayout";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "ミニ5路 囲碁 | JPTutor AI Yamato" },
+    { name: "description", content: "Enjoy a mini 5x5 Go game directly in your browser." },
+  ];
+};
 
 // ミニ5路囲碁のゲームコンポーネントを単独アプリ用に1ファイルに統合
 function IgoBoard() {
@@ -86,15 +93,14 @@ function IgoBoard() {
 
 export default function IgoRoute() {
   return (
-    <div className="min-h-screen bg-[#f4f1ea] pb-16">
-      {/* ⬅️ ② 共通ヘッダーコンポーネントを配置 */}
-      <Header />
-
-      <main className="max-w-xl mx-auto px-4 pt-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <IgoBoard />
-        </div>
-      </main>
-    </div>
+    <PageLayout>
+      <div className="min-h-screen bg-[#f4f1ea] pb-16">
+        <main className="max-w-xl mx-auto px-4 pt-8">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <IgoBoard />
+          </div>
+        </main>
+      </div>
+    </PageLayout>
   );
 }
