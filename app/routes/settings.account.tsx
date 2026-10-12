@@ -1,31 +1,28 @@
-import { useState } from "react";
-import { Form, useNavigation, useActionData, useLoaderData } from "@remix-run/react";
+import { useState, useEffect } from "react";
+import { Form, useNavigation, useActionData, useLoaderData, useNavigate } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
+import { supabase } from "../lib/supabaseClient"; // クライアント側のSupabaseインスタンス
 
-// Loader: ログイン状態の確認 ＆ マジックリンクからのコールバック処理
+// Loader: サーバー側での認証チェック
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { supabase, headers } = createServerSupabaseClient(request, context);
+  const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
 
-  // もしSupabaseからのコールバック（code）が含まれている場合は、セッションに交換する
   if (code) {
-    await supabase.auth.exchangeCodeForSession(code);
-    // codeパラメータを消してリダイレクト（クリーンなURLにする）
+    await serverSupabase.auth.exchangeCodeForSession(code);
     return redirect("/settings/account", { headers });
   }
 
-  // 現在のログインユーザーを取得
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await serverSupabase.auth.getUser();
 
   if (authError || !user) {
     return redirect("/login", { headers });
   }
 
-  // profiles テーブルなどからプランやクレジット情報を取得（必要に応じて調整）
-  const { data: profile } = await supabase
+  const { data: profile } = await serverSupabase
     .from("profiles")
     .select("credits, plan")
     .eq("id", user.id)
@@ -39,7 +36,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }, { headers });
 }
 
-// Action: アカウントの完全削除処理
+// Action: アカウント削除処理
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -50,8 +47,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
     }
 
-    const { supabase, headers } = createServerSupabaseClient(request, context);
-    const { data: { user } } = await supabase.auth.getUser();
+    const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
+    const { data: { user } } = await serverSupabase.auth.getUser();
 
     if (!user) {
       return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
@@ -81,7 +78,24 @@ export default function AccountSettingsRoute() {
   const [confirmInput, setConfirmInput] = useState("");
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
+  const navigate = useNavigate();
   const isSubmitting = navigation.state === "submitting";
+
+  // 【追加】ブラウザ側でURLハッシュ（#access_token...）を検知してセッションを保持させる処理
+  useEffect(() => {
+    const handleAuthHash = async () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token")) {
+        // Supabaseクライアントにハッシュを処理させる
+        const { error } = await supabase.auth.getSession();
+        if (!error) {
+          // ハッシュを綺麗にしてページを再読み込み・再フェッチさせる
+          navigate("/settings/account", { replace: true });
+        }
+      }
+    };
+    handleAuthHash();
+  }, [navigate]);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
