@@ -6,7 +6,7 @@ export const meta: MetaFunction = () => {
     { title: "Terms of Service | AI Yamato Japanese Tutoring" },
     {
       name: "description",
-      content: "Terms of Service for AI Yamato - VCE Japanese AI Tutoring Platform.",
+      content: "Terms of Service for AI Yamato - AI Japanese Tutoring Platform.",
     },
   ];
 };
@@ -49,7 +49,7 @@ export default function TermsOfService() {
               2. Description of Service
             </h2>
             <p>
-              AI Yamato is an AI-powered educational platform designed primarily to assist secondary school students (including VCE Japanese learners in Victoria, Australia) with Japanese language writing, oral practice, grammar checking, and vocabulary acquisition. The Service operates on a credit-based system and offers various user tiers, including free access and paid credit packs or subscriptions.
+              AI Yamato is an AI-powered educational platform designed to assist learners of all ages and backgrounds—including students and working professionals worldwide—with Japanese language writing, oral practice, grammar checking, and vocabulary acquisition. The Service operates on a credit-based system and offers various user tiers, including free access and paid credit packs or subscriptions.
             </p>
           </section>
 
@@ -65,7 +65,7 @@ export default function TermsOfService() {
                 <strong>Account Responsibility:</strong> You are fully responsible for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account.
               </li>
               <li>
-                <strong>Age Requirements:</strong> Users under the age of 18 should use the Service with the supervision and consent of a parent, guardian, or educational institution (School License).
+                <strong>Age Requirements:</strong> Users under the age of majority should use the Service with the supervision and consent of a parent, guardian, or educational institution (School License).
               </li>
             </ul>
           </section>
@@ -82,7 +82,7 @@ export default function TermsOfService() {
                 <strong>Expiration and Validity:</strong> Promotional or bonus credits may carry specific validity periods (e.g., as specified during campaign terms) and will expire if unused.
               </li>
               <li>
-                <strong>Refund Policy:</strong> All purchases of digital credits and plans are final, except where required by Australian Consumer Law (ACL).
+                <strong>Refund Policy:</strong> All purchases of digital credits and plans are final, except where required by applicable local consumer protection laws in the user&apos;s jurisdiction.
               </li>
             </ul>
           </section>
@@ -114,7 +114,7 @@ export default function TermsOfService() {
               7. Limitation of Liability and Disclaimer
             </h2>
             <p>
-              The Service is provided on an &quot;as is&quot; and &quot;as available&quot; basis. AI Yamato is an educational learning aid and does not guarantee specific academic results, VCE scores, or exam outcomes. For complete details regarding limitations, please review our separate <Link to="/disclaimer" className="text-indigo-600 underline hover:text-indigo-500">Disclaimer</Link>.
+              The Service is provided on an &quot;as is&quot; and &quot;as available&quot; basis. AI Yamato is an educational learning aid and does not guarantee specific academic results, language proficiency test scores, or exam outcomes. For complete details regarding limitations, please review our separate <Link to="/disclaimer" className="text-indigo-600 underline hover:text-indigo-500">Disclaimer</Link>.
             </p>
           </section>
 

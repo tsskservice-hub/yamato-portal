@@ -54,7 +54,7 @@ export default function PrivacyPolicy() {
                 <strong>Account &amp; Authentication Data:</strong> When you register or sign in using WebAuthn Passkeys, we store public key credentials and identifiers associated with your account in our secure database (Supabase). If provided, we may also store your email address for account recovery and important service updates.
               </li>
               <li>
-                <strong>Learning Activity &amp; Content:</strong> We collect data regarding your interactions with the AI tutor, including essay submissions (原稿用紙 drafts), oral practice audio transcripts, vocabulary progress, and quiz results, to provide and improve your personalized learning experience.
+                <strong>Learning Activity &amp; Content:</strong> We collect data regarding your interactions with the AI tutor, including essay submissions (genkoyoshi drafts), oral practice audio transcripts, vocabulary progress, and quiz results, to provide and improve your personalized learning experience.
               </li>
               <li>
                 <strong>Payment &amp; Transaction Information:</strong> When you purchase credit packs or subscriptions, payment processing is handled securely by third-party payment gateways (such as Stripe). We do not store your complete credit card numbers or sensitive financial details on our servers; we receive tokenized transaction data and billing status.

@@ -13,6 +13,7 @@
     "@remix-run/cloudflare-pages": "^2.17.5",
     "@remix-run/dev": "^2.17.5",
     "@remix-run/react": "^2.17.5",
+    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.3",
     "isbot": "^3.6.8",
     "lucide-react": "^1.55.0",

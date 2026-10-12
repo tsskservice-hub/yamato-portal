@@ -39,6 +39,12 @@ export default function Footer() {
             >
               Contact
             </Link>
+            <Link
+              to="/settings/account"
+              className="hover:text-indigo-600 transition-colors"
+            >
+              My Account
+            </Link>
           </div>
 
         </div>
