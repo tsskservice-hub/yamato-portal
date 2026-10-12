@@ -104,10 +104,26 @@ export default function Prices() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Start for free with daily credits, or top up with prepaid charge packs for intensive study.
           </p>
+
+          {/* クレジット消費ガイドボックス（Credit Consumption Guide）をタイトルの下に配置 */}
+          <div className="max-w-xl mx-auto mt-6 p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left">
+            <div className="flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200">
+              <Coins className="w-4 h-4 text-amber-500" />
+              <span>Credit Consumption Guide</span>
+            </div>
+            <div className="space-y-2 text-slate-500 dark:text-slate-400">
+              {CREDIT_CONSUMPTION_GUIDE.map((row, idx) => (
+                <div key={idx} className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                  <span>{row.item}</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* クレジットパックおよび価格表セクション（添付画像完全準拠） */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
           <div className="text-center space-y-4 max-w-3xl mx-auto mb-12">
             {/* 期間限定キャンペーンバナー */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
@@ -227,93 +243,86 @@ export default function Prices() {
 
           </div>
 
-          {/* クレジット消費ガイドボックス（Credit Consumption Guide） */}
-          <div className="max-w-2xl mx-auto mt-12 p-5 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs">
-            <div className="flex items-center justify-center space-x-2 font-bold mb-4 text-slate-800 dark:text-slate-200">
-              <Coins className="w-4 h-4 text-amber-500" />
-              <span>Credit Consumption Guide</span>
-            </div>
-            <div className="space-y-2.5 text-slate-500 dark:text-slate-400">
-              {CREDIT_CONSUMPTION_GUIDE.map((row, idx) => (
-                <div key={idx} className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                  <span>{row.item}</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 💡 トグルで開閉可能な縦割り詳細スペック表（Plan Technical Specifications） */}
-          <div className="max-w-4xl mx-auto mt-10">
+          {/* 💡 トグルで開閉可能な縦割り詳細スペック表（価格カードと完全同幅・文字サイズ拡大） */}
+          <div className="mt-10">
             <button
               onClick={() => setIsSpecsOpen(!isSpecsOpen)}
-              className="w-full py-3.5 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer"
+              className="w-full py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer"
             >
               <div className="flex items-center space-x-2">
                 <SlidersHorizontal className="w-4 h-4 text-blue-600" />
                 <span>View Detailed Plan Specs & Study Volume Estimates (プラン詳細スペック・学習量比較)</span>
               </div>
-              {isSpecsOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+              {isSpecsOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
 
             {isSpecsOpen && (
-              <div className="mt-4 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md animate-fadeIn text-xs space-y-6">
-                <div className="text-center pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">Plan Specifications & Learning Volume Breakdown</h3>
-                  <p className="text-slate-500 dark:text-slate-400 mt-1">All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume.</p>
+              <div className="mt-4 space-y-4 animate-fadeIn">
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">Plan Specifications & Learning Volume Breakdown</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume.</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
+                {/* 価格カードと同じ 4カラム構造（grid-cols-1 sm:grid-cols-2 lg:grid-cols-4）で完全同幅・文字サイズ拡大 (text-sm) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
                   
                   {/* Free Plan Specs */}
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800 space-y-3">
-                    <div className="font-bold text-slate-700 dark:text-slate-300 pb-1 border-b border-slate-200/50 dark:border-slate-800">Free Plan</div>
-                    <ul className="space-y-2 text-slate-500 dark:text-slate-400">
-                      <li><strong className="text-slate-700 dark:text-slate-300">Total Credits:</strong> 5 daily</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Cost per Credit:</strong> Free</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Essay Practice:</strong> ~0.2 sessions / day</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Base Expiry:</strong> Daily reset</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Feature Access:</strong> Full AI Chat & Tools</li>
-                    </ul>
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="font-bold text-slate-700 dark:text-slate-300 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Free Plan</div>
+                      <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
+                        <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 5 daily</li>
+                        <li><strong className="text-slate-900 dark:text-white">Cost per Credit:</strong> Free</li>
+                        <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~0.2 sessions / day</li>
+                        <li><strong className="text-slate-900 dark:text-white">Base Expiry:</strong> Daily reset</li>
+                        <li><strong className="text-slate-900 dark:text-white">Feature Access:</strong> Full AI Chat & Tools</li>
+                      </ul>
+                    </div>
                   </div>
 
                   {/* Starter Pack Specs */}
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800 space-y-3">
-                    <div className="font-bold text-blue-600 pb-1 border-b border-slate-200/50 dark:border-slate-800">Starter Pack ($10)</div>
-                    <ul className="space-y-2 text-slate-500 dark:text-slate-400">
-                      <li><strong className="text-slate-700 dark:text-slate-300">Total Credits:</strong> 2,000</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Cost efficiency:</strong> Standard</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Essay Practice:</strong> ~6–8 sessions</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Voice Roleplay:</strong> ~40–50 mins</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Bonus Expiry:</strong> Oct 29</li>
-                    </ul>
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Starter Pack ($10)</div>
+                      <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
+                        <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 2,000</li>
+                        <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> Standard</li>
+                        <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~6–8 sessions</li>
+                        <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~40–50 mins</li>
+                        <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
+                      </ul>
+                    </div>
                   </div>
 
                   {/* Standard Pack Specs */}
-                  <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 space-y-3 relative">
-                    <div className="font-bold text-blue-600 pb-1 border-b border-blue-200/50 dark:border-blue-800 flex justify-between items-center">
-                      <span>Standard ($25)</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">Popular</span>
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 shadow-xl space-y-4 flex flex-col justify-between relative">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm">
+                      Popular Specs
                     </div>
-                    <ul className="space-y-2 text-slate-500 dark:text-slate-400">
-                      <li><strong className="text-slate-700 dark:text-slate-300">Total Credits:</strong> 5,600 (+120% value)</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Cost efficiency:</strong> High Value</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Essay Practice:</strong> ~18–22 sessions</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Voice Roleplay:</strong> ~110–140 mins</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Bonus Expiry:</strong> Oct 29</li>
-                    </ul>
+                    <div>
+                      <div className="font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800 pt-1">Standard ($25)</div>
+                      <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
+                        <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 5,600 (+120% value)</li>
+                        <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> High Value</li>
+                        <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~18–22 sessions</li>
+                        <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~110–140 mins</li>
+                        <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
+                      </ul>
+                    </div>
                   </div>
 
                   {/* Pro Intensivist Specs */}
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800 space-y-3">
-                    <div className="font-bold text-purple-600 pb-1 border-b border-slate-200/50 dark:border-slate-800">Pro Intensivist ($50)</div>
-                    <ul className="space-y-2 text-slate-500 dark:text-slate-400">
-                      <li><strong className="text-slate-700 dark:text-slate-300">Total Credits:</strong> 12,000 (Maximum)</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Cost efficiency:</strong> Best Value</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Essay Practice:</strong> ~40–50 sessions</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Voice Roleplay:</strong> ~240–300 mins</li>
-                      <li><strong className="text-slate-700 dark:text-slate-300">Bonus Expiry:</strong> Oct 29</li>
-                    </ul>
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="font-bold text-purple-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Pro Intensivist ($50)</div>
+                      <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
+                        <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 12,000 (Maximum)</li>
+                        <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> Best Value</li>
+                        <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~40–50 sessions</li>
+                        <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~240–300 mins</li>
+                        <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
+                      </ul>
+                    </div>
                   </div>
 
                 </div>
