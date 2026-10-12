@@ -25,16 +25,16 @@ import { supabase } from '../lib/supabaseClient';
 import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
 import PageLayout from '../components/PageLayout';
 
-// 💡 prices.tsx 側からエクスポートされた PRICING_PLANS をインポートして完全に同期・連動します
+// 💡 PRICING_PLANS imported from prices.tsx for full synchronization
 import { PRICING_PLANS } from './prices';
 
-// 💡 外部ファイルからクイズデータとヘルパー関数をインポート
+// 💡 Quiz data and helper functions imported from external file
 import { getTodayQuiz, QuizItem } from '../data/quizzes';
 
 export const STRIPE_PRICES = {
-  starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // 実際のStripe Price ID
-  standard: 'price_1xxxx_standard',          // 必要に応じてStripeの正しいIDに変更してください
-  pro: 'price_1xxxx_pro',                    // 必要に応じてStripeの正しいIDに変更してください
+  starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // Actual Stripe Price ID
+  standard: 'price_1xxxx_standard',          // Update with your actual Stripe Price ID if needed
+  pro: 'price_1xxxx_pro',                    // Update with your actual Stripe Price ID if needed
 };
 
 // Auto demo conversations in English
@@ -59,7 +59,7 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// AI出力テキストの整形関数（HTMLエスケープと改行コードの保持）
+// AI output text formatting function (HTML escape & line break retention)
 function formatAiOutput(text: string): string {
   if (!text) return "";
   return text
@@ -284,7 +284,7 @@ export default function Home() {
         const typedData = data as { credits?: number; last_quiz_date?: string };
         setCredits(typedData.credits ?? 10);
 
-        // 本日のクイズをすでに解いているかチェック
+        // Check if today's quiz has already been completed
         const todayStr = new Date().toISOString().split('T')[0];
         if (typedData.last_quiz_date === todayStr) {
           setHasCompletedTodayQuiz(true);
@@ -295,7 +295,7 @@ export default function Home() {
     }
   };
 
-  // 💡 デイリークイズ解答処理
+  // 💡 Daily Quiz Answer Handler
   const handleAnswerQuiz = async (selectedIndex: number) => {
     if (isAnswerSubmitted || !user) return;
     setSelectedOption(selectedIndex);
@@ -308,7 +308,7 @@ export default function Home() {
       const todayStr = new Date().toISOString().split('T')[0];
       const newCredits = credits + 2;
 
-      // Supabaseのクレジットと last_quiz_date を更新
+      // Update Supabase credits and last_quiz_date
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -421,7 +421,7 @@ export default function Home() {
               Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
             </p>
 
-            {/* 💡 ログインユーザー向け：本日のデイリークイズバナー */}
+            {/* 💡 Daily Quiz Banner for Logged-in Users (English) */}
             {user && (
               <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
                 <div className="flex items-center space-x-3">
@@ -433,17 +433,16 @@ export default function Home() {
                       <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 px-2 py-0.5 rounded bg-emerald-500/10">Daily Challenge</span>
                       <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">+2 Credits</span>
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">本日の日本語・日本文化クイズ</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Today's Japanese & Culture Quiz</h3>
                     <p className="text-xs text-slate-500">
                       {hasCompletedTodayQuiz 
-                        ? "本日のクイズはクリア済みです！明日また挑戦してね✨" 
-                        : "1問正解して【2クレジット】をゲットしよう！（1日1回限定）"}
+                        ? "You've already completed today's quiz! Come back tomorrow for more ✨" 
+                        : "Answer correctly to earn 2 credits! (Available once per day)"}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => {
-                    // モーダルを開くときに解答状態を初期化（未挑戦ならリセット）
                     if (!hasCompletedTodayQuiz) {
                       setSelectedOption(null);
                       setIsAnswerSubmitted(false);
@@ -457,7 +456,7 @@ export default function Home() {
                       : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
                   }`}
                 >
-                  <span>{hasCompletedTodayQuiz ? "クイズ結果・解説を見る" : "今日のクイズに挑戦する"}</span>
+                  <span>{hasCompletedTodayQuiz ? "View Quiz Results & Explanation" : "Take Today's Quiz"}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -467,7 +466,7 @@ export default function Home() {
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center space-x-2">
                   <span className="text-base">🤖</span>
-                  <span className="font-bold text-sm text-emerald-900 dark:text-emerald-200">日本語Tutor AI ヤマト (Auto Demo)</span>
+                  <span className="font-bold text-sm text-emerald-900 dark:text-emerald-200">Japanese Tutor AI Yamato (Auto Demo)</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold animate-pulse">● Live Demo</span>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-medium">
@@ -475,7 +474,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 学習ペース表示モック */}
+              {/* Learning Pace Mock Display */}
               <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-2.5 mb-4 flex items-center justify-between">
                 <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">Learning Pace (Demo)</span>
                 <div className="inline-flex rounded-lg bg-white dark:bg-slate-900 p-0.5 shadow-xs border border-emerald-200 dark:border-emerald-800">
@@ -483,7 +482,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* チャット履歴風プレビューエリア */}
+              {/* Chat History Preview Area */}
               <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 mb-4 min-h-[160px] flex flex-col justify-center">
                 {/* User Message Bubble */}
                 <div className="flex justify-end">
@@ -510,13 +509,13 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3 bg-emerald-50/50 dark:bg-emerald-950/20 text-sm gap-3">
                 <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
                   <span>✨</span>
-                  <span>ヤマトに自分の質問をしてみませんか？</span>
+                  <span>Want to ask Yamato your own questions?</span>
                 </div>
                 <button 
                   onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
                   className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <span>アプリを試す（無料登録）</span>
+                  <span>Try App (Free Sign Up)</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -817,7 +816,7 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下常駐エリア（AIチューター窓 & 上に戻るボタンを一体化して配置） */}
+        {/* 🤖 Bottom-right Persistent AI Tutor Area */}
         <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
           {showScrollTop && (
             <button
@@ -851,16 +850,16 @@ export default function Home() {
               <div className="w-full h-full flex flex-col">
                 <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                   <h3 className="text-sm font-bold text-emerald-900 flex items-center gap-2 m-0">
-                    <span>🤖</span> 日本語Tutor AI Yamato
+                    <span>🤖</span> Japanese Tutor AI Yamato
                   </h3>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={toggleAiFullscreen}
                       className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
-                      title={isAiFullscreen ? "元の大きさに戻す" : "デバイスの画面に合わせて最大化"}
+                      title={isAiFullscreen ? "Restore original size" : "Maximize to screen"}
                     >
-                      {isAiFullscreen ? "🗗 縮小" : "🗖 最大化"}
+                      {isAiFullscreen ? "🗗 Minimize" : "🗖 Maximize"}
                     </button>
                     <button
                       type="button"
@@ -882,7 +881,7 @@ export default function Home() {
                   Ask questions about Japanese language, grammar, kanji, or culture!
                 </p>
 
-              {/* 学習レベル選択UI */}
+              {/* Learning Level Selection UI */}
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-emerald-900">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-emerald-200">
@@ -903,7 +902,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* チャット履歴エリア */}
+              {/* Chat History Area */}
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3">
                 {tutorMessages.map((msg, idx) => (
                   <div
@@ -932,10 +931,10 @@ export default function Home() {
                                 alt="AI Yamato Visual Explanation"
                                 onClick={() => setModalImageSrc(msg.imageUrl || null)}
                                 className="w-full h-auto rounded-md object-contain max-h-48 cursor-pointer hover:opacity-95 transition"
-                                title="クリックして画像を拡大"
+                                title="Click to enlarge image"
                               />
                               <p className="text-[10px] text-emerald-800 text-center mt-1 font-medium cursor-pointer" onClick={() => setModalImageSrc(msg.imageUrl || null)}>
-                                ✨ ヤマト特製図解・イラスト（クリックして拡大）
+                                ✨ Yamato Custom Diagram & Illustration (Click to Enlarge)
                               </p>
                             </div>
                           )}
@@ -949,7 +948,7 @@ export default function Home() {
                 )}
               </div>
 
-              {/* 入力フォーム & 図解生成チェックボックス */}
+              {/* Input Form & Visual Aid Checkbox */}
               <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                 <div className="flex items-center gap-2 px-1">
                   <label className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 cursor-pointer select-none">
@@ -987,7 +986,7 @@ export default function Home() {
         )}
       </aside>
 
-        {/* 💡 デイリークイズ回答用モーダル */}
+        {/* 💡 Daily Quiz Modal (English Instructions & UI) */}
         {isQuizModalOpen && (
           <div 
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
@@ -1011,7 +1010,7 @@ export default function Home() {
                   </div>
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 px-2 py-0.5 rounded bg-emerald-500/10">Daily Challenge (+2 Credits)</span>
-                    <h3 className="text-lg font-extrabold tracking-tight">本日の日本語・日本文化クイズ</h3>
+                    <h3 className="text-lg font-extrabold tracking-tight">Today's Japanese & Culture Quiz</h3>
                   </div>
                 </div>
 
@@ -1050,10 +1049,10 @@ export default function Home() {
                   <div className={`p-4 rounded-2xl border text-xs space-y-2 text-left ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-200' : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200'}`}>
                     <p className="font-bold">
                       {hasCompletedTodayQuiz && !isAnswerSubmitted 
-                        ? "✨ 本日のクイズはすでにクリア済みです！（獲得済みクレジット: +2）" 
+                        ? "✨ You have already completed today's quiz! (Credits earned: +2)" 
                         : isQuizCorrect 
-                        ? "🎉 正解です！ 2クレジット獲得しました！" 
-                        : "💪 残念！不正解です。また明日挑戦してね！"}
+                        ? "🎉 Correct! You earned 2 credits!" 
+                        : "💪 Incorrect! Try again tomorrow!"}
                     </p>
                     <p className="leading-relaxed text-slate-600 dark:text-slate-300">{currentQuiz.explanation}</p>
                   </div>
@@ -1064,7 +1063,7 @@ export default function Home() {
                     onClick={() => setIsQuizModalOpen(false)}
                     className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-bold transition cursor-pointer"
                   >
-                    閉じる
+                    Close
                   </button>
                 </div>
               </div>
@@ -1072,7 +1071,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* 画像拡大表示用モーダル（Lightbox） */}
+        {/* Enlarged Image Modal (Lightbox) */}
         {modalImageSrc && (
           <div 
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
@@ -1091,7 +1090,7 @@ export default function Home() {
                 alt="Enlarged AI Yamato Visual"
                 className="max-w-full max-h-[80vh] rounded-lg object-contain"
               />
-              <p className="text-xs text-slate-600 mt-2 font-medium">✨ ヤマト特製図解・イラスト（拡大表示）</p>
+              <p className="text-xs text-slate-600 mt-2 font-medium">✨ Yamato Custom Diagram & Illustration (Enlarged)</p>
             </div>
           </div>
         )}
