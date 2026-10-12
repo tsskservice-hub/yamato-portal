@@ -17,15 +17,21 @@ import {
   KeyRound, 
   LogOut, 
   Loader2,
-  Flame 
+  Flame,
+  ShoppingBag,
+  GraduationCap
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
 
+// 💡 prices.tsx 側から価格データやプラン定義（PRICING_PLANS）をインポートして連動させます
+// （※もし prices.tsx 側に export const PRICING_PLANS が定義されている前提のインポート例です）
+import { PRICING_PLANS } from './prices';
+
 export const STRIPE_PRICES = {
-  starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // 1つ目のファイルで定義されていた実際のID
-  standard: 'price_1xxxx_standard',          // 必要に応じてStripeの正しいPrice IDに変更してください
-  pro: 'price_1xxxx_pro',                    // 必要に応じてStripeの正しいPrice IDに変更してください
+  starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // 実際のStripe Price ID
+  standard: 'price_1xxxx_standard',          // 必要に応じてStripeの正しいIDに変更してください
+  pro: 'price_1xxxx_pro',                    // 必要に応じてStripeの正しいIDに変更してください
 };
 
 // Auto demo conversations in English
@@ -312,7 +318,6 @@ export default function Home() {
     try {
       setCheckoutLoadingPriceId(priceId);
 
-      // functions/api/checkout.ts に合わせたエンドポイントへ修正
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -493,7 +498,7 @@ export default function Home() {
           </div>
         </section>
 
-      {/* 3. Pricing & Credit Packs */}
+      {/* 3. Pricing & Credit Packs (prices.tsx からインポートした PRICING_PLANS を使用して完全に同期) */}
       <section className="space-y-12 text-center">
         <div className="space-y-4 max-w-3xl mx-auto">
           <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
@@ -510,126 +515,130 @@ export default function Home() {
           {/* Free Plan */}
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
             <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Free Plan</span>
-          <div>
-              <span className="text-4xl font-black">$0</span>
-              <span className="text-xs text-slate-500 ml-1">/ forever</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICING_PLANS.free.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICING_PLANS.free.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.free.period}</span>
+              </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+                Daily 5 Credits <span className="text-[10px] text-orange-500 font-normal">(Promo: 2 + 3 Free)</span>
+              </div>
+              <p className="text-xs text-slate-500">{PRICING_PLANS.free.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICING_PLANS.free.features.map((feat, idx) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
+            </div>
+            <button 
+              onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
+              className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              {PRICING_PLANS.free.ctaText}
+            </button>
           </div>
-          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-            Daily 5 Credits <span className="text-[10px] text-orange-500 font-normal">(Promo: 2 + 3 Free)</span>
-          </div>
-          <p className="text-xs text-slate-500">Recharged daily upon login. Enjoy basic chat, traditional games, and Genkoyoshi editor tools.</p>
-          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-            <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Daily Login Credits</span></li>
-            <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Free Traditional Games & Tools</span></li>
-          </ul>
-        </div>
-        <button 
-          onClick={() => { setAuthMode('signup'); setIsAuthModalOpen(true); }}
-          className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-        >
-          Get Started Free
-        </button>
-      </div>
 
           {/* Starter Pack */}
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-          <div className="space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Starter Pack</span>
-        <div>
-              <span className="text-4xl font-black">$10</span>
-              <span className="text-xs text-slate-500 ml-1">AUD</span>
-        </div>
-        <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-          2,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">1,000</span> <span className="text-[10px] text-orange-500 font-bold">(1,000 unexpired + 1,000 bonus until Oct 29)</span>
-        </div>
-        <p className="text-xs text-slate-500">Great for beginners. Ideal for a few essay corrections or voice roleplay sessions.</p>
-        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-            <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Standard AI Chat & Q&A</span></li>
-            <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Pay-as-you-go flexibility</span></li>
-        </ul>
-      </div>
-      <button 
-        onClick={() => handleCheckout(STRIPE_PRICES.starter)} 
-        disabled={checkoutLoadingPriceId === STRIPE_PRICES.starter}
-        className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-      >
-        {checkoutLoadingPriceId === STRIPE_PRICES.starter && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-        <span>Buy Starter Pack</span>
-      </button>
-    </div>
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICING_PLANS.starter.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICING_PLANS.starter.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.starter.period}</span>
+              </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+                2,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">1,000</span> <span className="text-[10px] text-orange-500 font-bold">(1,000 unexpired + 1,000 bonus until Oct 29)</span>
+              </div>
+              <p className="text-xs text-slate-500">{PRICING_PLANS.starter.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICING_PLANS.starter.features.map((feat, idx) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
+            </div>
+            <button 
+              onClick={() => handleCheckout(STRIPE_PRICES.starter)} 
+              disabled={checkoutLoadingPriceId === STRIPE_PRICES.starter}
+              className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+            >
+              {checkoutLoadingPriceId === STRIPE_PRICES.starter && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              <span>Buy Starter Pack</span>
+            </button>
+          </div>
 
           {/* Standard Pack */}
           <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-            Most Popular
-        </div>
-        <div className="space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Standard Pack</span>
-        <div>
-            <span className="text-4xl font-black">$25</span>
-            <span className="text-xs text-slate-500 ml-1">AUD</span>
-        </div>
-        <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-          5,600 Credits <span className="text-[10px] text-slate-400 line-through font-normal">2,800</span> <span className="text-[10px] text-orange-500 font-bold">(2,800 unexpired + 2,800 bonus until Oct 29)</span>
-        </div>
-        <p className="text-xs text-slate-500">Our most popular choice. Perfect for regular study routines and test preparation.</p>
-        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-          <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Double Value Promotion</span></li>
-          <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>Regular Study & Test Practice</span></li>
-        </ul>
-      </div>
-      <button 
-        onClick={() => handleCheckout(STRIPE_PRICES.standard)} 
-        disabled={checkoutLoadingPriceId === STRIPE_PRICES.standard}
-        className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-      >
-        {checkoutLoadingPriceId === STRIPE_PRICES.standard && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-        <span>Buy Standard Pack</span>
-      </button>
-    </div>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
+              Most Popular
+            </div>
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICING_PLANS.standard.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICING_PLANS.standard.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.standard.period}</span>
+              </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+                5,600 Credits <span className="text-[10px] text-slate-400 line-through font-normal">2,800</span> <span className="text-[10px] text-orange-500 font-bold">(2,800 unexpired + 2,800 bonus until Oct 29)</span>
+              </div>
+              <p className="text-xs text-slate-500">{PRICING_PLANS.standard.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICING_PLANS.standard.features.map((feat, idx) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
+            </div>
+            <button 
+              onClick={() => handleCheckout(STRIPE_PRICES.standard)} 
+              disabled={checkoutLoadingPriceId === STRIPE_PRICES.standard}
+              className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+            >
+              {checkoutLoadingPriceId === STRIPE_PRICES.standard && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              <span>Buy Standard Pack</span>
+            </button>
+          </div>
 
           {/* Pro Intensivist */}
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-          <div className="space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-600">Pro Intensivist</span>
-        <div>
-            <span className="text-4xl font-black">$50</span>
-            <span className="text-xs text-slate-500 ml-1">AUD</span>
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICING_PLANS.pro.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICING_PLANS.pro.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.pro.period}</span>
+              </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold">
+                12,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">6,000</span> <span className="text-[10px] text-orange-500 font-bold">(6,000 unexpired + 6,000 bonus until Oct 29)</span>
+              </div>
+              <p className="text-xs text-slate-500">{PRICING_PLANS.pro.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICING_PLANS.pro.features.map((feat, idx) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
+            </div>
+            <button 
+              onClick={() => handleCheckout(STRIPE_PRICES.pro)} 
+              disabled={checkoutLoadingPriceId === STRIPE_PRICES.pro}
+              className="mt-6 w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+            >
+              {checkoutLoadingPriceId === STRIPE_PRICES.pro && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              <span>Buy Pro Pack</span>
+            </button>
+          </div>
         </div>
-        <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold">
-          12,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">6,000</span> <span className="text-[10px] text-orange-500 font-bold">(6,000 unexpired + 6,000 bonus until Oct 29)</span>
-        </div>
-        <p className="text-xs text-slate-500">For heavy users and premium-intensive drills. Maximum value with doubled bonus credits.</p>
-        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-          <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>Double Value Promotion</span></li>
-          <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>Exam Prep & Intensive Essays</span></li>
-        </ul>
-      </div>
-      <button 
-        onClick={() => handleCheckout(STRIPE_PRICES.pro)} 
-        disabled={checkoutLoadingPriceId === STRIPE_PRICES.pro}
-        className="mt-6 w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-      >
-        {checkoutLoadingPriceId === STRIPE_PRICES.pro && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-        <span>Buy Pro Pack</span>
-      </button>
-    </div>
-      </div>
 
-      <div className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-        <div className="flex items-center justify-center space-x-2 font-bold mb-3">
-          <Coins className="w-4 h-4 text-amber-500" />
-          <span>Credit Consumption Guide</span>
+        <div className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+          <div className="flex items-center justify-center space-x-2 font-bold mb-3">
+            <Coins className="w-4 h-4 text-amber-500" />
+            <span>Credit Consumption Guide</span>
+          </div>
+          <div className="space-y-2 text-slate-500">
+            <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Text Chat (Q&A / Vocabulary)</span> <span className="font-semibold text-slate-700 dark:text-slate-300">1-2 credits / turn</span></div>
+            <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Essay / Genkoyoshi Correctors</span> <span className="font-semibold text-slate-700 dark:text-slate-300">20-30 credits / session</span></div>
+            <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Oral Exam / Voice Roleplay</span> <span className="font-semibold text-slate-700 dark:text-slate-300">15-25 credits / min</span></div>
+            <div className="flex justify-between pt-0.5"><span>Mini Games & Drills</span> <span className="font-semibold text-emerald-600">Free / 0.5 credits</span></div>
+          </div>
         </div>
-        <div className="space-y-2 text-slate-500">
-          <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Text Chat (Q&A / Vocabulary)</span> <span className="font-semibold text-slate-700 dark:text-slate-300">1-2 credits / turn</span></div>
-          <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Essay / Genkoyoshi Correctors</span> <span className="font-semibold text-slate-700 dark:text-slate-300">20-30 credits / session</span></div>
-          <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Oral Exam / Voice Roleplay</span> <span className="font-semibold text-slate-700 dark:text-slate-300">15-25 credits / min</span></div>
-          <div className="flex justify-between pt-0.5"><span>Mini Games & Drills</span> <span className="font-semibold text-emerald-600">Free / 0.5 credits</span></div>
-        </div>
-      </div>
-    </section>
+      </section>
 
       {/* 4. Additional Portal Pages Navigation Cards */}
       <section className="space-y-8">

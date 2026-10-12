@@ -3,6 +3,114 @@ import { Link } from "@remix-run/react";
 import { Sparkles, ArrowRight, ShieldCheck, Check, ShoppingBag, GraduationCap, Mic } from "lucide-react";
 import { Header } from "../components/header";
 
+// ----------------------------------------------------------------------
+// _index.tsx および prices.tsx で完全に同期・一元管理される価格およびプラン設定データ
+// ----------------------------------------------------------------------
+export const PRICING_PLANS = {
+  free: {
+    name: "Free",
+    price: "$0",
+    period: "/ forever",
+    badge: "Daily 5 Credits (Promo: 2 + 3 Free)",
+    description: "Access to traditional games, Genkoyoshi editor, and basic community features.",
+    features: [
+      "Free Traditional Games (Go, Hanafuda)",
+      "Genkoyoshi Grid & PDF Tool",
+    ],
+    ctaText: "Get Started Free",
+    ctaLink: "/",
+  },
+  starter: {
+    name: "Starter Pack",
+    price: "$10",
+    period: "AUD",
+    badge: "2,000 Credits (1,000 unexpired + 1,000 bonus until Oct 29)",
+    description: "Great for beginners. Ideal for a few essay corrections or voice roleplay sessions.",
+    features: [
+      "Standard AI Chat & Q&A",
+      "Pay-as-you-go flexibility",
+    ],
+    stripePriceKey: 'starter',
+  },
+  standard: {
+    name: "Standard Pack",
+    price: "$25",
+    period: "AUD",
+    badge: "5,600 Credits (2,800 unexpired + 2,800 bonus until Oct 29)",
+    description: "Our most popular choice. Perfect for regular study routines and test preparation.",
+    features: [
+      "Double Value Promotion",
+      "Regular Study & Test Practice",
+    ],
+    isMostPopular: true,
+    stripePriceKey: 'standard',
+  },
+  pro: {
+    name: "Pro Intensivist",
+    price: "$50",
+    period: "AUD",
+    badge: "12,000 Credits (6,000 unexpired + 6,000 bonus until Oct 29)",
+    description: "For heavy users and premium-intensive drills. Maximum value with doubled bonus credits.",
+    features: [
+      "Double Value Promotion",
+      "Exam Prep & Intensive Essays",
+    ],
+    stripePriceKey: 'pro',
+  },
+  junior: {
+    name: "Junior Years",
+    price: "$98",
+    period: "/ year",
+    description: "Foundational modules and interactive vocabulary building for Year 7-10 students.",
+    features: [
+      "Year 7-10 Curriculum Support",
+      "Interactive Vocab & Audio Drills",
+    ],
+    ctaText: "Coming Soon",
+    isComingSoon: true,
+  },
+  vceSeniorPass: {
+    name: "VCE Senior Pass",
+    price: "$198",
+    period: "/ year",
+    description: "All-in-one package for Year 11-12 students. Complete exam prep & unlimited coaching.",
+    features: [
+      "Full VCE Writing AI Tutor (110 Qs)",
+      "VCE Oral Exam Audio Hub & AI Practice",
+      "Unlimited AI Yamato Chat Coaching",
+    ],
+    ctaText: "Select VCE Senior Pass",
+    ctaLink: "https://vceeoywriting.jptutoraiyamato.com",
+    isBestValue: true,
+  },
+  schoolLicense: {
+    name: "School License",
+    price: "Custom",
+    period: "",
+    description: "Enterprise solution for Japanese language departments and classroom teachers.",
+    features: [
+      "Multi-Student Access & Teacher Dashboard",
+      "Priority Support & Custom Setup",
+    ],
+    ctaText: "Contact for School",
+    ctaLink: "mailto:support@jptutoraiyamato.com",
+  },
+  alacarteOral: {
+    name: "VCE Oral Exam AI Tutor Module",
+    price: "$130",
+    period: "/ year",
+    description: "Specialised oral exam simulation featuring Whisper speech-to-text, interactive examiner questions, and AI audio feedback.",
+    ctaLink: "https://vceeoywriting.jptutoraiyamato.com",
+  },
+  alacarteWriting: {
+    name: "VCE Writing AI Tutor Module",
+    price: "$130",
+    period: "/ year",
+    description: "Complete access to 110 original writing questions, handwriting photo evaluation, and detailed VCE-aligned grammar checking.",
+    ctaLink: "https://vceeoywriting.jptutoraiyamato.com",
+  }
+};
+
 export default function Prices() {
   const [isDark, setIsDark] = useState(true);
 
@@ -59,39 +167,41 @@ export default function Prices() {
             {/* 1. Free Plan */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
               <div>
-                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Free</div>
-                <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">$0 <span className="text-xs font-normal text-slate-500">/ forever</span></div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{PRICING_PLANS.free.name}</div>
+                <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">{PRICING_PLANS.free.price} <span className="text-xs font-normal text-slate-500">{PRICING_PLANS.free.period}</span></div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-                  Access to traditional games, Genkoyoshi editor, and basic community features.
+                  {PRICING_PLANS.free.description}
                 </p>
                 <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 mb-6">
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Free Traditional Games (Go, Hanafuda)</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 flex-shrink-0" /> Genkoyoshi Grid & PDF Tool</li>
+                  {PRICING_PLANS.free.features.map((feat, idx) => (
+                    <li key={idx} className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500 flex-shrink-0" /> {feat}</li>
+                  ))}
                 </ul>
               </div>
               <Link
-                to="/"
+                to={PRICING_PLANS.free.ctaLink}
                 className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all"
               >
-                Get Started Free
+                {PRICING_PLANS.free.ctaText}
               </Link>
             </div>
 
             {/* 2. Junior Years */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
               <div>
-                <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">Junior Years</div>
-                <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">$98 <span className="text-xs font-normal text-slate-500">/ year</span></div>
+                <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">{PRICING_PLANS.junior.name}</div>
+                <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">{PRICING_PLANS.junior.price} <span className="text-xs font-normal text-slate-500">{PRICING_PLANS.junior.period}</span></div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-                  Foundational modules and interactive vocabulary building for Year 7-10 students.
+                  {PRICING_PLANS.junior.description}
                 </p>
                 <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 mb-6">
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-indigo-500 flex-shrink-0" /> Year 7-10 Curriculum Support</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-indigo-500 flex-shrink-0" /> Interactive Vocab & Audio Drills</li>
+                  {PRICING_PLANS.junior.features.map((feat, idx) => (
+                    <li key={idx} className="flex items-center gap-2"><Check className="w-4 h-4 text-indigo-500 flex-shrink-0" /> {feat}</li>
+                  ))}
                 </ul>
               </div>
               <span className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 dark:bg-slate-800/60 text-slate-400 text-center cursor-not-allowed">
-                Coming Soon
+                {PRICING_PLANS.junior.ctaText}
               </span>
             </div>
 
@@ -101,24 +211,24 @@ export default function Prices() {
                 Best Value 🌟
               </div>
               <div>
-                <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-2">VCE Senior Pass</div>
-                <div className="text-3xl font-extrabold text-white mb-4">$198 <span className="text-xs font-normal text-indigo-200">/ year</span></div>
+                <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-2">{PRICING_PLANS.vceSeniorPass.name}</div>
+                <div className="text-3xl font-extrabold text-white mb-4">{PRICING_PLANS.vceSeniorPass.price} <span className="text-xs font-normal text-indigo-200">{PRICING_PLANS.vceSeniorPass.period}</span></div>
                 <p className="text-xs text-indigo-200 mb-6 leading-relaxed">
-                  All-in-one package for Year 11-12 students. Complete exam prep & unlimited coaching.
+                  {PRICING_PLANS.vceSeniorPass.description}
                 </p>
                 <ul className="space-y-2.5 text-xs text-indigo-100 mb-6">
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Full VCE Writing AI Tutor (110 Qs)</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 flex-shrink-0" /> VCE Oral Exam Audio Hub & AI Practice</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Unlimited AI Yamato Chat Coaching</li>
+                  {PRICING_PLANS.vceSeniorPass.features.map((feat, idx) => (
+                    <li key={idx} className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 flex-shrink-0" /> {feat}</li>
+                  ))}
                 </ul>
               </div>
               <a
-                href="https://vceeoywriting.jptutoraiyamato.com"
+                href={PRICING_PLANS.vceSeniorPass.ctaLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white text-center shadow-md transition-all flex items-center justify-center gap-1.5"
               >
-                <span>Select VCE Senior Pass</span>
+                <span>{PRICING_PLANS.vceSeniorPass.ctaText}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -126,21 +236,22 @@ export default function Prices() {
             {/* 4. School License */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
               <div>
-                <div className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-2">School License</div>
-                <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Custom</div>
+                <div className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-2">{PRICING_PLANS.schoolLicense.name}</div>
+                <div className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">{PRICING_PLANS.schoolLicense.price}</div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-                  Enterprise solution for Japanese language departments and classroom teachers.
+                  {PRICING_PLANS.schoolLicense.description}
                 </p>
                 <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 mb-6">
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-purple-500 flex-shrink-0" /> Multi-Student Access & Teacher Dashboard</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-purple-500 flex-shrink-0" /> Priority Support & Custom Setup</li>
+                  {PRICING_PLANS.schoolLicense.features.map((feat, idx) => (
+                    <li key={idx} className="flex items-center gap-2"><Check className="w-4 h-4 text-purple-500 flex-shrink-0" /> {feat}</li>
+                  ))}
                 </ul>
               </div>
               <a
-                href="mailto:support@jptutoraiyamato.com"
+                href={PRICING_PLANS.schoolLicense.ctaLink}
                 className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-purple-600 hover:bg-purple-500 text-white text-center transition-all"
               >
-                Contact for School
+                {PRICING_PLANS.schoolLicense.ctaText}
               </a>
             </div>
 
@@ -177,18 +288,18 @@ export default function Prices() {
                     <Mic className="w-5 h-5" />
                   </div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-                    $130 <span className="text-xs font-normal text-slate-500">/ year</span>
+                    {PRICING_PLANS.alacarteOral.price} <span className="text-xs font-normal text-slate-500">{PRICING_PLANS.alacarteOral.period}</span>
                   </div>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                  VCE Oral Exam AI Tutor Module
+                  {PRICING_PLANS.alacarteOral.name}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-                  Specialised oral exam simulation featuring Whisper speech-to-text, interactive examiner questions, and AI audio feedback.
+                  {PRICING_PLANS.alacarteOral.description}
                 </p>
               </div>
               <a
-                href="https://vceeoywriting.jptutoraiyamato.com"
+                href={PRICING_PLANS.alacarteOral.ctaLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-center transition-all flex items-center justify-center gap-1.5"
@@ -206,18 +317,18 @@ export default function Prices() {
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-                    $130 <span className="text-xs font-normal text-slate-500">/ year</span>
+                    {PRICING_PLANS.alacarteWriting.price} <span className="text-xs font-normal text-slate-500">{PRICING_PLANS.alacarteWriting.period}</span>
                   </div>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                  VCE Writing AI Tutor Module
+                  {PRICING_PLANS.alacarteWriting.name}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-                  Complete access to 110 original writing questions, handwriting photo evaluation, and detailed VCE-aligned grammar checking.
+                  {PRICING_PLANS.alacarteWriting.description}
                 </p>
               </div>
               <a
-                href="https://vceeoywriting.jptutoraiyamato.com"
+                href={PRICING_PLANS.alacarteWriting.ctaLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-center transition-all flex items-center justify-center gap-1.5"
