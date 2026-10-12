@@ -11,7 +11,7 @@ export type YamatoChatProps = {
   characterName?: string;        // チャット窓のタイトルに表示する名前
   initialGreeting?: string;      // 最初の一言メッセージ
   systemPrompt?: string;         // キャラクター固有の指示（将来の拡張用）
-  appType?: "concierge" | "writing" | "oral" | "general" | string; 
+  appType?: "concierge" | "writing" | "oral" | "general" | string;  
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -92,17 +92,21 @@ export function YamatoChat({
     if (!tutorInput.trim() || isTutorLoading) return;
 
     const userMsg = tutorInput.trim();
-    const needsVisual = requestVisualAid; // 🎨 チェック状態を保持（現在は常時falseですが将来有効化可能）
+    const needsVisual = requestVisualAid; // 🎨 チェック状態を保持
 
     setTutorInput("");
     setRequestVisualAid(false); // 送信後にチェックを自動リセット
 
-    const newMessages: ChatMessage[] = [...tutorMessages, { role: "user", content: userMsg }];
+    // 1. ユーザーのメッセージを追加し、AI用の空の応答枠をあらかじめ用意
+    const newMessages: ChatMessage[] = [
+      ...tutorMessages, 
+      { role: "user", content: userMsg },
+      { role: "assistant", content: "", imageUrl: undefined }
+    ];
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
 
     try {
-      // 🎨 チェックが入っている場合のみ、 visualPrompt を構築（将来の再開用にロジック維持）
       const visualPrompt = needsVisual
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
@@ -139,22 +143,32 @@ export function YamatoChat({
       const imageUrl = data.imageUrl;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
-      setTutorMessages([
-        ...newMessages,
-        {
+      // AIの「思考中」表示を終了
+      setIsTutorLoading(false);
+
+      // 2. 1文字ずつ滑らかに表示するタイピングアニメーション（1文字あたり15ms）
+      let currentText = "";
+      for (let i = 0; i < sanitizedReply.length; i++) {
+        currentText += sanitizedReply[i];
+        
+        const updatedMessages = [...newMessages];
+        updatedMessages[updatedMessages.length - 1] = {
           role: "assistant",
-          content: sanitizedReply,
-          imageUrl: imageUrl,
-        },
-      ]);
+          content: currentText,
+          imageUrl: i === sanitizedReply.length - 1 ? imageUrl : undefined, // 最後に画像を設定
+        };
+        setTutorMessages(updatedMessages);
+
+        await new Promise((resolve) => setTimeout(resolve, 15));
+      }
+
     } catch (err: any) {
       console.error(err);
-      setTutorMessages([
-        ...newMessages,
+      setIsTutorLoading(false);
+      setTutorMessages((prev) => [
+        ...prev.slice(0, prev.length - 1), // 空の枠を削除してエラーメッセージに置き換え
         { role: "assistant", content: `エラーが発生しました: ${err.message || "通信エラー"}` },
       ]);
-    } finally {
-      setIsTutorLoading(false);
     }
   };
 
@@ -248,7 +262,7 @@ export function YamatoChat({
                       ) : (
                         <div className="space-y-2">
                           <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                          {/* 🎨 [開発中につき一時非表示] インライン表示される生成画像（将来有効化する場合はコメントアウトを解除してください） */}
+                          {/* 🎨 [開発中につき一時非表示] インライン表示される生成画像 */}
                           {/* 
                           {msg.imageUrl && (
                             <div className="mt-2 rounded-lg overflow-hidden border border-emerald-200 bg-emerald-50/50 p-1">
@@ -277,22 +291,6 @@ export function YamatoChat({
 
               {/* 入力フォーム & 図解生成チェックボックス */}
               <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                {/* 🎨 [開発中につき一時非表示] ユーザーが明示的に図解を要求するためのチェックボックス（将来有効化する場合はコメントアウトを解除してください） */}
-                {/* 
-                <div className="flex items-center gap-2 px-1">
-                  <label className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={requestVisualAid}
-                      onChange={(e) => setRequestVisualAid(e.target.checked)}
-                      disabled={isTutorLoading}
-                      className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
-                    />
-                    <span>🎨 explain with diagrams and illustrations</span>
-                  </label>
-                </div>
-                */}
-
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -315,32 +313,6 @@ export function YamatoChat({
           </div>
         )}
       </aside>
-
-      {/* 🔍 [開発中につき一時非表示] 画像拡大表示用モーダル（Lightbox） */}
-      {/* 
-      {modalImageSrc && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
-          onClick={() => setModalImageSrc(null)}
-        >
-          <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-2xl p-2 shadow-2xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={() => setModalImageSrc(null)}
-              className="absolute top-3 right-3 bg-slate-800/70 hover:bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition cursor-pointer z-10"
-            >
-              ✕
-            </button>
-            <img
-              src={modalImageSrc}
-              alt="Enlarged AI Yamato Visual"
-              className="max-w-full max-h-[80vh] rounded-lg object-contain"
-            />
-            <p className="text-xs text-slate-600 mt-2 font-medium">✨ ヤマト特製図解・イラスト（拡大表示）</p>
-          </div>
-        </div>
-      )}
-      */}
     </>
   );
 }
