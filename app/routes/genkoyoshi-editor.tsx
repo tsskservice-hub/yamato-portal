@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import { Header } from "../components/header";
+import { Footer } from "../components/Footer";
 
 type Item =
   | { type: "num"; value: string }
@@ -266,7 +267,7 @@ export default function GenkoyoshiEditor() {
   };
 
   return (
-    <div className="genko-editor-root">
+    <div className="genko-editor-root flex flex-col min-h-screen">
       <style>{`
         :root {
           --cell-size: 41px;
@@ -279,7 +280,6 @@ export default function GenkoyoshiEditor() {
           padding: 20px;
           background-color: #f4f6f9;
           color: #333;
-          min-height: 100vh;
           position: relative;
         }
 
@@ -401,7 +401,7 @@ export default function GenkoyoshiEditor() {
           border: 1px solid #999;
           box-sizing: border-box;
           display: flex;
-          align-items: flex-end;     
+          align-items: flex-end;    
           justify-content: center;   
           padding-bottom: 2mm;        
           font-size: 1.35rem;         
@@ -464,6 +464,7 @@ export default function GenkoyoshiEditor() {
             padding: 0 !important;
           }
           header,
+          footer,
           .genko-editor-pane,
           .genko-btn-container,
           aside {
@@ -488,105 +489,107 @@ export default function GenkoyoshiEditor() {
       {/* ヘルパータイトルを Genkoyoshi Editor に指定 */}
       <Header title="Genkoyoshi Editor" />
 
-      <div className="genko-container mt-6">
-        <div className="genko-editor-pane">
-          <div className="genko-control-group">
-            <label htmlFor="format">用紙フォーマット</label>
-            <select
-              id="format"
-              value={format}
-              onChange={(e) => setFormat(e.target.value)}
-            >
-              <option value="400">400字詰め（20字×20行）</option>
-              <option value="200">200字詰め（20字×10行）</option>
-            </select>
+      <main className="flex-grow">
+        <div className="genko-container mt-6">
+          <div className="genko-editor-pane">
+            <div className="genko-control-group">
+              <label htmlFor="format">用紙フォーマット</label>
+              <select
+                id="format"
+                value={format}
+                onChange={(e) => setFormat(e.target.value)}
+              >
+                <option value="400">400字詰め（20字×20行）</option>
+                <option value="200">200字詰め（20字×10行）</option>
+              </select>
+            </div>
+
+            <div className="genko-control-group">
+              <label htmlFor="titleInput">題名（タイトル）</label>
+              <input
+                type="text"
+                id="titleInput"
+                placeholder="例：日本のアニメについて"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="genko-control-group">
+              <label htmlFor="nameInput">氏名</label>
+              <input
+                type="text"
+                id="nameInput"
+                placeholder="例：山田 太郎"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="genko-control-group">
+              <label htmlFor="textInput">本文</label>
+              <textarea
+                id="textInput"
+                placeholder="ここに文を書いてください。"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+            </div>
+
+            <div className="genko-stats">文字数: {charCount}字</div>
+
+            <div className="genko-btn-container">
+              <button className="genko-btn-print" onClick={handlePrint}>
+                印刷する / PDF保存
+              </button>
+              <button className="genko-btn-clear" onClick={clearAll}>
+                消す
+              </button>
+            </div>
           </div>
 
-          <div className="genko-control-group">
-            <label htmlFor="titleInput">題名（タイトル）</label>
-            <input
-              type="text"
-              id="titleInput"
-              placeholder="例：日本のアニメについて"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-
-          <div className="genko-control-group">
-            <label htmlFor="nameInput">氏名</label>
-            <input
-              type="text"
-              id="nameInput"
-              placeholder="例：山田 太郎"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div className="genko-control-group">
-            <label htmlFor="textInput">本文</label>
-            <textarea
-              id="textInput"
-              placeholder="ここに文を書いてください。"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-          </div>
-
-          <div className="genko-stats">文字数: {charCount}字</div>
-
-          <div className="genko-btn-container">
-            <button className="genko-btn-print" onClick={handlePrint}>
-              印刷する / PDF保存
-            </button>
-            <button className="genko-btn-clear" onClick={clearAll}>
-              消す
-            </button>
-          </div>
-        </div>
-
-        <div className="genko-preview-pane">
-          <div>
-            {isClient &&
-              pages.map((pageRows, pageIdx) => (
-                <div key={pageIdx} className="genko-sheet">
-                  <div className="genko-grid">
-                    {pageRows.map((rowItems, rowIdx) => (
-                      <div key={rowIdx} className="genko-row">
-                        {rowItems.map((item, colIdx) => {
-                          if (item.type === "co") {
-                            return (
-                              <div key={colIdx} className="genko-cell co-cell">
-                                <div className="co-wrapper">
-                                  <span className="co-main">{item.main}</span>
-                                  <span className="co-sub">{item.sub}</span>
+          <div className="genko-preview-pane">
+            <div>
+              {isClient &&
+                pages.map((pageRows, pageIdx) => (
+                  <div key={pageIdx} className="genko-sheet">
+                    <div className="genko-grid">
+                      {pageRows.map((rowItems, rowIdx) => (
+                        <div key={rowIdx} className="genko-row">
+                          {rowItems.map((item, colIdx) => {
+                            if (item.type === "co") {
+                              return (
+                                <div key={colIdx} className="genko-cell co-cell">
+                                  <div className="co-wrapper">
+                                    <span className="co-main">{item.main}</span>
+                                    <span className="co-sub">{item.sub}</span>
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          } else if (item.type === "num") {
-                            return (
-                              <div key={colIdx} className="genko-cell num-cell">
-                                <span className="num-pair">{item.value}</span>
-                              </div>
-                            );
-                          } else if (item.type === "char") {
-                            return (
-                              <div key={colIdx} className="genko-cell">
-                                {item.value}
-                              </div>
-                            );
-                          }
-                          return <div key={colIdx} className="genko-cell"></div>;
-                        })}
-                      </div>
-                    ))}
+                              );
+                            } else if (item.type === "num") {
+                              return (
+                                <div key={colIdx} className="genko-cell num-cell">
+                                  <span className="num-pair">{item.value}</span>
+                                </div>
+                              );
+                            } else if (item.type === "char") {
+                              return (
+                                <div key={colIdx} className="genko-cell">
+                                  {item.value}
+                                </div>
+                              );
+                            }
+                            return <div key={colIdx} className="genko-cell"></div>;
+                          })}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+            </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* 🤖 右下常駐・折りたたみ式 AIチューター常駐窓 */}
       <aside aria-label="AI Tutor" className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
@@ -700,6 +703,9 @@ export default function GenkoyoshiEditor() {
           </div>
         )}
       </aside>
+
+      {/* 共通フッターコンポーネント */}
+      <Footer />
     </div>
   );
 }

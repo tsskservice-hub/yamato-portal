@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "@remix-run/react";
 import { Sparkles, ArrowRight, ShieldCheck, Check, ShoppingBag, GraduationCap, Mic, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
 import { Header } from "../components/header";
+import { Footer } from "../components/Footer";
 
 // ----------------------------------------------------------------------
 // 添付画像の価格表およびクレジットパック仕様に完全に準拠した一元管理データ
@@ -11,11 +12,11 @@ export const PRICING_PLANS = {
     name: "FREE PLAN",
     price: "$0",
     period: "/ forever",
-    badge: "Daily 5 Credits (Promo: 2 + 3 Free)",
-    description: "Recharged daily upon login. Enjoy basic chat, traditional games, and Genkoyoshi editor tools.",
+    badge: "Daily Quiz Credits (Promo: 4 Credits until Oct 29)",
+    description: "Log in daily and answer Japanese quizzes correctly to earn credits. Valid for 7 days.",
     features: [
-      "Daily Login Credits",
-      "Free Traditional Games & Tools",
+      "Daily Quiz & Login Credits",
+      "Genkoyoshi Editor & Basic Tools",
     ],
     ctaText: "Get Started Free",
     ctaLink: "/",
@@ -152,12 +153,14 @@ export default function Prices() {
                   ))}
                 </ul>
               </div>
-              <Link
-                to={PRICING_PLANS.free.ctaLink}
-                className="mt-6 w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all"
-              >
-                {PRICING_PLANS.free.ctaText}
-              </Link>
+              <div className="mt-6 space-y-3">
+                <Link
+                  to={PRICING_PLANS.free.ctaLink}
+                  className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all block"
+                >
+                  {PRICING_PLANS.free.ctaText}
+                </Link>
+              </div>
             </div>
 
             {/* Starter Pack */}
@@ -178,12 +181,17 @@ export default function Prices() {
                   ))}
                 </ul>
               </div>
-              <a
-                href="#checkout"
-                className="mt-6 w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5"
-              >
-                <span>Buy Starter Pack</span>
-              </a>
+              <div className="mt-6 space-y-3">
+                <a
+                  href="#checkout"
+                  className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>Buy Starter Pack</span>
+                </a>
+                <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                  By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                </p>
+              </div>
             </div>
 
             {/* Standard Pack (Most Popular) */}
@@ -207,12 +215,17 @@ export default function Prices() {
                   ))}
                 </ul>
               </div>
-              <a
-                href="#checkout"
-                className="mt-6 w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5"
-              >
-                <span>Buy Standard Pack</span>
-              </a>
+              <div className="mt-6 space-y-3">
+                <a
+                  href="#checkout"
+                  className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>Buy Standard Pack</span>
+                </a>
+                <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                  By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                </p>
+              </div>
             </div>
 
             {/* Pro Intensivist */}
@@ -233,12 +246,17 @@ export default function Prices() {
                   ))}
                 </ul>
               </div>
-              <a
-                href="#checkout"
-                className="mt-6 w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5"
-              >
-                <span>Buy Pro Pack</span>
-              </a>
+              <div className="mt-6 space-y-3">
+                <a
+                  href="#checkout"
+                  className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>Buy Pro Pack</span>
+                </a>
+                <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                  By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                </p>
+              </div>
             </div>
 
           </div>
@@ -251,7 +269,7 @@ export default function Prices() {
             >
               <div className="flex items-center space-x-2">
                 <SlidersHorizontal className="w-4 h-4 text-blue-600" />
-                <span>View Detailed Plan Specs & Study Volume Estimates (プラン詳細スペック・学習量比較)</span>
+                <span>View Detailed Plan Specs & Study Volume Estimates</span>
               </div>
               {isSpecsOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
@@ -271,10 +289,10 @@ export default function Prices() {
                     <div>
                       <div className="font-bold text-slate-700 dark:text-slate-300 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Free Plan</div>
                       <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                        <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 5 daily</li>
+                        <li><strong className="text-slate-900 dark:text-white">Daily Earnings:</strong> 4 Credits (Promo until Oct 29, normally 2)</li>
                         <li><strong className="text-slate-900 dark:text-white">Cost per Credit:</strong> Free</li>
                         <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~0.2 sessions / day</li>
-                        <li><strong className="text-slate-900 dark:text-white">Base Expiry:</strong> Daily reset</li>
+                        <li><strong className="text-slate-900 dark:text-white">Credit Expiry:</strong> 7 days</li>
                         <li><strong className="text-slate-900 dark:text-white">Feature Access:</strong> Full AI Chat & Tools</li>
                       </ul>
                     </div>
@@ -333,15 +351,8 @@ export default function Prices() {
 
       </main>
 
-      <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-slate-100 dark:bg-slate-950 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} JP Tutor AI Yamato. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 sm:mt-0">
-            <Link to="/" className="hover:text-slate-700 dark:hover:text-slate-400 transition-colors">Home</Link>
-            <span className="hover:text-slate-700 dark:hover:text-slate-400 transition-colors">Powered by AI Yamato</span>
-          </div>
-        </div>
-      </footer>
+      {/* 統合した共通フッターコンポーネント */}
+      <Footer />
     </div>
   );
 }

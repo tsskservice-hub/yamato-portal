@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
+import { Footer } from '../components/Footer';
 
 // 💡 prices.tsx 側からエクスポートされた PRICING_PLANS をインポートして完全に同期・連動します
 import { PRICING_PLANS } from './prices';
@@ -555,14 +556,19 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-            <button 
-              onClick={() => handleCheckout(STRIPE_PRICES.starter)} 
-              disabled={checkoutLoadingPriceId === STRIPE_PRICES.starter}
-              className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-            >
-              {checkoutLoadingPriceId === STRIPE_PRICES.starter && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              <span>Buy Starter Pack</span>
-            </button>
+            <div className="mt-6 space-y-3">
+              <button 
+                onClick={() => handleCheckout(STRIPE_PRICES.starter)} 
+                disabled={checkoutLoadingPriceId === STRIPE_PRICES.starter}
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+              >
+                {checkoutLoadingPriceId === STRIPE_PRICES.starter && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Buy Starter Pack</span>
+              </button>
+              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+              </p>
+            </div>
           </div>
 
           {/* Standard Pack */}
@@ -586,14 +592,19 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-            <button 
-              onClick={() => handleCheckout(STRIPE_PRICES.standard)} 
-              disabled={checkoutLoadingPriceId === STRIPE_PRICES.standard}
-              className="mt-6 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-            >
-              {checkoutLoadingPriceId === STRIPE_PRICES.standard && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              <span>Buy Standard Pack</span>
-            </button>
+            <div className="mt-6 space-y-3">
+              <button 
+                onClick={() => handleCheckout(STRIPE_PRICES.standard)} 
+                disabled={checkoutLoadingPriceId === STRIPE_PRICES.standard}
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+              >
+                {checkoutLoadingPriceId === STRIPE_PRICES.standard && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Buy Standard Pack</span>
+              </button>
+              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+              </p>
+            </div>
           </div>
 
           {/* Pro Intensivist */}
@@ -614,14 +625,19 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-            <button 
-              onClick={() => handleCheckout(STRIPE_PRICES.pro)} 
-              disabled={checkoutLoadingPriceId === STRIPE_PRICES.pro}
-              className="mt-6 w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-            >
-              {checkoutLoadingPriceId === STRIPE_PRICES.pro && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              <span>Buy Pro Pack</span>
-            </button>
+            <div className="mt-6 space-y-3">
+              <button 
+                onClick={() => handleCheckout(STRIPE_PRICES.pro)} 
+                disabled={checkoutLoadingPriceId === STRIPE_PRICES.pro}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+              >
+                {checkoutLoadingPriceId === STRIPE_PRICES.pro && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Buy Pro Pack</span>
+              </button>
+              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -1049,10 +1065,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className={`border-t py-8 text-center text-xs text-slate-500 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-        <p>© 2026 JP Tutor AI Yamato. All rights reserved.</p>
-      </footer>
+      {/* 統合した共通フッターコンポーネント */}
+      <Footer />
     </div>
   );
 }
