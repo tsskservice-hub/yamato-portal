@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from '@remix-run/react';
-import { Coins, User } from 'lucide-react';
+import { Coins, User, Key, UserPlus } from 'lucide-react';
 
 type HeaderProps = {
   title?: string;
@@ -27,6 +27,24 @@ export default function Header({ title = "AI Yamato Japanese Hub" }: HeaderProps
           <div className="hidden sm:flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700">
             <Coins className="w-4 h-4 text-amber-500" />
             <span>Credits: <strong className="text-slate-900">120 pts</strong></span>
+          </div>
+
+          {/* パスキー認証ログイン・新規登録ボタン */}
+          <div className="flex items-center space-x-2">
+            <Link
+              to="/login"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            >
+              <Key className="w-4 h-4 text-slate-600" />
+              <span>Passkey Login</span>
+            </Link>
+            <Link
+              to="/signup"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors"
+            >
+              <UserPlus className="w-4 h-4 text-indigo-100" />
+              <span>Sign Up</span>
+            </Link>
           </div>
 
           {/* ユーザープロフィール */}
