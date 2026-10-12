@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Form, useNavigation, useActionData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { createServerSupabaseClient } from "~/lib/supabase.server";
+import { createServerSupabaseClient } from "../lib/supabase.server";
 
 // Loader: すでにログイン済みの場合はアカウント設定ページへリダイレクト
 export async function loader({ request, context }: LoaderFunctionArgs) {
