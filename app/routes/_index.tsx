@@ -24,8 +24,7 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
 
-// 💡 prices.tsx 側から価格データやプラン定義（PRICING_PLANS）をインポートして連動させます
-// （※もし prices.tsx 側に export const PRICING_PLANS が定義されている前提のインポート例です）
+// 💡 prices.tsx 側からエクスポートされた PRICING_PLANS をインポートして完全に同期・連動します
 import { PRICING_PLANS } from './prices';
 
 export const STRIPE_PRICES = {
@@ -498,7 +497,7 @@ export default function Home() {
           </div>
         </section>
 
-      {/* 3. Pricing & Credit Packs (prices.tsx からインポートした PRICING_PLANS を使用して完全に同期) */}
+      {/* 3. Pricing & Credit Packs (prices.tsx からインポートした PRICING_PLANS を使用) */}
       <section className="space-y-12 text-center">
         <div className="space-y-4 max-w-3xl mx-auto">
           <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
@@ -521,7 +520,7 @@ export default function Home() {
                 <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.free.period}</span>
               </div>
               <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                Daily 5 Credits <span className="text-[10px] text-orange-500 font-normal">(Promo: 2 + 3 Free)</span>
+                {PRICING_PLANS.free.badge}
               </div>
               <p className="text-xs text-slate-500">{PRICING_PLANS.free.description}</p>
               <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -546,8 +545,8 @@ export default function Home() {
                 <span className="text-4xl font-black">{PRICING_PLANS.starter.price}</span>
                 <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.starter.period}</span>
               </div>
-              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                2,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">1,000</span> <span className="text-[10px] text-orange-500 font-bold">(1,000 unexpired + 1,000 bonus until Oct 29)</span>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                {PRICING_PLANS.starter.badge}
               </div>
               <p className="text-xs text-slate-500">{PRICING_PLANS.starter.description}</p>
               <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -577,8 +576,8 @@ export default function Home() {
                 <span className="text-4xl font-black">{PRICING_PLANS.standard.price}</span>
                 <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.standard.period}</span>
               </div>
-              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                5,600 Credits <span className="text-[10px] text-slate-400 line-through font-normal">2,800</span> <span className="text-[10px] text-orange-500 font-bold">(2,800 unexpired + 2,800 bonus until Oct 29)</span>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                {PRICING_PLANS.standard.badge}
               </div>
               <p className="text-xs text-slate-500">{PRICING_PLANS.standard.description}</p>
               <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -605,8 +604,8 @@ export default function Home() {
                 <span className="text-4xl font-black">{PRICING_PLANS.pro.price}</span>
                 <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.pro.period}</span>
               </div>
-              <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold">
-                12,000 Credits <span className="text-[10px] text-slate-400 line-through font-normal">6,000</span> <span className="text-[10px] text-orange-500 font-bold">(6,000 unexpired + 6,000 bonus until Oct 29)</span>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
+                {PRICING_PLANS.pro.badge}
               </div>
               <p className="text-xs text-slate-500">{PRICING_PLANS.pro.description}</p>
               <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
