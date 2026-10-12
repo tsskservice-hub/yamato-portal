@@ -2,19 +2,18 @@ import { useState } from "react";
 import { Form, useNavigation, useActionData, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-// 実際のファイルパスに合わせてインポート（必要に応じて有効化してください）
-// import { createServerSupabaseClient, createAdminSupabaseClient } from "~/lib/supabase.server";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
 
-// Loader: Fetch logged-in user details
+// Loader: ログイン中のユーザー情報を実際のSupabaseから取得
 export async function loader({ request }: LoaderFunctionArgs) {
-  /*
   const { supabase, headers } = createServerSupabaseClient(request);
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return redirect("/login");
+    return redirect("/login", { headers });
   }
 
+  // profiles テーブルなどからプランやクレジット情報を取得（必要に応じてテーブル名やカラム名を合わせてください）
   const { data: profile } = await supabase
     .from("profiles")
     .select("credits, plan")
@@ -27,18 +26,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     credits: profile?.credits || 0,
     createdAt: user.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
   }, { headers });
-  */
-
-  // Dummy return values
-  return json({
-    email: "user@example.com",
-    plan: "VCE Japanese Pro",
-    credits: 120,
-    createdAt: "15 August 2026",
-  });
 }
 
-// Action: Account deletion handler
+// Action: アカウントの完全削除処理
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -49,14 +39,14 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
     }
 
-    /*
-    const { supabase } = createServerSupabaseClient(request);
+    const { supabase, headers } = createServerSupabaseClient(request);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
     }
 
+    // 特権権限（Service Role）を用いて auth.users から完全に削除
     const supabaseAdmin = createAdminSupabaseClient();
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
@@ -64,14 +54,13 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
     }
 
+    // 削除成功時はセッションCookieをクリアしてトップへリダイレクト
     return redirect("/", {
       headers: {
+        ...Object.fromEntries(headers.entries()),
         "Set-Cookie": "sb-access-token=; Max-Age=0; path=/",
       },
     });
-    */
-
-    return redirect("/");
   }
 
   return json({ success: true, error: null });
@@ -94,7 +83,7 @@ export default function AccountSettingsRoute() {
         </p>
       </div>
 
-      {/* 1. General Account Information Section */}
+      {/* 1. 総合的なアカウント情報セクション */}
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-6">
         <h2 className="text-lg font-semibold text-gray-900 border-b pb-3">Registration Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
@@ -117,7 +106,7 @@ export default function AccountSettingsRoute() {
         </div>
       </div>
 
-      {/* 2. Danger Zone (Account Deletion Section) */}
+      {/* 2. 危険なエリア（アカウント削除セクション） */}
       <div className="bg-white border border-red-200 rounded-lg shadow-sm p-6 space-y-4">
         <div className="border-b border-red-100 pb-4">
           <h2 className="text-lg font-semibold text-red-600">Delete Account</h2>
@@ -137,7 +126,7 @@ export default function AccountSettingsRoute() {
         </div>
       </div>
 
-      {/* Deletion Confirmation Modal */}
+      {/* 削除確認モーダル */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-6">
