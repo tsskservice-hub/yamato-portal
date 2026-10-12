@@ -28,9 +28,12 @@ import PageLayout from '../components/PageLayout';
 // 💡 prices.tsx 側からエクスポートされた PRICING_PLANS をインポートして完全に同期・連動します
 import { PRICING_PLANS } from './prices';
 
+// 💡 外部ファイルからクイズデータとヘルパー関数をインポート
+import { getTodayQuiz, QuizItem } from '../data/quizzes';
+
 export const STRIPE_PRICES = {
   starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // 実際のStripe Price ID
-  standard: 'price_1xxxx_standard',         // 必要に応じてStripeの正しいIDに変更してください
+  standard: 'price_1xxxx_standard',          // 必要に応じてStripeの正しいIDに変更してください
   pro: 'price_1xxxx_pro',                    // 必要に応じてStripeの正しいIDに変更してください
 };
 
@@ -78,6 +81,14 @@ export default function Home() {
   const [emailInput, setEmailInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // 💡 Daily Quiz States
+  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+  const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+  const [isQuizCorrect, setIsQuizCorrect] = useState(false);
+  const currentQuiz: QuizItem = getTodayQuiz();
 
   // Auto demo typing states for hero section
   const [currentStep, setCurrentStep] = useState(0);
@@ -247,33 +258,71 @@ export default function Home() {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserCredits = async (userId: string) => {
+  const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, last_quiz_date')
         .eq('id', userId)
         .single();
+      
       if (data && !error) {
-        const typedData = data as { credits?: number };
+        const typedData = data as { credits?: number; last_quiz_date?: string };
         setCredits(typedData.credits ?? 10);
+
+        // 本日のクイズをすでに解いているかチェック
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (typedData.last_quiz_date === todayStr) {
+          setHasCompletedTodayQuiz(true);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch credits:', err);
+      console.error('Failed to fetch user data:', err);
+    }
+  };
+
+  // 💡 デイリークイズ解答処理
+  const handleAnswerQuiz = async (selectedIndex: number) => {
+    if (isAnswerSubmitted || !user) return;
+    setSelectedOption(selectedIndex);
+    setIsAnswerSubmitted(true);
+
+    const correct = selectedIndex === currentQuiz.answer;
+    setIsQuizCorrect(correct);
+
+    if (correct) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const newCredits = credits + 2;
+
+      // Supabaseのクレジットと last_quiz_date を更新
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          credits: newCredits,
+          last_quiz_date: todayStr 
+        })
+        .eq('id', user.id);
+
+      if (!error) {
+        setCredits(newCredits);
+        setHasCompletedTodayQuiz(true);
+      } else {
+        console.error('Failed to update quiz credit rewards:', error);
+      }
     }
   };
 
@@ -353,7 +402,7 @@ export default function Home() {
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-           
+            
           {/* 2. Hero Section with YamatoChat-style Auto Demo */}
           <section className="text-center space-y-6 max-w-4xl mx-auto">
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
@@ -371,6 +420,48 @@ export default function Home() {
             <p className={`text-base sm:text-lg max-w-2xl mx-auto ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
               Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
             </p>
+
+            {/* 💡 ログインユーザー向け：本日のデイリークイズバナー */}
+            {user && (
+              <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                    🧠
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 px-2 py-0.5 rounded bg-emerald-500/10">Daily Challenge</span>
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">+2 Credits</span>
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">本日の日本語・日本文化クイズ</h3>
+                    <p className="text-xs text-slate-500">
+                      {hasCompletedTodayQuiz 
+                        ? "本日のクイズはクリア済みです！明日また挑戦してね✨" 
+                        : "1問正解して【2クレジット】をゲットしよう！（1日1回限定）"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    // モーダルを開くときに解答状態を初期化（未挑戦ならリセット）
+                    if (!hasCompletedTodayQuiz) {
+                      setSelectedOption(null);
+                      setIsAnswerSubmitted(false);
+                      setIsQuizCorrect(false);
+                    }
+                    setIsQuizModalOpen(true);
+                  }}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
+                    hasCompletedTodayQuiz 
+                      ? "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300" 
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+                  }`}
+                >
+                  <span>{hasCompletedTodayQuiz ? "クイズ結果・解説を見る" : "今日のクイズに挑戦する"}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
 
             <div className={`mt-8 p-5 sm:p-6 rounded-2xl border-2 border-emerald-300 shadow-2xl backdrop-blur-sm text-left ${isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white'}`}>
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
@@ -437,7 +528,7 @@ export default function Home() {
           <div className="space-y-4 max-w-3xl mx-auto">
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
-             
+              
             {/* Limited Time Campaign Banner */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
               <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-bounce" />
@@ -895,6 +986,91 @@ export default function Home() {
           </div>
         )}
       </aside>
+
+        {/* 💡 デイリークイズ回答用モーダル */}
+        {isQuizModalOpen && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setIsQuizModalOpen(false)}
+          >
+            <div 
+              className={`w-full max-w-lg rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setIsQuizModalOpen(false)}
+                className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-emerald-500/30">
+                    🧠
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 px-2 py-0.5 rounded bg-emerald-500/10">Daily Challenge (+2 Credits)</span>
+                    <h3 className="text-lg font-extrabold tracking-tight">本日の日本語・日本文化クイズ</h3>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-left">
+                  <p className="text-sm font-semibold leading-relaxed">{currentQuiz.question}</p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {currentQuiz.options.map((option, idx) => {
+                    let btnStyle = "border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20";
+                    if (isAnswerSubmitted || hasCompletedTodayQuiz) {
+                      if (idx === currentQuiz.answer) {
+                        btnStyle = "bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold";
+                      } else if (idx === selectedOption) {
+                        btnStyle = "bg-red-500/10 border-red-500 text-red-600";
+                      } else {
+                        btnStyle = "opacity-50 border-slate-200 dark:border-slate-700";
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={idx}
+                        disabled={isAnswerSubmitted || hasCompletedTodayQuiz}
+                        onClick={() => handleAnswerQuiz(idx)}
+                        className={`w-full p-3.5 rounded-xl border text-xs sm:text-sm text-left transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
+                      >
+                        <span>{option}</span>
+                        {(isAnswerSubmitted || hasCompletedTodayQuiz) && idx === currentQuiz.answer && <Check className="w-4 h-4 text-emerald-600" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {(isAnswerSubmitted || hasCompletedTodayQuiz) && (
+                  <div className={`p-4 rounded-2xl border text-xs space-y-2 text-left ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-200' : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200'}`}>
+                    <p className="font-bold">
+                      {hasCompletedTodayQuiz && !isAnswerSubmitted 
+                        ? "✨ 本日のクイズはすでにクリア済みです！（獲得済みクレジット: +2）" 
+                        : isQuizCorrect 
+                        ? "🎉 正解です！ 2クレジット獲得しました！" 
+                        : "💪 残念！不正解です。また明日挑戦してね！"}
+                    </p>
+                    <p className="leading-relaxed text-slate-600 dark:text-slate-300">{currentQuiz.explanation}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => setIsQuizModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-bold transition cursor-pointer"
+                  >
+                    閉じる
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 画像拡大表示用モーダル（Lightbox） */}
         {modalImageSrc && (
