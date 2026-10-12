@@ -28,7 +28,7 @@ export async function onRequestPost(context: {
   try {
     const payload = await request.text();
 
-    // ★ テスト用ヘッダー（x-test-mode: true）がある場合は署名検証をスキップして直接データをパース
+    // ★ テスト用ヘッダー（x-test-mode: true）がある場合は署名検証をスキップ
     if (isTestBypass) {
       const testData = JSON.parse(payload);
       userId = testData.userId;
@@ -37,25 +37,39 @@ export async function onRequestPost(context: {
     } else {
       // 通常のStripe Webhook処理
       if (!signature || !webhookSecret) {
+        console.error("Missing signature or webhook secret");
         return new Response(
           JSON.stringify({ error: "Missing signature or webhook secret" }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
       }
 
-      // ★ Cloudflare環境では非同期版の constructEventAsync を使用する
+      // 署名検証とイベントの構築
       const event = await stripe.webhooks.constructEventAsync(payload, signature, webhookSecret);
+      console.log(`Stripe Event Received: ${event.type}`);
 
-      if (event.type === "checkout.session.completed") {
+      // checkout.session.completed または async_payment_succeeded を処理対象にする
+      if (
+        event.type === "checkout.session.completed" ||
+        event.type === "checkout.session.async_payment_succeeded"
+      ) {
         const session = event.data.object as Stripe.Checkout.Session;
         userId = session.metadata?.supabase_user_id;
         creditsToAdd = Number(session.metadata?.credits || 0);
         sessionId = session.id;
         amountPaid = session.amount_total || 1000;
+
+        console.log(`Parsed Session Metadata - userId: ${userId}, credits: ${creditsToAdd}, amount: ${amountPaid}`);
+      } else {
+        // 対象外のイベントはそのまま200を返す
+        return new Response(JSON.stringify({ received: true, ignored: event.type }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
       }
     }
 
-    // 共通のSupabase更新処理
+    // Supabaseの更新処理
     if (userId && creditsToAdd > 0) {
       const supabaseAdmin = createClient(
         env.SUPABASE_URL,
@@ -69,17 +83,26 @@ export async function onRequestPost(context: {
       });
 
       if (rpcError) {
-        const { data: profile } = await supabaseAdmin
+        console.warn("RPC increment_credits failed, falling back to direct update:", rpcError.message);
+        const { data: profile, error: fetchError } = await supabaseAdmin
           .from("profiles")
           .select("credits")
           .eq("id", userId)
           .single();
 
+        if (fetchError) {
+          console.error("Failed to fetch profile for user:", userId, fetchError.message);
+        }
+
         const currentCredits = profile?.credits || 0;
-        await supabaseAdmin
+        const { error: updateError } = await supabaseAdmin
           .from("profiles")
           .update({ credits: currentCredits + creditsToAdd })
           .eq("id", userId);
+
+        if (updateError) {
+          console.error("Failed to update credits directly:", updateError.message);
+        }
       }
 
       // 2. purchases テーブルへの購入履歴の保存処理
@@ -92,7 +115,11 @@ export async function onRequestPost(context: {
 
       if (purchaseError) {
         console.error("Failed to insert purchase record:", purchaseError.message);
+      } else {
+        console.log(`Successfully recorded purchase for user ${userId} with ${creditsToAdd} credits.`);
       }
+    } else {
+      console.warn("Webhook processed, but userId was missing or creditsToAdd was 0. userId:", userId, "credits:", creditsToAdd);
     }
 
     return new Response(JSON.stringify({ received: true, testMode: isTestBypass }), {
