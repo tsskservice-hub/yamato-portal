@@ -13,8 +13,8 @@ export default function Footer() {
             &copy; {currentYear} AI Yamato. All rights reserved. Designed for VCE Japanese learners.
           </div>
 
-          {/* Legal and Support Links */}
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-600">
+          {/* Legal and Support Links (右下常駐AIとかぶらないよう右側にマージンを追加して左に寄せる) */}
+          <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm text-slate-600 mr-0 md:mr-28">
             <Link
               to="/terms"
               className="hover:text-indigo-600 transition-colors"
