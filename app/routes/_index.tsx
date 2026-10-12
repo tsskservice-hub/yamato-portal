@@ -247,32 +247,8 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [displayedUserText, displayedYamatoText, isTypingYamato, currentStep]);
 
-  // Auth and session handling
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    if (queryParams.get('success') === 'true') {
-      alert('Payment successful! Your credits have been updated.');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchUserData = async (userId: string) => {
+  // クレジット取得関数
+  const fetchUserCredits = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -294,6 +270,38 @@ export default function Home() {
       console.error('Failed to fetch user data:', err);
     }
   };
+
+  // Auth and session handling
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 2. 決済成功リダイレクトの検知 & クレジット再取得
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.get('success') === 'true') {
+      alert('決済が完了しました！クレジットが反映されました。');
+      if (user) {
+        fetchUserCredits(user.id); // Supabaseから最新残高を再取得
+      }
+      // URLからクエリパラメータを削除
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [user]);
 
   // 💡 Daily Quiz Answer Handler
   const handleAnswerQuiz = async (selectedIndex: number) => {
@@ -362,8 +370,10 @@ export default function Home() {
     setIsAuthModalOpen(true);
   };
 
+  // 1. 購入ボタン押下処理
   const handleCheckout = async (priceId: string) => {
     if (!user) {
+      alert("ログインが必要です");
       setAuthMode('signup');
       setIsAuthModalOpen(true);
       return;
@@ -372,25 +382,20 @@ export default function Home() {
     try {
       setCheckoutLoadingPriceId(priceId);
 
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: priceId,
-          userId: user.id,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, userId: user.id })
       });
 
-      const data = (await response.json()) as any;
+      const data = await response.json() as any;
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create checkout session');
       }
 
       if (data.url) {
-        window.location.href = data.url;
+        window.location.href = data.url; // Stripeチェックアウトへリダイレクト
       } else {
         throw new Error('No checkout URL returned from server.');
       }
@@ -412,7 +417,7 @@ export default function Home() {
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-            
+             
           {/* 2. Hero Section with YamatoChat-style Auto Demo */}
           <section className="text-center space-y-6 max-w-4xl mx-auto">
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
@@ -537,7 +542,7 @@ export default function Home() {
           <div className="space-y-4 max-w-3xl mx-auto">
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
-              
+               
             {/* Limited Time Campaign Banner */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
               <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-bounce" />
