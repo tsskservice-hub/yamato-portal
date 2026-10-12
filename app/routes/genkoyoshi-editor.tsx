@@ -16,7 +16,7 @@ type Item =
   | { type: "char"; value: string }
   | { type: "co"; main: string; sub: string };
 
-// ページトップへ戻るボタン（右上固定に変更）
+// ページトップへ戻るボタン（右下のフローティングエリアに統合）
 function ScrollTopButton() {
   const [visible, setVisible] = useState(false);
 
@@ -41,10 +41,10 @@ function ScrollTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed top-6 right-6 z-40 bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-full shadow-lg transition cursor-pointer text-xs font-bold"
+      className="bg-slate-800 hover:bg-slate-700 text-white w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center"
       title="ページトップへ戻る"
     >
-      ▲ Top
+      ▲
     </button>
   );
 }
@@ -578,9 +578,6 @@ export default function GenkoyoshiEditor() {
           }
         `}</style>
 
-        {/* 🚀 ページ右上固定の上戻りボタン */}
-        <ScrollTopButton />
-
         <div className="genko-container mt-6">
           <div className="genko-editor-pane">
             <div className="genko-control-group">
@@ -681,8 +678,10 @@ export default function GenkoyoshiEditor() {
           </div>
         </div>
 
-        {/* 🤖 右下常駐・折りたたみ式 AIチューター常駐窓 */}
-        <aside aria-label="AI Tutor" className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        {/* 🤖 右下常駐・上戻りボタン & AIチューター常駐窓の統合エリア */}
+        <aside aria-label="AI Tutor and Scroll" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+          <ScrollTopButton />
+
           {!isAiTutorOpen ? (
             <button
               type="button"
