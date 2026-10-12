@@ -5,7 +5,7 @@ import { json, redirect } from "@remix-run/node";
 // 実際のファイルパスに合わせてインポート（必要に応じて有効化してください）
 // import { createServerSupabaseClient, createAdminSupabaseClient } from "~/lib/supabase.server";
 
-// ローダー：ログイン中のユーザー情報を取得
+// Loader: Fetch logged-in user details
 export async function loader({ request }: LoaderFunctionArgs) {
   /*
   const { supabase, headers } = createServerSupabaseClient(request);
@@ -23,30 +23,30 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   return json({
     email: user.email ?? "",
-    plan: profile?.plan || "Freeプラン",
+    plan: profile?.plan || "Free Plan",
     credits: profile?.credits || 0,
-    createdAt: user.created_at ? new Date(user.created_at).toLocaleDateString("ja-JP") : "-",
+    createdAt: user.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
   }, { headers });
   */
 
-  // ダミー返却値
+  // Dummy return values
   return json({
     email: "user@example.com",
     plan: "VCE Japanese Pro",
     credits: 120,
-    createdAt: "2026年8月15日",
+    createdAt: "15 August 2026",
   });
 }
 
-// アクション：アカウント削除処理
+// Action: Account deletion handler
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
-    if (confirmText !== "削除する") {
-      return json({ error: "確認用のキーワードが正しくありません。", success: false }, { status: 400 });
+    if (confirmText !== "DELETE") {
+      return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
     }
 
     /*
@@ -54,14 +54,14 @@ export async function action({ request }: ActionFunctionArgs) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return json({ error: "認証エラーが発生しました。", success: false }, { status: 401 });
+      return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
     }
 
     const supabaseAdmin = createAdminSupabaseClient();
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
-      return json({ error: "アカウントの削除に失敗しました: " + deleteError.message, success: false }, { status: 500 });
+      return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
     }
 
     return redirect("/", {
@@ -88,41 +88,41 @@ export default function AccountSettingsRoute() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">アカウント設定</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
         <p className="text-sm text-gray-600 mt-1">
-          ご登録情報の確認やプラン管理、アカウントの退会手続きを行います。
+          Manage your registration details, subscription plan, and account cancellation.
         </p>
       </div>
 
-      {/* 1. 総合的なアカウント情報セクション */}
+      {/* 1. General Account Information Section */}
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-6">
-        <h2 className="text-lg font-semibold text-gray-900 border-b pb-3">登録情報</h2>
+        <h2 className="text-lg font-semibold text-gray-900 border-b pb-3">Registration Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>
-            <span className="block text-gray-500">メールアドレス</span>
+            <span className="block text-gray-500">Email Address</span>
             <span className="font-medium text-gray-900">{data.email}</span>
           </div>
           <div>
-            <span className="block text-gray-500">現在のプラン</span>
+            <span className="block text-gray-500">Current Plan</span>
             <span className="font-medium text-gray-900">{data.plan}</span>
           </div>
           <div>
-            <span className="block text-gray-500">保有クレジット残高</span>
-            <span className="font-medium text-gray-900">{data.credits} pt</span>
+            <span className="block text-gray-500">Credit Balance</span>
+            <span className="font-medium text-gray-900">{data.credits} pts</span>
           </div>
           <div>
-            <span className="block text-gray-500">アカウント作成日</span>
+            <span className="block text-gray-500">Account Created</span>
             <span className="font-medium text-gray-900">{data.createdAt}</span>
           </div>
         </div>
       </div>
 
-      {/* 2. 危険なエリア（アカウント削除セクション） */}
+      {/* 2. Danger Zone (Account Deletion Section) */}
       <div className="bg-white border border-red-200 rounded-lg shadow-sm p-6 space-y-4">
         <div className="border-b border-red-100 pb-4">
-          <h2 className="text-lg font-semibold text-red-600">アカウントの削除</h2>
+          <h2 className="text-lg font-semibold text-red-600">Delete Account</h2>
           <p className="text-sm text-gray-600 mt-1">
-            アカウントを削除すると、保存されたデータ、学習履歴、購入したクレジット、およびすべての個人情報が永久に消去されます。この操作は取り消せません。
+            Deleting your account will permanently erase all saved data, learning history, purchased credits, and personal information. This action cannot be undone.
           </p>
         </div>
 
@@ -132,18 +132,18 @@ export default function AccountSettingsRoute() {
             onClick={() => setIsModalOpen(true)}
             className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition"
           >
-            アカウントを削除する
+            Delete Account
           </button>
         </div>
       </div>
 
-      {/* 削除確認モーダル */}
+      {/* Deletion Confirmation Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-6">
-            <h3 className="text-xl font-bold text-gray-900">本当にアカウントを削除しますか？</h3>
+            <h3 className="text-xl font-bold text-gray-900">Are you sure you want to delete your account?</h3>
             <p className="text-sm text-gray-600">
-              確認のため、下の入力欄に <span className="font-semibold text-gray-900">「削除する」</span> と入力してください。
+              To confirm, please type <span className="font-semibold text-gray-900">「DELETE」</span> in the field below.
             </p>
 
             <Form method="post" className="space-y-4">
@@ -153,7 +153,7 @@ export default function AccountSettingsRoute() {
                 name="confirmText"
                 value={confirmInput}
                 onChange={(e) => setConfirmInput(e.target.value)}
-                placeholder="「削除する」と入力"
+                placeholder="Type 'DELETE'"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                 required
               />
@@ -168,14 +168,14 @@ export default function AccountSettingsRoute() {
                   disabled={isSubmitting}
                   className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                 >
-                  キャンセル
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={confirmInput !== "削除する" || isSubmitting}
+                  disabled={confirmInput !== "DELETE" || isSubmitting}
                   className="px-4 py-2 text-sm text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
                 >
-                  {isSubmitting ? "削除中..." : "完全に削除する"}
+                  {isSubmitting ? "Deleting..." : "Permanently Delete"}
                 </button>
               </div>
             </Form>
