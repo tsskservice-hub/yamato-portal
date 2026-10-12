@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
-import PageLayout from "~/components/PageLayout";
+import PageLayout from "../components/PageLayout";
 
 type Item =
   | { type: "num"; value: string }

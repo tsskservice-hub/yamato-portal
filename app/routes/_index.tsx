@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
-import PageLayout from '~/components/PageLayout';
+import PageLayout from '../components/PageLayout';
 
 // 💡 prices.tsx 側からエクスポートされた PRICING_PLANS をインポートして完全に同期・連動します
 import { PRICING_PLANS } from './prices';
