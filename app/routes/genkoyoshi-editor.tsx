@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
-import { Header } from "../components/header";
-import { Footer } from "../components/Footer";
+import PageLayout from "~/components/PageLayout";
 
 type Item =
   | { type: "num"; value: string }
@@ -267,229 +266,226 @@ export default function GenkoyoshiEditor() {
   };
 
   return (
-    <div className="genko-editor-root flex flex-col min-h-screen">
-      <style>{`
-        :root {
-          --cell-size: 41px;
-          --line-gap: 8px;
-        }
-
-        .genko-editor-root {
-          font-family: sans-serif;
-          margin: 0;
-          padding: 20px;
-          background-color: #f4f6f9;
-          color: #333;
-          position: relative;
-        }
-
-        .genko-container {
-          display: flex;
-          gap: 20px;
-          flex-wrap: wrap;
-        }
-
-        .genko-editor-pane {
-          flex: 1;
-          min-width: 300px;
-          background: #fff;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .genko-preview-pane {
-          flex: 1.5;
-          min-width: 350px;
-          background: #fff;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          overflow-x: auto;
-        }
-
-        .genko-control-group {
-          margin-bottom: 15px;
-        }
-
-        .genko-control-group label {
-          display: block;
-          font-weight: bold;
-          margin-bottom: 5px;
-          font-size: 0.9rem;
-        }
-
-        .genko-control-group input[type="text"],
-        .genko-control-group textarea,
-        .genko-control-group select {
-          width: 100%;
-          padding: 8px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          box-sizing: border-box;
-          font-size: 1rem;
-        }
-
-        .genko-control-group textarea {
-          height: 150px;
-          resize: vertical;
-        }
-
-        .genko-btn-container {
-          display: flex;
-          gap: 10px;
-          margin-top: 20px;
-        }
-
-        .genko-btn-container button {
-          padding: 10px 15px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: bold;
-        }
-
-        .genko-btn-print {
-          background-color: #0066cc;
-          color: #fff;
-          flex: 1;
-        }
-
-        .genko-btn-print:hover {
-          background-color: #0052a3;
-        }
-
-        .genko-btn-clear {
-          background-color: #e0e0e0;
-          color: #333;
-        }
-
-        .genko-btn-clear:hover {
-          background-color: #d0d0d0;
-        }
-
-        .genko-stats {
-          margin-top: 10px;
-          font-size: 0.85rem;
-          color: #555;
-        }
-
-        .genko-sheet {
-          background: #fff;
-          border: 1px solid #ccc;
-          padding: 30px;
-          box-sizing: border-box;
-          display: inline-block;
-          min-width: 100%;
-          margin-bottom: 20px;
-        }
-
-        .genko-grid {
-          display: flex;
-          flex-direction: column;
-          gap: var(--line-gap);
-        }
-
-        .genko-row {
-          display: flex;
-          gap: 0;
-        }
-
-        .genko-cell {
-          width: var(--cell-size);
-          height: var(--cell-size);
-          border: 1px solid #999;
-          box-sizing: border-box;
-          display: flex;
-          align-items: flex-end;    
-          justify-content: center;   
-          padding-bottom: 2mm;        
-          font-size: 1.35rem;         
-          line-height: 1;
-          position: relative;
-          background-color: #fff;
-        }
-
-        .genko-cell::after {
-          content: "";
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          border: 1px dotted #ffcccc;
-          pointer-events: none;
-        }
-
-        .co-cell {
-          justify-content: flex-end; 
-          padding-right: 2px;
-        }
-
-        .co-wrapper {
-          display: flex;
-          align-items: flex-end;     
-          font-size: 1.35rem;         
-          line-height: 1;
-          transform: translateX(3mm); 
-        }
-
-        .co-main {
-          display: inline-block;
-        }
-
-        .co-sub {
-          display: inline-block;
-          font-size: 1.35rem;         
-        }
-
-        .num-cell {
-          justify-content: center;
-          align-items: flex-end;
-          padding-bottom: 2mm;
-        }
-
-        .num-pair {
-          display: inline-flex;
-          font-size: 1.2rem;
-          letter-spacing: -0.5px;
-          line-height: 1;
-        }
-
-        @page {
-          size: B4 portrait;
-          margin: 10mm;
-        }
-
-        @media print {
-          body, .genko-editor-root {
-            background: none !important;
-            padding: 0 !important;
+    <PageLayout>
+      <div className="genko-editor-root flex flex-col min-h-screen">
+        <style>{`
+          :root {
+            --cell-size: 41px;
+            --line-gap: 8px;
           }
-          header,
-          footer,
-          .genko-editor-pane,
-          .genko-btn-container,
-          aside {
-            display: none !important;
+
+          .genko-editor-root {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+            position: relative;
           }
+
+          .genko-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+          }
+
+          .genko-editor-pane {
+            flex: 1;
+            min-width: 300px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+
           .genko-preview-pane {
-            box-shadow: none !important;
-            padding: 0 !important;
-            overflow: visible !important;
+            flex: 1.5;
+            min-width: 350px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
           }
+
+          .genko-control-group {
+            margin-bottom: 15px;
+          }
+
+          .genko-control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+          }
+
+          .genko-control-group input[type="text"],
+          .genko-control-group textarea,
+          .genko-control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+          }
+
+          .genko-control-group textarea {
+            height: 150px;
+            resize: vertical;
+          }
+
+          .genko-btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+          }
+
+          .genko-btn-container button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+          }
+
+          .genko-btn-print {
+            background-color: #0066cc;
+            color: #fff;
+            flex: 1;
+          }
+
+          .genko-btn-print:hover {
+            background-color: #0052a3;
+          }
+
+          .genko-btn-clear {
+            background-color: #e0e0e0;
+            color: #333;
+          }
+
+          .genko-btn-clear:hover {
+            background-color: #d0d0d0;
+          }
+
+          .genko-stats {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #555;
+          }
+
           .genko-sheet {
-            border: none !important;
-            margin: 0 !important;
-            page-break-after: always;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 30px;
+            box-sizing: border-box;
+            display: inline-block;
+            min-width: 100%;
+            margin-bottom: 20px;
           }
-        }
-      `}</style>
 
-      {/* 🚀 ページ右上固定の上戻りボタン */}
-      <ScrollTopButton />
+          .genko-grid {
+            display: flex;
+            flex-direction: column;
+            gap: var(--line-gap);
+          }
 
-      {/* ヘルパータイトルを Genkoyoshi Editor に指定 */}
-      <Header title="Genkoyoshi Editor" />
+          .genko-row {
+            display: flex;
+            gap: 0;
+          }
 
-      <main className="flex-grow">
+          .genko-cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            border: 1px solid #999;
+            box-sizing: border-box;
+            display: flex;
+            align-items: flex-end;   
+            justify-content: center;   
+            padding-bottom: 2mm;        
+            font-size: 1.35rem;         
+            line-height: 1;
+            position: relative;
+            background-color: #fff;
+          }
+
+          .genko-cell::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 1px dotted #ffcccc;
+            pointer-events: none;
+          }
+
+          .co-cell {
+            justify-content: flex-end; 
+            padding-right: 2px;
+          }
+
+          .co-wrapper {
+            display: flex;
+            align-items: flex-end;     
+            font-size: 1.35rem;         
+            line-height: 1;
+            transform: translateX(3mm); 
+          }
+
+          .co-main {
+            display: inline-block;
+          }
+
+          .co-sub {
+            display: inline-block;
+            font-size: 1.35rem;         
+          }
+
+          .num-cell {
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 2mm;
+          }
+
+          .num-pair {
+            display: inline-flex;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            line-height: 1;
+          }
+
+          @page {
+            size: B4 portrait;
+            margin: 10mm;
+          }
+
+          @media print {
+            body, .genko-editor-root {
+              background: none !important;
+              padding: 0 !important;
+            }
+            header,
+            footer,
+            .genko-editor-pane,
+            .genko-btn-container,
+            aside {
+              display: none !important;
+            }
+            .genko-preview-pane {
+              box-shadow: none !important;
+              padding: 0 !important;
+              overflow: visible !important;
+            }
+            .genko-sheet {
+              border: none !important;
+              margin: 0 !important;
+              page-break-after: always;
+            }
+          }
+        `}</style>
+
+        {/* 🚀 ページ右上固定の上戻りボタン */}
+        <ScrollTopButton />
+
         <div className="genko-container mt-6">
           <div className="genko-editor-pane">
             <div className="genko-control-group">
@@ -589,123 +585,120 @@ export default function GenkoyoshiEditor() {
             </div>
           </div>
         </div>
-      </main>
 
-      {/* 🤖 右下常駐・折りたたみ式 AIチューター常駐窓 */}
-      <aside aria-label="AI Tutor" className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        {!isAiTutorOpen ? (
-          <button
-            type="button"
-            onClick={() => setIsAiTutorOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
-          >
-            <span>🤖</span>
-            <span>AI Tutor</span>
-          </button>
-        ) : (
-          <div className={`bg-white border-2 border-blue-300 rounded-2xl p-5 shadow-2xl transition-all duration-200 space-y-4 ${
-            isAiTutorExpanded ? "w-[90vw] sm:w-[500px] md:w-[600px]" : "w-80 sm:w-96"
-          }`}>
-            <div className="flex items-center justify-between border-b pb-2">
-              <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2 m-0">
-                <span>🤖</span> Japanese Writing AI Tutor
-              </h3>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setIsAiTutorExpanded(!isAiTutorExpanded)}
-                  className="text-slate-500 hover:text-blue-700 text-xs font-bold px-2 py-1 rounded-md bg-slate-100 hover:bg-blue-50 transition cursor-pointer"
-                  title={isAiTutorExpanded ? "元のサイズに戻す" : "窓を大きく広げる"}
-                >
-                  {isAiTutorExpanded ? "🗗 元に戻す" : "🗖 拡大"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAiTutorOpen(false);
-                    setIsAiTutorExpanded(false);
-                  }}
-                  className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
-                >
-                  ✕ Close
-                </button>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Ask questions about your writing, kanji, or get study advice!
-            </p>
-
-            {/* 学習レベル選択UI */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex items-center justify-between">
-              <span className="text-xs font-bold text-blue-900">Learning Pace</span>
-              <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-blue-200">
-                {(["steady", "normal", "accelerated"] as const).map((level) => (
-                  <button
-                    key={level}
-                    type="button"
-                    onClick={() => setTutorLevel(level)}
-                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition cursor-pointer ${
-                      tutorLevel === level
-                        ? "bg-blue-600 text-white shadow-xs"
-                        : "text-slate-600 hover:text-blue-700"
-                    }`}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* チャット履歴エリア */}
-            <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 transition-all duration-200 ${
-              isAiTutorExpanded ? "h-96" : "h-44"
+        {/* 🤖 右下常駐・折りたたみ式 AIチューター常駐窓 */}
+        <aside aria-label="AI Tutor" className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+          {!isAiTutorOpen ? (
+            <button
+              type="button"
+              onClick={() => setIsAiTutorOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
+            >
+              <span>🤖</span>
+              <span>AI Tutor</span>
+            </button>
+          ) : (
+            <div className={`bg-white border-2 border-blue-300 rounded-2xl p-5 shadow-2xl transition-all duration-200 space-y-4 ${
+              isAiTutorExpanded ? "w-[90vw] sm:w-[500px] md:w-[600px]" : "w-80 sm:w-96"
             }`}>
-              {tutorMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
-                >
-                  <div
-                    className={`max-w-[90%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
-                      msg.role === "user"
-                        ? "bg-blue-600 text-white rounded-br-xs"
-                        : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
-                    }`}
+              <div className="flex items-center justify-between border-b pb-2">
+                <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2 m-0">
+                  <span>🤖</span> Japanese Writing AI Tutor
+                </h3>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsAiTutorExpanded(!isAiTutorExpanded)}
+                    className="text-slate-500 hover:text-blue-700 text-xs font-bold px-2 py-1 rounded-md bg-slate-100 hover:bg-blue-50 transition cursor-pointer"
+                    title={isAiTutorExpanded ? "元のサイズに戻す" : "窓を大きく広げる"}
                   >
-                    {msg.content}
-                  </div>
+                    {isAiTutorExpanded ? "🗗 元に戻す" : "🗖 拡大"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAiTutorOpen(false);
+                      setIsAiTutorExpanded(false);
+                    }}
+                    className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
+                  >
+                    ✕ Close
+                  </button>
                 </div>
-              ))}
-              {isTutorLoading && (
-                <div className="text-xs text-slate-500 italic">🤖 AI Tutor is thinking...</div>
-              )}
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Ask questions about your writing, kanji, or get study advice!
+              </p>
+
+              {/* 学習レベル選択UI */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex items-center justify-between">
+                <span className="text-xs font-bold text-blue-900">Learning Pace</span>
+                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-blue-200">
+                  {(["steady", "normal", "accelerated"] as const).map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => setTutorLevel(level)}
+                      className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition cursor-pointer ${
+                        tutorLevel === level
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-blue-700"
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* チャット履歴エリア */}
+              <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 transition-all duration-200 ${
+                isAiTutorExpanded ? "h-96" : "h-44"
+              }`}>
+                {tutorMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
+                  >
+                    <div
+                      className={`max-w-[90%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
+                        msg.role === "user"
+                          ? "bg-blue-600 text-white rounded-br-xs"
+                          : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                {isTutorLoading && (
+                  <div className="text-xs text-slate-500 italic">🤖 AI Tutor is thinking...</div>
+                )}
+              </div>
+
+              {/* 入力フォーム */}
+              <form onSubmit={handleSendTutorMessage} className="flex gap-2">
+                <input
+                  type="text"
+                  value={tutorInput}
+                  onChange={(e) => setTutorInput(e.target.value)}
+                  placeholder="Ask AI tutor anything..."
+                  disabled={isTutorLoading}
+                  className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50"
+                />
+                <button
+                  type="submit"
+                  disabled={isTutorLoading || !tutorInput.trim()}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  Send
+                </button>
+              </form>
             </div>
-
-            {/* 入力フォーム */}
-            <form onSubmit={handleSendTutorMessage} className="flex gap-2">
-              <input
-                type="text"
-                value={tutorInput}
-                onChange={(e) => setTutorInput(e.target.value)}
-                placeholder="Ask AI tutor anything..."
-                disabled={isTutorLoading}
-                className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50"
-              />
-              <button
-                type="submit"
-                disabled={isTutorLoading || !tutorInput.trim()}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
-              >
-                Send
-              </button>
-            </form>
-          </div>
-        )}
-      </aside>
-
-      {/* 共通フッターコンポーネント */}
-      <Footer />
-    </div>
+          )}
+        </aside>
+      </div>
+    </PageLayout>
   );
 }

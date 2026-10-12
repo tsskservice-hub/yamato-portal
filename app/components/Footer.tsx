@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 
-export function Footer() {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
