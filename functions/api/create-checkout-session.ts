@@ -21,8 +21,10 @@ export const onRequestPost = async (context: any) => {
     stripeParams.append('mode', 'payment');
     stripeParams.append('success_url', `${origin}/?success=true`);
     stripeParams.append('cancel_url', `${origin}/?canceled=true`);
-    stripeParams.append('line_items[price]', priceId);
-    stripeParams.append('line_items[quantity]', '1');
+    
+    // 修正: 配列のインデックス [0] を付与
+    stripeParams.append('line_items[0][price]', priceId);
+    stripeParams.append('line_items[0][quantity]', '1');
 
     if (userId) stripeParams.append('metadata[supabase_user_id]', userId);
     stripeParams.append('metadata[credits]', creditsToGrant.toString());
@@ -37,6 +39,13 @@ export const onRequestPost = async (context: any) => {
     });
 
     const session: any = await response.json();
+
+    // Stripe側からエラーが返ってきた場合の対策
+    if (!response.ok || !session.url) {
+      const errorMessage = session.error?.message || 'Unknown Stripe error';
+      return new Response(JSON.stringify({ error: errorMessage }), { status: 400 });
+    }
+
     return new Response(JSON.stringify({ url: session.url }), { status: 200 });
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
