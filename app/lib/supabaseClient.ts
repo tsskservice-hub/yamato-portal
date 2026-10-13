@@ -1,30 +1,51 @@
 import { createClient } from '@supabase/supabase-js';
 
-const getEnvVar = (key: string) => {
+const getEnvVar = (key: string): string => {
   try {
+    // 1. Remix / Vite の client / SSR 環境変数
     if (typeof import.meta !== 'undefined' && (import.meta as any).env?.[key]) {
       return (import.meta as any).env[key];
     }
   } catch {}
 
   try {
+    // 2. Node.js / Cloudflare Functions の process.env
     if (typeof process !== 'undefined' && process.env?.[key]) {
-      return process.env[key];
+      return process.env[key] as string;
+    }
+  } catch {}
+
+  try {
+    // 3. ウィンドウオブジェクト等に埋め込まれている場合
+    if (typeof window !== 'undefined' && (window as any)[key]) {
+      return (window as any)[key];
     }
   } catch {}
 
   return '';
 };
 
-// VITE_ プレフィックス付きの環境変数を優先的に取得
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL') || getEnvVar('SUPABASE_URL');
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('SUPABASE_ANON_KEY');
+// 💡 Cloudflare上で登録されている各種キーを網羅的にフォールバック探索
+const supabaseUrl = 
+  getEnvVar('SUPABASE_URL') || 
+  getEnvVar('VITE_SUPABASE_URL') || 
+  getEnvVar('PUBLIC_SUPABASE_URL');
 
-if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
-  console.error('❌ CRITICAL: Supabase URL or Anon Key is missing or using placeholder in Cloudflare Pages. Please check your Cloudflare Environment Variables settings.');
+const supabaseAnonKey = 
+  getEnvVar('SUPABASE_ANON_KEY') || 
+  getEnvVar('VITE_SUPABASE_ANON_KEY') || 
+  getEnvVar('PUBLIC_SUPABASE_ANON_KEY');
+
+if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+  console.error('❌ CRITICAL: Supabase URL is missing in Cloudflare Environment Variables.');
 }
 
-const safeUrl = supabaseUrl || 'https://placeholder.supabase.co';
-const safeKey = supabaseAnonKey || 'placeholder-key';
+if (!supabaseAnonKey || supabaseAnonKey.includes('placeholder')) {
+  console.error('❌ CRITICAL: Supabase Anon Key is missing in Cloudflare Environment Variables.');
+}
+
+// 実行時に有効な値がない場合でも最低限クラッシュを防ぎつつ、明確にログ出力する
+const safeUrl = (supabaseUrl && !supabaseUrl.includes('placeholder')) ? supabaseUrl : 'https://placeholder.supabase.co';
+const safeKey = (supabaseAnonKey && !supabaseAnonKey.includes('placeholder')) ? supabaseAnonKey : 'placeholder-key';
 
 export const supabase = createClient(safeUrl, safeKey);
