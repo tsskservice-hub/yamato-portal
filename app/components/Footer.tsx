@@ -30,12 +30,9 @@ export default function Footer({ onOpenAuth }: FooterProps) {
       // ログイン済みの場合はアカウント設定画面へ移動
       navigate("/settings/account");
     } else {
-      // 未ログインの場合は、ページ側から渡されたパスキー認証モーダルを開くハンドラーを実行
+      // 未ログインの場合は、パスキー認証モーダルを開く
       if (onOpenAuth) {
         onOpenAuth('signin');
-      } else {
-        // 万が一ハンドラーがない場合のフォールバック（通常のサインイン処理など）
-        navigate("/auth/email");
       }
     }
   };
