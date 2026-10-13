@@ -17,7 +17,7 @@ export const meta: MetaFunction = () => {
 // Supabase クライアント初期化用
 const SUPABASE_URL = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_URL || "" : "";
 const SUPABASE_ANON_KEY = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_ANON_KEY || "" : "";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { supabase } from "../lib/supabaseClient";
 
 type QuestionItem = {
   category: string;

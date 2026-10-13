@@ -11,7 +11,7 @@ import textTypesData from "../data/texttypes.json";
 // Supabase クライアント初期化用（環境変数にあわせて設定）
 const SUPABASE_URL = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_URL || "" : "";
 const SUPABASE_ANON_KEY = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_ANON_KEY || "" : "";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { supabase } from "../lib/supabaseClient";
 
 function BugReportCard() {
   return (
