@@ -1,3 +1,7 @@
+/**
+ * @file YamatoChat.tsx
+ * @description ヤマトAIチャットウィジェット（一括応答・デフォルト表示版）
+ */
 import { useState, useEffect, useRef } from "react";
 
 type ChatMessage = {
@@ -12,6 +16,7 @@ export type YamatoChatProps = {
   initialGreeting?: string;      // 最初の一言メッセージ
   systemPrompt?: string;         // キャラクター固有の指示（将来の拡張用）
   appType?: "concierge" | "writing" | "oral" | "general" | string;  
+  additionalContext?: any;       // コンシェルジュ等に渡す追加のポータルデータ
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -26,6 +31,7 @@ export function YamatoChat({
   initialGreeting = "こんにちは！日本語Tutor AI ヤマトです。何か話しかけてみてくださいね！",
   systemPrompt = "",
   appType = "general",
+  additionalContext,
 }: YamatoChatProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(true);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -97,11 +103,10 @@ export function YamatoChat({
     setTutorInput("");
     setRequestVisualAid(false); // 送信後にチェックを自動リセット
 
-    // 1. ユーザーのメッセージを追加し、AI用の空の応答枠をあらかじめ用意
+    // 1. ユーザーのメッセージを履歴に追加
     const newMessages: ChatMessage[] = [
       ...tutorMessages, 
       { role: "user", content: userMsg },
-      { role: "assistant", content: "", imageUrl: undefined }
     ];
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
@@ -123,6 +128,7 @@ export function YamatoChat({
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt, 
           requestVisualAid: needsVisual,
+          portalData: additionalContext, // コンシェルジュ用のポータルデータ（quizzes, price-plans等）を渡す
         }),
       });
 
@@ -143,30 +149,18 @@ export function YamatoChat({
       const imageUrl = data.imageUrl;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
-      // AIの「思考中」表示を終了
+      // AIの「思考中」表示を終了し、一括でメッセージを画面に反映（デフォルト表示）
       setIsTutorLoading(false);
-
-      // 2. 1文字ずつ滑らかに表示するタイピングアニメーション（1文字あたり15ms）
-      let currentText = "";
-      for (let i = 0; i < sanitizedReply.length; i++) {
-        currentText += sanitizedReply[i];
-        
-        const updatedMessages = [...newMessages];
-        updatedMessages[updatedMessages.length - 1] = {
-          role: "assistant",
-          content: currentText,
-          imageUrl: i === sanitizedReply.length - 1 ? imageUrl : undefined, // 最後に画像を設定
-        };
-        setTutorMessages(updatedMessages);
-
-        await new Promise((resolve) => setTimeout(resolve, 15));
-      }
+      setTutorMessages([
+        ...newMessages,
+        { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
+      ]);
 
     } catch (err: any) {
       console.error(err);
       setIsTutorLoading(false);
       setTutorMessages((prev) => [
-        ...prev.slice(0, prev.length - 1), // 空の枠を削除してエラーメッセージに置き換え
+        ...prev,
         { role: "assistant", content: `エラーが発生しました: ${err.message || "通信エラー"}` },
       ]);
     }
@@ -262,23 +256,6 @@ export function YamatoChat({
                       ) : (
                         <div className="space-y-2">
                           <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                          {/* 🎨 [開発中につき一時非表示] インライン表示される生成画像 */}
-                          {/* 
-                          {msg.imageUrl && (
-                            <div className="mt-2 rounded-lg overflow-hidden border border-emerald-200 bg-emerald-50/50 p-1">
-                              <img
-                                src={msg.imageUrl}
-                                alt="AI Yamato Visual Explanation"
-                                onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                className="w-full h-auto rounded-md object-contain max-h-48 cursor-pointer hover:opacity-95 transition"
-                                title="クリックして画像を拡大"
-                              />
-                              <p className="text-[10px] text-emerald-800 text-center mt-1 font-medium cursor-pointer" onClick={() => setModalImageSrc(msg.imageUrl || null)}>
-                                ✨ ヤマト特製図解・イラスト（クリックして拡大）
-                              </p>
-                            </div>
-                          )}
-                          */}
                         </div>
                       )}
                     </div>
@@ -289,7 +266,7 @@ export function YamatoChat({
                 )}
               </div>
 
-              {/* 入力フォーム & 図解生成チェックボックス */}
+              {/* 入力フォーム */}
               <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                 <div className="flex gap-2">
                   <input
