@@ -289,7 +289,7 @@ export default function Home() {
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     if (queryParams.get('success') === 'true') {
-      alert('決済が完了しました！クレジットが反映されました。');
+      alert('Payment completed! Your credits have been updated.');
       if (user) {
         fetchUserCredits(user.id); // Supabaseから最新残高を再取得
       }
