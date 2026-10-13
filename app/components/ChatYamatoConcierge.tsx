@@ -181,7 +181,8 @@ export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergePr
             {/* ヘッダー */}
             <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
               <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2 m-0">
-                <span>🤖</span> {characterName}
+                <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> 
+                {characterName}
               </h3>
               <div className="flex items-center gap-1.5">
                 <button
@@ -211,6 +212,11 @@ export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergePr
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3">
               {tutorMessages.map((msg, idx) => (
                 <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                  {msg.role === "assistant" && (
+                    <div className="text-[10px] text-slate-400 mb-0.5 ml-1 flex items-center gap-1">
+                      <span>🤖</span> やまと先生
+                    </div>
+                  )}
                   <div
                     className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
                       msg.role === "user"
@@ -229,7 +235,10 @@ export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergePr
                 </div>
               ))}
               {isTutorLoading && (
-                <div className="text-xs text-slate-500 italic">🤖 やまと先生が考えています...</div>
+                <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-blue-50/70 border border-blue-100 p-2 rounded-xl w-fit">
+                  <span className="inline-block animate-spin text-sm">🤖</span>
+                  <span>やまと先生が考えています...</span>
+                </div>
               )}
             </div>
 
