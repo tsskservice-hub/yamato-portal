@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（初期状態はボタンのみ表示）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（portalContextData 連携対応版）
  */
 import { useState, useEffect, useRef } from "react";
 
@@ -17,7 +17,25 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-export function ChatYamatoConcierge() {
+// 💡 _index.tsx から渡される additionalContext の型定義
+interface ChatYamatoConciergeProps {
+  additionalContext?: {
+    pricePlans?: Record<string, any>;
+    creditGuide?: Array<{ item: string; cost: string }>;
+    todayQuiz?: any;
+    allQuizzes?: Array<any>;
+    legalContent?: {
+      terms?: any;
+      disclaimer?: any;
+      privacy?: any;
+      contact?: any;
+    };
+    cityName?: string;
+    timeZone?: string;
+  };
+}
+
+export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergeProps) {
   // 💡 初期状態を閉じている状態（false）に変更し、リロード時にボタンとしておさまるようにします
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -76,20 +94,22 @@ export function ChatYamatoConcierge() {
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
 
-    // ポータルデータのペイロード
+    // ★ _index.tsx から受け取った additionalContext（価格、クイズ、法的データ）をそのままバックエンドに送信するペイロードに組み込む
     const portalContextPayload = {
-      quizzes: [
+      quizzes: additionalContext?.allQuizzes?.map(q => ({
+        title: q.topic || q.title,
+        description: q.question || q.description
+      })) || [
         { title: "VCE Japanese Kanji & Vocabulary", description: "Interactive practice aligned with Australian secondary curricula." },
         { title: "Mini Shogi & Go", description: "Traditional Japanese board games adapted for language learners." },
         { title: "Karuta & Typing Games", description: "Engaging drills to master Japanese reading and kana/kanji." }
       ],
-      pricingPlans: [
-        { tier: "Free Tier", detail: "Daily login bonuses and basic access to AI learning features." },
-        { tier: "Premium Pass", detail: "Full access to VCE writing tutors, oral practice, and unlimited interactions." }
-      ],
-      legalSummary: "Terms of Service & Privacy Policy: Designed for VCE and Australian secondary school Japanese learners. Secure checkout and support handled via Gumroad.",
-      cityName: "Melbourne, Australia",
-      timeZone: "Australia/Melbourne"
+      todayQuiz: additionalContext?.todayQuiz || null,
+      pricePlans: additionalContext?.pricePlans || null,
+      creditGuide: additionalContext?.creditGuide || null,
+      legalContent: additionalContext?.legalContent || null,
+      cityName: additionalContext?.cityName || "Melbourne, Australia",
+      timeZone: additionalContext?.timeZone || "Australia/Melbourne"
     };
 
     try {

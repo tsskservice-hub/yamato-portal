@@ -1,3 +1,7 @@
+/**
+ * @file _index.tsx
+ * @description AI Yamato Portal のランディングページ（コンシェルジュデータ連携版）
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from '@remix-run/react';
 import { 
@@ -24,14 +28,17 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import PageLayout from '../components/PageLayout';
 
-// 🤖 新しく作成したコンシェルジュ専用チャットウィジェットのインポート
+// 🤖 コンシェルジュ専用チャットウィジェットのインポート
 import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
 
 // 💡 共通の price-plans から price-plans およびキャンペーン文言をインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/price-plans';
 
 // 💡 Quiz data and helper functions imported from external file
-import { getTodayQuiz, QuizItem } from '../data/quizzes';
+import { getTodayQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
+
+// ★法的・サポートコンテンツデータをインポート
+import { LEGAL_CONTENT } from '../data/legal-content';
 
 // Auto demo conversations in English
 const DEMO_CONVERSATIONS = [
@@ -247,6 +254,15 @@ export default function Home() {
     } finally {
       setCheckoutLoadingPriceId(null);
     }
+  };
+
+  // ★コンシェルジュヤマトに渡すポータルデータ（価格プラン、消費ガイド、本日のクイズ、法的データ）を定義
+  const portalContextData = {
+    pricePlans: PRICE_PLANS,
+    creditGuide: CREDIT_CONSUMPTION_GUIDE,
+    todayQuiz: getTodayQuiz(),     // 本日の日付に対応するクイズデータ
+    allQuizzes: DAILY_QUIZZES,     // 全クイズデータ
+    legalContent: LEGAL_CONTENT,   // 利用規約・免責・プライバシー・連絡先の全データ
   };
 
   return (
@@ -671,8 +687,8 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト（ChatYamatoConcierge） */}
-        <ChatYamatoConcierge />
+        {/* 🤖 右下に常駐するコンシェルジュヤマト（ChatYamatoConcierge に additionalContext として portalContextData を渡す） */}
+        <ChatYamatoConcierge additionalContext={portalContextData} />
 
         {/* ページトップへ戻るボタン */}
         {showScrollTop && (
