@@ -32,7 +32,7 @@ import { getTodayQuiz, QuizItem } from '../data/quizzes';
 
 export const STRIPE_PRICES = {
   starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // Actual Stripe Price ID
-  standard: 'price_1xxxx_standard',          // Update with your actual Stripe Price ID if needed
+  standard: 'price_1xxxx_standard',         // Update with your actual Stripe Price ID if needed
   pro: 'price_1xxxx_pro',                    // Update with your actual Stripe Price ID if needed
 };
 
@@ -386,17 +386,18 @@ export default function Home() {
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-            
+             
           {/* 2. Hero Section with YamatoChat-style Auto Demo */}
           <section className="text-center space-y-6 max-w-4xl mx-auto">
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
-              <Award className="w-3.5 h-3.5 text-blue-600" />
+            {/* アクセントの赤バッジ */}
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
+              <Flame className="w-3.5 h-3.5 text-red-600 animate-pulse" />
               <span>Decades of Expertise in Japanese Language Education</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
               Your Gateway to <br />
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-red-600 bg-clip-text text-transparent">
                 Japanese Mastery
               </span>
             </h1>
@@ -407,15 +408,15 @@ export default function Home() {
 
             {/* 💡 Daily Quiz Banner for Logged-in Users (English) */}
             {user && (
-              <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
+              <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-red-600/10 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
                     🧠
                   </div>
                   <div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 px-2 py-0.5 rounded bg-emerald-500/10">Daily Challenge</span>
-                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">+2 Credits</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge</span>
+                      <span className="text-xs font-bold text-blue-700 dark:text-blue-300">+2 Credits</span>
                     </div>
                     <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Today's Japanese & Culture Quiz</h3>
                     <p className="text-xs text-slate-500">
@@ -437,7 +438,7 @@ export default function Home() {
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
                     hasCompletedTodayQuiz 
                       ? "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300" 
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+                      : "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20"
                   }`}
                 >
                   <span>{hasCompletedTodayQuiz ? "View Quiz Results & Explanation" : "Take Today's Quiz"}</span>
@@ -446,12 +447,13 @@ export default function Home() {
               </div>
             )}
 
-            <div className={`mt-8 p-5 sm:p-6 rounded-2xl border-2 border-emerald-300 shadow-2xl backdrop-blur-sm text-left ${isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white'}`}>
+            <div className={`mt-8 p-5 sm:p-6 rounded-2xl border-2 border-blue-400 shadow-2xl backdrop-blur-sm text-left ${isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white'}`}>
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center space-x-2">
                   <span className="text-base">🤖</span>
-                  <span className="font-bold text-sm text-emerald-900 dark:text-emerald-200">Japanese Tutor AI Yamato (Auto Demo)</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold animate-pulse">● Live Demo</span>
+                  <span className="font-bold text-sm text-blue-900 dark:text-blue-200">Japanese Tutor AI Yamato (Auto Demo)</span>
+                  {/* アクセントに赤を使用 */}
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 font-bold animate-pulse">● Live Demo</span>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-medium">
                   Step {currentStep + 1} / {DEMO_CONVERSATIONS.length}
@@ -459,10 +461,10 @@ export default function Home() {
               </div>
 
               {/* Learning Pace Mock Display */}
-              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-2.5 mb-4 flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">Learning Pace (Demo)</span>
-                <div className="inline-flex rounded-lg bg-white dark:bg-slate-900 p-0.5 shadow-xs border border-emerald-200 dark:border-emerald-800">
-                  <span className="px-2.5 py-1 rounded-md text-[10px] font-bold capitalize bg-emerald-600 text-white shadow-xs">normal</span>
+              <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-xl p-2.5 mb-4 flex items-center justify-between">
+                <span className="text-xs font-bold text-blue-900 dark:text-blue-300">Learning Pace (Demo)</span>
+                <div className="inline-flex rounded-lg bg-white dark:bg-slate-900 p-0.5 shadow-xs border border-blue-200 dark:border-blue-800">
+                  <span className="px-2.5 py-1 rounded-md text-[10px] font-bold capitalize bg-blue-600 text-white shadow-xs">normal</span>
                 </div>
               </div>
 
@@ -470,7 +472,7 @@ export default function Home() {
               <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 mb-4 min-h-[160px] flex flex-col justify-center">
                 {/* User Message Bubble */}
                 <div className="flex justify-end">
-                  <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-emerald-600 text-white font-medium">
+                  <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
                     <p>{displayedUserText}
                       <span className="inline-block w-1.5 h-3 ml-0.5 bg-white animate-pulse"></span>
                     </p>
@@ -483,21 +485,21 @@ export default function Home() {
                     <p>
                       {displayedYamatoText}
                       {isTypingYamato && displayedYamatoText.length < DEMO_CONVERSATIONS[currentStep].yamato.length && (
-                        <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-emerald-500 animate-pulse"></span>
+                        <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-500 animate-pulse"></span>
                       )}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3 bg-emerald-50/50 dark:bg-emerald-950/20 text-sm gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between border border-blue-200 dark:border-blue-800/50 rounded-xl p-3 bg-blue-50/50 dark:bg-blue-950/20 text-sm gap-3">
                 <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
                   <span>✨</span>
                   <span>Want to ask Yamato your own questions?</span>
                 </div>
                 <button 
                   onClick={() => handleOpenAuthModal('signup')}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
+                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
                 >
                   <span>Try App (Free Sign Up)</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -511,10 +513,10 @@ export default function Home() {
           <div className="space-y-4 max-w-3xl mx-auto">
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
-              
-            {/* Limited Time Campaign Banner */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
-              <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-bounce" />
+               
+            {/* Limited Time Campaign Banner (アクセントの赤枠・アイコン) */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
+              <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
               <span>Limited-Time Campaign (Until October 29): Paid packs include bonus credits useable until October 29! Standard base credits are unexpired.</span>
             </div>
           </div>
@@ -579,24 +581,24 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Standard Pack */}
-            <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
+            {/* Standard Pack (Most Popular - アクセントに赤を採用) */}
+            <div className={`p-6 rounded-3xl border-2 border-red-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
                 Most Popular
               </div>
               <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICING_PLANS.standard.name}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-red-600">{PRICING_PLANS.standard.name}</span>
                 <div>
                   <span className="text-4xl font-black">{PRICING_PLANS.standard.price}</span>
                   <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.standard.period}</span>
                 </div>
-                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                <div className="inline-block px-2.5 py-1 rounded-md bg-red-500/10 text-red-600 text-xs font-bold leading-normal">
                   {PRICING_PLANS.standard.badge}
                 </div>
                 <p className="text-xs text-slate-500">{PRICING_PLANS.standard.description}</p>
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                   {PRICING_PLANS.standard.features.map((feat, idx) => (
-                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
+                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-red-600" /><span>{feat}</span></li>
                   ))}
                 </ul>
               </div>
@@ -604,7 +606,7 @@ export default function Home() {
                 <button 
                   onClick={() => handleCheckout(STRIPE_PRICES.standard)} 
                   disabled={checkoutLoadingPriceId === STRIPE_PRICES.standard}
-                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                  className="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
                   {checkoutLoadingPriceId === STRIPE_PRICES.standard && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Buy Standard Pack</span>
@@ -658,7 +660,7 @@ export default function Home() {
               <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Text Chat (Q&A / Vocabulary)</span> <span className="font-semibold text-slate-700 dark:text-slate-300">1-2 credits / turn</span></div>
               <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Essay / Genkoyoshi Correctors</span> <span className="font-semibold text-slate-700 dark:text-slate-300">20-30 credits / session</span></div>
               <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Oral Exam / Voice Roleplay</span> <span className="font-semibold text-slate-700 dark:text-slate-300">15-25 credits / min</span></div>
-              <div className="flex justify-between pt-0.5"><span>Mini Games & Drills</span> <span className="font-semibold text-emerald-600">Free / 0.5 credits</span></div>
+              <div className="flex justify-between pt-0.5"><span>Mini Games & Drills</span> <span className="font-semibold text-blue-600">Free / 0.5 credits</span></div>
             </div>
           </div>
         </section>
@@ -672,9 +674,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* 1. genkoyoshi-editor (Active / First) */}
-            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-amber-500/50 transition-colors`}>
+            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
               <div className="space-y-4">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
                   <Grid className="w-5 h-5" />
                 </div>
                 <h3 className="font-bold text-base">Genkoyoshi Editor</h3>
@@ -682,7 +684,7 @@ export default function Home() {
               </div>
               <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
                 <span className="text-slate-400 font-medium">Free Tool</span>
-                <Link to="/genkoyoshi-editor" className="text-amber-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                <Link to="/genkoyoshi-editor" className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
                   <span>Open Editor</span> <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -746,7 +748,7 @@ export default function Home() {
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
                     <FileText className="w-5 h-5" />
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
@@ -764,7 +766,7 @@ export default function Home() {
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
                     <Gamepad2 className="w-5 h-5" />
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
@@ -806,7 +808,7 @@ export default function Home() {
             <button
               type="button"
               onClick={scrollToTop}
-              className="bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-full shadow-lg transition-all cursor-pointer text-sm flex items-center justify-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all cursor-pointer text-sm flex items-center justify-center"
               title="Scroll to top"
             >
               ⬆️
@@ -817,7 +819,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setIsAiTutorOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
             >
               <span>🤖</span>
               <span>AI Yamato</span>
@@ -825,7 +827,7 @@ export default function Home() {
           ) : (
             <div
               ref={aiChatRef}
-              className={`bg-white border-2 border-emerald-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+              className={`bg-white border-2 border-blue-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
                 isAiFullscreen
                   ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                   : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
@@ -833,7 +835,7 @@ export default function Home() {
             >
               <div className="w-full h-full flex flex-col">
                 <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-                  <h3 className="text-sm font-bold text-emerald-900 flex items-center gap-2 m-0">
+                  <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2 m-0">
                     <span>🤖</span> Japanese Tutor AI Yamato
                   </h3>
                   <div className="flex items-center gap-1.5">
@@ -866,9 +868,9 @@ export default function Home() {
                 </p>
 
               {/* Learning Level Selection UI */}
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-emerald-900">Learning Pace</span>
-                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-emerald-200">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-blue-900">Learning Pace</span>
+                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-blue-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
                       key={level}
@@ -876,8 +878,8 @@ export default function Home() {
                       onClick={() => setTutorLevel(level)}
                       className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition ${
                         tutorLevel === level
-                          ? "bg-emerald-600 text-white shadow-xs"
-                          : "text-slate-600 hover:text-emerald-700"
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-blue-700"
                       }`}
                     >
                       {level}
@@ -896,7 +898,7 @@ export default function Home() {
                     <div
                       className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
                         msg.role === "user"
-                          ? "bg-emerald-600 text-white rounded-br-xs"
+                          ? "bg-blue-600 text-white rounded-br-xs"
                           : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
                       }`}
                     >
@@ -909,7 +911,7 @@ export default function Home() {
                             dangerouslySetInnerHTML={{ __html: msg.content }}
                           />
                           {msg.imageUrl && (
-                            <div className="mt-2 rounded-lg overflow-hidden border border-emerald-200 bg-emerald-50/50 p-1">
+                            <div className="mt-2 rounded-lg overflow-hidden border border-blue-200 bg-blue-50/50 p-1">
                               <img
                                 src={msg.imageUrl}
                                 alt="AI Yamato Visual Explanation"
@@ -917,7 +919,7 @@ export default function Home() {
                                 className="w-full h-auto rounded-md object-contain max-h-48 cursor-pointer hover:opacity-95 transition"
                                 title="Click to enlarge image"
                               />
-                              <p className="text-[10px] text-emerald-800 text-center mt-1 font-medium cursor-pointer" onClick={() => setModalImageSrc(msg.imageUrl || null)}>
+                              <p className="text-[10px] text-blue-800 text-center mt-1 font-medium cursor-pointer" onClick={() => setModalImageSrc(msg.imageUrl || null)}>
                                 ✨ Yamato Custom Diagram & Illustration (Click to Enlarge)
                               </p>
                             </div>
@@ -935,13 +937,13 @@ export default function Home() {
               {/* Input Form & Visual Aid Checkbox */}
               <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                 <div className="flex items-center gap-2 px-1">
-                  <label className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 cursor-pointer select-none">
+                  <label className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={requestVisualAid}
                       onChange={(e) => setRequestVisualAid(e.target.checked)}
                       disabled={isTutorLoading}
-                      className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
+                      className="rounded border-blue-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
                     />
                     <span>🎨 explain with diagrams and illustrations</span>
                   </label>
@@ -954,12 +956,12 @@ export default function Home() {
                     onChange={(e) => setTutorInput(e.target.value)}
                     placeholder="Ask AI tutor anything..."
                     disabled={isTutorLoading}
-                    className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
+                    className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50"
                   />
                   <button
                     type="submit"
                     disabled={isTutorLoading || !tutorInput.trim()}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
                   >
                     Send
                   </button>
@@ -989,11 +991,11 @@ export default function Home() {
 
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-emerald-500/30">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">
                     🧠
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 px-2 py-0.5 rounded bg-emerald-500/10">Daily Challenge (+2 Credits)</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge (+2 Credits)</span>
                     <h3 className="text-lg font-extrabold tracking-tight">Today's Japanese & Culture Quiz</h3>
                   </div>
                 </div>
@@ -1004,10 +1006,10 @@ export default function Home() {
 
                 <div className="space-y-2.5">
                   {currentQuiz.options.map((option, idx) => {
-                    let btnStyle = "border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20";
+                    let btnStyle = "border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/20";
                     if (isAnswerSubmitted || hasCompletedTodayQuiz) {
                       if (idx === currentQuiz.answer) {
-                        btnStyle = "bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold";
+                        btnStyle = "bg-blue-500/10 border-blue-500 text-blue-700 dark:text-blue-300 font-bold";
                       } else if (idx === selectedOption) {
                         btnStyle = "bg-red-500/10 border-red-500 text-red-600";
                       } else {
@@ -1023,14 +1025,14 @@ export default function Home() {
                         className={`w-full p-3.5 rounded-xl border text-xs sm:text-sm text-left transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
                       >
                         <span>{option}</span>
-                        {(isAnswerSubmitted || hasCompletedTodayQuiz) && idx === currentQuiz.answer && <Check className="w-4 h-4 text-emerald-600" />}
+                        {(isAnswerSubmitted || hasCompletedTodayQuiz) && idx === currentQuiz.answer && <Check className="w-4 h-4 text-blue-600" />}
                       </button>
                     );
                   })}
                 </div>
 
                 {(isAnswerSubmitted || hasCompletedTodayQuiz) && (
-                  <div className={`p-4 rounded-2xl border text-xs space-y-2 text-left ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-200' : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200'}`}>
+                  <div className={`p-4 rounded-2xl border text-xs space-y-2 text-left ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : 'bg-red-500/10 border-red-500/30 text-red-800 dark:text-red-200'}`}>
                     <p className="font-bold">
                       {hasCompletedTodayQuiz && !isAnswerSubmitted 
                         ? "✨ You have already completed today's quiz! (Credits earned: +2)" 
