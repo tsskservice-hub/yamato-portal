@@ -17,11 +17,11 @@ export interface PlanConfig {
   isMostPopular?: boolean;
 }
 
-// 💡 キャンペーンに関する共通文言の定義
+// 💡 キャンペーンおよびボーナスクレジットの有効期限に関する共通文言の定義
 export const CAMPAIGN_NOTICE = {
   title: "Limited-Time Campaign (Until October 29)",
-  description: "Paid packs include bonus credits useable until October 29! Standard base credits are unexpired.",
-  rawText: "Limited-Time Campaign (Until October 29): Paid packs include bonus credits useable until October 29! Standard base credits are unexpired."
+  description: "Paid packs include bonus credits valid until October 29! Standard base credits do not expire.",
+  rawText: "Limited-Time Campaign (Until October 29): Paid packs include bonus credits valid until October 29! (Bonus credits expire on Oct 29; standard base credits are unexpired.)"
 };
 
 export const PRICE_PLANS: Record<string, PlanConfig> = {
@@ -51,7 +51,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     regularCredits: 1000,
     bonusCredits: 1000,
     expiryDate: '2026-10-29',
-    badge: "2,000 Credits (1,000 unexpired + 1,000 bonus until Oct 29)",
+    badge: "2,000 Credits (1,000 unexpired + 1,000 bonus valid until Oct 29)",
     description: "Great for beginners. Ideal for a few essay corrections or voice roleplay sessions.",
     features: [
       "Standard AI Chat & Q&A",
@@ -67,7 +67,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     regularCredits: 2800,
     bonusCredits: 2800,
     expiryDate: '2026-10-29',
-    badge: "5,600 Credits (2,800 unexpired + 2,800 bonus until Oct 29)",
+    badge: "5,600 Credits (2,800 unexpired + 2,800 bonus valid until Oct 29)",
     description: "Our most popular choice. Perfect for regular study routines and test preparation.",
     features: [
       "Double Value Promotion",
@@ -84,7 +84,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     regularCredits: 6000,
     bonusCredits: 6000,
     expiryDate: '2026-10-29',
-    badge: "12,000 Credits (6,000 unexpired + 6,000 bonus until Oct 29)",
+    badge: "12,000 Credits (6,000 unexpired + 6,000 bonus valid until Oct 29)",
     description: "For heavy users and premium-intensive drills. Maximum value with doubled bonus credits.",
     features: [
       "Double Value Promotion",
