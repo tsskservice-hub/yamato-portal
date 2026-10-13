@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（青テーマ・やまと先生表記）
  */
 import { useState, useEffect, useRef } from "react";
 
@@ -22,7 +22,7 @@ export function ChatYamatoConcierge() {
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
 
-  const characterName = "やまと先生 (Concierge)";
+  const characterName = "やまと先生";
   const initialGreeting = "Hello, my friend! 🌟 Welcome to the Yamato Portal. I am Yamato-sensei, your guide and concierge. Please feel free to ask me anything about our Japanese quizzes, mini-games, pricing plans, or portal features!";
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
@@ -75,7 +75,7 @@ export function ChatYamatoConcierge() {
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
 
-    // ポータルデータのペイロード（必要に応じてここでハードコードまたは安全に定義）
+    // ポータルデータのペイロード
     const portalContextPayload = {
       quizzes: [
         { title: "VCE Japanese Kanji & Vocabulary", description: "Interactive practice aligned with Australian secondary curricula." },
@@ -142,7 +142,7 @@ export function ChatYamatoConcierge() {
         <button
           type="button"
           onClick={() => setIsAiTutorOpen(true)}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
         >
           <span>🤖</span>
           <span>{characterName}</span>
@@ -150,7 +150,7 @@ export function ChatYamatoConcierge() {
       ) : (
         <div
           ref={aiChatRef}
-          className={`bg-white border-2 border-emerald-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+          className={`bg-white border-2 border-blue-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
             isAiFullscreen
               ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
               : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
@@ -159,7 +159,7 @@ export function ChatYamatoConcierge() {
           <div className="w-full h-full flex flex-col">
             {/* ヘッダー */}
             <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-              <h3 className="text-sm font-bold text-emerald-900 flex items-center gap-2 m-0">
+              <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2 m-0">
                 <span>🤖</span> {characterName}
               </h3>
               <div className="flex items-center gap-1.5">
@@ -193,7 +193,7 @@ export function ChatYamatoConcierge() {
                   <div
                     className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
                       msg.role === "user"
-                        ? "bg-emerald-600 text-white rounded-br-xs"
+                        ? "bg-blue-600 text-white rounded-br-xs"
                         : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
                     }`}
                   >
@@ -221,12 +221,12 @@ export function ChatYamatoConcierge() {
                   onChange={(e) => setTutorInput(e.target.value)}
                   placeholder="Ask Yamato anything..."
                   disabled={isTutorLoading}
-                  className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
+                  className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50"
                 />
                 <button
                   type="submit"
                   disabled={isTutorLoading || !tutorInput.trim()}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
                 >
                   Send
                 </button>
