@@ -24,8 +24,8 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import PageLayout from '../components/PageLayout';
 
-// 💡 共通の price-plans から直接インポート
-import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from '../data/price-plans';
+// 💡 共通の price-plans から price-plans およびキャンペーン文言をインポート
+import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/price-plans';
 
 // 💡 Quiz data and helper functions imported from external file
 import { getTodayQuiz, QuizItem } from '../data/quizzes';
@@ -497,9 +497,10 @@ export default function Home() {
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
                
+            {/* 💡 共通の CAMPAIGN_NOTICE からインポートした文言を表示 */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
               <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
-              <span>Limited-Time Campaign (Until October 29): Paid packs include bonus credits useable until October 29! Standard base credits are unexpired.</span>
+              <span>{CAMPAIGN_NOTICE.rawText}</span>
             </div>
           </div>
 

@@ -4,7 +4,7 @@ import { Sparkles, ArrowRight, ShieldCheck, Check, ShoppingBag, GraduationCap, M
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
-import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
+import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from "../data/price-plans";
 
 export default function Prices() {
   const navigate = useNavigate();
@@ -174,7 +174,7 @@ export default function Prices() {
             <div className="text-center space-y-4 max-w-3xl mx-auto mb-12">
               <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
                 <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-bounce" />
-                <span>Limited-Time Campaign (Until October 29): Paid packs include bonus credits useable until October 29! Standard base credits are unexpired.</span>
+                <span>{CAMPAIGN_NOTICE.rawText}</span>
               </div>
             </div>
 

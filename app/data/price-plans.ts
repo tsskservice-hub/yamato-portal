@@ -17,6 +17,13 @@ export interface PlanConfig {
   isMostPopular?: boolean;
 }
 
+// 💡 キャンペーンに関する共通文言の定義
+export const CAMPAIGN_NOTICE = {
+  title: "Limited-Time Campaign (Until October 29)",
+  description: "Paid packs include bonus credits useable until October 29! Standard base credits are unexpired.",
+  rawText: "Limited-Time Campaign (Until October 29): Paid packs include bonus credits useable until October 29! Standard base credits are unexpired."
+};
+
 export const PRICE_PLANS: Record<string, PlanConfig> = {
   free: {
     id: 'free',
