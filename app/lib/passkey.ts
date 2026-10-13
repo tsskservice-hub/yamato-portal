@@ -18,10 +18,23 @@ export async function signUpAndRegisterPasskey(email: string): Promise<boolean> 
 
   if (signUpError) throw signUpError;
 
-  if (!signUpData.session) {
+  if (!signUpData.session || !signUpData.user) {
     throw new Error(
       "Account created successfully, but auth session failed to initialize. Please sign in again."
     );
+  }
+
+  // 💡 追加: profiles テーブルにユーザーの ID と email を保存する
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .upsert({
+      id: signUpData.user.id,
+      email: trimmedEmail,
+    });
+
+  if (profileError) {
+    console.error("Failed to save profile:", profileError);
+    throw new Error("Failed to save user profile to database.");
   }
 
   // 2. ブラウザの生体認証（Passkey）登録プロンプトの呼び出し
