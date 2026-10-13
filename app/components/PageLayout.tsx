@@ -81,7 +81,9 @@ export default function PageLayout({
       <main className="flex-grow">
         {children}
       </main>
-      <Footer />
+      
+      {/* 💡 フッターに認証モーダルを開くハンドラーを渡す */}
+      <Footer onOpenAuth={handleOpenAuthModal} />
 
       {/* 💡 どのページからでも呼び出せる共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (

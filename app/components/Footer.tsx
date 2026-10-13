@@ -1,7 +1,44 @@
-import { Link } from "@remix-run/react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "@remix-run/react";
+import { supabase } from "../lib/supabaseClient";
 
-export default function Footer() {
+type FooterProps = {
+  onOpenAuth?: (mode: 'signin' | 'signup') => void;
+};
+
+export default function Footer({ onOpenAuth }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // マウント時にSupabaseのセッション状態をチェック
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session?.user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleMyAccountClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isLoggedIn) {
+      // ログイン済みの場合はアカウント設定画面へ移動
+      navigate("/settings/account");
+    } else {
+      // 未ログインの場合は、ページ側から渡されたパスキー認証モーダルを開くハンドラーを実行
+      if (onOpenAuth) {
+        onOpenAuth('signin');
+      } else {
+        // 万が一ハンドラーがない場合のフォールバック（通常のサインイン処理など）
+        navigate("/auth/email");
+      }
+    }
+  };
 
   return (
     <footer className="bg-white border-t border-slate-200 mt-auto">
@@ -13,7 +50,7 @@ export default function Footer() {
             &copy; {currentYear} AI Yamato. All rights reserved. Designed for VCE Japanese learners.
           </div>
 
-          {/* Legal and Support Links (右下常駐AIとかぶらないよう右側にマージンを追加して左に寄せる) */}
+          {/* Legal and Support Links */}
           <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm text-slate-600 mr-0 md:mr-28">
             <Link
               to="/terms"
@@ -39,12 +76,12 @@ export default function Footer() {
             >
               Contact
             </Link>
-            <Link
-              to="/settings/account"
-              className="hover:text-indigo-600 transition-colors"
+            <button
+              onClick={handleMyAccountClick}
+              className="hover:text-indigo-600 transition-colors bg-transparent border-none p-0 cursor-pointer text-sm font-normal text-slate-600"
             >
               My Account
-            </Link>
+            </button>
           </div>
 
         </div>
