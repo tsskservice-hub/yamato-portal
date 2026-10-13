@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（価格データ連携対応版）
+ * @description ヤマトAI 独立APIテスト画面（価格データおよびクイズデータ連携対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -8,6 +8,8 @@ import { useState } from "react";
 import { YamatoChat } from "../components/YamatoChat";
 // ★価格データとクレジット消費ガイドをインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
+// ★本日のクイズ取得関数とクイズリストをインポート
+import { getTodayQuiz, DAILY_QUIZZES } from "../data/quizzes";
 
 export const meta: MetaFunction = () => {
   return [
@@ -75,10 +77,12 @@ export default function TestYamatoPage() {
 
   const currentConfig = appConfig[activeAppType];
 
-  // ★コンシェルジュヤマト等に渡すポータルデータ（価格プランと消費ガイド）を定義
+  // ★コンシェルジュヤマト等に渡すポータルデータ（価格プラン、消費ガイド、本日のクイズ）を定義
   const portalContextData = {
     pricePlans: PRICE_PLANS,
     creditGuide: CREDIT_CONSUMPTION_GUIDE,
+    todayQuiz: getTodayQuiz(),     // 本日の日付に対応するクイズデータを渡す
+    allQuizzes: DAILY_QUIZZES,     // 全クイズデータ
   };
 
   return (
@@ -117,14 +121,14 @@ export default function TestYamatoPage() {
         </div>
       </main>
 
-      {/* YamatoChat に additionalContext として価格データを渡す */}
+      {/* YamatoChat に additionalContext としてクイズデータを追加した portalContextData を渡す */}
       <YamatoChat 
         appType={activeAppType}
         characterName={currentConfig.name}
         initialGreeting={currentConfig.greeting}
         themeColor={currentConfig.themeColor}
         defaultOpen={false}
-        additionalContext={portalContextData} // ★ここを追加
+        additionalContext={portalContextData}
       />
 
       <footer className="text-center text-xs text-slate-400 mt-8">
