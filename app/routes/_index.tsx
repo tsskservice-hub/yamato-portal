@@ -24,17 +24,11 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import PageLayout from '../components/PageLayout';
 
-// 💡 PRICING_PLANS imported from prices.tsx for full synchronization
-import { PRICING_PLANS } from './prices';
+// 💡 共通の price-plans から直接インポート
+import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from '../data/price-plans';
 
 // 💡 Quiz data and helper functions imported from external file
 import { getTodayQuiz, QuizItem } from '../data/quizzes';
-
-export const STRIPE_PRICES = {
-  starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // Actual Stripe Price ID
-  standard: 'price_1xxxx_standard',          // Update with your actual Stripe Price ID if needed
-  pro: 'price_1xxxx_pro',                    // Update with your actual Stripe Price ID if needed
-};
 
 // Auto demo conversations in English
 const DEMO_CONVERSATIONS = [
@@ -255,7 +249,6 @@ export default function Home() {
         const typedData = data as { credits?: number; last_quiz_date?: string };
         setCredits(typedData.credits ?? 10);
 
-        // Check if today's quiz has already been completed
         const todayStr = new Date().toISOString().split('T')[0];
         if (typedData.last_quiz_date === todayStr) {
           setHasCompletedTodayQuiz(true);
@@ -291,9 +284,8 @@ export default function Home() {
     if (queryParams.get('success') === 'true') {
       alert('Payment completed! Your credits have been updated.');
       if (user) {
-        fetchUserCredits(user.id); // Supabaseから最新残高を再取得
+        fetchUserCredits(user.id);
       }
-      // URLからクエリパラメータを削除
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [user]);
@@ -311,7 +303,6 @@ export default function Home() {
       const todayStr = new Date().toISOString().split('T')[0];
       const newCredits = credits + 2;
 
-      // Update Supabase credits and last_quiz_date
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -323,8 +314,6 @@ export default function Home() {
       if (!error) {
         setCredits(newCredits);
         setHasCompletedTodayQuiz(true);
-      } else {
-        console.error('Failed to update quiz credit rewards:', error);
       }
     }
   };
@@ -364,7 +353,7 @@ export default function Home() {
       }
 
       if (data.url) {
-        window.location.href = data.url; // Stripeチェックアウトへリダイレクト
+        window.location.href = data.url;
       } else {
         throw new Error('No checkout URL returned from server.');
       }
@@ -386,10 +375,9 @@ export default function Home() {
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-             
+            
           {/* 2. Hero Section with YamatoChat-style Auto Demo */}
           <section className="text-center space-y-6 max-w-4xl mx-auto">
-            {/* アクセントの赤バッジ */}
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
               <Flame className="w-3.5 h-3.5 text-red-600 animate-pulse" />
               <span>Decades of Expertise in Japanese Language Education</span>
@@ -406,7 +394,7 @@ export default function Home() {
               Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
             </p>
 
-            {/* 💡 Daily Quiz Banner for Logged-in Users (English) */}
+            {/* 💡 Daily Quiz Banner for Logged-in Users */}
             {user && (
               <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-red-600/10 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
                 <div className="flex items-center space-x-3">
@@ -452,7 +440,6 @@ export default function Home() {
                 <div className="flex items-center space-x-2">
                   <span className="text-base">🤖</span>
                   <span className="font-bold text-sm text-blue-900 dark:text-blue-200">Japanese Tutor AI Yamato (Auto Demo)</span>
-                  {/* アクセントに赤を使用 */}
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 font-bold animate-pulse">● Live Demo</span>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-medium">
@@ -460,7 +447,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Learning Pace Mock Display */}
               <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-xl p-2.5 mb-4 flex items-center justify-between">
                 <span className="text-xs font-bold text-blue-900 dark:text-blue-300">Learning Pace (Demo)</span>
                 <div className="inline-flex rounded-lg bg-white dark:bg-slate-900 p-0.5 shadow-xs border border-blue-200 dark:border-blue-800">
@@ -468,9 +454,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Chat History Preview Area */}
               <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 mb-4 min-h-[160px] flex flex-col justify-center">
-                {/* User Message Bubble */}
                 <div className="flex justify-end">
                   <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
                     <p>{displayedUserText}
@@ -479,7 +463,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Yamato Response Bubble */}
                 <div className="flex justify-start">
                   <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                     <p>
@@ -514,7 +497,6 @@ export default function Home() {
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
                
-            {/* Limited Time Campaign Banner (アクセントの赤枠・アイコン) */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
               <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
               <span>Limited-Time Campaign (Until October 29): Paid packs include bonus credits useable until October 29! Standard base credits are unexpired.</span>
@@ -525,17 +507,17 @@ export default function Home() {
             {/* Free Plan */}
             <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICING_PLANS.free.name}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICE_PLANS.free.name}</span>
                 <div>
-                  <span className="text-4xl font-black">{PRICING_PLANS.free.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.free.period}</span>
+                  <span className="text-4xl font-black">{PRICE_PLANS.free.price}</span>
+                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.free.period}</span>
                 </div>
                 <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                  {PRICING_PLANS.free.badge}
+                  {PRICE_PLANS.free.badge}
                 </div>
-                <p className="text-xs text-slate-500">{PRICING_PLANS.free.description}</p>
+                <p className="text-xs text-slate-500">{PRICE_PLANS.free.description}</p>
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICING_PLANS.free.features.map((feat, idx) => (
+                  {PRICE_PLANS.free.features.map((feat: string, idx: number) => (
                     <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
                   ))}
                 </ul>
@@ -544,35 +526,35 @@ export default function Home() {
                 onClick={() => handleOpenAuthModal('signup')}
                 className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                {PRICING_PLANS.free.ctaText}
+                {PRICE_PLANS.free.ctaText}
               </button>
             </div>
 
             {/* Starter Pack */}
             <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICING_PLANS.starter.name}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.starter.name}</span>
                 <div>
-                  <span className="text-4xl font-black">{PRICING_PLANS.starter.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.starter.period}</span>
+                  <span className="text-4xl font-black">{PRICE_PLANS.starter.price}</span>
+                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.starter.period}</span>
                 </div>
                 <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                  {PRICING_PLANS.starter.badge}
+                  {PRICE_PLANS.starter.badge}
                 </div>
-                <p className="text-xs text-slate-500">{PRICING_PLANS.starter.description}</p>
+                <p className="text-xs text-slate-500">{PRICE_PLANS.starter.description}</p>
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICING_PLANS.starter.features.map((feat, idx) => (
+                  {PRICE_PLANS.starter.features.map((feat: string, idx: number) => (
                     <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
                   ))}
                 </ul>
               </div>
               <div className="mt-6 space-y-3">
                 <button 
-                  onClick={() => handleCheckout(STRIPE_PRICES.starter)} 
-                  disabled={checkoutLoadingPriceId === STRIPE_PRICES.starter}
+                  onClick={() => handleCheckout(PRICE_PLANS.starter.id)} 
+                  disabled={checkoutLoadingPriceId === PRICE_PLANS.starter.id}
                   className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
-                  {checkoutLoadingPriceId === STRIPE_PRICES.starter && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {checkoutLoadingPriceId === PRICE_PLANS.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Buy Starter Pack</span>
                 </button>
                 <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
@@ -581,34 +563,34 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Standard Pack (Most Popular - 青色系に変更) */}
+            {/* Standard Pack */}
             <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
                 Most Popular
               </div>
               <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICING_PLANS.standard.name}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.standard.name}</span>
                 <div>
-                  <span className="text-4xl font-black">{PRICING_PLANS.standard.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.standard.period}</span>
+                  <span className="text-4xl font-black">{PRICE_PLANS.standard.price}</span>
+                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.standard.period}</span>
                 </div>
                 <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                  {PRICING_PLANS.standard.badge}
+                  {PRICE_PLANS.standard.badge}
                 </div>
-                <p className="text-xs text-slate-500">{PRICING_PLANS.standard.description}</p>
+                <p className="text-xs text-slate-500">{PRICE_PLANS.standard.description}</p>
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICING_PLANS.standard.features.map((feat, idx) => (
+                  {PRICE_PLANS.standard.features.map((feat: string, idx: number) => (
                     <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
                   ))}
                 </ul>
               </div>
               <div className="mt-6 space-y-3">
                 <button 
-                  onClick={() => handleCheckout(STRIPE_PRICES.standard)} 
-                  disabled={checkoutLoadingPriceId === STRIPE_PRICES.standard}
+                  onClick={() => handleCheckout(PRICE_PLANS.standard.id)} 
+                  disabled={checkoutLoadingPriceId === PRICE_PLANS.standard.id}
                   className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
-                  {checkoutLoadingPriceId === STRIPE_PRICES.standard && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {checkoutLoadingPriceId === PRICE_PLANS.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Buy Standard Pack</span>
                 </button>
                 <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
@@ -620,28 +602,28 @@ export default function Home() {
             {/* Pro Intensivist */}
             <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICING_PLANS.pro.name}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICE_PLANS.pro.name}</span>
                 <div>
-                  <span className="text-4xl font-black">{PRICING_PLANS.pro.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.pro.period}</span>
+                  <span className="text-4xl font-black">{PRICE_PLANS.pro.price}</span>
+                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.pro.period}</span>
                 </div>
                 <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                  {PRICING_PLANS.pro.badge}
+                  {PRICE_PLANS.pro.badge}
                 </div>
-                <p className="text-xs text-slate-500">{PRICING_PLANS.pro.description}</p>
+                <p className="text-xs text-slate-500">{PRICE_PLANS.pro.description}</p>
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICING_PLANS.pro.features.map((feat, idx) => (
+                  {PRICE_PLANS.pro.features.map((feat: string, idx: number) => (
                     <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>{feat}</span></li>
                   ))}
                 </ul>
               </div>
               <div className="mt-6 space-y-3">
                 <button 
-                  onClick={() => handleCheckout(STRIPE_PRICES.pro)} 
-                  disabled={checkoutLoadingPriceId === STRIPE_PRICES.pro}
+                  onClick={() => handleCheckout(PRICE_PLANS.pro.id)} 
+                  disabled={checkoutLoadingPriceId === PRICE_PLANS.pro.id}
                   className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
-                  {checkoutLoadingPriceId === STRIPE_PRICES.pro && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {checkoutLoadingPriceId === PRICE_PLANS.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Buy Pro Pack</span>
                 </button>
                 <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
@@ -657,10 +639,12 @@ export default function Home() {
               <span>Credit Consumption Guide</span>
             </div>
             <div className="space-y-2 text-slate-500">
-              <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Text Chat (Q&A / Vocabulary)</span> <span className="font-semibold text-slate-700 dark:text-slate-300">1-2 credits / turn</span></div>
-              <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Essay / Genkoyoshi Correctors</span> <span className="font-semibold text-slate-700 dark:text-slate-300">20-30 credits / session</span></div>
-              <div className="flex justify-between border-b border-slate-500/10 pb-1.5"><span>Oral Exam / Voice Roleplay</span> <span className="font-semibold text-slate-700 dark:text-slate-300">15-25 credits / min</span></div>
-              <div className="flex justify-between pt-0.5"><span>Mini Games & Drills</span> <span className="font-semibold text-blue-600">Free / 0.5 credits</span></div>
+              {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
+                <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5">
+                  <span>{row.item}</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -673,7 +657,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* 1. genkoyoshi-editor (Active / First) */}
+            {/* 1. genkoyoshi-editor */}
             <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
@@ -690,7 +674,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 2. eoy-oral-drill (Coming Soon) */}
+            {/* 2. eoy-oral-drill */}
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -708,7 +692,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 3. eoy-oral-elaborate (Coming Soon) */}
+            {/* 3. eoy-oral-elaborate */}
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -726,7 +710,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 4. eoy-oral-mock (Coming Soon) */}
+            {/* 4. eoy-oral-mock */}
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -744,7 +728,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 5. eoy-writing (Coming Soon) */}
+            {/* 5. eoy-writing */}
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -762,7 +746,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 6. game-igo (Coming Soon) */}
+            {/* 6. game-igo */}
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -780,7 +764,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 7. oral-exam-questions (Coming Soon) */}
+            {/* 7. oral-exam-questions */}
             <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -867,7 +851,6 @@ export default function Home() {
                   Ask questions about Japanese language, grammar, kanji, or culture!
                 </p>
 
-              {/* Learning Level Selection UI */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-blue-900">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-blue-200">
@@ -888,7 +871,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Chat History Area */}
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3">
                 {tutorMessages.map((msg, idx) => (
                   <div
@@ -934,7 +916,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Input Form & Visual Aid Checkbox */}
               <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                 <div className="flex items-center gap-2 px-1">
                   <label className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800 cursor-pointer select-none">
@@ -972,7 +953,7 @@ export default function Home() {
         )}
       </aside>
 
-        {/* 💡 Daily Quiz Modal (English Instructions & UI) */}
+        {/* 💡 Daily Quiz Modal */}
         {isQuizModalOpen && (
           <div 
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
