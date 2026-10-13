@@ -1,6 +1,6 @@
 /**
  * @file YamatoChat.tsx
- * @description ヤマトAIチャットウィジェット（一括応答・デフォルト表示版）
+ * @description ヤマトAIチャットウィジェット（初期非表示共通対応・カラーテーマ切り替え対応版）
  */
 import { useState, useEffect, useRef } from "react";
 
@@ -10,13 +10,45 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// 外部から受け取るプロパティ（Props）の型定義に appType を追加
+// 外部から受け取るプロパティ（Props）の型定義
 export type YamatoChatProps = {
-  characterName?: string;        // チャット窓のタイトルに表示する名前
+  characterName?: string;        // チャット窓のタイトルに表示する名前（例: "やまと先生"）
   initialGreeting?: string;      // 最初の一言メッセージ
   systemPrompt?: string;         // キャラクター固有の指示（将来の拡張用）
   appType?: "concierge" | "writing" | "oral" | "general" | string;  
   additionalContext?: any;       // コンシェルジュ等に渡す追加のポータルデータ
+  
+  // ★追加: 共通の初期非表示仕様とテーマカラー設定
+  defaultOpen?: boolean;         // 初期状態で開いておくか（デフォルトは false＝非表示・折りたたみボタン）
+  themeColor?: "emerald" | "blue" | string; // テーマカラー（"emerald" または "blue" など）
+};
+
+// カラーテーマごとのスタイル定義（Tailwind CSSのクラスが静的解析で消えないよう完全なクラス名で記述）
+const themeStyles = {
+  emerald: {
+    button: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    border: "border-emerald-300",
+    headerText: "text-emerald-900",
+    badgeBg: "bg-emerald-50 border-emerald-200",
+    badgeText: "text-emerald-900",
+    buttonActive: "bg-emerald-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-emerald-700",
+    userBubble: "bg-emerald-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-emerald-500",
+    submitBtn: "bg-emerald-600 hover:bg-emerald-700 text-white",
+  },
+  blue: {
+    button: "bg-blue-600 hover:bg-blue-700 text-white",
+    border: "border-blue-300",
+    headerText: "text-blue-900",
+    badgeBg: "bg-blue-50 border-blue-200",
+    badgeText: "text-blue-900",
+    buttonActive: "bg-blue-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-blue-700",
+    userBubble: "bg-blue-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-blue-500",
+    submitBtn: "bg-blue-600 hover:bg-blue-700 text-white",
+  },
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -32,10 +64,15 @@ export function YamatoChat({
   systemPrompt = "",
   appType = "general",
   additionalContext,
+  defaultOpen = false,      // ★すべてのヤマトで初期状態を「非表示（折りたたまれたボタン）」に統一
+  themeColor = "emerald",   // デフォルトのテーマカラー
 }: YamatoChatProps) {
-  const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(true);
+  const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
+
+  // 選択されたテーマのスタイルセットを取得（存在しない場合は emerald をフォールバック）
+  const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.emerald;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     {
@@ -173,7 +210,7 @@ export function YamatoChat({
           <button
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
+            className={`${currentTheme.button} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm`}
           >
             <span>🤖</span>
             <span>{characterName}</span>
@@ -181,7 +218,7 @@ export function YamatoChat({
         ) : (
           <div
             ref={aiChatRef}
-            className={`bg-white border-2 border-emerald-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+            className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                 : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
@@ -190,7 +227,7 @@ export function YamatoChat({
             <div className="w-full h-full flex flex-col">
               {/* ヘッダー */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-                <h3 className="text-sm font-bold text-emerald-900 flex items-center gap-2 m-0">
+                <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-2 m-0`}>
                   <span>🤖</span> {characterName}
                 </h3>
                 <div className="flex items-center gap-1.5">
@@ -222,16 +259,16 @@ export function YamatoChat({
               </p>
 
               {/* 学習ペース選択UI */}
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-emerald-900">Learning Pace</span>
-                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-emerald-200">
+              <div className={`${currentTheme.badgeBg} border rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0`}>
+                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
+                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
                       key={level}
                       type="button"
                       onClick={() => setTutorLevel(level)}
                       className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition ${
-                        tutorLevel === level ? "bg-emerald-600 text-white shadow-xs" : "text-slate-600 hover:text-emerald-700"
+                        tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
                       }`}
                     >
                       {level}
@@ -247,7 +284,7 @@ export function YamatoChat({
                     <div
                       className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
                         msg.role === "user"
-                          ? "bg-emerald-600 text-white rounded-br-xs"
+                          ? currentTheme.userBubble
                           : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
                       }`}
                     >
@@ -275,12 +312,12 @@ export function YamatoChat({
                     onChange={(e) => setTutorInput(e.target.value)}
                     placeholder="ヤマトに質問を入力..."
                     disabled={isTutorLoading}
-                    className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50"
+                    className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                   />
                   <button
                     type="submit"
                     disabled={isTutorLoading || !tutorInput.trim()}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                    className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                   >
                     送信
                   </button>

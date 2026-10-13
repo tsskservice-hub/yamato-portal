@@ -1,3 +1,7 @@
+/**
+ * @file test-yamato.tsx
+ * @description ヤマトAI 独立APIテスト画面（テーマカラー・初期非表示対応版）
+ */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
 import { useState } from "react";
@@ -13,6 +17,13 @@ export const meta: MetaFunction = () => {
 // サポートするアプリタイプの型定義
 type AppType = "concierge" | "writing" | "oral" | "general";
 
+// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー）
+type AppConfig = {
+  name: string;
+  greeting: string;
+  themeColor: "emerald" | "blue";
+};
+
 export default function TestYamatoPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
@@ -20,7 +31,6 @@ export default function TestYamatoPage() {
   // === 合言葉を tssk224 に設定 ===
   const SECRET_TOKEN = "tssk224";
 
-  // ★修正1: useState に正しく型を指定
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
 
   // トークンが一致しない場合はアクセス権なし画面を返す
@@ -38,29 +48,32 @@ export default function TestYamatoPage() {
     );
   }
 
-  // ★修正2: as const を付与して型エラーを回避
-  const appConfig: Record<AppType, { name: string; greeting: string }> = {
+  // as const を付与して型エラーを回避しつつ、テーマカラーや名称を定義
+  const appConfig: Record<AppType, AppConfig> = {
     concierge: {
-      name: "Yamato Concierge (LP案内役)",
+      name: "やまと先生", // ご要望の表示名に調整
       greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
+      themeColor: "blue", // ポータル（コンシェルジュ）は青
     },
     writing: {
       name: "VCEライティングヤマト",
       greeting: "Hello, my friend! 🌟 Welcome to your VCE Japanese writing practice session! Please upload your handwritten text or type your response.",
+      themeColor: "emerald", // ライティングは緑
     },
     oral: {
       name: "VCE口頭試験ヤマト",
       greeting: "Hello, my friend! 🌟 Welcome to your VCE Oral Exam practice room. Are you ready for Section 1 General Conversation or Section 2 Detailed Study?",
+      themeColor: "emerald", // 口頭試験は緑
     },
     general: {
       name: "一般学習ヤマト",
       greeting: "Hello, my friend! 🌟 Welcome! What would you like to learn about the Japanese language or culture today?",
+      themeColor: "emerald", // 一般学習は緑
     },
   };
 
   const currentConfig = appConfig[activeAppType];
 
-  // 以降は合言葉が一致した場合のみレンダリングされるテスト画面
   return (
     <div className="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative p-8">
       {/* ページ本体のヘッダー・切り替えUI */}
@@ -83,25 +96,27 @@ export default function TestYamatoPage() {
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
-                {type === "concierge" && "👋 LP Concierge"}
-                {type === "writing" && "✍️ VCE Writing"}
-                {type === "oral" && "🎤 VCE Oral"}
-                {type === "general" && "🌟 General"}
+                {type === "concierge" && "👋 LP Concierge (青)"}
+                {type === "writing" && "✍️ VCE Writing (緑)"}
+                {type === "oral" && "🎤 VCE Oral (緑)"}
+                {type === "general" && "🌟 General (緑)"}
               </button>
             ))}
           </div>
 
           <div className="mt-4 text-xs text-slate-400">
-            Current active appType: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{activeAppType}</code>
+            Current active appType: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{activeAppType}</code> | Theme: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{currentConfig.themeColor}</code>
           </div>
         </div>
       </main>
 
-      {/* ★修正3: YamatoChat に appType を渡す */}
+      {/* 共通化された YamatoChat に設定を渡す */}
       <YamatoChat 
         appType={activeAppType}
         characterName={currentConfig.name}
         initialGreeting={currentConfig.greeting}
+        themeColor={currentConfig.themeColor} // モードごとのカラーを反映
+        defaultOpen={false} // すべてのヤマトで初期状態を非表示（折りたたみボタン）に統一
       />
 
       <footer className="text-center text-xs text-slate-400 mt-8">
