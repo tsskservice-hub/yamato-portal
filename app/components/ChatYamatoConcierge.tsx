@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（青テーマ・やまと先生表記）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（初期状態はボタンのみ表示）
  */
 import { useState, useEffect, useRef } from "react";
 
@@ -18,7 +18,8 @@ function sanitizeAiOutput(text: string): string {
 }
 
 export function ChatYamatoConcierge() {
-  const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(true);
+  // 💡 初期状態を閉じている状態（false）に変更し、リロード時にボタンとしておさまるようにします
+  const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
 
