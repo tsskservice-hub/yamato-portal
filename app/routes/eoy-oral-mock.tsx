@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
+import { supabase } from "../lib/supabaseClient";
 
 export const meta: MetaFunction = () => {
   return [
@@ -119,6 +120,9 @@ const oralExamQuestionsData: Record<string, any> = {
 const questionDataRaw = oralExamQuestionsData;
 
 export default function MockOralMode() {
+  const [user, setUser] = useState<any>(null);
+  const [credits, setCredits] = useState<number>(10);
+
   const [examPhase, setExamPhase] = useState<"config" | "examining" | "result">("config");
   const [selectedLevel, setSelectedLevel] = useState<string>("normal");
   const [examType, setExamType] = useState<"sec1" | "sec1_2">("sec1");
@@ -194,6 +198,47 @@ export default function MockOralMode() {
 
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
   const activeAbortControllerRef = useRef<AbortController | null>(null);
+
+  // Supabase session & credits
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserCredits = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        const typedData = data as { credits?: number };
+        setCredits(typedData.credits ?? 10);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user credits:', err);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   // 💡 Canvasによる画像自動圧縮処理（長辺最大1200px, JPEG品質0.8）
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -912,7 +957,11 @@ export default function MockOralMode() {
   };
 
   return (
-    <PageLayout>
+    <PageLayout
+      user={user}
+      credits={credits}
+      onSignOut={handleSignOut}
+    >
       <div className="bg-slate-50 min-h-screen text-slate-800 font-sans relative pb-16">
         <style>{`
           @keyframes avatar-pulse {

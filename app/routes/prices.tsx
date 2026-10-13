@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "@remix-run/react";
-import { Sparkles, ArrowRight, ShieldCheck, Check, ShoppingBag, GraduationCap, Mic, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
+import { Link, useNavigate } from "@remix-run/react";
+import { Sparkles, ArrowRight, ShieldCheck, Check, ShoppingBag, GraduationCap, Mic, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, KeyRound, X } from "lucide-react";
+import { supabase } from "../lib/supabaseClient";
+import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
 
 // ----------------------------------------------------------------------
@@ -67,9 +69,37 @@ export const CREDIT_CONSUMPTION_GUIDE = [
 ];
 
 export default function Prices() {
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(true);
   const [isSpecsOpen, setIsSpecsOpen] = useState(false); // スペック表のトグル状態
 
+  // 💡 Auth & Credits States
+  const [user, setUser] = useState<any>(null);
+  const [credits, setCredits] = useState<number>(10);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [emailInput, setEmailInput] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // 💡 Fetch user credits from Supabase
+  const fetchUserCredits = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        setCredits((data as any).credits ?? 10);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user data:', err);
+    }
+  };
+
+  // 💡 Auth and session handling
   useEffect(() => {
     document.title = "Pricing & Plans - JP Tutor AI Yamato";
     
@@ -82,10 +112,67 @@ export default function Prices() {
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
+    setAuthMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
+  const handlePasskeyAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError(null);
+
+    try {
+      if (authMode === 'signup') {
+        if (!emailInput) {
+          throw new Error('Please enter your email address for passkey registration.');
+        }
+        await signUpAndRegisterPasskey(emailInput);
+        alert('Passkey registration successful! Welcome to AI Yamato.');
+      } else {
+        await signInWithPasskey();
+        alert('Passkey sign in successful!');
+      }
+      setIsAuthModalOpen(false);
+      setEmailInput('');
+    } catch (err: any) {
+      console.error(err);
+      setAuthError(err.message || 'Passkey authentication failed. Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   return (
-    <PageLayout>
+    <PageLayout 
+      user={user} 
+      credits={credits} 
+      onOpenAuth={handleOpenAuthModal} 
+      onSignOut={handleSignOut}
+    >
       <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
         
         <main className="flex-grow">
@@ -181,7 +268,7 @@ export default function Prices() {
                 <div className="mt-6 space-y-3">
                   <a
                     href="#checkout"
-                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5"
+                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>Buy Starter Pack</span>
                   </a>
@@ -215,7 +302,7 @@ export default function Prices() {
                 <div className="mt-6 space-y-3">
                   <a
                     href="#checkout"
-                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5"
+                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>Buy Standard Pack</span>
                   </a>
@@ -246,7 +333,7 @@ export default function Prices() {
                 <div className="mt-6 space-y-3">
                   <a
                     href="#checkout"
-                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5"
+                    className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>Buy Pro Pack</span>
                   </a>
@@ -258,7 +345,7 @@ export default function Prices() {
 
             </div>
 
-            {/* 💡 トグルで開閉可能な縦割り詳細スペック表（価格カードと完全同幅・文字サイズ拡大） */}
+            {/* 💡 トグルで開閉可能な縦割り詳細スペック表 */}
             <div className="mt-10">
               <button
                 onClick={() => setIsSpecsOpen(!isSpecsOpen)}
@@ -278,7 +365,6 @@ export default function Prices() {
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume.</p>
                   </div>
 
-                  {/* 価格カードと同じ 4カラム構造（grid-cols-1 sm:grid-cols-2 lg:grid-cols-4）で完全同幅・文字サイズ拡大 (text-sm) */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
                     
                     {/* Free Plan Specs */}
@@ -347,6 +433,86 @@ export default function Prices() {
           </section>
 
         </main>
+
+        {/* 💡 Passkey Authentication / Registration Modal */}
+        {isAuthModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100">
+              <button 
+                onClick={() => setIsAuthModalOpen(false)}
+                className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
+                    <KeyRound className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-extrabold tracking-tight">
+                    {authMode === 'signup' ? 'Create Account with Passkey' : 'Sign In with Passkey'}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {authMode === 'signup' 
+                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.' 
+                      : 'Authenticate instantly with your registered biometric passkey.'}
+                  </p>
+                </div>
+
+                {authError && (
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">
+                    {authError}
+                  </div>
+                )}
+
+                <form onSubmit={handlePasskeyAuth} className="space-y-4">
+                  {authMode === 'signup' && (
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Email Address</label>
+                      <input 
+                        type="email"
+                        required
+                        placeholder="your.email@school.vic.edu.au"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:border-blue-500 text-slate-900 dark:text-slate-100"
+                      />
+                    </div>
+                  )}
+
+                  <button 
+                    type="submit"
+                    disabled={authLoading}
+                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>{authLoading ? 'Verifying Passkey...' : authMode === 'signup' ? 'Register Passkey' : 'Sign In'}</span>
+                  </button>
+                </form>
+
+                <div className="text-center text-xs">
+                  {authMode === 'signup' ? (
+                    <p className="text-slate-500 dark:text-slate-400">
+                      Already have a passkey?{' '}
+                      <button onClick={() => setAuthMode('signin')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                        Sign In
+                      </button>
+                    </p>
+                  ) : (
+                    <p className="text-slate-500 dark:text-slate-400">
+                      New to AI Yamato?{' '}
+                      <button onClick={() => setAuthMode('signup')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                        Create Account
+                      </button>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </PageLayout>
   );

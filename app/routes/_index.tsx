@@ -22,7 +22,6 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { signUpAndRegisterPasskey, signInWithPasskey } from '../lib/passkey';
 import PageLayout from '../components/PageLayout';
 
 // 💡 PRICING_PLANS imported from prices.tsx for full synchronization
@@ -75,12 +74,8 @@ export default function Home() {
   const [credits, setCredits] = useState<number>(10);
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
-  // Auth modal states
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [emailInput, setEmailInput] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  // 💡 認証モーダル関連のステートは PageLayout 側へ集約したため、ここでは ref やコールバック用の関数を用意
+  const pageLayoutAuthOpenRef = useRef<((mode: 'signin' | 'signup') => void) | null>(null);
 
   // 💡 Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
@@ -334,48 +329,22 @@ export default function Home() {
     }
   };
 
-  const handlePasskeyAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthLoading(true);
-    setAuthError(null);
-
-    try {
-      if (authMode === 'signup') {
-        if (!emailInput) {
-          throw new Error('Please enter your email address for passkey registration.');
-        }
-        await signUpAndRegisterPasskey(emailInput);
-        alert('Passkey registration successful! Welcome to AI Yamato.');
-      } else {
-        await signInWithPasskey();
-        alert('Passkey sign in successful!');
-      }
-      setIsAuthModalOpen(false);
-      setEmailInput('');
-    } catch (err: any) {
-      console.error(err);
-      setAuthError(err.message || 'Passkey authentication failed. Please try again.');
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
   };
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    setAuthMode(mode);
-    setIsAuthModalOpen(true);
+    if (pageLayoutAuthOpenRef.current) {
+      pageLayoutAuthOpenRef.current(mode);
+    }
   };
 
   // 1. 購入ボタン押下処理
   const handleCheckout = async (priceId: string) => {
     if (!user) {
       alert("ログインが必要です");
-      setAuthMode('signup');
-      setIsAuthModalOpen(true);
+      handleOpenAuthModal('signup');
       return;
     }
 
@@ -411,13 +380,13 @@ export default function Home() {
     <PageLayout 
       user={user} 
       credits={credits} 
-      onOpenAuth={handleOpenAuthModal} 
       onSignOut={handleSignOut}
+      isDarkMode={isDarkMode}
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-             
+            
           {/* 2. Hero Section with YamatoChat-style Auto Demo */}
           <section className="text-center space-y-6 max-w-4xl mx-auto">
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
@@ -542,7 +511,7 @@ export default function Home() {
           <div className="space-y-4 max-w-3xl mx-auto">
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
-               
+              
             {/* Limited Time Campaign Banner */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
               <Flame className="w-4 h-4 text-orange-500 shrink-0 animate-bounce" />
@@ -1106,85 +1075,6 @@ export default function Home() {
                 className="max-w-full max-h-[80vh] rounded-lg object-contain"
               />
               <p className="text-xs text-slate-600 mt-2 font-medium">✨ Yamato Custom Diagram & Illustration (Enlarged)</p>
-            </div>
-          </div>
-        )}
-
-        {/* Passkey Authentication / Registration Modal */}
-        {isAuthModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
-              <button 
-                onClick={() => setIsAuthModalOpen(false)}
-                className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-                    <KeyRound className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-extrabold tracking-tight">
-                    {authMode === 'signup' ? 'Create Account with Passkey' : 'Sign In with Passkey'}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    {authMode === 'signup' 
-                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.' 
-                      : 'Authenticate instantly with your registered biometric passkey.'}
-                  </p>
-                </div>
-
-                {authError && (
-                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">
-                    {authError}
-                  </div>
-                )}
-
-                <form onSubmit={handlePasskeyAuth} className="space-y-4">
-                  {authMode === 'signup' && (
-                    <div className="space-y-1.5 text-left">
-                      <label className="text-xs font-semibold text-slate-500">Email Address</label>
-                      <input 
-                        type="email"
-                        required
-                        placeholder="your.email@school.vic.edu.au"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        className={`w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-slate-100' : 'bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900'}`}
-                      />
-                    </div>
-                  )}
-
-                  <button 
-                    type="submit"
-                    disabled={authLoading}
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>{authLoading ? 'Verifying Passkey...' : authMode === 'signup' ? 'Register Passkey' : 'Sign In'}</span>
-                  </button>
-                </form>
-
-                <div className="text-center text-xs">
-                  {authMode === 'signup' ? (
-                    <p className="text-slate-500">
-                      Already have a passkey?{' '}
-                      <button onClick={() => setAuthMode('signin')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
-                        Sign In
-                      </button>
-                    </p>
-                  ) : (
-                    <p className="text-slate-500">
-                      New to AI Yamato?{' '}
-                      <button onClick={() => setAuthMode('signup')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
-                        Create Account
-                      </button>
-                    </p>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
-import { Link } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { 
   KeyRound, 
   ShieldCheck, 
@@ -50,13 +50,14 @@ function ScrollTopButton() {
 }
 
 export default function GenkoyoshiEditor() {
+  const navigate = useNavigate();
   const [format, setFormat] = useState<string>("400");
   const [title, setTitle] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [text, setText] = useState<string>("");
   const [isClient, setIsClient] = useState<boolean>(false);
 
-  // 💡 Auth & Credits States (added to synchronize with header)
+  // 💡 Auth & Credits States
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(10);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -179,10 +180,8 @@ export default function GenkoyoshiEditor() {
     return items;
   };
 
-  // 空の1マスを生成するヘルパー関数
   const createEmptyCell = (): Item => ({ type: "char", value: "" });
 
-  // 1行（Item[]）を必ず colsPerLine (20マス) に補填するヘルパー関数
   const padRowToLength = (row: Item[], colsPerLine: number = 20): Item[] => {
     const padded = [...row];
     while (padded.length < colsPerLine) {
@@ -254,7 +253,6 @@ export default function GenkoyoshiEditor() {
     const allPagesLines: Item[][][] = [];
     let currentPageLines: Item[][] = [];
 
-    // 0行目: 題名
     const row0: Item[] = Array.from({ length: colsPerLine }, createEmptyCell);
     if (title) {
       const titleItems = parseTextToItems(title);
@@ -264,7 +262,6 @@ export default function GenkoyoshiEditor() {
     }
     currentPageLines.push(row0);
 
-    // 1行目: 氏名
     const row1: Item[] = Array.from({ length: colsPerLine }, createEmptyCell);
     if (name) {
       const nameItems = parseTextToItems(name);
@@ -290,7 +287,6 @@ export default function GenkoyoshiEditor() {
       allPagesLines.push(currentPageLines);
     }
 
-    // ページ単位で maxRows (20行/10行) になるまで空行を追加
     return allPagesLines.map((pageLines) => {
       const paddedPage = [...pageLines];
       while (paddedPage.length < maxRows) {
@@ -315,7 +311,6 @@ export default function GenkoyoshiEditor() {
     }
   };
 
-  // 🤖 AIチューターへのメッセージ送信ハンドラ
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
@@ -334,6 +329,7 @@ export default function GenkoyoshiEditor() {
           message: userMsg,
           chatHistory: tutorMessages,
           learningPace: tutorLevel,
+          userNickname: user?.email ? user.email.split('@')[0] : "Student",
         }),
       });
 
@@ -496,8 +492,8 @@ export default function GenkoyoshiEditor() {
             border: 1px solid #999;
             box-sizing: border-box;
             display: flex;
-            align-items: flex-end;   
-            justify-content: center;   
+            align-items: flex-end;    
+            justify-content: center;    
             padding-bottom: 2mm;        
             font-size: 1.35rem;         
             line-height: 1;

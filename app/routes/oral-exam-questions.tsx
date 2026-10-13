@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
+import { createClient } from "@supabase/supabase-js";
 
 // 🚀 モノレポ依存を排除し、app内のローカルデータファイルへ直接インポートする形に変更
 import questionDataRaw from "../data/oral-exam-questions.json";
@@ -11,6 +13,11 @@ export const meta: MetaFunction = () => {
     { name: "description", content: "VCE Japanese EOY Oral Exam Free Audio Resources" },
   ];
 };
+
+// Supabase クライアント初期化用
+const SUPABASE_URL = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_URL || "" : "";
+const SUPABASE_ANON_KEY = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_ANON_KEY || "" : "";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 type QuestionItem = {
   category: string;
@@ -62,6 +69,11 @@ function sanitizeAiOutput(text: string): string {
 }
 
 export default function OralExamQuestions() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<any>(null);
+  const [userCredits, setUserCredits] = useState<number | null>(null);
+
   const [currentSection, setCurrentSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2">("sec1");
   const [currentPace, setCurrentPace] = useState<"steady" | "normal" | "accelerated">("steady");
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
@@ -93,6 +105,60 @@ export default function OralExamQuestions() {
   
   // 💡 AIチューター専用の学習レベル選択ステート（steady / normal / accelerated）
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("steady");
+
+  // Supabase セッション監視とクレジット情報取得
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchUserCredits(userId: string) {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("credits")
+          .eq("id", userId)
+          .single();
+        if (!error && data && isMounted) {
+          setUserCredits(data.credits);
+        }
+      } catch (err) {
+        console.error("Error fetching user credits:", err);
+      }
+    }
+
+    async function initSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          if (isMounted) {
+            setUser(session.user);
+            await fetchUserCredits(session.user.id);
+          }
+        }
+      } catch (err) {
+        console.error("Session check error:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        await fetchUserCredits(session.user.id);
+      } else {
+        setUser(null);
+        setUserCredits(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
+  }, [navigate]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -197,7 +263,7 @@ export default function OralExamQuestions() {
     setIsTutorLoading(true);
 
     try {
-      // 🎨 チェックが入っている場合のみ、確実に対象メッセージに基づいた visualPrompt を構築
+      // 🎨 チェックが入っている場合のみ、確実に対象メッセージに基づえた visualPrompt を構築
       const visualPrompt = needsVisual
         ? `Educational instructional diagram and visual aid for VCE Japanese high school students explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
@@ -210,6 +276,7 @@ export default function OralExamQuestions() {
           chatHistory: tutorMessages,
           learningPace: tutorLevel,
           visualPrompt: visualPrompt, // 🎨 バックエンドへ visualPrompt を送信
+          userNickname: user?.email ? user.email.split('@')[0] : "Student",
         }),
       });
 
@@ -244,11 +311,30 @@ export default function OralExamQuestions() {
 
   const activeItems = questionData[currentSection][currentPace];
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-amber-50 font-sans">
+        <h3 className="text-xl font-semibold text-slate-700 animate-pulse">
+          Loading Oral Exam Audio Resources... 🎙️
+        </h3>
+      </div>
+    );
+  }
+
   return (
     <PageLayout>
       <div className="bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative">
         {/* Main Content */}
         <main className="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">
+          {/* User Credits Banner if available */}
+          {userCredits !== null && (
+            <div className="mb-6 flex justify-end">
+              <span className="text-sm bg-amber-200 text-amber-900 px-4 py-1.5 rounded-full font-bold shadow-xs">
+                💎 Credits: {userCredits}
+              </span>
+            </div>
+          )}
+
           {/* Hero Section */}
           <div className="bg-white border-2 border-amber-300 rounded-2xl p-6 sm:p-8 shadow-xl mb-10 text-center relative overflow-hidden">
             <div className="absolute -right-1 -bottom-1 text-amber-100 text-9xl select-none pointer-events-none">🎙️</div>
@@ -585,11 +671,6 @@ export default function OralExamQuestions() {
             </div>
           </div>
         )}
-
-        {/* Footer */}
-        <footer className="bg-white border-t border-amber-200 py-6 mt-12 text-center text-xs text-slate-500">
-          <p>&copy; 2026 JPTutor AI Yamato. All rights reserved. Designed for Australian Curriculum & VCE Japanese Students.</p>
-        </footer>
       </div>
     </PageLayout>
   );

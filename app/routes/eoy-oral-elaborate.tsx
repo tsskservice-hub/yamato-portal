@@ -2,6 +2,7 @@ import { useState, useRef, useMemo, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import oralExamQuestionsData from "../data/oral-exam-questions.json";
 import PageLayout from "../components/PageLayout";
+import { supabase } from "../lib/supabaseClient";
 
 export const meta: MetaFunction = () => {
   return [
@@ -125,6 +126,9 @@ function formatAiTutorFeedbackToHtml(rawText: string): string {
 }
 
 export default function ElaborateDrillMode() {
+  const [user, setUser] = useState<any>(null);
+  const [credits, setCredits] = useState<number>(10);
+
   const [selectedLevel, setSelectedLevel] = useState<string>("level2");
   const [selectedSection, setSelectedSection] = useState<string>("sec1");
   const [selectedTopics, setSelectedTopics] = useState<string[]>(["アルバイト (Part-time Job)"]);
@@ -151,6 +155,47 @@ export default function ElaborateDrillMode() {
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
   const [tutorLevel, setTutorLevel] = useState<'steady' | 'normal' | 'accelerated'>('steady');
+
+  // Supabase session & credits
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserCredits = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        const typedData = data as { credits?: number };
+        setCredits(typedData.credits ?? 10);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user credits:', err);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   const getFontSizeClass = () => {
     switch (chatFontSize) {
@@ -541,7 +586,11 @@ export default function ElaborateDrillMode() {
   };
 
   return (
-    <PageLayout>
+    <PageLayout
+      user={user}
+      credits={credits}
+      onSignOut={handleSignOut}
+    >
       <div className="bg-purple-50 min-h-screen text-slate-800 font-sans pb-16 relative">
         <style>{`
           @keyframes rotate-border {

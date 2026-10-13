@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { MetaFunction } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
+import { createClient } from "@supabase/supabase-js";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,7 +11,12 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// ミニ5路囲碁のゲームコンポーネントを単独アプリ用に1ファイルに統合
+// Supabase クライアント初期化用
+const SUPABASE_URL = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_URL || "" : "";
+const SUPABASE_ANON_KEY = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_ANON_KEY || "" : "";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ミニ5路囲碁のゲームコンポーネント
 function IgoBoard() {
   const SIZE = 5;
   // 0: 空, 1: 黒, 2: 白
@@ -92,10 +99,86 @@ function IgoBoard() {
 }
 
 export default function IgoRoute() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<any>(null);
+  const [userCredits, setUserCredits] = useState<number | null>(null);
+
+  // Supabase セッション監視とクレジット情報取得
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchUserCredits(userId: string) {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("credits")
+          .eq("id", userId)
+          .single();
+        if (!error && data && isMounted) {
+          setUserCredits(data.credits);
+        }
+      } catch (err) {
+        console.error("Error fetching user credits:", err);
+      }
+    }
+
+    async function initSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          if (isMounted) {
+            setUser(session.user);
+            await fetchUserCredits(session.user.id);
+          }
+        }
+      } catch (err) {
+        console.error("Session check error:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        await fetchUserCredits(session.user.id);
+      } else {
+        setUser(null);
+        setUserCredits(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-[#f4f1ea] font-sans">
+        <h3 className="text-xl font-semibold text-slate-700 animate-pulse">
+          Loading 5x5 Go... ♟️
+        </h3>
+      </div>
+    );
+  }
+
   return (
     <PageLayout>
       <div className="min-h-screen bg-[#f4f1ea] pb-16">
         <main className="max-w-xl mx-auto px-4 pt-8">
+          {userCredits !== null && (
+            <div className="mb-4 flex justify-end">
+              <span className="text-sm bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold shadow-xs">
+                💎 Credits: {userCredits}
+              </span>
+            </div>
+          )}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <IgoBoard />
           </div>

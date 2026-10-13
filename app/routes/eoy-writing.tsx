@@ -2,10 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
 import PageLayout from "../components/PageLayout";
+import { createClient } from "@supabase/supabase-js";
 
 // --- 📦 外部のJSONファイルから正式なデータをインポート ---
 import questionsData from "../data/writing-exam-questions.json";
 import textTypesData from "../data/texttypes.json";
+
+// Supabase クライアント初期化用（環境変数にあわせて設定）
+const SUPABASE_URL = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_URL || "" : "";
+const SUPABASE_ANON_KEY = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_ANON_KEY || "" : "";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function BugReportCard() {
   return (
@@ -176,13 +182,18 @@ function HighlightChecker() {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeTextType, setActiveTextType] = useState<string>("all");
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
+  // Supabase Auth & Credits State
+  const [user, setUser] = useState<any>(null);
+  const [userCredits, setUserCredits] = useState<number | null>(null);
+
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
@@ -193,6 +204,70 @@ export default function Dashboard() {
   useEffect(() => {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
+
+  // Supabase セッション監視とクレジット情報取得
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchUserCredits(userId: string) {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("credits")
+          .eq("id", userId)
+          .single();
+        if (!error && data && isMounted) {
+          setUserCredits(data.credits);
+        }
+      } catch (err) {
+        console.error("Error fetching user credits:", err);
+      }
+    }
+
+    async function initSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          if (isMounted) {
+            setUser(session.user);
+            await fetchUserCredits(session.user.id);
+          }
+        } else {
+          // 未認証の場合は必要に応じてリダイレクト、あるいはゲスト許可
+          // navigate("/login");
+        }
+      } catch (err) {
+        console.error("Session check error:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        await fetchUserCredits(session.user.id);
+      } else {
+        setUser(null);
+        setUserCredits(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
+  }, [navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setUserCredits(null);
+    navigate("/login");
+  };
 
   type ChatMessage = {
     role: 'assistant' | 'user';
@@ -295,7 +370,7 @@ export default function Dashboard() {
           pace: tutorLevel,          
           visualPrompt,
           assignedQuestion: assignedQuestionText,
-          userNickname: "Student",
+          userNickname: user?.email ? user.email.split('@')[0] : "Student",
           imageBase64: imageBase64
         }),
       });
@@ -346,8 +421,13 @@ export default function Dashboard() {
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           <div className="mb-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">
-            <h2 className="text-xl font-bold text-slate-800 m-0 mb-4 flex items-center gap-2">
-              <span>📌</span> Useful Resources & Help Centre
+            <h2 className="text-xl font-bold text-slate-800 m-0 mb-4 flex items-center justify-between">
+              <span className="flex items-center gap-2"><span>📌</span> Useful Resources & Help Centre</span>
+              {userCredits !== null && (
+                <span className="text-sm bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">
+                  💎 Credits: {userCredits}
+                </span>
+              )}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
