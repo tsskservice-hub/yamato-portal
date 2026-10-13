@@ -32,7 +32,7 @@ import { getTodayQuiz, QuizItem } from '../data/quizzes';
 
 export const STRIPE_PRICES = {
   starter: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // Actual Stripe Price ID
-  standard: 'price_1xxxx_standard',         // Update with your actual Stripe Price ID if needed
+  standard: 'price_1xxxx_standard',          // Update with your actual Stripe Price ID if needed
   pro: 'price_1xxxx_pro',                    // Update with your actual Stripe Price ID if needed
 };
 
@@ -581,24 +581,24 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Standard Pack (Most Popular - アクセントに赤を採用) */}
-            <div className={`p-6 rounded-3xl border-2 border-red-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
+            {/* Standard Pack (Most Popular - 青色系に変更) */}
+            <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
                 Most Popular
               </div>
               <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-red-600">{PRICING_PLANS.standard.name}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICING_PLANS.standard.name}</span>
                 <div>
                   <span className="text-4xl font-black">{PRICING_PLANS.standard.price}</span>
                   <span className="text-xs text-slate-500 ml-1">{PRICING_PLANS.standard.period}</span>
                 </div>
-                <div className="inline-block px-2.5 py-1 rounded-md bg-red-500/10 text-red-600 text-xs font-bold leading-normal">
+                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
                   {PRICING_PLANS.standard.badge}
                 </div>
                 <p className="text-xs text-slate-500">{PRICING_PLANS.standard.description}</p>
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                   {PRICING_PLANS.standard.features.map((feat, idx) => (
-                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-red-600" /><span>{feat}</span></li>
+                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
                   ))}
                 </ul>
               </div>
@@ -606,7 +606,7 @@ export default function Home() {
                 <button 
                   onClick={() => handleCheckout(STRIPE_PRICES.standard)} 
                   disabled={checkoutLoadingPriceId === STRIPE_PRICES.standard}
-                  className="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
                   {checkoutLoadingPriceId === STRIPE_PRICES.standard && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Buy Standard Pack</span>

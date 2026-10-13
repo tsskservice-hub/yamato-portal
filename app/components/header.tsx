@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from '@remix-run/react';
-import { Coins, KeyRound, ShieldCheck, LogOut, Sparkles } from 'lucide-react';
+import { Coins, KeyRound, ShieldCheck, LogOut } from 'lucide-react';
 
 type HeaderProps = {
   title?: string;
@@ -22,7 +22,7 @@ export default function Header({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* ロゴ・画像リンク（クリックでホームへ） */}
         <Link to="/" className="flex items-center space-x-2 group">
-          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-blue-600">
+          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-red-600">
             <img 
               src="/jptutoraiyamato.png" 
               alt="AI Yamato Logo" 
@@ -78,11 +78,6 @@ export default function Header({
           <Link to="/prices" className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all">
             Pricing & Plans
           </Link>
-
-          <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Yamato</span>
-          </div>
         </div>
       </div>
     </header>
