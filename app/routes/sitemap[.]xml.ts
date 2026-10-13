@@ -20,7 +20,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     "/privacy",        // privacy.tsx
     "/settings.account", // settings.account.tsx
     "/terms",          // terms.tsx
-    "/test-yamato",    // test-yamato.tsx
   ];
 
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
