@@ -1,11 +1,13 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（テーマカラー・初期非表示対応版）
+ * @description ヤマトAI 独立APIテスト画面（価格データ連携対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
 import { useState } from "react";
 import { YamatoChat } from "../components/YamatoChat";
+// ★価格データとクレジット消費ガイドをインポート
+import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
 
 export const meta: MetaFunction = () => {
   return [
@@ -48,31 +50,36 @@ export default function TestYamatoPage() {
     );
   }
 
-  // as const を付与して型エラーを回避しつつ、テーマカラーや名称を定義
   const appConfig: Record<AppType, AppConfig> = {
     concierge: {
-      name: "やまと先生", // ご要望の表示名に調整
+      name: "やまと先生",
       greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
-      themeColor: "blue", // ポータル（コンシェルジュ）は青
+      themeColor: "blue",
     },
     writing: {
       name: "VCEライティングヤマト",
       greeting: "Hello, my friend! 🌟 Welcome to your VCE Japanese writing practice session! Please upload your handwritten text or type your response.",
-      themeColor: "emerald", // ライティングは緑
+      themeColor: "emerald",
     },
     oral: {
       name: "VCE口頭試験ヤマト",
       greeting: "Hello, my friend! 🌟 Welcome to your VCE Oral Exam practice room. Are you ready for Section 1 General Conversation or Section 2 Detailed Study?",
-      themeColor: "emerald", // 口頭試験は緑
+      themeColor: "emerald",
     },
     general: {
       name: "一般学習ヤマト",
       greeting: "Hello, my friend! 🌟 Welcome! What would you like to learn about the Japanese language or culture today?",
-      themeColor: "emerald", // 一般学習は緑
+      themeColor: "emerald",
     },
   };
 
   const currentConfig = appConfig[activeAppType];
+
+  // ★コンシェルジュヤマト等に渡すポータルデータ（価格プランと消費ガイド）を定義
+  const portalContextData = {
+    pricePlans: PRICE_PLANS,
+    creditGuide: CREDIT_CONSUMPTION_GUIDE,
+  };
 
   return (
     <div className="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative p-8">
@@ -110,13 +117,14 @@ export default function TestYamatoPage() {
         </div>
       </main>
 
-      {/* 共通化された YamatoChat に設定を渡す */}
+      {/* YamatoChat に additionalContext として価格データを渡す */}
       <YamatoChat 
         appType={activeAppType}
         characterName={currentConfig.name}
         initialGreeting={currentConfig.greeting}
-        themeColor={currentConfig.themeColor} // モードごとのカラーを反映
-        defaultOpen={false} // すべてのヤマトで初期状態を非表示（折りたたみボタン）に統一
+        themeColor={currentConfig.themeColor}
+        defaultOpen={false}
+        additionalContext={portalContextData} // ★ここを追加
       />
 
       <footer className="text-center text-xs text-slate-400 mt-8">
