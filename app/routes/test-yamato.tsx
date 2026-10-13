@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（価格データおよびクイズデータ連携対応版）
+ * @description ヤマトAI 独立APIテスト画面（価格データ・クイズデータ・法的コンテンツ連携対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -10,6 +10,8 @@ import { YamatoChat } from "../components/YamatoChat";
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
 // ★本日のクイズ取得関数とクイズリストをインポート
 import { getTodayQuiz, DAILY_QUIZZES } from "../data/quizzes";
+// ★法的・サポートコンテンツデータをインポート
+import { LEGAL_CONTENT } from "../data/legal-content";
 
 export const meta: MetaFunction = () => {
   return [
@@ -77,12 +79,13 @@ export default function TestYamatoPage() {
 
   const currentConfig = appConfig[activeAppType];
 
-  // ★コンシェルジュヤマト等に渡すポータルデータ（価格プラン、消費ガイド、本日のクイズ）を定義
+  // ★コンシェルジュヤマト等に渡すポータルデータ（価格プラン、消費ガイド、本日のクイズ、法的データ）を定義
   const portalContextData = {
     pricePlans: PRICE_PLANS,
     creditGuide: CREDIT_CONSUMPTION_GUIDE,
     todayQuiz: getTodayQuiz(),     // 本日の日付に対応するクイズデータを渡す
     allQuizzes: DAILY_QUIZZES,     // 全クイズデータ
+    legalContent: LEGAL_CONTENT,   // 利用規約・免責・プライバシー・連絡先の全データを渡す
   };
 
   return (
@@ -121,7 +124,7 @@ export default function TestYamatoPage() {
         </div>
       </main>
 
-      {/* YamatoChat に additionalContext としてクイズデータを追加した portalContextData を渡す */}
+      {/* YamatoChat に additionalContext として法的データ等を追加した portalContextData を渡す */}
       <YamatoChat 
         appType={activeAppType}
         characterName={currentConfig.name}

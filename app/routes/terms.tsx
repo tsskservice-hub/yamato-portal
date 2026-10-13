@@ -1,3 +1,7 @@
+/**
+ * @file terms.tsx
+ * @description 利用規約ページ（legal-content.ts 連携版）
+ */
 import { useState, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/node";
 import { Link, useNavigate } from "@remix-run/react";
@@ -5,19 +9,21 @@ import { KeyRound, ShieldCheck, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
+import { LEGAL_CONTENT } from "../data/legal-content";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "Terms of Service | AI Yamato Japanese Tutoring" },
+    { title: `${LEGAL_CONTENT.terms.title} | AI Yamato Japanese Tutoring` },
     {
       name: "description",
-      content: "Terms of Service for AI Yamato - AI Japanese Tutoring Platform.",
+      content: LEGAL_CONTENT.terms.summary,
     },
   ];
 };
 
 export default function TermsOfService() {
   const navigate = useNavigate();
+  const content = LEGAL_CONTENT.terms;
 
   // 💡 Auth & Credits States (PageLayout連携用)
   const [user, setUser] = useState<any>(null);
@@ -122,10 +128,10 @@ export default function TermsOfService() {
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-            Terms of Service
+            {content.title}
           </h1>
           <p className="text-sm text-slate-500 mb-8">
-            Last updated: October 12, 2026
+            Last updated: {content.lastUpdated}
           </p>
 
           <div className="space-y-8 text-sm sm:text-base leading-relaxed text-slate-700">

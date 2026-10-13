@@ -1,3 +1,7 @@
+/**
+ * @file contact.tsx
+ * @description お問い合わせページ（legal-content.ts 連携版）
+ */
 import { useState, useEffect } from "react";
 import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
@@ -6,13 +10,14 @@ import { KeyRound, ShieldCheck, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
+import { LEGAL_CONTENT } from "../data/legal-content";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "Contact Us | AI Yamato Japanese Tutoring" },
+    { title: `${LEGAL_CONTENT.contact.title} | AI Yamato Japanese Tutoring` },
     {
       name: "description",
-      content: "Contact AI Yamato support team for assistance, feedback, or School License inquiries for VCE Japanese tutoring.",
+      content: LEGAL_CONTENT.contact.summary,
     },
   ];
 };
@@ -43,6 +48,7 @@ export default function Contact() {
   const actionData = useActionData<typeof action>() as ActionData | undefined;
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
+  const content = LEGAL_CONTENT.contact;
 
   // 💡 Auth & Credits States (PageLayout連携用)
   const [user, setUser] = useState<any>(null);
@@ -147,10 +153,10 @@ export default function Contact() {
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-            Contact Us
+            {content.title}
           </h1>
           <p className="text-sm sm:text-base text-slate-600 mb-8">
-            Have questions about AI Yamato, need technical support, or interested in a School License for your classroom? Fill out the form below or reach out directly.
+            {content.summary}
           </p>
 
           {actionData?.success && actionData.message && (
@@ -205,10 +211,11 @@ export default function Contact() {
                 name="inquiryType"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 text-sm bg-white"
               >
-                <option value="general">General Support / Question</option>
-                <option value="technical">Technical Issue (Passkey, Credits, Payments)</option>
-                <option value="school">School License / Teacher Inquiry</option>
-                <option value="feedback">Feedback & Suggestions</option>
+                {content.inquiryTypes.map((type, idx) => (
+                  <option key={idx} value={type.toLowerCase().split(' ')[0]}>
+                    {type}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -243,7 +250,7 @@ export default function Contact() {
               If you need immediate assistance or prefer sending an email directly, you can reach our team at:
             </p>
             <p className="text-sm font-medium text-indigo-600">
-              support@jptutoraiyamato.com
+              {content.directEmail}
             </p>
           </div>
 
