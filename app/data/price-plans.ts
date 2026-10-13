@@ -36,7 +36,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     ctaLink: "/",
   },
   starter: {
-    id: 'price_starter_xxx', // 実際のStripe Price IDに書き換えてください
+    id: 'price_1UOmko2ZJezqyZ9eR0l8cvUk', // 実際のStripe Price IDに書き換えてください
     name: "STARTER PACK",
     price: "$10",
     period: "AUD",
@@ -52,7 +52,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     ],
   },
   standard: {
-    id: 'price_standard_xxx', // 実際のStripe Price IDに書き換えてください
+    id: 'price_1UQ1Z12ZJezqyZ9ea1LYsCOY', // 実際のStripe Price IDに書き換えてください
     name: "STANDARD PACK",
     price: "$25",
     period: "AUD",
@@ -69,7 +69,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     isMostPopular: true,
   },
   pro: {
-    id: 'price_pro_xxx', // 実際のStripe Price IDに書き換えてください
+    id: 'price_1UQ1aE2ZJezqyZ9e2EUGqCZn', // 実際のStripe Price IDに書き換えてください
     name: "PRO INTENSIVIST",
     price: "$50",
     period: "AUD",
