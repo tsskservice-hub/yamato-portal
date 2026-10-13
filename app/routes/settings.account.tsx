@@ -19,7 +19,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { data: { user }, error: authError } = await serverSupabase.auth.getUser();
 
   if (authError || !user) {
-    return redirect("/login", { headers });
+    // ログインしていない場合は新しく設定したメール認証・バックアップページへリダイレクト
+    return redirect("/auth/email", { headers });
   }
 
   const { data: profile } = await serverSupabase

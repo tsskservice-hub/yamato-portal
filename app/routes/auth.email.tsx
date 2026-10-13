@@ -1,20 +1,19 @@
-import { useState } from "react";
-import { Form, useNavigation, useActionData } from "@remix-run/react";
+import { useState, useEffect } from "react";
+import { Form, useNavigation, useActionData, useNavigate } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { createServerSupabaseClient } from "../lib/supabase.server";
+import { supabase } from "../lib/supabaseClient";
 
-// Loader: すでにログイン済みの場合はアカウント設定ページへリダイレクト
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { supabase } = createServerSupabaseClient(request, context);
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
+  const { data: { user } } = await serverSupabase.auth.getUser();
   if (user) {
     return redirect("/settings/account");
   }
   return json({});
 }
 
-// Action: Supabase を使ったマジックリンク（OTP）認証メールの送信
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = String(formData.get("email") || "").trim();
@@ -23,13 +22,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "Please enter your email address." }, { status: 400 });
   }
 
-  const { supabase, headers } = createServerSupabaseClient(request, context);
+  const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
 
-  // Supabase Auth を使ってマジックリンクを送信
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await serverSupabase.auth.signInWithOtp({
     email,
     options: {
-      // ログイン成功後にリダイレクトするURL（必要に応じて調整してください）
       emailRedirectTo: `${new URL(request.url).origin}/settings/account`,
     },
   });
@@ -38,24 +35,40 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "Failed to send login link: " + error.message }, { status: 500 });
   }
 
-  // 送信成功時は確認メッセージ用のフラグなどを返してUIを切り替えるか、送信完了ページへリダイレクト
   return json({ success: true, message: "Check your email for the login link!" }, { headers });
 }
 
-export default function LoginRoute() {
+export default function AuthEmailRoute() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
+  const navigate = useNavigate();
   const isSubmitting = navigation.state === "submitting";
+
+  useEffect(() => {
+    const handleAuthRedirect = async () => {
+      const hash = window.location.hash;
+      const search = window.location.search;
+
+      if ((hash && hash.includes("access_token")) || search.includes("code=")) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          navigate("/settings/account", { replace: true });
+        }
+      }
+    };
+
+    handleAuthRedirect();
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-md border border-slate-200">
         <div>
           <h2 className="mt-2 text-center text-3xl font-extrabold text-slate-900">
-            Sign in to AI Yamato
+            Email Sign-In (Backup)
           </h2>
           <p className="mt-2 text-center text-sm text-slate-600">
-            Access your account, settings, and VCE Japanese tools.
+            Use this fallback method if your passkey is unavailable.
           </p>
         </div>
 
