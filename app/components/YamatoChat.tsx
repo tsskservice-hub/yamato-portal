@@ -1,6 +1,6 @@
 /**
  * @file YamatoChat.tsx
- * @description ヤマトAIチャットウィジェット（初期非表示共通対応・カラーテーマ切り替え対応版）
+ * @description ヤマトAIチャットウィジェット（初期非表示共通対応・カラーテーマ切り替え・考え中アイコン回転対応版）
  */
 import { useState, useEffect, useRef } from "react";
 
@@ -228,7 +228,7 @@ export function YamatoChat({
               {/* ヘッダー */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-2 m-0`}>
-                  <span>🤖</span> {characterName}
+                  <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
                 </h3>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -299,7 +299,10 @@ export function YamatoChat({
                   </div>
                 ))}
                 {isTutorLoading && (
-                  <div className="text-xs text-slate-500 italic">🤖 ヤマトが考えています...</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
+                    <span className="inline-block animate-spin text-sm">🤖</span>
+                    <span>ヤマトが考えています...</span>
+                  </div>
                 )}
               </div>
 
