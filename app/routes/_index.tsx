@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（思考中インジケーター＋一括表示デモ版）
+ * @description AI Yamato Portal のランディングページ（入力欄タイピング＋思考中＋一括回答デモ版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -25,7 +25,8 @@ import {
   ShoppingBag,
   GraduationCap,
   UserCheck,
-  Gauge
+  Gauge,
+  Send
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import PageLayout from '../components/PageLayout';
@@ -99,8 +100,9 @@ export default function Home() {
 
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
-  const [displayedUserText, setDisplayedUserText] = useState('');
-  const [displayedYamatoText, setDisplayedYamatoText] = useState('');
+  const [typedInputText, setTypedInputText] = useState('');         // 下部入力欄にタイピングされるテキスト
+  const [displayedUserText, setDisplayedUserText] = useState('');   // チャット欄に表示されるユーザーメッセージ（入力完了時に一括設定）
+  const [displayedYamatoText, setDisplayedYamatoText] = useState(''); // ヤマトの返答テキスト
   const [isThinking, setIsThinking] = useState(false);
   const [isAnswerShown, setIsAnswerShown] = useState(false);
 
@@ -123,34 +125,42 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // デモの進行管理（ユーザー入力タイピング ➔ 思考中 ➔ 返答表示）
+  // デモの進行管理（入力欄タイピング ➔ 吹き出しにユーザーメッセージ出現 ➔ 思考中 ➔ ヤマト回答一括表示）
   useEffect(() => {
     const currentConv = DEMO_CONVERSATIONS[currentStep];
     let timeout: NodeJS.Timeout;
 
-    // 1. ユーザーの質問テキストをタイピング風に一文字ずつ表示
-    if (displayedUserText.length < currentConv.user.length) {
+    // 1. デモ画面下部の入力欄に一文字ずつ文字が打ち込まれていく演出
+    if (typedInputText.length < currentConv.user.length) {
       timeout = setTimeout(() => {
-        setDisplayedUserText(currentConv.user.slice(0, displayedUserText.length + 1));
+        setTypedInputText(currentConv.user.slice(0, typedInputText.length + 1));
       }, 45);
     } 
-    // 2. ユーザー入力完了後、少し待って「Yamato is thinking...」状態へ
-    else if (!isThinking && !isAnswerShown && displayedYamatoText.length === 0) {
+    // 2. 入力完了後、送信されてチャット欄にユーザーの吹き出しが一括で現れ、入力欄をクリア
+    else if (!displayedUserText && typedInputText === currentConv.user) {
+      timeout = setTimeout(() => {
+        setDisplayedUserText(currentConv.user);
+        setTypedInputText('');
+      }, 300);
+    } 
+    // 3. ユーザー吹き出し出現後、少し待って「Yamato is thinking...」状態へ
+    else if (displayedUserText && !isThinking && !isAnswerShown && !displayedYamatoText) {
       timeout = setTimeout(() => {
         setIsThinking(true);
       }, 300);
     } 
-    // 3. 思考中アニメーションを約1.5秒間表示したあと、答えを完了状態にする
+    // 4. 思考中アニメーションを約1.5秒間表示したあと、ヤマトの答えを一括で表示
     else if (isThinking) {
       timeout = setTimeout(() => {
         setIsThinking(false);
         setDisplayedYamatoText(currentConv.yamato);
         setIsAnswerShown(true);
-      }, 1500); // 思考時間（1.5秒）
+      }, 1500);
     } 
-    // 4. 返答表示後、3秒間静止してから次の会話へリセットしてループ
+    // 5. 返答表示後、3秒間静止してから次の会話サイクルへリセット
     else if (isAnswerShown) {
       timeout = setTimeout(() => {
+        setTypedInputText('');
         setDisplayedUserText('');
         setDisplayedYamatoText('');
         setIsThinking(false);
@@ -160,7 +170,7 @@ export default function Home() {
     }
 
     return () => clearTimeout(timeout);
-  }, [displayedUserText, displayedYamatoText, isThinking, isAnswerShown, currentStep]);
+  }, [typedInputText, displayedUserText, displayedYamatoText, isThinking, isAnswerShown, currentStep]);
 
   // ユーザーデータ（クレジット・学習ペース等）の取得関数
   const fetchUserData = async (userId: string) => {
@@ -399,17 +409,18 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 mb-4 min-h-[160px] flex flex-col justify-center">
-                <div className="flex justify-end">
-                  <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
-                    <p>{displayedUserText}
-                      {displayedUserText.length < DEMO_CONVERSATIONS[currentStep].user.length && (
-                        <span className="inline-block w-1.5 h-3 ml-0.5 bg-white animate-pulse"></span>
-                      )}
-                    </p>
+              {/* チャット会話の表示エリア */}
+              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 mb-4 min-h-[140px] flex flex-col justify-center">
+                {/* ユーザーメッセージ（送信完了後に一括表示） */}
+                {displayedUserText && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
+                      <p>{displayedUserText}</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
+                {/* ヤマトの思考中 or 返答メッセージ */}
                 <div className="flex justify-start">
                   {isThinking ? (
                     <div className="p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex items-center space-x-2 shadow-xs">
@@ -417,12 +428,28 @@ export default function Home() {
                       <span className="italic font-medium animate-pulse">Yamato is thinking...</span>
                     </div>
                   ) : (
-                    isAnswerShown && (
+                    isAnswerShown && displayedYamatoText && (
                       <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                         <p>{displayedYamatoText}</p>
                       </div>
                     )
                   )}
+                </div>
+              </div>
+
+              {/* ★ デモ画面下部の入力フィールド（ここに文字がタイピングされていく演出） */}
+              <div className="flex items-center space-x-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 mb-4 shadow-xs">
+                <div className="flex-grow px-3 py-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200 flex items-center">
+                  {typedInputText ? (
+                    <span>{typedInputText}</span>
+                  ) : (
+                    <span className="text-slate-400 dark:text-slate-500">Ask Yamato a question...</span>
+                  )}
+                  {/* 点滅カーソル */}
+                  <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-600 animate-pulse"></span>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm opacity-90">
+                  <Send className="w-3.5 h-3.5" />
                 </div>
               </div>
 
