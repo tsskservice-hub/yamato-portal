@@ -1,18 +1,17 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（シンプル・クライアント認証対応版）
+ * @description アカウント設定画面（クライアントサイドSupabase更新対応版）
  */
 import { useState, useEffect } from "react";
-import { Form, useNavigation, useActionData, useLoaderData, useNavigate } from "@remix-run/react";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData, useNavigate } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { UserCheck, Gauge } from "lucide-react";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
 import { supabase } from "../lib/supabaseClient";
-import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側で認証ユーザーを取得し、対応するプロフィールを確実に取得する
+// Loader: サーバー側で認証ユーザーを取得し、初期プロフィールデータを取得する
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
@@ -27,7 +26,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       .from("profiles")
       .select("credits, plan, nickname, learning_pace")
       .eq("id", user.id)
-      .maybeSingle(); // .single()だとデータがない場合にエラーになるため .maybeSingle() を推奨
+      .maybeSingle();
 
     if (profile) {
       initialCredits = (profile as any).credits ?? 10;
@@ -47,8 +46,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   });
 }
 
-// Action: アカウント削除およびプロフィール更新処理
-export async function action({ request, context }: ActionFunctionArgs) {
+// Action: アカウント削除処理のみサーバー側で保持（プロフィール更新はクライアント側で実行するため削除）
+export async function action({ request, context }: LoaderFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
@@ -59,27 +58,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
   }
 
-  // 1. ニックネームと学習ペースの更新処理
-  if (intent === "update-profile") {
-    const nickname = formData.get("nickname")?.toString().trim() || "";
-    const learningPace = formData.get("learningPace")?.toString().trim() || "normal";
-
-    const { error: updateError } = await serverSupabase
-      .from("profiles")
-      .update({ 
-        nickname, 
-        learning_pace: learningPace 
-      })
-      .eq("id", user.id);
-
-    if (updateError) {
-      return json({ error: "Failed to update profile: " + updateError.message, success: false }, { status: 500 });
-    }
-
-    return json({ success: true, error: null, message: "Profile settings updated successfully!" }, { headers });
-  }
-
-  // 2. アカウント削除処理
+  // アカウント削除処理
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
     if (confirmText !== "DELETE") {
@@ -109,43 +88,27 @@ export default function AccountSettingsRoute() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
   
-  const actionData = useActionData<typeof action>() as { message?: string; error?: string; success?: boolean } | undefined;
-  
-  const navigation = useNavigation();
   const navigate = useNavigate();
-  const isSubmitting = navigation.state === "submitting";
 
-  // 「Saved!」表示用のステート
-  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
-
-  // actionDataの更新を検知して一時的に「Saved!」を表示する
-  useEffect(() => {
-    if (actionData?.success) {
-      setShowSavedIndicator(true);
-      const timer = setTimeout(() => {
-        setShowSavedIndicator(false);
-      }, 3000); // 3秒後に非表示
-      return () => clearTimeout(timer);
-    }
-  }, [actionData]);
-
-  // ローカルステート（ローダーから取得した初期データをセット）
+  // ローカルステート
   const [nicknameInput, setNicknameInput] = useState(initialData.nickname);
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
   const [userEmail, setUserEmail] = useState(initialData.email);
   const [userPlan, setUserPlan] = useState(initialData.plan);
   const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
 
-  // Auth & Credits States (PageLayout連携用)
+  // Auth & Credits States
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(initialData.credits);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [emailInput, setEmailInput] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
 
-  // ブラウザ側でユーザーのプロフィール情報を再取得して確実に同期する関数
+  // 保存中ステートおよび「Saved!」表示ステート
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // ブラウザ側でユーザーのプロフィール情報を再取得して同期する関数
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data: profileData, error } = await supabase
@@ -157,7 +120,7 @@ export default function AccountSettingsRoute() {
       if (profileData && !error) {
         setCredits((profileData as any).credits ?? 10);
         if ((profileData as any).plan) setUserPlan((profileData as any).plan);
-        if ((profileData as any).nickname) {
+        if ((profileData as any).nickname !== undefined && (profileData as any).nickname !== null) {
           setNicknameInput((profileData as any).nickname);
         }
         if ((profileData as any).learning_pace) {
@@ -169,7 +132,7 @@ export default function AccountSettingsRoute() {
     }
   };
 
-  // ブラウザ側のマウント時にセッションを確認し、プロフィールをフェッチ
+  // ブラウザ側のマウント時にセッションを確認
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       const currentUser = session?.user ?? null;
@@ -194,6 +157,43 @@ export default function AccountSettingsRoute() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // クライアント側でのプロフィール保存処理
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      alert("Please sign in to update your preferences.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          nickname: nicknameInput.trim(),
+          learning_pace: paceInput,
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // 成功時に「Saved!」を表示し、3秒後に消す
+      setShowSavedIndicator(true);
+      setTimeout(() => {
+        setShowSavedIndicator(false);
+      }, 3000);
+    } catch (err: any) {
+      console.error("Failed to update profile:", err);
+      setSaveError(err.message || "Failed to save preferences.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -227,9 +227,7 @@ export default function AccountSettingsRoute() {
             <UserCheck className="w-5 h-5 text-blue-600" /> AI Tutor Preferences & Profile
           </h2>
 
-          <Form method="post" className="space-y-6">
-            <input type="hidden" name="intent" value="update-profile" />
-
+          <form onSubmit={handleUpdateProfile} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* ニックネーム入力 */}
               <div>
@@ -238,7 +236,6 @@ export default function AccountSettingsRoute() {
                 </label>
                 <input
                   type="text"
-                  name="nickname"
                   value={nicknameInput}
                   onChange={(e) => setNicknameInput(e.target.value)}
                   placeholder="e.g. Kenji"
@@ -255,7 +252,6 @@ export default function AccountSettingsRoute() {
                   <Gauge className="w-4 h-4 text-blue-600" /> Default Learning Pace
                 </label>
                 <select
-                  name="learningPace"
                   value={paceInput}
                   onChange={(e) => setPaceInput(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -270,6 +266,10 @@ export default function AccountSettingsRoute() {
               </div>
             </div>
 
+            {saveError && (
+              <p className="text-xs text-red-600">{saveError}</p>
+            )}
+
             <div className="flex items-center justify-end space-x-3">
               {showSavedIndicator && (
                 <span className="text-xs font-semibold text-emerald-600 animate-fade-in flex items-center gap-1">
@@ -278,13 +278,13 @@ export default function AccountSettingsRoute() {
               )}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSaving}
                 className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
               >
-                {isSubmitting ? "Saving..." : "Save Preferences"}
+                {isSaving ? "Saving..." : "Save Preferences"}
               </button>
             </div>
-          </Form>
+          </form>
         </div>
 
         {/* 2. 総合的なアカウント情報セクション */}
@@ -339,7 +339,7 @@ export default function AccountSettingsRoute() {
                 To confirm, please type <span className="font-semibold text-gray-900">「DELETE」</span> in the field below.
               </p>
 
-              <Form method="post" className="space-y-4">
+              <form method="post" onSubmit={() => {}} className="space-y-4">
                 <input type="hidden" name="intent" value="delete-account" />
                 <input
                   type="text"
@@ -350,28 +350,23 @@ export default function AccountSettingsRoute() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900"
                   required
                 />
-                {actionData && 'error' in actionData && actionData.error && (
-                  <p className="text-xs text-red-600 mt-1">{actionData.error}</p>
-                )}
-
                 <div className="flex justify-end space-x-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    disabled={isSubmitting}
                     className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={confirmInput !== "DELETE" || isSubmitting}
+                    disabled={confirmInput !== "DELETE"}
                     className="px-4 py-2 text-sm text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
                   >
-                    {isSubmitting ? "Deleting..." : "Permanently Delete"}
+                    Permanently Delete
                   </button>
                 </div>
-              </Form>
+              </form>
             </div>
           </div>
         )}
