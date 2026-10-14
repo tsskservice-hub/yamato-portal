@@ -1,9 +1,9 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証モーダル・ニックネーム連携対応版）
+ * @description ポータル共通レイアウト（ルートデータ自動同期対応版）
  */
 import React, { useState } from "react";
-import { Link } from "@remix-run/react";
+import { useRouteLoaderData } from "@remix-run/react";
 import { KeyRound, ShieldCheck, X } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
@@ -21,13 +21,26 @@ type PageLayoutProps = {
 
 export default function PageLayout({ 
   children, 
-  user, 
-  credits, 
-  nickname = "", // 💡 デフォルト値を空文字に設定
+  user: propUser, 
+  credits: propCredits, 
+  nickname: propNickname, 
   onOpenAuth, 
   onSignOut,
   isDarkMode = false
 }: PageLayoutProps) {
+  // 💡 root.tsx の loader データをルートID "root" を通じて自動取得（バケツリレー不要化）
+  const rootData = useRouteLoaderData("root") as { 
+    user?: any; 
+    credits?: number; 
+    nickname?: string; 
+    plan?: string 
+  } | undefined;
+
+  // プロパティで直接渡されていなければ rootData から自動補完する
+  const user = propUser !== undefined ? propUser : rootData?.user;
+  const credits = propCredits !== undefined ? propCredits : (rootData?.credits ?? 10);
+  const nickname = propNickname !== undefined ? propNickname : (rootData?.nickname ?? "");
+
   // 💡 認証モーダルおよびパスキー認証のロジックを共通レイアウトへ集約
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -87,7 +100,7 @@ export default function PageLayout({
       <Header 
         user={user} 
         credits={credits} 
-        nickname={nickname} // 💡 取得したニックネームをHeaderへ確実に引き渡す
+        nickname={nickname} // 💡 ルートまたはプロパティから取得したニックネームをHeaderへ自動引き渡し
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={onSignOut} 
       />
