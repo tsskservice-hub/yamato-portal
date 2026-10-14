@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（アプリカード2セクション分割・グローバル/VCE対応版・思考中アニメーション付き自動デモ統合）
+ * @description AI Yamato Portal のランディングページ（思考中インジケーター＋一括表示デモ版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -97,12 +97,12 @@ export default function Home() {
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
   const currentQuiz: QuizItem = getTodayQuiz();
 
-  // Auto demo typing states for hero section
+  // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
   const [displayedUserText, setDisplayedUserText] = useState('');
   const [displayedYamatoText, setDisplayedYamatoText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
-  const [isTypingYamato, setIsTypingYamato] = useState(false);
+  const [isAnswerShown, setIsAnswerShown] = useState(false);
 
   // Scroll to top states & listener
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
@@ -123,40 +123,44 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Typing animation & thinking effect for Hero demo
+  // デモの進行管理（ユーザー入力タイピング ➔ 思考中 ➔ 返答表示）
   useEffect(() => {
     const currentConv = DEMO_CONVERSATIONS[currentStep];
     let timeout: NodeJS.Timeout;
 
+    // 1. ユーザーの質問テキストをタイピング風に一文字ずつ表示
     if (displayedUserText.length < currentConv.user.length) {
       timeout = setTimeout(() => {
         setDisplayedUserText(currentConv.user.slice(0, displayedUserText.length + 1));
       }, 45);
-    } else if (!isThinking && !isTypingYamato && displayedYamatoText.length === 0) {
+    } 
+    // 2. ユーザー入力完了後、少し待って「Yamato is thinking...」状態へ
+    else if (!isThinking && !isAnswerShown && displayedYamatoText.length === 0) {
       timeout = setTimeout(() => {
         setIsThinking(true);
       }, 300);
-    } else if (isThinking) {
+    } 
+    // 3. 思考中アニメーションを約1.5秒間表示したあと、答えを完了状態にする
+    else if (isThinking) {
       timeout = setTimeout(() => {
         setIsThinking(false);
-        setIsTypingYamato(true);
-      }, 1500);
-    } else if (isTypingYamato && displayedYamatoText.length < currentConv.yamato.length) {
-      timeout = setTimeout(() => {
-        setDisplayedYamatoText(currentConv.yamato.slice(0, displayedYamatoText.length + 1));
-      }, 25);
-    } else if (isTypingYamato && displayedYamatoText.length === currentConv.yamato.length) {
+        setDisplayedYamatoText(currentConv.yamato);
+        setIsAnswerShown(true);
+      }, 1500); // 思考時間（1.5秒）
+    } 
+    // 4. 返答表示後、3秒間静止してから次の会話へリセットしてループ
+    else if (isAnswerShown) {
       timeout = setTimeout(() => {
         setDisplayedUserText('');
         setDisplayedYamatoText('');
         setIsThinking(false);
-        setIsTypingYamato(false);
+        setIsAnswerShown(false);
         setCurrentStep((prev) => (prev + 1) % DEMO_CONVERSATIONS.length);
       }, 3000);
     }
 
     return () => clearTimeout(timeout);
-  }, [displayedUserText, displayedYamatoText, isThinking, isTypingYamato, currentStep]);
+  }, [displayedUserText, displayedYamatoText, isThinking, isAnswerShown, currentStep]);
 
   // ユーザーデータ（クレジット・学習ペース等）の取得関数
   const fetchUserData = async (userId: string) => {
@@ -413,14 +417,9 @@ export default function Home() {
                       <span className="italic font-medium animate-pulse">Yamato is thinking...</span>
                     </div>
                   ) : (
-                    (displayedYamatoText.length > 0 || isTypingYamato) && (
+                    isAnswerShown && (
                       <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
-                        <p>
-                          {displayedYamatoText}
-                          {isTypingYamato && displayedYamatoText.length < DEMO_CONVERSATIONS[currentStep].yamato.length && (
-                            <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-500 animate-pulse"></span>
-                          )}
-                        </p>
+                        <p>{displayedYamatoText}</p>
                       </div>
                     )
                   )}
