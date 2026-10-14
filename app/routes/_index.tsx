@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（型エラー修正済み・完全版）
+ * @description AI Yamato Portal のランディングページ（認証モーダル連動・完全版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -29,7 +29,7 @@ import {
   Send
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import PageLayout from '../components/PageLayout';
+import PageLayout, { PageLayoutRef } from '../components/PageLayout';
 
 // 🤖 コンシェルジュ専用チャットウィジェットのインポート
 import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
@@ -87,8 +87,8 @@ export default function Home() {
   const [welcomePace, setWelcomePace] = useState('normal');
   const [isSavingWelcome, setIsSavingWelcome] = useState(false);
 
-  // 💡 認証モーダル関連のステートは PageLayout 側へ集約
-  const pageLayoutAuthOpenRef = useRef<((mode: 'signin' | 'signup') => void) | null>(null);
+  // 💡 PageLayout の認証モーダルを外部から操作するための ref
+  const layoutRef = useRef<PageLayoutRef>(null);
 
   // 💡 Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
@@ -306,8 +306,8 @@ export default function Home() {
   };
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    if (pageLayoutAuthOpenRef.current) {
-      pageLayoutAuthOpenRef.current(mode);
+    if (layoutRef.current) {
+      layoutRef.current.openAuthModal(mode);
     }
   };
 
@@ -357,6 +357,7 @@ export default function Home() {
 
   return (
     <PageLayout 
+      ref={layoutRef}
       user={user} 
       credits={credits} 
       nickname={nickname} 
@@ -512,7 +513,7 @@ export default function Home() {
                   onClick={() => handleOpenAuthModal('signup')}
                   className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <span>Sign Up / Create Account</span>
+                  <span>Free Sign Up</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

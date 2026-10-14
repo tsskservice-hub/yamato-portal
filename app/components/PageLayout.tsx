@@ -1,8 +1,8 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（共通の箱・YamatoChat常駐解除版）
+ * @description ポータル共通レイアウト（外部からの ref による認証モーダル制御対応版）
  */
-import React, { useState } from "react";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
 import { KeyRound, ShieldCheck, X } from "lucide-react";
 import Header from "./header";
@@ -20,7 +20,12 @@ type PageLayoutProps = {
   isDarkMode?: boolean;
 };
 
-export default function PageLayout({  
+// 💡 親コンポーネントから ref 経由で呼び出せるメソッドの型定義
+export type PageLayoutRef = {
+  openAuthModal: (mode: 'signin' | 'signup') => void;
+};
+
+const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
   children,  
   user: propUser,  
   credits: propCredits,  
@@ -29,7 +34,7 @@ export default function PageLayout({
   onOpenAuth,  
   onSignOut,
   isDarkMode = false
-}: PageLayoutProps) {
+}, ref) => {
   // 💡 root.tsx の loader データをルートID "root" を通じて自動取得
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
@@ -73,6 +78,13 @@ export default function PageLayout({
     setEmailInput('');
     setIsAuthModalOpen(true);
   };
+
+  // 💡 ref を通じて親コンポーネントからモーダルを開けるように公開
+  useImperativeHandle(ref, () => ({
+    openAuthModal: (mode: 'signin' | 'signup') => {
+      handleOpenAuthModal(mode);
+    }
+  }));
 
   const handlePasskeyAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,4 +216,8 @@ export default function PageLayout({
       )}
     </div>
   );
-}
+});
+
+PageLayout.displayName = "PageLayout";
+
+export default PageLayout;
