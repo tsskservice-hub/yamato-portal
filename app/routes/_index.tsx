@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（アプリカード2セクション分割・グローバル/VCE対応版）
+ * @description AI Yamato Portal のランディングページ（アプリカード2セクション分割・グローバル/VCE対応版・思考中アニメーション付き自動デモ統合）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -101,6 +101,7 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
   const [displayedUserText, setDisplayedUserText] = useState('');
   const [displayedYamatoText, setDisplayedYamatoText] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
   const [isTypingYamato, setIsTypingYamato] = useState(false);
 
   // Scroll to top states & listener
@@ -122,7 +123,7 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Typing animation effect for Hero demo
+  // Typing animation & thinking effect for Hero demo
   useEffect(() => {
     const currentConv = DEMO_CONVERSATIONS[currentStep];
     let timeout: NodeJS.Timeout;
@@ -131,10 +132,15 @@ export default function Home() {
       timeout = setTimeout(() => {
         setDisplayedUserText(currentConv.user.slice(0, displayedUserText.length + 1));
       }, 45);
-    } else if (!isTypingYamato && displayedYamatoText.length === 0) {
+    } else if (!isThinking && !isTypingYamato && displayedYamatoText.length === 0) {
       timeout = setTimeout(() => {
+        setIsThinking(true);
+      }, 300);
+    } else if (isThinking) {
+      timeout = setTimeout(() => {
+        setIsThinking(false);
         setIsTypingYamato(true);
-      }, 350);
+      }, 1500);
     } else if (isTypingYamato && displayedYamatoText.length < currentConv.yamato.length) {
       timeout = setTimeout(() => {
         setDisplayedYamatoText(currentConv.yamato.slice(0, displayedYamatoText.length + 1));
@@ -143,13 +149,14 @@ export default function Home() {
       timeout = setTimeout(() => {
         setDisplayedUserText('');
         setDisplayedYamatoText('');
+        setIsThinking(false);
         setIsTypingYamato(false);
         setCurrentStep((prev) => (prev + 1) % DEMO_CONVERSATIONS.length);
       }, 3000);
     }
 
     return () => clearTimeout(timeout);
-  }, [displayedUserText, displayedYamatoText, isTypingYamato, currentStep]);
+  }, [displayedUserText, displayedYamatoText, isThinking, isTypingYamato, currentStep]);
 
   // ユーザーデータ（クレジット・学習ペース等）の取得関数
   const fetchUserData = async (userId: string) => {
@@ -392,20 +399,31 @@ export default function Home() {
                 <div className="flex justify-end">
                   <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
                     <p>{displayedUserText}
-                      <span className="inline-block w-1.5 h-3 ml-0.5 bg-white animate-pulse"></span>
+                      {displayedUserText.length < DEMO_CONVERSATIONS[currentStep].user.length && (
+                        <span className="inline-block w-1.5 h-3 ml-0.5 bg-white animate-pulse"></span>
+                      )}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
-                    <p>
-                      {displayedYamatoText}
-                      {isTypingYamato && displayedYamatoText.length < DEMO_CONVERSATIONS[currentStep].yamato.length && (
-                        <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-500 animate-pulse"></span>
-                      )}
-                    </p>
-                  </div>
+                  {isThinking ? (
+                    <div className="p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex items-center space-x-2 shadow-xs">
+                      <span className="inline-block animate-spin text-sm">🤖</span>
+                      <span className="italic font-medium animate-pulse">Yamato is thinking...</span>
+                    </div>
+                  ) : (
+                    (displayedYamatoText.length > 0 || isTypingYamato) && (
+                      <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
+                        <p>
+                          {displayedYamatoText}
+                          {isTypingYamato && displayedYamatoText.length < DEMO_CONVERSATIONS[currentStep].yamato.length && (
+                            <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-500 animate-pulse"></span>
+                          )}
+                        </p>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
 
@@ -635,10 +653,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 🦘🇦🇺 Section 2: Victorian Curriculum & VCE Students (Australia) */}
+          {/* 🐨🦘🇦🇺 Section 2: Victorian Curriculum & VCE Students (Victoria,Australia) */}
           <div className="space-y-6 pt-6">
             <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-              <span className="text-2xl">🇦🇺🦘</span>
+              <span className="text-2xl">🇦🇺🐨🦘</span>
               <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
