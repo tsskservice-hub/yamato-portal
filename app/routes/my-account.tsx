@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（Supabaseセッション保持・ニックネーム連動完全版）
+ * @description アカウント設定画面（ニックネームの巻き戻り防止・完全同期版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
@@ -97,9 +97,9 @@ export default function AccountSettingsRoute() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
 
-  // ローカルステート（rootData を最優先で初期値に採用し、未定義なら initialData を使用）
+  // 💡 修正: rootData.nickname、initialData.nickname のうち、有効な文字列を優先して初期化
   const [nicknameInput, setNicknameInput] = useState(
-    rootData?.nickname !== undefined && rootData.nickname !== "" 
+    (rootData?.nickname && rootData.nickname.trim() !== "") 
       ? rootData.nickname 
       : (initialData.nickname || "")
   );
@@ -108,7 +108,6 @@ export default function AccountSettingsRoute() {
   const [userPlan, setUserPlan] = useState(initialData.plan);
   const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
 
-  // 💡 認証ユーザーの初期値を rootData.user で安全にフォールバック（nullになるのを防ぐ）
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -118,7 +117,7 @@ export default function AccountSettingsRoute() {
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // 💡 rootData が更新された場合の同期
+  // 💡 rootData が更新された場合の同期（空文字で上書きされないようガードを追加）
   useEffect(() => {
     if (rootData) {
       if (rootData.user !== undefined && rootData.user !== null) {
@@ -127,7 +126,7 @@ export default function AccountSettingsRoute() {
       if (rootData.credits !== undefined) {
         setCredits(rootData.credits);
       }
-      if (rootData.nickname !== undefined && rootData.nickname !== "") {
+      if (rootData.nickname !== undefined && rootData.nickname !== null && rootData.nickname.trim() !== "") {
         setNicknameInput(rootData.nickname);
       }
     }
@@ -145,7 +144,8 @@ export default function AccountSettingsRoute() {
       if (profileData && !error) {
         setCredits((profileData as any).credits ?? 10);
         if ((profileData as any).plan) setUserPlan((profileData as any).plan);
-        if ((profileData as any).nickname !== undefined && (profileData as any).nickname !== null && (profileData as any).nickname !== "") {
+        // 💡 データベースから取得した値が空でない場合のみ反映（空文字で上書きして消えてしまうのを防止）
+        if ((profileData as any).nickname !== undefined && (profileData as any).nickname !== null && (profileData as any).nickname.trim() !== "") {
           setNicknameInput((profileData as any).nickname);
         }
         if ((profileData as any).learning_pace) {
@@ -157,7 +157,7 @@ export default function AccountSettingsRoute() {
     }
   };
 
-  // ブラウザ側のマウント時にセッションを確認（既存のuserが既にある場合は上書きしてnullにしない）
+  // ブラウザ側のマウント時にセッションを確認
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       const currentUser = session?.user ?? null;
@@ -207,7 +207,7 @@ export default function AccountSettingsRoute() {
         throw error;
       }
 
-      // 💡 保存成功後に最新プロフィールを再取得し、Remix のルートデータも再検証
+      // 保存成功後に最新プロフィールを再取得し、Remix のルートデータも再検証
       await fetchUserProfile(user.id);
       revalidator.revalidate();
 
@@ -239,7 +239,7 @@ export default function AccountSettingsRoute() {
     <PageLayout 
       user={user} 
       credits={credits} 
-      nickname={nicknameInput} // 💡 入力中のリアルタイムニックネームを Header へ渡す
+      nickname={nicknameInput} // 💡 リアルタイムのニックネームを Header へ渡す
       onOpenAuth={handleOpenAuthModal} 
       onSignOut={handleSignOut}
     >
