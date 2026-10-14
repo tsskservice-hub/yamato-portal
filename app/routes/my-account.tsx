@@ -12,7 +12,7 @@ import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側で取得できる場合は初期データを埋め込む、またはデフォルト値を返す
+// Loader: サーバー側で認証ユーザーを取得し、対応するプロフィールを確実に取得する
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
@@ -27,7 +27,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       .from("profiles")
       .select("credits, plan, nickname, learning_pace")
       .eq("id", user.id)
-      .single();
+      .maybeSingle(); // .single()だとデータがない場合にエラーになるため .maybeSingle() を推奨
 
     if (profile) {
       initialCredits = (profile as any).credits ?? 10;
@@ -115,7 +115,7 @@ export default function AccountSettingsRoute() {
   const navigate = useNavigate();
   const isSubmitting = navigation.state === "submitting";
 
-  // ローカルステート（ローダーからの初期データを反映）
+  // ローカルステート（ローダーから取得した初期データをセット）
   const [nicknameInput, setNicknameInput] = useState(initialData.nickname);
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
   const [userEmail, setUserEmail] = useState(initialData.email);
@@ -131,14 +131,14 @@ export default function AccountSettingsRoute() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Supabaseからユーザー情報とプロフィール（credits, nickname, learning_pace等）をブラウザ側で再取得・同期
+  // ブラウザ側でユーザーのプロフィール情報を再取得して確実に同期する関数
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data: profileData, error } = await supabase
         .from('profiles')
         .select('credits, plan, nickname, learning_pace')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       if (profileData && !error) {
         setCredits((profileData as any).credits ?? 10);
@@ -155,7 +155,7 @@ export default function AccountSettingsRoute() {
     }
   };
 
-  // ブラウザ側のマウント時にセッションを確認
+  // ブラウザ側のマウント時にセッションを確認し、プロフィールをフェッチ
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       const currentUser = session?.user ?? null;
@@ -190,33 +190,6 @@ export default function AccountSettingsRoute() {
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
-  };
-
-  const handlePasskeyAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthLoading(true);
-    setAuthError(null);
-
-    try {
-      if (authMode === 'signup') {
-        if (!emailInput) {
-          throw new Error('Please enter your email address for passkey registration.');
-        }
-        await signUpAndRegisterPasskey(emailInput);
-        alert('Passkey registration successful! Welcome to AI Yamato.');
-      } else {
-        await signInWithPasskey();
-        alert('Passkey sign in successful!');
-      }
-      setIsAuthModalOpen(false);
-      setEmailInput('');
-      window.location.reload();
-    } catch (err: any) {
-      console.error(err);
-      setAuthError(err.message || 'Passkey authentication failed. Please try again.');
-    } finally {
-      setAuthLoading(false);
-    }
   };
 
   return (
