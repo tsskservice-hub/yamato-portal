@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 
 /**
- * 新規登録フロー：アカウント作成 ➔ パスキー登録
+ * 新規登録フロー：アカウント作成 ➔ パスキー登録 ➔ アカウント設定画面へリダイレクト
  */
 export async function signUpAndRegisterPasskey(email: string): Promise<boolean> {
   const trimmedEmail = email.trim();
@@ -24,7 +24,7 @@ export async function signUpAndRegisterPasskey(email: string): Promise<boolean> 
     );
   }
 
-  // 💡 追加: profiles テーブルにユーザーの ID と email を保存する
+  // 💡 profiles テーブルにユーザーの ID と email を保存する
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert({
@@ -40,6 +40,9 @@ export async function signUpAndRegisterPasskey(email: string): Promise<boolean> 
   // 2. ブラウザの生体認証（Passkey）登録プロンプトの呼び出し
   const { error: registerError } = await supabase.auth.registerPasskey();
   if (registerError) throw registerError;
+
+  // 💡 3. 新規登録＆パスキー登録が成功したら、すぐにアカウント設定画面へリダイレクト
+  window.location.href = "/settings/account";
 
   return true;
 }

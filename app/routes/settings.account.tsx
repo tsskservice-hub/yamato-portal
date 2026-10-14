@@ -1,14 +1,18 @@
+/**
+ * @file settings.account.tsx
+ * @description アカウント設定画面（ニックネームおよび学習ペースの保存・更新対応版）
+ */
 import { useState, useEffect } from "react";
 import { Form, useNavigation, useActionData, useLoaderData, useNavigate } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { KeyRound, ShieldCheck, X } from "lucide-react";
+import { KeyRound, ShieldCheck, X, UserCheck, Gauge } from "lucide-react";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側での認証チェック
+// Loader: サーバー側での認証チェックとプロフィール情報の取得
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
   const url = new URL(request.url);
@@ -22,13 +26,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { data: { user }, error: authError } = await serverSupabase.auth.getUser();
 
   if (authError || !user) {
-    // 💡 メール認証ページへのリダイレクトを廃止し、未ログイン時はトップページへ誘導
+    // 未ログイン時はトップページへ誘導
     return redirect("/", { headers });
   }
 
+  // profiles テーブルから credits, plan に加え nickname と learning_pace を取得
   const { data: profile } = await serverSupabase
     .from("profiles")
-    .select("credits, plan")
+    .select("credits, plan, nickname, learning_pace")
     .eq("id", user.id)
     .single();
 
@@ -36,26 +41,49 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     email: user.email ?? "",
     plan: profile?.plan || "Free Plan",
     credits: profile?.credits || 0,
+    nickname: profile?.nickname || "",
+    learningPace: profile?.learning_pace || "normal",
     createdAt: user.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
   }, { headers });
 }
 
-// Action: アカウント削除処理
+// Action: アカウント削除およびプロフィール更新処理
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
+  const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
+  const { data: { user } } = await serverSupabase.auth.getUser();
+
+  if (!user) {
+    return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
+  }
+
+  // 1. ニックネームと学習ペースの更新処理
+  if (intent === "update-profile") {
+    const nickname = formData.get("nickname")?.toString().trim() || "";
+    const learningPace = formData.get("learningPace")?.toString().trim() || "normal";
+
+    const { error: updateError } = await serverSupabase
+      .from("profiles")
+      .update({ 
+        nickname, 
+        learning_pace: learningPace 
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      return json({ error: "Failed to update profile: " + updateError.message, success: false }, { status: 500 });
+    }
+
+    return json({ success: true, error: null, message: "Profile settings updated successfully!" }, { headers });
+  }
+
+  // 2. アカウント削除処理
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
     if (confirmText !== "DELETE") {
       return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
-    }
-
-    const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
-    const { data: { user } } = await serverSupabase.auth.getUser();
-
-    if (!user) {
-      return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
     }
 
     const supabaseAdmin = createAdminSupabaseClient(context);
@@ -80,12 +108,19 @@ export default function AccountSettingsRoute() {
   const data = useLoaderData<typeof loader>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
-  const actionData = useActionData<typeof action>();
+  
+  // 型推論エラーを防ぐため actionData に型を明示
+  const actionData = useActionData<typeof action>() as { message?: string; error?: string } | undefined;
+  
   const navigation = useNavigation();
   const navigate = useNavigate();
   const isSubmitting = navigation.state === "submitting";
 
-  // 💡 Auth & Credits States (PageLayout連携用)
+  // フォーム入力用のステート（ローダーからの初期値を反映）
+  const [nicknameInput, setNicknameInput] = useState(data.nickname);
+  const [paceInput, setPaceInput] = useState(data.learningPace);
+
+  // Auth & Credits States (PageLayout連携用)
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(data.credits);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -94,7 +129,7 @@ export default function AccountSettingsRoute() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // 💡 Fetch user credits from Supabase
+  // Fetch user credits from Supabase
   const fetchUserCredits = async (userId: string) => {
     try {
       const { data: profileData, error } = await supabase
@@ -111,7 +146,7 @@ export default function AccountSettingsRoute() {
     }
   };
 
-  // 💡 Auth and session handling
+  // Auth and session handling
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
@@ -193,11 +228,75 @@ export default function AccountSettingsRoute() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Manage your registration details, subscription plan, and account cancellation.
+            Manage your AI tutor preferences, registration details, subscription plan, and account cancellation.
           </p>
         </div>
 
-        {/* 1. 総合的なアカウント情報セクション */}
+        {/* 更新完了メッセージの表示 */}
+        {actionData?.message ? (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-lg text-sm">
+            {actionData.message}
+          </div>
+        ) : null}
+
+        {/* 1. AIチューター設定・プロフィールセクション（ニックネーム & ペース） */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-blue-600" /> AI Tutor Preferences & Profile
+          </h2>
+
+          <Form method="post" className="space-y-6">
+            <input type="hidden" name="intent" value="update-profile" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* ニックネーム入力 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Nickname (AI呼びかけ用)
+                </label>
+                <input
+                  type="text"
+                  name="nickname"
+                  value={nicknameInput}
+                  onChange={(e) => setNicknameInput(e.target.value)}
+                  placeholder="e.g. Kenji"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">やまと先生があなたを呼ぶときの名前です。</p>
+              </div>
+
+              {/* 学習ペース選択 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+                  <Gauge className="w-4 h-4 text-blue-600" /> Default Learning Pace
+                </label>
+                <select
+                  name="learningPace"
+                  value={paceInput}
+                  onChange={(e) => setPaceInput(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="steady">Steady (じっくり丁寧・基礎重視)</option>
+                  <option value="normal">Normal (標準ペース)</option>
+                  <option value="accelerated">Accelerated (高速・発展重視)</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">チャット指導時のデフォルトのテンポ設定です。</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? "Saving..." : "Save Preferences"}
+              </button>
+            </div>
+          </Form>
+        </div>
+
+        {/* 2. 総合的なアカウント情報セクション */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-6">
           <h2 className="text-lg font-semibold text-gray-900 border-b pb-3">Registration Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
@@ -220,7 +319,7 @@ export default function AccountSettingsRoute() {
           </div>
         </div>
 
-        {/* 2. 危険なエリア（アカウント削除セクション） */}
+        {/* 3. 危険なエリア（アカウント削除セクション） */}
         <div className="bg-white border border-red-200 rounded-lg shadow-sm p-6 space-y-4">
           <div className="border-b border-red-100 pb-4">
             <h2 className="text-lg font-semibold text-red-600">Delete Account</h2>
@@ -261,7 +360,7 @@ export default function AccountSettingsRoute() {
                   required
                 />
                 {actionData && 'error' in actionData && actionData.error && (
-                  <p className="text-xs text-red-600 mt-1">{actionData.error as string}</p>
+                  <p className="text-xs text-red-600 mt-1">{actionData.error}</p>
                 )}
 
                 <div className="flex justify-end space-x-3 pt-2">
