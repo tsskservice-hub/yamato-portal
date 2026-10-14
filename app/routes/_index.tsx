@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（ルートデータ連動対応版）
+ * @description AI Yamato Portal のランディングページ（ルートデータ・学習ペース・Supabase即時更新連動版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -59,19 +59,25 @@ const DEMO_CONVERSATIONS = [
 ];
 
 export default function Home() {
-  // 💡 root.tsx の loader からユーザー情報・ニックネーム・クレジット等を自動取得
+  // 💡 root.tsx の loader からユーザー情報・ニックネーム・クレジット・学習ペースを自動取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     nickname?: string;
     credits?: number;
     plan?: string;
+    learningPace?: "steady" | "normal" | "accelerated";
   } | undefined;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
-  // rootData があればその値を初期値にする
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
   const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
+  
+  // ★追加: rootData から学習ペースを取得（デフォルトは normal）
+  const [learningPace, setLearningPace] = useState<"steady" | "normal" | "accelerated">(
+    rootData?.learningPace ?? "normal"
+  );
+
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
   // 💡 初回プロフィール（ニックネーム・学習ペース）設定モーダル用ステート（コードは残しつつ非表示運用）
@@ -145,7 +151,7 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [displayedUserText, displayedYamatoText, isTypingYamato, currentStep]);
 
-  // クレジット取得関数
+  // ユーザーデータ（クレジット・学習ペース等）の取得関数
   const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -155,10 +161,13 @@ export default function Home() {
         .single();
       
       if (data && !error) {
-        const typedData = data as { credits?: number; last_quiz_date?: string; nickname?: string; learning_pace?: string };
+        const typedData = data as { credits?: number; last_quiz_date?: string; nickname?: string; learning_pace?: "steady" | "normal" | "accelerated" };
         setCredits(typedData.credits ?? 10);
         if (typedData.nickname) {
           setNickname(typedData.nickname);
+        }
+        if (typedData.learning_pace) {
+          setLearningPace(typedData.learning_pace);
         }
 
         const todayStr = new Date().toISOString().split('T')[0];
@@ -320,7 +329,8 @@ export default function Home() {
     <PageLayout 
       user={user} 
       credits={credits} 
-      nickname={nickname} // 💡 取得・同期されたニックネームをPageLayout（およびHeader）へ確実に渡す
+      nickname={nickname} // 💡 取得・同期されたニックネームをPageLayoutへ確実に渡す
+      learningPace={learningPace} // 💡 ページの学習ペースをPageLayoutへ渡す
       onSignOut={handleSignOut}
       isDarkMode={isDarkMode}
     >
@@ -739,8 +749,12 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト（ChatYamatoConcierge に additionalContext として portalContextData を渡す） */}
-        <ChatYamatoConcierge additionalContext={portalContextData} />
+        {/* 🤖 右下に常駐するコンシェルジュヤマト（学習ペースとuserIdを渡して即時更新対応） */}
+        <ChatYamatoConcierge 
+          additionalContext={portalContextData} 
+          initialLearningPace={learningPace}
+          userId={user?.id}
+        />
 
         {/* ページトップへ戻るボタン */}
         {showScrollTop && (

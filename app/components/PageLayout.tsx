@@ -1,13 +1,12 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（ルートデータ自動同期・学習ペースおよびユーザーIDのYamatoChat連携対応版）
+ * @description ポータル共通レイアウト（共通の箱・YamatoChat常駐解除版）
  */
 import React, { useState } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
 import { KeyRound, ShieldCheck, X } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
-import YamatoChat from "./YamatoChat"; // ★YamatoChatをインポート
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
 type PageLayoutProps = {
@@ -15,7 +14,7 @@ type PageLayoutProps = {
   user?: any;
   credits?: number;
   nickname?: string;
-  learningPace?: "steady" | "normal" | "accelerated"; // ★追加: 学習ペースの受け取り用prop
+  learningPace?: "steady" | "normal" | "accelerated"; 
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
   isDarkMode?: boolean;
@@ -26,18 +25,18 @@ export default function PageLayout({
   user: propUser,  
   credits: propCredits,  
   nickname: propNickname,
-  learningPace: propLearningPace, // ★追加
+  learningPace: propLearningPace, 
   onOpenAuth,  
   onSignOut,
   isDarkMode = false
 }: PageLayoutProps) {
-  // 💡 root.tsx の loader データをルートID "root" をを通じて自動取得
+  // 💡 root.tsx の loader データをルートID "root" を通じて自動取得
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
     credits?: number;  
     nickname?: string;  
     plan?: string;
-    learningPace?: "steady" | "normal" | "accelerated"; // ★追加
+    learningPace?: "steady" | "normal" | "accelerated"; 
   } | undefined;
 
   // 💡 優先順位: 
@@ -124,12 +123,6 @@ export default function PageLayout({
       </main>
       
       <Footer onOpenAuth={handleOpenAuthModal} />
-
-      {/* ★ ここで PageLayout 全体に常駐する YamatoChat に学習ペースとユーザーIDを自動反映して渡す */}
-      <YamatoChat 
-        initialLearningPace={learningPace} 
-        userId={user?.id} 
-      />
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (

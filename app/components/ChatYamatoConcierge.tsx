@@ -1,8 +1,9 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（portalContextData 連携対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（学習ペース・Supabase即時更新連動版）
  */
 import { useState, useEffect, useRef } from "react";
+import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
 
 type ChatMessage = {
   role: "assistant" | "user";
@@ -17,8 +18,8 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-// 💡 _index.tsx から渡される additionalContext の型定義
-interface ChatYamatoConciergeProps {
+// 💡 _index.tsx から渡される additionalContext および学習ペース・ユーザーIDの型定義
+export interface ChatYamatoConciergeProps {
   additionalContext?: {
     pricePlans?: Record<string, any>;
     creditGuide?: Array<{ item: string; cost: string }>;
@@ -33,9 +34,15 @@ interface ChatYamatoConciergeProps {
     cityName?: string;
     timeZone?: string;
   };
+  initialLearningPace?: "steady" | "normal" | "accelerated"; // ★追加
+  userId?: string; // ★追加
 }
 
-export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergeProps) {
+export function ChatYamatoConcierge({ 
+  additionalContext, 
+  initialLearningPace = "normal", 
+  userId 
+}: ChatYamatoConciergeProps) {
   // 💡 初期状態を閉じている状態（false）に変更し、リロード時にボタンとしておさまるようにします
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -52,6 +59,36 @@ export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergePr
   ]);
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
+  
+  // ★学習ペース用のステート
+  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
+
+  // 💡 props から渡される initialLearningPace が変わった時に同期させる
+  useEffect(() => {
+    if (initialLearningPace) {
+      setTutorLevel(initialLearningPace);
+    }
+  }, [initialLearningPace]);
+
+  // ★学習ペース変更時にローカルステートと Supabase を即時更新する関数
+  const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
+    setTutorLevel(newLevel);
+
+    if (!userId) return;
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ learning_pace: newLevel })
+        .eq("id", userId);
+
+      if (error) {
+        console.error("学習ペースのSupabase更新に失敗しました:", error.message);
+      }
+    } catch (err) {
+      console.error("学習ペース更新時の通信エラー:", err);
+    }
+  };
 
   // フルスクリーン制御
   const toggleAiFullscreen = async () => {
@@ -94,7 +131,6 @@ export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergePr
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
 
-    // ★ _index.tsx から受け取った additionalContext（価格、クイズ、法的データ）をそのままバックエンドに送信するペイロードに組み込む
     const portalContextPayload = {
       quizzes: additionalContext?.allQuizzes?.map(q => ({
         title: q.topic || q.title,
@@ -119,9 +155,9 @@ export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergePr
         body: JSON.stringify({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
-          learningPace: "normal",
+          learningPace: tutorLevel, // ★ 現在選択されている学習ペースを反映
           userNickname: "my friend",
-          appType: "concierge", // 常にコンシェルジュとして動作
+          appType: "concierge",
           portalData: portalContextPayload,
         }),
       });
@@ -205,6 +241,27 @@ export function ChatYamatoConcierge({ additionalContext }: ChatYamatoConciergePr
                 >
                   ✕ Close
                 </button>
+              </div>
+            </div>
+
+            {/* 学習ペース選択UIの追加 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
+              <span className="text-xs font-bold text-blue-900">Learning Pace</span>
+              <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
+                {(["steady", "normal", "accelerated"] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => handlePaceChange(level)}
+                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition cursor-pointer ${
+                      tutorLevel === level 
+                        ? "bg-blue-600 text-white shadow-xs" 
+                        : "text-slate-600 hover:text-blue-700"
+                    }`}
+                  >
+                    {level}
+                  </button>
+                ))}
               </div>
             </div>
 
