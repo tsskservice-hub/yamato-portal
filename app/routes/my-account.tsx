@@ -1,9 +1,9 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クライアントサイドSupabase更新・ニックネーム連動対応版）
+ * @description アカウント設定画面（rootルートデータ・ニックネーム連動対応版）
  */
 import { useState, useEffect } from "react";
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate, useRouteLoaderData } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { UserCheck, Gauge } from "lucide-react";
@@ -90,16 +90,23 @@ export default function AccountSettingsRoute() {
   
   const navigate = useNavigate();
 
-  // ローカルステート
-  const [nicknameInput, setNicknameInput] = useState(initialData.nickname);
+  // 💡 root.tsx からグローバルデータを安全に取得
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+  } | undefined;
+
+  // ローカルステート（rootData の値を初期値に優先利用）
+  const [nicknameInput, setNicknameInput] = useState(rootData?.nickname ?? initialData.nickname);
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
-  const [userEmail, setUserEmail] = useState(initialData.email);
+  const [userEmail, setUserEmail] = useState(rootData?.user?.email ?? initialData.email);
   const [userPlan, setUserPlan] = useState(initialData.plan);
   const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
 
   // Auth & Credits States
-  const [user, setUser] = useState<any>(null);
-  const [credits, setCredits] = useState<number>(initialData.credits);
+  const [user, setUser] = useState<any>(rootData?.user ?? null);
+  const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
@@ -107,6 +114,18 @@ export default function AccountSettingsRoute() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // 💡 rootData が更新された場合にステートを同期
+  useEffect(() => {
+    if (rootData) {
+      if (rootData.user !== undefined) {
+        setUser(rootData.user);
+        if (rootData.user?.email) setUserEmail(rootData.user.email);
+      }
+      if (rootData.credits !== undefined) setCredits(rootData.credits);
+      if (rootData.nickname !== undefined) setNicknameInput(rootData.nickname);
+    }
+  }, [rootData]);
 
   // ブラウザ側でユーザーのプロフィール情報を再取得して同期する関数
   const fetchUserProfile = async (userId: string) => {
@@ -198,6 +217,7 @@ export default function AccountSettingsRoute() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setNicknameInput("");
     navigate("/");
   };
 
