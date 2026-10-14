@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（チャット履歴蓄積型オートデモ版）
+ * @description AI Yamato Portal のランディングページ（型エラー修正済み・完全版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -512,7 +512,7 @@ export default function Home() {
                   onClick={() => handleOpenAuthModal('signup')}
                   className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <span>Try App (Free Sign Up)</span>
+                  <span>Sign Up / Create Account</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（全8ペルソナ・原稿用紙ネイビー対応版）
+ * @description ヤマトAI 独立APIテスト画面（全世界 / オーストラリア・ビクトリア州 2セクション分割対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -20,15 +20,16 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// サポートするアプリタイプの型定義（全8種類）
+// サポートするアプリタイプの型定義（全9種類）
 type AppType = 
   | "concierge" 
+  | "game-igo" 
+  | "genkoyoshi-editor-general" 
+  | "genkoyoshi-editor-vce" 
   | "eoy-oral-drill" 
   | "eoy-oral-elaborate" 
   | "eoy-oral-mock" 
   | "eoy-writing" 
-  | "game-igo" 
-  | "genkoyoshi-editor" 
   | "oral-exam-questions";
 
 // 各アプリタイプごとの設定（表示名、挨拶、テーマカラー）
@@ -68,6 +69,23 @@ export default function TestYamatoPage() {
       greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
       themeColor: "blue",
     },
+    // 🌍 全世界対応
+    "game-igo": {
+      name: "囲碁ヤマト",
+      greeting: "こんにちは！囲碁AIヤマトです。一局打ってみましょうか？それともルールや定石について質問しますか？",
+      themeColor: "black",
+    },
+    "genkoyoshi-editor-general": {
+      name: "原稿用紙エディター (一般)",
+      greeting: "こんにちは！一般向け原稿用紙エディターです。日本語の文章構成や推敲をサポートします。",
+      themeColor: "navy",
+    },
+    // 🇦🇺🦘 オーストラリア・ビクトリア州対応 (VCE)
+    "genkoyoshi-editor-vce": {
+      name: "原稿用紙エディター (VCE)",
+      greeting: "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards.",
+      themeColor: "navy",
+    },
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Drill practice session! Let's sharpen your speaking skills.",
@@ -87,16 +105,6 @@ export default function TestYamatoPage() {
       name: "EOY Writing Practice",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills.",
       themeColor: "orange",
-    },
-    "game-igo": {
-      name: "囲碁ヤマト",
-      greeting: "こんにちは！囲碁AIヤマトです。一局打ってみましょうか？それともルールや定石について質問しますか？",
-      themeColor: "black",
-    },
-    "genkoyoshi-editor": {
-      name: "原稿用紙エディター",
-      greeting: "こんにちは！原稿用紙エディターです。原稿の構成や文章の推敲をサポートします。",
-      themeColor: "navy", // ★ここをネイビーに変更
     },
     "oral-exam-questions": {
       name: "口頭試験問題ジェネレーター",
@@ -123,45 +131,82 @@ export default function TestYamatoPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center">
           <h1 className="text-2xl font-bold text-slate-900 mb-3">🇯🇵 ヤマト AI 独立APIテスト画面</h1>
           <p className="text-slate-600 text-sm leading-relaxed mb-6">
-            右下に常駐しているAIヤマトのチャット窓、または以下の切り替えパネルから、各ペルソナ（appType）の動作テストを行えます。
+            右下に常駐しているAIヤマトのチャット窓、または以下のセクション別切り替えパネルから、各ペルソナの動作テストを行えます。
           </p>
 
-          {/* モード切り替えタブ・ボタン群（全8種） */}
-          <div className="flex flex-wrap justify-center gap-2">
-            {(
-              [
-                "concierge",
-                "eoy-oral-drill",
-                "eoy-oral-elaborate",
-                "eoy-oral-mock",
-                "eoy-writing",
-                "game-igo",
-                "genkoyoshi-editor",
-                "oral-exam-questions",
-              ] as const
-            ).map((type) => (
-              <button
-                key={type}
-                onClick={() => setActiveAppType(type)}
-                className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
-                  activeAppType === type
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                {type === "concierge" && "👋 LP Concierge (青)"}
-                {type === "eoy-oral-drill" && "🗣️ Oral Drill (黄)"}
-                {type === "eoy-oral-elaborate" && "💭 Oral Elaborate (紫)"}
-                {type === "eoy-oral-mock" && "📝 Oral Mock (水色)"}
-                {type === "eoy-writing" && "✍️ Writing (オレンジ)"}
-                {type === "game-igo" && "⚪ 囲碁 (黒)"}
-                {type === "genkoyoshi-editor" && "📄 原稿用紙 (ネイビー)"}
-                {type === "oral-exam-questions" && "❓ 口頭試験問題 (緑)"}
-              </button>
-            ))}
+          <div className="space-y-6 text-left">
+            {/* 共通コンシェルジュ */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">📌 ポータル共通</h2>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setActiveAppType("concierge")}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
+                    activeAppType === "concierge" ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  }`}
+                >
+                  👋 LP Concierge (青)
+                </button>
+              </div>
+            </div>
+
+            {/* 🌍 Section 1: 全世界対応 (Global & General) */}
+            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200">
+              <h2 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>🌍</span> Section 1: 全世界対応 (Global & General)
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {(["genkoyoshi-editor-general", "game-igo"] as const).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setActiveAppType(type)}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
+                      activeAppType === type ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                    }`}
+                  >
+                    {type === "genkoyoshi-editor-general" && "📄 原稿用紙エディター (一般/ネイビー)"}
+                    {type === "game-igo" && "⚪ 囲碁ヤマト (黒)"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 🇦🇺🦘 Section 2: オーストラリア・ビクトリア州対応 (Victorian Curriculum & VCE) */}
+            <div className="bg-red-50/50 p-4 rounded-xl border border-red-200">
+              <h2 className="text-xs font-bold text-red-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>🇦🇺🦘</span> Section 2: オーストラリア・ビクトリア州対応 (Victorian Curriculum & VCE)
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    "genkoyoshi-editor-vce",
+                    "eoy-oral-drill",
+                    "eoy-oral-elaborate",
+                    "eoy-oral-mock",
+                    "eoy-writing",
+                    "oral-exam-questions",
+                  ] as const
+                ).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setActiveAppType(type)}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
+                      activeAppType === type ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                    }`}
+                  >
+                    {type === "genkoyoshi-editor-vce" && "📄 原稿用紙エディター (VCE/ネイビー)"}
+                    {type === "eoy-oral-drill" && "🗣️ Oral Drill (黄)"}
+                    {type === "eoy-oral-elaborate" && "💭 Oral Elaborate (紫)"}
+                    {type === "eoy-oral-mock" && "📝 Oral Mock (水色)"}
+                    {type === "eoy-writing" && "✍️ Writing (オレンジ)"}
+                    {type === "oral-exam-questions" && "❓ 口頭試験問題 (緑)"}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="mt-4 text-xs text-slate-400">
+          <div className="mt-6 text-xs text-slate-400">
             Current active appType: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{activeAppType}</code> | Theme: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{currentConfig.themeColor}</code>
           </div>
         </div>

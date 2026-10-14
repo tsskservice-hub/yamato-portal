@@ -1,6 +1,6 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（ニックネームリアルタイム連動・未設定時フォールバック改善版）
+ * @description ポータル共通ヘッダー（新規登録ボタン表記改善版）
  */
 import React from 'react';
 import { Link } from '@remix-run/react';
@@ -25,7 +25,7 @@ export default function Header({
 }: HeaderProps) {
   // 💡 修正ポイント: 
   // ユーザーが入力中の文字（nickname）があればそれを最優先で表示し、
-  // 完全な未入力・空白のときのみ "Set Nickname" または "My Friend" を表示する
+  // 完全な未入力・空白のときのみ "Set Nickname" を表示する
   const trimmedNickname = nickname ? nickname.trim() : "";
   const displayNickname = trimmedNickname !== "" ? trimmedNickname : "Set Nickname";
 
@@ -82,16 +82,16 @@ export default function Header({
                 className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <KeyRound className="w-3.5 h-3.5 text-blue-500" />
-                <span>Passkey Sign In</span>
+                <span>Sign In</span>
               </button>
 
-              {/* パスキー新規登録ボタン */}
+              {/* 新規登録ボタン（従来の Register Passkey からわかりやすい Sign Up に変更） */}
               <button 
                 onClick={() => onOpenAuth?.('signup')}
                 className="text-xs font-semibold px-4 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Register Passkey</span>
+                <span>Sign Up</span>
               </button>
             </>
           )}
