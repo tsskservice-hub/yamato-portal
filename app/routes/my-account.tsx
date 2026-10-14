@@ -109,11 +109,25 @@ export default function AccountSettingsRoute() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
   
-  const actionData = useActionData<typeof action>() as { message?: string; error?: string } | undefined;
+  const actionData = useActionData<typeof action>() as { message?: string; error?: string; success?: boolean } | undefined;
   
   const navigation = useNavigation();
   const navigate = useNavigate();
   const isSubmitting = navigation.state === "submitting";
+
+  // 「Saved!」表示用のステート
+  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+
+  // actionDataの更新を検知して一時的に「Saved!」を表示する
+  useEffect(() => {
+    if (actionData?.success) {
+      setShowSavedIndicator(true);
+      const timer = setTimeout(() => {
+        setShowSavedIndicator(false);
+      }, 3000); // 3秒後に非表示
+      return () => clearTimeout(timer);
+    }
+  }, [actionData]);
 
   // ローカルステート（ローダーから取得した初期データをセット）
   const [nicknameInput, setNicknameInput] = useState(initialData.nickname);
@@ -207,13 +221,6 @@ export default function AccountSettingsRoute() {
           </p>
         </div>
 
-        {/* 更新完了メッセージの表示 */}
-        {actionData?.message ? (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-lg text-sm">
-            {actionData.message}
-          </div>
-        ) : null}
-
         {/* 1. AIチューター設定・プロフィールセクション（ニックネーム & ペース） */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-6">
           <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
@@ -263,7 +270,12 @@ export default function AccountSettingsRoute() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex items-center justify-end space-x-3">
+              {showSavedIndicator && (
+                <span className="text-xs font-semibold text-emerald-600 animate-fade-in flex items-center gap-1">
+                  ✓ Saved!
+                </span>
+              )}
               <button
                 type="submit"
                 disabled={isSubmitting}
