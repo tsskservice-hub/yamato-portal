@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クライアントサイドSupabase更新対応版）
+ * @description アカウント設定画面（クライアントサイドSupabase更新・ニックネーム連動対応版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate } from "@remix-run/react";
@@ -46,7 +46,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   });
 }
 
-// Action: アカウント削除処理のみサーバー側で保持（プロフィール更新はクライアント側で実行するため削除）
+// Action: アカウント削除処理のみサーバー側で保持
 export async function action({ request, context }: LoaderFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -210,6 +210,7 @@ export default function AccountSettingsRoute() {
     <PageLayout 
       user={user} 
       credits={credits} 
+      nickname={nicknameInput} // 💡 入力中のニックネームをリアルタイムでHeaderへ渡す
       onOpenAuth={handleOpenAuthModal} 
       onSignOut={handleSignOut}
     >
