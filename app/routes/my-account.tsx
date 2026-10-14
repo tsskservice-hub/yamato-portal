@@ -1,9 +1,9 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クライアントサイドSupabase更新・rootルートデータ & ニックネーム連動対応版）
+ * @description アカウント設定画面（クライアントサイドSupabase更新・rootデータ & ニックネームリアルタイム連動完了版）
  */
 import { useState, useEffect } from "react";
-import { useLoaderData, useNavigate, useRouteLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { UserCheck, Gauge } from "lucide-react";
@@ -86,8 +86,9 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 export default function AccountSettingsRoute() {
   const initialData = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
 
-  // 💡 root.tsx からのグローバルデータも併せて安全に取得
+  // 💡 root.tsx からのグローバルデータも安全に取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -97,8 +98,10 @@ export default function AccountSettingsRoute() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
 
-  // ローカルステート（initialData および rootData から初期値を構成）
-  const [nicknameInput, setNicknameInput] = useState(rootData?.nickname || initialData.nickname);
+  // ローカルステート（優先順位: rootData > initialData > 空文字）
+  const [nicknameInput, setNicknameInput] = useState(
+    rootData?.nickname || initialData.nickname || ""
+  );
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
   const [userEmail, setUserEmail] = useState(initialData.email);
   const [userPlan, setUserPlan] = useState(initialData.plan);
@@ -115,7 +118,7 @@ export default function AccountSettingsRoute() {
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // 💡 rootData が更新された場合にステートを同期
+  // 💡 rootData が更新された場合の同期
   useEffect(() => {
     if (rootData) {
       if (rootData.user !== undefined) setUser(rootData.user);
@@ -200,6 +203,9 @@ export default function AccountSettingsRoute() {
         throw error;
       }
 
+      // 💡 保存成功後、Remix の loader を再実行して root.tsx 側も含めたグローバル状態を同期させる
+      revalidator.revalidate();
+
       // 成功時に「Saved!」を表示し、3秒後に消す
       setShowSavedIndicator(true);
       setTimeout(() => {
@@ -229,7 +235,7 @@ export default function AccountSettingsRoute() {
     <PageLayout 
       user={user} 
       credits={credits} 
-      nickname={nicknameInput} // 💡 入力中のニックネームをリアルタイムでHeaderへ渡す
+      nickname={nicknameInput} // 💡 入力中および取得済みの最新ニックネームをリアルタイムで Header へ渡す
       onOpenAuth={handleOpenAuthModal} 
       onSignOut={handleSignOut}
     >

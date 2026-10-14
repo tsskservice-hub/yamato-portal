@@ -1,6 +1,6 @@
 /**
  * @file root.tsx
- * @description アプリケーション大元レイアウト（グローバルローダー・ユーザー/プロフィールデータ自動取得対応版）
+ * @description アプリケーション大元レイアウト（グローバルローダー・ノーキャッシュ対応版）
  */
 import {
   Links,
@@ -30,7 +30,7 @@ export const links: LinksFunction = () => [
   },
 ];
 
-// 💡 グローバルローダー：全ページ共通でユーザー情報とprofilesテーブルのニックネーム・クレジットを自動取得
+// 💡 グローバルローダー：常に最新のユーザー情報と profiles データを取得し、ブラウザキャッシュを残さないように設定
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
@@ -53,12 +53,20 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
-  return json({
-    user,
-    nickname,
-    credits,
-    plan,
-  });
+  // 💡 常に最新のデータベース状態を反映させるため、キャッシュをさせないヘッダーを付与する
+  return json(
+    {
+      user,
+      nickname,
+      credits,
+      plan,
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      },
+    }
+  );
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
