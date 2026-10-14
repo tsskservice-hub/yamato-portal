@@ -91,7 +91,7 @@ export default function Header({
                 className="text-xs font-semibold px-4 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all flex items-center space-x-1 cursor-pointer"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Sign Up</span>
+                <span>Free Sign Up</span>
               </button>
             </>
           )}
