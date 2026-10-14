@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（デバッグログ検証版）
+ * @description アカウント設定画面（planカラムエラー修正・ニックネーム完全同期版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
@@ -24,19 +24,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   if (user) {
     const { data: profile } = await serverSupabase
       .from("profiles")
-      .select("credits, plan, nickname, learning_pace")
+      .select("credits, nickname, learning_pace") // 💡 存在しない plan を除外
       .eq("id", user.id)
       .maybeSingle();
 
     if (profile) {
       initialCredits = (profile as any).credits ?? 10;
-      initialPlan = (profile as any).plan ?? "Free Plan";
       initialNickname = (profile as any).nickname ?? "";
       initialPace = (profile as any).learning_pace ?? "normal";
     }
   }
-
-  console.log("🛠️ [Loader] Server fetched initialNickname:", initialNickname);
 
   return json({
     email: user?.email ?? "",
@@ -96,20 +93,16 @@ export default function AccountSettingsRoute() {
     nickname?: string;
   } | undefined;
 
-  console.log("🔍 [Client Render] rootData.nickname:", rootData?.nickname, "| initialData.nickname:", initialData.nickname);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
 
-  // ステート初期化
+  // ステート初期化（rootData や initialData の値を最優先に反映）
   const [nicknameInput, setNicknameInput] = useState(() => {
-    const val = (rootData?.nickname && rootData.nickname.trim() !== "")
+    return (rootData?.nickname && rootData.nickname.trim() !== "")
       ? rootData.nickname
       : (initialData.nickname && initialData.nickname.trim() !== ""
           ? initialData.nickname
           : "");
-    console.log("✨ [useState Init] nicknameInput initialized to:", val);
-    return val;
   });
 
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
@@ -128,7 +121,6 @@ export default function AccountSettingsRoute() {
 
   // rootData が更新された場合の同期
   useEffect(() => {
-    console.log("⚡ [useEffect: rootData changed]", rootData);
     if (rootData) {
       if (rootData.user !== undefined && rootData.user !== null) {
         setUser(rootData.user);
@@ -137,7 +129,6 @@ export default function AccountSettingsRoute() {
         setCredits(rootData.credits);
       }
       if (rootData.nickname !== undefined && rootData.nickname !== null && rootData.nickname.trim() !== "") {
-        console.log("⚡ [useEffect: rootData] updating nicknameInput to:", rootData.nickname);
         setNicknameInput(rootData.nickname);
       }
     }
@@ -146,20 +137,15 @@ export default function AccountSettingsRoute() {
   // ブラウザ側でユーザーのプロフィール情報を再取得して同期する関数
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log("📡 [fetchUserProfile] Fetching from Supabase for userId:", userId);
       const { data: profileData, error } = await supabase
         .from('profiles')
-        .select('credits, plan, nickname, learning_pace')
+        .select('credits, nickname, learning_pace') // 💡 存在しない plan を除外
         .eq('id', userId)
         .maybeSingle();
       
-      console.log("📡 [fetchUserProfile] Result:", profileData, "Error:", error);
-
       if (profileData && !error) {
         setCredits((profileData as any).credits ?? 10);
-        if ((profileData as any).plan) setUserPlan((profileData as any).plan);
         if ((profileData as any).nickname !== undefined && (profileData as any).nickname !== null && (profileData as any).nickname.trim() !== "") {
-          console.log("📡 [fetchUserProfile] Setting nicknameInput to:", (profileData as any).nickname);
           setNicknameInput((profileData as any).nickname);
         }
         if ((profileData as any).learning_pace) {
@@ -167,16 +153,14 @@ export default function AccountSettingsRoute() {
         }
       }
     } catch (err) {
-      console.error('❌ [fetchUserProfile] Failed to fetch user profile:', err);
+      console.error('Failed to fetch user profile:', err);
     }
   };
 
   // ブラウザ側のマウント時にセッションを確認
   useEffect(() => {
-    console.log("🔌 [useEffect: Mount Session check]");
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       const currentUser = session?.user ?? null;
-      console.log("🔌 [getSession] currentUser:", currentUser?.email);
       if (currentUser) {
         setUser(currentUser);
         setUserEmail(currentUser.email ?? "");
@@ -187,8 +171,7 @@ export default function AccountSettingsRoute() {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("🔌 [onAuthStateChange] event:", event, "session:", session?.user?.email);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       if (currentUser) {
         setUser(currentUser);
@@ -211,8 +194,6 @@ export default function AccountSettingsRoute() {
     setIsSaving(true);
     setSaveError(null);
 
-    console.log("💾 [handleUpdateProfile] Saving nickname:", nicknameInput.trim());
-
     try {
       const { error } = await supabase
         .from("profiles")
@@ -226,7 +207,6 @@ export default function AccountSettingsRoute() {
         throw error;
       }
 
-      console.log("💾 [handleUpdateProfile] Save successful! Revalidating...");
       await fetchUserProfile(user.id);
       revalidator.revalidate();
 
@@ -235,7 +215,7 @@ export default function AccountSettingsRoute() {
         setShowSavedIndicator(false);
       }, 3000);
     } catch (err: any) {
-      console.error("❌ [handleUpdateProfile] Failed to update profile:", err);
+      console.error("Failed to update profile:", err);
       setSaveError(err.message || "Failed to save preferences.");
     } finally {
       setIsSaving(false);

@@ -1,6 +1,6 @@
 /**
  * @file root.tsx
- * @description アプリケーション大元レイアウト（グローバルローダー・ノーキャッシュ対応版）
+ * @description アプリケーション大元レイアウト（グローバルローダー・planカラムエラー修正 & ノーキャッシュ対応版）
  */
 import {
   Links,
@@ -40,16 +40,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let plan = "Free Plan";
 
   if (user) {
-    const { data: profile } = await serverSupabase
+    // 💡 存在しない plan カラムをクエリから除外
+    const { data: profile, error } = await serverSupabase
       .from("profiles")
-      .select("nickname, credits, plan")
+      .select("nickname, credits")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile) {
+    if (profile && !error) {
       nickname = (profile as any).nickname ?? "";
       credits = (profile as any).credits ?? 10;
-      plan = (profile as any).plan ?? "Free Plan";
     }
   }
 
