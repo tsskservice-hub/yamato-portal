@@ -1,11 +1,11 @@
 /**
  * @file contact.tsx
- * @description お問い合わせページ（legal-content.ts 連携版）
+ * @description お問い合わせページ（legal-content.ts 連携版・rootルートデータ連携対応版）
  */
 import { useState, useEffect } from "react";
 import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Link, useActionData, useNavigation } from "@remix-run/react";
+import { Link, useActionData, useNavigation, useRouteLoaderData } from "@remix-run/react";
 import { KeyRound, ShieldCheck, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
@@ -50,26 +50,47 @@ export default function Contact() {
   const isSubmitting = navigation.state === "submitting";
   const content = LEGAL_CONTENT.contact;
 
-  // 💡 Auth & Credits States (PageLayout連携用)
-  const [user, setUser] = useState<any>(null);
-  const [credits, setCredits] = useState<number>(10);
+  // 💡 root.tsx からグローバルデータを安全に取得
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+  } | undefined;
+
+  // 💡 rootData から初期値を安全に連動
+  const [user, setUser] = useState<any>(rootData?.user ?? null);
+  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
+  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [emailInput, setEmailInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // 💡 Fetch user credits from Supabase
-  const fetchUserCredits = async (userId: string) => {
+  // 💡 rootData が更新された場合にステートを同期
+  useEffect(() => {
+    if (rootData) {
+      if (rootData.user !== undefined) setUser(rootData.user);
+      if (rootData.credits !== undefined) setCredits(rootData.credits);
+      if (rootData.nickname !== undefined) setNickname(rootData.nickname);
+    }
+  }, [rootData]);
+
+  // 💡 Fetch user credits & profile from Supabase
+  const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, nickname')
         .eq('id', userId)
         .single();
       
       if (data && !error) {
         setCredits((data as any).credits ?? 10);
+        if ((data as any).nickname) {
+          setNickname((data as any).nickname);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
@@ -81,14 +102,14 @@ export default function Contact() {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
@@ -98,6 +119,7 @@ export default function Contact() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setNickname("");
   };
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
@@ -136,6 +158,7 @@ export default function Contact() {
     <PageLayout 
       user={user} 
       credits={credits} 
+      nickname={nickname}
       onOpenAuth={handleOpenAuthModal} 
       onSignOut={handleSignOut}
     >

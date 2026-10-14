@@ -1,6 +1,10 @@
+/**
+ * @file genkoyoshi-editor.tsx
+ * @description 原稿用紙エディター（rootルートデータ・ニックネーム連携対応版）
+ */
 import React, { useState, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate, useRouteLoaderData } from "@remix-run/react";
 import { 
   KeyRound, 
   ShieldCheck, 
@@ -51,15 +55,25 @@ function ScrollTopButton() {
 
 export default function GenkoyoshiEditor() {
   const navigate = useNavigate();
+
+  // 💡 root.tsx からグローバルデータを安全に取得
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+  } | undefined;
+
   const [format, setFormat] = useState<string>("400");
   const [title, setTitle] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [text, setText] = useState<string>("");
   const [isClient, setIsClient] = useState<boolean>(false);
 
-  // 💡 Auth & Credits States
-  const [user, setUser] = useState<any>(null);
-  const [credits, setCredits] = useState<number>(10);
+  // 💡 rootData から初期値を安全に連動
+  const [user, setUser] = useState<any>(rootData?.user ?? null);
+  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
+  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [emailInput, setEmailInput] = useState('');
@@ -83,17 +97,29 @@ export default function GenkoyoshiEditor() {
     setIsClient(true);
   }, []);
 
-  // 💡 Fetch user credits from Supabase
-  const fetchUserCredits = async (userId: string) => {
+  // 💡 rootData が更新された場合にステートを同期
+  useEffect(() => {
+    if (rootData) {
+      if (rootData.user !== undefined) setUser(rootData.user);
+      if (rootData.credits !== undefined) setCredits(rootData.credits);
+      if (rootData.nickname !== undefined) setNickname(rootData.nickname);
+    }
+  }, [rootData]);
+
+  // 💡 Fetch user credits & profile from Supabase if needed
+  const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, nickname')
         .eq('id', userId)
         .single();
       
       if (data && !error) {
         setCredits((data as any).credits ?? 10);
+        if ((data as any).nickname) {
+          setNickname((data as any).nickname);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
@@ -105,14 +131,14 @@ export default function GenkoyoshiEditor() {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
@@ -122,6 +148,7 @@ export default function GenkoyoshiEditor() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setNickname("");
   };
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
@@ -329,7 +356,7 @@ export default function GenkoyoshiEditor() {
           message: userMsg,
           chatHistory: tutorMessages,
           learningPace: tutorLevel,
-          userNickname: user?.email ? user.email.split('@')[0] : "Student",
+          userNickname: nickname || (user?.email ? user.email.split('@')[0] : "Student"),
         }),
       });
 
@@ -355,6 +382,7 @@ export default function GenkoyoshiEditor() {
     <PageLayout 
       user={user} 
       credits={credits} 
+      nickname={nickname}
       onOpenAuth={handleOpenAuthModal} 
       onSignOut={handleSignOut}
     >
@@ -492,7 +520,7 @@ export default function GenkoyoshiEditor() {
             border: 1px solid #999;
             box-sizing: border-box;
             display: flex;
-            align-items: flex-end;    
+            align-items: flex-end;   
             justify-content: center;    
             padding-bottom: 2mm;        
             font-size: 1.35rem;         

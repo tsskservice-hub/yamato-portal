@@ -1,5 +1,9 @@
+/**
+ * @file prices.tsx
+ * @description 料金プランページ（rootルートデータ連携対応版）
+ */
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate, useRouteLoaderData } from "@remix-run/react";
 import { Sparkles, ArrowRight, ShieldCheck, Check, ShoppingBag, GraduationCap, Mic, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, KeyRound, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
@@ -12,24 +16,46 @@ export default function Prices() {
   const [isSpecsOpen, setIsSpecsOpen] = useState(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
 
-  const [user, setUser] = useState<any>(null);
-  const [credits, setCredits] = useState<number>(10);
+  // 💡 root.tsx からグローバルデータを安全に取得
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+  } | undefined;
+
+  // 💡 rootData から初期値を安全に連動
+  const [user, setUser] = useState<any>(rootData?.user ?? null);
+  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
+  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [emailInput, setEmailInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const fetchUserCredits = async (userId: string) => {
+  // 💡 rootData が更新された場合にステートを同期
+  useEffect(() => {
+    if (rootData) {
+      if (rootData.user !== undefined) setUser(rootData.user);
+      if (rootData.credits !== undefined) setCredits(rootData.credits);
+      if (rootData.nickname !== undefined) setNickname(rootData.nickname);
+    }
+  }, [rootData]);
+
+  const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, nickname')
         .eq('id', userId)
         .single();
       
       if (data && !error) {
         setCredits((data as any).credits ?? 10);
+        if ((data as any).nickname) {
+          setNickname((data as any).nickname);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
@@ -52,14 +78,14 @@ export default function Prices() {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
@@ -69,6 +95,7 @@ export default function Prices() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setNickname("");
   };
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
@@ -137,6 +164,7 @@ export default function Prices() {
     <PageLayout 
       user={user} 
       credits={credits} 
+      nickname={nickname}
       onOpenAuth={handleOpenAuthModal} 
       onSignOut={handleSignOut}
     >
