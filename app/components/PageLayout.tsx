@@ -1,12 +1,13 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（ルートデータ自動同期・ニックネーム優先反映対応版）
+ * @description ポータル共通レイアウト（ルートデータ自動同期・学習ペースおよびユーザーIDのYamatoChat連携対応版）
  */
 import React, { useState } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
 import { KeyRound, ShieldCheck, X } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
+import YamatoChat from "./YamatoChat"; // ★YamatoChatをインポート
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
 type PageLayoutProps = {
@@ -14,26 +15,29 @@ type PageLayoutProps = {
   user?: any;
   credits?: number;
   nickname?: string;
+  learningPace?: "steady" | "normal" | "accelerated"; // ★追加: 学習ペースの受け取り用prop
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
   isDarkMode?: boolean;
 };
 
-export default function PageLayout({ 
-  children, 
-  user: propUser, 
-  credits: propCredits, 
-  nickname: propNickname, 
-  onOpenAuth, 
+export default function PageLayout({  
+  children,  
+  user: propUser,  
+  credits: propCredits,  
+  nickname: propNickname,
+  learningPace: propLearningPace, // ★追加
+  onOpenAuth,  
   onSignOut,
   isDarkMode = false
 }: PageLayoutProps) {
-  // 💡 root.tsx の loader データをルートID "root" を通じて自動取得
-  const rootData = useRouteLoaderData("root") as { 
-    user?: any; 
-    credits?: number; 
-    nickname?: string; 
-    plan?: string 
+  // 💡 root.tsx の loader データをルートID "root" をを通じて自動取得
+  const rootData = useRouteLoaderData("root") as {  
+    user?: any;  
+    credits?: number;  
+    nickname?: string;  
+    plan?: string;
+    learningPace?: "steady" | "normal" | "accelerated"; // ★追加
   } | undefined;
 
   // 💡 優先順位: 
@@ -43,9 +47,16 @@ export default function PageLayout({
   const user = propUser !== undefined ? propUser : rootData?.user;
   const credits = propCredits !== undefined ? propCredits : (rootData?.credits ?? 10);
   
-  // 💡 修正ポイント: propNickname が明示的に存在し、かつ有効な文字列であれば最優先で採用する
+  // 💡 ニックネームの解決
   const rawNickname = (propNickname !== undefined && propNickname !== null) ? propNickname : rootData?.nickname;
   const nickname = rawNickname && rawNickname.trim() !== "" ? rawNickname : "";
+
+  // 💡 学習ペースの解決（prop > rootData > デフォルト"normal"）
+  const rawLearningPace = propLearningPace !== undefined ? propLearningPace : rootData?.learningPace;
+  const learningPace: "steady" | "normal" | "accelerated" = 
+    (rawLearningPace === "steady" || rawLearningPace === "normal" || rawLearningPace === "accelerated")
+      ? rawLearningPace
+      : "normal";
 
   // 💡 認証モーダルおよびパスキー認証のロジックを共通レイアウトへ集約
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -113,6 +124,12 @@ export default function PageLayout({
       </main>
       
       <Footer onOpenAuth={handleOpenAuthModal} />
+
+      {/* ★ ここで PageLayout 全体に常駐する YamatoChat に学習ペースとユーザーIDを自動反映して渡す */}
+      <YamatoChat 
+        initialLearningPace={learningPace} 
+        userId={user?.id} 
+      />
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (

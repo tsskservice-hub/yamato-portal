@@ -1,8 +1,9 @@
 /**
  * @file YamatoChat.tsx
- * @description ヤマトAIチャットウィジェット（初期非表示共通対応・カラーテーマ切り替え・考え中アイコン回転対応版）
+ * @description ヤマトAIチャットウィジェット（初期非表示対応・テーマカラー切り替え・Supabase即時更新対応版）
  */
 import { useState, useEffect, useRef } from "react";
+import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート（プロジェクトの構成に合わせてパスを調整してください）
 
 type ChatMessage = {
   role: "assistant" | "user";
@@ -18,9 +19,13 @@ export type YamatoChatProps = {
   appType?: "concierge" | "writing" | "oral" | "general" | string;  
   additionalContext?: any;       // コンシェルジュ等に渡す追加のポータルデータ
   
-  // ★追加: 共通の初期非表示仕様とテーマカラー設定
+  // 共通の初期非表示仕様とテーマカラー設定
   defaultOpen?: boolean;         // 初期状態で開いておくか（デフォルトは false＝非表示・折りたたみボタン）
   themeColor?: "emerald" | "blue" | string; // テーマカラー（"emerald" または "blue" など）
+  
+  // ★追加: 学習ペースの初期値と、Supabase更新用のユーザーID
+  initialLearningPace?: "steady" | "normal" | "accelerated";
+  userId?: string; 
 };
 
 // カラーテーマごとのスタイル定義（Tailwind CSSのクラスが静的解析で消えないよう完全なクラス名で記述）
@@ -64,8 +69,10 @@ export function YamatoChat({
   systemPrompt = "",
   appType = "general",
   additionalContext,
-  defaultOpen = false,      // ★すべてのヤマトで初期状態を「非表示（折りたたまれたボタン）」に統一
-  themeColor = "emerald",   // デフォルトのテーマカラー
+  defaultOpen = false,      
+  themeColor = "emerald",   
+  initialLearningPace = "normal", 
+  userId, // ★追加: ユーザーIDを受け取る
 }: YamatoChatProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -82,7 +89,38 @@ export function YamatoChat({
   ]);
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
-  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
+  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
+
+  // 💡 props から渡される initialLearningPace が変わった時に同期させる
+  useEffect(() => {
+    if (initialLearningPace) {
+      setTutorLevel(initialLearningPace);
+    }
+  }, [initialLearningPace]);
+
+  // ★追加: ユーザーが学習ペースを変更した際に、ローカルステート更新とSupabaseの即時更新を行う関数
+  const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
+    setTutorLevel(newLevel); // 1. まずUI側のステートを即時反映
+
+    if (!userId) {
+      console.warn("userIdが渡されていないため、Supabaseのprofiles更新はスキップされました。");
+      return;
+    }
+
+    try {
+      // 2. Supabase の profiles テーブルを即時更新
+      const { error } = await supabase
+        .from("profiles")
+        .update({ learning_pace: newLevel })
+        .eq("id", userId);
+
+      if (error) {
+        console.error("学習ペースのSupabase更新に失敗しました:", error.message);
+      }
+    } catch (err) {
+      console.error("学習ペース更新時の通信エラー:", err);
+    }
+  };
 
   // 🎨 [開発中につき一時非表示] ユーザーが明示的に図解・イラスト生成を要求するためのチェックボックス用ステート
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
@@ -266,7 +304,7 @@ export function YamatoChat({
                     <button
                       key={level}
                       type="button"
-                      onClick={() => setTutorLevel(level)}
+                      onClick={() => handlePaceChange(level)} // ★変更: クリック時にSupabase即時更新関数を実行
                       className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition ${
                         tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
                       }`}

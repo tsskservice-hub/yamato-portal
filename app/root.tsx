@@ -1,6 +1,6 @@
 /**
  * @file root.tsx
- * @description アプリケーション大元レイアウト（グローバルローダー・planカラムエラー修正 & ノーキャッシュ対応版）
+ * @description アプリケーション大元レイアウト（グローバルローダー・learning_pace対応 & ノーキャッシュ対応版）
  */
 import {
   Links,
@@ -30,7 +30,7 @@ export const links: LinksFunction = () => [
   },
 ];
 
-// 💡 グローバルローダー：常に最新のユーザー情報と profiles データを取得し、ブラウザキャッシュを残さないように設定
+// 💡 グローバルローダー：常に最新のユーザー情報と profiles データ（learning_pace含む）を取得し、キャッシュを残さないように設定
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
@@ -38,18 +38,25 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let nickname = "";
   let credits = 10;
   let plan = "Free Plan";
+  let learningPace: "steady" | "normal" | "accelerated" = "normal"; // デフォルト値
 
   if (user) {
-    // 💡 存在しない plan カラムをクエリから除外
+    // 💡 profiles テーブルから nickname, credits に加えて learning_pace を取得
     const { data: profile, error } = await serverSupabase
       .from("profiles")
-      .select("nickname, credits")
+      .select("nickname, credits, learning_pace")
       .eq("id", user.id)
       .maybeSingle();
 
     if (profile && !error) {
       nickname = (profile as any).nickname ?? "";
       credits = (profile as any).credits ?? 10;
+      
+      // データベースの値が有効な形式であれば反映、そうでなければデフォルト
+      const dbPace = (profile as any).learning_pace;
+      if (dbPace === "steady" || dbPace === "normal" || dbPace === "accelerated") {
+        learningPace = dbPace;
+      }
     }
   }
 
@@ -60,6 +67,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       nickname,
       credits,
       plan,
+      learningPace, // ★ここでルートデータとして全体に共有する
     },
     {
       headers: {
