@@ -13,7 +13,7 @@ type PageLayoutProps = {
   children: React.ReactNode;
   user?: any;
   credits?: number;
-  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティを追加
+  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティ
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
   isDarkMode?: boolean;
@@ -87,7 +87,7 @@ export default function PageLayout({
       <Header 
         user={user} 
         credits={credits} 
-        nickname={nickname} // 💡 取得したニックネームをHeaderへ渡す
+        nickname={nickname} // 💡 取得したニックネームをHeaderへ確実に引き渡す
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={onSignOut} 
       />
