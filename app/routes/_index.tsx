@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（完全安定版オートデモ）
+ * @description AI Yamato Portal のランディングページ（思考中3秒間・完全同期型オートデモ）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -126,13 +126,12 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // 💡 完全に安定したシーケンシャル・デモコントローラー
+  // 💡 思考中を約3秒間に設定した安定版デモコントローラー
   useEffect(() => {
     let isMounted = true;
     const currentConv = DEMO_CONVERSATIONS[currentStep];
 
     const runDemoSequence = async () => {
-      // 1. 初期化・クリア
       if (!isMounted) return;
       setTypedInputText('');
       setIsSending(false);
@@ -141,11 +140,10 @@ export default function Home() {
       setIsThinking(false);
       setIsAnswerShown(false);
 
-      // 少し待ってから入力タイピング開始
       await new Promise((r) => setTimeout(r, 400));
       if (!isMounted) return;
 
-      // 2. 入力欄へのタイピング演出（一文字ずつ）
+      // 1. 入力欄へのタイピング演出（一文字ずつ）
       for (let i = 1; i <= currentConv.user.length; i++) {
         if (!isMounted) return;
         setTypedInputText(currentConv.user.slice(0, i));
@@ -155,12 +153,12 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 200));
       if (!isMounted) return;
 
-      // 3. 送信ボタン演出（ピカッと光る）
+      // 2. 送信ボタン演出（ピカッと光る）
       setIsSending(true);
       await new Promise((r) => setTimeout(r, 350));
       if (!isMounted) return;
 
-      // 4. 入力クリア ＆ チャット欄にユーザーの吹き出しが出現
+      // 3. 入力クリア ＆ チャット欄にユーザーの吹き出しが出現
       setIsSending(false);
       setTypedInputText('');
       setDisplayedUserText(currentConv.user);
@@ -168,17 +166,17 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 400));
       if (!isMounted) return;
 
-      // 5. 思考中インジケーター表示 (Yamato is thinking...)
+      // 4. 思考中インジケーター表示 (Yamato is thinking... / 約3秒間回転)
       setIsThinking(true);
-      await new Promise((r) => setTimeout(r, 1500)); // 思考時間 1.5秒
+      await new Promise((r) => setTimeout(r, 3000)); // 思考時間 3.0秒
       if (!isMounted) return;
 
-      // 6. ヤマトの回答を一括表示
+      // 5. ヤマトの回答を一括表示
       setIsThinking(false);
       setDisplayedYamatoText(currentConv.yamato);
       setIsAnswerShown(true);
 
-      // 7. 表示された状態で3秒間維持してから、次の会話ステップへ
+      // 6. 表示された状態で3秒間維持してから、次の会話ステップへ
       await new Promise((r) => setTimeout(r, 3000));
       if (!isMounted) return;
 
