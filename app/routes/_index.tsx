@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（入力欄タイピング＋思考中＋一括回答デモ版）
+ * @description AI Yamato Portal のランディングページ（入力欄タイピング＋送信ボタン演出＋思考中＋一括回答デモ版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -101,7 +101,8 @@ export default function Home() {
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
   const [typedInputText, setTypedInputText] = useState('');         // 下部入力欄にタイピングされるテキスト
-  const [displayedUserText, setDisplayedUserText] = useState('');   // チャット欄に表示されるユーザーメッセージ（入力完了時に一括設定）
+  const [isSending, setIsSending] = useState(false);                // 送信ボタン押下演出用のステート
+  const [displayedUserText, setDisplayedUserText] = useState('');   // チャット欄に表示されるユーザーメッセージ
   const [displayedYamatoText, setDisplayedYamatoText] = useState(''); // ヤマトの返答テキスト
   const [isThinking, setIsThinking] = useState(false);
   const [isAnswerShown, setIsAnswerShown] = useState(false);
@@ -125,23 +126,25 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // デモの進行管理（入力欄タイピング ➔ 吹き出しにユーザーメッセージ出現 ➔ 思考中 ➔ ヤマト回答一括表示）
+  // デモの進行管理（入力欄タイピング ➔ 送信ボタン演出 ➔ 吹き出し出現 ➔ 思考中 ➔ ヤマト回答）
   useEffect(() => {
     const currentConv = DEMO_CONVERSATIONS[currentStep];
     let timeout: NodeJS.Timeout;
 
     // 1. デモ画面下部の入力欄に一文字ずつ文字が打ち込まれていく演出
-    if (typedInputText.length < currentConv.user.length) {
+    if (!isSending && typedInputText.length < currentConv.user.length) {
       timeout = setTimeout(() => {
         setTypedInputText(currentConv.user.slice(0, typedInputText.length + 1));
       }, 45);
     } 
-    // 2. 入力完了後、送信されてチャット欄にユーザーの吹き出しが一括で現れ、入力欄をクリア
-    else if (!displayedUserText && typedInputText === currentConv.user) {
+    // 2. 入力完了後、送信ボタンが押される演出（約300ms点灯）
+    else if (!isSending && typedInputText === currentConv.user) {
+      setIsSending(true);
       timeout = setTimeout(() => {
-        setDisplayedUserText(currentConv.user);
-        setTypedInputText('');
-      }, 300);
+        setIsSending(false);
+        setDisplayedUserText(currentConv.user); // ユーザー吹き出しを表示
+        setTypedInputText('');                  // 入力欄をクリア
+      }, 350);
     } 
     // 3. ユーザー吹き出し出現後、少し待って「Yamato is thinking...」状態へ
     else if (displayedUserText && !isThinking && !isAnswerShown && !displayedYamatoText) {
@@ -161,6 +164,7 @@ export default function Home() {
     else if (isAnswerShown) {
       timeout = setTimeout(() => {
         setTypedInputText('');
+        setIsSending(false);
         setDisplayedUserText('');
         setDisplayedYamatoText('');
         setIsThinking(false);
@@ -170,7 +174,7 @@ export default function Home() {
     }
 
     return () => clearTimeout(timeout);
-  }, [typedInputText, displayedUserText, displayedYamatoText, isThinking, isAnswerShown, currentStep]);
+  }, [typedInputText, isSending, displayedUserText, displayedYamatoText, isThinking, isAnswerShown, currentStep]);
 
   // ユーザーデータ（クレジット・学習ペース等）の取得関数
   const fetchUserData = async (userId: string) => {
@@ -437,7 +441,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* ★ デモ画面下部の入力フィールド（ここに文字がタイピングされていく演出） */}
+              {/* ★ デモ画面下部の入力フィールド（タイピング＋送信ボタン連動演出） */}
               <div className="flex items-center space-x-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 mb-4 shadow-xs">
                 <div className="flex-grow px-3 py-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200 flex items-center">
                   {typedInputText ? (
@@ -446,9 +450,11 @@ export default function Home() {
                     <span className="text-slate-400 dark:text-slate-500">Ask Yamato a question...</span>
                   )}
                   {/* 点滅カーソル */}
-                  <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-600 animate-pulse"></span>
+                  {!isSending && <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-600 animate-pulse"></span>}
                 </div>
-                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm opacity-90">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm transition-all duration-200 ${
+                  isSending ? 'bg-blue-700 scale-95 ring-2 ring-blue-400/50 text-white' : 'bg-blue-600 text-white opacity-90'
+                }`}>
                   <Send className="w-3.5 h-3.5" />
                 </div>
               </div>
