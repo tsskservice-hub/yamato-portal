@@ -1,9 +1,9 @@
 /**
  * @file YamatoChat.tsx
- * @description ヤマトAIチャットウィジェット（初期非表示対応・テーマカラー切り替え・Supabase即時更新対応版）
+ * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新対応版）
  */
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート（プロジェクトの構成に合わせてパスを調整してください）
+import { supabase } from "../lib/supabaseClient";
 
 type ChatMessage = {
   role: "assistant" | "user";
@@ -13,22 +13,22 @@ type ChatMessage = {
 
 // 外部から受け取るプロパティ（Props）の型定義
 export type YamatoChatProps = {
-  characterName?: string;        // チャット窓のタイトルに表示する名前（例: "やまと先生"）
+  characterName?: string;        // チャット窓のタイトルに表示する名前
   initialGreeting?: string;      // 最初の一言メッセージ
-  systemPrompt?: string;         // キャラクター固有の指示（将来の拡張用）
+  systemPrompt?: string;         // キャラクター固有の指示
   appType?: "concierge" | "writing" | "oral" | "general" | string;  
   additionalContext?: any;       // コンシェルジュ等に渡す追加のポータルデータ
   
   // 共通の初期非表示仕様とテーマカラー設定
-  defaultOpen?: boolean;         // 初期状態で開いておくか（デフォルトは false＝非表示・折りたたみボタン）
-  themeColor?: "emerald" | "blue" | string; // テーマカラー（"emerald" または "blue" など）
+  defaultOpen?: boolean;         // 初期状態で開いておくか
+  themeColor?: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy" | string; 
   
-  // ★追加: 学習ペースの初期値と、Supabase更新用のユーザーID
+  // 学習ペースの初期値と、Supabase更新用のユーザーID
   initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string; 
 };
 
-// カラーテーマごとのスタイル定義（Tailwind CSSのクラスが静的解析で消えないよう完全なクラス名で記述）
+// カラーテーマごとのスタイル定義（全対応版）
 const themeStyles = {
   emerald: {
     button: "bg-emerald-600 hover:bg-emerald-700 text-white",
@@ -54,6 +54,90 @@ const themeStyles = {
     inputRing: "focus:ring-blue-500",
     submitBtn: "bg-blue-600 hover:bg-blue-700 text-white",
   },
+  yellow: {
+    button: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
+    border: "border-yellow-300",
+    headerText: "text-yellow-900",
+    badgeBg: "bg-yellow-50 border-yellow-200",
+    badgeText: "text-yellow-900",
+    buttonActive: "bg-yellow-500 text-slate-900 shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-yellow-700",
+    userBubble: "bg-yellow-500 text-slate-900 rounded-br-xs",
+    inputRing: "focus:ring-yellow-500",
+    submitBtn: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
+  },
+  purple: {
+    button: "bg-purple-600 hover:bg-purple-700 text-white",
+    border: "border-purple-300",
+    headerText: "text-purple-900",
+    badgeBg: "bg-purple-50 border-purple-200",
+    badgeText: "text-purple-900",
+    buttonActive: "bg-purple-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-purple-700",
+    userBubble: "bg-purple-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-purple-500",
+    submitBtn: "bg-purple-600 hover:bg-purple-700 text-white",
+  },
+  cyan: {
+    button: "bg-cyan-600 hover:bg-cyan-700 text-white",
+    border: "border-cyan-300",
+    headerText: "text-cyan-900",
+    badgeBg: "bg-cyan-50 border-cyan-200",
+    badgeText: "text-cyan-900",
+    buttonActive: "bg-cyan-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-cyan-700",
+    userBubble: "bg-cyan-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-cyan-500",
+    submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
+  },
+  orange: {
+    button: "bg-orange-500 hover:bg-orange-600 text-white",
+    border: "border-orange-300",
+    headerText: "text-orange-900",
+    badgeBg: "bg-orange-50 border-orange-200",
+    badgeText: "text-orange-900",
+    buttonActive: "bg-orange-500 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-orange-700",
+    userBubble: "bg-orange-500 text-white rounded-br-xs",
+    inputRing: "focus:ring-orange-500",
+    submitBtn: "bg-orange-500 hover:bg-orange-600 text-white",
+  },
+  black: {
+    button: "bg-slate-900 hover:bg-black text-white",
+    border: "border-slate-700",
+    headerText: "text-slate-900",
+    badgeBg: "bg-slate-100 border-slate-300",
+    badgeText: "text-slate-900",
+    buttonActive: "bg-slate-900 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-slate-900",
+    userBubble: "bg-slate-900 text-white rounded-br-xs",
+    inputRing: "focus:ring-slate-900",
+    submitBtn: "bg-slate-900 hover:bg-black text-white",
+  },
+  green: {
+    button: "bg-green-600 hover:bg-green-700 text-white",
+    border: "border-green-300",
+    headerText: "text-green-900",
+    badgeBg: "bg-green-50 border-green-200",
+    badgeText: "text-green-900",
+    buttonActive: "bg-green-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-green-700",
+    userBubble: "bg-green-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-green-500",
+    submitBtn: "bg-green-600 hover:bg-green-700 text-white",
+  },
+  navy: {
+    button: "bg-indigo-900 hover:bg-indigo-950 text-white",
+    border: "border-indigo-300",
+    headerText: "text-indigo-950",
+    badgeBg: "bg-indigo-50 border-indigo-200",
+    badgeText: "text-indigo-950",
+    buttonActive: "bg-indigo-900 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-indigo-900",
+    userBubble: "bg-indigo-900 text-white rounded-br-xs",
+    inputRing: "focus:ring-indigo-900",
+    submitBtn: "bg-indigo-900 hover:bg-indigo-950 text-white",
+  },
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -72,13 +156,13 @@ export function YamatoChat({
   defaultOpen = false,      
   themeColor = "emerald",   
   initialLearningPace = "normal", 
-  userId, // ★追加: ユーザーIDを受け取る
+  userId, 
 }: YamatoChatProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
 
-  // 選択されたテーマのスタイルセットを取得（存在しない場合は emerald をフォールバック）
+  // 選択されたテーマのスタイルセットを取得（存在しない場合は emerald）
   const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.emerald;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
@@ -91,16 +175,14 @@ export function YamatoChat({
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
 
-  // 💡 props から渡される initialLearningPace が変わった時に同期させる
   useEffect(() => {
     if (initialLearningPace) {
       setTutorLevel(initialLearningPace);
     }
   }, [initialLearningPace]);
 
-  // ★追加: ユーザーが学習ペースを変更した際に、ローカルステート更新とSupabaseの即時更新を行う関数
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
-    setTutorLevel(newLevel); // 1. まずUI側のステートを即時反映
+    setTutorLevel(newLevel);
 
     if (!userId) {
       console.warn("userIdが渡されていないため、Supabaseのprofiles更新はスキップされました。");
@@ -108,7 +190,6 @@ export function YamatoChat({
     }
 
     try {
-      // 2. Supabase の profiles テーブルを即時更新
       const { error } = await supabase
         .from("profiles")
         .update({ learning_pace: newLevel })
@@ -122,11 +203,7 @@ export function YamatoChat({
     }
   };
 
-  // 🎨 [開発中につき一時非表示] ユーザーが明示的に図解・イラスト生成を要求するためのチェックボックス用ステート
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
-
-  // 🔍 [開発中につき一時非表示] 拡大表示（モーダル）用のステート
-  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   const toggleAiFullscreen = async () => {
     if (!aiChatRef.current) return;
@@ -144,7 +221,6 @@ export function YamatoChat({
     }
   };
 
-  // 💡 ESCキーやブラウザ側の全画面解除に確実に対応し、元のデフォルトの大きさに戻す
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
@@ -173,12 +249,11 @@ export function YamatoChat({
     if (!tutorInput.trim() || isTutorLoading) return;
 
     const userMsg = tutorInput.trim();
-    const needsVisual = requestVisualAid; // 🎨 チェック状態を保持
+    const needsVisual = requestVisualAid;
 
     setTutorInput("");
-    setRequestVisualAid(false); // 送信後にチェックを自動リセット
+    setRequestVisualAid(false);
 
-    // 1. ユーザーのメッセージを履歴に追加
     const newMessages: ChatMessage[] = [
       ...tutorMessages, 
       { role: "user", content: userMsg },
@@ -203,7 +278,7 @@ export function YamatoChat({
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt, 
           requestVisualAid: needsVisual,
-          portalData: additionalContext, // コンシェルジュ用のポータルデータ（quizzes, price-plans等）を渡す
+          portalData: additionalContext,
         }),
       });
 
@@ -224,7 +299,6 @@ export function YamatoChat({
       const imageUrl = data.imageUrl;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
-      // AIの「思考中」表示を終了し、一括でメッセージを画面に反映（デフォルト表示）
       setIsTutorLoading(false);
       setTutorMessages([
         ...newMessages,
@@ -304,7 +378,7 @@ export function YamatoChat({
                     <button
                       key={level}
                       type="button"
-                      onClick={() => handlePaceChange(level)} // ★変更: クリック時にSupabase即時更新関数を実行
+                      onClick={() => handlePaceChange(level)}
                       className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition ${
                         tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
                       }`}

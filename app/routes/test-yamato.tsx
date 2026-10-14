@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（全8ペルソナ対応版）
+ * @description ヤマトAI 独立APIテスト画面（全8ペルソナ・原稿用紙ネイビー対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -35,7 +35,7 @@ type AppType =
 type AppConfig = {
   name: string;
   greeting: string;
-  themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green";
+  themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy";
 };
 
 export default function TestYamatoPage() {
@@ -96,7 +96,7 @@ export default function TestYamatoPage() {
     "genkoyoshi-editor": {
       name: "原稿用紙エディター",
       greeting: "こんにちは！原稿用紙エディターです。原稿の構成や文章の推敲をサポートします。",
-      themeColor: "blue",
+      themeColor: "navy", // ★ここをネイビーに変更
     },
     "oral-exam-questions": {
       name: "口頭試験問題ジェネレーター",
@@ -155,7 +155,7 @@ export default function TestYamatoPage() {
                 {type === "eoy-oral-mock" && "📝 Oral Mock (水色)"}
                 {type === "eoy-writing" && "✍️ Writing (オレンジ)"}
                 {type === "game-igo" && "⚪ 囲碁 (黒)"}
-                {type === "genkoyoshi-editor" && "📄 原稿用紙 (青)"}
+                {type === "genkoyoshi-editor" && "📄 原稿用紙 (ネイビー)"}
                 {type === "oral-exam-questions" && "❓ 口頭試験問題 (緑)"}
               </button>
             ))}
