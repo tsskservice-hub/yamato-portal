@@ -12,15 +12,38 @@ import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側の複雑なチェックを廃止し、常にページを描画できるようにする
+// Loader: サーバー側で取得できる場合は初期データを埋め込む、またはデフォルト値を返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
+  const { data: { user } } = await serverSupabase.auth.getUser();
+
+  let initialNickname = "";
+  let initialPace = "normal";
+  let initialPlan = "Free Plan";
+  let initialCredits = 10;
+
+  if (user) {
+    const { data: profile } = await serverSupabase
+      .from("profiles")
+      .select("credits, plan, nickname, learning_pace")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) {
+      initialCredits = (profile as any).credits ?? 10;
+      initialPlan = (profile as any).plan ?? "Free Plan";
+      initialNickname = (profile as any).nickname ?? "";
+      initialPace = (profile as any).learning_pace ?? "normal";
+    }
+  }
+
   return json({
-    email: "",
-    plan: "Free Plan",
-    credits: 10,
-    nickname: "",
-    learningPace: "normal",
-    createdAt: "-",
+    email: user?.email ?? "",
+    plan: initialPlan,
+    credits: initialCredits,
+    nickname: initialNickname,
+    learningPace: initialPace,
+    createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
   });
 }
 
@@ -92,7 +115,7 @@ export default function AccountSettingsRoute() {
   const navigate = useNavigate();
   const isSubmitting = navigation.state === "submitting";
 
-  // ローカルステート
+  // ローカルステート（ローダーからの初期データを反映）
   const [nicknameInput, setNicknameInput] = useState(initialData.nickname);
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
   const [userEmail, setUserEmail] = useState(initialData.email);
@@ -108,7 +131,7 @@ export default function AccountSettingsRoute() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Supabaseからユーザー情報とプロフィール（credits, nickname, learning_pace等）をブラウザ側で取得
+  // Supabaseからユーザー情報とプロフィール（credits, nickname, learning_pace等）をブラウザ側で再取得・同期
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data: profileData, error } = await supabase
