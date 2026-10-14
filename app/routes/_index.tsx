@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（入力欄タイピング＋送信ボタン演出＋思考中＋一括回答デモ版）
+ * @description AI Yamato Portal のランディングページ（完全同期型オートデモ版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -126,19 +126,19 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // デモの進行管理（入力欄タイピング ➔ 送信ボタン演出 ➔ 吹き出し出現 ➔ 思考中 ➔ ヤマト回答）
+  // デモの進行管理（入力欄タイピング ➔ 送信ボタン演出 ➔ 吹き出し出現 ➔ 思考中 ➔ ヤマト回答 ➔ ループ）
   useEffect(() => {
     const currentConv = DEMO_CONVERSATIONS[currentStep];
     let timeout: NodeJS.Timeout;
 
-    // 1. デモ画面下部の入力欄に一文字ずつ文字が打ち込まれていく演出
-    if (!isSending && typedInputText.length < currentConv.user.length) {
+    // ステップ1: 入力欄に一文字ずつ文字が打ち込まれていく
+    if (!isSending && !displayedUserText && typedInputText.length < currentConv.user.length) {
       timeout = setTimeout(() => {
         setTypedInputText(currentConv.user.slice(0, typedInputText.length + 1));
       }, 45);
     } 
-    // 2. 入力完了後、送信ボタンが押される演出（約300ms点灯）
-    else if (!isSending && typedInputText === currentConv.user) {
+    // ステップ2: 入力完了後、送信ボタンがピカッと光る演出（約350ms）
+    else if (!isSending && !displayedUserText && typedInputText === currentConv.user) {
       setIsSending(true);
       timeout = setTimeout(() => {
         setIsSending(false);
@@ -146,13 +146,13 @@ export default function Home() {
         setTypedInputText('');                  // 入力欄をクリア
       }, 350);
     } 
-    // 3. ユーザー吹き出し出現後、少し待って「Yamato is thinking...」状態へ
+    // ステップ3: ユーザー吹き出しが出たら、少し待って「Yamato is thinking...」へ
     else if (displayedUserText && !isThinking && !isAnswerShown && !displayedYamatoText) {
       timeout = setTimeout(() => {
         setIsThinking(true);
       }, 300);
     } 
-    // 4. 思考中アニメーションを約1.5秒間表示したあと、ヤマトの答えを一括で表示
+    // ステップ4: 思考中アニメーションを1.5秒表示したあと、ヤマトの答えを一括で表示
     else if (isThinking) {
       timeout = setTimeout(() => {
         setIsThinking(false);
@@ -160,7 +160,7 @@ export default function Home() {
         setIsAnswerShown(true);
       }, 1500);
     } 
-    // 5. 返答表示後、3秒間静止してから次の会話サイクルへリセット
+    // ステップ5: 返答表示後、3秒間静止してから次の会話ステップへリセットしてループ
     else if (isAnswerShown) {
       timeout = setTimeout(() => {
         setTypedInputText('');
