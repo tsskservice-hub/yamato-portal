@@ -1,41 +1,11 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "@remix-run/react";
-import { supabase } from "../lib/supabaseClient";
+import { Link } from "@remix-run/react";
 
 type FooterProps = {
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
 };
 
-export default function Footer({ onOpenAuth }: FooterProps) {
+export default function Footer({}: FooterProps) {
   const currentYear = new Date().getFullYear();
-  const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // マウント時にSupabaseのセッション状態をチェック
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session?.user);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session?.user);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleMyAccountClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isLoggedIn) {
-      // ログイン済みの場合はアカウント設定画面へ移動
-      navigate("/my-account");
-    } else {
-      // 未ログインの場合は、パスキー認証モーダルを開く
-      if (onOpenAuth) {
-        onOpenAuth('signin');
-      }
-    }
-  };
 
   return (
     <footer className="bg-white border-t border-slate-200 mt-auto">
@@ -73,12 +43,12 @@ export default function Footer({ onOpenAuth }: FooterProps) {
             >
               Contact
             </Link>
-            <button
-              onClick={handleMyAccountClick}
-              className="hover:text-indigo-600 transition-colors bg-transparent border-none p-0 cursor-pointer text-sm font-normal text-slate-600"
+            <Link
+              to="/my-account"
+              className="hover:text-indigo-600 transition-colors"
             >
               My Account
-            </button>
+            </Link>
           </div>
 
         </div>
