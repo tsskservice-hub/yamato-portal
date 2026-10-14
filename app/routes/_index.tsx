@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（初回プロフィール設定ポップアップ対応版）
+ * @description AI Yamato Portal のランディングページ（初回プロフィール設定ポップアップ一時非表示版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from '@remix-run/react';
@@ -64,7 +64,7 @@ export default function Home() {
   const [credits, setCredits] = useState<number>(10);
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
-  // 💡 初回プロフィール（ニックネーム・学習ペース）設定モーダル用ステート
+  // 💡 初回プロフィール（ニックネーム・学習ペース）設定モーダル用ステート（コードは残しつつ非表示運用）
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
   const [welcomeNickname, setWelcomeNickname] = useState('');
   const [welcomePace, setWelcomePace] = useState('normal');
@@ -135,7 +135,7 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [displayedUserText, displayedYamatoText, isTypingYamato, currentStep]);
 
-  // クレジット取得 ＆ ニックネーム未登録チェック関数
+  // クレジット取得関数（新規登録後のポップアップ自動表示は一時的に無効化）
   const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -153,12 +153,14 @@ export default function Home() {
           setHasCompletedTodayQuiz(true);
         }
 
-        // 💡 ニックネームがまだ登録されていない場合は、1.5秒後にウェルカムポップアップを表示
+        // 💡 新規登録直後のMy Accountへの直接遷移に切り替えたため、ポップアップの自動起動を一時停止しています
+        /*
         if (!typedData.nickname || typedData.nickname.trim() === "") {
           setTimeout(() => {
             setIsWelcomeModalOpen(true);
           }, 1500);
         }
+        */
       }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
@@ -184,7 +186,7 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 初回プロフィール設定の保存ハンドラー
+  // 初回プロフィール設定の保存ハンドラー（ポップアップ用としてコード保持）
   const handleSaveWelcomeProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -746,8 +748,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* 💡 初回ログイン時：プロフィール設定ポップアップ */}
-        {isWelcomeModalOpen && (
+        {/* 💡 初回ログイン時：プロフィール設定ポップアップ（一時非表示。必要に応じて復活可能） */}
+        {false && isWelcomeModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
               <div className="space-y-6">

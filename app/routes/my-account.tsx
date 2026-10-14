@@ -237,7 +237,9 @@ export default function AccountSettingsRoute() {
                   placeholder="e.g. Kenji"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">やまと先生があなたを呼ぶときの名前です。</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Yamato will call you by this name. If left blank, you will be called "My Friend".
+                </p>
               </div>
 
               {/* 学習ペース選択 */}
@@ -255,7 +257,9 @@ export default function AccountSettingsRoute() {
                   <option value="normal">Normal (標準ペース)</option>
                   <option value="accelerated">Accelerated (高速・発展重視)</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">チャット指導時のデフォルトのテンポ設定です。</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Let Yamato know whether you want to learn at a steady, normal, or accelerated pace. Yamato will tailor his conversation accordingly. You can also change this anytime right from Yamato's chat window.
+                </p>
               </div>
             </div>
 
