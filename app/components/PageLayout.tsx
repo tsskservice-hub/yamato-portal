@@ -13,7 +13,7 @@ type PageLayoutProps = {
   children: React.ReactNode;
   user?: any;
   credits?: number;
-  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティ
+  nickname?: string;
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
   isDarkMode?: boolean;
@@ -23,12 +23,12 @@ export default function PageLayout({
   children, 
   user: propUser, 
   credits: propCredits, 
-  nickname: propNickname, 
+  nickname: propNickname, // 💡 デフォルト値（= ""）を削除し、未定義状態を保つ
   onOpenAuth, 
   onSignOut,
   isDarkMode = false
 }: PageLayoutProps) {
-  // 💡 root.tsx の loader データをルートID "root" を通じて自動取得（バケツリレー不要化）
+  // 💡 root.tsx の loader データをルートID "root" を通じて自動取得
   const rootData = useRouteLoaderData("root") as { 
     user?: any; 
     credits?: number; 
@@ -36,7 +36,7 @@ export default function PageLayout({
     plan?: string 
   } | undefined;
 
-  // プロパティで直接渡されていなければ rootData から自動補完する
+  // プロパティで直接渡されていない（undefined）場合のみ rootData から自動補完する
   const user = propUser !== undefined ? propUser : rootData?.user;
   const credits = propCredits !== undefined ? propCredits : (rootData?.credits ?? 10);
   const nickname = propNickname !== undefined ? propNickname : (rootData?.nickname ?? "");
@@ -49,7 +49,6 @@ export default function PageLayout({
   const [authError, setAuthError] = useState<string | null>(null);
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    // 各ページから渡された onOpenAuth があれば優先しつつ、未定義の場合は内蔵モーダルを開く
     if (onOpenAuth) {
       onOpenAuth(mode);
     }
@@ -80,7 +79,6 @@ export default function PageLayout({
       setIsAuthModalOpen(false);
       setEmailInput('');
 
-      // 💡 新規登録（signup）のときはアカウント設定画面へ飛ばし、サインインのときは現在のページをリロード
       if (isSignup) {
         window.location.href = "/my-account";
       } else {
@@ -100,7 +98,7 @@ export default function PageLayout({
       <Header 
         user={user} 
         credits={credits} 
-        nickname={nickname} // 💡 ルートまたはプロパティから取得したニックネームをHeaderへ自動引き渡し
+        nickname={nickname} 
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={onSignOut} 
       />
@@ -108,10 +106,9 @@ export default function PageLayout({
         {children}
       </main>
       
-      {/* 💡 フッターに認証モーダルを開くハンドラーを渡す */}
       <Footer onOpenAuth={handleOpenAuthModal} />
 
-      {/* 💡 どのページからでも呼び出せる共通のパスキー認証・登録モーダル */}
+      {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
