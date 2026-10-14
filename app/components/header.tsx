@@ -1,6 +1,6 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（ニックネーム表示・マイアカウント導線対応版）
+ * @description ポータル共通ヘッダー（ニックネームリアルタイム連動・未設定時フォールバック改善版）
  */
 import React from 'react';
 import { Link } from '@remix-run/react';
@@ -10,7 +10,7 @@ type HeaderProps = {
   title?: string;
   user?: any;
   credits?: number;
-  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティを追加
+  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティ
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
 };
@@ -23,8 +23,11 @@ export default function Header({
   onOpenAuth, 
   onSignOut 
 }: HeaderProps) {
-  // 表示するニックネーム（未設定の場合は "My Friend"）
-  const displayNickname = nickname && nickname.trim() !== "" ? nickname : "My Friend";
+  // 💡 修正ポイント: 
+  // ユーザーが入力中の文字（nickname）があればそれを最優先で表示し、
+  // 完全な未入力・空白のときのみ "Set Nickname" または "My Friend" を表示する
+  const trimmedNickname = nickname ? nickname.trim() : "";
+  const displayNickname = trimmedNickname !== "" ? trimmedNickname : "Set Nickname";
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-xs">
@@ -46,7 +49,7 @@ export default function Header({
         <div className="flex items-center space-x-3">
           {user ? (
             <>
-              {/* 💡 クレジット残の左隣に表示する、My Accountへのリンク付きニックネーム */}
+              {/* 💡 マイアカウントへのリンク付きニックネーム（入力とリアルタイム連動） */}
               <Link 
                 to="/my-account"
                 className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-all cursor-pointer shadow-xs"
