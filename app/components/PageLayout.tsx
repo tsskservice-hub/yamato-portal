@@ -46,7 +46,9 @@ export default function PageLayout({
     setAuthError(null);
 
     try {
-      if (authMode === 'signup') {
+      const isSignup = authMode === 'signup';
+
+      if (isSignup) {
         if (!emailInput) {
           throw new Error('Please enter your email address for passkey registration.');
         }
@@ -59,8 +61,12 @@ export default function PageLayout({
       setIsAuthModalOpen(false);
       setEmailInput('');
 
-      // 💡 認証成功後、現在のページをフルリロードしてサーバーサイドへ確実にセッションクッキーを同期させる
-      window.location.href = window.location.href;
+      // 💡 新規登録（signup）のときはアカウント設定画面へ飛ばし、サインインのときは現在のページをリロード
+      if (isSignup) {
+        window.location.href = "/settings/account";
+      } else {
+        window.location.href = window.location.href;
+      }
 
     } catch (err: any) {
       console.error(err);
