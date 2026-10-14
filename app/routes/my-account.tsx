@@ -1,50 +1,27 @@
 /**
- * @file settings.account.tsx
- * @description アカウント設定画面（ニックネームおよび学習ペースの保存・更新対応版）
+ * @file my-account.tsx
+ * @description アカウント設定画面（シンプル・クライアント認証対応版）
  */
 import { useState, useEffect } from "react";
 import { Form, useNavigation, useActionData, useLoaderData, useNavigate } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { KeyRound, ShieldCheck, X, UserCheck, Gauge } from "lucide-react";
+import { UserCheck, Gauge } from "lucide-react";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側での認証チェックとプロフィール情報の取得
+// Loader: サーバー側の複雑なチェックを廃止し、常にページを描画できるようにする
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-
-  if (code) {
-    await serverSupabase.auth.exchangeCodeForSession(code);
-    return redirect("/my-account", { headers });
-  }
-
-  const { data: { user }, error: authError } = await serverSupabase.auth.getUser();
-
-  if (authError || !user) {
-    // 未ログイン時はトップページへ誘導
-    return redirect("/", { headers });
-  }
-
-  // profiles テーブルから credits, plan に加え nickname と learning_pace を取得
-  const { data: profile } = await serverSupabase
-    .from("profiles")
-    .select("credits, plan, nickname, learning_pace")
-    .eq("id", user.id)
-    .single();
-
   return json({
-    email: user.email ?? "",
-    plan: profile?.plan || "Free Plan",
-    credits: profile?.credits || 0,
-    nickname: profile?.nickname || "",
-    learningPace: profile?.learning_pace || "normal",
-    createdAt: user.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
-  }, { headers });
+    email: "",
+    plan: "Free Plan",
+    credits: 10,
+    nickname: "",
+    learningPace: "normal",
+    createdAt: "-",
+  });
 }
 
 // Action: アカウント削除およびプロフィール更新処理
@@ -105,79 +82,81 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function AccountSettingsRoute() {
-  const data = useLoaderData<typeof loader>();
+  const initialData = useLoaderData<typeof loader>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
   
-  // 型推論エラーを防ぐため actionData に型を明示
   const actionData = useActionData<typeof action>() as { message?: string; error?: string } | undefined;
   
   const navigation = useNavigation();
   const navigate = useNavigate();
   const isSubmitting = navigation.state === "submitting";
 
-  // フォーム入力用のステート（ローダーからの初期値を反映）
-  const [nicknameInput, setNicknameInput] = useState(data.nickname);
-  const [paceInput, setPaceInput] = useState(data.learningPace);
+  // ローカルステート
+  const [nicknameInput, setNicknameInput] = useState(initialData.nickname);
+  const [paceInput, setPaceInput] = useState(initialData.learningPace);
+  const [userEmail, setUserEmail] = useState(initialData.email);
+  const [userPlan, setUserPlan] = useState(initialData.plan);
+  const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
 
   // Auth & Credits States (PageLayout連携用)
   const [user, setUser] = useState<any>(null);
-  const [credits, setCredits] = useState<number>(data.credits);
+  const [credits, setCredits] = useState<number>(initialData.credits);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [emailInput, setEmailInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Fetch user credits from Supabase
-  const fetchUserCredits = async (userId: string) => {
+  // Supabaseからユーザー情報とプロフィール（credits, nickname, learning_pace等）をブラウザ側で取得
+  const fetchUserProfile = async (userId: string) => {
     try {
       const { data: profileData, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, plan, nickname, learning_pace')
         .eq('id', userId)
         .single();
       
       if (profileData && !error) {
-        setCredits((profileData as any).credits ?? data.credits);
+        setCredits((profileData as any).credits ?? 10);
+        if ((profileData as any).plan) setUserPlan((profileData as any).plan);
+        if ((profileData as any).nickname) {
+          setNicknameInput((profileData as any).nickname);
+        }
+        if ((profileData as any).learning_pace) {
+          setPaceInput((profileData as any).learning_pace);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch user data:', err);
+      console.error('Failed to fetch user profile:', err);
     }
   };
 
-  // Auth and session handling
+  // ブラウザ側のマウント時にセッションを確認
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserCredits(session.user.id);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        setUserEmail(currentUser.email ?? "");
+        if (currentUser.created_at) {
+          setUserCreatedAt(new Date(currentUser.created_at).toLocaleDateString("en-AU"));
+        }
+        fetchUserProfile(currentUser.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserCredits(session.user.id);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        setUserEmail(currentUser.email ?? "");
+        fetchUserProfile(currentUser.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // ブラウザ側でURLハッシュ（#access_token...）を検知してセッションを保持させる処理
-  useEffect(() => {
-    const handleAuthHash = async () => {
-      const hash = window.location.hash;
-      if (hash && hash.includes("access_token")) {
-        const { error } = await supabase.auth.getSession();
-        if (!error) {
-          navigate("/my-account", { replace: true });
-        }
-      }
-    };
-    handleAuthHash();
-  }, [navigate]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -302,11 +281,11 @@ export default function AccountSettingsRoute() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
             <div>
               <span className="block text-gray-500">Email Address</span>
-              <span className="font-medium text-gray-900">{data.email}</span>
+              <span className="font-medium text-gray-900">{userEmail || "Loading..."}</span>
             </div>
             <div>
               <span className="block text-gray-500">Current Plan</span>
-              <span className="font-medium text-gray-900">{data.plan}</span>
+              <span className="font-medium text-gray-900">{userPlan}</span>
             </div>
             <div>
               <span className="block text-gray-500">Credit Balance</span>
@@ -314,7 +293,7 @@ export default function AccountSettingsRoute() {
             </div>
             <div>
               <span className="block text-gray-500">Account Created</span>
-              <span className="font-medium text-gray-900">{data.createdAt}</span>
+              <span className="font-medium text-gray-900">{userCreatedAt}</span>
             </div>
           </div>
         </div>
