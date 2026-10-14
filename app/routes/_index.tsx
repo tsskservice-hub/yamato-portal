@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（ルートデータ・学習ペース・Supabase即時更新連動版）
+ * @description AI Yamato Portal のランディングページ（アプリカード2セクション分割・グローバル/VCE対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -80,13 +80,13 @@ export default function Home() {
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
-  // 💡 初回プロフィール（ニックネーム・学習ペース）設定モーダル用ステート（コードは残しつつ非表示運用）
+  // 💡 初回プロフィール設定モーダル用ステート
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
   const [welcomeNickname, setWelcomeNickname] = useState('');
   const [welcomePace, setWelcomePace] = useState('normal');
   const [isSavingWelcome, setIsSavingWelcome] = useState(false);
 
-  // 💡 認証モーダル関連のステートは PageLayout 側へ集約したため、ここでは ref やコールバック用の関数を用意
+  // 💡 認証モーダル関連のステートは PageLayout 側へ集約
   const pageLayoutAuthOpenRef = useRef<((mode: 'signin' | 'signup') => void) | null>(null);
 
   // 💡 Daily Quiz States
@@ -201,34 +201,6 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 初回プロフィール設定の保存ハンドラー
-  const handleSaveWelcomeProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    setIsSavingWelcome(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          nickname: welcomeNickname.trim(),
-          learning_pace: welcomePace
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      setNickname(welcomeNickname.trim());
-      setIsWelcomeModalOpen(false);
-      alert('Welcome to AI Yamato! Your preferences have been saved.');
-    } catch (err: any) {
-      console.error('Failed to save profile:', err);
-      alert('Failed to save preferences. Please try again.');
-    } finally {
-      setIsSavingWelcome(false);
-    }
-  };
-
   // 決済成功リダイレクトの検知 & クレジット再取得
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -329,8 +301,8 @@ export default function Home() {
     <PageLayout 
       user={user} 
       credits={credits} 
-      nickname={nickname} // 💡 取得・同期されたニックネームをPageLayoutへ確実に渡す
-      learningPace={learningPace} // 💡 ページの学習ペースをPageLayoutへ渡す
+      nickname={nickname} 
+      learningPace={learningPace} 
       onSignOut={handleSignOut}
       isDarkMode={isDarkMode}
     >
@@ -612,136 +584,169 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 4. Additional Portal Pages Navigation Cards */}
-        <section className="space-y-8">
+        {/* 4. Additional Portal Pages Navigation Cards (Divided into 2 Sections) */}
+        <section className="space-y-12">
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-extrabold tracking-tight">Portal Pages & Modules</h2>
-            <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Direct access to all specialized exam prep modules, tools, and pricing pages.</p>
+            <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Direct access to all specialized exam prep modules, tools, and learning spaces.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* 1. genkoyoshi-editor */}
-            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
-                  <Grid className="w-5 h-5" />
-                </div>
-                <h3 className="font-bold text-base">Genkoyoshi Editor</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor for precise Japanese character layout, counting, and PDF export.</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Free Tool</span>
-                <Link to="/genkoyoshi-editor" className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                  <span>Open Editor</span> <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
+          {/* 🌏 Section 1: Global & General Japanese Learners */}
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+              <span className="text-2xl">🌍</span>
+              <h3 className="text-xl font-extrabold tracking-tight">Section 1: Global & General Japanese Learners</h3>
             </div>
-
-            {/* 2. eoy-oral-drill */}
-            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* General Genkoyoshi Editor */}
+              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
+                <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                    <Mic className="w-5 h-5" />
+                    <Grid className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  <h4 className="font-bold text-base">Genkoyoshi Editor (General)</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor for precise Japanese character layout, counting, and PDF export for general learners.</p>
                 </div>
-                <h3 className="font-bold text-base">EOY Oral Drill</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.</p>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Free Tool</span>
+                  <Link to="/genkoyoshi-editor-general" className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                    <span>Open Editor</span> <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Module</span>
-                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+
+              {/* Game (Igo / Go) */}
+              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                      <Gamepad2 className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  </div>
+                  <h4 className="font-bold text-base">Go (Igo) Mini Game</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Mini Game</span>
+                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* 3. eoy-oral-elaborate */}
-            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-                    <Mic className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                </div>
-                <h3 className="font-bold text-base">EOY Oral Elaboration</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Module</span>
-                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-              </div>
+          {/* 🦘🇦🇺 Section 2: Victorian Curriculum & VCE Students (Australia) */}
+          <div className="space-y-6 pt-6">
+            <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+              <span className="text-2xl">🇦🇺🦘</span>
+              <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
             </div>
-
-            {/* 4. eoy-oral-mock */}
-            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
-                    <Mic className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                </div>
-                <h3 className="font-bold text-base">EOY Oral Mock Exam</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Module</span>
-                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-              </div>
-            </div>
-
-            {/* 5. eoy-writing */}
-            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* VCE Genkoyoshi Editor */}
+              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
+                <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
-                    <FileText className="w-5 h-5" />
+                    <Grid className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  <h4 className="font-bold text-base">Genkoyoshi Editor (VCE)</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Specialized VCE manuscript editor with strict Victorian curriculum criteria check and AI essay advisor.</p>
                 </div>
-                <h3 className="font-bold text-base">EOY Writing Exam Tutor</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback.</p>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">VCE Tool</span>
+                  <Link to="/genkoyoshi-editor-vce" className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                    <span>Open VCE Editor</span> <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Module</span>
-                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-              </div>
-            </div>
 
-            {/* 6. game-igo */}
-            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                    <Gamepad2 className="w-5 h-5" />
+              {/* eoy-oral-drill */}
+              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                      <Mic className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  <h4 className="font-bold text-base">EOY Oral Drill</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.</p>
                 </div>
-                <h3 className="font-bold text-base">Go (Igo) Mini Game</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Module</span>
+                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Mini Game</span>
-                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-              </div>
-            </div>
 
-            {/* 7. oral-exam-questions */}
-            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                    <FileText className="w-5 h-5" />
+              {/* eoy-oral-elaborate */}
+              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                      <Mic className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  <h4 className="font-bold text-base">EOY Oral Elaboration</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.</p>
                 </div>
-                <h3 className="font-bold text-base">Oral Exam Questions</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">Curated database of official and practice VCE oral examination questions with audio samples.</p>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Module</span>
+                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">Reference</span>
-                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+
+              {/* eoy-oral-mock */}
+              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
+                      <Mic className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  </div>
+                  <h4 className="font-bold text-base">EOY Oral Mock Exam</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Module</span>
+                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                </div>
+              </div>
+
+              {/* eoy-writing */}
+              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  </div>
+                  <h4 className="font-bold text-base">EOY Writing Exam Tutor</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback.</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Module</span>
+                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                </div>
+              </div>
+
+              {/* oral-exam-questions */}
+              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                  </div>
+                  <h4 className="font-bold text-base">Oral Exam Questions</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Curated database of official and practice VCE oral examination questions with audio samples.</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Reference</span>
+                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                </div>
               </div>
             </div>
           </div>
@@ -749,7 +754,7 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト（学習ペースとuserIdを渡して即時更新対応） */}
+        {/* 🤖 右下に常駐するコンシェルジュヤマト */}
         <ChatYamatoConcierge 
           additionalContext={portalContextData} 
           initialLearningPace={learningPace}
