@@ -20,7 +20,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   if (code) {
     await serverSupabase.auth.exchangeCodeForSession(code);
-    return redirect("/settings/account", { headers });
+    return redirect("/my-account", { headers });
   }
 
   const { data: { user }, error: authError } = await serverSupabase.auth.getUser();
@@ -172,7 +172,7 @@ export default function AccountSettingsRoute() {
       if (hash && hash.includes("access_token")) {
         const { error } = await supabase.auth.getSession();
         if (!error) {
-          navigate("/settings/account", { replace: true });
+          navigate("/my-account", { replace: true });
         }
       }
     };

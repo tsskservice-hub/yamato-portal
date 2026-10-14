@@ -802,7 +802,7 @@ export default function Home() {
 
                 <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-800">
                   <p className="text-[11px] text-slate-500">
-                    You can change these anytime in <Link to="/settings/account" onClick={() => setIsWelcomeModalOpen(false)} className="text-blue-600 font-semibold hover:underline">My Account</Link>.
+                    You can change these anytime in <Link to="/my-account" onClick={() => setIsWelcomeModalOpen(false)} className="text-blue-600 font-semibold hover:underline">My Account</Link>.
                   </p>
                 </div>
               </div>

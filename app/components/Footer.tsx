@@ -28,7 +28,7 @@ export default function Footer({ onOpenAuth }: FooterProps) {
     e.preventDefault();
     if (isLoggedIn) {
       // ログイン済みの場合はアカウント設定画面へ移動
-      navigate("/settings/account");
+      navigate("/my-account");
     } else {
       // 未ログインの場合は、パスキー認証モーダルを開く
       if (onOpenAuth) {

@@ -18,7 +18,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     "/oral-exam-questions", // oral-exam-questions.tsx
     "/prices",         // prices.tsx
     "/privacy",        // privacy.tsx
-    "/settings.account", // settings.account.tsx
+    "/my-account", // my-account.tsx
     "/terms",          // terms.tsx
   ];
 

@@ -63,7 +63,7 @@ export default function PageLayout({
 
       // 💡 新規登録（signup）のときはアカウント設定画面へ飛ばし、サインインのときは現在のページをリロード
       if (isSignup) {
-        window.location.href = "/settings/account";
+        window.location.href = "/my-account";
       } else {
         window.location.href = window.location.href;
       }
