@@ -1,3 +1,7 @@
+/**
+ * @file PageLayout.tsx
+ * @description ポータル共通レイアウト（認証モーダル・ニックネーム連携対応版）
+ */
 import React, { useState } from "react";
 import { Link } from "@remix-run/react";
 import { KeyRound, ShieldCheck, X } from "lucide-react";
@@ -9,6 +13,7 @@ type PageLayoutProps = {
   children: React.ReactNode;
   user?: any;
   credits?: number;
+  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティを追加
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
   isDarkMode?: boolean;
@@ -18,6 +23,7 @@ export default function PageLayout({
   children, 
   user, 
   credits, 
+  nickname = "", // 💡 デフォルト値を空文字に設定
   onOpenAuth, 
   onSignOut,
   isDarkMode = false
@@ -81,6 +87,7 @@ export default function PageLayout({
       <Header 
         user={user} 
         credits={credits} 
+        nickname={nickname} // 💡 取得したニックネームをHeaderへ渡す
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={onSignOut} 
       />

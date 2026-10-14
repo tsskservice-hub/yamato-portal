@@ -1,11 +1,16 @@
+/**
+ * @file header.tsx
+ * @description ポータル共通ヘッダー（ニックネーム表示・マイアカウント導線対応版）
+ */
 import React from 'react';
 import { Link } from '@remix-run/react';
-import { Coins, KeyRound, ShieldCheck, LogOut } from 'lucide-react';
+import { Coins, KeyRound, ShieldCheck, LogOut, User } from 'lucide-react';
 
 type HeaderProps = {
   title?: string;
   user?: any;
   credits?: number;
+  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティを追加
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
 };
@@ -14,9 +19,13 @@ export default function Header({
   title = "AI Yamato Japanese Hub", 
   user, 
   credits = 10, 
+  nickname = "",
   onOpenAuth, 
   onSignOut 
 }: HeaderProps) {
+  // 表示するニックネーム（未設定の場合は "My Friend"）
+  const displayNickname = nickname && nickname.trim() !== "" ? nickname : "My Friend";
+
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -37,6 +46,16 @@ export default function Header({
         <div className="flex items-center space-x-3">
           {user ? (
             <>
+              {/* 💡 クレジット残の左隣に表示する、My Accountへのリンク付きニックネーム */}
+              <Link 
+                to="/my-account"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-all cursor-pointer shadow-xs"
+                title="Click to change your nickname in Account Settings"
+              >
+                <User className="w-3.5 h-3.5 text-blue-600" />
+                <span>{displayNickname}</span>
+              </Link>
+
               {/* クレジット残高表示 */}
               <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-amber-50 border-amber-200 text-amber-700">
                 <Coins className="w-3.5 h-3.5" />
