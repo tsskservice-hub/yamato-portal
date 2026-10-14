@@ -1,9 +1,9 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（初回プロフィール設定ポップアップ一時非表示版）
+ * @description AI Yamato Portal のランディングページ（ルートデータ連動対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from '@remix-run/react';
+import { Link, useRouteLoaderData } from '@remix-run/react';
 import { 
   Sparkles, 
   Coins, 
@@ -59,9 +59,19 @@ const DEMO_CONVERSATIONS = [
 ];
 
 export default function Home() {
+  // 💡 root.tsx の loader からユーザー情報・ニックネーム・クレジット等を自動取得
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    nickname?: string;
+    credits?: number;
+    plan?: string;
+  } | undefined;
+
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [credits, setCredits] = useState<number>(10);
+  // rootData があればその値を初期値にする
+  const [user, setUser] = useState<any>(rootData?.user ?? null);
+  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
+  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
   // 💡 初回プロフィール（ニックネーム・学習ペース）設定モーダル用ステート（コードは残しつつ非表示運用）
@@ -135,7 +145,7 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [displayedUserText, displayedYamatoText, isTypingYamato, currentStep]);
 
-  // クレジット取得関数（新規登録後のポップアップ自動表示は一時的に無効化）
+  // クレジット取得関数
   const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -147,20 +157,14 @@ export default function Home() {
       if (data && !error) {
         const typedData = data as { credits?: number; last_quiz_date?: string; nickname?: string; learning_pace?: string };
         setCredits(typedData.credits ?? 10);
+        if (typedData.nickname) {
+          setNickname(typedData.nickname);
+        }
 
         const todayStr = new Date().toISOString().split('T')[0];
         if (typedData.last_quiz_date === todayStr) {
           setHasCompletedTodayQuiz(true);
         }
-
-        // 💡 新規登録直後のMy Accountへの直接遷移に切り替えたため、ポップアップの自動起動を一時停止しています
-        /*
-        if (!typedData.nickname || typedData.nickname.trim() === "") {
-          setTimeout(() => {
-            setIsWelcomeModalOpen(true);
-          }, 1500);
-        }
-        */
       }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
@@ -170,23 +174,25 @@ export default function Home() {
   // Auth and session handling
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        fetchUserData(currentUser.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        fetchUserData(currentUser.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // 初回プロフィール設定の保存ハンドラー（ポップアップ用としてコード保持）
+  // 初回プロフィール設定の保存ハンドラー
   const handleSaveWelcomeProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -203,6 +209,7 @@ export default function Home() {
 
       if (error) throw error;
 
+      setNickname(welcomeNickname.trim());
       setIsWelcomeModalOpen(false);
       alert('Welcome to AI Yamato! Your preferences have been saved.');
     } catch (err: any) {
@@ -213,7 +220,7 @@ export default function Home() {
     }
   };
 
-  // 2. 決済成功リダイレクトの検知 & クレジット再取得
+  // 決済成功リダイレクトの検知 & クレジット再取得
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     if (queryParams.get('success') === 'true') {
@@ -225,7 +232,7 @@ export default function Home() {
     }
   }, [user]);
 
-  // 💡 Daily Quiz Answer Handler
+  // Daily Quiz Answer Handler
   const handleAnswerQuiz = async (selectedIndex: number) => {
     if (isAnswerSubmitted || !user) return;
     setSelectedOption(selectedIndex);
@@ -256,6 +263,7 @@ export default function Home() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setNickname("");
   };
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
@@ -264,7 +272,7 @@ export default function Home() {
     }
   };
 
-  // 1. 購入ボタン押下処理
+  // 購入ボタン押下処理
   const handleCheckout = async (priceId: string) => {
     if (!user) {
       alert("ログインが必要です");
@@ -300,19 +308,19 @@ export default function Home() {
     }
   };
 
-  // ★コンシェルジュヤマトに渡すポータルデータ（価格プラン、消費ガイド、本日のクイズ、法的データ）を定義
   const portalContextData = {
     pricePlans: PRICE_PLANS,
     creditGuide: CREDIT_CONSUMPTION_GUIDE,
-    todayQuiz: getTodayQuiz(),     // 本日の日付に対応するクイズデータ
-    allQuizzes: DAILY_QUIZZES,     // 全クイズデータ
-    legalContent: LEGAL_CONTENT,   // 利用規約・免責・プライバシー・連絡先の全データ
+    todayQuiz: getTodayQuiz(),
+    allQuizzes: DAILY_QUIZZES,
+    legalContent: LEGAL_CONTENT,
   };
 
   return (
     <PageLayout 
       user={user} 
       credits={credits} 
+      nickname={nickname} // 💡 取得・同期されたニックネームをPageLayout（およびHeader）へ確実に渡す
       onSignOut={handleSignOut}
       isDarkMode={isDarkMode}
     >
@@ -745,70 +753,6 @@ export default function Home() {
             >
               ⬆️
             </button>
-          </div>
-        )}
-
-        {/* 💡 初回ログイン時：プロフィール設定ポップアップ（一時非表示。必要に応じて復活可能） */}
-        {false && isWelcomeModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-                    ✨
-                  </div>
-                  <h3 className="text-xl font-extrabold tracking-tight">Welcome to AI Yamato!</h3>
-                  <p className="text-xs text-slate-500">
-                    Please tell us your preferred nickname and learning pace for your AI tutor.
-                  </p>
-                </div>
-
-                <form onSubmit={handleSaveWelcomeProfile} className="space-y-4 text-left">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
-                      Your Nickname (AI呼びかけ用)
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={welcomeNickname}
-                      onChange={(e) => setWelcomeNickname(e.target.value)}
-                      placeholder="e.g. Kenji"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
-                      Default Learning Pace
-                    </label>
-                    <select
-                      value={welcomePace}
-                      onChange={(e) => setWelcomePace(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    >
-                      <option value="steady">Steady (じっくり丁寧・基礎重視)</option>
-                      <option value="normal">Normal (標準ペース)</option>
-                      <option value="accelerated">Accelerated (高速・発展重視)</option>
-                    </select>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSavingWelcome}
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    <span>{isSavingWelcome ? "Saving..." : "Get Started"}</span>
-                  </button>
-                </form>
-
-                <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-800">
-                  <p className="text-[11px] text-slate-500">
-                    You can change these anytime in <Link to="/my-account" onClick={() => setIsWelcomeModalOpen(false)} className="text-blue-600 font-semibold hover:underline">My Account</Link>.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 

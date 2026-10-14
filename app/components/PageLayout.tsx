@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（ルートデータ自動同期対応版）
+ * @description ポータル共通レイアウト（ルートデータ自動同期・堅牢化対応版）
  */
 import React, { useState } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -23,7 +23,7 @@ export default function PageLayout({
   children, 
   user: propUser, 
   credits: propCredits, 
-  nickname: propNickname, // 💡 デフォルト値（= ""）を削除し、未定義状態を保つ
+  nickname: propNickname, 
   onOpenAuth, 
   onSignOut,
   isDarkMode = false
@@ -36,10 +36,16 @@ export default function PageLayout({
     plan?: string 
   } | undefined;
 
-  // プロパティで直接渡されていない（undefined）場合のみ rootData から自動補完する
+  // 💡 優先順位: 
+  // 1. プロパティで明示的に渡された有効な値
+  // 2. root.tsx のローダーから自動取得できた値
+  // 3. デフォルトのフォールバック値
   const user = propUser !== undefined ? propUser : rootData?.user;
   const credits = propCredits !== undefined ? propCredits : (rootData?.credits ?? 10);
-  const nickname = propNickname !== undefined ? propNickname : (rootData?.nickname ?? "");
+  
+  // ニックネームは明示的に渡されたもの、または rootData から取得したもの、どちらもなければ空文字（Header側で "My Friend" になります）
+  const rawNickname = propNickname !== undefined ? propNickname : rootData?.nickname;
+  const nickname = rawNickname && rawNickname.trim() !== "" ? rawNickname : "";
 
   // 💡 認証モーダルおよびパスキー認証のロジックを共通レイアウトへ集約
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
