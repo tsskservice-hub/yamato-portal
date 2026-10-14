@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（思考中3秒間・完全同期型オートデモ）
+ * @description AI Yamato Portal のランディングページ（チャット履歴蓄積型オートデモ版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -100,12 +100,13 @@ export default function Home() {
 
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
+  const [chatHistory, setChatHistory] = useState<Array<{ user: string; yamato?: string }>>([]);
   const [typedInputText, setTypedInputText] = useState('');         
   const [isSending, setIsSending] = useState(false);                
-  const [displayedUserText, setDisplayedUserText] = useState('');   
-  const [displayedYamatoText, setDisplayedYamatoText] = useState(''); 
   const [isThinking, setIsThinking] = useState(false);
-  const [isAnswerShown, setIsAnswerShown] = useState(false);
+
+  // 自動スクロール用のref
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top states & listener
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
@@ -126,7 +127,14 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // 💡 思考中を約3秒間に設定した安定版デモコントローラー
+  // チャット欄が更新されたら自動で一番下へスクロール
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatHistory, isThinking, typedInputText]);
+
+  // 💡 チャット履歴が蓄積されていくデモコントローラー
   useEffect(() => {
     let isMounted = true;
     const currentConv = DEMO_CONVERSATIONS[currentStep];
@@ -135,12 +143,10 @@ export default function Home() {
       if (!isMounted) return;
       setTypedInputText('');
       setIsSending(false);
-      setDisplayedUserText('');
-      setDisplayedYamatoText('');
       setIsThinking(false);
-      setIsAnswerShown(false);
 
-      await new Promise((r) => setTimeout(r, 400));
+      // 初回またはリセット後の待機
+      await new Promise((r) => setTimeout(r, 600));
       if (!isMounted) return;
 
       // 1. 入力欄へのタイピング演出（一文字ずつ）
@@ -158,10 +164,10 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 350));
       if (!isMounted) return;
 
-      // 3. 入力クリア ＆ チャット欄にユーザーの吹き出しが出現
+      // 3. 入力クリア ＆ チャット履歴にユーザーの質問を追加（ヤマトはまだ未回答）
       setIsSending(false);
       setTypedInputText('');
-      setDisplayedUserText(currentConv.user);
+      setChatHistory((prev) => [...prev, { user: currentConv.user }]);
 
       await new Promise((r) => setTimeout(r, 400));
       if (!isMounted) return;
@@ -171,16 +177,29 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 3000)); // 思考時間 3.0秒
       if (!isMounted) return;
 
-      // 5. ヤマトの回答を一括表示
+      // 5. 思考中を消して、該当する履歴のヤマトの回答を埋める
       setIsThinking(false);
-      setDisplayedYamatoText(currentConv.yamato);
-      setIsAnswerShown(true);
+      setChatHistory((prev) => {
+        const updated = [...prev];
+        const lastItem = updated[updated.length - 1];
+        if (lastItem) {
+          lastItem.yamato = currentConv.yamato;
+        }
+        return updated;
+      });
 
-      // 6. 表示された状態で3秒間維持してから、次の会話ステップへ
-      await new Promise((r) => setTimeout(r, 3000));
-      if (!isMounted) return;
-
-      setCurrentStep((prev) => (prev + 1) % DEMO_CONVERSATIONS.length);
+      // 6. 最後の会話ステップ（3つ目）が終わった場合、しばらく表示したあとに全体をクリアしてループ
+      if (currentStep === DEMO_CONVERSATIONS.length - 1) {
+        await new Promise((r) => setTimeout(r, 4000));
+        if (!isMounted) return;
+        setChatHistory([]); // 全てクリアして1つ目から再スタート
+        setCurrentStep(0);
+      } else {
+        // 次のステップへ
+        await new Promise((r) => setTimeout(r, 2000));
+        if (!isMounted) return;
+        setCurrentStep((prev) => prev + 1);
+      }
     };
 
     runDemoSequence();
@@ -427,32 +446,43 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* チャット会話の表示エリア */}
-              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 mb-4 min-h-[140px] flex flex-col justify-center">
-                {/* ユーザーメッセージ（送信完了後に一括表示） */}
-                {displayedUserText && (
-                  <div className="flex justify-end">
-                    <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
-                      <p>{displayedUserText}</p>
-                    </div>
+              {/* チャット会話の蓄積表示エリア（スクロール可能） */}
+              <div 
+                ref={chatScrollRef}
+                className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-4 mb-4 h-[220px] overflow-y-auto flex flex-col scroll-smooth shadow-inner"
+              >
+                {chatHistory.length === 0 && !isThinking && (
+                  <div className="my-auto text-center text-xs text-slate-400 dark:text-slate-500 italic">
+                    AI Yamato demo is starting...
                   </div>
                 )}
 
-                {/* ヤマトの思考中 or 返答メッセージ */}
-                <div className="flex justify-start">
-                  {isThinking ? (
-                    <div className="p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex items-center space-x-2 shadow-xs">
-                      <span className="inline-block animate-spin text-sm">🤖</span>
-                      <span className="italic font-medium animate-pulse">Yamato is thinking...</span>
-                    </div>
-                  ) : (
-                    isAnswerShown && displayedYamatoText && (
-                      <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
-                        <p>{displayedYamatoText}</p>
+                {chatHistory.map((exchange, idx) => (
+                  <div key={idx} className="space-y-3">
+                    {/* ユーザーメッセージ */}
+                    <div className="flex justify-end">
+                      <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
+                        <p>{exchange.user}</p>
                       </div>
-                    )
-                  )}
-                </div>
+                    </div>
+
+                    {/* ヤマトの返答または思考中 */}
+                    <div className="flex justify-start">
+                      {exchange.yamato ? (
+                        <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
+                          <p>{exchange.yamato}</p>
+                        </div>
+                      ) : (
+                        isThinking && idx === chatHistory.length - 1 && (
+                          <div className="p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex items-center space-x-2 shadow-xs">
+                            <span className="inline-block animate-spin text-sm">🤖</span>
+                            <span className="italic font-medium animate-pulse">Yamato is thinking...</span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* ★ デモ画面下部の入力フィールド（タイピング＋送信ボタン連動演出） */}
