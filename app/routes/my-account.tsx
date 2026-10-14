@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（rootルートデータ・ニックネーム連動対応版）
+ * @description アカウント設定画面（クライアントサイドSupabase更新・rootルートデータ & ニックネーム連動対応版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData } from "@remix-run/react";
@@ -85,22 +85,22 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 
 export default function AccountSettingsRoute() {
   const initialData = useLoaderData<typeof loader>();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [confirmInput, setConfirmInput] = useState("");
-  
   const navigate = useNavigate();
 
-  // 💡 root.tsx からグローバルデータを安全に取得
+  // 💡 root.tsx からのグローバルデータも併せて安全に取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
     nickname?: string;
   } | undefined;
 
-  // ローカルステート（rootData の値を初期値に優先利用）
-  const [nicknameInput, setNicknameInput] = useState(rootData?.nickname ?? initialData.nickname);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmInput, setConfirmInput] = useState("");
+
+  // ローカルステート（initialData および rootData から初期値を構成）
+  const [nicknameInput, setNicknameInput] = useState(rootData?.nickname || initialData.nickname);
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
-  const [userEmail, setUserEmail] = useState(rootData?.user?.email ?? initialData.email);
+  const [userEmail, setUserEmail] = useState(initialData.email);
   const [userPlan, setUserPlan] = useState(initialData.plan);
   const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
 
@@ -118,12 +118,11 @@ export default function AccountSettingsRoute() {
   // 💡 rootData が更新された場合にステートを同期
   useEffect(() => {
     if (rootData) {
-      if (rootData.user !== undefined) {
-        setUser(rootData.user);
-        if (rootData.user?.email) setUserEmail(rootData.user.email);
-      }
+      if (rootData.user !== undefined) setUser(rootData.user);
       if (rootData.credits !== undefined) setCredits(rootData.credits);
-      if (rootData.nickname !== undefined) setNicknameInput(rootData.nickname);
+      if (rootData.nickname !== undefined && rootData.nickname !== "") {
+        setNicknameInput(rootData.nickname);
+      }
     }
   }, [rootData]);
 
