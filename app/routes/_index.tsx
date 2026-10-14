@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（完全同期型オートデモ版）
+ * @description AI Yamato Portal のランディングページ（完全安定版オートデモ）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -100,10 +100,10 @@ export default function Home() {
 
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
-  const [typedInputText, setTypedInputText] = useState('');         // 下部入力欄にタイピングされるテキスト
-  const [isSending, setIsSending] = useState(false);                // 送信ボタン押下演出用のステート
-  const [displayedUserText, setDisplayedUserText] = useState('');   // チャット欄に表示されるユーザーメッセージ
-  const [displayedYamatoText, setDisplayedYamatoText] = useState(''); // ヤマトの返答テキスト
+  const [typedInputText, setTypedInputText] = useState('');         
+  const [isSending, setIsSending] = useState(false);                
+  const [displayedUserText, setDisplayedUserText] = useState('');   
+  const [displayedYamatoText, setDisplayedYamatoText] = useState(''); 
   const [isThinking, setIsThinking] = useState(false);
   const [isAnswerShown, setIsAnswerShown] = useState(false);
 
@@ -126,55 +126,71 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // デモの進行管理（入力欄タイピング ➔ 送信ボタン演出 ➔ 吹き出し出現 ➔ 思考中 ➔ ヤマト回答 ➔ ループ）
+  // 💡 完全に安定したシーケンシャル・デモコントローラー
   useEffect(() => {
+    let isMounted = true;
     const currentConv = DEMO_CONVERSATIONS[currentStep];
-    let timeout: NodeJS.Timeout;
 
-    // ステップ1: 入力欄に一文字ずつ文字が打ち込まれていく
-    if (!isSending && !displayedUserText && typedInputText.length < currentConv.user.length) {
-      timeout = setTimeout(() => {
-        setTypedInputText(currentConv.user.slice(0, typedInputText.length + 1));
-      }, 45);
-    } 
-    // ステップ2: 入力完了後、送信ボタンがピカッと光る演出（約350ms）
-    else if (!isSending && !displayedUserText && typedInputText === currentConv.user) {
+    const runDemoSequence = async () => {
+      // 1. 初期化・クリア
+      if (!isMounted) return;
+      setTypedInputText('');
+      setIsSending(false);
+      setDisplayedUserText('');
+      setDisplayedYamatoText('');
+      setIsThinking(false);
+      setIsAnswerShown(false);
+
+      // 少し待ってから入力タイピング開始
+      await new Promise((r) => setTimeout(r, 400));
+      if (!isMounted) return;
+
+      // 2. 入力欄へのタイピング演出（一文字ずつ）
+      for (let i = 1; i <= currentConv.user.length; i++) {
+        if (!isMounted) return;
+        setTypedInputText(currentConv.user.slice(0, i));
+        await new Promise((r) => setTimeout(r, 45));
+      }
+
+      await new Promise((r) => setTimeout(r, 200));
+      if (!isMounted) return;
+
+      // 3. 送信ボタン演出（ピカッと光る）
       setIsSending(true);
-      timeout = setTimeout(() => {
-        setIsSending(false);
-        setDisplayedUserText(currentConv.user); // ユーザー吹き出しを表示
-        setTypedInputText('');                  // 入力欄をクリア
-      }, 350);
-    } 
-    // ステップ3: ユーザー吹き出しが出たら、少し待って「Yamato is thinking...」へ
-    else if (displayedUserText && !isThinking && !isAnswerShown && !displayedYamatoText) {
-      timeout = setTimeout(() => {
-        setIsThinking(true);
-      }, 300);
-    } 
-    // ステップ4: 思考中アニメーションを1.5秒表示したあと、ヤマトの答えを一括で表示
-    else if (isThinking) {
-      timeout = setTimeout(() => {
-        setIsThinking(false);
-        setDisplayedYamatoText(currentConv.yamato);
-        setIsAnswerShown(true);
-      }, 1500);
-    } 
-    // ステップ5: 返答表示後、3秒間静止してから次の会話ステップへリセットしてループ
-    else if (isAnswerShown) {
-      timeout = setTimeout(() => {
-        setTypedInputText('');
-        setIsSending(false);
-        setDisplayedUserText('');
-        setDisplayedYamatoText('');
-        setIsThinking(false);
-        setIsAnswerShown(false);
-        setCurrentStep((prev) => (prev + 1) % DEMO_CONVERSATIONS.length);
-      }, 3000);
-    }
+      await new Promise((r) => setTimeout(r, 350));
+      if (!isMounted) return;
 
-    return () => clearTimeout(timeout);
-  }, [typedInputText, isSending, displayedUserText, displayedYamatoText, isThinking, isAnswerShown, currentStep]);
+      // 4. 入力クリア ＆ チャット欄にユーザーの吹き出しが出現
+      setIsSending(false);
+      setTypedInputText('');
+      setDisplayedUserText(currentConv.user);
+
+      await new Promise((r) => setTimeout(r, 400));
+      if (!isMounted) return;
+
+      // 5. 思考中インジケーター表示 (Yamato is thinking...)
+      setIsThinking(true);
+      await new Promise((r) => setTimeout(r, 1500)); // 思考時間 1.5秒
+      if (!isMounted) return;
+
+      // 6. ヤマトの回答を一括表示
+      setIsThinking(false);
+      setDisplayedYamatoText(currentConv.yamato);
+      setIsAnswerShown(true);
+
+      // 7. 表示された状態で3秒間維持してから、次の会話ステップへ
+      await new Promise((r) => setTimeout(r, 3000));
+      if (!isMounted) return;
+
+      setCurrentStep((prev) => (prev + 1) % DEMO_CONVERSATIONS.length);
+    };
+
+    runDemoSequence();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentStep]);
 
   // ユーザーデータ（クレジット・学習ペース等）の取得関数
   const fetchUserData = async (userId: string) => {
