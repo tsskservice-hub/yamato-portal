@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（全ペルソナ固有データのリアルタイム連動インスペクション対応版）
+ * @description ヤマトAI 独立APIテスト画面（API側で受け取るportalDataの対応関係リアルタイム表示対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -32,15 +32,14 @@ type AppType =
   | "eoy-writing" 
   | "oral-exam-questions";
 
-// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、ペルソナ固有の読み込みデータ詳細）
+// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、API側の対応ファイル名と読み込みデータ内訳）
 type AppConfig = {
   name: string;
   greeting: string;
   themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy";
+  apiSourceFile: string;
   targetAudience: string;
-  curriculumScope: string;
-  coreMethodology: string;
-  specialRules: string[];
+  portalDataUsage: string[];
 };
 
 export default function TestYamatoPage() {
@@ -67,123 +66,107 @@ export default function TestYamatoPage() {
     );
   }
 
-  // ★全9ペルソナごとの詳細な設定と固有データを定義
+  // ★全9ペルソナごとの設定と、api/src/側の対応ファイル＆portalDataの読み込み仕様を定義
   const appConfig: Record<AppType, AppConfig> = {
     concierge: {
       name: "やまと先生",
       greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
       themeColor: "blue",
+      apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
       targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
-      curriculumScope: "ポータル全般の機能案内・価格プラン・利用ガイド",
-      coreMethodology: "フレンドリーかつ丁寧なコンシェルジュ対応",
-      specialRules: [
-        "ポータル共通のナビゲーションを担当",
-        "価格プランやクレジット消費の仕組みを分かりやすく案内",
-        "必要に応じて各学習アプリへの誘導を行う"
+      portalDataUsage: [
+        "PRICE_PLANS: サブスク・チケット料金体系を案内用に参照",
+        "CREDIT_CONSUMPTION_GUIDE: クレジット消費ルールをユーザーに説明",
+        "todayQuiz / DAILY_QUIZZES: 本日のクイズを案内会話に活用",
+        "LEGAL_CONTENT: 利用規約やサポート窓口情報を案内"
       ],
     },
     "game-igo": {
       name: "囲碁ヤマト",
       greeting: "こんにちは！囲碁AIヤマトです。一局打ってみましょうか？それともルールや定石について質問しますか？",
       themeColor: "black",
-      targetAudience: "囲碁に興味のある日本語学習者・一般ユーザー",
-      curriculumScope: "囲碁の基本ルール、定石、ミニ碁盤での対話形式プレイング",
-      coreMethodology: "対話を通じた楽しく自然な囲碁の指南",
-      specialRules: [
-        "5路盤などのミニ碁盤でのシミュレーション対応",
-        "日本語での囲碁用語（アタリ、コウ、セキなど）の解説",
-        "Socraticな問いかけによる思考の促し"
+      apiSourceFile: "game-igo.ts (経由: foundation.ts)",
+      targetAudience: "囲碁に興味のある日本語学習者",
+      portalDataUsage: [
+        "portalData.credits: 囲碁対局およびAIアドバイス時のクレジット消費連携",
+        "portalData.legalContent: ゲーム利用規約・免責事項の参照"
       ],
     },
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
       greeting: "こんにちは！一般向け原稿用紙エディターです。日本語の文章構成や推敲をサポートします。",
       themeColor: "navy",
+      apiSourceFile: "genkoyoshi-editor-general.ts (経由: foundation.ts)",
       targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
-      curriculumScope: "一般日本語の文章構成、表現力向上、誤字脱字チェック",
-      coreMethodology: "文脈に寄り添った丁寧な推敲・アドバイス",
-      specialRules: [
-        "原稿用紙のマス目カウントとレイアウト補助",
-        "自然な表現への書き換え提案（直接的な答えの全書き換えを避ける）",
-        "語彙力と文体の一貫性のチェック"
+      portalDataUsage: [
+        "portalData.credits: 原稿用紙の推敲・添削機能実行時のクレジット消費判定",
+        "portalData.pricePlans: アップグレードプランの案内"
       ],
     },
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
       greeting: "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards.",
       themeColor: "navy",
+      apiSourceFile: "genkoyoshi-editor-vce.ts (経由: foundation.ts)",
       targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
-      curriculumScope: "VCE Japanese Detailed Study / EOY Writing Standards",
-      coreMethodology: "厳格なVCE基準に基づいたSocraticコーチング",
-      specialRules: [
-        "オーストラリア英語（UK/AU spelling: realise, colour等）の許容",
-        "VCE漢字・文法ハイライトチェッカー連携",
-        "直接的なエッセイの書き直しを避け、生徒自身の思考を引き出す"
+      portalDataUsage: [
+        "portalData.credits: VCEエッセイ添削・漢字文法チェック時のクレジット消費",
+        "portalData.legalContent: 教育目的利用における免責事項の適用"
       ],
     },
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Drill practice session! Let's sharpen your speaking skills.",
       themeColor: "yellow",
+      apiSourceFile: "eoy-oral-drill.ts (経由: foundation.ts)",
       targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
-      curriculumScope: "セクション1（General Conversation）および基礎受け答えドリル",
-      coreMethodology: "反復練習による発話の流暢さ向上",
-      specialRules: [
-        "短いやり取りを通じたスピーキングの反射神経強化",
-        "音声入力・音声合成を前提とした発音・イントネーションの確認",
-        "シンプルな質問から徐々にステップアップ"
+      portalDataUsage: [
+        "portalData.credits: 音声認識・音声合成（TTS）利用時のクレジット消化連携",
+        "portalData.learningPace: ユーザーの学習ペース設定（steady/normal/accelerated）の反映"
       ],
     },
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
       greeting: "Hello, my friend! 🌟 Welcome to the EOY Oral Elaborate session. Let's dive deeper into your detailed study and responses.",
       themeColor: "purple",
-      targetAudience: "VCE口頭試験の詳細研究（Detailed Study）セクション対策の生徒",
-      curriculumScope: "Detailed Studyのテーマ深掘り・批判的思考力育成",
-      coreMethodology: "多角的な問いかけによる議論の深化",
-      specialRules: [
-        "詳細研究のサブテーマに関する深い考察の引き出し",
-        "論理的な説明構成と意見の正当化を促すコーチング",
-        "アカデミックで自然な日本語表現のサポート"
+      apiSourceFile: "eoy-oral-elaborate.ts (経由: foundation.ts)",
+      targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
+      portalDataUsage: [
+        "portalData.credits: 詳細研究深掘りセッションにおけるクレジット消費管理",
+        "portalData.learningPace: 詳細な対話ペースの制御"
       ],
     },
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Mock Exam. Ready to simulate the real exam experience?",
       themeColor: "cyan",
+      apiSourceFile: "eoy-oral-mock.ts (経由: foundation.ts)",
       targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
-      curriculumScope: "VCE Oral Exam 本番形式（Section 1 & Section 2通し）のシミュレーション",
-      coreMethodology: "本番同様の緊張感を持つ厳格かつ温かい試験官モード",
-      specialRules: [
-        "実際の試験形式に準拠したロールプレイ進行",
-        "試験後の詳細なフィードバックと改善ポイントの提示",
-        "タイムマネジメントと受け答えのトーンの調整"
+      portalDataUsage: [
+        "portalData.credits: 模擬試験実施時の総合クレジット消費管理",
+        "portalData.pricePlans: 試験対策プランの案内"
       ],
     },
     "eoy-writing": {
       name: "EOY Writing Practice",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills.",
       themeColor: "orange",
+      apiSourceFile: "eoy-writing.ts (経由: foundation.ts)",
       targetAudience: "VCE期末ライティング試験対策を行う生徒",
-      curriculumScope: "VCE Writing Exam 過去問および110オリジナルプロンプト対応",
-      coreMethodology: "段階的な構成チェックと自己修正の誘導",
-      specialRules: [
-        "原稿用紙レイアウトと文字数制限の厳守",
-        "構成（序論・本論・結論）の論理性チェック",
-        "VCE特有の評価基準（Criteria）に基づいたアドバイス"
+      portalDataUsage: [
+        "portalData.credits: 110オリジナルプロンプトおよび長文添削のクレジット消費",
+        "portalData.legalContent: ライティング課題におけるAI利用ガイドラインの適用"
       ],
     },
     "oral-exam-questions": {
       name: "口頭試験問題ジェネレーター",
       greeting: "Hello, my friend! 🌟 Welcome to Oral Exam Questions generator. What kind of practice questions would you like to explore?",
       themeColor: "green",
+      apiSourceFile: "oral-exam-questions.ts (経由: foundation.ts)",
       targetAudience: "VCE口頭試験の練習問題を作成したい生徒・教員",
-      curriculumScope: "多岐にわたるトピックに基づく口頭試験用質問の自動生成・カスタマイズ",
-      coreMethodology: "学習者の習熟度に応じたカスタム質問の提示",
-      specialRules: [
-        "学習者の興味や学習進度に合わせた個別最適化された質問の作成",
-        "質問の意図や回答のポイントの解説付与",
-        "オーストラリアの学校現場の文脈に配慮したトピック選定"
+      portalDataUsage: [
+        "portalData.credits: 問題生成機能利用時のクレジット消費",
+        "portalData.pricePlans: 教員・生徒向けプラン情報の参照"
       ],
     },
   };
@@ -294,101 +277,60 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：選択中ペルソナ固有データおよびポータル共通データの可視化パネル */}
+        {/* 右側カラム：API側（api/src/）での連携仕様と yamato-portal データの受け渡し内訳可視化パネル */}
         <div className="lg:col-span-6 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl p-6 shadow-md">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
             <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-              <span>📊</span> [{currentConfig.name}] の読み込みデータ構成
+              <span>📊</span> [{currentConfig.name}] のAPI側連携とデータ内訳
             </h2>
             <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
-              Persona Inspector
+              API Binding Inspector
             </span>
           </div>
 
           <div className="space-y-4 text-xs">
-            {/* 1. 現在選択中のアプリ・ペルソナ固有設定 */}
-            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
-              <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-1.5">
-                <span>👤</span> 1. ペルソナ固有の定義・指導方針 (<code className="text-slate-300">{activeAppType}</code>)
-              </h3>
-              <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
-                <li>
-                  <strong className="text-white">対象ユーザー層:</strong> <span className="text-amber-300">{currentConfig.targetAudience}</span>
-                </li>
-                <li>
-                  <strong className="text-white">カリキュラム範囲:</strong> <span className="text-slate-200">{currentConfig.curriculumScope}</span>
-                </li>
-                <li>
-                  <strong className="text-white">指導メソッド:</strong> <span className="text-slate-200">{currentConfig.coreMethodology}</span>
-                </li>
-                <li>
-                  <strong className="text-white">テーマカラー:</strong> <span className="text-amber-300">{currentConfig.themeColor}</span>
-                </li>
-                <li>
-                  <strong className="text-white">初期挨拶:</strong> <span className="text-slate-400 italic">"{currentConfig.greeting}"</span>
-                </li>
-              </ul>
-              <div className="mt-2.5 pt-2 border-t border-slate-800/80">
-                <p className="font-semibold text-slate-400 mb-1">個別指導ルール (Special Rules):</p>
-                <ul className="space-y-1 text-slate-300 list-disc list-inside">
-                  {currentConfig.specialRules.map((rule, idx) => (
-                    <li key={idx}>{rule}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* 2. 価格プランデータ */}
-            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
-              <h3 className="font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
-                <span>💳</span> 2. 価格プランデータ (<code className="text-slate-300">PRICE_PLANS</code>)
-              </h3>
-              <p className="text-slate-300 leading-relaxed mb-1.5">
-                定義プラン数: <strong className="text-white">{pricePlanKeys.length} 件</strong> の料金体系データがロードされています。
-              </p>
-              <div className="text-[11px] text-slate-400 bg-slate-900 p-2 rounded border border-slate-800 font-mono">
-                {pricePlanKeys.map((key) => (
-                  <div key={key} className="truncate">
-                    - プランキー: <span className="text-amber-300">{key}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. クレジット消費ガイド */}
+            {/* 1. API側の対応ソースファイル */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
               <h3 className="font-bold text-purple-400 mb-2 flex items-center gap-1.5">
-                <span>⚡</span> 3. クレジット消費ガイド (<code className="text-slate-300">CREDIT_CONSUMPTION_GUIDE</code>)
-              </h3>
-              <p className="text-slate-300 leading-relaxed">
-                AI機能利用時（チャット、原稿用紙推敲、音声生成など）のクレジット消化ルール一覧データがロードされています。
-              </p>
-            </div>
-
-            {/* 4. 本日のクイズ・全クイズ */}
-            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
-              <h3 className="font-bold text-yellow-400 mb-2 flex items-center gap-1.5">
-                <span>🧠</span> 4. クイズデータ (<code className="text-slate-300">todayQuiz / DAILY_QUIZZES</code>)
+                <span>⚙️</span> 1. api/src/ 側の対応ファイル
               </h3>
               <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
                 <li>
-                  <strong className="text-white">本日のクイズ:</strong>{" "}
-                  {todayQuiz ? <span className="text-amber-300">"{todayQuiz.question || todayQuiz.title || '取得成功'}"</span> : <span className="text-slate-400">データなし</span>}
+                  <strong className="text-white">担当ペルソナモジュール:</strong> <span className="text-amber-300 font-mono">{currentConfig.apiSourceFile}</span>
                 </li>
                 <li>
-                  <strong className="text-white">全クイズリスト数:</strong> <span className="text-white">{DAILY_QUIZZES?.length ?? 0} 問</span> がロードされています。
+                  <strong className="text-white">基盤構造:</strong> <code className="text-slate-200">ApiPageLayout / foundation.ts</code> を通じて統一処理
+                </li>
+                <li>
+                  <strong className="text-white">対象ユーザー層:</strong> <span className="text-slate-200">{currentConfig.targetAudience}</span>
                 </li>
               </ul>
             </div>
 
-            {/* 5. 法的・サポート情報 */}
+            {/* 2. yamato-portal から何を読み込んでいるか（API側での活用仕様） */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
-              <h3 className="font-bold text-cyan-400 mb-2 flex items-center gap-1.5">
-                <span>📜</span> 5. 法的・サポート情報 (<code className="text-slate-300">LEGAL_CONTENT</code>)
+              <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-1.5">
+                <span>📥</span> 2. yamato-portal から読み込んでいるデータと活用方法
               </h3>
-              <p className="text-slate-300 leading-relaxed">
-                利用規約、免責事項、プライバシーポリシー、連絡先などの公式文書データがロードされています。
-              </p>
+              <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
+                {currentConfig.portalDataUsage.map((usage, idx) => (
+                  <li key={idx}>
+                    <strong className="text-white">{usage.split(':')[0]}:</strong> <span className="text-slate-300">{usage.split(':')[1]}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 3. 共通ポータルデータ概要 */}
+            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+              <h3 className="font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
+                <span>📦</span> 3. 送信中の共通ポータルコンテキスト概要
+              </h3>
+              <ul className="space-y-1 text-slate-300 list-disc list-inside leading-relaxed">
+                <li>価格プラン総数: <strong className="text-white">{pricePlanKeys.length} 件</strong> ({pricePlanKeys.join(', ')})</li>
+                <li>クイズデータ: 本日のクイズ ＋ 全 <strong className="text-white">{DAILY_QUIZZES?.length ?? 0} 問</strong></li>
+                <li>法的・サポート規約: ロード済み (<code className="text-slate-300">LEGAL_CONTENT</code>)</li>
+              </ul>
             </div>
           </div>
         </div>
