@@ -37,8 +37,8 @@ import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
 // 💡 共通の price-plans から price-plans およびキャンペーン文言をインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/price-plans';
 
-// 💡 Quiz data and helper functions imported from external file
-import { getTodayQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
+// 💡 Quiz data and helper functions imported from external file (getRandomQuizに変更)
+import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
 
 // ★法的・サポートコンテンツデータをインポート
 import { LEGAL_CONTENT } from '../data/legal-content';
@@ -73,7 +73,7 @@ export default function Home() {
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
   const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
-  
+   
   // ★学習ペースを取得（デフォルトは normal）
   const [learningPace, setLearningPace] = useState<"steady" | "normal" | "accelerated">(
     rootData?.learningPace ?? "normal"
@@ -90,19 +90,19 @@ export default function Home() {
   // 💡 PageLayout の認証モーダルを外部から操作するための ref
   const layoutRef = useRef<PageLayoutRef>(null);
 
-  // 💡 Daily Quiz States
+  // 💡 Daily Quiz States (完全にランダムなクイズを取得)
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
-  const currentQuiz: QuizItem = getTodayQuiz();
+  const currentQuiz: QuizItem = getRandomQuiz();
 
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
   const [chatHistory, setChatHistory] = useState<Array<{ user: string; yamato?: string }>>([]);
-  const [typedInputText, setTypedInputText] = useState('');         
-  const [isSending, setIsSending] = useState(false);                
+  const [typedInputText, setTypedInputText] = useState('');        
+  const [isSending, setIsSending] = useState(false);                 
   const [isThinking, setIsThinking] = useState(false);
 
   // 自動スクロール用のref
@@ -348,10 +348,10 @@ export default function Home() {
 
   // ポータルコンテキストデータに userNickname を含めてコンシェルジュに渡す
   const portalContextData = {
-    userNickname: nickname || "My friend", // ← Supabaseのニックネームをコンシェルジュに連携
+    userNickname: nickname || "My friend",
     pricePlans: PRICE_PLANS,
     creditGuide: CREDIT_CONSUMPTION_GUIDE,
-    todayQuiz: getTodayQuiz(),
+    todayQuiz: getRandomQuiz(),
     allQuizzes: DAILY_QUIZZES,
     legalContent: LEGAL_CONTENT,
   };
@@ -369,7 +369,7 @@ export default function Home() {
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-            
+             
           {/* 2. Hero Section with YamatoChat-style Auto Demo */}
           <section className="text-center space-y-6 max-w-4xl mx-auto">
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
@@ -918,15 +918,31 @@ export default function Home() {
                 </div>
 
                 {(isAnswerSubmitted || hasCompletedTodayQuiz) && (
-                  <div className={`p-4 rounded-2xl border text-xs space-y-2 text-left ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : 'bg-red-500/10 border-red-500/30 text-red-800 dark:text-red-200'}`}>
-                    <p className="font-bold">
-                      {hasCompletedTodayQuiz && !isAnswerSubmitted 
-                        ? "✨ You have already completed today's quiz! (Credits earned: +2)" 
-                        : isQuizCorrect 
-                        ? "🎉 Correct! You earned 2 credits!" 
-                        : "💪 Incorrect! Try again tomorrow!"}
-                    </p>
-                    <p className="leading-relaxed text-slate-600 dark:text-slate-300">{currentQuiz.explanation}</p>
+                  <div className="space-y-3 text-left">
+                    {/* 💡 quizzes.ts で指定された画像がある場合に自動で並べて表示 */}
+                    {currentQuiz.images && currentQuiz.images.length > 0 && (
+                      <div className="flex flex-wrap gap-3 justify-center my-2">
+                        {currentQuiz.images.map((imgSrc, index) => (
+                          <img 
+                            key={index}
+                            src={imgSrc} 
+                            alt={`Quiz illustration ${index + 1}`} 
+                            className="h-32 rounded-xl object-contain shadow-md border border-slate-200 dark:border-slate-700 bg-white p-2"
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={`p-4 rounded-2xl border text-xs space-y-2 ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : 'bg-red-500/10 border-red-500/30 text-red-800 dark:text-red-200'}`}>
+                      <p className="font-bold">
+                        {hasCompletedTodayQuiz && !isAnswerSubmitted 
+                          ? "✨ You have already completed today's quiz! (Credits earned: +2)" 
+                          : isQuizCorrect 
+                          ? "🎉 Correct! You earned 2 credits!" 
+                          : "💪 Incorrect! Try again tomorrow!"}
+                      </p>
+                      <p className="leading-relaxed text-slate-600 dark:text-slate-300">{currentQuiz.explanation}</p>
+                    </div>
                   </div>
                 )}
 
