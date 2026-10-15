@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（API側で受け取るportalDataの対応関係リアルタイム表示対応版）
+ * @description ヤマトAI 独立APIテスト画面（portalData動的インスペクション対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -32,14 +32,15 @@ type AppType =
   | "eoy-writing" 
   | "oral-exam-questions";
 
-// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、API側の対応ファイル名と読み込みデータ内訳）
+// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、APIファイル名、および送信する portalData の実体）
 type AppConfig = {
   name: string;
   greeting: string;
   themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy";
   apiSourceFile: string;
   targetAudience: string;
-  portalDataUsage: string[];
+  // ★各ペルソナがバックエンドに渡す専用データをここで動的に定義（今後フィールドが増減してもここを変更するだけで自動追従）
+  getPortalPayload: () => Record<string, any>;
 };
 
 export default function TestYamatoPage() {
@@ -66,7 +67,7 @@ export default function TestYamatoPage() {
     );
   }
 
-  // ★全9ペルソナごとの設定と、api/src/側の対応ファイル＆portalDataの読み込み仕様を定義
+  // ★全9ペルソナごとの設定と、バックエンド（api/src/）へ実際に送出する portalData のペイロードを関数で定義
   const appConfig: Record<AppType, AppConfig> = {
     concierge: {
       name: "やまと先生",
@@ -74,12 +75,11 @@ export default function TestYamatoPage() {
       themeColor: "blue",
       apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
       targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
-      portalDataUsage: [
-        "PRICE_PLANS: サブスク・チケット料金体系を案内用に参照",
-        "CREDIT_CONSUMPTION_GUIDE: クレジット消費ルールをユーザーに説明",
-        "todayQuiz / DAILY_QUIZZES: 本日のクイズを案内会話に活用",
-        "LEGAL_CONTENT: 利用規約やサポート窓口情報を案内"
-      ],
+      getPortalPayload: () => ({
+        userRole: "guest / student / educator",
+        preferredLanguage: "English / Japanese",
+        activePage: "Landing Page / Concierge",
+      }),
     },
     "game-igo": {
       name: "囲碁ヤマト",
@@ -87,10 +87,11 @@ export default function TestYamatoPage() {
       themeColor: "black",
       apiSourceFile: "game-igo.ts (経由: foundation.ts)",
       targetAudience: "囲碁に興味のある日本語学習者",
-      portalDataUsage: [
-        "portalData.credits: 囲碁対局およびAIアドバイス時のクレジット消費連携",
-        "portalData.legalContent: ゲーム利用規約・免責事項の参照"
-      ],
+      getPortalPayload: () => ({
+        boardSize: "5x5 mini board",
+        currentMove: 0,
+        playerColor: "black",
+      }),
     },
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
@@ -98,10 +99,11 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-general.ts (経由: foundation.ts)",
       targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
-      portalDataUsage: [
-        "portalData.credits: 原稿用紙の推敲・添削機能実行時のクレジット消費判定",
-        "portalData.pricePlans: アップグレードプランの案内"
-      ],
+      getPortalPayload: () => ({
+        studentEssay: "（サンプル入力中の文章データ）",
+        targetLength: "400字",
+        focusArea: "文体チェック・誤字脱字",
+      }),
     },
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
@@ -109,10 +111,23 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-vce.ts (経由: foundation.ts)",
       targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
-      portalDataUsage: [
-        "portalData.credits: VCEエッセイ添削・漢字文法チェック時のクレジット消費",
-        "portalData.legalContent: 教育目的利用における免責事項の適用"
-      ],
+      // ★ genkoyoshi-editor-vce.ts の VceGenkoyoshiPortalData 型に対応する動的ペイロード
+      getPortalPayload: () => ({
+        studentName: "Sample Student",
+        selectedTextType: "Article / Speech",
+        studentEssay: "（VCEエッセイのプレビューデータ）",
+        kanjiList: "[kanji-list.json data]",
+        textTypes: "[texttypes.json data]",
+        grammarList: "[vce-grammar-list.ts data]",
+        vocabList: "[vce-vocabulary-list.json data]",
+        writingStyles: "[writing-styles.ts data]",
+        u3o3Descriptor: "[vce-u3o3-descriptor.ts data]",
+        u4o3Descriptor: "[vce-u4o3-descriptor.ts data]",
+        eoyWrittenCriteria: "[vce-eoy-written-criteria.ts data]",
+        faqList: "[FAQ Data Bank]",
+        timeZone: "Australia/Melbourne",
+        cityName: "Melbourne",
+      }),
     },
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
@@ -120,10 +135,11 @@ export default function TestYamatoPage() {
       themeColor: "yellow",
       apiSourceFile: "eoy-oral-drill.ts (経由: foundation.ts)",
       targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
-      portalDataUsage: [
-        "portalData.credits: 音声認識・音声合成（TTS）利用時のクレジット消化連携",
-        "portalData.learningPace: ユーザーの学習ペース設定（steady/normal/accelerated）の反映"
-      ],
+      getPortalPayload: () => ({
+        learningPace: "normal",
+        sectionType: "Section 1 General Conversation",
+        audioEnabled: true,
+      }),
     },
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
@@ -131,10 +147,11 @@ export default function TestYamatoPage() {
       themeColor: "purple",
       apiSourceFile: "eoy-oral-elaborate.ts (経由: foundation.ts)",
       targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
-      portalDataUsage: [
-        "portalData.credits: 詳細研究深掘りセッションにおけるクレジット消費管理",
-        "portalData.learningPace: 詳細な対話ペースの制御"
-      ],
+      getPortalPayload: () => ({
+        detailedStudyTopic: "Japanese Pop Culture & Society",
+        subTheme: "Anime and Modern Ethics",
+        learningPace: "accelerated",
+      }),
     },
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
@@ -142,10 +159,11 @@ export default function TestYamatoPage() {
       themeColor: "cyan",
       apiSourceFile: "eoy-oral-mock.ts (経由: foundation.ts)",
       targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
-      portalDataUsage: [
-        "portalData.credits: 模擬試験実施時の総合クレジット消費管理",
-        "portalData.pricePlans: 試験対策プランの案内"
-      ],
+      getPortalPayload: () => ({
+        examMode: "Full Mock (Section 1 & 2)",
+        examinerTone: "Strict yet encouraging VCE examiner",
+        timerSeconds: 900,
+      }),
     },
     "eoy-writing": {
       name: "EOY Writing Practice",
@@ -153,10 +171,11 @@ export default function TestYamatoPage() {
       themeColor: "orange",
       apiSourceFile: "eoy-writing.ts (経由: foundation.ts)",
       targetAudience: "VCE期末ライティング試験対策を行う生徒",
-      portalDataUsage: [
-        "portalData.credits: 110オリジナルプロンプトおよび長文添削のクレジット消費",
-        "portalData.legalContent: ライティング課題におけるAI利用ガイドラインの適用"
-      ],
+      getPortalPayload: () => ({
+        promptNumber: "75",
+        originalPromptsCount: 110,
+        targetCriteria: "Content, Grammar, Vocabulary",
+      }),
     },
     "oral-exam-questions": {
       name: "口頭試験問題ジェネレーター",
@@ -164,14 +183,17 @@ export default function TestYamatoPage() {
       themeColor: "green",
       apiSourceFile: "oral-exam-questions.ts (経由: foundation.ts)",
       targetAudience: "VCE口頭試験の練習問題を作成したい生徒・教員",
-      portalDataUsage: [
-        "portalData.credits: 問題生成機能利用時のクレジット消費",
-        "portalData.pricePlans: 教員・生徒向けプラン情報の参照"
-      ],
+      getPortalPayload: () => ({
+        generatedTopicCount: 5,
+        difficultyLevel: "VCE Units 3/4 Standard",
+        targetSchoolContext: "Victorian Secondary Schools",
+      }),
     },
   };
 
   const currentConfig = appConfig[activeAppType];
+  const activePortalPayload = currentConfig.getPortalPayload();
+  const payloadKeys = Object.keys(activePortalPayload);
 
   // ★ポータルデータ（価格プラン、消費ガイド、本日のクイズ、法的データ）を定義
   const portalContextData = {
@@ -277,14 +299,14 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：API側（api/src/）での連携仕様と yamato-portal データの受け渡し内訳可視化パネル */}
+        {/* 右側カラム：動的インスペクターパネル */}
         <div className="lg:col-span-6 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl p-6 shadow-md">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
             <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-              <span>📊</span> [{currentConfig.name}] のAPI側連携とデータ内訳
+              <span>📊</span> [{currentConfig.name}] の動的データ内訳
             </h2>
             <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
-              API Binding Inspector
+              Dynamic Inspector
             </span>
           </div>
 
@@ -299,32 +321,33 @@ export default function TestYamatoPage() {
                   <strong className="text-white">担当ペルソナモジュール:</strong> <span className="text-amber-300 font-mono">{currentConfig.apiSourceFile}</span>
                 </li>
                 <li>
-                  <strong className="text-white">基盤構造:</strong> <code className="text-slate-200">ApiPageLayout / foundation.ts</code> を通じて統一処理
-                </li>
-                <li>
                   <strong className="text-white">対象ユーザー層:</strong> <span className="text-slate-200">{currentConfig.targetAudience}</span>
                 </li>
               </ul>
             </div>
 
-            {/* 2. yamato-portal から何を読み込んでいるか（API側での活用仕様） */}
+            {/* 2. ペルソナ固有の portalData（オブジェクトのキーを動的に展開表示） */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
               <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-1.5">
-                <span>📥</span> 2. yamato-portal から読み込んでいるデータと活用方法
+                <span>📥</span> 2. portalData 動的マッピング ({activeAppType}.ts)
               </h3>
-              <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
-                {currentConfig.portalDataUsage.map((usage, idx) => (
-                  <li key={idx}>
-                    <strong className="text-white">{usage.split(':')[0]}:</strong> <span className="text-slate-300">{usage.split(':')[1]}</span>
-                  </li>
+              <p className="text-slate-400 mb-2">
+                現在このペルソナに対して定義されている送信ペイロード項目（自動抽出）：
+              </p>
+              <div className="bg-slate-900 p-2.5 rounded border border-slate-800 font-mono text-[11px] space-y-1">
+                {payloadKeys.map((key) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-amber-300 font-bold">- {key}</span>
+                    <span className="text-slate-500 text-[10px]">{typeof activePortalPayload[key]}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
 
-            {/* 3. 共通ポータルデータ概要 */}
+            {/* 3. 同時送信される共通コンテキスト概要 */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
               <h3 className="font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
-                <span>📦</span> 3. 送信中の共通ポータルコンテキスト概要
+                <span>📦</span> 3. 共通ポータルデータ概要
               </h3>
               <ul className="space-y-1 text-slate-300 list-disc list-inside leading-relaxed">
                 <li>価格プラン総数: <strong className="text-white">{pricePlanKeys.length} 件</strong> ({pricePlanKeys.join(', ')})</li>
