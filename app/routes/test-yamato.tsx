@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（左右2カラムレイアウト・読み込みデータ常時インスペクション対応版）
+ * @description ヤマトAI 独立APIテスト画面（yamato-portal側の実データ可視化・型エラー解消版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -124,6 +124,9 @@ export default function TestYamatoPage() {
     legalContent: LEGAL_CONTENT,   // 利用規約・免責・プライバシー・連絡先の全データを渡す
   };
 
+  const todayQuiz = getTodayQuiz() as any;
+  const pricePlanKeys = PRICE_PLANS ? Object.keys(PRICE_PLANS) : [];
+
   return (
     <div className="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative p-6 lg:p-10">
       {/* メインコンテンツ（左右2カラムレイアウト） */}
@@ -216,71 +219,90 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：yamato-portal / api プロジェクトからの読み込みデータ可視化パネル */}
+        {/* 右側カラム：yamato-portal側から読み込んでいる実データの可視化パネル */}
         <div className="lg:col-span-6 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl p-6 shadow-md">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
             <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-              <span>📊</span> 現在選択中のヤマトの読み込みデータ構成
+              <span>📊</span> yamato-portal 側から送信中の読み込みデータ構成
             </h2>
             <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
-              Live Inspector
+              Portal Data Inspector
             </span>
           </div>
 
           <div className="space-y-4 text-xs">
-            {/* 1. yamato-portalプロジェクト側からのデータ */}
+            {/* 1. 現在選択中のアプリ・ペルソナ設定 */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
               <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-1.5">
-                <span>🌐</span> 1. yamato-portal プロジェクト側 (Client / Remix)
+                <span>👤</span> 1. アクティブアプリ設定 (<code className="text-slate-300">appConfig / appType</code>)
               </h3>
               <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
                 <li>
-                  <strong className="text-white">基本UI・ペルソナ設定 (AppConfig):</strong>{" "}
-                  名前 (<span className="text-amber-300">{currentConfig.name}</span>), 
-                  挨拶文, テーマカラー (<span className="text-amber-300">{currentConfig.themeColor}</span>)
+                  <strong className="text-white">識別キー (appType):</strong> <span className="text-amber-300 font-mono">{activeAppType}</span>
                 </li>
                 <li>
-                  <strong className="text-white">価格プランデータ (<code className="text-slate-200">PRICE_PLANS</code>):</strong>{" "}
-                  サブスクリプションやチケット制の料金体系・プラン詳細
+                  <strong className="text-white">キャラクター名:</strong> <span className="text-amber-300">{currentConfig.name}</span>
                 </li>
                 <li>
-                  <strong className="text-white">クレジット消費ガイド (<code className="text-slate-200">CREDIT_CONSUMPTION_GUIDE</code>):</strong>{" "}
-                  各AI機能利用時のクレジット消化ルール
+                  <strong className="text-white">テーマカラー:</strong> <span className="text-amber-300">{currentConfig.themeColor}</span>
                 </li>
                 <li>
-                  <strong className="text-white">本日のクイズ・全クイズ (<code className="text-slate-200">todayQuiz / allQuizzes</code>):</strong>{" "}
-                  日付連動の日本語・VCE学習用クイズデータ
-                </li>
-                <li>
-                  <strong className="text-white">法的・サポート情報 (<code className="text-slate-200">LEGAL_CONTENT</code>):</strong>{" "}
-                  利用規約、免責事項、プライバシーポリシー、連絡先
+                  <strong className="text-white">初期挨拶 (greeting):</strong> <span className="text-slate-400 italic">"{currentConfig.greeting}"</span>
                 </li>
               </ul>
             </div>
 
-            {/* 2. apiプロジェクト側からのデータ */}
+            {/* 2. 価格プランデータ */}
+            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+              <h3 className="font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
+                <span>💳</span> 2. 価格プランデータ (<code className="text-slate-300">PRICE_PLANS</code>)
+              </h3>
+              <p className="text-slate-300 leading-relaxed mb-1.5">
+                定義プラン数: <strong className="text-white">{pricePlanKeys.length} 件</strong> の料金体系データがロードされています。
+              </p>
+              <div className="text-[11px] text-slate-400 bg-slate-900 p-2 rounded border border-slate-800 font-mono">
+                {pricePlanKeys.map((key) => (
+                  <div key={key} className="truncate">
+                    - プランキー: <span className="text-amber-300">{key}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. クレジット消費ガイド */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
               <h3 className="font-bold text-purple-400 mb-2 flex items-center gap-1.5">
-                <span>⚙️</span> 2. api プロジェクト側 (Server / Backend Persona)
+                <span>⚡</span> 3. クレジット消費ガイド (<code className="text-slate-300">CREDIT_CONSUMPTION_GUIDE</code>)
+              </h3>
+              <p className="text-slate-300 leading-relaxed">
+                AI機能利用時（チャット、原稿用紙推敲、音声生成など）のクレジット消化ルール一覧データがロードされています。
+              </p>
+            </div>
+
+            {/* 4. 本日のクイズ・全クイズ */}
+            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+              <h3 className="font-bold text-yellow-400 mb-2 flex items-center gap-1.5">
+                <span>🧠</span> 4. クイズデータ (<code className="text-slate-300">todayQuiz / DAILY_QUIZZES</code>)
               </h3>
               <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
                 <li>
-                  <strong className="text-white">共通レイアウト・基盤 (<code className="text-slate-200">ApiPageLayout / foundation.ts</code>):</strong>{" "}
-                  全ペルソナ共通のシステムプロンプト構造と `portalData` 受け渡しルーティング
+                  <strong className="text-white">本日のクイズ:</strong>{" "}
+                  {todayQuiz ? <span className="text-amber-300">"{todayQuiz.question || todayQuiz.title || '取得成功'}"</span> : <span className="text-slate-400">データなし</span>}
                 </li>
                 <li>
-                  <strong className="text-white">個別ペルソナテンプレート (<code className="text-slate-200">{activeAppType}.ts</code>):</strong>{" "}
-                  選択されたアプリ専用の Socratic（ソクラテス式）指導プロンプトとルール定義
-                </li>
-                <li>
-                  <strong className="text-white">ユーティリティ (<code className="text-slate-200">time-utils.ts / weather-utils.ts</code>):</strong>{" "}
-                  豪州ビクトリア州のタイムゾーン管理・Open-Meteo天気予報データ連携基盤
-                </li>
-                <li>
-                  <strong className="text-white">LLMエンジン / エンドポイント (<code className="text-slate-200">chat.ts / index.ts</code>):</strong>{" "}
-                  Google Cloud Vertex AI (Gemini) との通信およびストリーミング処理
+                  <strong className="text-white">全クイズリスト数:</strong> <span className="text-white">{DAILY_QUIZZES?.length ?? 0} 問</span> がロードされています。
                 </li>
               </ul>
+            </div>
+
+            {/* 5. 法的・サポート情報 */}
+            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+              <h3 className="font-bold text-cyan-400 mb-2 flex items-center gap-1.5">
+                <span>📜</span> 5. 法的・サポート情報 (<code className="text-slate-300">LEGAL_CONTENT</code>)
+              </h3>
+              <p className="text-slate-300 leading-relaxed">
+                利用規約、免責事項、プライバシーポリシー、連絡先などの公式文書データがロードされています。
+              </p>
             </div>
           </div>
         </div>
