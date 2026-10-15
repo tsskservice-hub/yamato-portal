@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（選択中ペルソナの読み込みデータ表示対応版）
+ * @description ヤマトAI 独立APIテスト画面（左右2カラムレイアウト・読み込みデータ常時インスペクション対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -47,8 +47,6 @@ export default function TestYamatoPage() {
   const SECRET_TOKEN = "tssk224";
 
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
-  // 読み込みデータの詳細表示を開閉する状態
-  const [showDataInspector, setShowDataInspector] = useState(false);
 
   // トークンが一致しない場合はアクセス権なし画面を返す
   if (token !== SECRET_TOKEN) {
@@ -127,23 +125,27 @@ export default function TestYamatoPage() {
   };
 
   return (
-    <div className="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative p-8">
-      {/* ページ本体のヘッダー・切り替えUI */}
-      <main className="max-w-4xl mx-auto w-full my-auto space-y-6">
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center">
-          <h1 className="text-2xl font-bold text-slate-900 mb-3">🇯🇵 ヤマト AI 独立APIテスト画面</h1>
-          <p className="text-slate-600 text-sm leading-relaxed mb-6">
-            右下に常駐しているAIヤマトのチャット窓、または以下のセクション別切り替えパネルから、各ペルソナの動作テストを行えます。
+    <div className="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative p-6 lg:p-10">
+      {/* メインコンテンツ（左右2カラムレイアウト） */}
+      <main className="max-w-7xl mx-auto w-full my-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* 左側カラム：ヤマトAI 独立APIテスト画面（切り替えパネル） */}
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <h1 className="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+            <span>🇯🇵</span> ヤマト AI 独立APIテスト
+          </h1>
+          <p className="text-slate-600 text-xs leading-relaxed mb-6">
+            右下のチャット窓、または以下のセクション別ボタンから各ペルソナの動作テストを行えます。
           </p>
 
-          <div className="space-y-6 text-left">
+          <div className="space-y-4 text-left">
             {/* 共通コンシェルジュ */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">📌 ポータル共通</h2>
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">📌 ポータル共通</h2>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setActiveAppType("concierge")}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${
                     activeAppType === "concierge" ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
                   }`}
                 >
@@ -153,30 +155,30 @@ export default function TestYamatoPage() {
             </div>
 
             {/* 🌍 Section 1: 全世界対応 (Global & General) */}
-            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200">
-              <h2 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>🌍</span> Section 1: 全世界対応 (Global & General)
+            <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-200">
+              <h2 className="text-[11px] font-bold text-blue-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>🌍</span> Section 1: 全世界対応
               </h2>
               <div className="flex flex-wrap gap-2">
                 {(["genkoyoshi-editor-general", "game-igo"] as const).map((type) => (
                   <button
                     key={type}
                     onClick={() => setActiveAppType(type)}
-                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${
                       activeAppType === type ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
                     }`}
                   >
-                    {type === "genkoyoshi-editor-general" && "📄 原稿用紙エディター (一般/ネイビー)"}
-                    {type === "game-igo" && "⚪ 囲碁ヤマト (黒)"}
+                    {type === "genkoyoshi-editor-general" && "📄 原稿用紙 (一般)"}
+                    {type === "game-igo" && "⚪ 囲碁ヤマト"}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* 🇦🇺🦘 Section 2: オーストラリア・ビクトリア州対応 (Victorian Curriculum & VCE) */}
-            <div className="bg-red-50/50 p-4 rounded-xl border border-red-200">
-              <h2 className="text-xs font-bold text-red-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>🇦🇺🦘</span> Section 2: オーストラリア・ビクトリア州対応 (Victorian Curriculum & VCE)
+            <div className="bg-red-50/50 p-3 rounded-xl border border-red-200">
+              <h2 className="text-[11px] font-bold text-red-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>🇦🇺🦘</span> Section 2: VCE / オーストラリア
               </h2>
               <div className="flex flex-wrap gap-2">
                 {(
@@ -192,67 +194,97 @@ export default function TestYamatoPage() {
                   <button
                     key={type}
                     onClick={() => setActiveAppType(type)}
-                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${
                       activeAppType === type ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
                     }`}
                   >
-                    {type === "genkoyoshi-editor-vce" && "📄 原稿用紙エディター (VCE/ネイビー)"}
-                    {type === "eoy-oral-drill" && "🗣️ Oral Drill (黄)"}
-                    {type === "eoy-oral-elaborate" && "💭 Oral Elaborate (紫)"}
-                    {type === "eoy-oral-mock" && "📝 Oral Mock (水色)"}
-                    {type === "eoy-writing" && "✍️ Writing (オレンジ)"}
-                    {type === "oral-exam-questions" && "❓ 口頭試験問題 (緑)"}
+                    {type === "genkoyoshi-editor-vce" && "📄 原稿用紙 (VCE)"}
+                    {type === "eoy-oral-drill" && "🗣️ Oral Drill"}
+                    {type === "eoy-oral-elaborate" && "💭 Oral Elaborate"}
+                    {type === "eoy-oral-mock" && "📝 Oral Mock"}
+                    {type === "eoy-writing" && "✍️ Writing"}
+                    {type === "oral-exam-questions" && "❓ 口頭試験問題"}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* ステータスとデータインスペクターのトグルボタン */}
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs border-t border-slate-100 pt-4">
-            <div className="text-slate-500">
-              Current active appType: <code className="bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">{activeAppType}</code> | Theme: <code className="bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">{currentConfig.themeColor}</code>
-            </div>
-            <button
-              onClick={() => setShowDataInspector(!showDataInspector)}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-            >
-              <span>🔍</span> {showDataInspector ? "読み込みデータを隠す" : "読み込みデータを確認する"}
-            </button>
+          <div className="mt-6 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+            <span>Selected: <strong className="text-slate-800">{currentConfig.name}</strong></span>
+            <span className="font-mono bg-slate-200 px-2 py-0.5 rounded text-[11px] text-slate-700">{activeAppType}</span>
+          </div>
+        </div>
+
+        {/* 右側カラム：yamato-portal / api プロジェクトからの読み込みデータ可視化パネル */}
+        <div className="lg:col-span-6 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl p-6 shadow-md">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+            <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
+              <span>📊</span> 現在選択中のヤマトの読み込みデータ構成
+            </h2>
+            <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
+              Live Inspector
+            </span>
           </div>
 
-          {/* ★ 選択したヤマトに読み込まれているデータを全て表示するインスペクターパネル */}
-          {showDataInspector && (
-            <div className="mt-4 bg-slate-900 text-slate-200 rounded-xl p-4 text-left font-mono text-xs overflow-hidden shadow-inner border border-slate-800">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-slate-400">
-                <span>📦 Loaded Portal Context Data for [{activeAppType}]</span>
-                <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">JSON Preview</span>
-              </div>
-              <div className="max-h-80 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                <div>
-                  <span className="text-emerald-400 font-bold">// 1. キャラクター設定 (AppConfig)</span>
-                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(currentConfig, null, 2)}</pre>
-                </div>
-                <div>
-                  <span className="text-emerald-400 font-bold">// 2. 価格プラン (pricePlans)</span>
-                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.pricePlans, null, 2)}</pre>
-                </div>
-                <div>
-                  <span className="text-emerald-400 font-bold">// 3. クレジット消費ガイド (creditGuide)</span>
-                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.creditGuide, null, 2)}</pre>
-                </div>
-                <div>
-                  <span className="text-emerald-400 font-bold">// 4. 本日のクイズ (todayQuiz)</span>
-                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.todayQuiz, null, 2)}</pre>
-                </div>
-                <div>
-                  <span className="text-emerald-400 font-bold">// 5. 法的・サポートコンテンツ (legalContent)</span>
-                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.legalContent, null, 2)}</pre>
-                </div>
-              </div>
+          <div className="space-y-4 text-xs">
+            {/* 1. yamato-portalプロジェクト側からのデータ */}
+            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+              <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-1.5">
+                <span>🌐</span> 1. yamato-portal プロジェクト側 (Client / Remix)
+              </h3>
+              <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
+                <li>
+                  <strong className="text-white">基本UI・ペルソナ設定 (AppConfig):</strong>{" "}
+                  名前 (<span className="text-amber-300">{currentConfig.name}</span>), 
+                  挨拶文, テーマカラー (<span className="text-amber-300">{currentConfig.themeColor}</span>)
+                </li>
+                <li>
+                  <strong className="text-white">価格プランデータ (<code className="text-slate-200">PRICE_PLANS</code>):</strong>{" "}
+                  サブスクリプションやチケット制の料金体系・プラン詳細
+                </li>
+                <li>
+                  <strong className="text-white">クレジット消費ガイド (<code className="text-slate-200">CREDIT_CONSUMPTION_GUIDE</code>):</strong>{" "}
+                  各AI機能利用時のクレジット消化ルール
+                </li>
+                <li>
+                  <strong className="text-white">本日のクイズ・全クイズ (<code className="text-slate-200">todayQuiz / allQuizzes</code>):</strong>{" "}
+                  日付連動の日本語・VCE学習用クイズデータ
+                </li>
+                <li>
+                  <strong className="text-white">法的・サポート情報 (<code className="text-slate-200">LEGAL_CONTENT</code>):</strong>{" "}
+                  利用規約、免責事項、プライバシーポリシー、連絡先
+                </li>
+              </ul>
             </div>
-          )}
+
+            {/* 2. apiプロジェクト側からのデータ */}
+            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+              <h3 className="font-bold text-purple-400 mb-2 flex items-center gap-1.5">
+                <span>⚙️</span> 2. api プロジェクト側 (Server / Backend Persona)
+              </h3>
+              <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
+                <li>
+                  <strong className="text-white">共通レイアウト・基盤 (<code className="text-slate-200">ApiPageLayout / foundation.ts</code>):</strong>{" "}
+                  全ペルソナ共通のシステムプロンプト構造と `portalData` 受け渡しルーティング
+                </li>
+                <li>
+                  <strong className="text-white">個別ペルソナテンプレート (<code className="text-slate-200">{activeAppType}.ts</code>):</strong>{" "}
+                  選択されたアプリ専用の Socratic（ソクラテス式）指導プロンプトとルール定義
+                </li>
+                <li>
+                  <strong className="text-white">ユーティリティ (<code className="text-slate-200">time-utils.ts / weather-utils.ts</code>):</strong>{" "}
+                  豪州ビクトリア州のタイムゾーン管理・Open-Meteo天気予報データ連携基盤
+                </li>
+                <li>
+                  <strong className="text-white">LLMエンジン / エンドポイント (<code className="text-slate-200">chat.ts / index.ts</code>):</strong>{" "}
+                  Google Cloud Vertex AI (Gemini) との通信およびストリーミング処理
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
+
       </main>
 
       {/* YamatoChat に設定とデータを渡す */}
