@@ -1,10 +1,10 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（英語によるパスキー案内ステップ付き・シンプル版）
+ * @description ポータル共通レイアウト（Get Startedメイン＋パスキー解説トグル付き・英語完全版）
  */
 import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
-import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2 } from "lucide-react";
+import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
@@ -69,6 +69,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   // ★新規登録時のパスキー事前案内ステップ（signupの初回のみ true）
   const [isGuideStep, setIsGuideStep] = useState(false);
 
+  // ★トグルの開閉状態（初期値は閉じている、またはお好みで開閉）
+  const [isToggleOpen, setIsToggleOpen] = useState(false);
+
   const [emailInput, setEmailInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -80,8 +83,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setAuthMode(mode);
     setAuthError(null);
     setEmailInput('');
+    setIsToggleOpen(false); // モーダルを開いたときはトグルを閉じた状態にする
 
-    // 💡 新規登録 (signup) の場合のみ、最初に英語のパスキー案内ステップを表示する
+    // 💡 新規登録 (signup) の場合のみ、最初にパスキー案内ステップを表示する
     if (mode === 'signup') {
       setIsGuideStep(true);
     } else {
@@ -163,7 +167,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
               <X className="w-5 h-5" />
             </button>
 
-            {/* 🌟 新規登録時のパスキー事前案内ステップ（英語・全編） */}
+            {/* 🌟 新規登録時のパスキー事前案内ステップ（Get Startedメイン ＆ トグル解説付き） */}
             {isGuideStep && authMode === 'signup' ? (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
@@ -174,61 +178,83 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                     Welcome to AI Yamato! 🌸
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    For a secure and seamless experience, we use passwordless next-generation biometrics ("Passkeys").
+                    Get started instantly with secure, passwordless authentication.
                   </p>
                 </div>
 
-                {/* 3ステップの図解案内（英語） */}
-                <div className="space-y-3">
-                  {/* Step 1 */}
-                  <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 flex items-start space-x-3">
-                    <div className="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                      1
-                    </div>
-                    <div className="text-xs space-y-0.5">
-                      <p className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1">
-                        <Mail className="w-3.5 h-3.5" /> Enter Email Address
-                      </p>
-                      <p className="text-slate-500 dark:text-slate-400">Register with your school or personal email.</p>
-                    </div>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 flex items-start space-x-3">
-                    <div className="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                      2
-                    </div>
-                    <div className="text-xs space-y-0.5">
-                      <p className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1">
-                        <Fingerprint className="w-3.5 h-3.5" /> Biometric Authentication
-                      </p>
-                      <p className="text-slate-500 dark:text-slate-400">Securely link via Touch ID, Face ID, or Windows Hello.</p>
-                    </div>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 flex items-start space-x-3">
-                    <div className="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                      3
-                    </div>
-                    <div className="text-xs space-y-0.5">
-                      <p className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Complete & One-Touch Login
-                      </p>
-                      <p className="text-slate-500 dark:text-slate-400">Log in instantly without passwords next time!</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* アクションボタン（Get Startedボタンのみ） */}
-                <div className="pt-2">
+                {/* メインアクションボタン（Get Started） */}
+                <div>
                   <button 
                     onClick={() => setIsGuideStep(false)}
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
                     <span>Get Started (Register Passkey)</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
+                </div>
+
+                {/* トグル開閉ボタン：パスキーの詳細と仕組みを見る */}
+                <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
+                  <button
+                    onClick={() => setIsToggleOpen(!isToggleOpen)}
+                    className="w-full flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline bg-transparent border-none p-0 cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" /> What is a Passkey & Why is it secure?
+                    </span>
+                    {isToggleOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {/* トグル内部の中身（3ステップ ＋ なぜ安全なのかの解説） */}
+                  {isToggleOpen && (
+                    <div className="mt-3 space-y-4 text-left animate-fadeIn">
+                      {/* 3ステップの案内 */}
+                      <div className="space-y-2.5">
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-start space-x-2.5">
+                          <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</div>
+                          <div className="text-[11px] space-y-0.5">
+                            <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                              <Mail className="w-3 h-3" /> Enter Email Address
+                            </p>
+                            <p className="text-slate-500 dark:text-slate-400">Register with your email.</p>
+                          </div>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-start space-x-2.5">
+                          <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</div>
+                          <div className="text-[11px] space-y-0.5">
+                            <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                              <Fingerprint className="w-3 h-3" /> Biometric Authentication
+                            </p>
+                            <p className="text-slate-500 dark:text-slate-400">Use Touch ID, Face ID, or Windows Hello.</p>
+                          </div>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-start space-x-2.5">
+                          <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</div>
+                          <div className="text-[11px] space-y-0.5">
+                            <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> One-Touch Login
+                            </p>
+                            <p className="text-slate-500 dark:text-slate-400">Log in instantly without passwords next time!</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* なぜ安全なのかの分かりやすい解説（英語） */}
+                      <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 text-[11px] text-slate-600 dark:text-slate-300 space-y-2 leading-relaxed">
+                        <p className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-blue-600" /> How Passkeys Keep You Safe 🔒
+                        </p>
+                        <p>
+                          ✨ <strong>Device-Based Security:</strong> Passkeys use your own device's screen lock (such as your fingerprint, face scan, or PIN) to log you in.
+                        </p>
+                        <p>
+                          🛡️ <strong>Extremely Secure & Easy:</strong> Because your login key stays safely inside your personal device, it cannot be guessed or stolen by hackers. As long as you don't lend your device and share your screen lock PIN with others, it is super secure and effortless to use! 🚀
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
