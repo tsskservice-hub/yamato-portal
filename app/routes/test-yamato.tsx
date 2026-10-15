@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（全世界 / オーストラリア・ビクトリア州 2セクション分割対応版）
+ * @description ヤマトAI 独立APIテスト画面（選択中ペルソナの読み込みデータ表示対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -47,6 +47,8 @@ export default function TestYamatoPage() {
   const SECRET_TOKEN = "tssk224";
 
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
+  // 読み込みデータの詳細表示を開閉する状態
+  const [showDataInspector, setShowDataInspector] = useState(false);
 
   // トークンが一致しない場合はアクセス権なし画面を返す
   if (token !== SECRET_TOKEN) {
@@ -206,9 +208,50 @@ export default function TestYamatoPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-xs text-slate-400">
-            Current active appType: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{activeAppType}</code> | Theme: <code className="bg-slate-100 px-2 py-1 rounded text-slate-600">{currentConfig.themeColor}</code>
+          {/* ステータスとデータインスペクターのトグルボタン */}
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs border-t border-slate-100 pt-4">
+            <div className="text-slate-500">
+              Current active appType: <code className="bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">{activeAppType}</code> | Theme: <code className="bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">{currentConfig.themeColor}</code>
+            </div>
+            <button
+              onClick={() => setShowDataInspector(!showDataInspector)}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+            >
+              <span>🔍</span> {showDataInspector ? "読み込みデータを隠す" : "読み込みデータを確認する"}
+            </button>
           </div>
+
+          {/* ★ 選択したヤマトに読み込まれているデータを全て表示するインスペクターパネル */}
+          {showDataInspector && (
+            <div className="mt-4 bg-slate-900 text-slate-200 rounded-xl p-4 text-left font-mono text-xs overflow-hidden shadow-inner border border-slate-800">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-slate-400">
+                <span>📦 Loaded Portal Context Data for [{activeAppType}]</span>
+                <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">JSON Preview</span>
+              </div>
+              <div className="max-h-80 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                <div>
+                  <span className="text-emerald-400 font-bold">// 1. キャラクター設定 (AppConfig)</span>
+                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(currentConfig, null, 2)}</pre>
+                </div>
+                <div>
+                  <span className="text-emerald-400 font-bold">// 2. 価格プラン (pricePlans)</span>
+                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.pricePlans, null, 2)}</pre>
+                </div>
+                <div>
+                  <span className="text-emerald-400 font-bold">// 3. クレジット消費ガイド (creditGuide)</span>
+                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.creditGuide, null, 2)}</pre>
+                </div>
+                <div>
+                  <span className="text-emerald-400 font-bold">// 4. 本日のクイズ (todayQuiz)</span>
+                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.todayQuiz, null, 2)}</pre>
+                </div>
+                <div>
+                  <span className="text-emerald-400 font-bold">// 5. 法的・サポートコンテンツ (legalContent)</span>
+                  <pre className="text-slate-300 mt-1 bg-slate-950 p-2 rounded">{JSON.stringify(portalContextData.legalContent, null, 2)}</pre>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
