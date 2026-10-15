@@ -1,10 +1,10 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（portalData動的インスペクション対応版）
+ * @description ヤマトAI 独立APIテスト画面（APIスキーマ動的フェッチ対応インスペクター版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { YamatoChat } from "../components/YamatoChat";
 // ★価格データとクレジット消費ガイドをインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
@@ -32,15 +32,13 @@ type AppType =
   | "eoy-writing" 
   | "oral-exam-questions";
 
-// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、APIファイル名、および送信する portalData の実体）
+// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、APIファイル名、対象ユーザー層など）
 type AppConfig = {
   name: string;
   greeting: string;
   themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy";
   apiSourceFile: string;
   targetAudience: string;
-  // ★各ペルソナがバックエンドに渡す専用データをここで動的に定義（今後フィールドが増減してもここを変更するだけで自動追従）
-  getPortalPayload: () => Record<string, any>;
 };
 
 export default function TestYamatoPage() {
@@ -51,6 +49,35 @@ export default function TestYamatoPage() {
   const SECRET_TOKEN = "tssk224";
 
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
+
+  // ★ APIから動的に取得したフィールド一覧を格納するステート
+  const [apiFields, setApiFields] = useState<string[]>([]);
+  const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
+
+  // ★ activeAppType が切り替わるたびに、バックエンドの /api/schema/:appType から最新のフィールド一覧を取得する
+  useEffect(() => {
+    async function fetchSchema() {
+      setIsLoadingSchema(true);
+      try {
+        // ※ 稼働中のAPIサーバーのURLに合わせて変更してください（例: ローカル開発時は http://localhost:8787 など）
+        const apiBaseUrl = "http://localhost:8787"; 
+        const res = await fetch(`${apiBaseUrl}/api/schema/${activeAppType}`);
+        if (res.ok) {
+          const data = (await res.json()) as { appType: string; fields: string[] };
+          setApiFields(data.fields || []);
+        } else {
+          setApiFields([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch schema from API:", err);
+        setApiFields([]);
+      } finally {
+        setIsLoadingSchema(false);
+      }
+    }
+
+    fetchSchema();
+  }, [activeAppType]);
 
   // トークンが一致しない場合はアクセス権なし画面を返す
   if (token !== SECRET_TOKEN) {
@@ -67,7 +94,7 @@ export default function TestYamatoPage() {
     );
   }
 
-  // ★全9ペルソナごとの設定と、バックエンド（api/src/）へ実際に送出する portalData のペイロードを関数で定義
+  // ★全9ペルソナごとのメタ情報（表示名・対応ファイル等）
   const appConfig: Record<AppType, AppConfig> = {
     concierge: {
       name: "やまと先生",
@@ -75,11 +102,6 @@ export default function TestYamatoPage() {
       themeColor: "blue",
       apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
       targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
-      getPortalPayload: () => ({
-        userRole: "guest / student / educator",
-        preferredLanguage: "English / Japanese",
-        activePage: "Landing Page / Concierge",
-      }),
     },
     "game-igo": {
       name: "囲碁ヤマト",
@@ -87,11 +109,6 @@ export default function TestYamatoPage() {
       themeColor: "black",
       apiSourceFile: "game-igo.ts (経由: foundation.ts)",
       targetAudience: "囲碁に興味のある日本語学習者",
-      getPortalPayload: () => ({
-        boardSize: "5x5 mini board",
-        currentMove: 0,
-        playerColor: "black",
-      }),
     },
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
@@ -99,11 +116,6 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-general.ts (経由: foundation.ts)",
       targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
-      getPortalPayload: () => ({
-        studentEssay: "（サンプル入力中の文章データ）",
-        targetLength: "400字",
-        focusArea: "文体チェック・誤字脱字",
-      }),
     },
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
@@ -111,23 +123,6 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-vce.ts (経由: foundation.ts)",
       targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
-      // ★ genkoyoshi-editor-vce.ts の VceGenkoyoshiPortalData 型に対応する動的ペイロード
-      getPortalPayload: () => ({
-        studentName: "Sample Student",
-        selectedTextType: "Article / Speech",
-        studentEssay: "（VCEエッセイのプレビューデータ）",
-        kanjiList: "[kanji-list.json data]",
-        textTypes: "[texttypes.json data]",
-        grammarList: "[vce-grammar-list.ts data]",
-        vocabList: "[vce-vocabulary-list.json data]",
-        writingStyles: "[writing-styles.ts data]",
-        u3o3Descriptor: "[vce-u3o3-descriptor.ts data]",
-        u4o3Descriptor: "[vce-u4o3-descriptor.ts data]",
-        eoyWrittenCriteria: "[vce-eoy-written-criteria.ts data]",
-        faqList: "[FAQ Data Bank]",
-        timeZone: "Australia/Melbourne",
-        cityName: "Melbourne",
-      }),
     },
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
@@ -135,11 +130,6 @@ export default function TestYamatoPage() {
       themeColor: "yellow",
       apiSourceFile: "eoy-oral-drill.ts (経由: foundation.ts)",
       targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
-      getPortalPayload: () => ({
-        learningPace: "normal",
-        sectionType: "Section 1 General Conversation",
-        audioEnabled: true,
-      }),
     },
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
@@ -147,11 +137,6 @@ export default function TestYamatoPage() {
       themeColor: "purple",
       apiSourceFile: "eoy-oral-elaborate.ts (経由: foundation.ts)",
       targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
-      getPortalPayload: () => ({
-        detailedStudyTopic: "Japanese Pop Culture & Society",
-        subTheme: "Anime and Modern Ethics",
-        learningPace: "accelerated",
-      }),
     },
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
@@ -159,11 +144,6 @@ export default function TestYamatoPage() {
       themeColor: "cyan",
       apiSourceFile: "eoy-oral-mock.ts (経由: foundation.ts)",
       targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
-      getPortalPayload: () => ({
-        examMode: "Full Mock (Section 1 & 2)",
-        examinerTone: "Strict yet encouraging VCE examiner",
-        timerSeconds: 900,
-      }),
     },
     "eoy-writing": {
       name: "EOY Writing Practice",
@@ -171,11 +151,6 @@ export default function TestYamatoPage() {
       themeColor: "orange",
       apiSourceFile: "eoy-writing.ts (経由: foundation.ts)",
       targetAudience: "VCE期末ライティング試験対策を行う生徒",
-      getPortalPayload: () => ({
-        promptNumber: "75",
-        originalPromptsCount: 110,
-        targetCriteria: "Content, Grammar, Vocabulary",
-      }),
     },
     "oral-exam-questions": {
       name: "口頭試験問題ジェネレーター",
@@ -183,17 +158,10 @@ export default function TestYamatoPage() {
       themeColor: "green",
       apiSourceFile: "oral-exam-questions.ts (経由: foundation.ts)",
       targetAudience: "VCE口頭試験の練習問題を作成したい生徒・教員",
-      getPortalPayload: () => ({
-        generatedTopicCount: 5,
-        difficultyLevel: "VCE Units 3/4 Standard",
-        targetSchoolContext: "Victorian Secondary Schools",
-      }),
     },
   };
 
   const currentConfig = appConfig[activeAppType];
-  const activePortalPayload = currentConfig.getPortalPayload();
-  const payloadKeys = Object.keys(activePortalPayload);
 
   // ★ポータルデータ（価格プラン、消費ガイド、本日のクイズ、法的データ）を定義
   const portalContextData = {
@@ -204,7 +172,6 @@ export default function TestYamatoPage() {
     legalContent: LEGAL_CONTENT,   // 利用規約・免責・プライバシー・連絡先の全データを渡す
   };
 
-  const todayQuiz = getTodayQuiz() as any;
   const pricePlanKeys = PRICE_PLANS ? Object.keys(PRICE_PLANS) : [];
 
   return (
@@ -299,14 +266,14 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：動的インスペクターパネル */}
+        {/* 右側カラム：APIスキーマ動的連動インスペクターパネル */}
         <div className="lg:col-span-6 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl p-6 shadow-md">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
             <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-              <span>📊</span> [{currentConfig.name}] の動的データ内訳
+              <span>📊</span> [{currentConfig.name}] のAPIスキーマ自動連動インスペクター
             </h2>
             <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
-              Dynamic Inspector
+              Live API Schema
             </span>
           </div>
 
@@ -326,21 +293,29 @@ export default function TestYamatoPage() {
               </ul>
             </div>
 
-            {/* 2. ペルソナ固有の portalData（オブジェクトのキーを動的に展開表示） */}
+            {/* 2. APIサーバーから動的取得した portalData のフィールド一覧 */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
-              <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-1.5">
-                <span>📥</span> 2. portalData 動的マッピング ({activeAppType}.ts)
-              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-blue-400 flex items-center gap-1.5">
+                  <span>📥</span> 2. バックエンドから取得した active portalData キー
+                </h3>
+                {isLoadingSchema && <span className="text-[10px] text-amber-400 animate-pulse">Syncing...</span>}
+              </div>
               <p className="text-slate-400 mb-2">
-                現在このペルソナに対して定義されている送信ペイロード項目（自動抽出）：
+                バックエンドの定義（<code className="text-slate-300">defaultPortalData</code>）からAPI経由でリアルタイム抽出された項目：
               </p>
               <div className="bg-slate-900 p-2.5 rounded border border-slate-800 font-mono text-[11px] space-y-1">
-                {payloadKeys.map((key) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <span className="text-amber-300 font-bold">- {key}</span>
-                    <span className="text-slate-500 text-[10px]">{typeof activePortalPayload[key]}</span>
-                  </div>
-                ))}
+                {apiFields.length > 0 ? (
+                  apiFields.map((field) => (
+                    <div key={field} className="text-amber-300 flex items-center gap-2">
+                      <span>-</span> <span>{field}</span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-slate-500 italic">
+                    {isLoadingSchema ? "読み込み中..." : "このペルソナ用のスキーマ未登録、またはAPI未接続"}
+                  </span>
+                )}
               </div>
             </div>
 
