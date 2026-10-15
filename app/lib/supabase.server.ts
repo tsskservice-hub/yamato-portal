@@ -1,10 +1,13 @@
+/**
+ * @file supabase.server.ts
+ * @description Server-side Supabase clients for Remix / Cloudflare Workers
+ */
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
-// Cloudflare環境およびビルド・ランタイムでの確実なフォールバック用定数
+// Cloudflare環境およびビルド・ランタイムでのフォールバック用定数（機密情報は含めない）
 const DEFAULT_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
 const DEFAULT_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicXV3em9yZWVjeHhiZXdqcGRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2OTA5NDksImV4cCI6MjEwMjI2Njk0OX0.OHz5CEV9CLO02vzP4FOBCwPSs-aHuDOZtgobfiO5VM0";
-const DEFAULT_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicXV3em9yZWVjeHhiZXdqcGRuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjY5MDk0OSwiZXhwIjoyMTAyMjY2OTQ5fQ.3urGAd9dp1ZS36kF_vBCQ_1RrbIypR-Def_0QRHqE4k";
 
 const getEnv = (key: string, context?: any) => {
   const cfEnv = context?.cloudflare?.env || context?.env || context || {};
@@ -45,10 +48,16 @@ export function createServerSupabaseClient(request: Request, context?: any) {
   return { supabase, headers };
 }
 
-// 2. 特権権限（Service Role）を用いた管理者用クライアント（アカウント完全削除用）
+// 2. 特権権限（Service Role）を用いた管理者用クライアント（アカウント完全削除用など）
 export function createAdminSupabaseClient(context?: any) {
   const url = getEnv("SUPABASE_URL", context) || getEnv("VITE_SUPABASE_URL", context) || DEFAULT_URL;
-  const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", context) || DEFAULT_SERVICE_KEY;
+  
+  // 秘密鍵は環境変数（SUPABASE_SERVICE_ROLE_KEY）からのみ取得するように厳格化
+  const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", context);
+
+  if (!serviceKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.");
+  }
 
   return createClient(url, serviceKey, {
     auth: {
