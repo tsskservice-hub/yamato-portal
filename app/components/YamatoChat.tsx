@@ -23,9 +23,10 @@ export type YamatoChatProps = {
   defaultOpen?: boolean;         // 初期状態で開いておくか
   themeColor?: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy" | string; 
   
-  // 学習ペースの初期値と、Supabase更新用のユーザーID
+  // 学習ペースの初期値、Supabase更新用のユーザーID、ユーザーのニックネーム
   initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string; 
+  userNickname?: string;         // ← 【追加】ユーザーのニックネームを受け取るプロパティ
 };
 
 // カラーテーマごとのスタイル定義（全対応版）
@@ -153,10 +154,11 @@ export function YamatoChat({
   systemPrompt = "",
   appType = "general",
   additionalContext,
-  defaultOpen = false,      
-  themeColor = "emerald",   
+  defaultOpen = false,       
+  themeColor = "emerald",    
   initialLearningPace = "normal", 
   userId, 
+  userNickname = "My friend", // ← 【追加】受け取るプロパティ（未指定時は "My friend"）
 }: YamatoChatProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -273,7 +275,7 @@ export function YamatoChat({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
-          userNickname: "テストゲストさん",
+          userNickname: userNickname, // ← 【変更】固定値 ("テストゲストさん") から受け取った変数に変更
           appType: appType,
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt, 
