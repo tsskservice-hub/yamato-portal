@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（yamato-portal側の実データ可視化・型エラー解消版）
+ * @description ヤマトAI 独立APIテスト画面（全ペルソナ固有データのリアルタイム連動インスペクション対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -32,11 +32,15 @@ type AppType =
   | "eoy-writing" 
   | "oral-exam-questions";
 
-// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー）
+// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、ペルソナ固有の読み込みデータ詳細）
 type AppConfig = {
   name: string;
   greeting: string;
   themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy";
+  targetAudience: string;
+  curriculumScope: string;
+  coreMethodology: string;
+  specialRules: string[];
 };
 
 export default function TestYamatoPage() {
@@ -63,53 +67,124 @@ export default function TestYamatoPage() {
     );
   }
 
+  // ★全9ペルソナごとの詳細な設定と固有データを定義
   const appConfig: Record<AppType, AppConfig> = {
     concierge: {
       name: "やまと先生",
       greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
       themeColor: "blue",
+      targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
+      curriculumScope: "ポータル全般の機能案内・価格プラン・利用ガイド",
+      coreMethodology: "フレンドリーかつ丁寧なコンシェルジュ対応",
+      specialRules: [
+        "ポータル共通のナビゲーションを担当",
+        "価格プランやクレジット消費の仕組みを分かりやすく案内",
+        "必要に応じて各学習アプリへの誘導を行う"
+      ],
     },
-    // 🌍 全世界対応
     "game-igo": {
       name: "囲碁ヤマト",
       greeting: "こんにちは！囲碁AIヤマトです。一局打ってみましょうか？それともルールや定石について質問しますか？",
       themeColor: "black",
+      targetAudience: "囲碁に興味のある日本語学習者・一般ユーザー",
+      curriculumScope: "囲碁の基本ルール、定石、ミニ碁盤での対話形式プレイング",
+      coreMethodology: "対話を通じた楽しく自然な囲碁の指南",
+      specialRules: [
+        "5路盤などのミニ碁盤でのシミュレーション対応",
+        "日本語での囲碁用語（アタリ、コウ、セキなど）の解説",
+        "Socraticな問いかけによる思考の促し"
+      ],
     },
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
       greeting: "こんにちは！一般向け原稿用紙エディターです。日本語の文章構成や推敲をサポートします。",
       themeColor: "navy",
+      targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
+      curriculumScope: "一般日本語の文章構成、表現力向上、誤字脱字チェック",
+      coreMethodology: "文脈に寄り添った丁寧な推敲・アドバイス",
+      specialRules: [
+        "原稿用紙のマス目カウントとレイアウト補助",
+        "自然な表現への書き換え提案（直接的な答えの全書き換えを避ける）",
+        "語彙力と文体の一貫性のチェック"
+      ],
     },
-    // 🇦🇺🦘 オーストラリア・ビクトリア州対応 (VCE)
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
       greeting: "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards.",
       themeColor: "navy",
+      targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
+      curriculumScope: "VCE Japanese Detailed Study / EOY Writing Standards",
+      coreMethodology: "厳格なVCE基準に基づいたSocraticコーチング",
+      specialRules: [
+        "オーストラリア英語（UK/AU spelling: realise, colour等）の許容",
+        "VCE漢字・文法ハイライトチェッカー連携",
+        "直接的なエッセイの書き直しを避け、生徒自身の思考を引き出す"
+      ],
     },
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Drill practice session! Let's sharpen your speaking skills.",
       themeColor: "yellow",
+      targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
+      curriculumScope: "セクション1（General Conversation）および基礎受け答えドリル",
+      coreMethodology: "反復練習による発話の流暢さ向上",
+      specialRules: [
+        "短いやり取りを通じたスピーキングの反射神経強化",
+        "音声入力・音声合成を前提とした発音・イントネーションの確認",
+        "シンプルな質問から徐々にステップアップ"
+      ],
     },
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
       greeting: "Hello, my friend! 🌟 Welcome to the EOY Oral Elaborate session. Let's dive deeper into your detailed study and responses.",
       themeColor: "purple",
+      targetAudience: "VCE口頭試験の詳細研究（Detailed Study）セクション対策の生徒",
+      curriculumScope: "Detailed Studyのテーマ深掘り・批判的思考力育成",
+      coreMethodology: "多角的な問いかけによる議論の深化",
+      specialRules: [
+        "詳細研究のサブテーマに関する深い考察の引き出し",
+        "論理的な説明構成と意見の正当化を促すコーチング",
+        "アカデミックで自然な日本語表現のサポート"
+      ],
     },
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Mock Exam. Ready to simulate the real exam experience?",
       themeColor: "cyan",
+      targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
+      curriculumScope: "VCE Oral Exam 本番形式（Section 1 & Section 2通し）のシミュレーション",
+      coreMethodology: "本番同様の緊張感を持つ厳格かつ温かい試験官モード",
+      specialRules: [
+        "実際の試験形式に準拠したロールプレイ進行",
+        "試験後の詳細なフィードバックと改善ポイントの提示",
+        "タイムマネジメントと受け答えのトーンの調整"
+      ],
     },
     "eoy-writing": {
       name: "EOY Writing Practice",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills.",
       themeColor: "orange",
+      targetAudience: "VCE期末ライティング試験対策を行う生徒",
+      curriculumScope: "VCE Writing Exam 過去問および110オリジナルプロンプト対応",
+      coreMethodology: "段階的な構成チェックと自己修正の誘導",
+      specialRules: [
+        "原稿用紙レイアウトと文字数制限の厳守",
+        "構成（序論・本論・結論）の論理性チェック",
+        "VCE特有の評価基準（Criteria）に基づいたアドバイス"
+      ],
     },
     "oral-exam-questions": {
       name: "口頭試験問題ジェネレーター",
       greeting: "Hello, my friend! 🌟 Welcome to Oral Exam Questions generator. What kind of practice questions would you like to explore?",
       themeColor: "green",
+      targetAudience: "VCE口頭試験の練習問題を作成したい生徒・教員",
+      curriculumScope: "多岐にわたるトピックに基づく口頭試験用質問の自動生成・カスタマイズ",
+      coreMethodology: "学習者の習熟度に応じたカスタム質問の提示",
+      specialRules: [
+        "学習者の興味や学習進度に合わせた個別最適化された質問の作成",
+        "質問の意図や回答のポイントの解説付与",
+        "オーストラリアの学校現場の文脈に配慮したトピック選定"
+      ],
     },
   };
 
@@ -219,37 +294,48 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：yamato-portal側から読み込んでいる実データの可視化パネル */}
+        {/* 右側カラム：選択中ペルソナ固有データおよびポータル共通データの可視化パネル */}
         <div className="lg:col-span-6 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl p-6 shadow-md">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
             <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-              <span>📊</span> yamato-portal 側から送信中の読み込みデータ構成
+              <span>📊</span> [{currentConfig.name}] の読み込みデータ構成
             </h2>
             <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
-              Portal Data Inspector
+              Persona Inspector
             </span>
           </div>
 
           <div className="space-y-4 text-xs">
-            {/* 1. 現在選択中のアプリ・ペルソナ設定 */}
+            {/* 1. 現在選択中のアプリ・ペルソナ固有設定 */}
             <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
               <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-1.5">
-                <span>👤</span> 1. アクティブアプリ設定 (<code className="text-slate-300">appConfig / appType</code>)
+                <span>👤</span> 1. ペルソナ固有の定義・指導方針 (<code className="text-slate-300">{activeAppType}</code>)
               </h3>
               <ul className="space-y-1.5 text-slate-300 list-disc list-inside leading-relaxed">
                 <li>
-                  <strong className="text-white">識別キー (appType):</strong> <span className="text-amber-300 font-mono">{activeAppType}</span>
+                  <strong className="text-white">対象ユーザー層:</strong> <span className="text-amber-300">{currentConfig.targetAudience}</span>
                 </li>
                 <li>
-                  <strong className="text-white">キャラクター名:</strong> <span className="text-amber-300">{currentConfig.name}</span>
+                  <strong className="text-white">カリキュラム範囲:</strong> <span className="text-slate-200">{currentConfig.curriculumScope}</span>
+                </li>
+                <li>
+                  <strong className="text-white">指導メソッド:</strong> <span className="text-slate-200">{currentConfig.coreMethodology}</span>
                 </li>
                 <li>
                   <strong className="text-white">テーマカラー:</strong> <span className="text-amber-300">{currentConfig.themeColor}</span>
                 </li>
                 <li>
-                  <strong className="text-white">初期挨拶 (greeting):</strong> <span className="text-slate-400 italic">"{currentConfig.greeting}"</span>
+                  <strong className="text-white">初期挨拶:</strong> <span className="text-slate-400 italic">"{currentConfig.greeting}"</span>
                 </li>
               </ul>
+              <div className="mt-2.5 pt-2 border-t border-slate-800/80">
+                <p className="font-semibold text-slate-400 mb-1">個別指導ルール (Special Rules):</p>
+                <ul className="space-y-1 text-slate-300 list-disc list-inside">
+                  {currentConfig.specialRules.map((rule, idx) => (
+                    <li key={idx}>{rule}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             {/* 2. 価格プランデータ */}
