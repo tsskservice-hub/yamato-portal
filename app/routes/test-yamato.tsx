@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 import { YamatoChat } from "../components/YamatoChat";
 // ★価格データとクレジット消費ガイドをインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
-// ★本日のクイズ取得関数とクイズリストをインポート
-import { getTodayQuiz, DAILY_QUIZZES } from "../data/quizzes";
+// ★本日のクイズ取得関数（getRandomQuiz）とクイズリストをインポート
+import { getRandomQuiz, DAILY_QUIZZES } from "../data/quizzes";
 // ★法的・サポートコンテンツデータをインポート
 import { LEGAL_CONTENT } from "../data/legal-content";
 
@@ -163,12 +163,12 @@ export default function TestYamatoPage() {
 
   const currentConfig = appConfig[activeAppType];
 
-  // ★ポータルデータ（価格プラン、消費ガイド、本日のクイズ、法的データ）を定義
+  // ★ポータルデータ（価格プラン、消費ガイド、ランダムクイズ、法的データ）を定義
   const portalContextData = {
     pricePlans: PRICE_PLANS,
     creditGuide: CREDIT_CONSUMPTION_GUIDE,
-    todayQuiz: getTodayQuiz(),     // 本日の日付に対応するクイズデータを渡す
-    allQuizzes: DAILY_QUIZZES,     // 全クイズデータ
+    todayQuiz: getRandomQuiz(), // 完全ランダムなクイズデータを渡す
+    allQuizzes: DAILY_QUIZZES,   // 全クイズデータ
     legalContent: LEGAL_CONTENT,   // 利用規約・免責・プライバシー・連絡先の全データを渡す
   };
 
@@ -326,7 +326,7 @@ export default function TestYamatoPage() {
               </h3>
               <ul className="space-y-1 text-slate-300 list-disc list-inside leading-relaxed">
                 <li>価格プラン総数: <strong className="text-white">{pricePlanKeys.length} 件</strong> ({pricePlanKeys.join(', ')})</li>
-                <li>クイズデータ: 本日のクイズ ＋ 全 <strong className="text-white">{DAILY_QUIZZES?.length ?? 0} 問</strong></li>
+                <li>クイズデータ: ランダムクイズ ＋ 全 <strong className="text-white">{DAILY_QUIZZES?.length ?? 0} 問</strong></li>
                 <li>法的・サポート規約: ロード済み (<code className="text-slate-300">LEGAL_CONTENT</code>)</li>
               </ul>
             </div>
