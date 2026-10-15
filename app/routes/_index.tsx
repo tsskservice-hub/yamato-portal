@@ -96,9 +96,7 @@ export default function Home() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
- // const currentQuiz: QuizItem = getRandomQuiz();
-  // テスト確認用：必ず「なると」のクイズ（loan-004）を取得する
-const currentQuiz: QuizItem = DAILY_QUIZZES.find(q => q.id === "loan-004") || getRandomQuiz();
+  const currentQuiz: QuizItem = getRandomQuiz();
 
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
