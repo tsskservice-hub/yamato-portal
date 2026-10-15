@@ -51,9 +51,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   const user = propUser !== undefined ? propUser : rootData?.user;
   const credits = propCredits !== undefined ? propCredits : (rootData?.credits ?? 10);
   
-  // 💡 ニックネームの解決
+  // 💡 ニックネームの解決（prop > rootData > フォールバック）
   const rawNickname = (propNickname !== undefined && propNickname !== null) ? propNickname : rootData?.nickname;
-  const nickname = rawNickname && rawNickname.trim() !== "" ? rawNickname : "";
+  const nickname = rawNickname && rawNickname.trim() !== "" ? rawNickname : "My friend";
 
   // 💡 学習ペースの解決（prop > rootData > デフォルト"normal"）
   const rawLearningPace = propLearningPace !== undefined ? propLearningPace : rootData?.learningPace;
@@ -69,7 +69,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   // ★新規登録時のパスキー事前案内ステップ（signupの初回のみ true）
   const [isGuideStep, setIsGuideStep] = useState(false);
 
-  // ★トグルの開閉状態（初期値は閉じている、またはお好みで開閉）
+  // ★トグルの開閉状態
   const [isToggleOpen, setIsToggleOpen] = useState(false);
 
   const [emailInput, setEmailInput] = useState('');

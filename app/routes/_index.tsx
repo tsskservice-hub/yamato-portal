@@ -74,7 +74,7 @@ export default function Home() {
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
   const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
   
-  // ★追加: rootData から学習ペースを取得（デフォルトは normal）
+  // ★学習ペースを取得（デフォルトは normal）
   const [learningPace, setLearningPace] = useState<"steady" | "normal" | "accelerated">(
     rootData?.learningPace ?? "normal"
   );
@@ -159,12 +159,12 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 200));
       if (!isMounted) return;
 
-      // 2. 送信ボタン演出（ピカッと光る）
+      // 2. 送信ボタン演出
       setIsSending(true);
       await new Promise((r) => setTimeout(r, 350));
       if (!isMounted) return;
 
-      // 3. 入力クリア ＆ チャット履歴にユーザーの質問を追加（ヤマトはまだ未回答）
+      // 3. 入力クリア ＆ チャット履歴にユーザーの質問を追加
       setIsSending(false);
       setTypedInputText('');
       setChatHistory((prev) => [...prev, { user: currentConv.user }]);
@@ -172,9 +172,9 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 400));
       if (!isMounted) return;
 
-      // 4. 思考中インジケーター表示 (Yamato is thinking... / 約3秒間回転)
+      // 4. 思考中インジケーター表示
       setIsThinking(true);
-      await new Promise((r) => setTimeout(r, 3000)); // 思考時間 3.0秒
+      await new Promise((r) => setTimeout(r, 3000));
       if (!isMounted) return;
 
       // 5. 思考中を消して、該当する履歴のヤマトの回答を埋める
@@ -188,14 +188,13 @@ export default function Home() {
         return updated;
       });
 
-      // 6. 最後の会話ステップ（3つ目）が終わった場合、しばらく表示したあとに全体をクリアしてループ
+      // 6. ループ処理
       if (currentStep === DEMO_CONVERSATIONS.length - 1) {
         await new Promise((r) => setTimeout(r, 4000));
         if (!isMounted) return;
-        setChatHistory([]); // 全てクリアして1つ目から再スタート
+        setChatHistory([]);
         setCurrentStep(0);
       } else {
-        // 次のステップへ
         await new Promise((r) => setTimeout(r, 2000));
         if (!isMounted) return;
         setCurrentStep((prev) => prev + 1);
@@ -347,7 +346,9 @@ export default function Home() {
     }
   };
 
+  // ポータルコンテキストデータに userNickname を含めてコンシェルジュに渡す
   const portalContextData = {
+    userNickname: nickname || "My friend", // ← Supabaseのニックネームをコンシェルジュに連携
     pricePlans: PRICE_PLANS,
     creditGuide: CREDIT_CONSUMPTION_GUIDE,
     todayQuiz: getTodayQuiz(),
@@ -447,7 +448,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* チャット会話の蓄積表示エリア（スクロール可能） */}
+              {/* チャット会話の蓄積表示エリア */}
               <div 
                 ref={chatScrollRef}
                 className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-4 mb-4 h-[220px] overflow-y-auto flex flex-col scroll-smooth shadow-inner"
@@ -460,14 +461,12 @@ export default function Home() {
 
                 {chatHistory.map((exchange, idx) => (
                   <div key={idx} className="space-y-3">
-                    {/* ユーザーメッセージ */}
                     <div className="flex justify-end">
                       <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
                         <p>{exchange.user}</p>
                       </div>
                     </div>
 
-                    {/* ヤマトの返答または思考中 */}
                     <div className="flex justify-start">
                       {exchange.yamato ? (
                         <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
@@ -486,7 +485,6 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* ★ デモ画面下部の入力フィールド（タイピング＋送信ボタン連動演出） */}
               <div className="flex items-center space-x-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 mb-4 shadow-xs">
                 <div className="flex-grow px-3 py-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200 flex items-center">
                   {typedInputText ? (
@@ -494,7 +492,6 @@ export default function Home() {
                   ) : (
                     <span className="text-slate-400 dark:text-slate-500">Ask Yamato a question...</span>
                   )}
-                  {/* 点滅カーソル */}
                   {!isSending && <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-600 animate-pulse"></span>}
                 </div>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm transition-all duration-200 ${
@@ -526,7 +523,6 @@ export default function Home() {
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
                
-            {/* 💡 共通の CAMPAIGN_NOTICE からインポートした文言を表示 */}
             <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
               <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
               <span>{CAMPAIGN_NOTICE.rawText}</span>
@@ -679,21 +675,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 4. Additional Portal Pages Navigation Cards (Divided into 2 Sections) */}
+        {/* 4. Portal Pages Navigation Cards */}
         <section className="space-y-12">
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-extrabold tracking-tight">Portal Pages & Modules</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Direct access to all specialized exam prep modules, tools, and learning spaces.</p>
           </div>
 
-          {/* 🌏 Section 1: Global & General Japanese Learners */}
+          {/* Section 1 */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
               <span className="text-2xl">🌍</span>
               <h3 className="text-xl font-extrabold tracking-tight">Section 1: Global & General Japanese Learners</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* General Genkoyoshi Editor */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
                 <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
@@ -710,7 +705,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Game (Igo / Go) */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -730,14 +724,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 🐨🦘🇦🇺 Section 2: Victorian Curriculum & VCE Students (Victoria,Australia) */}
+          {/* Section 2 */}
           <div className="space-y-6 pt-6">
             <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
               <span className="text-2xl">🇦🇺🐨🦘</span>
               <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* VCE Genkoyoshi Editor */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
                 <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
@@ -754,7 +747,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* eoy-oral-drill */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -772,7 +764,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* eoy-oral-elaborate */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -790,7 +781,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* eoy-oral-mock */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -808,7 +798,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* eoy-writing */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -826,7 +815,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* oral-exam-questions */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -849,7 +837,7 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト */}
+        {/* 🤖 右下に常駐するコンシェルジュヤマト（Supabaseのnicknameを反映） */}
         <ChatYamatoConcierge 
           additionalContext={portalContextData} 
           initialLearningPace={learningPace}
