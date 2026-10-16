@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（認証モーダル連動・完全版）
+ * @description AI Yamato Portal のランディングページ（認証モーダル連動・クレジットガード対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -37,7 +37,7 @@ import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
 // 💡 共通の price-plans から price-plans およびキャンペーン文言をインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/price-plans';
 
-// 💡 Quiz data and helper functions imported from external file (getRandomQuizに変更)
+// 💡 Quiz data and helper functions imported from external file
 import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
 
 // ★法的・サポートコンテンツデータをインポート
@@ -58,6 +58,12 @@ const DEMO_CONVERSATIONS = [
     yamato: "Chats and vocabulary Q&A cost 1-2 credits. You also get daily free credits upon login, or you can top up anytime!"
   }
 ];
+
+// 💡 テキストAI・画像AIの最大予想消費クレジット数（キャップ設定）
+const MAX_ESTIMATED_CREDITS = {
+  textAi: 2,   // テキストチャット最大予想
+  imageAi: 4,  // 画像生成・ビジュアル解説最大予想
+};
 
 export default function Home() {
   // 💡 root.tsx の loader からユーザー情報・ニックネーム・クレジット・学習ペースを自動取得
@@ -90,7 +96,7 @@ export default function Home() {
   // 💡 PageLayout の認証モーダルを外部から操作するための ref
   const layoutRef = useRef<PageLayoutRef>(null);
 
-  // 💡 Daily Quiz States (完全にランダムなクイズを取得)
+  // 💡 Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -145,11 +151,9 @@ export default function Home() {
       setIsSending(false);
       setIsThinking(false);
 
-      // 初回またはリセット後の待機
       await new Promise((r) => setTimeout(r, 600));
       if (!isMounted) return;
 
-      // 1. 入力欄へのタイピング演出（一文字ずつ）
       for (let i = 1; i <= currentConv.user.length; i++) {
         if (!isMounted) return;
         setTypedInputText(currentConv.user.slice(0, i));
@@ -159,12 +163,10 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 200));
       if (!isMounted) return;
 
-      // 2. 送信ボタン演出
       setIsSending(true);
       await new Promise((r) => setTimeout(r, 350));
       if (!isMounted) return;
 
-      // 3. 入力クリア ＆ チャット履歴にユーザーの質問を追加
       setIsSending(false);
       setTypedInputText('');
       setChatHistory((prev) => [...prev, { user: currentConv.user }]);
@@ -172,12 +174,10 @@ export default function Home() {
       await new Promise((r) => setTimeout(r, 400));
       if (!isMounted) return;
 
-      // 4. 思考中インジケーター表示
       setIsThinking(true);
       await new Promise((r) => setTimeout(r, 3000));
       if (!isMounted) return;
 
-      // 5. 思考中を消して、該当する履歴のヤマトの回答を埋める
       setIsThinking(false);
       setChatHistory((prev) => {
         const updated = [...prev];
@@ -188,7 +188,6 @@ export default function Home() {
         return updated;
       });
 
-      // 6. ループ処理
       if (currentStep === DEMO_CONVERSATIONS.length - 1) {
         await new Promise((r) => setTimeout(r, 4000));
         if (!isMounted) return;
@@ -258,7 +257,6 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 決済成功リダイレクトの検知 & クレジット再取得
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     if (queryParams.get('success') === 'true') {
@@ -269,6 +267,25 @@ export default function Home() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [user]);
+
+  // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数
+  const validateFeatureCredits = (featureType: 'textAi' | 'imageAi'): boolean => {
+    if (!user) {
+      alert("ログインが必要です");
+      handleOpenAuthModal('signup');
+      return false;
+    }
+    const maxRequired = MAX_ESTIMATED_CREDITS[featureType];
+    if (credits < maxRequired) {
+      alert(`この機能を利用するには最大 ${maxRequired} クレジットの余裕が必要です（現在残高: 🪙 ${credits} クレジット）。クレジットをチャージするか、デイリークイズで増やしてくださいね！`);
+      const pricingSection = document.getElementById('pricing');
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      return false;
+    }
+    return true;
+  };
 
   // Daily Quiz Answer Handler
   const handleAnswerQuiz = async (selectedIndex: number) => {
@@ -310,7 +327,6 @@ export default function Home() {
     }
   };
 
-  // 購入ボタン押下処理
   const handleCheckout = async (priceId: string) => {
     if (!user) {
       alert("ログインが必要です");
@@ -346,7 +362,6 @@ export default function Home() {
     }
   };
 
-  // ポータルコンテキストデータに userNickname を含めてコンシェルジュに渡す
   const portalContextData = {
     userNickname: nickname || "My friend",
     pricePlans: PRICE_PLANS,
@@ -367,9 +382,8 @@ export default function Home() {
       isDarkMode={isDarkMode}
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
-        {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-             
+            
           {/* 2. Hero Section with YamatoChat-style Auto Demo */}
           <section className="text-center space-y-6 max-w-4xl mx-auto">
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
@@ -504,10 +518,14 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-between border border-blue-200 dark:border-blue-800/50 rounded-xl p-3 bg-blue-50/50 dark:bg-blue-950/20 text-sm gap-3">
                 <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
                   <span>✨</span>
-                  <span>Want to ask Yamato your own questions?</span>
+                  <span>Want to ask Yamato your own questions? (Req max {MAX_ESTIMATED_CREDITS.textAi} credits)</span>
                 </div>
                 <button 
-                  onClick={() => handleOpenAuthModal('signup')}
+                  onClick={() => {
+                    if (validateFeatureCredits('textAi')) {
+                      handleOpenAuthModal('signup');
+                    }
+                  }}
                   className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
                 >
                   <span>Free Sign Up</span>
@@ -518,7 +536,7 @@ export default function Home() {
           </section>
 
         {/* 3. Pricing & Credit Packs */}
-        <section className="space-y-12 text-center">
+        <section className="space-y-12 text-center" id="pricing">
           <div className="space-y-4 max-w-3xl mx-auto">
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
@@ -662,7 +680,7 @@ export default function Home() {
           <div className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
             <div className="flex items-center justify-center space-x-2 font-bold mb-3">
               <Coins className="w-4 h-4 text-amber-500" />
-              <span>Credit Consumption Guide</span>
+              <span>Credit Consumption Guide (Max Cap Guard Active)</span>
             </div>
             <div className="space-y-2 text-slate-500">
               {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
@@ -695,13 +713,21 @@ export default function Home() {
                     <Grid className="w-5 h-5" />
                   </div>
                   <h4 className="font-bold text-base">Genkoyoshi Editor (General)</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor for precise Japanese character layout, counting, and PDF export for general learners.</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor with image/text AI layout analysis (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Free Tool</span>
-                  <Link to="/genkoyoshi-editor-general" className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                  <span className="text-slate-400 font-medium">AI Tool</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateFeatureCredits('imageAi')) {
+                        window.location.href = "/genkoyoshi-editor-general";
+                      }
+                    }}
+                    className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                  >
                     <span>Open Editor</span> <ArrowRight className="w-3 h-3" />
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -737,13 +763,21 @@ export default function Home() {
                     <Grid className="w-5 h-5" />
                   </div>
                   <h4 className="font-bold text-base">Genkoyoshi Editor (VCE)</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Specialized VCE manuscript editor with strict Victorian curriculum criteria check and AI essay advisor.</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">Specialized VCE manuscript editor with strict criteria check and image/text AI essay advisor (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">VCE Tool</span>
-                  <Link to="/genkoyoshi-editor-vce" className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                  <span className="text-slate-400 font-medium">VCE AI Tool</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateFeatureCredits('imageAi')) {
+                        window.location.href = "/genkoyoshi-editor-vce";
+                      }
+                    }}
+                    className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                  >
                     <span>Open VCE Editor</span> <ArrowRight className="w-3 h-3" />
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -837,11 +871,13 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト（Supabaseのnicknameを反映） */}
+        {/* 🤖 右下に常駐するコンシェルジュヤマト */}
         <ChatYamatoConcierge 
           additionalContext={portalContextData} 
           initialLearningPace={learningPace}
           userId={user?.id}
+          credits={credits}
+          onOpenAuth={() => handleOpenAuthModal('signup')}
         />
 
         {/* ページトップへ戻るボタン */}
@@ -919,7 +955,6 @@ export default function Home() {
 
                 {(isAnswerSubmitted || hasCompletedTodayQuiz) && (
                   <div className="space-y-3 text-left">
-                    {/* 💡 quizzes.ts で指定された画像がある場合に自動で並べて表示 */}
                     {currentQuiz.images && currentQuiz.images.length > 0 && (
                       <div className="flex flex-wrap gap-3 justify-center my-2">
                         {currentQuiz.images.map((imgSrc, index) => (

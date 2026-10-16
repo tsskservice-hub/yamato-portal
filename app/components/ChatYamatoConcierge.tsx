@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（学習ペース・Supabase即時更新連動版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（学習ペース・Supabase即時更新連動・テキスト/画像AIクレジットガード対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -18,7 +18,13 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-// 💡 _index.tsx から渡される additionalContext および学習ペース・ユーザーIDの型定義
+// 💡 テキストAI・画像AI利用時の最大予想消費クレジット数（キャップ設定）
+const MAX_ESTIMATED_CREDITS = {
+  textAi: 2,   // テキストチャット最大予想消費
+  imageAi: 4,  // 画像生成・ビジュアル解説最大予想消費
+};
+
+// 💡 _index.tsx から渡される additionalContext および学習ペース・ユーザーID・クレジットの型定義
 export interface ChatYamatoConciergeProps {
   additionalContext?: {
     pricePlans?: Record<string, any>;
@@ -34,16 +40,19 @@ export interface ChatYamatoConciergeProps {
     cityName?: string;
     timeZone?: string;
   };
-  initialLearningPace?: "steady" | "normal" | "accelerated"; // ★追加
-  userId?: string; // ★追加
+  initialLearningPace?: "steady" | "normal" | "accelerated";
+  userId?: string;
+  credits?: number; // クレジット残高
+  onOpenAuth?: () => void;
 }
 
 export function ChatYamatoConcierge({ 
   additionalContext, 
   initialLearningPace = "normal", 
-  userId 
+  userId,
+  credits = 10,
+  onOpenAuth
 }: ChatYamatoConciergeProps) {
-  // 💡 初期状態を閉じている状態（false）に変更し、リロード時にボタンとしておさまるようにします
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
@@ -63,14 +72,13 @@ export function ChatYamatoConcierge({
   // ★学習ペース用のステート
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
 
-  // 💡 props から渡される initialLearningPace が変わった時に同期させる
   useEffect(() => {
     if (initialLearningPace) {
       setTutorLevel(initialLearningPace);
     }
   }, [initialLearningPace]);
 
-  // ★学習ペース変更時にローカルステートと Supabase を即時更新する関数
+  // 学習ペース変更時にローカルステートと Supabase を即時更新する関数
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
     setTutorLevel(newLevel);
 
@@ -116,10 +124,14 @@ export function ChatYamatoConcierge({
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // メッセージ送信処理
+  // メッセージ送信処理（テキストAI: 最大予想2クレジットをチェック）
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
+
+    if (userId && credits < MAX_ESTIMATED_CREDITS.textAi) {
+      return;
+    }
 
     const userMsg = tutorInput.trim();
     setTutorInput("");
@@ -155,7 +167,7 @@ export function ChatYamatoConcierge({
         body: JSON.stringify({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
-          learningPace: tutorLevel, // ★ 現在選択されている学習ペースを反映
+          learningPace: tutorLevel,
           userNickname: "my friend",
           appType: "concierge",
           portalData: portalContextPayload,
@@ -193,16 +205,36 @@ export function ChatYamatoConcierge({
     }
   };
 
+  // 💡 画像AI機能などを利用する際の手前チェック用ヘルパー関数
+  const handleRequestImageAiFeature = () => {
+    if (userId && credits < MAX_ESTIMATED_CREDITS.imageAi) {
+      alert(`画像生成AIを利用するには最大 ${MAX_ESTIMATED_CREDITS.imageAi} クレジットの余裕が必要です（現在残高: 🪙 ${credits} クレジット）。デイリークイズやプラン購入で補充してください。`);
+      const pricingSection = document.getElementById('pricing');
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      return false;
+    }
+    // クレジットが足りている場合の画像生成処理へ進む
+    alert("画像AI機能へアクセスします（クレジット十分）");
+    return true;
+  };
+
   return (
     <aside aria-label="Yamato Concierge" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
       {!isAiTutorOpen ? (
         <button
           type="button"
           onClick={() => setIsAiTutorOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative"
         >
           <span>🤖</span>
           <span>{characterName}</span>
+          {userId && credits < MAX_ESTIMATED_CREDITS.textAi && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
+              !
+            </span>
+          )}
         </button>
       ) : (
         <div
@@ -216,10 +248,17 @@ export function ChatYamatoConcierge({
           <div className="w-full h-full flex flex-col">
             {/* ヘッダー */}
             <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-              <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2 m-0">
-                <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> 
-                {characterName}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-blue-900 flex items-center gap-1.5 m-0">
+                  <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> 
+                  {characterName}
+                </h3>
+                {userId && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${credits >= MAX_ESTIMATED_CREDITS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    🪙 {credits} credits
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
@@ -265,60 +304,96 @@ export function ChatYamatoConcierge({
               </div>
             </div>
 
-            {/* チャット履歴エリア */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3">
-              {tutorMessages.map((msg, idx) => (
-                <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                  {msg.role === "assistant" && (
-                    <div className="text-[10px] text-slate-400 mb-0.5 ml-1 flex items-center gap-1">
-                      <span>🤖</span> やまと先生
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
-                      msg.role === "user"
-                        ? "bg-blue-600 text-white rounded-br-xs"
-                        : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
-                    }`}
-                  >
-                    {msg.role === "user" ? (
-                      msg.content
-                    ) : (
-                      <div className="space-y-2">
-                        <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {isTutorLoading && (
-                <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-blue-50/70 border border-blue-100 p-2 rounded-xl w-fit">
-                  <span className="inline-block animate-spin text-sm">🤖</span>
-                  <span>やまと先生が考えています...</span>
-                </div>
-              )}
-            </div>
-
-            {/* 入力フォーム */}
-            <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={tutorInput}
-                  onChange={(e) => setTutorInput(e.target.value)}
-                  placeholder="Ask Yamato anything..."
-                  disabled={isTutorLoading}
-                  className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50"
-                />
+            {/* クレジット不足時のガード画面（テキストAIの最大予想に満たない場合） */}
+            {userId && credits < MAX_ESTIMATED_CREDITS.textAi ? (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="text-3xl">🪙</div>
+                <h4 className="font-bold text-sm text-slate-800">More Credits Required</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Your current balance ({credits} credits) is below the estimated max requirement ({MAX_ESTIMATED_CREDITS.textAi} credits) to chat with Yamato-sensei. Complete today's daily quiz for <span className="font-bold text-blue-600">+2 free credits</span> or top up a credit pack!
+                </p>
                 <button
-                  type="submit"
-                  disabled={isTutorLoading || !tutorInput.trim()}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                  type="button"
+                  onClick={() => {
+                    const pricingSection = document.getElementById('pricing');
+                    if (pricingSection) {
+                      pricingSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    setIsAiTutorOpen(false);
+                  }}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
                 >
-                  Send
+                  View Credit Packs & Daily Quiz
                 </button>
               </div>
-            </form>
+            ) : (
+              <>
+                {/* チャット履歴エリア */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3">
+                  {tutorMessages.map((msg, idx) => (
+                    <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                      {msg.role === "assistant" && (
+                        <div className="text-[10px] text-slate-400 mb-0.5 ml-1 flex items-center gap-1">
+                          <span>🤖</span> やまと先生
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
+                          msg.role === "user"
+                            ? "bg-blue-600 text-white rounded-br-xs"
+                            : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                        }`}
+                      >
+                        {msg.role === "user" ? (
+                          msg.content
+                        ) : (
+                          <div className="space-y-2">
+                            <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {isTutorLoading && (
+                    <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-blue-50/70 border border-blue-100 p-2 rounded-xl w-fit">
+                      <span className="inline-block animate-spin text-sm">🤖</span>
+                      <span>やまと先生が考えています...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 入力フォーム ＆ 画像AI機能テストボタン */}
+                <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={tutorInput}
+                      onChange={(e) => setTutorInput(e.target.value)}
+                      placeholder="Ask Yamato anything..."
+                      disabled={isTutorLoading}
+                      className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isTutorLoading || !tutorInput.trim()}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      Send
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
+                    <span>💡 Chat: max {MAX_ESTIMATED_CREDITS.textAi} cr / Image AI: max {MAX_ESTIMATED_CREDITS.imageAi} cr</span>
+                    <button
+                      type="button"
+                      onClick={handleRequestImageAiFeature}
+                      className="text-blue-600 hover:underline font-semibold cursor-pointer"
+                    >
+                      Test Image AI Check
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
