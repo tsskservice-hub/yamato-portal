@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（アーキテクチャ構成表表示版）
+ * @description ヤマトAI 独立APIテスト画面（アーキテクチャ構成表表示版・ライト背景対応）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -262,13 +262,13 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表 */}
-        <div className="lg:col-span-6 bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl p-6 shadow-md">
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
-            <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
+        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表（薄い背景色対応） */}
+        <div className="lg:col-span-6 bg-white text-slate-800 border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+            <h2 className="text-sm font-bold text-blue-900 flex items-center gap-2">
               <span>🚀</span> AIヤマト・エコシステム 構成表
             </h2>
-            <span className="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
+            <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 font-semibold">
               Architecture Overview
             </span>
           </div>
@@ -276,44 +276,44 @@ export default function TestYamatoPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400">
-                  <th className="py-2.5 px-2 font-bold w-1/4">役割・レイヤー</th>
+                <tr className="border-b border-slate-200 text-slate-500 bg-slate-50/70">
+                  <th className="py-2.5 px-2 font-bold w-1/4 rounded-l-lg">役割・レイヤー</th>
                   <th className="py-2.5 px-2 font-bold w-3/8">バックエンド (api)</th>
-                  <th className="py-2.5 px-2 font-bold w-3/8">フロントエンド (portal)</th>
+                  <th className="py-2.5 px-2 font-bold w-3/8 rounded-r-lg">フロントエンド (portal)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                <tr>
-                  <td className="py-3 px-2 font-semibold text-white align-top">土台 (機体)</td>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tr className="hover:bg-slate-50/50 transition-colors">
+                  <td className="py-3 px-2 font-bold text-slate-900 align-top">土台 (機体)</td>
                   <td className="py-3 px-2 align-top">
-                    <span className="font-bold text-blue-400">🚀 FoundationLayout.ts</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">すべてのプロンプトの根本的なルールやエンジンを組み立てる大元</p>
+                    <span className="font-bold text-blue-600">🚀 FoundationLayout.ts</span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">すべてのプロンプトの根本的なルールやエンジンを組み立てる大元</p>
                   </td>
                   <td className="py-3 px-2 align-top">
-                    <span className="font-bold text-blue-400">🚀 PageLayout.tsx</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-3 px-2 font-semibold text-white align-top">窓口・外装</td>
-                  <td className="py-3 px-2 align-top">
-                    <span className="font-bold text-purple-400">🛠️ YamatoApiCommon.tsx</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">共通プロンプト構造や portalData などの共通オプションを受け渡す基盤</p>
-                  </td>
-                  <td className="py-3 px-2 align-top">
-                    <span className="font-bold text-purple-400">🛠️ YamatoChatCommon.tsx</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">対話UIの汎用テンプレート・操縦士コックピット</p>
+                    <span className="font-bold text-blue-600">🚀 PageLayout.tsx</span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤</p>
                   </td>
                 </tr>
-                <tr>
-                  <td className="py-3 px-2 font-semibold text-white align-top">乗組員 (ひな形)</td>
+                <tr className="hover:bg-slate-50/50 transition-colors">
+                  <td className="py-3 px-2 font-bold text-slate-900 align-top">窓口・外装</td>
                   <td className="py-3 px-2 align-top">
-                    <span className="font-bold text-amber-400">👨‍✈️ a-template.ts</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">新しいペルソナ（単語ヤマト、文法ヤマトなど）を記述するひな形</p>
+                    <span className="font-bold text-purple-600">🛠️ YamatoApiCommon.tsx</span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">共通プロンプト構造や portalData などの共通オプションを受け渡す基盤</p>
                   </td>
                   <td className="py-3 px-2 align-top">
-                    <span className="font-bold text-amber-400">👨‍✈️ YamatoChatCommon をコピーして新規作成</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5">（ChatYamatoGrammar.tsx等）固有の名前・テーマ・プロンプトをカスタマイズ</p>
+                    <span className="font-bold text-purple-600">🛠️ YamatoChatCommon.tsx</span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">対話UIの汎用テンプレート・操縦士コックピット</p>
+                  </td>
+                </tr>
+                <tr className="hover:bg-slate-50/50 transition-colors">
+                  <td className="py-3 px-2 font-bold text-slate-900 align-top">乗組員 (ひな形)</td>
+                  <td className="py-3 px-2 align-top">
+                    <span className="font-bold text-amber-600">👨‍✈️ a-template.ts</span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">新しいペルソナ（単語ヤマト、文法ヤマトなど）を記述するひな形</p>
+                  </td>
+                  <td className="py-3 px-2 align-top">
+                    <span className="font-bold text-amber-600">👨‍✈️ YamatoChatCommon をコピーして新規作成</span>
+                    <p className="text-[11px] text-slate-500 mt-0.5">（ChatYamatoGrammar.tsx等）固有の名前・テーマ・プロンプトをカスタマイズ</p>
                   </td>
                 </tr>
               </tbody>
