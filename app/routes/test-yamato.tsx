@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（アーキテクチャ構成表表示版・ライト背景対応）
+ * @description ヤマトAI 独立APIテスト画面（アーキテクチャ構成表・インポート連鎖解説版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -262,58 +262,63 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表（薄い背景色対応） */}
+        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表（一回り大きい文字 ＆ スクロールバー対応） */}
         <div className="lg:col-span-6 bg-white text-slate-800 border border-slate-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
-            <h2 className="text-sm font-bold text-blue-900 flex items-center gap-2">
+            <h2 className="text-base font-bold text-blue-900 flex items-center gap-2">
               <span>🚀</span> AIヤマト・エコシステム 構成表
             </h2>
-            <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 font-semibold">
+            <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md border border-blue-200 font-semibold">
               Architecture Overview
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+          {/* スクロールバー付きコンテナ（文字を一回り大きく：text-smベース） */}
+          <div className="max-h-[580px] overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500 bg-slate-50/70">
-                  <th className="py-2.5 px-2 font-bold w-1/4 rounded-l-lg">役割・レイヤー</th>
-                  <th className="py-2.5 px-2 font-bold w-3/8">バックエンド (api)</th>
-                  <th className="py-2.5 px-2 font-bold w-3/8 rounded-r-lg">フロントエンド (portal)</th>
+                <tr className="border-b border-slate-200 text-slate-600 bg-slate-50/80 sticky top-0">
+                  <th className="py-3 px-3 font-bold w-1/4 rounded-l-lg">役割・レイヤー</th>
+                  <th className="py-3 px-3 font-bold w-3/8">バックエンド (api)</th>
+                  <th className="py-3 px-3 font-bold w-3/8 rounded-r-lg">フロントエンド (portal)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 px-2 font-bold text-slate-900 align-top">土台 (機体)</td>
-                  <td className="py-3 px-2 align-top">
+                  <td className="py-3.5 px-3 font-bold text-slate-900 align-top">土台 (機体)</td>
+                  <td className="py-3.5 px-3 align-top">
                     <span className="font-bold text-blue-600">🚀 FoundationLayout.ts</span>
-                    <p className="text-[11px] text-slate-500 mt-0.5">すべてのプロンプトの根本的なルールやエンジンを組み立てる大元</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">すべてのプロンプトの根本的なルールやエンジンを組み立てる大元</p>
                   </td>
-                  <td className="py-3 px-2 align-top">
+                  <td className="py-3.5 px-3 align-top">
                     <span className="font-bold text-blue-600">🚀 PageLayout.tsx</span>
-                    <p className="text-[11px] text-slate-500 mt-0.5">ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤</p>
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 px-2 font-bold text-slate-900 align-top">窓口・外装</td>
-                  <td className="py-3 px-2 align-top">
+                  <td className="py-3.5 px-3 font-bold text-slate-900 align-top">窓口・外装</td>
+                  <td className="py-3.5 px-3 align-top">
                     <span className="font-bold text-purple-600">🛠️ YamatoApiCommon.tsx</span>
-                    <p className="text-[11px] text-slate-500 mt-0.5">共通プロンプト構造や portalData などの共通オプションを受け渡す基盤</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">共通プロンプト構造や portalData などの共通オプションを受け渡す基盤</p>
                   </td>
-                  <td className="py-3 px-2 align-top">
+                  <td className="py-3.5 px-3 align-top">
                     <span className="font-bold text-purple-600">🛠️ YamatoChatCommon.tsx</span>
-                    <p className="text-[11px] text-slate-500 mt-0.5">対話UIの汎用テンプレート・操縦士コックピット</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">対話UIの汎用テンプレート・操縦士コックピット</p>
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 px-2 font-bold text-slate-900 align-top">乗組員 (ひな形)</td>
-                  <td className="py-3 px-2 align-top">
+                  <td className="py-3.5 px-3 font-bold text-slate-900 align-top">乗組員 (ひな形)</td>
+                  <td className="py-3.5 px-3 align-top">
                     <span className="font-bold text-amber-600">👨‍✈️ a-template.ts</span>
-                    <p className="text-[11px] text-slate-500 mt-0.5">新しいペルソナ（単語ヤマト、文法ヤマトなど）を記述するひな形</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      FoundationLayout のデータが内包・インポートされている 
+                      <strong className="text-slate-700"> YamatoApiCommon.tsx </strong> 
+                      をインポートしてペルソナを記述するひな形
+                    </p>
                   </td>
-                  <td className="py-3 px-2 align-top">
+                  <td className="py-3.5 px-3 align-top">
                     <span className="font-bold text-amber-600">👨‍✈️ YamatoChatCommon をコピーして新規作成</span>
-                    <p className="text-[11px] text-slate-500 mt-0.5">（ChatYamatoGrammar.tsx等）固有の名前・テーマ・プロンプトをカスタマイズ</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">（ChatYamatoGrammar.tsx等）固有の名前・テーマ・プロンプトをカスタマイズ</p>
                   </td>
                 </tr>
               </tbody>
