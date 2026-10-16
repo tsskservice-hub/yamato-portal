@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -50,12 +50,20 @@ export function ChatYamatoConcierge({
   additionalContext, 
   initialLearningPace = "normal", 
   userId,
-  credits = 10,
+  credits: initialCredits = 10,
   onOpenAuth
 }: ChatYamatoConciergeProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
+
+  // 💡 コンポーネント内でクレジット残高を管理するステート（リアルタイム更新用）
+  const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
+
+  // 親から渡された初期 credits が更新されたら反映
+  useEffect(() => {
+    setCurrentCredits(initialCredits);
+  }, [initialCredits]);
 
   const characterName = "やまと先生";
   const initialGreeting = "Hello, my friend! 🌟 Welcome to the Yamato Portal. I am Yamato-sensei, your guide and concierge. Please feel free to ask me anything about our Japanese quizzes, mini-games, pricing plans, or portal features!";
@@ -124,6 +132,24 @@ export function ChatYamatoConcierge({
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  // 💡 Supabaseから最新のクレジット残高を非同期で再取得する関数
+  const refreshUserCredits = async () => {
+    if (!userId) return;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error && typeof data.credits === 'number') {
+        setCurrentCredits(data.credits);
+      }
+    } catch (err) {
+      console.error("Failed to refresh credits:", err);
+    }
+  };
+
   // メッセージ送信処理（未ログインガード ＆ userId の確実な送信 ＆ クレジットチェック）
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,8 +165,8 @@ export function ChatYamatoConcierge({
     }
 
     // 💡 ガード2: クレジット残高がテキストAIの必要最低限に満たない場合
-    if (credits < MAX_ESTIMATED_CREDITS.textAi) {
-      alert(`クレジットが不足しています（現在残高: 🪙 ${credits} クレジット）。デイリークイズやプラン購入で補充してください。`);
+    if (currentCredits < MAX_ESTIMATED_CREDITS.textAi) {
+      alert(`クレジットが不足しています（現在残高: 🪙 ${currentCredits} クレジット）。デイリークイズやプラン購入で補充してください。`);
       return;
     }
 
@@ -207,9 +233,8 @@ export function ChatYamatoConcierge({
         { role: "assistant", content: sanitizedReply }
       ]);
 
-      // 💡 チャット成功後、画面上のクレジット残高を最新にするためにページをリロードまたは親コンポーネントへ通知（必要に応じて）
-      // ※ root.tsx の loader が再実行されるようにルーターをリフレッシュするか、クレジット更新を促すことができます。
-      window.location.reload(); 
+      // 💡 リロードせず、バックグラウンドで最新のクレジット残高を非同期取得して更新
+      await refreshUserCredits();
 
     } catch (err: any) {
       console.error(err);
@@ -228,8 +253,8 @@ export function ChatYamatoConcierge({
       if (onOpenAuth) onOpenAuth();
       return false;
     }
-    if (credits < MAX_ESTIMATED_CREDITS.imageAi) {
-      alert(`画像生成AIを利用するには最大 ${MAX_ESTIMATED_CREDITS.imageAi} クレジットの余裕が必要です（現在残高: 🪙 ${credits} クレジット）。`);
+    if (currentCredits < MAX_ESTIMATED_CREDITS.imageAi) {
+      alert(`画像生成AIを利用するには最大 ${MAX_ESTIMATED_CREDITS.imageAi} クレジットの余裕が必要です（現在残高: 🪙 ${currentCredits} クレジット）。`);
       return false;
     }
     alert("画像AI機能へアクセスします（クレジット十分）");
@@ -246,7 +271,7 @@ export function ChatYamatoConcierge({
         >
           <span>🤖</span>
           <span>{characterName}</span>
-          {userId && credits < MAX_ESTIMATED_CREDITS.textAi && (
+          {userId && currentCredits < MAX_ESTIMATED_CREDITS.textAi && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
               !
             </span>
@@ -270,8 +295,8 @@ export function ChatYamatoConcierge({
                   {characterName}
                 </h3>
                 {userId ? (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${credits >= MAX_ESTIMATED_CREDITS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    🪙 {credits} credits
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= MAX_ESTIMATED_CREDITS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    🪙 {currentCredits} credits
                   </span>
                 ) : (
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
@@ -343,12 +368,12 @@ export function ChatYamatoConcierge({
                   Sign In / Sign Up Now
                 </button>
               </div>
-            ) : credits < MAX_ESTIMATED_CREDITS.textAi ? (
+            ) : currentCredits < MAX_ESTIMATED_CREDITS.textAi ? (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                 <div className="text-3xl">🪙</div>
                 <h4 className="font-bold text-sm text-slate-800">More Credits Required</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Your current balance ({credits} credits) is below the estimated max requirement ({MAX_ESTIMATED_CREDITS.textAi} credits) to chat with Yamato-sensei. Complete today's daily quiz for <span className="font-bold text-blue-600">+2 free credits</span> or top up a credit pack!
+                  Your current balance ({currentCredits} credits) is below the estimated max requirement ({MAX_ESTIMATED_CREDITS.textAi} credits) to chat with Yamato-sensei. Complete today's daily quiz for <span className="font-bold text-blue-600">+2 free credits</span> or top up a credit pack!
                 </p>
                 <button
                   type="button"
