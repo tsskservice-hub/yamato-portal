@@ -124,11 +124,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       setEmailInput('');
       setIsGuideStep(false);
 
-      if (isSignup) {
-        window.location.href = "/my-account";
-      } else {
-        window.location.href = window.location.href;
-      }
+      // 💡 認証成功後はページをリロードして root.tsx の loader を再実行し、最新のユーザー情報を反映
+      window.location.reload();
 
     } catch (err: any) {
       console.error(err);
@@ -196,6 +193,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                 {/* トグル開閉ボタン：パスキーの詳細と仕組みを見る */}
                 <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
                   <button
+                    type="button"
                     onClick={() => setIsToggleOpen(!isToggleOpen)}
                     className="w-full flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline bg-transparent border-none p-0 cursor-pointer"
                   >
@@ -309,14 +307,14 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   {authMode === 'signup' ? (
                     <p className="text-slate-500">
                       Already have a passkey?{' '}
-                      <button onClick={() => setAuthMode('signin')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                      <button type="button" onClick={() => setAuthMode('signin')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
                         Sign In
                       </button>
                     </p>
                   ) : (
                     <p className="text-slate-500">
                       New to AI Yamato?{' '}
-                      <button onClick={() => { setAuthMode('signup'); setIsGuideStep(true); }} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                      <button type="button" onClick={() => { setAuthMode('signup'); setIsGuideStep(true); }} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
                         Create Account
                       </button>
                     </p>

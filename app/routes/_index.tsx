@@ -87,12 +87,6 @@ export default function Home() {
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
-  // 💡 初回プロフィール設定モーダル用ステート
-  const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
-  const [welcomeNickname, setWelcomeNickname] = useState('');
-  const [welcomePace, setWelcomePace] = useState('normal');
-  const [isSavingWelcome, setIsSavingWelcome] = useState(false);
-
   // 💡 PageLayout の認証モーダルを外部から操作するための ref
   const layoutRef = useRef<PageLayoutRef>(null);
 
@@ -271,7 +265,7 @@ export default function Home() {
   // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数
   const validateFeatureCredits = (featureType: 'textAi' | 'imageAi'): boolean => {
     if (!user) {
-      alert("ログインが必要です");
+      alert("やまと先生の機能を利用するにはログインが必要です");
       handleOpenAuthModal('signup');
       return false;
     }
@@ -518,17 +512,20 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-between border border-blue-200 dark:border-blue-800/50 rounded-xl p-3 bg-blue-50/50 dark:bg-blue-950/20 text-sm gap-3">
                 <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
                   <span>✨</span>
-                  <span>Want to ask Yamato your own questions? (Req max {MAX_ESTIMATED_CREDITS.textAi} credits)</span>
+                  <span>Want to chat with Yamato-sensei? (Requires login & max {MAX_ESTIMATED_CREDITS.textAi} credits)</span>
                 </div>
                 <button 
                   onClick={() => {
-                    if (validateFeatureCredits('textAi')) {
+                    if (!user) {
                       handleOpenAuthModal('signup');
+                    } else if (validateFeatureCredits('textAi')) {
+                      // ログイン済みかつクレジット十分な場合はコンシェルジュウィジェットを開くフォーカスなどを案内
+                      alert("You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!");
                     }
                   }}
                   className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <span>Free Sign Up</span>
+                  <span>{user ? "Chat with Yamato" : "Free Sign Up"}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -871,7 +868,7 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト（userId と credits を正確に渡すように修正済み） */}
+        {/* 🤖 右下に常駐するコンシェルジュヤマト（userId と credits を正確に渡して未ログイン時は自動ブロック・誘導） */}
         <ChatYamatoConcierge 
           additionalContext={portalContextData} 
           initialLearningPace={learningPace}

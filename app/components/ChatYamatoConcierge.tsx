@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（学習ペース・Supabase即時更新連動・テキスト/画像AIクレジットガード対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -124,12 +124,23 @@ export function ChatYamatoConcierge({
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // メッセージ送信処理（テキストAI: 最大予想2クレジットをチェック）
+  // メッセージ送信処理（未ログインガード ＆ userId の確実な送信 ＆ クレジットチェック）
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
 
-    if (userId && credits < MAX_ESTIMATED_CREDITS.textAi) {
+    // 💡 ガード1: 未ログインの場合はチャットをブロックして認証モーダルを開く
+    if (!userId) {
+      alert("やまと先生とお話しするには、無料サインアップまたはログインが必要です！");
+      if (onOpenAuth) {
+        onOpenAuth();
+      }
+      return;
+    }
+
+    // 💡 ガード2: クレジット残高がテキストAIの必要最低限に満たない場合
+    if (credits < MAX_ESTIMATED_CREDITS.textAi) {
+      alert(`クレジットが不足しています（現在残高: 🪙 ${credits} クレジット）。デイリークイズやプラン購入で補充してください。`);
       return;
     }
 
@@ -166,11 +177,12 @@ export function ChatYamatoConcierge({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMsg,
-          history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
+          chatHistory: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
           userNickname: "my friend",
           appType: "concierge",
           portalData: portalContextPayload,
+          userId: userId, // ★重要：バックエンドでクレジットを減算するためにユーザーIDを確実に送信
         }),
       });
 
@@ -183,7 +195,7 @@ export function ChatYamatoConcierge({
       }
 
       if (!response.ok) {
-        throw new Error(data?.error || `APIエラー (${response.status})`);
+        throw new Error(data?.error || data?.reply || `APIエラー (${response.status})`);
       }
 
       const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
@@ -194,6 +206,10 @@ export function ChatYamatoConcierge({
         ...newMessages,
         { role: "assistant", content: sanitizedReply }
       ]);
+
+      // 💡 チャット成功後、画面上のクレジット残高を最新にするためにページをリロードまたは親コンポーネントへ通知（必要に応じて）
+      // ※ root.tsx の loader が再実行されるようにルーターをリフレッシュするか、クレジット更新を促すことができます。
+      window.location.reload(); 
 
     } catch (err: any) {
       console.error(err);
@@ -207,15 +223,15 @@ export function ChatYamatoConcierge({
 
   // 💡 画像AI機能などを利用する際の手前チェック用ヘルパー関数
   const handleRequestImageAiFeature = () => {
-    if (userId && credits < MAX_ESTIMATED_CREDITS.imageAi) {
-      alert(`画像生成AIを利用するには最大 ${MAX_ESTIMATED_CREDITS.imageAi} クレジットの余裕が必要です（現在残高: 🪙 ${credits} クレジット）。デイリークイズやプラン購入で補充してください。`);
-      const pricingSection = document.getElementById('pricing');
-      if (pricingSection) {
-        pricingSection.scrollIntoView({ behavior: 'smooth' });
-      }
+    if (!userId) {
+      alert("ログインが必要です");
+      if (onOpenAuth) onOpenAuth();
       return false;
     }
-    // クレジットが足りている場合の画像生成処理へ進む
+    if (credits < MAX_ESTIMATED_CREDITS.imageAi) {
+      alert(`画像生成AIを利用するには最大 ${MAX_ESTIMATED_CREDITS.imageAi} クレジットの余裕が必要です（現在残高: 🪙 ${credits} クレジット）。`);
+      return false;
+    }
     alert("画像AI機能へアクセスします（クレジット十分）");
     return true;
   };
@@ -253,9 +269,13 @@ export function ChatYamatoConcierge({
                   <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> 
                   {characterName}
                 </h3>
-                {userId && (
+                {userId ? (
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${credits >= MAX_ESTIMATED_CREDITS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                     🪙 {credits} credits
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    🔒 Guest (Login Required)
                   </span>
                 )}
               </div>
@@ -283,7 +303,7 @@ export function ChatYamatoConcierge({
               </div>
             </div>
 
-            {/* 学習ペース選択UIの追加 */}
+            {/* 学習ペース選択UI */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
               <span className="text-xs font-bold text-blue-900">Learning Pace</span>
               <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -304,8 +324,26 @@ export function ChatYamatoConcierge({
               </div>
             </div>
 
-            {/* クレジット不足時のガード画面（テキストAIの最大予想に満たない場合） */}
-            {userId && credits < MAX_ESTIMATED_CREDITS.textAi ? (
+            {/* 未ログイン時のガード画面、またはクレジット不足時のガード画面 */}
+            {!userId ? (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="text-3xl">🔒</div>
+                <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Please sign up or log in to chat with Yamato-sensei and receive 10 welcome credits!
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAiTutorOpen(false);
+                    if (onOpenAuth) onOpenAuth();
+                  }}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
+                >
+                  Sign In / Sign Up Now
+                </button>
+              </div>
+            ) : credits < MAX_ESTIMATED_CREDITS.textAi ? (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                 <div className="text-3xl">🪙</div>
                 <h4 className="font-bold text-sm text-slate-800">More Credits Required</h4>
