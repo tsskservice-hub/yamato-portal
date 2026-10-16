@@ -1,5 +1,5 @@
 /**
- * @file YamatoChat.tsx
+ * @file YamatoChatCommon.tsx
  * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新対応版）
  */
 import { useState, useEffect, useRef } from "react";
@@ -12,7 +12,7 @@ type ChatMessage = {
 };
 
 // 外部から受け取るプロパティ（Props）の型定義
-export type YamatoChatProps = {
+export type YamatoChatCommonProps = {
   characterName?: string;        // チャット窓のタイトルに表示する名前
   initialGreeting?: string;      // 最初の一言メッセージ
   systemPrompt?: string;         // キャラクター固有の指示
@@ -148,7 +148,7 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-export function YamatoChat({
+export function YamatoChatCommon({
   characterName = "ヤマト AI",
   initialGreeting = "こんにちは！日本語Tutor AI ヤマトです。何か話しかけてみてくださいね！",
   systemPrompt = "",
@@ -159,7 +159,7 @@ export function YamatoChat({
   initialLearningPace = "normal", 
   userId, 
   userNickname = "My friend", // ← 【追加】受け取るプロパティ（未指定時は "My friend"）
-}: YamatoChatProps) {
+}: YamatoChatCommonProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
@@ -448,4 +448,4 @@ export function YamatoChat({
   );
 }
 
-export default YamatoChat;
+export default YamatoChatCommon;
