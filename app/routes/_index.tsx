@@ -215,13 +215,20 @@ export default function Home() {
     }
   }, []);
 
-  // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数
-  const validateFeatureCredits = (featureType: 'textAi' | 'imageAi'): boolean => {
-    if (!user) {
+  // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数（Supabaseセッションフォールバック付き）
+  const validateFeatureCredits = async (featureType: 'textAi' | 'imageAi'): Promise<boolean> => {
+    let activeUser = user;
+    if (!activeUser) {
+      const { data: { session } } = await supabase.auth.getSession();
+      activeUser = session?.user ?? null;
+    }
+
+    if (!activeUser) {
       alert("やまと先生の機能を利用するにはログインが必要です");
       handleOpenAuthModal('signup');
       return false;
     }
+
     const maxRequired = MAX_ESTIMATED_CREDITS[featureType];
     if (credits < maxRequired) {
       alert(`この機能を利用するには最大 ${maxRequired} クレジットの余裕が必要です（現在残高: 🪙 ${credits} クレジット）。クレジットをチャージするか、デイリークイズで増やしてくださいね！`);
@@ -236,7 +243,13 @@ export default function Home() {
 
   // Daily Quiz Answer Handler
   const handleAnswerQuiz = async (selectedIndex: number) => {
-    if (isAnswerSubmitted || !user) return;
+    let activeUser = user;
+    if (!activeUser) {
+      const { data: { session } } = await supabase.auth.getSession();
+      activeUser = session?.user ?? null;
+    }
+
+    if (isAnswerSubmitted || !activeUser) return;
     setSelectedOption(selectedIndex);
     setIsAnswerSubmitted(true);
 
@@ -253,7 +266,7 @@ export default function Home() {
           credits: newCredits,
           last_quiz_date: todayStr 
         })
-        .eq('id', user.id);
+        .eq('id', activeUser.id);
 
       if (!error) {
         setHasCompletedTodayQuiz(true);
@@ -268,7 +281,13 @@ export default function Home() {
   };
 
   const handleCheckout = async (priceId: string) => {
-    if (!user) {
+    let activeUser = user;
+    if (!activeUser) {
+      const { data: { session } } = await supabase.auth.getSession();
+      activeUser = session?.user ?? null;
+    }
+
+    if (!activeUser) {
       alert("ログインが必要です");
       handleOpenAuthModal('signup');
       return;
@@ -280,7 +299,7 @@ export default function Home() {
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId: user.id })
+        body: JSON.stringify({ priceId, userId: activeUser.id })
       });
 
       const data = await response.json() as any;
@@ -468,10 +487,16 @@ export default function Home() {
                 </div>
               </div>
               <button 
-                onClick={() => {
-                  if (!user) {
+                onClick={async () => {
+                  let activeUser = user;
+                  if (!activeUser) {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    activeUser = session?.user ?? null;
+                  }
+
+                  if (!activeUser) {
                     handleOpenAuthModal('signup');
-                  } else if (validateFeatureCredits('textAi')) {
+                  } else if (await validateFeatureCredits('textAi')) {
                     alert("You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!");
                   }
                 }}
@@ -668,8 +693,8 @@ export default function Home() {
                   <span className="text-slate-400 font-medium">AI Tool</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (validateFeatureCredits('imageAi')) {
+                    onClick={async () => {
+                      if (await validateFeatureCredits('imageAi')) {
                         window.location.href = "/genkoyoshi-editor-general";
                       }
                     }}
@@ -718,8 +743,8 @@ export default function Home() {
                   <span className="text-slate-400 font-medium">VCE AI Tool</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (validateFeatureCredits('imageAi')) {
+                    onClick={async () => {
+                      if (await validateFeatureCredits('imageAi')) {
                         window.location.href = "/genkoyoshi-editor-vce";
                       }
                     }}
@@ -793,8 +818,8 @@ export default function Home() {
                   <span className="text-red-600 font-medium">VCE AI Tool</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (validateFeatureCredits('textAi')) {
+                    onClick={async () => {
+                      if (await validateFeatureCredits('textAi')) {
                         window.location.href = "/eoy-writing";
                       }
                     }}
