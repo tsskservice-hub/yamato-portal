@@ -1,11 +1,13 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（1列縦並び・API先頭配置・テスト用userId対応版）
+ * @description ヤマトAI 独立APIテスト画面（動的ユーザーID取得・クレジット連動対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { YamatoChatCommon } from "../components/YamatoChatCommon";
+// ★ブラウザ用Supabaseクライアントのインポート
+import { supabase } from "../lib/supabaseClient";
 // ★価格データとクレジット消費ガイドをインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
 // ★本日のクイズ取得関数（getRandomQuiz）とクイズリストをインポート
@@ -49,11 +51,44 @@ export default function TestYamatoPage() {
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
+  // 💡 動的に取得したログイン中のユーザーIDを保持するステート
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+
   // 💡 バックエンドから非同期で取得するエコシステムのメタデータ
   const [ecosystemMeta, setEcosystemMeta] = useState<any>(null);
 
-  // 💡 テスト用の固定ユーザーUUID（401 Unauthorized 回避およびクレジット検証用）
-  const TEST_USER_ID = "test-user-yamato-001";
+  // 💡 ページ読み込み時および認証状態の変化時に、現在のログインユーザーIDを動的に取得する
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (user && !error) {
+          setCurrentUserId(user.id);
+          console.log("🔓 [TestYamato] ログイン中のユーザーIDを検知しました:", user.id);
+        } else {
+          console.warn("🔒 [TestYamato] 現在ログインしていません（ゲスト状態）。");
+          setCurrentUserId(undefined);
+        }
+      } catch (err) {
+        console.error("❌ [TestYamato] ユーザー情報の取得に失敗しました:", err);
+      }
+    }
+
+    fetchUser();
+
+    // 認証状態の変更（ログイン・ログアウト）をリアルタイムで検知して追従
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUserId(session.user.id);
+      } else {
+        setCurrentUserId(undefined);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
   useEffect(() => {
@@ -195,9 +230,15 @@ export default function TestYamatoPage() {
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
           </h1>
-          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "20px" }}>
+          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "12px" }}>
             右下のチャット窓、または以下のセクション別ボタンから各ペルソナの動作テストを行えます。
           </p>
+
+          {/* 現在のログイン状態表示バナー */}
+          <div style={{ marginBottom: "20px", fontSize: "12px", padding: "8px 12px", borderRadius: "8px", backgroundColor: currentUserId ? "#f0fdf4" : "#fef2f2", border: `1px solid ${currentUserId ? "#bbf7d0" : "#fecaca"}`, color: currentUserId ? "#166534" : "#b91c1c", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span>{currentUserId ? "🔓 ログイン中 (ID動的取得済み):" : "🔒 未ログイン (チャット送信時に401エラーになります):"}</span>
+            <code style={{ fontFamily: "monospace", fontSize: "11px" }}>{currentUserId || "Not Logged In"}</code>
+          </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", textAlign: "left" }}>
             {/* 共通コンシェルジュ */}
@@ -546,7 +587,7 @@ export default function TestYamatoPage() {
 
       </main>
 
-      {/* 💡 YamatoChatCommon にテスト用 userId ("test-user-yamato-001") を渡して401エラーを回避 */}
+      {/* 💡 YamatoChatCommon に動的に取得したログイン中の userId を渡す */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig.name}
@@ -554,7 +595,7 @@ export default function TestYamatoPage() {
         themeColor={currentConfig.themeColor as any}
         defaultOpen={false}
         additionalContext={portalContextData}
-        userId={TEST_USER_ID} 
+        userId={currentUserId} 
       />
 
       <footer style={{ textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }}>
