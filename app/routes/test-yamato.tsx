@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（ログイン仕様削除版）
+ * @description ヤマトAI 独立APIテスト画面（ログイン仕様削除・PageLayout詳細化版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -441,14 +441,18 @@ export default function TestYamatoPage() {
                   </ul>
                 </div>
 
-                {/* 💡 PageLayout.tsx は枠の下部に独立配置 */}
-                <div style={{ backgroundColor: "#f1f5f9", border: "1px dashed #94a3b8", borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <h4 style={{ fontSize: "11px", fontWeight: "bold", color: "#64748b", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>ℹ️</span> 枠外参考: PageLayout.tsx (共通ポータルレイアウト ※ヤマト作成とは非依存)
+                {/* 💡 PageLayout.tsx (共通ポータルレイアウト ※枠外実装、ヤマト作成と非依存) */}
+                <div style={{ backgroundColor: "#f1f5f9", border: "1px dashed #94a3b8", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#64748b", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>ℹ️</span> 枠外実装: PageLayout.tsx (共通ポータルレイアウト ※ヤマト作成とは非依存)
                   </h4>
-                  <p style={{ fontSize: "11px", color: "#475569", margin: 0, lineHeight: "1.4" }}>
-                    Remixで構築された全画面の共通ヘッダー・フッター、およびパスキー認証基盤。本番公開ページの全体外装を決定しますが、個別チャット部品の動作や作成には直接関与しません。
-                  </p>
+                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#475569", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
+                    <li><strong>全体外装とルーティング:</strong> Remixで構築された全画面の共通ヘッダー、フッター、およびグローバルナビゲーションの統括。</li>
+                    <li><strong>🔒 パスキー認証基盤 (WebAuthn):</strong> セキュアな生体認証ログイン状態の保持、ユーザープロファイルの取得、およびセッション管理。</li>
+                    <li><strong>💳 クレジット・プラン管理:</strong> サブスクリプション状態や利用可能クレジット残高の全局的な状態保持とリアルタイム監視。</li>
+                    <li><strong>🛡️ セキュリティとルーティング保護:</strong> 保護されたページへのアクセス制御、トークン検証、および未認証ユーザーのリダイレクト制御。</li>
+                    <li><strong>⚠️ 非依存性:</strong> 本番公開ページの全体外装や認証基盤を決定する枠外実装であり、個別チャット部品（ヤマトAI）の内部対話ロジックや動作・作成には直接関与しません。</li>
+                  </ul>
                 </div>
               </div>
 
