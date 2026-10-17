@@ -512,9 +512,14 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-between border border-blue-200 dark:border-blue-800/50 rounded-xl p-3 bg-blue-50/50 dark:bg-blue-950/20 text-sm gap-3">
-              <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
-                <span>✨</span>
-                <span>Want to chat with Yamato-sensei? (Requires login & max {MAX_ESTIMATED_CREDITS.textAi} credits)</span>
+              <div className="flex flex-col space-y-1 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
+                <div className="flex items-center space-x-2">
+                  <span>✨</span>
+                  <span>Want to chat with Yamato-sensei? (Requires login & max {MAX_ESTIMATED_CREDITS.textAi} credits)</span>
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 pl-5">
+                  Answer today's Daily Quiz to earn 2 credits, or sign up now to receive 10 welcome credits!
+                </div>
               </div>
               <button 
                 onClick={() => {
