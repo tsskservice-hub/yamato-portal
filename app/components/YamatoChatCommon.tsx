@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新・userId送信対応版）
+ * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.1.0",
-  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・userId送信対応）",
+  version: "2.2.0",
+  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・スマートクレジットエラー分岐）",
   features: [
     {
       featureName: "Theme Customization",
@@ -41,8 +41,8 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "チャット窓の最大化・縮小表示、およびリサイズ可能なフロートウィジェット設計"
     },
     {
-      featureName: "Backend API Integration",
-      description: "api.jptutoraiyamato.com/chat エンドポイントと連携し、会話履歴・userId・ニックネーム・学習ペース・システムプロンプトを送信"
+      featureName: "Smart Credit Handling",
+      description: "残高ゼロ（ZERO_CREDITS）と部分的な残高不足（PARTIAL_SHORTAGE）をスマートに検知し、適切な案内と誘導を表示"
     }
   ],
   supportedThemes: ["emerald", "blue", "yellow", "purple", "cyan", "orange", "black", "green", "navy"],
@@ -318,7 +318,7 @@ export function YamatoChatCommon({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      // 💡 api.jptutoraiyamato.com/chat へリクエスト送信（userId を確実に含める）
+      // 💡 api.jptutoraiyamato.com/chat へリクエスト送信
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -332,7 +332,7 @@ export function YamatoChatCommon({
           visualPrompt: visualPrompt, 
           requestVisualAid: needsVisual,
           portalData: additionalContext,
-          userId: userId, // ★重要：バックエンドでの認証・クレジット減算用UUIDを送信
+          userId: userId,
         }),
       });
 
@@ -345,7 +345,36 @@ export function YamatoChatCommon({
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
+      // 💡 クレジット不足エラー（402 Payment Required）のスマート分岐ハンドリング
       if (!response.ok) {
+        if (response.status === 402) {
+          setIsTutorLoading(false);
+          const errorCode = data?.error;
+          const msgContent = data?.message || "クレジットが不足しています。";
+
+          if (errorCode === "ZERO_CREDITS") {
+            // パターン1: クレジットが完全に 0 の場合
+            setTutorMessages([
+              ...newMessages,
+              {
+                role: "assistant",
+                content: `🚨 **[クレジット残高ゼロ]**\n\n${msgContent}\n\n💡 学習を続けるには、料金プランページよりクレジットを追加してください。`
+              }
+            ]);
+            return;
+          } else if (errorCode === "PARTIAL_SHORTAGE") {
+            // パターン2: テキストならいけるが、画像や模試などの高コスト機能で足りない場合
+            setTutorMessages([
+              ...newMessages,
+              {
+                role: "assistant",
+                content: `⚠️ **[クレジット残高不足]**\n\n${msgContent}\n\n💬 テキストチャット（2クレジット）であればまだご利用いただけます。`
+              }
+            ]);
+            return;
+          }
+        }
+
         throw new Error(data?.error || `APIエラー (${response.status})`);
       }
 
