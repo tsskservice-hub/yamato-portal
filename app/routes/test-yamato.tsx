@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・プロジェクト分離4大コラム ＆ 往来ライフサイクルフロー図完備版）
+ * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・プロジェクト分離4大コラム ＆ 独立第3セクション往来ライフサイクルフロー図完備版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -184,10 +184,10 @@ export default function TestYamatoPage() {
   return (
     <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
-      {/* メインコンテンツ（上下2段フルワイド配置） */}
+      {/* メインコンテンツ（上下フルワイド配置） */}
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
-        {/* 上段：ヤマトAI 独立APIテスト画面 */}
+        {/* セクション1：ヤマトAI 独立APIテスト画面 */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
@@ -295,7 +295,7 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 下段：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 4大プロジェクト分離詳細コラムインスペクター */}
+        {/* セクション2：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 4大プロジェクト分離詳細コラムインスペクター */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
@@ -455,72 +455,81 @@ export default function TestYamatoPage() {
 
             </div>
 
-            {/* 3. アーキテクチャ往来ライフサイクル & 3大ファイルの連携まとめ（フロー図カード） */}
-            <div style={{ backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <h3 style={{ fontSize: "14px", fontWeight: "bold", color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "8px", borderBottom: "2px solid #cbd5e1", paddingBottom: "8px" }}>
-                <span>🗺️</span> AIヤマト・エコシステム 往来ライフサイクル & 3大ファイル連携フロー図
+          </div>
+        </div>
+
+        {/* セクション3：独立した「AIヤマト・エコシステム 往来ライフサイクル & 3大ファイル連携フロー図」カード */}
+        <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
+            <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+              <span>🗺️</span> AIヤマト・エコシステム 往来ライフサイクル & 3大ファイル連携フロー図
+            </h2>
+            <span style={{ fontSize: "11px", backgroundColor: "#f0fdf4", color: "#166534", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bbf7d0", fontWeight: "600" }}>
+              Architecture Guide
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            
+            {/* 往路・復路の2カラムフロー図 */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", fontSize: "12px", color: "#334155" }}>
+              
+              {/* 往路（往き） */}
+              <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#1e40af", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span>🚀</span> 往路（往き）: 生徒の質問からAI送信まで
+                </h3>
+                <div style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "white", padding: "10px", borderRadius: "8px", border: "1px solid #dbeafe", lineHeight: "1.5" }}>
+                  [1] YamatoChatCommon.tsx (フロント)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│ (POST /chat + appType送信)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [2] index.ts (APIサーバー / ルーター)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│ (appTypeを見てペルソナ判別)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [3] a-template.ts 派生ファイル (各ヤマトの固有頭脳)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│ (専門知識プロンプトの構築)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [4] YamatoApiCommon.tsx (共通パイプライン)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│ (portalDataやオプション結合)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [5] FoundationLayout.ts (基盤エンジン)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│ (根本ルール・オーストラリア英語等適用)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [6] Vertex AI (Gemini 2.5 Flash) へ送信
+                </div>
+              </div>
+
+              {/* 復路（帰り） */}
+              <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span>✨</span> 復路（帰り）: AI生成から生徒への到達まで
+                </h3>
+                <div style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "white", padding: "10px", borderRadius: "8px", border: "1px solid #dcfce7", lineHeight: "1.5" }}>
+                  [1] Vertex AI (Gemini) が回答テキスト生成<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [2] index.ts (APIサーバーの後半処理)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│ (テキスト抽出・画像生成・クレジット減算処理)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [3] YamatoChatCommon.tsx (フロントUI)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;│ (JSONデータを吹き出しとして描画)<br/>
+                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                  [4] 生徒の目に届く（画面表示完了 🎉）
+                </div>
+              </div>
+
+            </div>
+
+            {/* 3大ファイルの連携まとめ */}
+            <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>📌</span> 3大ファイル（FoundationLayout・YamatoApiCommon・各ペルソナ頭脳）の関係性と役割分担
               </h3>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", fontSize: "12px", color: "#334155" }}>
-                
-                {/* 往路（往き） */}
-                <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "10px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#1e40af", margin: 0 }}>
-                    🚀 往路（往き）: 生徒の質問からAI送信まで
-                  </h4>
-                  <div style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "white", padding: "8px", borderRadius: "6px", border: "1px solid #dbeafe", lineHeight: "1.4" }}>
-                    [1] YamatoChatCommon.tsx (フロント)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│ (POST /chat + appType送信)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [2] index.ts (APIサーバー / ルーター)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│ (appTypeを見てペルソナ判別)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [3] a-template.ts 派生ファイル (各ヤマトの固有頭脳)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│ (専門知識プロンプトの構築)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [4] YamatoApiCommon.tsx (共通パイプライン)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│ (portalDataやオプション結合)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [5] FoundationLayout.ts (基盤エンジン)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│ (根本ルール・オーストラリア英語等適用)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [6] Vertex AI (Gemini 2.5 Flash) へ送信
-                  </div>
-                </div>
-
-                {/* 復路（帰り） */}
-                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "10px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", margin: 0 }}>
-                    ✨ 復路（帰り）: AI生成から生徒への到達まで
-                  </h4>
-                  <div style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "white", padding: "8px", borderRadius: "6px", border: "1px solid #dcfce7", lineHeight: "1.4" }}>
-                    [1] Vertex AI (Gemini) が回答テキスト生成<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [2] index.ts (APIサーバーの後半処理)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│ (テキスト抽出・画像生成・クレジット減算処理)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [3] YamatoChatCommon.tsx (フロントUI)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;│ (JSONデータを吹き出しとして描画)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [4] 生徒の目に届く（画面表示完了 🎉）
-                  </div>
-                </div>
-
-              </div>
-
-              {/* 3大ファイルの関係性と役割のまとめ */}
-              <div style={{ backgroundColor: "white", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#0f172a", margin: 0 }}>
-                  📌 3大ファイル（FoundationLayout・YamatoApiCommon・各ペルソナ頭脳）の関係性と役割分担
-                </h4>
-                <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#475569", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
-                  <li><strong>FoundationLayout.ts（すべてのヤマトに適用）:</strong> 全ペルソナの根本にある普遍的なルール（オーストラリア英語強制、Socratic対話、安全性ガードレールなど）を統括する基盤エンジン。</li>
-                  <li><strong>YamatoApiCommon.tsx（すべての通信を支える共通窓口）:</strong> 選択されたペルソナ固有のロジックとポータルデータ（`portalData`やFAQ等）を安全に結合・中継するバックエンドの共通パイプライン。</li>
-                  <li><strong>a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や囲碁の対局など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。</li>
-                </ul>
-              </div>
-
+              <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "12px", color: "#475569", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.5" }}>
+                <li><strong>FoundationLayout.ts（すべてのヤマトに適用）:</strong> 全ペルソナの根本にある普遍的なルール（オーストラリア英語強制、Socratic対話、安全性ガードレールなど）を統括する基盤エンジン。</li>
+                <li><strong>YamatoApiCommon.tsx（すべての通信を支える共通窓口）:</strong> 選択されたペルソナ固有のロジックとポータルデータ（`portalData`やFAQ等）を安全に結合・中継するバックエンドの共通パイプライン。</li>
+                <li><strong>a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や囲碁の対局など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。</li>
+              </ul>
             </div>
 
           </div>
