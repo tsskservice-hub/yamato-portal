@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期・スマートクレジットエラー分岐対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期・スマートクレジットエラー分岐・英語案内対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -176,7 +176,7 @@ export function ChatYamatoConcierge({
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `🚨 **[クレジット残高ゼロ]**\n\n現在クレジットがありません。学習を継続するにはプランのアップグレードまたはクレジットの追加が必要です。\n\n💡 料金プランページよりクレジットを追加してください。`
+          content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan from our pricing section! 📚✨`
         }
       ]);
       setTutorInput("");
@@ -190,7 +190,7 @@ export function ChatYamatoConcierge({
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `⚠️ **[クレジット残高不足]**\n\n現在の残高（${currentCredits}クレジット）ではテキストチャット（2クレジット）を行うことができません。\n\n💡 デイリークイズやプラン購入で補充してください。`
+          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request. Try completing today's daily quiz for free credits or top up your account! 🪙`
         }
       ]);
       setTutorInput("");
@@ -252,14 +252,13 @@ export function ChatYamatoConcierge({
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
-          const msgContent = data?.message || "クレジットが不足しています。";
 
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
               {
                 role: "assistant",
-                content: `🚨 **[クレジット残高ゼロ]**\n\n${msgContent}\n\n💡 学習を続けるには、料金プランページよりクレジットを追加してください。`
+                content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan from our pricing section! 📚✨`
               }
             ]);
             await refreshUserCredits();
@@ -269,7 +268,7 @@ export function ChatYamatoConcierge({
               ...newMessages,
               {
                 role: "assistant",
-                content: `⚠️ **[クレジット残高不足]**\n\n${msgContent}\n\n💬 テキストチャット（2クレジット）であればまだご利用いただけます。`
+                content: `⚠️ **[Insufficient Credits]**\n\nMy friend, this action requires more credits than your current balance. Don't worry—standard text chat (2 credits) is still available, or you can top up for full access! 💬`
               }
             ]);
             await refreshUserCredits();
@@ -306,15 +305,15 @@ export function ChatYamatoConcierge({
   // 💡 画像AI機能などを利用する際の手前チェック用ヘルパー関数
   const handleRequestImageAiFeature = () => {
     if (!userId) {
-      alert("ログインが必要です");
+      alert("Login required");
       if (onOpenAuth) onOpenAuth();
       return false;
     }
     if (currentCredits < FEATURE_COSTS.imageAi) {
-      alert(`画像生成AIを利用するには ${FEATURE_COSTS.imageAi} クレジット必要ですが、現在の残高は ${currentCredits} クレジットです（※テキストチャット（2クレジット）ならまだご利用いただけます）。`);
+      alert(`Image AI requires ${FEATURE_COSTS.imageAi} credits, but you currently have ${currentCredits} credits (Note: standard text chat at 2 credits is still available).`);
       return false;
     }
-    alert("画像AI機能へアクセスします（クレジット十分）");
+    alert("Accessing Image AI feature (sufficient credits).");
     return true;
   };
 
@@ -433,7 +432,7 @@ export function ChatYamatoConcierge({
                     <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                       {msg.role === "assistant" && (
                         <div className="text-[10px] text-slate-400 mb-0.5 ml-1 flex items-center gap-1">
-                          <span>🤖</span> やまと先生
+                          <span>🤖</span> Yamato-sensei
                         </div>
                       )}
                       <div
@@ -465,7 +464,7 @@ export function ChatYamatoConcierge({
                   {isTutorLoading && (
                     <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-blue-50/70 border border-blue-100 p-2 rounded-xl w-fit">
                       <span className="inline-block animate-spin text-sm">🤖</span>
-                      <span>やまと先生が考えています...</span>
+                      <span>Yamato-sensei is thinking...</span>
                     </div>
                   )}
                 </div>

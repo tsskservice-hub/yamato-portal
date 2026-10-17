@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐対応版）
+ * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐・英語案内対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.2.0",
-  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・スマートクレジットエラー分岐）",
+  version: "2.3.0",
+  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・スマートクレジットエラー分岐・英語案内対応）",
   features: [
     {
       featureName: "Theme Customization",
@@ -42,7 +42,7 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     },
     {
       featureName: "Smart Credit Handling",
-      description: "残高ゼロ（ZERO_CREDITS）と部分的な残高不足（PARTIAL_SHORTAGE）をスマートに検知し、適切な案内と誘導を表示"
+      description: "残高ゼロ（ZERO_CREDITS）と部分的な残高不足（PARTIAL_SHORTAGE）を検知し、温かい英語のメッセージで案内"
     }
   ],
   supportedThemes: ["emerald", "blue", "yellow", "purple", "cyan", "orange", "black", "green", "navy"],
@@ -194,7 +194,7 @@ function sanitizeAiOutput(text: string): string {
 
 export function YamatoChatCommon({
   characterName = "ヤマト AI",
-  initialGreeting = "こんにちは！日本語Tutor AI ヤマトです。何か話しかけてみてくださいね！",
+  initialGreeting = "Hello, my friend! 🌟 Welcome to Yamato AI Tutor. How can I assist your Japanese learning today?",
   systemPrompt = "",
   appType = "general",
   additionalContext,
@@ -296,7 +296,7 @@ export function YamatoChatCommon({
 
     // 💡 未ログインガード：userId が存在しない場合はチャットをブロック
     if (!userId) {
-      alert("ログインセッションが検出されません。一度ログインし直してください。");
+      alert("Authentication required. Please sign in or log in to chat.");
       return;
     }
 
@@ -345,30 +345,27 @@ export function YamatoChatCommon({
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
-      // 💡 クレジット不足エラー（402 Payment Required）のスマート分岐ハンドリング
+      // 💡 クレジット不足エラー（402 Payment Required）のスマート分岐ハンドリング（英語案内対応）
       if (!response.ok) {
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
-          const msgContent = data?.message || "クレジットが不足しています。";
 
           if (errorCode === "ZERO_CREDITS") {
-            // パターン1: クレジットが完全に 0 の場合
             setTutorMessages([
               ...newMessages,
               {
                 role: "assistant",
-                content: `🚨 **[クレジット残高ゼロ]**\n\n${msgContent}\n\n💡 学習を続けるには、料金プランページよりクレジットを追加してください。`
+                content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
               }
             ]);
             return;
           } else if (errorCode === "PARTIAL_SHORTAGE") {
-            // パターン2: テキストならいけるが、画像や模試などの高コスト機能で足りない場合
             setTutorMessages([
               ...newMessages,
               {
                 role: "assistant",
-                content: `⚠️ **[クレジット残高不足]**\n\n${msgContent}\n\n💬 テキストチャット（2クレジット）であればまだご利用いただけます。`
+                content: `⚠️ **[Insufficient Credits]**\n\nMy friend, this action requires more credits than your current balance. Don't worry—standard text chat (2 credits) is still available, or you can top up for full access! 💬`
               }
             ]);
             return;
@@ -378,7 +375,7 @@ export function YamatoChatCommon({
         throw new Error(data?.error || `APIエラー (${response.status})`);
       }
 
-      const replyText = data.reply || "お返事がうまく取得できませんでした。";
+      const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
       const imageUrl = data.imageUrl;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
@@ -393,7 +390,7 @@ export function YamatoChatCommon({
       setIsTutorLoading(false);
       setTutorMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `エラーが発生しました: ${err.message || "通信エラー"}` },
+        { role: "assistant", content: `Sorry, an error occurred: ${err.message || "Communication error"}` },
       ]);
     }
   };
@@ -450,7 +447,7 @@ export function YamatoChatCommon({
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed mb-3 shrink-0">
-                接続先: <code>api.jptutoraiyamato.com/chat</code> (Mode: <code>{appType}</code>)
+                Endpoint: <code>api.jptutoraiyamato.com/chat</code> (Mode: <code>{appType}</code>)
               </p>
 
               {/* 学習ペース選択UI */}
@@ -505,7 +502,7 @@ export function YamatoChatCommon({
                 {isTutorLoading && (
                   <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
                     <span className="inline-block animate-spin text-sm">🤖</span>
-                    <span>ヤマトが考えています...</span>
+                    <span>Yamato is thinking...</span>
                   </div>
                 )}
               </div>
@@ -517,7 +514,7 @@ export function YamatoChatCommon({
                     type="text"
                     value={tutorInput}
                     onChange={(e) => setTutorInput(e.target.value)}
-                    placeholder="ヤマトに質問を入力..."
+                    placeholder="Ask Yamato anything..."
                     disabled={isTutorLoading}
                     className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                   />
@@ -526,7 +523,7 @@ export function YamatoChatCommon({
                     disabled={isTutorLoading || !tutorInput.trim()}
                     className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                   >
-                    送信
+                    Send
                   </button>
                 </div>
               </form>
