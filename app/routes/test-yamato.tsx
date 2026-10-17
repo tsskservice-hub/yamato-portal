@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（バックエンドメタデータAPI自動同期・インラインスタイル堅牢レイアウト版）
+ * @description ヤマトAI 独立APIテスト画面（FoundationLayoutメタデータ詳細自動同期・インラインスタイル堅牢レイアウト版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -49,7 +49,7 @@ export default function TestYamatoPage() {
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
-  // 💡 バックエンドから非同期で取得するエコシステムのメタデータ
+  // 💡 バックエンドから非同期で取得するエコシステムのメタデータ（FoundationLayout詳細を含む）
   const [ecosystemMeta, setEcosystemMeta] = useState<any>(null);
 
   // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
@@ -72,7 +72,7 @@ export default function TestYamatoPage() {
         // 2. バックエンドのエコシステムメタデータ（FoundationLayout等）の取得
         const metaRes = await fetch(`${apiBaseUrl}/api/ecosystem-metadata`);
         if (metaRes.ok) {
-          const metaJson = (await metaRes.json()) as { metadata: any }; // 💡 型をキャスト
+          const metaJson = (await metaRes.json()) as { metadata: any };
           setEcosystemMeta(metaJson.metadata);
         }
       } catch (err) {
@@ -176,14 +176,16 @@ export default function TestYamatoPage() {
     legalContent: LEGAL_CONTENT,
   };
 
+  const foundationMeta = ecosystemMeta?.foundation;
+
   return (
     <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
       {/* メインコンテンツ（インラインスタイルによる安全な左右2カラムレイアウト） */}
-      <main style={{ maxWidth: "1280px", width: "100%", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
+      <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
         
         {/* 左側カラム：ヤマトAI 独立APIテスト画面 */}
-        <div style={{ flex: "1 1 450px", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        <div style={{ flex: "1 1 420px", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
           </h1>
@@ -290,11 +292,11 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表（API自動同期版） */}
-        <div style={{ flex: "1 1 500px", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表 ＆ FoundationLayout詳細メタデータ */}
+        <div style={{ flex: "1 1 540px", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-              <span>🚀</span> AIヤマト・エコシステム 構成表
+              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ
             </h2>
             <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
               Live API Synced
@@ -302,7 +304,9 @@ export default function TestYamatoPage() {
           </div>
 
           {/* スクロールバー付きコンテナ */}
-          <div style={{ maxHeight: "580px", overflowY: "auto", paddingRight: "4px" }}>
+          <div style={{ maxHeight: "650px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "20px" }}>
+            
+            {/* 1. 基本構成テーブル */}
             <table style={{ width: "100%", textAlign: "left", fontSize: "14px", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid #e2e8f0", color: "#475569", backgroundColor: "#f8fafc", position: "sticky", top: 0 }}>
@@ -314,14 +318,14 @@ export default function TestYamatoPage() {
               <tbody>
                 <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
                   <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>
-                    {ecosystemMeta?.foundation?.layer || "土台 (機体)"}
+                    {foundationMeta?.layer || "土台 (機体)"}
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
                     <span style={{ fontWeight: "bold", color: "#2563eb" }}>
-                      🚀 {ecosystemMeta?.foundation?.fileName || "FoundationLayout.ts"}
+                      🚀 {foundationMeta?.fileName || "FoundationLayout.ts"}
                     </span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {ecosystemMeta?.foundation?.role || "すべてのプロンプトの根本的なルールやエンジンを組み立てる大元"}
+                      {foundationMeta?.role || "すべてのプロンプトの根本的なルールやエンジンを組み立てる大元"}
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
@@ -369,6 +373,103 @@ export default function TestYamatoPage() {
                 </tr>
               </tbody>
             </table>
+
+            {/* 2. FoundationLayout 内部メタデータ詳細（currentSettings の動的インスペクター表示） */}
+            {foundationMeta?.currentSettings && (
+              <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px" }}>
+                <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#334155", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span>📋</span> FoundationLayout.ts 適用ルール仕様詳細 (Live Meta)
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "12px" }}>
+                  
+                  {/* Naming Rules */}
+                  {foundationMeta.currentSettings.namingRules && (
+                    <div>
+                      <strong style={{ color: "#0f172a" }}>👤 命名規則:</strong>
+                      <ul style={{ margin: "4px 0 0 16px", padding: 0, color: "#475569" }}>
+                        {foundationMeta.currentSettings.namingRules.map((rule: string, i: number) => (
+                          <li key={i}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Communication Rules */}
+                  {foundationMeta.currentSettings.communicationRules && (
+                    <div>
+                      <strong style={{ color: "#0f172a" }}>🗣️ 通信・言語規則:</strong>
+                      <ul style={{ margin: "4px 0 0 16px", padding: 0, color: "#475569" }}>
+                        {foundationMeta.currentSettings.communicationRules.map((rule: string, i: number) => (
+                          <li key={i}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Environmental Context */}
+                  {foundationMeta.currentSettings.environmentalContext && (
+                    <div>
+                      <strong style={{ color: "#0f172a" }}>🌍 環境コンテキスト (時間・天気):</strong>
+                      <ul style={{ margin: "4px 0 0 16px", padding: 0, color: "#475569" }}>
+                        {foundationMeta.currentSettings.environmentalContext.map((rule: string, i: number) => (
+                          <li key={i}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Knowledge Bank */}
+                  {foundationMeta.currentSettings.knowledgeBank && (
+                    <div>
+                      <strong style={{ color: "#0f172a" }}>📚 総合FAQナレッジバンク:</strong>
+                      <ul style={{ margin: "4px 0 0 16px", padding: 0, color: "#475569" }}>
+                        {foundationMeta.currentSettings.knowledgeBank.map((rule: string, i: number) => (
+                          <li key={i}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Visual Generation */}
+                  {foundationMeta.currentSettings.visualGeneration && (
+                    <div>
+                      <strong style={{ color: "#0f172a" }}>🎨 画像・視覚支援生成:</strong>
+                      <ul style={{ margin: "4px 0 0 16px", padding: 0, color: "#475569" }}>
+                        {foundationMeta.currentSettings.visualGeneration.map((rule: string, i: number) => (
+                          <li key={i}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Turn and Feedback */}
+                  {foundationMeta.currentSettings.turnAndFeedback && (
+                    <div>
+                      <strong style={{ color: "#0f172a" }}>🔄 ターン制御・フィードバック:</strong>
+                      <ul style={{ margin: "4px 0 0 16px", padding: 0, color: "#475569" }}>
+                        {foundationMeta.currentSettings.turnAndFeedback.map((rule: string, i: number) => (
+                          <li key={i}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Safety Guardrails */}
+                  {foundationMeta.currentSettings.safetyGuardrails && (
+                    <div>
+                      <strong style={{ color: "#0f172a" }}>🛡️ 安全性ガードレール:</strong>
+                      <ul style={{ margin: "4px 0 0 16px", padding: 0, color: "#475569" }}>
+                        {foundationMeta.currentSettings.safetyGuardrails.map((rule: string, i: number) => (
+                          <li key={i}>{rule}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
 
