@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（プロジェクト別詳細コラム・PageLayout枠外分離版）
+ * @description ヤマトAI 独立APIテスト画面（プロジェクト別詳細コラム・往路APIステップ枠囲み＆順序最適化版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -380,7 +380,7 @@ export default function TestYamatoPage() {
             {/* 2. プロジェクト別 4大詳細コラム（左2つ：apiプロジェクト / 右2つ：yamato-portalプロジェクト） */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
               
-              {/* 【左側】：APIプロジェクト側コラム（2つ：FoundationLayout.ts, YamatoApiCommon.tsx） */}
+              {/* 【左側】：APIプロジェクト側コラム（2つ） */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px" }}>
                 <div style={{ fontSize: "13px", fontWeight: "bold", color: "#1d4ed8", borderBottom: "2px solid #93c5fd", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
                   <span>⚙️</span> APIプロジェクト側（バックエンド / Cloudflare Workers）
@@ -418,14 +418,14 @@ export default function TestYamatoPage() {
                 </div>
               </div>
 
-              {/* 【右側】：yamato-portalプロジェクト側コラム（※枠内には YamatoChatCommon.tsx のみ配置） */}
+              {/* 【右側】：yamato-portalプロジェクト側コラム */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px", justifyContent: "space-between" }}>
                 <div>
                   <div style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", borderBottom: "2px solid #86efac", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px" }}>
                     <span>🌐</span> yamato-portalプロジェクト側（フロントエンド / Remix）
                   </div>
 
-                  {/* ④ YamatoChatCommon.tsx （ヤマト作成に関係するウィジェット本体） */}
+                  {/* ④ YamatoChatCommon.tsx */}
                   <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
                     <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#92400e", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
                       <span>🛠️</span> YamatoChatCommon.tsx (フロントAIウィジェット)
@@ -440,7 +440,7 @@ export default function TestYamatoPage() {
                   </div>
                 </div>
 
-                {/* 💡 PageLayout.tsx はヤマト作成に関係ないため、枠の外（下部）に独立配置 */}
+                {/* 💡 PageLayout.tsx は枠の外（下部）に独立配置 */}
                 <div style={{ backgroundColor: "#f1f5f9", border: "1px dashed #94a3b8", borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "6px", marginTop: "16px" }}>
                   <h4 style={{ fontSize: "11px", fontWeight: "bold", color: "#64748b", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
                     <span>ℹ️</span> 枠外参考: PageLayout.tsx (共通ポータルレイアウト ※ヤマト作成とは非依存)
@@ -483,15 +483,22 @@ export default function TestYamatoPage() {
                   &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
                   [2] index.ts (APIサーバー / ルーター)<br/>
                   &nbsp;&nbsp;&nbsp;&nbsp;│ (appTypeを見てペルソナ判別)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [3] a-template.ts 派生ファイル (各ヤマトの固有頭脳)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;│ (専門知識プロンプトの構築)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [4] YamatoApiCommon.tsx (共通パイプライン)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;│ (portalDataやオプション結合)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [5] FoundationLayout.ts (基盤エンジン)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;│ (根本ルール・オーストラリア英語等適用)<br/>
+                  
+                  {/* ★ APIプロジェクト側の3ステップ [3], [4], [5] を色付きの専用枠で明示的にまとめる */}
+                  <div style={{ backgroundColor: "#f0fdf4", border: "2px solid #22c55e", borderRadius: "8px", padding: "8px", margin: "6px 0" }}>
+                    <div style={{ fontSize: "10px", fontWeight: "bold", color: "#15803d", marginBottom: "4px" }}>
+                      ⚙️ APIプロジェクト側（バックエンド処理ブロック）
+                    </div>
+                    [3] a-template.ts 派生ファイル (各ヤマトの固有頭脳)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;│ (専門知識プロンプトの構築)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                    [4] YamatoApiCommon.tsx (共通パイプライン)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;│ (portalDataやオプション結合)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+                    [5] FoundationLayout.ts (基盤エンジン)<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(根本ルール・オーストラリア英語等適用)
+                  </div>
+
                   &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
                   [6] Vertex AI (Gemini 2.5 Flash) へ送信
                 </div>
@@ -518,15 +525,15 @@ export default function TestYamatoPage() {
 
             </div>
 
-            {/* 3大ファイルの連携まとめ */}
+            {/* 3大ファイルの連携まとめ（★フロー図の登場順 [3]➔[4]➔[5] に完全一致させる） */}
             <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
               <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>📌</span> 3大ファイル（FoundationLayout・YamatoApiCommon・各ペルソナ頭脳）の関係性と役割分担
+                <span>📌</span> 3大ファイル（各ペルソナ頭脳・YamatoApiCommon・FoundationLayout）の役割分担順序
               </h3>
               <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "12px", color: "#475569", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.5" }}>
-                <li><strong>FoundationLayout.ts（すべてのヤマトに適用）:</strong> 全ペルソナの根本にある普遍的なルール（オーストラリア英語強制、Socratic対話、安全性ガードレールなど）を統括する基盤エンジン。</li>
-                <li><strong>YamatoApiCommon.tsx（すべての通信を支える共通窓口）:</strong> 選択されたペルソナ固有のロジックとポータルデータ（`portalData`やFAQ等）を安全に結合・中継するバックエンドの共通パイプライン。</li>
-                <li><strong>a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や囲碁の対局など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。</li>
+                <li><strong>[3] a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や囲碁の対局など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。</li>
+                <li><strong>[4] YamatoApiCommon.tsx（すべての通信を支える共通窓口）:</strong> 選択されたペルソナ固有のロジックとポータルデータ（`portalData`やFAQ等）を安全に結合・中継するバックエンドの共通パイプライン。</li>
+                <li><strong>[5] FoundationLayout.ts（すべてのヤマトに適用）:</strong> 全ペルソナの根本にある普遍的なルール（オーストラリア英語強制、Socratic対話、安全性ガードレールなど）を統括する基盤エンジン。</li>
               </ul>
             </div>
 
