@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（レイアウト崩れ防止・インラインスタイル対応版）
+ * @description ヤマトAI 独立APIテスト画面（環境自動判定API接続 ＆ インラインスタイル堅牢レイアウト版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -49,11 +49,14 @@ export default function TestYamatoPage() {
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
+  // 💡 実行環境（ローカルか本番か）に応じて API のベースURLを自動切り替え
   useEffect(() => {
     async function fetchSchema() {
       setIsLoadingSchema(true);
       try {
-        const apiBaseUrl = "http://localhost:8787"; 
+        const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+        const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
+
         const res = await fetch(`${apiBaseUrl}/api/schema/${activeAppType}`);
         if (res.ok) {
           const data = (await res.json()) as { appType: string; fields: string[] };
@@ -165,7 +168,7 @@ export default function TestYamatoPage() {
   return (
     <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
-      {/* メインコンテンツ（安全なインラインスタイルによる左右2カラムレイアウト） */}
+      {/* メインコンテンツ（インラインスタイルによる安全な左右2カラムレイアウト） */}
       <main style={{ maxWidth: "1280px", width: "100%", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
         
         {/* 左側カラム：ヤマトAI 独立APIテスト画面 */}
