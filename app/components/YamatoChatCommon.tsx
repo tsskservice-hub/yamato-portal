@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新対応版）
+ * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新・userId送信対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.0.0",
-  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替付き）",
+  version: "2.1.0",
+  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・userId送信対応）",
   features: [
     {
       featureName: "Theme Customization",
@@ -42,7 +42,7 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     },
     {
       featureName: "Backend API Integration",
-      description: "api.jptutoraiyamato.com/chat エンドポイントと連携し、会話履歴・ニックネーム・学習ペース・システムプロンプトを送信"
+      description: "api.jptutoraiyamato.com/chat エンドポイントと連携し、会話履歴・userId・ニックネーム・学習ペース・システムプロンプトを送信"
     }
   ],
   supportedThemes: ["emerald", "blue", "yellow", "purple", "cyan", "orange", "black", "green", "navy"],
@@ -70,7 +70,7 @@ export type YamatoChatCommonProps = {
   // 学習ペースの初期値、Supabase更新用のユーザーID、ユーザーのニックネーム
   initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string; 
-  userNickname?: string;         // ← 【追加】ユーザーのニックネームを受け取るプロパティ
+  userNickname?: string;         // ユーザーのニックネームを受け取るプロパティ
 };
 
 // カラーテーマごとのスタイル定義（全対応版）
@@ -198,11 +198,11 @@ export function YamatoChatCommon({
   systemPrompt = "",
   appType = "general",
   additionalContext,
-  defaultOpen = false,       
+  defaultOpen = false,        
   themeColor = "emerald",    
   initialLearningPace = "normal", 
   userId, 
-  userNickname = "My friend", // ← 【追加】受け取るプロパティ（未指定時は "My friend"）
+  userNickname = "My friend", 
 }: YamatoChatCommonProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -294,6 +294,12 @@ export function YamatoChatCommon({
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
 
+    // 💡 未ログインガード：userId が存在しない場合はチャットをブロック
+    if (!userId) {
+      alert("ログインセッションが検出されません。一度ログインし直してください。");
+      return;
+    }
+
     const userMsg = tutorInput.trim();
     const needsVisual = requestVisualAid;
 
@@ -312,6 +318,7 @@ export function YamatoChatCommon({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
+      // 💡 api.jptutoraiyamato.com/chat へリクエスト送信（userId を確実に含める）
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -319,12 +326,13 @@ export function YamatoChatCommon({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
-          userNickname: userNickname, // ← 【変更】固定値 ("テストゲストさん") から受け取った変数に変更
+          userNickname: userNickname,
           appType: appType,
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt, 
           requestVisualAid: needsVisual,
           portalData: additionalContext,
+          userId: userId, // ★重要：バックエンドでの認証・クレジット減算用UUIDを送信
         }),
       });
 
@@ -451,6 +459,15 @@ export function YamatoChatCommon({
                       ) : (
                         <div className="space-y-2">
                           <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                          {msg.imageUrl && (
+                            <div className="mt-2">
+                              <img 
+                                src={msg.imageUrl} 
+                                alt="AI Generated Visual Aid" 
+                                className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white" 
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
