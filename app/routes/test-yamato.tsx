@@ -490,7 +490,7 @@ export default function TestYamatoPage() {
 
                 {/* 復路（帰り） */}
                 <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "10px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", margin: 0, defaultOpen: "false" as any, marginBlock: 0 }}>
+                  <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", margin: 0 }}>
                     ✨ 復路（帰り）: AI生成から生徒への到達まで
                   </h4>
                   <div style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "white", padding: "8px", borderRadius: "6px", border: "1px solid #dcfce7", lineHeight: "1.4" }}>
