@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（アーキテクチャ構成表・インポート連鎖解説版）
+ * @description ヤマトAI 独立APIテスト画面（レイアウト崩れ防止・インラインスタイル対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -20,7 +20,6 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// サポートするアプリタイプの型定義（全9種類）
 type AppType = 
   | "concierge" 
   | "game-igo" 
@@ -32,7 +31,6 @@ type AppType =
   | "eoy-writing" 
   | "oral-exam-questions";
 
-// 各アプリタイプごとの設定（表示名、挨拶、テーマカラー、APIファイル名、対象ユーザー層など）
 type AppConfig = {
   name: string;
   greeting: string;
@@ -45,16 +43,12 @@ export default function TestYamatoPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
-  // === 合言葉を tssk224 に設定 ===
   const SECRET_TOKEN = "tssk224";
 
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
-
-  // ★ APIから動的に取得したフィールド一覧を格納するステート
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
-  // ★ activeAppType が切り替わるたびに、バックエンドの /api/schema/:appType から最新のフィールド一覧を取得する
   useEffect(() => {
     async function fetchSchema() {
       setIsLoadingSchema(true);
@@ -78,14 +72,13 @@ export default function TestYamatoPage() {
     fetchSchema();
   }, [activeAppType]);
 
-  // トークンが一致しない場合はアクセス権なし画面を返す
   if (token !== SECRET_TOKEN) {
     return (
-      <div className="bg-slate-100 min-h-screen text-slate-800 flex items-center justify-center p-8 font-sans">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center">
-          <div className="text-4xl mb-4">🔒</div>
-          <h1 className="text-xl font-bold text-slate-900 mb-2">アクセス権がありません</h1>
-          <p className="text-slate-600 text-sm leading-relaxed">
+      <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px", fontFamily: "sans-serif" }}>
+        <div style={{ maxWidth: "400px", width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "32px", textAlign: "center" }}>
+          <div style={{ fontSize: "36px", marginBottom: "16px" }}>🔒</div>
+          <h1 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "8px" }}>アクセス権がありません</h1>
+          <p style={{ fontSize: "14px", color: "#475569", lineHeight: "1.5" }}>
             このページを表示するための有効なトークンが指定されていません。正しいURLからアクセスしてください。
           </p>
         </div>
@@ -93,7 +86,6 @@ export default function TestYamatoPage() {
     );
   }
 
-  // ★全9ペルソナごとのメタ情報（表示名・対応ファイル等）
   const appConfig: Record<AppType, AppConfig> = {
     concierge: {
       name: "やまと先生",
@@ -171,48 +163,63 @@ export default function TestYamatoPage() {
   };
 
   return (
-    <div className="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative p-6 lg:p-10">
-      {/* メインコンテンツ（左右2カラムレイアウト） */}
-      <main className="max-w-7xl mx-auto w-full my-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
+      
+      {/* メインコンテンツ（安全なインラインスタイルによる左右2カラムレイアウト） */}
+      <main style={{ maxWidth: "1280px", width: "100%", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
         
-        {/* 左側カラム：ヤマトAI 独立APIテスト画面（切り替えパネル） */}
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h1 className="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+        {/* 左側カラム：ヤマトAI 独立APIテスト画面 */}
+        <div style={{ flex: "1 1 450px", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
           </h1>
-          <p className="text-slate-600 text-xs leading-relaxed mb-6">
+          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "24px" }}>
             右下のチャット窓、または以下のセクション別ボタンから各ペルソナの動作テストを行えます。
           </p>
 
-          <div className="space-y-4 text-left">
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", textAlign: "left" }}>
             {/* 共通コンシェルジュ */}
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">📌 ポータル共通</h2>
-              <div className="flex flex-wrap gap-2">
+            <div style={{ backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#64748b", textTransform: "uppercase", marginBottom: "8px" }}>📌 ポータル共通</h2>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 <button
                   onClick={() => setActiveAppType("concierge")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${
-                    activeAppType === "concierge" ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                  }`}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    backgroundColor: activeAppType === "concierge" ? "#0f172a" : "#ffffff",
+                    color: activeAppType === "concierge" ? "#ffffff" : "#475569",
+                    border: "1px solid #cbd5e1"
+                  }}
                 >
                   👋 LP Concierge (青)
                 </button>
               </div>
             </div>
 
-            {/* 🌍 Section 1: 全世界対応 (Global & General) */}
-            <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-200">
-              <h2 className="text-[11px] font-bold text-blue-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>🌍</span> Section 1: 全世界対応
+            {/* 🌍 Section 1 */}
+            <div style={{ backgroundColor: "#eff6ff", padding: "12px", borderRadius: "12px", border: "1px solid #bfdbfe" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#1d4ed8", textTransform: "uppercase", marginBottom: "8px" }}>
+                🌍 Section 1: 全世界対応
               </h2>
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {(["genkoyoshi-editor-general", "game-igo"] as const).map((type) => (
                   <button
                     key={type}
                     onClick={() => setActiveAppType(type)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${
-                      activeAppType === type ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                    }`}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      backgroundColor: activeAppType === type ? "#0f172a" : "#ffffff",
+                      color: activeAppType === type ? "#ffffff" : "#475569",
+                      border: "1px solid #cbd5e1"
+                    }}
                   >
                     {type === "genkoyoshi-editor-general" && "📄 原稿用紙 (一般)"}
                     {type === "game-igo" && "⚪ 囲碁ヤマト"}
@@ -221,12 +228,12 @@ export default function TestYamatoPage() {
               </div>
             </div>
 
-            {/* 🇦🇺🦘 Section 2: オーストラリア・ビクトリア州対応 (Victorian Curriculum & VCE) */}
-            <div className="bg-red-50/50 p-3 rounded-xl border border-red-200">
-              <h2 className="text-[11px] font-bold text-red-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>🇦🇺🦘</span> Section 2: VCE / オーストラリア
+            {/* 🇦🇺🦘 Section 2 */}
+            <div style={{ backgroundColor: "#fef2f2", padding: "12px", borderRadius: "12px", border: "1px solid #fecaca" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#b91c1c", textTransform: "uppercase", marginBottom: "8px" }}>
+                🇦🇺🦘 Section 2: VCE / オーストラリア
               </h2>
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {(
                   [
                     "genkoyoshi-editor-vce",
@@ -240,9 +247,16 @@ export default function TestYamatoPage() {
                   <button
                     key={type}
                     onClick={() => setActiveAppType(type)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-sm ${
-                      activeAppType === type ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                    }`}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      backgroundColor: activeAppType === type ? "#0f172a" : "#ffffff",
+                      color: activeAppType === type ? "#ffffff" : "#475569",
+                      border: "1px solid #cbd5e1"
+                    }}
                   >
                     {type === "genkoyoshi-editor-vce" && "📄 原稿用紙 (VCE)"}
                     {type === "eoy-oral-drill" && "🗣️ Oral Drill"}
@@ -256,69 +270,69 @@ export default function TestYamatoPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-            <span>Selected: <strong className="text-slate-800">{currentConfig.name}</strong></span>
-            <span className="font-mono bg-slate-200 px-2 py-0.5 rounded text-[11px] text-slate-700">{activeAppType}</span>
+          <div style={{ marginTop: "24px", fontSize: "12px", color: "#64748b", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Selected: <strong style={{ color: "#1e293b" }}>{currentConfig.name}</strong></span>
+            <span style={{ fontFamily: "monospace", backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#334155" }}>{activeAppType}</span>
           </div>
         </div>
 
-        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表（一回り大きい文字 ＆ スクロールバー対応） */}
-        <div className="lg:col-span-6 bg-white text-slate-800 border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
-            <h2 className="text-base font-bold text-blue-900 flex items-center gap-2">
+        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表 */}
+        <div style={{ flex: "1 1 500px", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
+            <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
               <span>🚀</span> AIヤマト・エコシステム 構成表
             </h2>
-            <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md border border-blue-200 font-semibold">
+            <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
               Architecture Overview
             </span>
           </div>
 
-          {/* スクロールバー付きコンテナ（文字を一回り大きく：text-smベース） */}
-          <div className="max-h-[580px] overflow-y-auto pr-1 space-y-3 custom-scrollbar">
-            <table className="w-full text-left text-sm border-collapse">
+          {/* スクロールバー付きコンテナ */}
+          <div style={{ maxHeight: "580px", overflowY: "auto", paddingRight: "4px" }}>
+            <table style={{ width: "100%", textAlign: "left", fontSize: "14px", borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-slate-200 text-slate-600 bg-slate-50/80 sticky top-0">
-                  <th className="py-3 px-3 font-bold w-1/4 rounded-l-lg">役割・レイヤー</th>
-                  <th className="py-3 px-3 font-bold w-3/8">バックエンド (api)</th>
-                  <th className="py-3 px-3 font-bold w-3/8 rounded-r-lg">フロントエンド (portal)</th>
+                <tr style={{ borderBottom: "2px solid #e2e8f0", color: "#475569", backgroundColor: "#f8fafc", position: "sticky", top: 0 }}>
+                  <th style={{ padding: "12px", fontWeight: "bold", width: "25%" }}>役割・レイヤー</th>
+                  <th style={{ padding: "12px", fontWeight: "bold", width: "37.5%" }}>バックエンド (api)</th>
+                  <th style={{ padding: "12px", fontWeight: "bold", width: "37.5%" }}>フロントエンド (portal)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3.5 px-3 font-bold text-slate-900 align-top">土台 (機体)</td>
-                  <td className="py-3.5 px-3 align-top">
-                    <span className="font-bold text-blue-600">🚀 FoundationLayout.ts</span>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">すべてのプロンプトの根本的なルールやエンジンを組み立てる大元</p>
+              <tbody>
+                <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>土台 (機体)</td>
+                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
+                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>🚀 FoundationLayout.ts</span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>すべてのプロンプトの根本的なルールやエンジンを組み立てる大元</p>
                   </td>
-                  <td className="py-3.5 px-3 align-top">
-                    <span className="font-bold text-blue-600">🚀 PageLayout.tsx</span>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤</p>
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3.5 px-3 font-bold text-slate-900 align-top">窓口・外装</td>
-                  <td className="py-3.5 px-3 align-top">
-                    <span className="font-bold text-purple-600">🛠️ YamatoApiCommon.tsx</span>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">共通プロンプト構造や portalData などの共通オプションを受け渡す基盤</p>
-                  </td>
-                  <td className="py-3.5 px-3 align-top">
-                    <span className="font-bold text-purple-600">🛠️ YamatoChatCommon.tsx</span>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">対話UIの汎用テンプレート・操縦士コックピット</p>
+                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
+                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>🚀 PageLayout.tsx</span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤</p>
                   </td>
                 </tr>
-                <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3.5 px-3 font-bold text-slate-900 align-top">乗組員 (ひな形)</td>
-                  <td className="py-3.5 px-3 align-top">
-                    <span className="font-bold text-amber-600">👨‍✈️ a-template.ts</span>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      FoundationLayout のデータが内包・インポートされている 
-                      <strong className="text-slate-700"> YamatoApiCommon.tsx </strong> 
+                <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>窓口・外装</td>
+                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
+                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoApiCommon.tsx</span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>共通プロンプト構造や portalData などの共通オプションを受け渡す基盤</p>
+                  </td>
+                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
+                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoChatCommon.tsx</span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>対話UIの汎用テンプレート・操縦士コックピット</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>乗組員 (ひな形)</td>
+                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
+                    <span style={{ fontWeight: "bold", color: "#d97706" }}>👨‍✈️ a-template.ts</span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                      FoundationLayout のデータが内包されている 
+                      <strong style={{ color: "#334155" }}> YamatoApiCommon.tsx </strong> 
                       をインポートしてペルソナを記述するひな形
                     </p>
                   </td>
-                  <td className="py-3.5 px-3 align-top">
-                    <span className="font-bold text-amber-600">👨‍✈️ YamatoChatCommon をコピーして新規作成</span>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">（ChatYamatoGrammar.tsx等）固有の名前・テーマ・プロンプトをカスタマイズ</p>
+                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
+                    <span style={{ fontWeight: "bold", color: "#d97706" }}>👨‍✈️ YamatoChatCommon をコピーして新規作成</span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>（ChatYamatoGrammar.tsx等）固有の名前・テーマ・プロンプトをカスタマイズ</p>
                   </td>
                 </tr>
               </tbody>
@@ -338,7 +352,7 @@ export default function TestYamatoPage() {
         additionalContext={portalContextData}
       />
 
-      <footer className="text-center text-xs text-slate-400 mt-8">
+      <footer style={{ textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }}>
         <p>&copy; 2026 JPTutor AI Yamato.</p>
       </footer>
     </div>
