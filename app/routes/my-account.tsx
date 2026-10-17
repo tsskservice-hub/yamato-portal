@@ -36,6 +36,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   return json({
+    user: user ? { id: user.id, email: user.email } : null,
     email: user?.email ?? "",
     plan: initialPlan,
     credits: initialCredits,
@@ -110,7 +111,7 @@ export default function AccountSettingsRoute() {
   const [userPlan, setUserPlan] = useState(initialData.plan);
   const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
 
-  const [user, setUser] = useState<any>(rootData?.user ?? null);
+  const [user, setUser] = useState<any>(rootData?.user ?? initialData.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -132,10 +133,17 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
-  // クライアント側でのプロフィール保存処理
+  // クライアント側でのプロフィール保存処理（Supabaseセッションフォールバック付き）
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
+    
+    let activeUser = user;
+    if (!activeUser) {
+      const { data: { session } } = await supabase.auth.getSession();
+      activeUser = session?.user ?? null;
+    }
+
+    if (!activeUser) {
       alert("Please sign in to update your preferences.");
       return;
     }
@@ -150,7 +158,7 @@ export default function AccountSettingsRoute() {
           nickname: nicknameInput.trim(),
           learning_pace: paceInput,
         })
-        .eq("id", user.id);
+        .eq("id", activeUser.id);
 
       if (error) {
         throw error;
