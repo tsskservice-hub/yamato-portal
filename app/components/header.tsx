@@ -1,10 +1,10 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（新規登録ボタン表記改善版）
+ * @description ポータル共通ヘッダー（要素の並び順変更版）
  */
 import React from 'react';
 import { Link } from '@remix-run/react';
-import { Coins, KeyRound, ShieldCheck, LogOut, User } from 'lucide-react';
+import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle } from 'lucide-react';
 
 type HeaderProps = {
   title?: string;
@@ -23,8 +23,7 @@ export default function Header({
   onOpenAuth, 
   onSignOut 
 }: HeaderProps) {
-  // 💡 修正ポイント: 
-  // ユーザーが入力中の文字（nickname）があればそれを最優先で表示し、
+  // 💡 ユーザーが入力中の文字（nickname）があればそれを最優先で表示し、
   // 完全な未入力・空白のときのみ "Set Nickname" を表示する
   const trimmedNickname = nickname ? nickname.trim() : "";
   const displayNickname = trimmedNickname !== "" ? trimmedNickname : "Set Nickname";
@@ -46,37 +45,63 @@ export default function Header({
           </span>
         </Link>
 
+        {/* 
+          ご指定の並び順（左側から順に）：
+          1. nickname（ログイン時のみ）
+          2. credit（ログイン時のみ）
+          3. pricing
+          4. FAQ
+          5. sign in/out
+        */}
         <div className="flex items-center space-x-3">
-          {user ? (
-            <>
-              {/* 💡 マイアカウントへのリンク付きニックネーム（入力とリアルタイム連動） */}
-              <Link 
-                to="/my-account"
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-all cursor-pointer shadow-xs"
-                title="Click to change your nickname in Account Settings"
-              >
-                <User className="w-3.5 h-3.5 text-blue-600" />
-                <span>{displayNickname}</span>
-              </Link>
+          {/* 1. Nickname (ログイン時のみ表示) */}
+          {user && (
+            <Link 
+              to="/my-account"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-all cursor-pointer shadow-xs"
+              title="Click to change your nickname in Account Settings"
+            >
+              <User className="w-3.5 h-3.5 text-blue-600" />
+              <span>{displayNickname}</span>
+            </Link>
+          )}
 
-              {/* クレジット残高表示 */}
-              <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-amber-50 border-amber-200 text-amber-700">
-                <Coins className="w-3.5 h-3.5" />
-                <span>Credits: {credits}</span>
-              </div>
-              
-              {/* サインアウトボタン */}
-              <button 
-                onClick={onSignOut}
-                className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1 cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
-              </button>
-            </>
+          {/* 2. Credit (ログイン時のみ表示) */}
+          {user && (
+            <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-amber-50 border-amber-200 text-amber-700">
+              <Coins className="w-3.5 h-3.5" />
+              <span>Credits: {credits}</span>
+            </div>
+          )}
+
+          {/* 3. Pricing */}
+          <Link 
+            to="/prices" 
+            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1"
+          >
+            <span>Pricing</span>
+          </Link>
+
+          {/* 4. FAQ */}
+          <Link 
+            to="/faq" 
+            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
+            <span>FAQ</span>
+          </Link>
+
+          {/* 5. Sign In / Sign Out */}
+          {user ? (
+            <button 
+              onClick={onSignOut}
+              className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1 cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
           ) : (
             <>
-              {/* パスキー認証ログインボタン */}
               <button 
                 onClick={() => onOpenAuth?.('signin')}
                 className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1 cursor-pointer"
@@ -85,7 +110,6 @@ export default function Header({
                 <span>Sign In</span>
               </button>
 
-              {/* 新規登録ボタン（従来の Register Passkey からわかりやすい Sign Up に変更） */}
               <button 
                 onClick={() => onOpenAuth?.('signup')}
                 className="text-xs font-semibold px-4 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all flex items-center space-x-1 cursor-pointer"
@@ -95,11 +119,6 @@ export default function Header({
               </button>
             </>
           )}
-
-          {/* 料金ページへのリンク */}
-          <Link to="/prices" className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all">
-            Pricing & Plans
-          </Link>
         </div>
       </div>
     </header>
