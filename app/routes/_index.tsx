@@ -96,7 +96,14 @@ export default function Home() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
-  const currentQuiz: QuizItem = getRandomQuiz();
+  
+  // ★ クイズが勝手に変わらないよう、ステートとして保持する
+  const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(DAILY_QUIZZES[0]);
+
+  // 初回ロード時に一度だけランダムなクイズをセット
+  useEffect(() => {
+    setCurrentQuiz(getRandomQuiz());
+  }, []);
 
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
@@ -360,7 +367,7 @@ export default function Home() {
     userNickname: nickname || "My friend",
     pricePlans: PRICE_PLANS,
     creditGuide: CREDIT_CONSUMPTION_GUIDE,
-    todayQuiz: getRandomQuiz(),
+    todayQuiz: currentQuiz,
     allQuizzes: DAILY_QUIZZES,
     legalContent: LEGAL_CONTENT,
   };
@@ -418,11 +425,6 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => {
-                    if (!hasCompletedTodayQuiz) {
-                      setSelectedOption(null);
-                      setIsAnswerSubmitted(false);
-                      setIsQuizCorrect(false);
-                    }
                     setIsQuizModalOpen(true);
                   }}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
@@ -519,7 +521,6 @@ export default function Home() {
                     if (!user) {
                       handleOpenAuthModal('signup');
                     } else if (validateFeatureCredits('textAi')) {
-                      // ログイン済みかつクレジット十分な場合はコンシェルジュウィジェットを開くフォーカスなどを案内
                       alert("You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!");
                     }
                   }}
