@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・プロジェクト分離4大コラム ＆ 独立第3セクション往来ライフサイクルフロー図完備版）
+ * @description ヤマトAI 独立APIテスト画面（プロジェクト別詳細コラム・PageLayout枠外分離版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -332,11 +332,11 @@ export default function TestYamatoPage() {
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>
-                      🚀 {portalLayoutMeta?.fileName || "PageLayout.tsx"}
+                    <span style={{ fontWeight: "bold", color: "#94a3b8" }}>
+                      (🚀 {portalLayoutMeta?.fileName || "PageLayout.tsx"})
                     </span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {portalLayoutMeta?.role || "ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤"}
+                    <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px", lineHeight: "1.4" }}>
+                      ポータル全体の共通レイアウト（※ヤマトチャット作成には直接関与しません）
                     </p>
                   </td>
                 </tr>
@@ -380,7 +380,7 @@ export default function TestYamatoPage() {
             {/* 2. プロジェクト別 4大詳細コラム（左2つ：apiプロジェクト / 右2つ：yamato-portalプロジェクト） */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
               
-              {/* 【左側】：APIプロジェクト側コラム（2つ） */}
+              {/* 【左側】：APIプロジェクト側コラム（2つ：FoundationLayout.ts, YamatoApiCommon.tsx） */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px" }}>
                 <div style={{ fontSize: "13px", fontWeight: "bold", color: "#1d4ed8", borderBottom: "2px solid #93c5fd", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
                   <span>⚙️</span> APIプロジェクト側（バックエンド / Cloudflare Workers）
@@ -418,38 +418,36 @@ export default function TestYamatoPage() {
                 </div>
               </div>
 
-              {/* 【右側】：yamato-portalプロジェクト側コラム（2つ） */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px" }}>
-                <div style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", borderBottom: "2px solid #86efac", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span>🌐</span> yamato-portalプロジェクト側（フロントエンド / Remix）
+              {/* 【右側】：yamato-portalプロジェクト側コラム（※枠内には YamatoChatCommon.tsx のみ配置） */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px", justifyContent: "space-between" }}>
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", borderBottom: "2px solid #86efac", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px" }}>
+                    <span>🌐</span> yamato-portalプロジェクト側（フロントエンド / Remix）
+                  </div>
+
+                  {/* ④ YamatoChatCommon.tsx （ヤマト作成に関係するウィジェット本体） */}
+                  <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#92400e", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span>🛠️</span> YamatoChatCommon.tsx (フロントAIウィジェット)
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
+                      <li><strong>汎用対話UIコックピット:</strong> 全9ペルソナのテスト画面や学習ポータルで共有される高機能AIチャットウィジェット。</li>
+                      <li><strong>🎨 9色テーマカラー対応:</strong> `emerald`, `blue`, `yellow`, `purple`, `cyan`, `orange`, `black`, `green`, `navy` の動的カラー切り替え。</li>
+                      <li><strong>⚡ Supabase即時DB同期:</strong> 学習ペース（steady, normal, accelerated）やクレジット残高の変更をSupabase profilesとリアルタイム同期。</li>
+                      <li><strong>🖥️ フルスクリーン切替:</strong> 没入型の学習やエッセイ執筆をサポートする全画面表示モードの搭載。</li>
+                      <li><strong>💬 高度なインタラクション:</strong> 音声入力連携、画像プレビュー、クレジット消費ガイド、本日のクイズポップアップ等の総合機能。</li>
+                    </ul>
+                  </div>
                 </div>
 
-                {/* ③ PageLayout.tsx */}
-                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#166534", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>🚀</span> PageLayout.tsx (共通ポータルレイアウト)
+                {/* 💡 PageLayout.tsx はヤマト作成に関係ないため、枠の外（下部）に独立配置 */}
+                <div style={{ backgroundColor: "#f1f5f9", border: "1px dashed #94a3b8", borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "6px", marginTop: "16px" }}>
+                  <h4 style={{ fontSize: "11px", fontWeight: "bold", color: "#64748b", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>ℹ️</span> 枠外参考: PageLayout.tsx (共通ポータルレイアウト ※ヤマト作成とは非依存)
                   </h4>
-                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
-                    <li><strong>ポータル全体レイアウト:</strong> Remixで構築された全画面の共通ヘッダー、フッター、およびナビゲーション基盤。</li>
-                    <li><strong>🔐 パスキー認証解説ガイド:</strong> サインアップ（新規登録）時の初回限定パスキー事前案内と、3ステップの生体認証（Touch ID, Face ID等）解説トグルの統合。</li>
-                    <li><strong>🎯 スマート状態フォールバック:</strong> ユーザー状態や設定値の取得において `Props &gt; Root Loader &gt; Default Fallback` の優先順位で確実に解決。</li>
-                    <li><strong>📐 レスポンシブグリッド:</strong> ラップトップやタブレットなど、あらゆる画面サイズで一望しやすいフルワイド＆グリッドデザイン。</li>
-                    <li><strong>🧭 パンくず・メタデータ統括:</strong> ページごとのSEOメタタグ（`meta` 関数）および動的ルーティング状態の管理。</li>
-                  </ul>
-                </div>
-
-                {/* ④ YamatoChatCommon.tsx */}
-                <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#92400e", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>🛠️</span> YamatoChatCommon.tsx (フロントAIウィジェット)
-                  </h4>
-                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
-                    <li><strong>汎用対話UIコックピット:</strong> 全9ペルソナのテスト画面や学習ポータルで共有される高機能AIチャットウィジェット。</li>
-                    <li><strong>🎨 9色テーマカラー対応:</strong> `emerald`, `blue`, `yellow`, `purple`, `cyan`, `orange`, `black`, `green`, `navy` の動的カラー切り替え。</li>
-                    <li><strong>⚡ Supabase即時DB同期:</strong> 学習ペース（steady, normal, accelerated）やクレジット残高の変更をSupabase profilesとリアルタイム同期。</li>
-                    <li><strong>🖥️ フルスクリーン切替:</strong> 没入型の学習やエッセイ執筆をサポートする全画面表示モードの搭載。</li>
-                    <li><strong>💬 高度なインタラクション:</strong> 音声入力連携、画像プレビュー、クレジット消費ガイド、本日のクイズポップアップ等の総合機能。</li>
-                  </ul>
+                  <p style={{ fontSize: "11px", color: "#475569", margin: 0, lineHeight: "1.4" }}>
+                    Remixで構築された全画面の共通ヘッダー・フッター、およびパスキー認証基盤。本番公開ページの全体外装を決定しますが、個別チャット部品の動作や作成には直接関与しません。
+                  </p>
                 </div>
               </div>
 
