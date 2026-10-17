@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（環境自動判定API接続 ＆ インラインスタイル堅牢レイアウト版）
+ * @description ヤマトAI 独立APIテスト画面（バックエンドメタデータAPI自動同期・インラインスタイル堅牢レイアウト版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -49,30 +49,41 @@ export default function TestYamatoPage() {
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
-  // 💡 実行環境（ローカルか本番か）に応じて API のベースURLを自動切り替え
+  // 💡 バックエンドから非同期で取得するエコシステムのメタデータ
+  const [ecosystemMeta, setEcosystemMeta] = useState<any>(null);
+
+  // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
   useEffect(() => {
-    async function fetchSchema() {
+    async function fetchData() {
       setIsLoadingSchema(true);
       try {
         const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
         const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
 
-        const res = await fetch(`${apiBaseUrl}/api/schema/${activeAppType}`);
-        if (res.ok) {
-          const data = (await res.json()) as { appType: string; fields: string[] };
+        // 1. スキーマ情報の取得
+        const schemaRes = await fetch(`${apiBaseUrl}/api/schema/${activeAppType}`);
+        if (schemaRes.ok) {
+          const data = (await schemaRes.json()) as { appType: string; fields: string[] };
           setApiFields(data.fields || []);
         } else {
           setApiFields([]);
         }
+
+        // 2. バックエンドのエコシステムメタデータ（FoundationLayout等）の取得
+        const metaRes = await fetch(`${apiBaseUrl}/api/ecosystem-metadata`);
+        if (metaRes.ok) {
+          const metaJson = (await metaRes.json()) as { metadata: any }; // 💡 型をキャスト
+          setEcosystemMeta(metaJson.metadata);
+        }
       } catch (err) {
-        console.error("Failed to fetch schema from API:", err);
+        console.error("Failed to fetch data from API:", err);
         setApiFields([]);
       } finally {
         setIsLoadingSchema(false);
       }
     }
 
-    fetchSchema();
+    fetchData();
   }, [activeAppType]);
 
   if (token !== SECRET_TOKEN) {
@@ -279,14 +290,14 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表 */}
+        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表（API自動同期版） */}
         <div style={{ flex: "1 1 500px", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
               <span>🚀</span> AIヤマト・エコシステム 構成表
             </h2>
             <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
-              Architecture Overview
+              Live API Synced
             </span>
           </div>
 
@@ -302,35 +313,53 @@ export default function TestYamatoPage() {
               </thead>
               <tbody>
                 <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>土台 (機体)</td>
-                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>🚀 FoundationLayout.ts</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>すべてのプロンプトの根本的なルールやエンジンを組み立てる大元</p>
+                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>
+                    {ecosystemMeta?.foundation?.layer || "土台 (機体)"}
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>🚀 PageLayout.tsx</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤</p>
+                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>
+                      🚀 {ecosystemMeta?.foundation?.fileName || "FoundationLayout.ts"}
+                    </span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                      {ecosystemMeta?.foundation?.role || "すべてのプロンプトの根本的なルールやエンジンを組み立てる大元"}
+                    </p>
+                  </td>
+                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
+                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>
+                      🚀 {ecosystemMeta?.portalLayout?.fileName || "PageLayout.tsx"}
+                    </span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                      {ecosystemMeta?.portalLayout?.role || "ポータル全体の共通レイアウト、ヘッダー/フッター、パスキー認証基盤"}
+                    </p>
                   </td>
                 </tr>
                 <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
                   <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>窓口・外装</td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoApiCommon.tsx</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>共通プロンプト構造や portalData などの共通オプションを受け渡す基盤</p>
+                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>
+                      🛠️ {ecosystemMeta?.apiCommon?.fileName || "YamatoApiCommon.tsx"}
+                    </span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                      {ecosystemMeta?.apiCommon?.role || "共通プロンプト構造や portalData などの共通オプションを受け渡す基盤"}
+                    </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoChatCommon.tsx</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>対話UIの汎用テンプレート・操縦士コックピット</p>
+                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>
+                      🛠️ {ecosystemMeta?.chatCommon?.fileName || "YamatoChatCommon.tsx"}
+                    </span>
+                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
+                      {ecosystemMeta?.chatCommon?.role || "対話UIの汎用テンプレート・操縦士コックピット"}
+                    </p>
                   </td>
                 </tr>
                 <tr>
                   <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>乗組員 (ひな形)</td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#d97706" }}>👨‍✈️ a-template.ts</span>
+                    <span style={{ fontWeight: "bold", color: "#d97706" }}>
+                      👨‍✈️ {ecosystemMeta?.template?.fileName || "a-template.ts"}
+                    </span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      FoundationLayout のデータが内包されている 
-                      <strong style={{ color: "#334155" }}> YamatoApiCommon.tsx </strong> 
-                      をインポートしてペルソナを記述するひな形
+                      {ecosystemMeta?.template?.role || "FoundationLayout のデータが内包されている YamatoApiCommon.tsx をインポートしてペルソナを記述するひな形"}
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
