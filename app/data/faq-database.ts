@@ -10,7 +10,7 @@ export interface FaqItem {
   questionEn: string;      // English question text
   questionJp: string;      // Japanese question text (kept identical to English for uniformity)
   answerHtml: string;      // Detailed explanation displayed on the site's FAQ page (supports HTML and ruby tags)
-  expertGuidance: string;  // Scoring criteria and guidance policy referenced by AI Yamato in its prompt
+  expertGuidance: string;  // Scoring criteria and guidance policy referenced by AI Yamato in its prompt (Backend/AI use only; hidden on frontend FAQ view)
 }
 
 export const faqDatabase: FaqItem[] = [
