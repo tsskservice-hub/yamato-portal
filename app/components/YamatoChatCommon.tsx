@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（初期非表示対応・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐・英語案内対応版）
+ * @description ヤマトAIチャットウィジェット（未ログインガード削除・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐・英語案内対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,7 +25,7 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.3.0",
+  version: "2.3.1",
   role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・スマートクレジットエラー分岐・英語案内対応）",
   features: [
     {
@@ -293,12 +293,6 @@ export function YamatoChatCommon({
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
-
-    // 💡 未ログインガード：userId が存在しない場合はチャットをブロック
-    if (!userId) {
-      alert("Authentication required. Please sign in or log in to chat.");
-      return;
-    }
 
     const userMsg = tutorInput.trim();
     const needsVisual = requestVisualAid;
