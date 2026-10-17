@@ -7,7 +7,7 @@
       "Content: Introduction, Body, Conclusion",
       "Sentence style: Plain style in general, Polite style is also acceptable"
     ],
-    "sampleImage": "/article.pdf",
+    "sampleImage": "text_type_samples/article.pdf",
     "title_original": "Article (記事)",
     "purpose_original": "Articles are used to inform, persuade, or entertain readers through a structured publication format.",
     "structure_original": [
@@ -23,7 +23,7 @@
       "Items you should include: Name of the recipient, Subject line, Main text, Last line, Name of the sender",
       "Sentence style: Polite style or, Plain style depending on the relationship"
     ],
-    "sampleImage": "/email.pdf",
+    "sampleImage": "text_type_samples/email.pdf",
     "title_original": "Email (Eメール)",
     "purpose_original": "Emails are used to quickly convey a message, consultation, or advice to a specific recipient more casually or formally than a letter.",
     "structure_original": [
@@ -39,7 +39,7 @@
       "Content: Introduction, Body, Conclusion",
       "Sentence style: Polite style or, Plain style"
     ],
-    "sampleImage": "/essay.pdf",
+    "sampleImage": "text_type_samples/essay.pdf",
     "title_original": "Essay (作文)",
     "purpose_original": "Essays are used to present and logically argue your own thoughts or reflections on a given theme through structured paragraphs.",
     "structure_original": [
@@ -56,7 +56,7 @@
       "Content: Introduction, Body, Conclusion",
       "Sentence style: Plain style in general as you write to yourself"
     ],
-    "sampleImage": "/journal.pdf",
+    "sampleImage": "text_type_samples/journal.pdf",
     "title_original": "Journal, Diary Entry (日記)",
     "purpose_original": "Journals are used to personally record daily events, changes in mood, reflections, and future plans.",
     "structure_original": [
@@ -87,7 +87,7 @@
       "Content: Introduction, Body, Conclusion",
       "Sentence style: Polite style or, Plain style"
     ],
-    "sampleImage": "/personal_account.pdf",
+    "sampleImage": "text_type_samples/personal_account.pdf",
     "title_original": "Personal Account (体験談)",
     "purpose_original": "Personal accounts are used to describe a personal experience, including challenges faced and the process of overcoming them.",
     "structure_original": [
@@ -104,7 +104,7 @@
       "Content: Introduction, Body of the letter, Conclusion",
       "Sentence style: Polite style or, Plain style depending on the relationship"
     ],
-    "sampleImage": "/letter.pdf",
+    "sampleImage": "text_type_samples/letter.pdf",
     "title_original": "Personal Letter (手紙)",
     "purpose_original": "Personal letters are used to share updates, express gratitude, or maintain personal connections with a recipient.",
     "structure_original": [
@@ -121,7 +121,7 @@
       "Content: Introduction, Body, Conclusion",
       "Sentence style: Polite style or, Plain style"
     ],
-    "sampleImage": "/report.pdf",
+    "sampleImage": "text_type_samples/report.pdf",
     "title_original": "Report - Research, Analysis (レポート)",
     "purpose_original": "Reports are used to organize and present research findings, objective analyses, or facts clearly.",
     "structure_original": [
@@ -169,7 +169,7 @@
       "Items you should include: Title, Greeting（e.g. こんにちは。）, Introduction to the topic（e.g. ～について話したいと思います。）, Body of the speech, Closing expression（e.g. ありがとうございました。）",
       "Sentence style: Polite style"
     ],
-    "sampleImage": "/speech_script.pdf",
+    "sampleImage": "text_type_samples/speech_script.pdf",
     "title_original": "Speech Script（スピーチの原稿）",
     "purpose_original": "Speeches are used to directly communicate opinions or information to a live audience.",
     "structure_original": [
@@ -185,7 +185,7 @@
       "Content: Introduction, Body, Conclusion",
       "Sentence style: Plain style or, Polite style"
     ],
-    "sampleImage": "/story.pdf",
+    "sampleImage": "text_type_samples/story.pdf",
     "title_original": "Story (物語)",
     "purpose_original": "Stories are used to write imaginative narratives featuring characters, settings, and a dynamic plot.",
     "structure_original": [
@@ -219,7 +219,7 @@
       "Main Text:",
       "Square Usage:"
     ],
-    "sampleImage": "/genkoyoshi.pdf",
+    "sampleImage": "text_type_samples/genkoyoshi.pdf",
     "title_original": "Genkooyooshi Usage Guide",
     "purpose_original": "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkooyooshi. Refer to each text type for details.",
     "structure_original": [
