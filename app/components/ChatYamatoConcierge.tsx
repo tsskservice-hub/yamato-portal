@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期・画像表示対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期・スマートクレジットエラー分岐対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -18,10 +18,15 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-// 💡 テキストAI・画像AI利用時の最大予想消費クレジット数（キャップ設定）
-const MAX_ESTIMATED_CREDITS = {
-  textAi: 2,   // テキストチャット最大予想消費
-  imageAi: 4,  // 画像生成・ビジュアル解説最大予想消費
+// 💡 機能ごとの消費クレジット定義（バックエンドの credit-rules.ts と完全に一致）
+const FEATURE_COSTS = {
+  textAi: 2,         // 通常のテキストチャット
+  imageAi: 4,        // 画像付きチャット・ビジュアル解説
+  voiceDrill: 3,     // 音声ドリル
+  voiceElaborate: 4, // 音声詳細応答
+  mockSection1: 6,   // 模試 Sec1
+  mockSection2: 6,   // 模試 Sec2
+  mockFull: 10,      // フル模試
 };
 
 // 💡 _index.tsx から渡される additionalContext および学習ペース・ユーザーID・クレジットの型定義
@@ -150,7 +155,7 @@ export function ChatYamatoConcierge({
     }
   };
 
-  // メッセージ送信処理（未ログインガード ＆ userId の確実な送信 ＆ クレジットチェック）
+  // メッセージ送信処理（未ログインガード ＆ userId ＆ 402スマートクレジットエラー分岐ハンドリング）
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
@@ -164,9 +169,31 @@ export function ChatYamatoConcierge({
       return;
     }
 
-    // 💡 ガード2: クレジット残高がテキストAIの必要最低限に満たない場合
-    if (currentCredits < MAX_ESTIMATED_CREDITS.textAi) {
-      alert(`クレジットが不足しています（現在残高: 🪙 ${currentCredits} クレジット）。デイリークイズやプラン購入で補充してください。`);
+    // 💡 ガード2: クレジット残高が完全にゼロの場合の事前ブロック
+    if (currentCredits <= 0) {
+      setTutorMessages((prev) => [
+        ...prev,
+        { role: "user", content: tutorInput.trim() },
+        {
+          role: "assistant",
+          content: `🚨 **[クレジット残高ゼロ]**\n\n現在クレジットがありません。学習を継続するにはプランのアップグレードまたはクレジットの追加が必要です。\n\n💡 料金プランページよりクレジットを追加してください。`
+        }
+      ]);
+      setTutorInput("");
+      return;
+    }
+
+    // 💡 ガード3: クレジット残高がテキストチャットの最低コスト（2クレジット）に満たない場合
+    if (currentCredits < FEATURE_COSTS.textAi) {
+      setTutorMessages((prev) => [
+        ...prev,
+        { role: "user", content: tutorInput.trim() },
+        {
+          role: "assistant",
+          content: `⚠️ **[クレジット残高不足]**\n\n現在の残高（${currentCredits}クレジット）ではテキストチャット（2クレジット）を行うことができません。\n\n💡 デイリークイズやプラン購入で補充してください。`
+        }
+      ]);
+      setTutorInput("");
       return;
     }
 
@@ -220,7 +247,36 @@ export function ChatYamatoConcierge({
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
+      // 💡 402エラー（スマートクレジットエラー分岐）のハンドリング
       if (!response.ok) {
+        if (response.status === 402) {
+          setIsTutorLoading(false);
+          const errorCode = data?.error;
+          const msgContent = data?.message || "クレジットが不足しています。";
+
+          if (errorCode === "ZERO_CREDITS") {
+            setTutorMessages([
+              ...newMessages,
+              {
+                role: "assistant",
+                content: `🚨 **[クレジット残高ゼロ]**\n\n${msgContent}\n\n💡 学習を続けるには、料金プランページよりクレジットを追加してください。`
+              }
+            ]);
+            await refreshUserCredits();
+            return;
+          } else if (errorCode === "PARTIAL_SHORTAGE") {
+            setTutorMessages([
+              ...newMessages,
+              {
+                role: "assistant",
+                content: `⚠️ **[クレジット残高不足]**\n\n${msgContent}\n\n💬 テキストチャット（2クレジット）であればまだご利用いただけます。`
+              }
+            ]);
+            await refreshUserCredits();
+            return;
+          }
+        }
+
         throw new Error(data?.error || data?.reply || `APIエラー (${response.status})`);
       }
 
@@ -254,8 +310,8 @@ export function ChatYamatoConcierge({
       if (onOpenAuth) onOpenAuth();
       return false;
     }
-    if (currentCredits < MAX_ESTIMATED_CREDITS.imageAi) {
-      alert(`画像生成AIを利用するには最大 ${MAX_ESTIMATED_CREDITS.imageAi} クレジットの余裕が必要です（現在残高: 🪙 ${currentCredits} クレジット）。`);
+    if (currentCredits < FEATURE_COSTS.imageAi) {
+      alert(`画像生成AIを利用するには ${FEATURE_COSTS.imageAi} クレジット必要ですが、現在の残高は ${currentCredits} クレジットです（※テキストチャット（2クレジット）ならまだご利用いただけます）。`);
       return false;
     }
     alert("画像AI機能へアクセスします（クレジット十分）");
@@ -272,7 +328,7 @@ export function ChatYamatoConcierge({
         >
           <span>🤖</span>
           <span>{characterName}</span>
-          {userId && currentCredits < MAX_ESTIMATED_CREDITS.textAi && (
+          {userId && currentCredits < FEATURE_COSTS.textAi && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
               !
             </span>
@@ -296,7 +352,7 @@ export function ChatYamatoConcierge({
                   {characterName}
                 </h3>
                 {userId ? (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= MAX_ESTIMATED_CREDITS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                     🪙 {currentCredits} credits
                   </span>
                 ) : (
@@ -350,7 +406,7 @@ export function ChatYamatoConcierge({
               </div>
             </div>
 
-            {/* 未ログイン時のガード画面、またはクレジット不足時のガード画面 */}
+            {/* 未ログイン時のガード画面 */}
             {!userId ? (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                 <div className="text-3xl">🔒</div>
@@ -367,27 +423,6 @@ export function ChatYamatoConcierge({
                   className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
                 >
                   Sign In / Sign Up Now
-                </button>
-              </div>
-            ) : currentCredits < MAX_ESTIMATED_CREDITS.textAi ? (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="text-3xl">🪙</div>
-                <h4 className="font-bold text-sm text-slate-800">More Credits Required</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Your current balance ({currentCredits} credits) is below the estimated max requirement ({MAX_ESTIMATED_CREDITS.textAi} credits) to chat with Yamato-sensei. Complete today's daily quiz for <span className="font-bold text-blue-600">+2 free credits</span> or top up a credit pack!
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const pricingSection = document.getElementById('pricing');
-                    if (pricingSection) {
-                      pricingSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                    setIsAiTutorOpen(false);
-                  }}
-                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
-                >
-                  View Credit Packs & Daily Quiz
                 </button>
               </div>
             ) : (
@@ -455,7 +490,7 @@ export function ChatYamatoConcierge({
                     </button>
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                    <span>💡 Chat: max {MAX_ESTIMATED_CREDITS.textAi} cr / Image AI: max {MAX_ESTIMATED_CREDITS.imageAi} cr</span>
+                    <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
                     <button
                       type="button"
                       onClick={handleRequestImageAiFeature}
