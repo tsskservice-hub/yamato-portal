@@ -1,16 +1,15 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（最新 PageLayout 統合版）
+ * @description EOY Writing Practice モジュール（最新 PageLayout 完全連動・重複認証削除版）
  */
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "@remix-run/react";
+import { Link, useRouteLoaderData } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 
 // --- 📦 外部のJSONファイルから正式なデータをインポート ---
 import questionsData from "../data/writing-exam-questions.json";
 import textTypesData from "../data/texttypes.json";
-import { supabase } from "../lib/supabaseClient";
 
 function BugReportCard() {
   return (
@@ -181,63 +180,33 @@ function HighlightChecker() {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeTextType, setActiveTextType] = useState<string>("all");
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
-  // Supabase Auth State (PageLayout handles session automatically, kept here for chat integration)
-  const [user, setUser] = useState<any>(null);
+  // 💡 root.tsx からグローバルデータを安全に取得
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+  } | undefined;
+
+  const user = rootData?.user ?? null;
+  const credits = rootData?.credits ?? 10;
+  const nickname = rootData?.nickname ?? "";
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
 
-  // PageLayoutの認証モーダルなどを操作するための ref
   const layoutRef = useRef<PageLayoutRef>(null);
-
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
-  }, []);
-
-  // Supabase セッション監視
-  useEffect(() => {
-    let isMounted = true;
-
-    async function initSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user && isMounted) {
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    initSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription?.unsubscribe();
-    };
   }, []);
 
   type ChatMessage = {
@@ -341,7 +310,7 @@ export default function Dashboard() {
           pace: tutorLevel,          
           visualPrompt,
           assignedQuestion: assignedQuestionText,
-          userNickname: user?.email ? user.email.split('@')[0] : "Student",
+          userNickname: nickname || (user?.email ? user.email.split('@')[0] : "Student"),
           imageBase64: imageBase64
         }),
       });
@@ -377,18 +346,8 @@ export default function Dashboard() {
     return matchesCategory && matchesTextType;
   });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-white font-sans">
-        <h3 className="text-2xl font-semibold text-slate-700 animate-pulse">
-          Checking your session... Secure Portal loading... 🔒
-        </h3>
-      </div>
-    );
-  }
-
   return (
-    <PageLayout ref={layoutRef} user={user}>
+    <PageLayout ref={layoutRef}>
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           <div className="mb-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">

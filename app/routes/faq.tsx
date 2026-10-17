@@ -1,9 +1,10 @@
 /**
  * @file faq.tsx
- * @description VCE日本語ポータル（Yamato Portal）総合FAQページ（PageLayout適用版）
+ * @description VCE日本語ポータル（Yamato Portal）総合FAQページ（超シンプル・レイアウト一元管理版）
  */
 import React, { useState, useMemo } from 'react';
 import { Link } from '@remix-run/react';
+import type { MetaFunction } from "@remix-run/node";
 import { 
   Search, 
   HelpCircle, 
@@ -16,8 +17,18 @@ import {
   LayoutDashboard,
   ArrowLeft
 } from 'lucide-react';
-import PageLayout from '../components/PageLayout'; // ※プロジェクトのパス構成に合わせて調整してください
+import PageLayout from '../components/PageLayout';
 import { faqDatabase, FaqItem } from '../data/faq-database';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "FAQ & AI Guide | AI Yamato Japanese Tutoring" },
+    {
+      name: "description",
+      content: "Frequently Asked Questions and AI Yamato expert guidance for VCE Japanese students.",
+    },
+  ];
+};
 
 export default function FaqPage() {
   const [searchQuery, setSearchQuery] = useState("");

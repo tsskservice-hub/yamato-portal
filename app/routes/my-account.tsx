@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（planカラムエラー修正・ニックネーム完全同期版）
+ * @description アカウント設定画面（PageLayout完全連動・重複認証ロジック削除版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
@@ -24,7 +24,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   if (user) {
     const { data: profile } = await serverSupabase
       .from("profiles")
-      .select("credits, nickname, learning_pace") // 💡 存在しない plan を除外
+      .select("credits, nickname, learning_pace")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -96,7 +96,7 @@ export default function AccountSettingsRoute() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
 
-  // ステート初期化（rootData や initialData の値を最優先に反映）
+  // ステート初期化
   const [nicknameInput, setNicknameInput] = useState(() => {
     return (rootData?.nickname && rootData.nickname.trim() !== "")
       ? rootData.nickname
@@ -112,8 +112,6 @@ export default function AccountSettingsRoute() {
 
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
@@ -133,55 +131,6 @@ export default function AccountSettingsRoute() {
       }
     }
   }, [rootData]);
-
-  // ブラウザ側でユーザーのプロフィール情報を再取得して同期する関数
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data: profileData, error } = await supabase
-        .from('profiles')
-        .select('credits, nickname, learning_pace') // 💡 存在しない plan を除外
-        .eq('id', userId)
-        .maybeSingle();
-      
-      if (profileData && !error) {
-        setCredits((profileData as any).credits ?? 10);
-        if ((profileData as any).nickname !== undefined && (profileData as any).nickname !== null && (profileData as any).nickname.trim() !== "") {
-          setNicknameInput((profileData as any).nickname);
-        }
-        if ((profileData as any).learning_pace) {
-          setPaceInput((profileData as any).learning_pace);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch user profile:', err);
-    }
-  };
-
-  // ブラウザ側のマウント時にセッションを確認
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
-      const currentUser = session?.user ?? null;
-      if (currentUser) {
-        setUser(currentUser);
-        setUserEmail(currentUser.email ?? "");
-        if (currentUser.created_at) {
-          setUserCreatedAt(new Date(currentUser.created_at).toLocaleDateString("en-AU"));
-        }
-        fetchUserProfile(currentUser.id);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null;
-      if (currentUser) {
-        setUser(currentUser);
-        setUserEmail(currentUser.email ?? "");
-        fetchUserProfile(currentUser.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   // クライアント側でのプロフィール保存処理
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -207,7 +156,6 @@ export default function AccountSettingsRoute() {
         throw error;
       }
 
-      await fetchUserProfile(user.id);
       revalidator.revalidate();
 
       setShowSavedIndicator(true);
@@ -229,18 +177,9 @@ export default function AccountSettingsRoute() {
     navigate("/");
   };
 
-  const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    setAuthMode(mode);
-    setIsAuthModalOpen(true);
-  };
-
   return (
     <PageLayout 
-      user={user} 
-      credits={credits} 
-      nickname={nicknameInput}
-      onOpenAuth={handleOpenAuthModal} 
-      onSignOut={handleSignOut}
+      
     >
       <div className="max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]">
         <div>

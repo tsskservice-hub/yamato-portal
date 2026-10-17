@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（認証モーダル連動・クレジットガード・リアルタイム残高同期対応版）
+ * @description AI Yamato Portal のランディングページ（PageLayout完全連動・重複認証削除版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -67,24 +67,22 @@ const MAX_ESTIMATED_CREDITS = {
 };
 
 export default function Home() {
-  // 💡 root.tsx の loader からユーザー情報・ニックネーム・クレジット・学習ペースを自動取得
+  // 💡 root.tsx からグローバルデータを安全に取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
-    nickname?: string;
     credits?: number;
+    nickname?: string;
     plan?: string;
     learningPace?: "steady" | "normal" | "accelerated";
   } | undefined;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [user, setUser] = useState<any>(rootData?.user ?? null);
-  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
-  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
-   
-  // ★学習ペースを取得（デフォルトは normal）
-  const [learningPace, setLearningPace] = useState<"steady" | "normal" | "accelerated">(
-    rootData?.learningPace ?? "normal"
-  );
+  
+  // 💡 rootData から初期値を安全に連動
+  const user = rootData?.user ?? null;
+  const credits = rootData?.credits ?? 10;
+  const nickname = rootData?.nickname ?? "";
+  const learningPace = rootData?.learningPace ?? "normal";
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
@@ -209,66 +207,13 @@ export default function Home() {
     };
   }, [currentStep]);
 
-  // ユーザーデータ（クレジット・学習ペース等）の取得関数
-  const fetchUserData = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('credits, last_quiz_date, nickname, learning_pace')
-        .eq('id', userId)
-        .single();
-      
-      if (data && !error) {
-        const typedData = data as { credits?: number; last_quiz_date?: string; nickname?: string; learning_pace?: "steady" | "normal" | "accelerated" };
-        setCredits(typedData.credits ?? 10);
-        if (typedData.nickname) {
-          setNickname(typedData.nickname);
-        }
-        if (typedData.learning_pace) {
-          setLearningPace(typedData.learning_pace);
-        }
-
-        const todayStr = new Date().toISOString().split('T')[0];
-        if (typedData.last_quiz_date === todayStr) {
-          setHasCompletedTodayQuiz(true);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch user data:', err);
-    }
-  };
-
-  // Auth and session handling
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchUserData(currentUser.id);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchUserData(currentUser.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     if (queryParams.get('success') === 'true') {
       alert('Payment completed! Your credits have been updated.');
-      if (user) {
-        fetchUserData(user.id);
-      }
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [user]);
+  }, []);
 
   // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数
   const validateFeatureCredits = (featureType: 'textAi' | 'imageAi'): boolean => {
@@ -311,16 +256,9 @@ export default function Home() {
         .eq('id', user.id);
 
       if (!error) {
-        setCredits(newCredits);
         setHasCompletedTodayQuiz(true);
       }
     }
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setNickname("");
   };
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
@@ -376,11 +314,6 @@ export default function Home() {
   return (
     <PageLayout 
       ref={layoutRef}
-      user={user} 
-      credits={credits} 
-      nickname={nickname} 
-      learningPace={learningPace} 
-      onSignOut={handleSignOut}
       isDarkMode={isDarkMode}
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
@@ -565,7 +498,6 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
             {/* Free Plan */}
-            {/* <!-- カード開始: Free Plan --> */}
             <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICE_PLANS.free.name}</span>
@@ -592,7 +524,6 @@ export default function Home() {
             </div>
 
             {/* Starter Pack */}
-            {/* <!-- カード開始: Starter Pack --> */}
             <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.starter.name}</span>
@@ -626,7 +557,6 @@ export default function Home() {
             </div>
 
             {/* Standard Pack */}
-            {/* <!-- カード開始: Standard Pack --> */}
             <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
                 Most Popular
@@ -663,7 +593,6 @@ export default function Home() {
             </div>
 
             {/* Pro Intensivist */}
-            {/* <!-- カード開始: Pro Intensivist Pack --> */}
             <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
               <div className="space-y-4">
                 <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICE_PLANS.pro.name}</span>
@@ -727,7 +656,6 @@ export default function Home() {
               <h3 className="text-xl font-extrabold tracking-tight">Section 1: Global & General Japanese Learners</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* <!-- カード開始: Genkoyoshi Editor (General) --> */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
                 <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
@@ -752,7 +680,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* <!-- カード開始: Go (Igo) Mini Game --> */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -779,7 +706,6 @@ export default function Home() {
               <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* <!-- カード開始: Genkoyoshi Editor (VCE) --> */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
                 <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
@@ -804,7 +730,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* <!-- カード開始: EOY Oral Drill --> */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -822,7 +747,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* <!-- カード開始: EOY Oral Elaboration --> */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -840,7 +764,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* <!-- カード開始: EOY Oral Mock Exam --> */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -858,7 +781,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* <!-- カード開始: EOY Writing Exam Tutor --> */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
                 <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
@@ -883,7 +805,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* <!-- カード開始: Oral Exam Questions --> */}
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -906,7 +827,7 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト（userId と credits を正確に渡して未ログイン時は自動ブロック・誘導） */}
+        {/* 🤖 右下に常駐するコンシェルジュヤマト */}
         <ChatYamatoConcierge 
           additionalContext={portalContextData} 
           initialLearningPace={learningPace}

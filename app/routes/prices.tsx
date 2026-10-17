@@ -1,111 +1,50 @@
 /**
  * @file prices.tsx
- * @description 料金プランページ（rootルートデータ連携対応版）
+ * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版）
  */
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useRouteLoaderData } from "@remix-run/react";
-import { Sparkles, ArrowRight, ShieldCheck, Check, ShoppingBag, GraduationCap, Mic, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, KeyRound, X } from "lucide-react";
-import { supabase } from "../lib/supabaseClient";
-import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
-import PageLayout from "../components/PageLayout";
+import { Link, useRouteLoaderData } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/node";
+import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
+import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from "../data/price-plans";
+import { useRef } from "react";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Pricing & Plans - JP Tutor AI Yamato" },
+    {
+      name: "description",
+      content: "Explore flexible pricing plans and credit packs for AI Yamato Japanese tutoring.",
+    },
+  ];
+};
 
 export default function Prices() {
-  const navigate = useNavigate();
-  const [isDark, setIsDark] = useState(true);
   const [isSpecsOpen, setIsSpecsOpen] = useState(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
+  const pageLayoutRef = useRef<PageLayoutRef>(null);
 
-  // 💡 root.tsx からグローバルデータを安全に取得
+  // 💡 root.tsx からユーザー情報を取得して判定に使用
   const rootData = useRouteLoaderData("root") as {
     user?: any;
-    credits?: number;
-    nickname?: string;
   } | undefined;
-
-  // 💡 rootData から初期値を安全に連動
-  const [user, setUser] = useState<any>(rootData?.user ?? null);
-  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
-  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
-
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [emailInput, setEmailInput] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-
-  // 💡 rootData が更新された場合にステートを同期
-  useEffect(() => {
-    if (rootData) {
-      if (rootData.user !== undefined) setUser(rootData.user);
-      if (rootData.credits !== undefined) setCredits(rootData.credits);
-      if (rootData.nickname !== undefined) setNickname(rootData.nickname);
-    }
-  }, [rootData]);
-
-  const fetchUserData = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('credits, nickname')
-        .eq('id', userId)
-        .single();
-      
-      if (data && !error) {
-        setCredits((data as any).credits ?? 10);
-        if ((data as any).nickname) {
-          setNickname((data as any).nickname);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch user data:', err);
-    }
-  };
+  const user = rootData?.user ?? null;
 
   useEffect(() => {
-    document.title = "Pricing & Plans - JP Tutor AI Yamato";
-    
     const savedTheme = localStorage.getItem("theme");
     const isDarkModeActive = savedTheme === "dark" || (!savedTheme && document.documentElement.classList.contains("dark"));
-    
-    setIsDark(isDarkModeActive);
     if (isDarkModeActive) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
-
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setNickname("");
-  };
-
-  const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    setAuthMode(mode);
-    setIsAuthModalOpen(true);
-  };
 
   const handleCheckout = async (priceId: string) => {
     if (!user) {
-      handleOpenAuthModal('signin');
+      // 未ログインの場合はPageLayout内の認証モーダルを 'signin' で開く
+      pageLayoutRef.current?.openAuthModal('signin');
       return;
     }
 
@@ -134,40 +73,8 @@ export default function Prices() {
     }
   };
 
-  const handlePasskeyAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthLoading(true);
-    setAuthError(null);
-
-    try {
-      if (authMode === 'signup') {
-        if (!emailInput) {
-          throw new Error('Please enter your email address for passkey registration.');
-        }
-        await signUpAndRegisterPasskey(emailInput);
-        alert('Passkey registration successful! Welcome to AI Yamato.');
-      } else {
-        await signInWithPasskey();
-        alert('Passkey sign in successful!');
-      }
-      setIsAuthModalOpen(false);
-      setEmailInput('');
-    } catch (err: any) {
-      console.error(err);
-      setAuthError(err.message || 'Passkey authentication failed. Please try again.');
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
   return (
-    <PageLayout 
-      user={user} 
-      credits={credits} 
-      nickname={nickname}
-      onOpenAuth={handleOpenAuthModal} 
-      onSignOut={handleSignOut}
-    >
+    <PageLayout ref={pageLayoutRef}>
       <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
         <main className="flex-grow">
           <section className="pt-14 pb-8 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto">
@@ -392,56 +299,6 @@ export default function Prices() {
             </div>
           </section>
         </main>
-
-        {isAuthModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100">
-              <button 
-                onClick={() => setIsAuthModalOpen(false)}
-                className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-                    <KeyRound className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-extrabold tracking-tight">
-                    {authMode === 'signup' ? 'Create Account with Passkey' : 'Sign In with Passkey'}
-                  </h3>
-                </div>
-                {authError && (
-                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">
-                    {authError}
-                  </div>
-                )}
-                <form onSubmit={handlePasskeyAuth} className="space-y-4">
-                  {authMode === 'signup' && (
-                    <div className="space-y-1.5 text-left">
-                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Email Address</label>
-                      <input 
-                        type="email"
-                        required
-                        placeholder="your.email@school.vic.edu.au"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
-                      />
-                    </div>
-                  )}
-                  <button 
-                    type="submit"
-                    disabled={authLoading}
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/30 cursor-pointer"
-                  >
-                    <span>{authLoading ? 'Verifying...' : authMode === 'signup' ? 'Register Passkey' : 'Sign In'}</span>
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </PageLayout>
   );

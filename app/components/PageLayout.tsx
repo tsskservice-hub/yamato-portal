@@ -1,72 +1,17 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（Get Startedメイン＋パスキー解説トグル付き・英語完全版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包版）
  */
-import React, { useState, useImperativeHandle, forwardRef } from "react";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
 import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
+import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
-/**
- * PageLayout のメタデータおよび仕様の型定義
- */
-export interface PageLayoutMetaType {
-  componentName: string;
-  version: string;
-  role: string;
-  features: {
-    featureName: string;
-    description: string;
-  }[];
-  authFlows: {
-    mode: string;
-    description: string;
-  }[];
-  stateFallbacks: {
-    target: string;
-    priorityOrder: string[];
-  }[];
-}
-
-/**
- * 構造化メタデータ（コード近接配置）
- */
-export const PAGE_LAYOUT_META: PageLayoutMetaType = {
-  componentName: "PageLayout",
-  version: "2.0.0",
-  role: "ポータル共通レイアウト（Header, Footer, パスキー認証モーダル統括）",
-  features: [
-    {
-      featureName: "Get Started & Passkey Guide",
-      description: "新規登録時（signup）に初回限定のパスキー事前案内ステップを表示し、分かりやすい3ステップとセキュリティ解説トグルを提供"
-    },
-    {
-      featureName: "Biometric & Passkey Auth",
-      description: "Touch ID, Face ID, Windows Hello 等を用いたパスワードレスのセキュアなサインイン・新規登録処理"
-    },
-    {
-      featureName: "Smart State Fallback",
-      description: "props > root.tsx (Remix loader) > デフォルト値 の順序で、ユーザー情報・クレジット・ニックネーム・学習ペースを自動解決"
-    }
-  ],
-  authFlows: [
-    {
-      mode: "signup",
-      description: "メールアドレス入力 → パスキー登録ステップ → 生体認証による安全なアカウント作成"
-    },
-    {
-      mode: "signin",
-      description: "ワンタッチの生体認証（Passkey）による即時サインイン"
-    }
-  ],
-  stateFallbacks: [
-    {
-      target: "User, Credits, Nickname, LearningPace",
-      priorityOrder: ["Explicit Props", "Route Loader Data (root.tsx)", "Default Fallback Values"]
-    }
-  ]
+export type PageLayoutRef = {
+  openAuthModal: (mode: 'signin' | 'signup') => void;
 };
 
 type PageLayoutProps = {
@@ -75,14 +20,7 @@ type PageLayoutProps = {
   credits?: number;
   nickname?: string;
   learningPace?: "steady" | "normal" | "accelerated"; 
-  onOpenAuth?: (mode: 'signin' | 'signup') => void;
-  onSignOut?: () => void;
   isDarkMode?: boolean;
-};
-
-// 💡 親コンポーネントから ref 経由で呼び出せるメソッドの型定義
-export type PageLayoutRef = {
-  openAuthModal: (mode: 'signin' | 'signup') => void;
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -91,71 +29,100 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   credits: propCredits,  
   nickname: propNickname,
   learningPace: propLearningPace, 
-  onOpenAuth,  
-  onSignOut,
   isDarkMode = false
 }, ref) => {
-  // 💡 root.tsx の loader データをルートID "root" を通じて自動取得
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
     credits?: number;  
     nickname?: string;  
-    plan?: string;
     learningPace?: "steady" | "normal" | "accelerated"; 
   } | undefined;
 
-  // 💡 優先順位: 
-  // 1. プロパティで明示的に渡された値
-  // 2. root.tsx のローダーから自動取得できた値
-  // 3. デフォルトのフォールバック値
-  const user = propUser !== undefined ? propUser : rootData?.user;
-  const credits = propCredits !== undefined ? propCredits : (rootData?.credits ?? 10);
-  
-  // 💡 ニックネームの解決（prop > rootData > フォールバック）
-  const rawNickname = (propNickname !== undefined && propNickname !== null) ? propNickname : rootData?.nickname;
-  const nickname = rawNickname && rawNickname.trim() !== "" ? rawNickname : "My friend";
+  // 💡 ユーザー情報・クレジット・ニックネーム・学習ペースの状態管理（props > rootData > local state）
+  const [user, setUser] = useState<any>(propUser !== undefined ? propUser : (rootData?.user ?? null));
+  const [credits, setCredits] = useState<number>(propCredits !== undefined ? propCredits : (rootData?.credits ?? 10));
+  const [nickname, setNickname] = useState<string>(propNickname !== undefined ? propNickname : (rootData?.nickname ?? ""));
 
-  // 💡 学習ペースの解決（prop > rootData > デフォルト"normal"）
   const rawLearningPace = propLearningPace !== undefined ? propLearningPace : rootData?.learningPace;
   const learningPace: "steady" | "normal" | "accelerated" = 
     (rawLearningPace === "steady" || rawLearningPace === "normal" || rawLearningPace === "accelerated")
       ? rawLearningPace
       : "normal";
 
-  // 💡 認証モーダルおよびパスキー認証のロジック
+  // 💡 Supabase セッション監視とプロフィール情報の同期
+  const fetchUserData = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits, nickname')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        setCredits((data as any).credits ?? 10);
+        if ((data as any).nickname) {
+          setNickname((data as any).nickname);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch user data:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (propUser !== undefined) setUser(propUser);
+    if (propCredits !== undefined) setCredits(propCredits);
+    if (propNickname !== undefined) setNickname(propNickname);
+  }, [propUser, propCredits, propNickname]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
+      if (propUser === undefined) {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchUserData(session.user.id);
+        }
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setNickname("");
+  };
+
+  // 💡 認証モーダル・パスキーのステート管理
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  
-  // ★新規登録時のパスキー事前案内ステップ（signupの初回のみ true）
   const [isGuideStep, setIsGuideStep] = useState(false);
-
-  // ★トグルの開閉状態
   const [isToggleOpen, setIsToggleOpen] = useState(false);
-
   const [emailInput, setEmailInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    if (onOpenAuth) {
-      onOpenAuth(mode);
-    }
     setAuthMode(mode);
     setAuthError(null);
     setEmailInput('');
-    setIsToggleOpen(false); // モーダルを開いたときはトグルを閉じた状態にする
-
-    // 💡 新規登録 (signup) の場合のみ、最初にパスキー案内ステップを表示する
+    setIsToggleOpen(false);
     if (mode === 'signup') {
       setIsGuideStep(true);
     } else {
       setIsGuideStep(false);
     }
-
     setIsAuthModalOpen(true);
   };
 
-  // 💡 ref を通じて親コンポーネントからモーダルを開けるように公開
   useImperativeHandle(ref, () => ({
     openAuthModal: (mode: 'signin' | 'signup') => {
       handleOpenAuthModal(mode);
@@ -169,7 +136,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
     try {
       const isSignup = authMode === 'signup';
-
       if (isSignup) {
         if (!emailInput) {
           throw new Error('Please enter your email address for passkey registration.');
@@ -183,10 +149,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       setIsAuthModalOpen(false);
       setEmailInput('');
       setIsGuideStep(false);
-
-      // 💡 認証成功後はページをリロードして root.tsx の loader を再実行し、最新のユーザー情報を反映
       window.location.reload();
-
     } catch (err: any) {
       console.error(err);
       setAuthError(err.message || 'Passkey authentication failed. Please try again.');
@@ -195,14 +158,16 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     }
   };
 
+  const resolvedNickname = nickname && nickname.trim() !== "" ? nickname : "My friend";
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header 
         user={user} 
         credits={credits} 
-        nickname={nickname} 
+        nickname={resolvedNickname} 
         onOpenAuth={handleOpenAuthModal} 
-        onSignOut={onSignOut} 
+        onSignOut={handleSignOut} 
       />
       <main className="flex-grow">
         {children}
@@ -224,7 +189,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
               <X className="w-5 h-5" />
             </button>
 
-            {/* 🌟 新規登録時のパスキー事前案内ステップ（Get Startedメイン ＆ トグル解説付き） */}
             {isGuideStep && authMode === 'signup' ? (
               <div className="space-y-6">
                 <div className="text-center space-y-2">
@@ -239,7 +203,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   </p>
                 </div>
 
-                {/* メインアクションボタン（Get Started） */}
                 <div>
                   <button 
                     onClick={() => setIsGuideStep(false)}
@@ -250,7 +213,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   </button>
                 </div>
 
-                {/* トグル開閉ボタン：パスキーの詳細と仕組みを見る */}
                 <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
                   <button
                     type="button"
@@ -263,10 +225,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                     {isToggleOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
 
-                  {/* トグル内部の中身（3ステップ ＋ なぜ安全なのかの解説） */}
                   {isToggleOpen && (
                     <div className="mt-3 space-y-4 text-left animate-fadeIn">
-                      {/* 3ステップの案内 */}
                       <div className="space-y-2.5">
                         <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-start space-x-2.5">
                           <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</div>
@@ -299,7 +259,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                         </div>
                       </div>
 
-                      {/* なぜ安全なのかの分かりやすい解説（英語） */}
                       <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 text-[11px] text-slate-600 dark:text-slate-300 space-y-2 leading-relaxed">
                         <p className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
                           <Lock className="w-3.5 h-3.5 text-blue-600" /> How Passkeys Keep You Safe 🔒
@@ -308,7 +267,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                           ✨ <strong>Device-Based Security:</strong> Passkeys use your own device's screen lock (such as your fingerprint, face scan, or PIN) to log you in.
                         </p>
                         <p>
-                          🛡️ <strong>Extremely Secure & Easy:</strong> Because your login key stays safely inside your personal device, it cannot be guessed or stolen by hackers. As long as you don't lend your device and share your screen lock PIN with others, it is super secure and effortless to use! 🚀
+                          🛡️ <strong>Extremely Secure & Easy:</strong> Because your login key stays safely inside your personal device, it cannot be guessed or stolen by hackers. 🚀
                         </p>
                       </div>
                     </div>
@@ -316,7 +275,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                 </div>
               </div>
             ) : (
-              /* 🔐 通常のパスキー認証・登録フォーム */
               <div className="space-y-6">
                 <div className="text-center space-y-2">
                   <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
