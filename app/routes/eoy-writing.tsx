@@ -1,16 +1,15 @@
+/**
+ * @file eoy-writing.tsx
+ * @description EOY Writing Practice モジュール（最新 PageLayout 統合版）
+ */
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
-import PageLayout from "../components/PageLayout";
-import { createClient } from "@supabase/supabase-js";
+import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 
 // --- 📦 外部のJSONファイルから正式なデータをインポート ---
 import questionsData from "../data/writing-exam-questions.json";
 import textTypesData from "../data/texttypes.json";
-
-// Supabase クライアント初期化用（環境変数にあわせて設定）
-const SUPABASE_URL = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_URL || "" : "";
-const SUPABASE_ANON_KEY = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_ANON_KEY || "" : "";
 import { supabase } from "../lib/supabaseClient";
 
 function BugReportCard() {
@@ -190,13 +189,15 @@ export default function Dashboard() {
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
-  // Supabase Auth & Credits State
+  // Supabase Auth State (PageLayout handles session automatically, kept here for chat integration)
   const [user, setUser] = useState<any>(null);
-  const [userCredits, setUserCredits] = useState<number | null>(null);
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
+
+  // PageLayoutの認証モーダルなどを操作するための ref
+  const layoutRef = useRef<PageLayoutRef>(null);
 
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -205,36 +206,15 @@ export default function Dashboard() {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // Supabase セッション監視とクレジット情報取得
+  // Supabase セッション監視
   useEffect(() => {
     let isMounted = true;
-
-    async function fetchUserCredits(userId: string) {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("credits")
-          .eq("id", userId)
-          .single();
-        if (!error && data && isMounted) {
-          setUserCredits(data.credits);
-        }
-      } catch (err) {
-        console.error("Error fetching user credits:", err);
-      }
-    }
 
     async function initSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          if (isMounted) {
-            setUser(session.user);
-            await fetchUserCredits(session.user.id);
-          }
-        } else {
-          // 未認証の場合は必要に応じてリダイレクト、あるいはゲスト許可
-          // navigate("/login");
+        if (session?.user && isMounted) {
+          setUser(session.user);
         }
       } catch (err) {
         console.error("Session check error:", err);
@@ -248,10 +228,8 @@ export default function Dashboard() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        await fetchUserCredits(session.user.id);
       } else {
         setUser(null);
-        setUserCredits(null);
       }
       setLoading(false);
     });
@@ -260,14 +238,7 @@ export default function Dashboard() {
       isMounted = false;
       subscription?.unsubscribe();
     };
-  }, [navigate]);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setUserCredits(null);
-    navigate("/login");
-  };
+  }, []);
 
   type ChatMessage = {
     role: 'assistant' | 'user';
@@ -417,17 +388,12 @@ export default function Dashboard() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout ref={layoutRef} user={user}>
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           <div className="mb-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">
             <h2 className="text-xl font-bold text-slate-800 m-0 mb-4 flex items-center justify-between">
               <span className="flex items-center gap-2"><span>📌</span> Useful Resources & Help Centre</span>
-              {userCredits !== null && (
-                <span className="text-sm bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">
-                  💎 Credits: {userCredits}
-                </span>
-              )}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
