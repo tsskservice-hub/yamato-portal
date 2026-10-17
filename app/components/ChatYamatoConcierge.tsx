@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期・画像表示対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -226,11 +226,12 @@ export function ChatYamatoConcierge({
 
       const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
       const sanitizedReply = sanitizeAiOutput(replyText);
+      const aiImageUrl = data.imageUrl; // バックエンドから返却される可能性のある画像URL
 
       setIsTutorLoading(false);
       setTutorMessages([
         ...newMessages,
-        { role: "assistant", content: sanitizedReply }
+        { role: "assistant", content: sanitizedReply, imageUrl: aiImageUrl }
       ]);
 
       // 💡 リロードせず、バックグラウンドで最新のクレジット残高を非同期取得して更新
@@ -412,6 +413,15 @@ export function ChatYamatoConcierge({
                         ) : (
                           <div className="space-y-2">
                             <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                            {msg.imageUrl && (
+                              <div className="mt-2">
+                                <img 
+                                  src={msg.imageUrl} 
+                                  alt="AI Generated Visual Aid" 
+                                  className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white" 
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

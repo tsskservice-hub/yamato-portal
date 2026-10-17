@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（1列縦並び・API先頭配置版）
+ * @description ヤマトAI 独立APIテスト画面（1列縦並び・API先頭配置・テスト用userId対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -51,6 +51,9 @@ export default function TestYamatoPage() {
 
   // 💡 バックエンドから非同期で取得するエコシステムのメタデータ
   const [ecosystemMeta, setEcosystemMeta] = useState<any>(null);
+
+  // 💡 テスト用の固定ユーザーUUID（401 Unauthorized 回避およびクレジット検証用）
+  const TEST_USER_ID = "test-user-yamato-001";
 
   // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
   useEffect(() => {
@@ -202,6 +205,7 @@ export default function TestYamatoPage() {
               <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#64748b", textTransform: "uppercase", marginBottom: "8px" }}>📌 ポータル共通</h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 <button
+                  type="button"
                   onClick={() => setActiveAppType("concierge")}
                   style={{
                     padding: "6px 12px",
@@ -228,6 +232,7 @@ export default function TestYamatoPage() {
                 {(["genkoyoshi-editor-general", "game-igo"] as const).map((type) => (
                   <button
                     key={type}
+                    type="button"
                     onClick={() => setActiveAppType(type)}
                     style={{
                       padding: "6px 12px",
@@ -265,6 +270,7 @@ export default function TestYamatoPage() {
                 ).map((type) => (
                   <button
                     key={type}
+                    type="button"
                     onClick={() => setActiveAppType(type)}
                     style={{
                       padding: "6px 12px",
@@ -540,7 +546,7 @@ export default function TestYamatoPage() {
 
       </main>
 
-      {/* YamatoChatCommon に設定とデータを渡す */}
+      {/* 💡 YamatoChatCommon にテスト用 userId ("test-user-yamato-001") を渡して401エラーを回避 */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig.name}
@@ -548,6 +554,7 @@ export default function TestYamatoPage() {
         themeColor={currentConfig.themeColor as any}
         defaultOpen={false}
         additionalContext={portalContextData}
+        userId={TEST_USER_ID} 
       />
 
       <footer style={{ textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }}>
