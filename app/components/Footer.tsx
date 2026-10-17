@@ -1,50 +1,50 @@
 import { Link } from "@remix-run/react";
 
-// 1. 不具合報告ボタン用コンポーネント
+// 1. 不具合報告ボタン用コンポーネント（1つ目のリンクを使用）
 type BugReportButtonProps = {
   onClick?: () => void;
   className?: string;
 };
 
-function BugReportButton({ onClick, className = "" }: BugReportButtonProps) {
+function BugReportButton({ className = "" }: BugReportButtonProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-3 py-1.5 bg-white hover:bg-amber-50 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-lg font-medium text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 ${className}`}
+    <a
+      href="https://docs.google.com/forms/d/e/1FAIpQLSfdNF18yTlwIrCunrkp-Cw0mspx5mP0iHtK7nPTwEcE95Gtjw/viewform?usp=header"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`px-3 py-1.5 bg-white hover:bg-amber-50 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-lg font-medium text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 no-underline ${className}`}
     >
       <span>🐛</span>
       <span>Report Bug</span>
-    </button>
+    </a>
   );
 }
 
-// 2. フィードバック・提案用コンポーネント
+// 2. フィードバック・提案用コンポーネント（2つ目のリンクを使用）
 type QuickFeedbackButtonProps = {
   onClick?: () => void;
   className?: string;
 };
 
-function QuickFeedbackButton({ onClick, className = "" }: QuickFeedbackButtonProps) {
+function QuickFeedbackButton({ className = "" }: QuickFeedbackButtonProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 hover:border-blue-300 rounded-lg font-medium text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 ${className}`}
+    <a
+      href="https://docs.google.com/forms/d/e/1FAIpQLSfa4c9elcIiRigoMvFzHOlW1vSeYlUYvvUcV6TkdgS4TNaK7g/viewform?usp=header"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 hover:border-blue-300 rounded-lg font-medium text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 no-underline ${className}`}
     >
       <span>💬</span>
       <span>Feedback</span>
-    </button>
+    </a>
   );
 }
 
 type FooterProps = {
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
-  onOpenBugReport?: () => void;
-  onOpenFeedback?: () => void;
 };
 
-export default function Footer({ onOpenBugReport, onOpenFeedback }: FooterProps) {
+export default function Footer({}: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -57,8 +57,8 @@ export default function Footer({ onOpenBugReport, onOpenFeedback }: FooterProps)
             <span>&copy; {currentYear} AI Yamato. All rights reserved.</span>
             
             <div className="flex items-center gap-2">
-              <BugReportButton onClick={onOpenBugReport} />
-              <QuickFeedbackButton onClick={onOpenFeedback} />
+              <BugReportButton />
+              <QuickFeedbackButton />
             </div>
           </div>
 
