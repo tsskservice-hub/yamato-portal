@@ -15,7 +15,7 @@ function BugReportButton({ className = "" }: BugReportButtonProps) {
       className={`px-3 py-1.5 bg-white hover:bg-amber-50 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-lg font-medium text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 no-underline ${className}`}
     >
       <span>🐛</span>
-      <span>Report Bug</span>
+      <span>Report Bug & Photo</span>
     </a>
   );
 }
@@ -35,7 +35,7 @@ function QuickFeedbackButton({ className = "" }: QuickFeedbackButtonProps) {
       className={`px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 hover:border-blue-300 rounded-lg font-medium text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 no-underline ${className}`}
     >
       <span>💬</span>
-      <span>Feedback</span>
+      <span>Quick Feedback</span>
     </a>
   );
 }
