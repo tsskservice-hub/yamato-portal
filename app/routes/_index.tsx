@@ -15,6 +15,7 @@ import {
   Gamepad2, 
   Check, 
   ArrowRight, 
+  ArrowDown,
   ShieldCheck, 
   Award, 
   X, 
@@ -512,10 +513,22 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-between border border-blue-200 dark:border-blue-800/50 rounded-xl p-3 bg-blue-50/50 dark:bg-blue-950/20 text-sm gap-3">
-              <div className="flex flex-col space-y-1 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
+              <div className="flex flex-col space-y-1.5 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
                 <div className="flex items-center space-x-2">
                   <span>✨</span>
-                  <span>Want to chat with Yamato-sensei? (Requires login & max {MAX_ESTIMATED_CREDITS.textAi} credits)</span>
+                  <span>Want to chat with Yamato-sensei? (Requires login & 2 credits for text chat)</span>
+                  <a 
+                    href="#pricing-credits-guide" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('pricing-credits-guide')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="inline-flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:underline font-bold ml-1 cursor-pointer bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded-md"
+                    title="View Credit Consumption Guide"
+                  >
+                    <span>Guide</span>
+                    <ArrowDown className="w-3 h-3 animate-bounce" />
+                  </a>
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 pl-5">
                   Answer today's Daily Quiz to earn 2 credits, or sign up now to receive 10 welcome credits!
@@ -684,7 +697,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+          <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm scroll-mt-20`}>
             <div className="flex items-center justify-center space-x-2 font-bold mb-3">
               <Coins className="w-4 h-4 text-amber-500" />
               <span>Credit Consumption Guide (Max Cap Guard Active)</span>
