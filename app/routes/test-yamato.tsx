@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・4大エコシステムメタデータ一括インスペクター版）
+ * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・4大ファイル並行展開インスペクター版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -49,7 +49,7 @@ export default function TestYamatoPage() {
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
-  // 💡 バックエンドから非同期で取得するエコシステムのメタデータ（FoundationLayout詳細を含む）
+  // 💡 バックエンドから非同期で取得するエコシステムのメタデータ
   const [ecosystemMeta, setEcosystemMeta] = useState<any>(null);
 
   // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
@@ -69,7 +69,7 @@ export default function TestYamatoPage() {
           setApiFields([]);
         }
 
-        // 2. バックエンドのエコシステムメタデータ（FoundationLayout等）の取得
+        // 2. バックエンドのエコシステムメタデータの取得
         const metaRes = await fetch(`${apiBaseUrl}/api/ecosystem-metadata`);
         if (metaRes.ok) {
           const metaJson = (await metaRes.json()) as { metadata: any };
@@ -292,11 +292,11 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 下段：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 4大ファイル詳細メタデータ */}
+        {/* 下段：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 4大ファイル並行展開インスペクター */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ (4大ファイル一括インスペクター)
+              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ (4大ファイル並行展開インスペクター)
             </h2>
             <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
               Live API Synced
@@ -304,12 +304,12 @@ export default function TestYamatoPage() {
           </div>
 
           {/* スクロールバー付きコンテナ（ラップトップ画面で一望しやすい設計） */}
-          <div style={{ maxHeight: "750px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div style={{ maxHeight: "850px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "20px" }}>
             
-            {/* 1. 基本構成テーブル（🚀 FoundationLayout.ts / PageLayout.tsx / 🛠️ YamatoApiCommon.tsx / YamatoChatCommon.tsx） */}
+            {/* 1. 基本構成テーブル */}
             <table style={{ width: "100%", textAlign: "left", fontSize: "14px", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ borderBottom: "2px solid #e2e8f0", color: "#475569", backgroundColor: "#f8fafc", position: "sticky", top: 0 }}>
+                <tr style={{ borderBottom: "2px solid #e2e8f0", color: "#475569", backgroundColor: "#f8fafc", position: "sticky", top: 0, zIndex: 10 }}>
                   <th style={{ padding: "12px", fontWeight: "bold", width: "25%" }}>役割・レイヤー</th>
                   <th style={{ padding: "12px", fontWeight: "bold", width: "37.5%" }}>バックエンド (api)</th>
                   <th style={{ padding: "12px", fontWeight: "bold", width: "37.5%" }}>フロントエンド (portal)</th>
@@ -374,44 +374,71 @@ export default function TestYamatoPage() {
               </tbody>
             </table>
 
-            {/* 2. 4大ファイル詳細スペック（FoundationLayout, PageLayout, YamatoApiCommon, YamatoChatCommon） */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+            {/* 2. 4大ファイル詳細スペック並行展開グリッド (2×2) */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
               
-              {/* FoundationLayout.ts */}
-              <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "14px" }}>
-                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#1e40af", marginBottom: "6px" }}>🚀 FoundationLayout.ts</h4>
-                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
-                  すべてのLLMプロンプトの土台。命名規則、通信言語ルール、タイムゾーン、ナレッジバンク、安全性ガードレールを厳格に管理。
+              {/* ① FoundationLayout.ts */}
+              <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#1e40af", display: "flex", alignItems: "center", gap: "6px", margin: 0 }}>
+                  <span>🚀</span> FoundationLayout.ts (土台・エンジン)
+                </h4>
+                <p style={{ fontSize: "11px", color: "#475569", lineHeight: "1.4", margin: 0 }}>
+                  すべてのLLMプロンプトの根本。命名規則、通信言語規則、タイムゾーン管理、ナレッジバンク、安全性ガードレールを統括。
                 </p>
+                {foundationMeta?.currentSettings && (
+                  <div style={{ fontSize: "11px", color: "#334155", backgroundColor: "white", padding: "8px", borderRadius: "8px", border: "1px solid #dbeafe", marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div><strong>👤 命名規則:</strong> {foundationMeta.currentSettings.namingRules?.[0]}</div>
+                    <div><strong>🗣️ 言語規則:</strong> {foundationMeta.currentSettings.communicationRules?.[0]}</div>
+                    <div><strong>🛡️ ガードレール:</strong> {foundationMeta.currentSettings.safetyGuardrails?.[0]}</div>
+                  </div>
+                )}
               </div>
 
-              {/* PageLayout.tsx */}
-              <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "14px" }}>
-                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#166534", marginBottom: "6px" }}>🚀 PageLayout.tsx</h4>
-                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
-                  ポータル共通UIレイアウト。Get Started案内、パスキー解説トグル（3ステップ＆生体認証）、スマート状態フォールバックを統括。
+              {/* ② PageLayout.tsx */}
+              <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", display: "flex", alignItems: "center", gap: "6px", margin: 0 }}>
+                  <span>🚀</span> PageLayout.tsx (共通ポータルUI)
+                </h4>
+                <p style={{ fontSize: "11px", color: "#475569", lineHeight: "1.4", margin: 0 }}>
+                  ポータル全体の共通レイアウト。Get Started案内、パスキー解説トグル（3ステップ＆生体認証）、スマート状態フォールバック。
                 </p>
+                <div style={{ fontSize: "11px", color: "#334155", backgroundColor: "white", padding: "8px", borderRadius: "8px", border: "1px solid #dcfce7", marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div><strong>🔐 認証フロー:</strong> Signup時初回パスキーガイド &amp; トグル解説</div>
+                  <div><strong>🎯 状態解決:</strong> Props &gt; Root Loader &gt; Default Fallback</div>
+                </div>
               </div>
 
-              {/* YamatoApiCommon.tsx */}
-              <div style={{ backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "12px", padding: "14px" }}>
-                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#6b21a8", marginBottom: "6px" }}>🛠️ YamatoApiCommon.tsx</h4>
-                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
+              {/* ③ YamatoApiCommon.tsx */}
+              <div style={{ backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#6b21a8", display: "flex", alignItems: "center", gap: "6px", margin: 0 }}>
+                  <span>🛠️</span> YamatoApiCommon.tsx (バックエンド共通)
+                </h4>
+                <p style={{ fontSize: "11px", color: "#475569", lineHeight: "1.4", margin: 0 }}>
                   バックエンド専用の共通プロンプトインジェクションレイヤー。`portalData` などの共通オプションを型安全に伝播。
                 </p>
+                <div style={{ fontSize: "11px", color: "#334155", backgroundColor: "white", padding: "8px", borderRadius: "8px", border: "1px solid #f3e8ff", marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div><strong>📦 オプション型:</strong> YamatoApiCommonOptions (portalData拡張)</div>
+                  <div><strong>⚙️ パイプライン:</strong> buildFoundationLayoutPrompt の安全なラップ</div>
+                </div>
               </div>
 
-              {/* YamatoChatCommon.tsx */}
-              <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px" }}>
-                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#92400e", marginBottom: "6px" }}>🛠️ YamatoChatCommon.tsx</h4>
-                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
+              {/* ④ YamatoChatCommon.tsx */}
+              <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#92400e", display: "flex", alignItems: "center", gap: "6px", margin: 0 }}>
+                  <span>🛠️</span> YamatoChatCommon.tsx (フロントAIウィジェット)
+                </h4>
+                <p style={{ fontSize: "11px", color: "#475569", lineHeight: "1.4", margin: 0 }}>
                   フロントエンド共通AIウィジェット。9色のテーマカラー対応、フルスクリーン切替、Supabaseと連携した学習ペース即時同期。
                 </p>
+                <div style={{ fontSize: "11px", color: "#334155", backgroundColor: "white", padding: "8px", borderRadius: "8px", border: "1px solid #fef3c7", marginTop: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div><strong>🎨 テーマカラー:</strong> emerald, blue, yellow, purple等 9色対応</div>
+                  <div><strong>⚡ DB同期:</strong> 学習ペース切替時にSupabase profilesを即時更新</div>
+                </div>
               </div>
 
             </div>
 
-            {/* 3. FoundationLayout 内部メタデータ詳細（currentSettings の動的インスペクター表示） */}
+            {/* 3. FoundationLayout 詳細ルール仕様 (Live Meta フル展開) */}
             {foundationMeta?.currentSettings && (
               <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px" }}>
                 <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#334155", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
