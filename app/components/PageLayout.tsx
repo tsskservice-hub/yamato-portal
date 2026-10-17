@@ -9,6 +9,66 @@ import Header from "./header";
 import Footer from "./Footer";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
+/**
+ * PageLayout のメタデータおよび仕様の型定義
+ */
+export interface PageLayoutMetaType {
+  componentName: string;
+  version: string;
+  role: string;
+  features: {
+    featureName: string;
+    description: string;
+  }[];
+  authFlows: {
+    mode: string;
+    description: string;
+  }[];
+  stateFallbacks: {
+    target: string;
+    priorityOrder: string[];
+  }[];
+}
+
+/**
+ * 構造化メタデータ（コード近接配置）
+ */
+export const PAGE_LAYOUT_META: PageLayoutMetaType = {
+  componentName: "PageLayout",
+  version: "2.0.0",
+  role: "ポータル共通レイアウト（Header, Footer, パスキー認証モーダル統括）",
+  features: [
+    {
+      featureName: "Get Started & Passkey Guide",
+      description: "新規登録時（signup）に初回限定のパスキー事前案内ステップを表示し、分かりやすい3ステップとセキュリティ解説トグルを提供"
+    },
+    {
+      featureName: "Biometric & Passkey Auth",
+      description: "Touch ID, Face ID, Windows Hello 等を用いたパスワードレスのセキュアなサインイン・新規登録処理"
+    },
+    {
+      featureName: "Smart State Fallback",
+      description: "props > root.tsx (Remix loader) > デフォルト値 の順序で、ユーザー情報・クレジット・ニックネーム・学習ペースを自動解決"
+    }
+  ],
+  authFlows: [
+    {
+      mode: "signup",
+      description: "メールアドレス入力 → パスキー登録ステップ → 生体認証による安全なアカウント作成"
+    },
+    {
+      mode: "signin",
+      description: "ワンタッチの生体認証（Passkey）による即時サインイン"
+    }
+  ],
+  stateFallbacks: [
+    {
+      target: "User, Credits, Nickname, LearningPace",
+      priorityOrder: ["Explicit Props", "Route Loader Data (root.tsx)", "Default Fallback Values"]
+    }
+  ]
+};
+
 type PageLayoutProps = {
   children: React.ReactNode;
   user?: any;

@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（FoundationLayoutメタデータ詳細自動同期・インラインスタイル堅牢レイアウト版）
+ * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・4大エコシステムメタデータ一括インスペクター版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -181,15 +181,15 @@ export default function TestYamatoPage() {
   return (
     <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
-      {/* メインコンテンツ（インラインスタイルによる安全な左右2カラムレイアウト） */}
-      <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-start" }}>
+      {/* メインコンテンツ（上下2段フルワイド配置） */}
+      <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
-        {/* 左側カラム：ヤマトAI 独立APIテスト画面 */}
-        <div style={{ flex: "1 1 420px", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        {/* 上段：ヤマトAI 独立APIテスト画面 */}
+        <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
           </h1>
-          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "24px" }}>
+          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "20px" }}>
             右下のチャット窓、または以下のセクション別ボタンから各ペルソナの動作テストを行えます。
           </p>
 
@@ -286,27 +286,27 @@ export default function TestYamatoPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: "24px", fontSize: "12px", color: "#64748b", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ marginTop: "20px", fontSize: "12px", color: "#64748b", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>Selected: <strong style={{ color: "#1e293b" }}>{currentConfig.name}</strong></span>
             <span style={{ fontFamily: "monospace", backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#334155" }}>{activeAppType}</span>
           </div>
         </div>
 
-        {/* 右側カラム：AIヤマト・エコシステム アーキテクチャ構成表 ＆ FoundationLayout詳細メタデータ */}
-        <div style={{ flex: "1 1 540px", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+        {/* 下段：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 4大ファイル詳細メタデータ */}
+        <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ
+              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ (4大ファイル一括インスペクター)
             </h2>
             <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
               Live API Synced
             </span>
           </div>
 
-          {/* スクロールバー付きコンテナ */}
-          <div style={{ maxHeight: "650px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "20px" }}>
+          {/* スクロールバー付きコンテナ（ラップトップ画面で一望しやすい設計） */}
+          <div style={{ maxHeight: "750px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "20px" }}>
             
-            {/* 1. 基本構成テーブル */}
+            {/* 1. 基本構成テーブル（🚀 FoundationLayout.ts / PageLayout.tsx / 🛠️ YamatoApiCommon.tsx / YamatoChatCommon.tsx） */}
             <table style={{ width: "100%", textAlign: "left", fontSize: "14px", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid #e2e8f0", color: "#475569", backgroundColor: "#f8fafc", position: "sticky", top: 0 }}>
@@ -374,7 +374,44 @@ export default function TestYamatoPage() {
               </tbody>
             </table>
 
-            {/* 2. FoundationLayout 内部メタデータ詳細（currentSettings の動的インスペクター表示） */}
+            {/* 2. 4大ファイル詳細スペック（FoundationLayout, PageLayout, YamatoApiCommon, YamatoChatCommon） */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+              
+              {/* FoundationLayout.ts */}
+              <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "14px" }}>
+                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#1e40af", marginBottom: "6px" }}>🚀 FoundationLayout.ts</h4>
+                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
+                  すべてのLLMプロンプトの土台。命名規則、通信言語ルール、タイムゾーン、ナレッジバンク、安全性ガードレールを厳格に管理。
+                </p>
+              </div>
+
+              {/* PageLayout.tsx */}
+              <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "14px" }}>
+                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#166534", marginBottom: "6px" }}>🚀 PageLayout.tsx</h4>
+                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
+                  ポータル共通UIレイアウト。Get Started案内、パスキー解説トグル（3ステップ＆生体認証）、スマート状態フォールバックを統括。
+                </p>
+              </div>
+
+              {/* YamatoApiCommon.tsx */}
+              <div style={{ backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "12px", padding: "14px" }}>
+                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#6b21a8", marginBottom: "6px" }}>🛠️ YamatoApiCommon.tsx</h4>
+                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
+                  バックエンド専用の共通プロンプトインジェクションレイヤー。`portalData` などの共通オプションを型安全に伝播。
+                </p>
+              </div>
+
+              {/* YamatoChatCommon.tsx */}
+              <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px" }}>
+                <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#92400e", marginBottom: "6px" }}>🛠️ YamatoChatCommon.tsx</h4>
+                <p style={{ fontSize: "11px", color: "#334155", lineHeight: "1.4" }}>
+                  フロントエンド共通AIウィジェット。9色のテーマカラー対応、フルスクリーン切替、Supabaseと連携した学習ペース即時同期。
+                </p>
+              </div>
+
+            </div>
+
+            {/* 3. FoundationLayout 内部メタデータ詳細（currentSettings の動的インスペクター表示） */}
             {foundationMeta?.currentSettings && (
               <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px" }}>
                 <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#334155", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>

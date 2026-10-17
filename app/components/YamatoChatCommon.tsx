@@ -5,6 +5,50 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 
+/**
+ * YamatoChatCommon のメタデータおよび仕様の型定義
+ */
+export interface YamatoChatCommonMetaType {
+  componentName: string;
+  version: string;
+  role: string;
+  features: {
+    featureName: string;
+    description: string;
+  }[];
+  supportedThemes: string[];
+  learningPaces: string[];
+}
+
+/**
+ * 構造化メタデータ（コード近接配置）
+ */
+export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
+  componentName: "YamatoChatCommon",
+  version: "2.0.0",
+  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替付き）",
+  features: [
+    {
+      featureName: "Theme Customization",
+      description: "emerald, blue, yellow, purple, cyan, orange, black, green, navy などの多様なカラーテーマスタイルを動的に適用"
+    },
+    {
+      featureName: "Learning Pace Synchronization",
+      description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
+    },
+    {
+      featureName: "Fullscreen & Responsive Window",
+      description: "チャット窓の最大化・縮小表示、およびリサイズ可能なフロートウィジェット設計"
+    },
+    {
+      featureName: "Backend API Integration",
+      description: "api.jptutoraiyamato.com/chat エンドポイントと連携し、会話履歴・ニックネーム・学習ペース・システムプロンプトを送信"
+    }
+  ],
+  supportedThemes: ["emerald", "blue", "yellow", "purple", "cyan", "orange", "black", "green", "navy"],
+  learningPaces: ["steady", "normal", "accelerated"]
+};
+
 type ChatMessage = {
   role: "assistant" | "user";
   content: string;
