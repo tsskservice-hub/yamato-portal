@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・4大ファイル並行コラム箇条書きインスペクター版）
+ * @description ヤマトAI 独立APIテスト画面（上下2段フルワイド・左右プロジェクト分離4大詳細コラムインスペクター版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -295,19 +295,19 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* 下段：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 4大ファイル並行コラム詳細インスペクター */}
+        {/* 下段：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 4大プロジェクト分離詳細コラムインスペクター */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ (4大コラム並行詳細インスペクター)
+              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ (プロジェクト別 4大詳細コラム)
             </h2>
             <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
               Live API Synced
             </span>
           </div>
 
-          {/* スクロールバー付きコンテナ（ラップトップ画面で一望しやすい設計） */}
-          <div style={{ maxHeight: "850px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "20px" }}>
+          {/* スクロールバー付きコンテナ */}
+          <div style={{ maxHeight: "850px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "24px" }}>
             
             {/* 1. 基本構成テーブル */}
             <table style={{ width: "100%", textAlign: "left", fontSize: "14px", borderCollapse: "collapse" }}>
@@ -377,67 +377,80 @@ export default function TestYamatoPage() {
               </tbody>
             </table>
 
-            {/* 2. 4大ファイル詳細スペック並行コラム (要約なし・上から順に箇条書き仕様) */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+            {/* 2. プロジェクト別 4大詳細コラム（左2つ：apiプロジェクト / 右2つ：yamato-portalプロジェクト） */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
               
-              {/* ① FoundationLayout.ts コラム */}
-              <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#1e40af", display: "flex", alignItems: "center", gap: "6px", margin: 0, borderBottom: "1px solid #dbeafe", paddingBottom: "8px" }}>
-                  <span>🚀</span> FoundationLayout.ts
-                </h4>
-                <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.4" }}>
-                  <li><strong>土台・エンジン:</strong> すべてのLLMプロンプトの根本ルールを統括</li>
-                  <li><strong>👤 命名規則:</strong> {foundationMeta?.currentSettings?.namingRules?.[0] || "ユーザーニックネームの適切な反映"}</li>
-                  <li><strong>🗣️ 言語規則:</strong> {foundationMeta?.currentSettings?.communicationRules?.[0] || "厳格な英語強制と日本語補助"}</li>
-                  <li><strong>🌍 環境コンテキスト:</strong> タイムゾーンに基づく日時・天気の動的挿入</li>
-                  <li><strong>📚 ナレッジバンク:</strong> 総合FAQデータの自動コンパイルと埋め込み</li>
-                  <li><strong>🎨 視覚支援生成:</strong> 図解・ダイアグラムの自動プロンプト構成</li>
-                  <li><strong>🔄 ターン制御:</strong> 会話の進行に応じた段階的フィードバック</li>
-                  <li><strong>🛡️ 安全性ガードレール:</strong> 不適切なプロンプトに対する防御メカニズム</li>
-                </ul>
+              {/* 【左側】：APIプロジェクト側コラム（2つ） */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px" }}>
+                <div style={{ fontSize: "13px", fontWeight: "bold", color: "#1d4ed8", borderBottom: "2px solid #93c5fd", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span>⚙️</span> APIプロジェクト側（バックエンド / Cloudflare Workers）
+                </div>
+
+                {/* ① FoundationLayout.ts */}
+                <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#1e40af", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>🚀</span> FoundationLayout.ts (基盤エンジン)
+                  </h4>
+                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
+                    <li><strong>コア機体設計:</strong> 全9ペルソナ共通のLLMシステムプロンプトの根本大元。</li>
+                    <li><strong>👤 命名規則管理:</strong> ユーザーニックネーム（`userNickname`）が存在する場合はその名前で親しみやすく呼びかけ、未設定時は「my friend」等の温かい表現に自動フォールバック。</li>
+                    <li><strong>🗣️ 通信・言語規則:</strong> 厳格な英語強制（AIの応答原則はすべて英語、日本語はターゲット語句や例文・漢字等の解説時のみ許可）。オーストラリア英語標準（AU/UKスペル規則: realise, colour, centre等）を厳守し、矢印の記号指定は常に `&gt;` または `-&gt;` を使用。</li>
+                    <li><strong>🌍 環境コンテキスト:</strong> タイムゾーンに基づく現在時刻・日付の動的挿入（デフォルト: Australia/Melbourne）。都市別の天気情報の自動連動とエラーハンドリング。</li>
+                    <li><strong>📚 総合FAQナレッジバンク:</strong> 総合FAQデータベース（`faqList`）の自動コンパイルとシステム内埋め込みにより、料金やプランに関する質問に正確に回答。</li>
+                    <li><strong>🎨 視覚支援・画像生成:</strong> 学習効果を高めるためのイラスト・ダイアグラム作成プロンプト（Imagen 3連携）の自動構成ルール。</li>
+                    <li><strong>🔄 ターン制御・Socratic対話:</strong> 直接的な解答やエッセイの丸写しを避け、段階的に生徒の自発的思考を促すコーチング手法の徹底。</li>
+                    <li><strong>🛡️ 安全性ガードレール:</strong> 不適切なプロンプトに対する強固な防御と、温かみのある人間の教師としてのロールプレイ維持。</li>
+                  </ul>
+                </div>
+
+                {/* ② YamatoApiCommon.tsx */}
+                <div style={{ backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#6b21a8", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>🛠️</span> YamatoApiCommon.tsx (バックエンド共通層)
+                  </h4>
+                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
+                    <li><strong>共通プロンプトインジェクション:</strong> 各ペルソナ固有のロジックに共通基盤を安全に注入するAPI層のパイプライン。</li>
+                    <li><strong>📦 拡張オプション型:</strong> `YamatoApiCommonOptions` 型定義により、`portalData` や学習ペース、FAQ等の共通オプションを型安全に伝播。</li>
+                    <li><strong>⚙️ パイプライン制御:</strong> `buildFoundationLayoutPrompt` を安全にラップし、リクエストごとの動的パラメータを漏れなく結合。</li>
+                    <li><strong>🔌 エンドポイント中継:</strong> HonoベースのCloudflare WorkersワーカーとVertex AI（Gemini 2.5 Flash）間のシームレスな通信制御。</li>
+                    <li><strong>🛡️ 型安全性とバリデーション:</strong> リクエストボディの検証、認証トークンチェック、およびエラーハンドリングの標準化。</li>
+                  </ul>
+                </div>
               </div>
 
-              {/* ② PageLayout.tsx コラム */}
-              <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", display: "flex", alignItems: "center", gap: "6px", margin: 0, borderBottom: "1px solid #dcfce7", paddingBottom: "8px" }}>
-                  <span>🚀</span> PageLayout.tsx
-                </h4>
-                <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.4" }}>
-                  <li><strong>共通ポータルUI:</strong> 複数ページのレイアウト構造を統括</li>
-                  <li><strong>🔐 認証フロー:</strong> Signup時の初回パスキー事前案内と3ステップガイド</li>
-                  <li><strong>👆 生体認証:</strong> Touch ID, Face ID, Windows Hello 対応</li>
-                  <li><strong>🎯 状態解決:</strong> Props &gt; Root Loader &gt; Default Fallback</li>
-                  <li><strong>📐 レイアウト:</strong> フルワイド及ビグリッドデザインのレスポンシブ適応</li>
-                  <li><strong>🧭 ナビゲーション:</strong> ヘッダー・フッターおよびパンくずリストの管理</li>
-                </ul>
-              </div>
+              {/* 【右側】：yamato-portalプロジェクト側コラム（2つ） */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px" }}>
+                <div style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", borderBottom: "2px solid #86efac", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span>🌐</span> yamato-portalプロジェクト側（フロントエンド / Remix）
+                </div>
 
-              {/* ③ YamatoApiCommon.tsx コラム */}
-              <div style={{ backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#6b21a8", display: "flex", alignItems: "center", gap: "6px", margin: 0, borderBottom: "1px solid #f3e8ff", paddingBottom: "8px" }}>
-                  <span>🛠️</span> YamatoApiCommon.tsx
-                </h4>
-                <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.4" }}>
-                  <li><strong>バックエンド共通:</strong> APIリクエスト・レスポンスの基盤</li>
-                  <li><strong>📦 オプション型:</strong> YamatoApiCommonOptions (portalData拡張)</li>
-                  <li><strong>⚙️ パイプライン:</strong> buildFoundationLayoutPrompt の安全なラップ</li>
-                  <li><strong>🔌 エンドポイント:</strong> Honoワーカーとのシームレスなデータ中継</li>
-                  <li><strong>🛡️ バリデーション:</strong> リクエストパラメータとトークンの型安全検証</li>
-                </ul>
-              </div>
+                {/* ③ PageLayout.tsx */}
+                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#166534", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>🚀</span> PageLayout.tsx (共通ポータルレイアウト)
+                  </h4>
+                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
+                    <li><strong>ポータル全体レイアウト:</strong> Remixで構築された全画面の共通ヘッダー、フッター、およびナビゲーション基盤。</li>
+                    <li><strong>🔐 パスキー認証解説ガイド:</strong> サインアップ（新規登録）時の初回限定パスキー事前案内と、3ステップの生体認証（Touch ID, Face ID等）解説トグルの統合。</li>
+                    <li><strong>🎯 スマート状態フォールバック:</strong> ユーザー状態や設定値の取得において `Props &gt; Root Loader &gt; Default Fallback` の優先順位で確実に解決。</li>
+                    <li><strong>📐 レスポンシブグリッド:</strong> ラップトップやタブレットなど、あらゆる画面サイズで一望しやすいフルワイド＆グリッドデザイン。</li>
+                    <li><strong>🧭 パンくず・メタデータ統括:</strong> ページごとのSEOメタタグ（`meta` 関数）および動的ルーティング状態の管理。</li>
+                  </ul>
+                </div>
 
-              {/* ④ YamatoChatCommon.tsx コラム */}
-              <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h4 style={{ fontSize: "13px", fontWeight: "bold", color: "#92400e", display: "flex", alignItems: "center", gap: "6px", margin: 0, borderBottom: "1px solid #fef3c7", paddingBottom: "8px" }}>
-                  <span>🛠️</span> YamatoChatCommon.tsx
-                </h4>
-                <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.4" }}>
-                  <li><strong>フロントAIウィジェット:</strong> 共通チャット・コックピットUI</li>
-                  <li><strong>🎨 テーマカラー:</strong> emerald, blue, yellow, purple等 9色対応</li>
-                  <li><strong>⚡ DB同期:</strong> 学習ペース切替時にSupabase profilesを即時更新</li>
-                  <li><strong>🖥️ フルスクリーン:</strong> 没入型学習のための全画面表示切り替え</li>
-                  <li><strong>💬 インタラクション:</strong> 音声入力・画像プレビュー・リアルタイム応答</li>
-                </ul>
+                {/* ④ YamatoChatCommon.tsx */}
+                <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#92400e", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>🛠️</span> YamatoChatCommon.tsx (フロントAIウィジェット)
+                  </h4>
+                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
+                    <li><strong>汎用対話UIコックピット:</strong> 全9ペルソナのテスト画面や学習ポータルで共有される高機能AIチャットウィジェット。</li>
+                    <li><strong>🎨 9色テーマカラー対応:</strong> `emerald`, `blue`, `yellow`, `purple`, `cyan`, `orange`, `black`, `green`, `navy` の動的カラー切り替え。</li>
+                    <li><strong>⚡ Supabase即時DB同期:</strong> 学習ペース（steady, normal, accelerated）やクレジット残高の変更をSupabase profilesとリアルタイム同期。</li>
+                    <li><strong>🖥️ フルスクリーン切替:</strong> 没入型の学習やエッセイ執筆をサポートする全画面表示モードの搭載。</li>
+                    <li><strong>💬 高度なインタラクション:</strong> 音声入力連携、画像プレビュー、クレジット消費ガイド、本日のクイズポップアップ等の総合機能。</li>
+                  </ul>
+                </div>
               </div>
 
             </div>
