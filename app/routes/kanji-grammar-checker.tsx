@@ -136,7 +136,7 @@ export default function KanjiGrammarCheckerPage() {
             </h1>
             
             <p className="text-base text-slate-600 leading-relaxed">
-              Paste the text transcribed by your AI Tutor from the photo of your handwritten answer here to instantly check your unique VCE Kanji (<span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 Yellow</span>) and VCE Grammar (<span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 Green</span>)!
+              Paste the text transcribed by your AI Tutor from the photo of your handwritten answer here to instantly check your unique VCE Kanji <span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 Yellow</span> and VCE Grammar <span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 Green</span>!
             </p>
           </div>
 

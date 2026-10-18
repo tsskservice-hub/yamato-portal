@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（API同期ナレッジ対応・データ送信完全軽量化版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（収縮時ボタンの枠線・背景・文字色個別指定対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -35,13 +35,16 @@ export interface ChatYamatoConciergeProps {
   userId?: string;
   credits?: number; // クレジット残高
   onOpenAuth?: () => void;
+  // 💡 追加：画面右下に収まっているときのトグルボタン専用のカスタムクラス指定（オプショナル）
+  floatingButtonClassName?: string;
 }
 
 export function ChatYamatoConcierge({ 
   initialLearningPace = "normal", 
   userId,
   credits: initialCredits = 10,
-  onOpenAuth
+  onOpenAuth,
+  floatingButtonClassName = "bg-white hover:bg-slate-50 text-slate-900 border-2 border-red-500", // デフォルトでご指定の「枠線：赤、背景：白、文字：黒」を設定
 }: ChatYamatoConciergeProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -291,7 +294,7 @@ export function ChatYamatoConcierge({
         <button
           type="button"
           onClick={() => setIsAiTutorOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative"
+          className={`${floatingButtonClassName} font-bold px-5 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
         >
           <span>🤖</span>
           <span>{characterName}</span>
