@@ -196,7 +196,7 @@ export default function TestYamatoPage() {
       {/* メインコンテンツ（上下フルワイド配置） */}
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
-        {/* セクション1：ヤマトAI 独立APIテスト画面 */}
+{/* セクション1：ヤマトAI 独立APIテスト画面 */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
@@ -220,11 +220,11 @@ export default function TestYamatoPage() {
                     fontWeight: "600",
                     cursor: "pointer",
                     border: appConfig.concierge.buttonStyle.border,
-                    backgroundColor: activeAppType === "concierge" ? "#0f172a" : appConfig.concierge.buttonStyle.background,
-                    color: activeAppType === "concierge" ? "#ffffff" : appConfig.concierge.buttonStyle.color
+                    backgroundColor: appConfig.concierge.buttonStyle.background, // 💡 選択時も元の背景色を維持
+                    color: appConfig.concierge.buttonStyle.color                   // 💡 選択時も元の文字色を維持
                   }}
                 >
-                  👋 LP Concierge (コンシェルジュ)
+                  👋 LP Concierge (コンシェルジュ) {activeAppType === "concierge" && " ✓"}
                 </button>
               </div>
             </div>
@@ -250,12 +250,12 @@ export default function TestYamatoPage() {
                         fontWeight: "600",
                         cursor: "pointer",
                         border: cfg.buttonStyle.border,
-                        backgroundColor: isSelected ? "#0f172a" : cfg.buttonStyle.background,
-                        color: isSelected ? "#ffffff" : cfg.buttonStyle.color
+                        backgroundColor: cfg.buttonStyle.background, // 💡 選択時も元の背景色を維持
+                        color: cfg.buttonStyle.color                   // 💡 選択時も元の文字色を維持
                       }}
                     >
-                      {type === "genkoyoshi-editor-general" && "📄 原稿用紙 (一般)"}
-                      {type === "game-igo" && "⚪ 囲碁ヤマト"}
+                      {type === "genkoyoshi-editor-general" && (<span>📄 原稿用紙 (一般) {isSelected && " ✓"}</span>)}
+                      {type === "game-igo" && (<span>⚪ 囲碁ヤマト {isSelected && " ✓"}</span>)}
                     </button>
                   );
                 })}
@@ -292,16 +292,16 @@ export default function TestYamatoPage() {
                         fontWeight: "600",
                         cursor: "pointer",
                         border: cfg.buttonStyle.border,
-                        backgroundColor: isSelected ? "#0f172a" : cfg.buttonStyle.background,
-                        color: isSelected ? "#ffffff" : cfg.buttonStyle.color
+                        backgroundColor: cfg.buttonStyle.background, // 💡 選択時も元の背景色を維持
+                        color: cfg.buttonStyle.color                   // 💡 選択時も元の文字色を維持
                       }}
                     >
-                      {type === "genkoyoshi-editor-vce" && "📄 原稿用紙 (VCE)"}
-                      {type === "eoy-oral-drill" && "🗣️ Oral Drill"}
-                      {type === "eoy-oral-elaborate" && "💭 Oral Elaborate"}
-                      {type === "eoy-oral-mock" && "📝 Oral Mock"}
-                      {type === "eoy-writing" && "✍️ Writing"}
-                      {type === "oral-exam-questions" && "✨ 語彙文法チェッカー"}
+                      {type === "genkoyoshi-editor-vce" && (<span>📄 原稿用紙 (VCE) {isSelected && " ✓"}</span>)}
+                      {type === "eoy-oral-drill" && (<span>🗣️ Oral Drill {isSelected && " ✓"}</span>)}
+                      {type === "eoy-oral-elaborate" && (<span>💭 Oral Elaborate {isSelected && " ✓"}</span>)}
+                      {type === "eoy-oral-mock" && (<span>📝 Oral Mock {isSelected && " ✓"}</span>)}
+                      {type === "eoy-writing" && (<span>✍️ Writing {isSelected && " ✓"}</span>)}
+                      {type === "oral-exam-questions" && (<span>✨ 語彙文法チェッカー {isSelected && " ✓"}</span>)}
                     </button>
                   );
                 })}
@@ -309,11 +309,18 @@ export default function TestYamatoPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: "20px", fontSize: "12px", color: "#64748b", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>Selected: <strong style={{ color: "#1e293b" }}>{currentConfig.name}</strong></span>
+          {/* 💡 選択中であることがひと目でわかるステータスインジケーター */}
+          <div style={{ marginTop: "20px", fontSize: "12px", color: "#1e293b", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "#16a34a", fontWeight: "bold" }}>✓ 現在選択中のヤマト:</span> 
+              <strong style={{ color: "#0f172a" }}>{currentConfig.name}</strong>
+            </span>
             <span style={{ fontFamily: "monospace", backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#334155" }}>{activeAppType}</span>
           </div>
         </div>
+
+
+
 
         {/* セクション2：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 詳細コラム（1列縦並び：API先行配置） */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
