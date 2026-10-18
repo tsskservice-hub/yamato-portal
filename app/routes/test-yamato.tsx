@@ -31,6 +31,11 @@ type AppConfig = {
   themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy";
   apiSourceFile: string;
   targetAudience: string;
+  buttonStyle: {
+    border: string;
+    background: string;
+    color: string;
+  };
 };
 
 export default function TestYamatoPage() {
@@ -101,6 +106,7 @@ export default function TestYamatoPage() {
       themeColor: "blue",
       apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
       targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
+      buttonStyle: { border: "2px solid red", background: "white", color: "black" },
     },
     "game-igo": {
       name: "囲碁ヤマト",
@@ -108,6 +114,7 @@ export default function TestYamatoPage() {
       themeColor: "black",
       apiSourceFile: "game-igo.ts (経由: FoundationLayout.ts)",
       targetAudience: "囲碁に興味のある日本語学習者",
+      buttonStyle: { border: "2px solid white", background: "black", color: "white" },
     },
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
@@ -115,6 +122,7 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-general.ts (経由: FoundationLayout.ts)",
       targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
+      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "white" }, // 水色・青・白
     },
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
@@ -122,6 +130,7 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-vce.ts (経由: FoundationLayout.ts)",
       targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
+      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "white" }, // 水色・青・白
     },
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
@@ -129,6 +138,7 @@ export default function TestYamatoPage() {
       themeColor: "yellow",
       apiSourceFile: "eoy-oral-drill.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
+      buttonStyle: { border: "2px solid #eab308", background: "#bbf7d0", color: "black" }, // 黄色・薄い緑・黒
     },
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
@@ -136,6 +146,7 @@ export default function TestYamatoPage() {
       themeColor: "purple",
       apiSourceFile: "eoy-oral-elaborate.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
+      buttonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "black" }, // 紫・うすい紫・黒
     },
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
@@ -143,6 +154,7 @@ export default function TestYamatoPage() {
       themeColor: "cyan",
       apiSourceFile: "eoy-oral-mock.ts (経由: FoundationLayout.ts)",
       targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
+      buttonStyle: { border: "2px solid red", background: "#3b82f6", color: "white" }, // 赤・青・白
     },
     "eoy-writing": {
       name: "EOY Writing Practice",
@@ -150,13 +162,15 @@ export default function TestYamatoPage() {
       themeColor: "orange",
       apiSourceFile: "eoy-writing.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末ライティング試験対策を行う生徒",
+      buttonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "black" }, // 青・うすい水色・黒
     },
     "oral-exam-questions": {
-      name: "口頭試験問題ジェネレーター",
-      greeting: "Hello, my friend! 🌟 Welcome to Oral Exam Questions generator. What kind of practice questions would you like to explore?",
+      name: "語彙文法チェッカー",
+      greeting: "Hello, my friend! 🌟 Welcome to the Vocabulary & Grammar Checker. What expressions or sentences would you like to check today?",
       themeColor: "green",
       apiSourceFile: "oral-exam-questions.ts (経由: FoundationLayout.ts)",
-      targetAudience: "VCE口頭試験の練習問題を作成したい生徒・教員",
+      targetAudience: "VCE日本語の語彙や文法を確認したい生徒・教員",
+      buttonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "black" }, // 緑・黄色・黒
     },
   };
 
@@ -191,12 +205,12 @@ export default function TestYamatoPage() {
                     fontSize: "12px",
                     fontWeight: "600",
                     cursor: "pointer",
-                    backgroundColor: activeAppType === "concierge" ? "#0f172a" : "#ffffff",
-                    color: activeAppType === "concierge" ? "#ffffff" : "#475569",
-                    border: "1px solid #cbd5e1"
+                    border: appConfig.concierge.buttonStyle.border,
+                    backgroundColor: activeAppType === "concierge" ? "#0f172a" : appConfig.concierge.buttonStyle.background,
+                    color: activeAppType === "concierge" ? "#ffffff" : appConfig.concierge.buttonStyle.color
                   }}
                 >
-                  👋 LP Concierge (青)
+                  👋 LP Concierge (コンシェルジュ)
                 </button>
               </div>
             </div>
@@ -207,26 +221,29 @@ export default function TestYamatoPage() {
                 🌍 Section 1: 全世界対応
               </h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {(["genkoyoshi-editor-general", "game-igo"] as const).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setActiveAppType(type)}
-                    style={{
-                      padding: "6px 12px",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      backgroundColor: activeAppType === type ? "#0f172a" : "#ffffff",
-                      color: activeAppType === type ? "#ffffff" : "#475569",
-                      border: "1px solid #cbd5e1"
-                    }}
-                  >
-                    {type === "genkoyoshi-editor-general" && "📄 原稿用紙 (一般)"}
-                    {type === "game-igo" && "⚪ 囲碁ヤマト"}
-                  </button>
-                ))}
+                {(["genkoyoshi-editor-general", "game-igo"] as const).map((type) => {
+                  const cfg = appConfig[type];
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setActiveAppType(type)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        border: cfg.buttonStyle.border,
+                        backgroundColor: activeAppType === type ? "#0f172a" : cfg.buttonStyle.background,
+                        color: activeAppType === type ? "#ffffff" : cfg.buttonStyle.color
+                      }}
+                    >
+                      {type === "genkoyoshi-editor-general" && "📄 原稿用紙 (一般)"}
+                      {type === "game-igo" && "⚪ 囲碁ヤマト"}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -245,30 +262,33 @@ export default function TestYamatoPage() {
                     "eoy-writing",
                     "oral-exam-questions",
                   ] as const
-                ).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setActiveAppType(type)}
-                    style={{
-                      padding: "6px 12px",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      backgroundColor: activeAppType === type ? "#0f172a" : "#ffffff",
-                      color: activeAppType === type ? "#ffffff" : "#475569",
-                      border: "1px solid #cbd5e1"
-                    }}
-                  >
-                    {type === "genkoyoshi-editor-vce" && "📄 原稿用紙 (VCE)"}
-                    {type === "eoy-oral-drill" && "🗣️ Oral Drill"}
-                    {type === "eoy-oral-elaborate" && "💭 Oral Elaborate"}
-                    {type === "eoy-oral-mock" && "📝 Oral Mock"}
-                    {type === "eoy-writing" && "✍️ Writing"}
-                    {type === "oral-exam-questions" && "❓ 口頭試験問題"}
-                  </button>
-                ))}
+                ).map((type) => {
+                  const cfg = appConfig[type];
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setActiveAppType(type)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        border: cfg.buttonStyle.border,
+                        backgroundColor: activeAppType === type ? "#0f172a" : cfg.buttonStyle.background,
+                        color: activeAppType === type ? "#ffffff" : cfg.buttonStyle.color
+                      }}
+                    >
+                      {type === "genkoyoshi-editor-vce" && "📄 原稿用紙 (VCE)"}
+                      {type === "eoy-oral-drill" && "🗣️ Oral Drill"}
+                      {type === "eoy-oral-elaborate" && "💭 Oral Elaborate"}
+                      {type === "eoy-oral-mock" && "📝 Oral Mock"}
+                      {type === "eoy-writing" && "✍️ Writing"}
+                      {type === "oral-exam-questions" && "✨ 語彙文法チェッカー"}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -515,7 +535,7 @@ export default function TestYamatoPage() {
 
       </main>
 
-      {/* 💡 YamatoChatCommon 呼び出し（最新の収縮時カスタムカラー指定対応） */}
+      {/* 💡 YamatoChatCommon 呼び出し */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig.name}
