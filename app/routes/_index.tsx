@@ -745,6 +745,29 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* ✨ 追加された Kanji & Grammar Checker カード */}
+              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
+                <div className="space-y-4">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-base">VCE Kanji & Grammar Checker</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Instantly verify unique VCE kanji and grammar patterns in your handwritten essay transcripts.</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-amber-600 font-medium">VCE Tool</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate("/kanji-grammar-checker");
+                    }}
+                    className="text-amber-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                  >
+                    <span>Open Checker</span> <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
               <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
