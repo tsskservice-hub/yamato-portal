@@ -317,7 +317,7 @@ export default function TestYamatoPage() {
                       🚀 {foundationMeta?.fileName || "FoundationLayout.ts"}
                     </span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {foundationMeta?.role || "すべてのプロンプトの根本的なルールやエンジンを組み立てる大元"}
+                      {foundationMeta?.role || "すべてのプロンプトの根本的なルールやエンジンを組み立てる大元（同期データのうち全てのヤマトに必要なデータを取り込む場所）"}
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
@@ -355,7 +355,7 @@ export default function TestYamatoPage() {
                       👨‍✈️ {ecosystemMeta?.template?.fileName || "a-template.ts"}
                     </span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {ecosystemMeta?.template?.role || "FoundationLayout のデータが内包されている YamatoApiCommon.tsx をインポートしてペルソナを記述するひな形"}
+                      {ecosystemMeta?.template?.role || "FoundationLayout のデータが内包されている YamatoApiCommon.tsx をインポートしてペルソナを記述するひな形（同期データのうち個別のヤマトに必要なデータを取り込む場所）"}
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
@@ -381,9 +381,9 @@ export default function TestYamatoPage() {
                     <span>🚀</span> FoundationLayout.ts (基盤エンジン)
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
-                    <li><strong>コア機体設計:</strong> 全9ペルソナ共通のLLMシステムプロンプトの根本大元。</li>
-                    <li><strong>👤 命名規則管理:</strong> ユーザーニックネーム（`userNickname`）が存在する場合はその名前で親しみやすく呼びかけ、未設定時は「my friend」等の温かい表現に自動フォールバック。</li>
-                    <li><strong>🗣️ 通信・言語規則:</strong> 厳格な英語強制（AIの応答原則はすべて英語、日本語はターゲット語句や例文・漢字等の解説時のみ許可）。オーストラリア英語標準（AU/UKスペル規則: realise, colour, centre等）を厳守し、矢印の記号指定は常に `&gt;` または `-&gt;` を使用。</li>
+                    <li><strong>コア機体設計:</strong> 全ペルソナ共通のLLMシステムプロンプトの根本大元。<strong>同期データのうち全てのヤマトに必要なデータ（FAQ等）を取り込む場所</strong>として機能。</li>
+                    <li><strong>👤 命名規則管理:</strong> ユーザーニックネーム（userNickname）が存在する場合はその名前で親しみやすく呼びかけ、未設定時は「my friend」等の温かい表現に自動フォールバック。</li>
+                    <li><strong>🗣️ 通信・言語規則:</strong> 厳格な英語強制（AIの応答原則はすべて英語、日本語はターゲット語句や例文・漢字等の解説時のみ許可）。オーストラリア英語標準（AU/UKスペル規則: realise, colour, centre等）を厳守し、矢印の記号指定は常に &quot;&rarr;&quot; または &quot;-&gt;&quot; を使用。</li>
                     <li><strong>🌍 環境コンテキスト:</strong> タイムゾーンに基づく現在時刻・日付の動的挿入（デフォルト: Australia/Melbourne）。都市別の天気情報の自動連動とエラーハンドリング。</li>
                     <li><strong>📚 総合FAQナレッジバンク:</strong> 総合FAQデータベースの自動コンパイルとシステム内埋め込みにより、料金やプランに関する質問に正確に回答。</li>
                     <li><strong>🎨 視覚支援・画像生成:</strong> 学習効果を高めるためのイラスト・ダイアグラム作成プロンプト（Imagen 3連携）の自動構成ルール。</li>
@@ -399,8 +399,8 @@ export default function TestYamatoPage() {
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
                     <li><strong>共通プロンプトインジェクション:</strong> 各ペルソナ固有のロジックに共通基盤を安全に注入するAPI層のパイプライン。</li>
-                    <li><strong>📦 拡張オプション型:</strong> `YamatoApiCommonOptions` 型定義により、学習ペースやFAQ等の共通オプションを型安全に伝播。</li>
-                    <li><strong>⚙️ パイプライン制御:</strong> `buildFoundationLayoutPrompt` を安全にラップし、リクエストごとの動的パラメータを漏れなく結合。</li>
+                    <li><strong>📦 拡張オプション型:</strong> YamatoApiCommonOptions 型定義により、学習ペースやFAQ等の共通オプションを型安全に伝播。</li>
+                    <li><strong>⚙️ パイプライン制御:</strong> buildFoundationLayoutPrompt を安全にラップし、リクエストごとの動的パラメータを漏れなく結合。</li>
                     <li><strong>🔌 エンドポイント中継:</strong> HonoベースのCloudflare WorkersワーカーとVertex AI（Gemini 2.5 Flash）間のシームレスな通信制御。</li>
                     <li><strong>🛡️ 型安全性とバリデーション:</strong> リクエストボディの検証、認証トークンチェック、およびエラーハンドリングの標準化。</li>
                   </ul>
@@ -420,14 +420,14 @@ export default function TestYamatoPage() {
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
                     <li><strong>汎用対話UIコックピット:</strong> 全9ペルソナのテスト画面や学習ポータルで共有される高機能AIチャットウィジェット。</li>
-                    <li><strong>🎨 9色テーマカラー対応:</strong> `emerald`, `blue`, `yellow`, `purple`, `cyan`, `orange`, `black`, `green`, `navy` の動的カラー切り替え。</li>
+                    <li><strong>🎨 9色テーマカラー対応:</strong> emerald, blue, yellow, purple, cyan, orange, black, green, navy の動的カラー切り替え。</li>
                     <li><strong>⚡ Supabase即時DB同期:</strong> 学習ペース（steady, normal, accelerated）やクレジット残高の変更をSupabase profilesとリアルタイム同期。</li>
                     <li><strong>🖥️ フルスクリーン切替:</strong> 没入型の学習やエッセイ執筆をサポートする全画面表示モードの搭載。</li>
                     <li><strong>💬 高度なインタラクション:</strong> 音声入力連携、画像プレビュー、クレジット消費ガイド、本日のクイズポップアップ等の総合機能。</li>
                   </ul>
                 </div>
 
-                {/* 💡 PageLayout.tsx (共通ポータルレイアウト ※枠外実装、ヤマト作成と非依存) */}
+                {/* 💡 PageLayout.tsx */}
                 <div style={{ backgroundColor: "#f1f5f9", border: "1px dashed #94a3b8", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#64748b", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
                     <span>ℹ️</span> 枠外実装: PageLayout.tsx (共通ポータルレイアウト ※ヤマト作成とは非依存)
@@ -479,13 +479,13 @@ export default function TestYamatoPage() {
                     <div style={{ fontSize: "10px", fontWeight: "bold", color: "#15803d", marginBottom: "4px" }}>
                       ⚙️ APIプロジェクト側（バックエンド処理ブロック）
                     </div>
-                    [3] a-template.ts 派生ファイル (各ヤマトの固有頭脳)<br/>
+                    [3] a-template.ts 派生ファイル (各ヤマトの固有頭脳：<strong>同期データのうち個別のヤマトに必要なデータを取り込む場所</strong>)<br/>
                     &nbsp;&nbsp;&nbsp;&nbsp;│ (専門知識プロンプトの構築)<br/>
                     &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
                     [4] YamatoApiCommon.tsx (共通パイプライン)<br/>
                     &nbsp;&nbsp;&nbsp;&nbsp;│ (学習ペースやオプション結合)<br/>
                     &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [5] FoundationLayout.ts (基盤エンジン)<br/>
+                    [5] FoundationLayout.ts (基盤エンジン：<strong>同期データのうち全てのヤマトに必要なデータを取り込む場所</strong>)<br/>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(根本ルール・オーストラリア英語等適用)
                   </div>
 
@@ -521,9 +521,9 @@ export default function TestYamatoPage() {
                 <span>📌</span> 3大ファイル（各ペルソナ頭脳・YamatoApiCommon・FoundationLayout）の役割分担順序
               </h3>
               <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "12px", color: "#475569", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.5" }}>
-                <li><strong>[3] a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や囲碁の対局など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。</li>
+                <li><strong>[3] a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や価格案内など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。<strong>同期データのうち個別のヤマトに必要なデータ（pricePlans等）を取り込む場所</strong>。</li>
                 <li><strong>[4] YamatoApiCommon.tsx（すべての通信を支える共通窓口）:</strong> 選択されたペルソナ固有のロジックと共通基盤を安全に結合・中継するバックエンドの共通パイプライン。</li>
-                <li><strong>[5] FoundationLayout.ts（すべてのヤマトに適用）:</strong> 全ペルソナの根本にある普遍的なルール（オーストラリア英語強制、Socratic対話、安全性ガードレールなど）を統括する基盤エンジン。</li>
+                <li><strong>[5] FoundationLayout.ts（すべてのヤマトに適用）:</strong> 全ペルソナの根本にある普遍的なルール（オーストラリア英語強制、Socratic対話など）を統括する基盤エンジン。<strong>同期データのうち全てのヤマトに必要なデータ（faqList等）を取り込む場所</strong>。</li>
               </ul>
             </div>
 
@@ -532,7 +532,7 @@ export default function TestYamatoPage() {
 
       </main>
 
-      {/* 💡 YamatoChatCommon 呼び出し（軽量化完了） */}
+      {/* 💡 YamatoChatCommon 呼び出し */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig.name}
