@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（ボタン位置調整版）
+ * @description EOY Writing Practice モジュール（ボタン位置修正版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -113,8 +113,8 @@ export default function Dashboard() {
           <div>
             <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
               
-              {/* 💡 「AI Yamato is ready for you」のすぐ右隣にボタンを配置 */}
-              <div className="flex items-center justify-between flex-wrap gap-3">
+              {/* 💡 「AI Yamato is ready for you」のすぐ右隣に配置（justify-betweenを削除し、flex items-center gap-4に変更） */}
+              <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
                   <span>🤖</span> AI Yamato is ready for you
                 </div>
