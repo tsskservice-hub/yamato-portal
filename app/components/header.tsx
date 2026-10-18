@@ -1,6 +1,6 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（要素の並び順変更版）
+ * @description ポータル共通ヘッダー（My Accountリンクを追加・移動版）
  */
 import React from 'react';
 import { Link } from '@remix-run/react';
@@ -51,7 +51,8 @@ export default function Header({
           2. credit（ログイン時のみ）
           3. pricing
           4. FAQ
-          5. sign in/out
+          5. My Account
+          6. sign in/out
         */}
         <div className="flex items-center space-x-3">
           {/* 1. Nickname (ログイン時のみ表示) */}
@@ -91,7 +92,16 @@ export default function Header({
             <span>FAQ</span>
           </Link>
 
-          {/* 5. Sign In / Sign Out */}
+          {/* 5. My Account */}
+          <Link 
+            to="/my-account" 
+            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1"
+          >
+            <User className="w-3.5 h-3.5 text-slate-500" />
+            <span>My Account</span>
+          </Link>
+
+          {/* 6. Sign In / Sign Out */}
           {user ? (
             <button 
               onClick={onSignOut}

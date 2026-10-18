@@ -88,12 +88,6 @@ export default function Footer({}: FooterProps) {
             >
               Contact
             </Link>
-            <Link
-              to="/my-account"
-              className="hover:text-indigo-600 transition-colors"
-            >
-              My Account
-            </Link>
           </div>
 
         </div>
