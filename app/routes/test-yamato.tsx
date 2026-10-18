@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（ログイン仕様削除・API同期ナレッジ完全移行版）
+ * @description ヤマトAI 独立APIテスト画面（ログイン仕様削除・API同期ナレッジ完全移行版・YamatoChatCommon最新対応）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { useSearchParams } from "@remix-run/react";
@@ -366,7 +366,7 @@ export default function TestYamatoPage() {
                   <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
                     <li><strong>コア機体設計:</strong> 全ペルソナ共通のLLMシステムプロンプトの根本大元。<strong>同期データのうち全てのヤマトに必要なデータ（FAQ等）を取り込む場所</strong>として機能。</li>
                     <li><strong>👤 命名規則管理:</strong> ユーザーニックネーム（userNickname）が存在する場合はその名前で親しみやすく呼びかけ、未設定時は「my friend」等の温かい表現に自動フォールバック。</li>
-                    <li><strong>🗣️ 通信・言語規則:</strong> 厳格な英語強制（AIの応答原則はすべて英語、日本語はターゲット語句や例文・漢字等の解説時のみ許可）。オーストラリア英語標準（AU/UKスペル規則: realise, colour, centre等）を厳守し、矢印の記号指定は常に &quot;&rarr;&quot; または &quot;-&gt;&quot; を使用。</li>
+                    <li><strong>🗣️ 通信・言語規則:</strong> 厳格な英語強制（AIの応答原則はすべて英語、日本語はターゲット語句や例文・漢字等の解説時のみ許可）。オーストラリア英語標準（AU/UKスペル規則: realise, colour, centre等）を厳守し、矢印の記号指定は常に "&rarr;" または "-&gt;" を使用。</li>
                     <li><strong>🌍 環境コンテキスト:</strong> タイムゾーンに基づく現在時刻・日付の動的挿入（デフォルト: Australia/Melbourne）。都市別の天気情報の自動連動とエラーハンドリング。</li>
                     <li><strong>📚 総合FAQナレッジバンク:</strong> 総合FAQデータベースの自動コンパイルとシステム内埋め込みにより、料金やプランに関する質問に正確に回答。</li>
                     <li><strong>🎨 視覚支援・画像生成:</strong> 学習効果を高めるためのイラスト・ダイアグラム作成プロンプト（Imagen 3連携）の自動構成ルール。</li>
@@ -515,7 +515,7 @@ export default function TestYamatoPage() {
 
       </main>
 
-      {/* 💡 YamatoChatCommon 呼び出し */}
+      {/* 💡 YamatoChatCommon 呼び出し（最新の収縮時カスタムカラー指定対応） */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig.name}
