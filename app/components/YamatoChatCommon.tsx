@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（画像アップロード・フォントサイズ切替・新9色テーマカラー対応版）
+ * @description ヤマトAIチャットウィジェット（未ログインガード・クレジット残高表示・402スマートクレジット制御・新9色テーマ対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,16 +25,24 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.9.0",
-  role: "ポータル共通AIチャットウィジェット（新9色テーマ対応版）",
+  version: "3.0.0",
+  role: "ポータル共通AIチャットウィジェット（ログインガード・クレジット管理完全統合版）",
   features: [
     {
-      featureName: "New 9 Color Themes",
-      description: "赤、青、黒、緑、黄色、オレンジ、紫、水色、ピンクの新しい9色テーマに対応"
+      featureName: "Login Guard & Auth Modal Trigger",
+      description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
     },
     {
-      featureName: "Customizable Floating Button Styles",
-      description: "画面右下に収まっているときのトグルボタンの枠線色、ボタン背景、文字色を個別に指定可能"
+      featureName: "Live Credit Display & Warning Badge",
+      description: "ヘッダーに現在のクレジット残高をリアルタイム表示し、不足時に警告バッジを点灯"
+    },
+    {
+      featureName: "Smart 402 Credit Error Handling",
+      description: "バックエンドからの ZERO_CREDITS および PARTIAL_SHORTAGE エラーをスマートにハンドリング"
+    },
+    {
+      featureName: "New 9 Color Themes",
+      description: "赤、青、黒、緑、黄色、オレンジ, 紫、水色、ピンクの新しい9色テーマに対応"
     },
     {
       featureName: "Image Upload & Vision Support",
@@ -47,14 +55,6 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Learning Pace Synchronization",
       description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
-    },
-    {
-      featureName: "Fullscreen & Responsive Window",
-      description: "チャット窓の最大化・縮小表示、およびリサイズ可能なフロートウィジェット設計"
-    },
-    {
-      featureName: "Smart Credit Handling",
-      description: "残高ゼロ（ZERO_CREDITS）と部分的な残高不足（PARTIAL_SHORTAGE）を検知し案内"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink"],
@@ -67,7 +67,13 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// 外部から受け取るプロパティ（Props）の型定義（新しい9色に対応）
+// 💡 機能ごとの消費クレジット定義（バックエンドの credit-rules.ts と完全に一致）
+const FEATURE_COSTS = {
+  textAi: 2,         // 通常のテキストチャット
+  imageAi: 4,        // 画像付きチャット・ビジュアル解説
+};
+
+// 外部から受け取るプロパティ（Props）の型定義
 export type YamatoChatCommonProps = {
   characterName?: string;
   initialGreeting?: string;
@@ -84,9 +90,11 @@ export type YamatoChatCommonProps = {
   initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string;
   userNickname?: string;
+  credits?: number; // クレジット残高初期値
+  onOpenAuth?: () => void; // 未ログイン時に認証モーダルを開くコールバック
 };
 
-// 💡 新しい9色（赤、青、黒、緑、黄色、オレンジ、紫、水色、ピンク）のテーマカラーごとのスタイル定義
+// 新9色のテーマカラーごとのスタイル定義
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -244,11 +252,20 @@ export function YamatoChatCommon({
   initialLearningPace = "normal",
   userId,
   userNickname = "My friend",
+  credits: initialCredits = 10,
+  onOpenAuth,
 }: YamatoChatCommonProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 💡 クレジット残高の管理ステート
+  const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
+
+  useEffect(() => {
+    setCurrentCredits(initialCredits);
+  }, [initialCredits]);
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
 
@@ -342,6 +359,24 @@ export function YamatoChatCommon({
     };
   }, []);
 
+  // 💡 Supabaseから最新のクレジット残高を再取得する関数
+  const refreshUserCredits = async () => {
+    if (!userId) return;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error && typeof data.credits === 'number') {
+        setCurrentCredits(data.credits);
+      }
+    } catch (err) {
+      console.error("Failed to refresh credits:", err);
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -357,6 +392,43 @@ export function YamatoChatCommon({
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
+
+    // 💡 ガード1: 未ログインの場合はチャットをブロックして認証モーダルを開く
+    if (!userId) {
+      alert("お話しするには、無料サインアップまたはログインが必要です！");
+      if (onOpenAuth) {
+        onOpenAuth();
+      }
+      return;
+    }
+
+    // 💡 ガード2: クレジット残高がゼロの場合の事前ブロック
+    if (currentCredits <= 0) {
+      setTutorMessages((prev) => [
+        ...prev,
+        { role: "user", content: tutorInput.trim() },
+        {
+          role: "assistant",
+          content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
+        }
+      ]);
+      setTutorInput("");
+      return;
+    }
+
+    // 💡 ガード3: クレジット残高がテキストチャットの最低コストに満たない場合
+    if (currentCredits < FEATURE_COSTS.textAi) {
+      setTutorMessages((prev) => [
+        ...prev,
+        { role: "user", content: tutorInput.trim() },
+        {
+          role: "assistant",
+          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request. Please top up your account! 🪙`
+        }
+      ]);
+      setTutorInput("");
+      return;
+    }
 
     const userMsg = tutorInput.trim() || "Please check this answer image.";
     const needsVisual = requestVisualAid;
@@ -393,7 +465,7 @@ export function YamatoChatCommon({
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,
-          userId: userId,
+          userId: userId, // 💡 バックエンドでクレジットを減算するためにユーザーIDを送信
         }),
       });
 
@@ -405,6 +477,7 @@ export function YamatoChatCommon({
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
+      // 💡 402スマートクレジットエラーハンドリング
       if (!response.ok) {
         if (response.status === 402) {
           setIsTutorLoading(false);
@@ -414,12 +487,14 @@ export function YamatoChatCommon({
               ...newMessages,
               { role: "assistant", content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! Please top up your credits to continue!` }
             ]);
+            await refreshUserCredits();
             return;
           } else if (errorCode === "PARTIAL_SHORTAGE") {
             setTutorMessages([
               ...newMessages,
-              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\nMy friend, standard text chat (2 credits) is available!` }
+              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\nMy friend, standard text chat (2 credits) is available, but this action requires more credits.` }
             ]);
+            await refreshUserCredits();
             return;
           }
         }
@@ -435,6 +510,10 @@ export function YamatoChatCommon({
         ...newMessages,
         { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
       ]);
+
+      // 💡 リロードせずにバックグラウンドでクレジット残高を最新化
+      await refreshUserCredits();
+
     } catch (err: any) {
       console.error(err);
       setIsTutorLoading(false);
@@ -453,12 +532,17 @@ export function YamatoChatCommon({
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
             style={floatingInlineStyle}
-            className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm`}
+            className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
           >
             <span>🤖</span>
             <span>{characterName}</span>
             {selectedImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
+            )}
+            {userId && currentCredits < FEATURE_COSTS.textAi && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
+                !
+              </span>
             )}
           </button>
         ) : (
@@ -471,11 +555,22 @@ export function YamatoChatCommon({
             }`}
           >
             <div className="w-full h-full flex flex-col">
-              {/* ヘッダー */}
+              {/* ヘッダー（クレジット残高表示対応） */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-                <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-2 m-0`}>
-                  <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
+                    <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
+                  </h3>
+                  {userId ? (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                      🪙 {currentCredits} credits
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                      🔒 Guest (Login Required)
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
@@ -547,124 +642,147 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* チャット履歴エリア */}
-              <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
-                {tutorMessages.map((msg, idx) => (
-                  <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                    <div
-                      className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
-                        msg.role === "user"
-                          ? currentTheme.userBubble
-                          : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
-                      }`}
-                    >
-                      {msg.role === "user" ? (
-                        <div>
-                          {msg.content}
-                          {msg.imageUrl && (
-                            <div className="mt-2">
-                              <img
-                                src={msg.imageUrl}
-                                alt="User Upload"
-                                className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
-                                onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                          {msg.imageUrl && (
-                            <div className="mt-2">
-                              <img
-                                src={msg.imageUrl}
-                                alt="AI Generated Visual Aid"
-                                className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
-                                onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {isTutorLoading && (
-                  <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
-                    <span className="inline-block animate-spin text-sm">🤖</span>
-                    <span>Yamato is thinking & reading...</span>
-                  </div>
-                )}
-              </div>
-
-              {/* 添付画像のプレビューバー */}
-              {selectedImagePreview && (
-                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                  <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
-                  <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
+              {/* 💡 未ログイン時の新規登録・ログインガード画面 */}
+              {!userId ? (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="text-3xl">🔒</div>
+                  <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Please sign up or log in to chat with {characterName} and receive welcome credits!
+                  </p>
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedImage(null);
-                      setSelectedImagePreview(null);
-                      if (fileInputRef.current) fileInputRef.current.value = '';
+                      setIsAiTutorOpen(false);
+                      if (onOpenAuth) onOpenAuth();
                     }}
-                    className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
+                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
                   >
-                    ✕
+                    Sign In / Sign Up Now
                   </button>
                 </div>
+              ) : (
+                <>
+                  {/* チャット履歴エリア */}
+                  <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
+                    {tutorMessages.map((msg, idx) => (
+                      <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                        <div
+                          className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
+                            msg.role === "user"
+                              ? currentTheme.userBubble
+                              : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                          }`}
+                        >
+                          {msg.role === "user" ? (
+                            <div>
+                              {msg.content}
+                              {msg.imageUrl && (
+                                <div className="mt-2">
+                                  <img
+                                    src={msg.imageUrl}
+                                    alt="User Upload"
+                                    className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
+                                    onClick={() => setModalImageSrc(msg.imageUrl || null)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                              {msg.imageUrl && (
+                                <div className="mt-2">
+                                  <img
+                                    src={msg.imageUrl}
+                                    alt="AI Generated Visual Aid"
+                                    className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
+                                    onClick={() => setModalImageSrc(msg.imageUrl || null)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {isTutorLoading && (
+                      <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
+                        <span className="inline-block animate-spin text-sm">🤖</span>
+                        <span>Yamato is thinking & reading...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 添付画像のプレビューバー */}
+                  {selectedImagePreview && (
+                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
+                      <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                      <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedImage(null);
+                          setSelectedImagePreview(null);
+                          if (fileInputRef.current) fileInputRef.current.value = '';
+                        }}
+                        className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 入力フォーム */}
+                  <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
+                      >
+                        <span>📷</span>
+                        <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
+                      </button>
+
+                      <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={requestVisualAid}
+                          onChange={(e) => setRequestVisualAid(e.target.checked)}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+                        />
+                        <span>Visual Aid</span>
+                      </label>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={tutorInput}
+                        onChange={(e) => setTutorInput(e.target.value)}
+                        placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        disabled={isTutorLoading}
+                        className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
+                      />
+                      <button
+                        type="submit"
+                        disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
+                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </form>
+                </>
               )}
-
-              {/* 入力フォーム */}
-              <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                <div className="flex items-center justify-between">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
-                  >
-                    <span>📷</span>
-                    <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
-                  </button>
-
-                  <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={requestVisualAid}
-                      onChange={(e) => setRequestVisualAid(e.target.checked)}
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
-                    />
-                    <span>Visual Aid</span>
-                  </label>
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={tutorInput}
-                    onChange={(e) => setTutorInput(e.target.value)}
-                    placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
-                    disabled={isTutorLoading}
-                    className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
-                  />
-                  <button
-                    type="submit"
-                    disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
-                    className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
-                  >
-                    Send
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         )}
@@ -691,7 +809,7 @@ export function YamatoChatCommon({
           </div>
         </div>
       )}
-  </>
+    </>
   );
 }
 
