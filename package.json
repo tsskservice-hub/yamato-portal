@@ -2,13 +2,15 @@
   "name": "yamato-portal",
   "private": true,
   "type": "module",
-  "scripts": {
-    "dev": "remix vite:dev",
-    "build": "remix vite:build && npx esbuild server.ts --bundle --format=esm --platform=browser --external:@cloudflare/* --external:@remix-run/* --external:react --external:react-dom --outfile=functions/[[path]].js",
-    "sync:knowledge": "node scripts/sync-knowledge.js",
-    "deploy:full": "npm run build && npm run sync:knowledge",
-    "start": "npm run build && wrangler pages dev build/client"
-  },
+
+"scripts": {
+  "dev": "remix vite:dev",
+  "build": "remix vite:build && npx esbuild server.ts --bundle --format=esm --platform=browser --external:@cloudflare/* --external:@remix-run/* --external:react --external:react-dom --outfile=functions/[[path]].js",
+  "sync:knowledge": "npx tsx scripts/sync-knowledge.ts",
+  "deploy:full": "npm run build && npm run sync:knowledge",
+  "start": "npm run build && wrangler pages dev build/client"
+},
+
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260702.1",
     "@remix-run/cloudflare": "^2.17.5",
@@ -32,6 +34,7 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.18",
+    "tsx": "^4.23.15",
     "wrangler": "^3.114.1"
   }
 }
