@@ -162,11 +162,6 @@ export default function TestYamatoPage() {
 
   const currentConfig = appConfig[activeAppType];
 
-  const foundationMeta = ecosystemMeta?.foundation;
-  const portalLayoutMeta = ecosystemMeta?.portalLayout;
-  const apiCommonMeta = ecosystemMeta?.apiCommon;
-  const chatCommonMeta = ecosystemMeta?.chatCommon;
-
   return (
     <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
@@ -309,21 +304,15 @@ export default function TestYamatoPage() {
               </thead>
               <tbody>
                 <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>
-                    {foundationMeta?.layer || "土台 (機体)"}
-                  </td>
+                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>土台 (機体)</td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>
-                      🚀 {foundationMeta?.fileName || "FoundationLayout.ts"}
-                    </span>
+                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>🚀 FoundationLayout.ts</span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {foundationMeta?.role || "すべてのプロンプトの根本的なルールやエンジンを組み立てる大元（同期データのうち全てのヤマトに必要なデータを取り込む場所）"}
+                      すべてのプロンプトの根本的なルールやエンジンを組み立てる大元（同期データのうち全てのヤマトに必要なデータを取り込む場所）
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#94a3b8" }}>
-                      (🚀 {portalLayoutMeta?.fileName || "PageLayout.tsx"})
-                    </span>
+                    <span style={{ fontWeight: "bold", color: "#94a3b8" }}>(🚀 PageLayout.tsx)</span>
                     <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px", lineHeight: "1.4" }}>
                       ポータル全体の共通レイアウト（※ヤマトチャット作成には直接関与しません）
                     </p>
@@ -332,30 +321,24 @@ export default function TestYamatoPage() {
                 <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
                   <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>窓口・外装</td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>
-                      🛠️ {apiCommonMeta?.fileName || "YamatoApiCommon.tsx"}
-                    </span>
+                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoApiCommon.tsx</span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {apiCommonMeta?.role || "共通プロンプト構造やオプションを受け渡す基盤"}
+                      共通プロンプト構造やオプションを受け渡す基盤
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>
-                      🛠️ {chatCommonMeta?.fileName || "YamatoChatCommon.tsx"}
-                    </span>
+                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoChatCommon.tsx</span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {chatCommonMeta?.role || "対話UIの汎用テンプレート・操縦士コックピット"}
+                      対話UIの汎用テンプレート・操縦士コックピット
                     </p>
                   </td>
                 </tr>
                 <tr>
                   <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>乗組員 (ひな形)</td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#d97706" }}>
-                      👨‍✈️ {ecosystemMeta?.template?.fileName || "a-template.ts"}
-                    </span>
+                    <span style={{ fontWeight: "bold", color: "#d97706" }}>👨‍✈️ a-template.ts</span>
                     <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      {ecosystemMeta?.template?.role || "FoundationLayout のデータが内包されている YamatoApiCommon.tsx をインポートしてペルソナを記述するひな形（同期データのうち個別のヤマトに必要なデータを取り込む場所）"}
+                      FoundationLayout のデータが内包されている YamatoApiCommon.tsx をインポートしてペルソナを記述するひな形（同期データのうち個別のヤマトに必要なデータを取り込む場所）
                     </p>
                   </td>
                   <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
