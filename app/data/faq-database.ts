@@ -13,7 +13,7 @@ export interface FaqItem {
   expertGuidance: string;  // Scoring criteria and guidance policy referenced by AI Yamato in its prompt (Backend/AI use only; hidden on frontend FAQ view)
 }
 
-export const faqDatabase: FaqItem[] = [
+export const faqList: FaqItem[] = [
   // --- 1. Portal Usage Related (portal_usage) ---
   {
     id: "portal_credits_system",

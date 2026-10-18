@@ -18,7 +18,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
-import { faqDatabase, FaqItem } from '../data/faq-database';
+import { faqList, FaqItem } from '../data/faq-database';
 
 export const meta: MetaFunction = () => {
   return [
@@ -51,7 +51,7 @@ export default function FaqPage() {
 
   // Filter FAQs by search query and category
   const filteredFaqs = useMemo(() => {
-    return faqDatabase.filter(item => {
+    return faqList.filter(item => {
       const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
       const query = searchQuery.toLowerCase().trim();
       
