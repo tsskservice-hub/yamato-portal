@@ -1,10 +1,10 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成機能付き）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { useRouteLoaderData } from "@remix-run/react";
-import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles } from "lucide-react";
+import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
+import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles, Home, ChevronRight } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
 import { supabase } from "../lib/supabaseClient";
@@ -21,6 +21,7 @@ type PageLayoutProps = {
   nickname?: string;
   learningPace?: "steady" | "normal" | "accelerated"; 
   isDarkMode?: boolean;
+  breadcrumbTitle?: string; // 💡 個別ページでカスタム名称を指定したい場合のオプション
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -29,7 +30,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   credits: propCredits,  
   nickname: propNickname,
   learningPace: propLearningPace, 
-  isDarkMode = false
+  isDarkMode = false,
+  breadcrumbTitle
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
@@ -37,6 +39,38 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     nickname?: string;  
     learningPace?: "steady" | "normal" | "accelerated"; 
   } | undefined;
+
+  const location = useLocation();
+
+  // 💡 パス名から自動でパンくずの項目を生成するロジック
+  const generateBreadcrumbs = () => {
+    const paths = location.pathname.split("/").filter(Boolean);
+    const crumbs: { label: string; path: string }[] = [];
+    
+    let currentPath = "";
+    paths.forEach((segment, index) => {
+      currentPath += `/${segment}`;
+      
+      // パスセグメントに応じた分かりやすい日本語・英語のラベル変換マップ
+      let label = segment.replace(/-/g, " ");
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      
+      if (segment === "eoy-writing") label = "EOY Writing Practice";
+      if (segment === "kanji-grammar-checker") label = "Kanji & Grammar Checker";
+      if (segment === "dashboard") label = "Dashboard";
+
+      // 最後のセグメントかつ prop で custom title が指定されている場合はそちらを優先
+      if (index === paths.length - 1 && breadcrumbTitle) {
+        label = breadcrumbTitle;
+      }
+
+      crumbs.push({ label, path: currentPath });
+    });
+
+    return crumbs;
+  };
+
+  const breadcrumbs = generateBreadcrumbs();
 
   // 💡 ユーザー情報・クレジット・ニックネーム・学習ペースの状態管理（props > rootData > local state）
   const [user, setUser] = useState<any>(propUser !== undefined ? propUser : (rootData?.user ?? null));
@@ -162,7 +196,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   const resolvedNickname = nickname && nickname.trim() !== "" ? nickname : "My friend";
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className={`flex flex-col min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
       <Header 
         user={user} 
         credits={credits} 
@@ -170,6 +204,36 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={handleSignOut} 
       />
+
+      {/* 🍞 共通パンくずリスト（トップページ '/' 以外の階層でのみ表示） */}
+      {location.pathname !== "/" && (
+        <nav aria-label="Breadcrumb" className={`w-full border-b px-4 py-2.5 text-xs sm:text-sm font-medium ${isDarkMode ? 'bg-slate-900/60 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+          <div className="max-w-4xl mx-auto flex items-center space-x-2 overflow-x-auto whitespace-nowrap">
+            <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+              <Home className="w-3.5 h-3.5" />
+              <span>Home</span>
+            </Link>
+            {breadcrumbs.map((crumb, index) => {
+              const isLast = index === breadcrumbs.length - 1;
+              return (
+                <div key={crumb.path} className="flex items-center space-x-2">
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  {isLast ? (
+                    <span className={`font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                      {crumb.label}
+                    </span>
+                  ) : (
+                    <Link to={crumb.path} className="hover:text-blue-600 transition-colors">
+                      {crumb.label}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </nav>
+      )}
+
       <main className="flex-grow">
         {children}
       </main>
