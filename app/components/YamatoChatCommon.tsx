@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（画像アップロード・フォントサイズ切替・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐完全統合版）
+ * @description ヤマトAIチャットウィジェット（画像アップロード・フォントサイズ切替・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐・収縮時ボタン詳細カラー指定対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,9 +25,13 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.7.0",
-  role: "ポータル共通AIチャットウィジェット（画像アップロード・フォントサイズ変更・全テーマカラー・Supabase即時更新・フルスクリーン切替・スマートクレジットエラー分岐対応）",
+  version: "2.8.0",
+  role: "ポータル共通AIチャットウィジェット（収縮時ボタンの枠線・背景・文字色個別指定対応版）",
   features: [
+    {
+      featureName: "Customizable Floating Button Styles",
+      description: "画面右下に収まっているときのトグルボタンの枠線色、ボタン背景・ホバー色、文字色をテーマごと、またはプロパティで個別に指定可能"
+    },
     {
       featureName: "Image Upload & Vision Support",
       description: "手書き答案などの画像を選択・プレビュー付きでアップロードし、AI家庭教師に画像付きで質問送信可能"
@@ -65,24 +69,30 @@ type ChatMessage = {
 
 // 外部から受け取るプロパティ（Props）の型定義
 export type YamatoChatCommonProps = {
-  characterName?: string;         // チャット窓のタイトルに表示する名前
-  initialGreeting?: string;      // 最初の一言メッセージ
-  systemPrompt?: string;          // キャラクター固有の指示
+  characterName?: string;             // チャット窓のタイトルに表示する名前
+  initialGreeting?: string;           // 最初の一言メッセージ
+  systemPrompt?: string;              // キャラクター固有の指示
   appType?: "concierge" | "writing" | "oral" | "general" | string;  
   
   // 共通の初期非表示仕様とテーマカラー設定
-  defaultOpen?: boolean;          // 初期状態で開いておくか
+  defaultOpen?: boolean;              // 初期状態で開いておくか
   themeColor?: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy" | string; 
   
+  // 💡 追加：画面右下に収まっているときのトグルボタン専用のカスタムカラー指定（オプショナル）
+  floatingButtonClassName?: string;   // 例: "bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-300"
+
   // 学習ペースの初期値、Supabase更新用のユーザーID、ユーザーのニックネーム
   initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string; 
-  userNickname?: string;          // ユーザーのニックネームを受け取るプロパティ
+  userNickname?: string;              // ユーザーのニックネームを受け取るプロパティ
 };
 
-// カラーテーマごとのスタイル定義（全対応版）
+// カラーテーマごとのスタイル定義（収縮時ボタンの枠線・背景・文字色の個別指定プロパティを内包）
 const themeStyles = {
   emerald: {
+    floatingBg: "bg-emerald-600 hover:bg-emerald-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-emerald-400",
     button: "bg-emerald-600 hover:bg-emerald-700 text-white",
     border: "border-emerald-300",
     headerText: "text-emerald-900",
@@ -95,6 +105,9 @@ const themeStyles = {
     submitBtn: "bg-emerald-600 hover:bg-emerald-700 text-white",
   },
   blue: {
+    floatingBg: "bg-blue-600 hover:bg-blue-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-blue-400",
     button: "bg-blue-600 hover:bg-blue-700 text-white",
     border: "border-blue-300",
     headerText: "text-blue-900",
@@ -107,6 +120,9 @@ const themeStyles = {
     submitBtn: "bg-blue-600 hover:bg-blue-700 text-white",
   },
   yellow: {
+    floatingBg: "bg-yellow-500 hover:bg-yellow-600",
+    floatingText: "text-slate-900",
+    floatingBorder: "border border-yellow-300",
     button: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
     border: "border-yellow-300",
     headerText: "text-yellow-900",
@@ -119,6 +135,9 @@ const themeStyles = {
     submitBtn: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
   },
   purple: {
+    floatingBg: "bg-purple-600 hover:bg-purple-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-purple-400",
     button: "bg-purple-600 hover:bg-purple-700 text-white",
     border: "border-purple-300",
     headerText: "text-purple-900",
@@ -131,6 +150,9 @@ const themeStyles = {
     submitBtn: "bg-purple-600 hover:bg-purple-700 text-white",
   },
   cyan: {
+    floatingBg: "bg-cyan-600 hover:bg-cyan-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-cyan-400",
     button: "bg-cyan-600 hover:bg-cyan-700 text-white",
     border: "border-cyan-300",
     headerText: "text-cyan-900",
@@ -143,6 +165,9 @@ const themeStyles = {
     submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
   },
   orange: {
+    floatingBg: "bg-orange-500 hover:bg-orange-600",
+    floatingText: "text-white",
+    floatingBorder: "border border-orange-300",
     button: "bg-orange-500 hover:bg-orange-600 text-white",
     border: "border-orange-300",
     headerText: "text-orange-900",
@@ -155,6 +180,9 @@ const themeStyles = {
     submitBtn: "bg-orange-500 hover:bg-orange-600 text-white",
   },
   black: {
+    floatingBg: "bg-slate-900 hover:bg-black",
+    floatingText: "text-white",
+    floatingBorder: "border border-slate-700",
     button: "bg-slate-900 hover:bg-black text-white",
     border: "border-slate-700",
     headerText: "text-slate-900",
@@ -167,6 +195,9 @@ const themeStyles = {
     submitBtn: "bg-slate-900 hover:bg-black text-white",
   },
   green: {
+    floatingBg: "bg-green-600 hover:bg-green-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-green-400",
     button: "bg-green-600 hover:bg-green-700 text-white",
     border: "border-green-300",
     headerText: "text-green-900",
@@ -179,6 +210,9 @@ const themeStyles = {
     submitBtn: "bg-green-600 hover:bg-green-700 text-white",
   },
   navy: {
+    floatingBg: "bg-indigo-900 hover:bg-indigo-950",
+    floatingText: "text-white",
+    floatingBorder: "border border-indigo-400",
     button: "bg-indigo-900 hover:bg-indigo-950 text-white",
     border: "border-indigo-300",
     headerText: "text-indigo-950",
@@ -206,6 +240,7 @@ export function YamatoChatCommon({
   appType = "general",
   defaultOpen = false,      
   themeColor = "emerald",    
+  floatingButtonClassName, // 💡 追加：右下の収縮ボタン用カスタムクラス
   initialLearningPace = "normal", 
   userId, 
   userNickname = "My friend", 
@@ -215,7 +250,7 @@ export function YamatoChatCommon({
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // フォントサイズの管理ステート ('sm' | 'base' | 'lg' | 'xl')
+  // フォントサイズの管理ステート
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
 
   // 画像アップロード用ステート
@@ -224,6 +259,9 @@ export function YamatoChatCommon({
 
   // 選択されたテーマのスタイルセットを取得
   const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.emerald;
+
+  // 💡 画面右下のボタンのクラス決定ロジック（個別指定 className があれば最優先、なければテーマの個別指定を合体）
+  const finalFloatingButtonClass = floatingButtonClassName || `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     {
@@ -316,7 +354,6 @@ export function YamatoChatCommon({
     };
   }, []);
 
-  // 画像選択ハンドラー
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -355,7 +392,6 @@ export function YamatoChatCommon({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      // 💡 api.jptutoraiyamato.com/chat へリクエスト送信（imageBase64対応）
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -382,7 +418,6 @@ export function YamatoChatCommon({
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
-      // 💡 クレジット不足エラー（402 Payment Required）のスマート分岐ハンドリング
       if (!response.ok) {
         if (response.status === 402) {
           setIsTutorLoading(false);
@@ -439,7 +474,7 @@ export function YamatoChatCommon({
           <button
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
-            className={`${currentTheme.button} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm`}
+            className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm`}
           >
             <span>🤖</span>
             <span>{characterName}</span>
@@ -505,7 +540,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI（新規追加） */}
+              {/* フォントサイズ変更UI */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -533,7 +568,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* チャット履歴エリア（フォントサイズ反映） */}
+              {/* チャット履歴エリア */}
               <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
                 {tutorMessages.map((msg, idx) => (
                   <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
@@ -584,7 +619,7 @@ export function YamatoChatCommon({
                 )}
               </div>
 
-              {/* 添付画像のプレビューバー（新規追加） */}
+              {/* 添付画像のプレビューバー */}
               {selectedImagePreview && (
                 <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
                   <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
@@ -606,7 +641,6 @@ export function YamatoChatCommon({
               {/* 入力フォーム */}
               <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                 <div className="flex items-center justify-between">
-                  {/* 画像アップロード用隐藏ファイル入力 & ボタン（新規追加） */}
                   <input
                     type="file"
                     accept="image/*"

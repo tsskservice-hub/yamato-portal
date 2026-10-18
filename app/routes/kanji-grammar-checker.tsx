@@ -129,27 +129,8 @@ export default function KanjiGrammarCheckerPage() {
     <PageLayout ref={layoutRef}>
       <div className="min-h-screen bg-slate-50 text-slate-900 font-sans py-12 px-4 sm:px-6 lg:px-8">
         <main className="max-w-4xl mx-auto space-y-8">
-          {/* Breadcrumb / Back link */}
-          <div className="flex items-center justify-between">
-            <Link 
-              to="/eoy-writing" 
-              className="inline-flex items-center space-x-2 text-sm font-bold text-blue-600 hover:underline bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to EOY Writing Exam Tutor</span>
-            </Link>
-            <div className="text-xs font-medium text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
-              🪙 Credits: <span className="font-bold text-slate-800">{credits}</span>
-            </div>
-          </div>
-
           {/* Header Card */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>Dedicated VCE Writing Tool</span>
-            </div>
-            
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
               VCE Kanji & Grammar Checker
             </h1>
