@@ -344,6 +344,7 @@ export default function GenkoyoshiEditor() {
       user={user} 
       credits={credits} 
       nickname={nickname}
+      breadcrumbTitle="Genkoyoshi Editor for VCE"
     >
       <div className="genko-editor-root flex flex-col min-h-screen">
         <style>{`

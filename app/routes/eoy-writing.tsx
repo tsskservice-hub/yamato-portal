@@ -205,7 +205,7 @@ export default function Dashboard() {
   });
 
   return (
-    <PageLayout ref={layoutRef}>
+    <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           
