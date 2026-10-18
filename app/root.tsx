@@ -18,6 +18,8 @@ import stylesheet from "./tailwind.css?url";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
+  // 💡 ヤマトのアイコンをファビコンとして設定
+  { rel: "icon", href: "/jptutoraiyamato.png", type: "image/png" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
