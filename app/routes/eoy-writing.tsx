@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（最新 PageLayout 完全連動・重複認証削除版）
+ * @description EOY Writing Practice モジュール（Useful Resources削除・Genkooyooshiガイド移動版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -35,148 +35,6 @@ function sanitizeAiOutput(text: string): string {
   return text
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\*\*/g, '');
-}
-
-function HighlightChecker() {
-  const [text, setText] = useState(
-    "私は日本へ行って、日本語の勉強をたくさんしなければなりません。"
-  );
-
-  const vceKanjiList = [
-    "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "本", "人", "回", "才", "円", "番", "春", "夏", "秋", "冬", "日", "月", "火", "水", "木", "金", "土", "曜", "年", "時", "分", "夕", "半", "午", "毎", "週", "間", "今", "先", "朝", "晩", "昼", "夜", "去", "目", "口", "耳", "手", "体", "上", "中", "下", "右", "左", "前", "後", "東", "西", "南", "北", "外", "学", "校", "英", "語", "文", "漢", "字", "勉", "強", "父", "母", "子", "家", "族", "兄", "弟", "姉", "妹", "友", "私", "男", "女", "大", "小", "好", "安", "高", "新", "古", "多", "少", "楽", "長", "近", "正", "広", "早", "明", "行", "来", "休", "出", "入", "生", "見", "思", "書", "言", "話", "読", "売", "買", "食", "飲", "知", "作", "住", "会", "使", "着", "発", "聞", "帰", "持", "待", "教", "乗", "働", "動", "歩", "終", "始", "泊", "洗", "立", "考", "習", "山", "川", "田", "花", "島", "海", "天", "雨", "雪", "牛", "魚", "馬", "犬", "京", "都", "市", "県", "州", "国", "町", "神", "寺", "駅", "店", "電", "車", "道", "旅", "赤", "青", "白", "黒", "色", "銀", "々", "何", "紙", "元", "気", "活", "社", "自", "物", "名", "方", "院", "所", "屋", "肉", "場", "飯", "洋", "和", "病", "次", "同", "仕", "事", "点"
-  ];
-
-  const vceGrammarList = [
-    "しなければなりませんでした", "なければなりません", "なくてはいけません", "たくなかったです", "いたいと思っています", "にいったことがあります", "ことがある", "ことが好きじゃないです", "ことができました", "ことができます", "ことがはじまります", "ほうがいいです", "てもいいですか", "ていただけませんか", "てくださいませんか", "いでください", "かもしれません", "たのしみにしています", "にきょうみがあります", "としてしられています", "でゆう名です", "のおかげで、", "のほかに、", "だけでなく", "とchigaimasu", "にとにています", "をつうじて", "たいです", "たくないです", "たがります", "たがっている", "つもりです", "が上手です", "下手です", "やすい", "づらい", "にくい", "が好きです", "大好です", "きらいです", "ほしいです", "がいります", "分かります", "はじめました", "おえました", "に来ます", "行きます", "てしまいます", "試してみます", "みたいです", "もいいです", "はいけません", "てはだめです", "なくてもいいです", "なくてもよかったです", "べきです", "べきじゃないです", "べきでした", "ましょう", "ましょうか", "ませんか", "てください", "すぎます", "という", "などの", "ために", "あいだ", "まえに", "あとで", "からです", "ですから", "そうだです", "らしいです", "ようです", "でしょう", "だろう", "のようです", "と思います", "と言います", "んです", "られます", "といえば、", "たとえば、", "だから、", "しかし、", "また、", "そして、", "一方、", "によると、", "として", "は一番", "ことは", "ながら", "なので、", "てから、", "でから、", "から、", "ので、", "たら、", "ば、", "でも", "ても、", "けれど", "けど", "のに", "し、", "くて", "より", "など", "ほか", "て、", "ています", "でいます", "でから、"
-  ];
-
-  const getHighlightedText = () => {
-    let processedText = text;
-    const placeholders: { [key: string]: string } = {};
-    let placeholderIndex = 0;
-
-    const foundUniqueGrammar = new Set<string>();
-    vceGrammarList.forEach((grammar) => {
-      if (processedText.includes(grammar)) {
-        let canonicalGrammar = grammar;
-        if (grammar === "でいます") {
-          canonicalGrammar = "ています";
-        } else if (grammar === "でから、") {
-          canonicalGrammar = "てから、";
-        }
-        foundUniqueGrammar.add(canonicalGrammar);
-
-        while (processedText.includes(grammar)) {
-          const key = `__GRAMMAR_PLACEHOLDER_${placeholderIndex}__`;
-          placeholders[key] = `<span style="background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; border-radius: 4px; padding: 2px 4px; margin: 0 2px; font-weight: bold; font-size: 20px;">${grammar}</span>`;
-
-          const targetIndex = processedText.indexOf(grammar);
-          if (targetIndex !== -1) {
-            processedText =
-              processedText.substring(0, targetIndex) +
-              key +
-              processedText.substring(targetIndex + grammar.length);
-          } else {
-            break;
-          }
-          placeholderIndex++;
-        }
-      }
-    });
-
-    const grammarCount = foundUniqueGrammar.size;
-    const foundUniqueKanji = new Set<string>();
-
-    vceKanjiList.forEach((kanji) => {
-      const cleanCheck = processedText.replace(
-        /__GRAMMAR_PLACEHOLDER_\d+__/g,
-        ""
-      );
-      const realMatches = cleanCheck.match(
-        new RegExp(kanji.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "g")
-      );
-
-      if (realMatches) {
-        foundUniqueKanji.add(kanji);
-        while (processedText.includes(kanji)) {
-          const key = `__KANJI_PLACEHOLDER_${placeholderIndex}__`;
-          placeholders[key] = `<span style="background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; border-radius: 4px; padding: 2px 4px; margin: 0 2px; font-weight: bold; font-size: 20px;">${kanji}</span>`;
-
-          const targetIndex = processedText.indexOf(kanji);
-          if (targetIndex !== -1) {
-            processedText =
-              processedText.substring(0, targetIndex) +
-              key +
-              processedText.substring(targetIndex + kanji.length);
-          } else {
-            break;
-          }
-          placeholderIndex++;
-        }
-      }
-    });
-
-    const kanjiCount = foundUniqueKanji.size;
-    let finalHtml = processedText;
-    Object.keys(placeholders).forEach((key) => {
-      finalHtml = finalHtml.split(key).join(placeholders[key]);
-    });
-
-    return { html: finalHtml, kanjiCount, grammarCount };
-  };
-
-  const { html, kanjiCount, grammarCount } = getHighlightedText();
-
-  return (
-    <div className="mb-10 p-6 rounded-xl border-2 border-dashed border-slate-200 bg-white shadow-sm">
-      <h2 className="text-2xl font-bold text-slate-800 mb-3 mt-0">
-        ✨ VCE Kanji & Grammar Checker
-      </h2>
-      <p className="text-xl text-slate-600 mb-5">
-        💡 Paste the text transcribed by your AI Tutor from the photo of your handwritten answer here to instantly check your unique VCE Kanji (🟡 Yellow) and
-        VCE Grammar (🟢 Green)!
-      </p>
-
-      <div className="flex flex-col gap-5">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Type or paste Japanese text here..."
-          className="w-full h-36 p-4 rounded-lg border border-slate-300 text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y box-border bg-white text-slate-800"
-        />
-
-        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-          <div className="flex gap-4 mb-4 border-b border-slate-100 pb-3 flex-wrap">
-            <span className="text-lg font-bold text-yellow-800 bg-yellow-100 px-3.5 py-1.5 rounded-md">
-              🟡 Kanji Count (Unique): {kanjiCount}
-            </span>
-            <span className="text-lg font-bold text-green-800 bg-green-100 px-3.5 py-1.5 rounded-md">
-              🟢 Grammar Count (Unique): {grammarCount}
-            </span>
-          </div>
-
-          {text ? (
-            <div
-              className="text-[20px] leading-relaxed text-slate-700 mb-4"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-          ) : (
-            <div className="text-slate-400 italic mb-4 text-xl">
-              Enter text to see the highlighted results here.
-            </div>
-          )}
-
-          <div className="bg-red-50 border border-red-300 rounded-lg p-4 text-lg text-red-900 leading-relaxed">
-            <strong>⚠️ Note for Students:</strong> The counting is based on exact
-            matches of grammar patterns and kanji. Because unexpected phrases or
-            typos might occasionally trigger false matches, please use these
-            numbers <strong>for reference only</strong> and double-check your
-            work!
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function Dashboard() {
@@ -350,27 +208,27 @@ export default function Dashboard() {
     <PageLayout ref={layoutRef}>
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
-          <div className="mb-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">
-            <h2 className="text-xl font-bold text-slate-800 m-0 mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2"><span>📌</span> Useful Resources & Help Centre</span>
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button
-                onClick={() => setActiveModal("Genkooyooshi")}
-                className="w-full text-left p-4 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-lg shadow-sm transition-all box-border"
-              >
-                📝 How to use Genkooyooshi
-              </button>
-              <Link
-                to="/faq"
-                className="w-full p-4 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 hover:border-emerald-300 rounded-xl no-underline font-bold text-lg block box-border shadow-sm transition-all"
-              >
-                <div className="text-emerald-900 mb-0.5">💡 FAQs: Exams and AI Yamato</div>
-                <div className="text-sm font-normal text-emerald-700">Name rules, word counts, kanji and more</div>
-              </Link>
-              <BugReportCard />
-              <QuickFeedbackCard />
+          
+          {/* 💡 Dedicated Kanji & Grammar Checker Banner / Link */}
+          <div className="mb-8 p-6 bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-emerald-500/10 border-2 border-amber-400/40 rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-1 text-left">
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white uppercase tracking-wider">
+                <span>Dedicated Tool</span>
+              </div>
+              <h2 className="text-xl font-extrabold text-slate-900">
+                ✨ VCE Kanji & Grammar Checker (New Dedicated Page)
+              </h2>
+              <p className="text-xs text-slate-600">
+                Check your unique VCE Kanji (<span className="text-amber-700 font-bold">🟡 Yellow</span>) and Grammar (<span className="text-emerald-700 font-bold">🟢 Green</span>) in a dedicated workspace!
+              </p>
             </div>
+            <Link
+              to="/kanji-grammar-checker"
+              className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/20 transition-all flex items-center space-x-2 whitespace-nowrap cursor-pointer"
+            >
+              <span>Open Checker Tool</span>
+              <span className="text-sm">→</span>
+            </Link>
           </div>
 
           <div>
@@ -476,14 +334,24 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mb-12">
-            <HighlightChecker />
-          </div>
-
           <div className="flex justify-between items-end border-b-2 border-slate-200 pb-2 mb-6">
             <h1 className="text-slate-800 text-2xl sm:text-3xl font-bold m-0">
               📚 Task List ({filteredQuestions.length} questions)
             </h1>
+          </div>
+
+          {/* 💡 How to use Genkooyooshi card placed neatly right above the filters */}
+          <div className="mb-6">
+            <button
+              onClick={() => setActiveModal("Genkooyooshi")}
+              className="w-full text-left p-4 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-2xl cursor-pointer font-bold text-base shadow-sm transition-all flex items-center justify-between box-border"
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-xl">📝</span>
+                <span>How to use Genkooyooshi (Manuscript Paper Guidelines)</span>
+              </div>
+              <span className="text-sm font-bold bg-white px-3 py-1 rounded-xl shadow-xs border border-rose-200">View Guide →</span>
+            </button>
           </div>
 
           <div className="mb-6">
