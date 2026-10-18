@@ -28,7 +28,7 @@ type AppType =
 type AppConfig = {
   name: string;
   greeting: string;
-  themeColor: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy";
+  themeColor: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink";
   apiSourceFile: string;
   targetAudience: string;
   buttonStyle: {
@@ -108,7 +108,7 @@ export default function TestYamatoPage() {
     concierge: {
       name: "やまと先生",
       greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
-      themeColor: "blue",
+      themeColor: "red", // 💡 やまと先生（赤）
       apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
       targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
       buttonStyle: { border: "2px solid #ef4444", background: "#ffffff", color: "#000000" },
@@ -117,7 +117,7 @@ export default function TestYamatoPage() {
     "game-igo": {
       name: "囲碁ヤマト",
       greeting: "こんにちは！囲碁AIヤマトです。一局打ってみましょうか？それともルールや定石について質問しますか？",
-      themeColor: "black",
+      themeColor: "black", // 💡 囲碁ヤマト（黒）
       apiSourceFile: "game-igo.ts (経由: FoundationLayout.ts)",
       targetAudience: "囲碁に興味のある日本語学習者",
       buttonStyle: { border: "2px solid #ffffff", background: "#000000", color: "#ffffff" },
@@ -126,7 +126,7 @@ export default function TestYamatoPage() {
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
       greeting: "こんにちは！一般向け原稿用紙エディターです。日本語の文章構成や推敲をサポートします。",
-      themeColor: "navy",
+      themeColor: "blue", // 💡 原稿用紙一般（青）
       apiSourceFile: "genkoyoshi-editor-general.ts (経由: FoundationLayout.ts)",
       targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
       buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
@@ -135,7 +135,7 @@ export default function TestYamatoPage() {
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
       greeting: "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards.",
-      themeColor: "navy",
+      themeColor: "blue", // 💡 原稿用紙VCE（青）
       apiSourceFile: "genkoyoshi-editor-vce.ts (経由: FoundationLayout.ts)",
       targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
       buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
@@ -144,7 +144,7 @@ export default function TestYamatoPage() {
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Drill practice session! Let's sharpen your speaking skills.",
-      themeColor: "yellow",
+      themeColor: "green", // 💡 Oral Drill（緑）
       apiSourceFile: "eoy-oral-drill.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
       buttonStyle: { border: "2px solid #eab308", background: "#dcfce7", color: "#000000" },
@@ -153,7 +153,7 @@ export default function TestYamatoPage() {
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
       greeting: "Hello, my friend! 🌟 Welcome to the EOY Oral Elaborate session. Let's dive deeper into your detailed study and responses.",
-      themeColor: "purple",
+      themeColor: "purple", // 💡 Oral Elaborate（紫）
       apiSourceFile: "eoy-oral-elaborate.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
       buttonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "#000000" },
@@ -162,7 +162,7 @@ export default function TestYamatoPage() {
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Mock Exam. Ready to simulate the real exam experience?",
-      themeColor: "cyan",
+      themeColor: "pink", // 💡 Oral Mock（ピンク）
       apiSourceFile: "eoy-oral-mock.ts (経由: FoundationLayout.ts)",
       targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
       buttonStyle: { border: "2px solid #ef4444", background: "#3b82f6", color: "#ffffff" },
@@ -171,7 +171,7 @@ export default function TestYamatoPage() {
     "eoy-writing": {
       name: "VCE Writing Practice",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills.",
-      themeColor: "orange",
+      themeColor: "cyan", // 💡 VCE Writing（水色）
       apiSourceFile: "eoy-writing.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末ライティング試験対策を行う生徒",
       buttonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "#000000" },
@@ -180,7 +180,7 @@ export default function TestYamatoPage() {
     "oral-exam-questions": {
       name: "語彙文法チェッカー",
       greeting: "Hello, my friend! 🌟 Welcome to the Vocabulary & Grammar Checker. What expressions or sentences would you like to check today?",
-      themeColor: "green",
+      themeColor: "orange", // 💡 語彙文法チェッカー（オレンジ）
       apiSourceFile: "oral-exam-questions.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE日本語の語彙や文法を確認したい生徒・教員",
       buttonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "#000000" },
@@ -221,7 +221,7 @@ export default function TestYamatoPage() {
                     cursor: "pointer",
                     border: appConfig.concierge.buttonStyle.border,
                     backgroundColor: appConfig.concierge.buttonStyle.background, // 💡 選択時も元の背景色を維持
-                    color: appConfig.concierge.buttonStyle.color                   // 💡 選択時も元の文字色を維持
+                    color: appConfig.concierge.buttonStyle.color                 // 💡 選択時も元の文字色を維持
                   }}
                 >
                   👋 LP Concierge (コンシェルジュ) {activeAppType === "concierge" && " ✓"}
@@ -251,7 +251,7 @@ export default function TestYamatoPage() {
                         cursor: "pointer",
                         border: cfg.buttonStyle.border,
                         backgroundColor: cfg.buttonStyle.background, // 💡 選択時も元の背景色を維持
-                        color: cfg.buttonStyle.color                   // 💡 選択時も元の文字色を維持
+                        color: cfg.buttonStyle.color                 // 💡 選択時も元の文字色を維持
                       }}
                     >
                       {type === "genkoyoshi-editor-general" && (<span>📄 原稿用紙 (一般) {isSelected && " ✓"}</span>)}
@@ -293,7 +293,7 @@ export default function TestYamatoPage() {
                         cursor: "pointer",
                         border: cfg.buttonStyle.border,
                         backgroundColor: cfg.buttonStyle.background, // 💡 選択時も元の背景色を維持
-                        color: cfg.buttonStyle.color                   // 💡 選択時も元の文字色を維持
+                        color: cfg.buttonStyle.color                 // 💡 選択時も元の文字色を維持
                       }}
                     >
                       {type === "genkoyoshi-editor-vce" && (<span>📄 原稿用紙 (VCE) {isSelected && " ✓"}</span>)}
@@ -547,7 +547,7 @@ export default function TestYamatoPage() {
             <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
               <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
                 <span>📌</span> 3大ファイル（各ペルソナ頭脳・YamatoApiCommon・FoundationLayout）の役割分担順序
-            </h3>
+              </h3>
               <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "12px", color: "#475569", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.5" }}>
                 <li><strong>[3] a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や価格案内など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。<strong>同期データのうち個別のヤマトに必要なデータ（pricePlans等）を取り込む場所</strong>。</li>
                 <li><strong>[4] YamatoApiCommon.tsx（すべての通信を支える共通窓口）:</strong> 選択されたペルソナ固有のロジックと共通基盤を安全に結合・中継するバックエンドの共通パイプライン。</li>
