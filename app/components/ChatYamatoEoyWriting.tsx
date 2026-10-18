@@ -1,14 +1,14 @@
 /**
- * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（未ログインガード・クレジット残高表示・402スマートクレジット制御・新9色テーマ対応・Supabaseセッション自動検知強化版）
+ * @file ChatYamatoEoyWriting.tsx
+ * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（水色テーマ・Eoy Writing頭脳・指定挨拶固定版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 /**
- * YamatoChatCommon のメタデータおよび仕様の型定義
+ * ChatYamatoEoyWriting のメタデータおよび仕様の型定義
  */
-export interface YamatoChatCommonMetaType {
+export interface ChatYamatoEoyWritingMetaType {
   componentName: string;
   version: string;
   role: string;
@@ -23,10 +23,10 @@ export interface YamatoChatCommonMetaType {
 /**
  * 構造化メタデータ（コード近接配置）
  */
-export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
-  componentName: "YamatoChatCommon",
-  version: "3.1.0",
-  role: "ポータル共通AIチャットウィジェット（ログインガード・クレジット管理・セッション自動検知統合版）",
+export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
+  componentName: "ChatYamatoEoyWriting",
+  version: "3.2.0",
+  role: "VCE Writing Practice専用AIチャットウィジェット（固定頭脳・水色テーマ統合版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -41,8 +41,8 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "バックエンドからの ZERO_CREDITS および PARTIAL_SHORTAGE エラーをスマートにハンドリング"
     },
     {
-      featureName: "New 9 Color Themes",
-      description: "赤、青、黒、緑、黄色、オレンジ, 紫、水色、ピンクの新しい9色テーマに対応"
+      featureName: "Cyan Color Theme Fixed",
+      description: "VCE Writing専用の水色（cyan）テーマをデフォルト固定"
     },
     {
       featureName: "Image Upload & Vision Support",
@@ -55,9 +55,13 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Learning Pace Synchronization",
       description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
+    },
+    {
+      featureName: "Credit Cost & Feature Test Footer",
+      description: "チャット下部にクレジット消費案内（Chat / Image）と画像AIテスト機能へのリンクを配置"
     }
   ],
-  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink"],
+  supportedThemes: ["cyan"],
   learningPaces: ["steady", "normal", "accelerated"]
 };
 
@@ -74,133 +78,17 @@ const FEATURE_COSTS = {
 };
 
 // 外部から受け取るプロパティ（Props）の型定義
-export type YamatoChatCommonProps = {
-  characterName?: string;
-  initialGreeting?: string;
-  systemPrompt?: string;
-  appType?: "concierge" | "writing" | "oral" | "general" | string;
+export type ChatYamatoEoyWritingProps = {
+  systemPrompt?: string; // 💡 選択された設問情報を親から受け取る
   defaultOpen?: boolean;
-  themeColor?: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | string;
-  floatingButtonClassName?: string;
-  buttonStyle?: {
-    border?: string;
-    background?: string;
-    color?: string;
-  };
-  initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string;
   userNickname?: string;
   credits?: number; // クレジット残高初期値
   onOpenAuth?: () => void; // 未ログイン時に認証モーダルを開くコールバック
 };
 
-// 新9色のテーマカラーごとのスタイル定義
+// 💡 Eoy Writing で使用されている水色（cyan）テーマのスタイル定義
 const themeStyles = {
-  red: {
-    floatingBg: "bg-red-600 hover:bg-red-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-red-400",
-    button: "bg-red-600 hover:bg-red-700 text-white",
-    border: "border-red-300",
-    headerText: "text-red-900",
-    badgeBg: "bg-red-50 border-red-200",
-    badgeText: "text-red-900",
-    buttonActive: "bg-red-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-red-700",
-    userBubble: "bg-red-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-red-500",
-    submitBtn: "bg-red-600 hover:bg-red-700 text-white",
-  },
-  blue: {
-    floatingBg: "bg-blue-600 hover:bg-blue-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-blue-400",
-    button: "bg-blue-600 hover:bg-blue-700 text-white",
-    border: "border-blue-300",
-    headerText: "text-blue-900",
-    badgeBg: "bg-blue-50 border-blue-200",
-    badgeText: "text-blue-900",
-    buttonActive: "bg-blue-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-blue-700",
-    userBubble: "bg-blue-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-blue-500",
-    submitBtn: "bg-blue-600 hover:bg-blue-700 text-white",
-  },
-  black: {
-    floatingBg: "bg-slate-900 hover:bg-black",
-    floatingText: "text-white",
-    floatingBorder: "border border-slate-700",
-    button: "bg-slate-900 hover:bg-black text-white",
-    border: "border-slate-700",
-    headerText: "text-slate-900",
-    badgeBg: "bg-slate-100 border-slate-300",
-    badgeText: "text-slate-900",
-    buttonActive: "bg-slate-900 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-slate-900",
-    userBubble: "bg-slate-900 text-white rounded-br-xs",
-    inputRing: "focus:ring-slate-900",
-    submitBtn: "bg-slate-900 hover:bg-black text-white",
-  },
-  green: {
-    floatingBg: "bg-green-600 hover:bg-green-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-green-400",
-    button: "bg-green-600 hover:bg-green-700 text-white",
-    border: "border-green-300",
-    headerText: "text-green-900",
-    badgeBg: "bg-green-50 border-green-200",
-    badgeText: "text-green-900",
-    buttonActive: "bg-green-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-green-700",
-    userBubble: "bg-green-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-green-500",
-    submitBtn: "bg-green-600 hover:bg-green-700 text-white",
-  },
-  yellow: {
-    floatingBg: "bg-yellow-500 hover:bg-yellow-600",
-    floatingText: "text-slate-900",
-    floatingBorder: "border border-yellow-300",
-    button: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
-    border: "border-yellow-300",
-    headerText: "text-yellow-900",
-    badgeBg: "bg-yellow-50 border-yellow-200",
-    badgeText: "text-yellow-900",
-    buttonActive: "bg-yellow-500 text-slate-900 shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-yellow-700",
-    userBubble: "bg-yellow-500 text-slate-900 rounded-br-xs",
-    inputRing: "focus:ring-yellow-500",
-    submitBtn: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
-  },
-  orange: {
-    floatingBg: "bg-orange-500 hover:bg-orange-600",
-    floatingText: "text-white",
-    floatingBorder: "border border-orange-300",
-    button: "bg-orange-500 hover:bg-orange-600 text-white",
-    border: "border-orange-300",
-    headerText: "text-orange-900",
-    badgeBg: "bg-orange-50 border-orange-200",
-    badgeText: "text-orange-900",
-    buttonActive: "bg-orange-500 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-orange-700",
-    userBubble: "bg-orange-500 text-white rounded-br-xs",
-    inputRing: "focus:ring-orange-500",
-    submitBtn: "bg-orange-500 hover:bg-orange-600 text-white",
-  },
-  purple: {
-    floatingBg: "bg-purple-600 hover:bg-purple-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-purple-400",
-    button: "bg-purple-600 hover:bg-purple-700 text-white",
-    border: "border-purple-300",
-    headerText: "text-purple-900",
-    badgeBg: "bg-purple-50 border-purple-200",
-    badgeText: "text-purple-900",
-    buttonActive: "bg-purple-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-purple-700",
-    userBubble: "bg-purple-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-purple-500",
-    submitBtn: "bg-purple-600 hover:bg-purple-700 text-white",
-  },
   cyan: {
     floatingBg: "bg-cyan-600 hover:bg-cyan-700",
     floatingText: "text-white",
@@ -216,21 +104,6 @@ const themeStyles = {
     inputRing: "focus:ring-cyan-500",
     submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
   },
-  pink: {
-    floatingBg: "bg-pink-600 hover:bg-pink-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-pink-400",
-    button: "bg-pink-600 hover:bg-pink-700 text-white",
-    border: "border-pink-300",
-    headerText: "text-pink-900",
-    badgeBg: "bg-pink-50 border-pink-200",
-    badgeText: "text-pink-900",
-    buttonActive: "bg-pink-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-pink-700",
-    userBubble: "bg-pink-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-pink-500",
-    submitBtn: "bg-pink-600 hover:bg-pink-700 text-white",
-  },
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -240,31 +113,29 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-export function YamatoChatCommon({
-  characterName = "ヤマト AI",
-  initialGreeting = "Hello, my friend! 🌟 Welcome to Yamato AI Tutor. How can I assist your Japanese learning today?",
+export function ChatYamatoEoyWriting({
   systemPrompt = "",
-  appType = "general",
   defaultOpen = false,
-  themeColor = "blue",
-  floatingButtonClassName,
-  buttonStyle,
-  initialLearningPace = "normal",
   userId: propUserId,
   userNickname = "My friend",
   credits: initialCredits = 10,
   onOpenAuth,
-}: YamatoChatCommonProps) {
+}: ChatYamatoEoyWritingProps) {
+  // 💡 ご指定のパラメータを固定で適用
+  const characterName = "Eoy Writing Practice";
+  const appType = "eoy-writing";
+  const themeColor = "cyan";
+  // 「年末の筆記試験に向けて勉強頑張っていますか。今日もあなたの学力向上を一生懸命サポートします！」の英語翻訳版
+  const initialGreeting = "Hello, my friend! 🌟 How are your studies going for the end-of-year written exam? I'm here to support your academic improvement with all my heart today too!";
+
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 内部で管理する実質的な userId（プロパティがない場合、Supabaseセッションから自動取得）
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
 
-  // propUserId が変更されたら同期
   useEffect(() => {
     if (propUserId) {
       setActiveUserId(propUserId);
@@ -275,7 +146,6 @@ export function YamatoChatCommon({
     setCurrentCredits(initialCredits);
   }, [initialCredits]);
 
-  // 💡 安全策：親からの `userId` が未設定の場合でも、Supabase セッションを自動検知してログイン状態を復元
   useEffect(() => {
     let isMounted = true;
 
@@ -294,7 +164,7 @@ export function YamatoChatCommon({
           }
         }
       } catch (err) {
-        console.error("Session check error in YamatoChatCommon:", err);
+        console.error("Session check error in ChatYamatoEoyWriting:", err);
       }
     }
 
@@ -330,15 +200,9 @@ export function YamatoChatCommon({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
-  const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.blue;
+  const currentTheme = themeStyles.cyan;
 
-  const finalFloatingButtonClass = floatingButtonClassName || `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
-  
-  const floatingInlineStyle = buttonStyle ? {
-    border: buttonStyle.border,
-    backgroundColor: buttonStyle.background,
-    color: buttonStyle.color,
-  } : undefined;
+  const finalFloatingButtonClass = `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     {
@@ -348,16 +212,10 @@ export function YamatoChatCommon({
   ]);
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
-  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
+  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
 
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (initialLearningPace) {
-      setTutorLevel(initialLearningPace);
-    }
-  }, [initialLearningPace]);
 
   const getFontSizeClass = () => {
     switch (chatFontSize) {
@@ -417,7 +275,6 @@ export function YamatoChatCommon({
     };
   }, []);
 
-  // 💡 Supabaseから最新のクレジット残高を再取得する関数
   const refreshUserCredits = async () => {
     if (!activeUserId) return;
     try {
@@ -447,11 +304,24 @@ export function YamatoChatCommon({
     }
   };
 
+  const handleRequestImageAiFeature = () => {
+    if (!activeUserId) {
+      alert("Login required");
+      if (onOpenAuth) onOpenAuth();
+      return false;
+    }
+    if (currentCredits < FEATURE_COSTS.imageAi) {
+      alert(`Image AI requires ${FEATURE_COSTS.imageAi} credits, but you currently have ${currentCredits} credits (Note: standard text chat at 2 credits is still available).`);
+      return false;
+    }
+    alert("Accessing Image AI feature (sufficient credits).");
+    return true;
+  };
+
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
 
-    // 💡 ガード1: 未ログインの場合はチャットをブロックして認証モーダルを開く
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
       if (onOpenAuth) {
@@ -460,7 +330,6 @@ export function YamatoChatCommon({
       return;
     }
 
-    // 💡 ガード2: クレジット残高がゼロの場合の事前ブロック
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
         ...prev,
@@ -474,7 +343,6 @@ export function YamatoChatCommon({
       return;
     }
 
-    // 💡 ガード3: クレジット残高がテキストチャットの最低コストに満たない場合
     if (currentCredits < FEATURE_COSTS.textAi) {
       setTutorMessages((prev) => [
         ...prev,
@@ -523,7 +391,7 @@ export function YamatoChatCommon({
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,
-          userId: activeUserId, // 💡 確実なユーザーIDを送信
+          userId: activeUserId,
         }),
       });
 
@@ -535,7 +403,6 @@ export function YamatoChatCommon({
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
-      // 💡 402スマートクレジットエラーハンドリング
       if (!response.ok) {
         if (response.status === 402) {
           setIsTutorLoading(false);
@@ -588,7 +455,6 @@ export function YamatoChatCommon({
           <button
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
-            style={floatingInlineStyle}
             className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
           >
             <span>🤖</span>
@@ -837,6 +703,18 @@ export function YamatoChatCommon({
                         Send
                       </button>
                     </div>
+
+                    {/* 💡 消費クレジット案内 ＆ 画像AIテストリンク */}
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
+                      <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
+                      <button
+                        type="button"
+                        onClick={handleRequestImageAiFeature}
+                        className="text-blue-600 hover:underline font-semibold cursor-pointer"
+                      >
+                        Test Image AI Check
+                      </button>
+                    </div>
                   </form>
                 </>
               )}
@@ -870,4 +748,4 @@ export function YamatoChatCommon({
   );
 }
 
-export default YamatoChatCommon;
+export default ChatYamatoEoyWriting;

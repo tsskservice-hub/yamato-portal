@@ -96,15 +96,6 @@ export default function Dashboard() {
     return matchesCategory && matchesTextType;
   });
 
-  // アクティブな設問テキストの構築
-  const assignedQuestionText = selectedQuestion 
-    ? `Q${selectedQuestion.id} (${selectedQuestion.textType}): ${selectedQuestion.english}` 
-    : "";
-
-  const systemPromptAddition = assignedQuestionText
-    ? `Current Active VCE Writing Exam Question being discussed: ${assignedQuestionText}`
-    : "General VCE Japanese Writing Practice.";
-
   return (
     <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
@@ -371,13 +362,8 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* 💡 ChatYamatoEoyWriting コンポーネントの配置 */}
+          {/* 💡 ChatYamatoEoyWriting 専用コンポーネントの配置（プロパティ不要） */}
           <ChatYamatoEoyWriting
-            characterName="AI Yamato"
-            initialGreeting="Hello! I'm AI Yamato, your Japanese Tutor. Ask me anything about VCE Japanese writing practice, grammar, or phrasing! You can also upload photos of your handwritten answers."
-            systemPrompt={systemPromptAddition}
-            appType="writing"
-            themeColor="blue"
             userId={user?.id}
             userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
             credits={credits}
