@@ -331,6 +331,7 @@ export default function TestYamatoPage() {
             <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
               Live API Synced
             </span>
+
           </div>
 
           {/* スクロールバー付きコンテナ */}
@@ -446,7 +447,7 @@ export default function TestYamatoPage() {
                   </h4>
                   <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
                     <li><strong>汎用対話UIコックピット:</strong> 全9ペルソナのテスト画面や学習ポータルで共有される高機能AIチャットウィジェット。</li>
-                    <li><strong>🎨 9色テーマカラー対応:</strong> emerald, blue, yellow, purple, cyan, orange, black, green, navy の動的カラー切り替え。</li>
+                    <li><strong>🎨 9色テーマカラー対応:</strong> 赤、青、黒、緑、黄色、オレンジ、紫、水色、ピンク の動的カラー切り替え。</li>
                     <li><strong>⚡ Supabase即時DB同期:</strong> 学習ペース（steady, normal, accelerated）やクレジット残高の変更をSupabase profilesとリアルタイム同期。</li>
                     <li><strong>🖥️ フルスクリーン切替:</strong> 没入型の学習やエッセイ執筆をサポートする全画面表示モードの搭載。</li>
                     <li><strong>💬 高度なインタラクション:</strong> 音声入力連携、画像プレビュー、クレジット消費ガイド、本日のクイズポップアップ等の総合機能。</li>
@@ -482,6 +483,7 @@ export default function TestYamatoPage() {
             <span style={{ fontSize: "11px", backgroundColor: "#f0fdf4", color: "#166534", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bbf7d0", fontWeight: "600" }}>
               Architecture Guide
             </span>
+
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -545,7 +547,7 @@ export default function TestYamatoPage() {
             <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
               <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
                 <span>📌</span> 3大ファイル（各ペルソナ頭脳・YamatoApiCommon・FoundationLayout）の役割分担順序
-              </h3>
+            </h3>
               <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "12px", color: "#475569", display: "flex", flexDirection: "column", gap: "6px", lineHeight: "1.5" }}>
                 <li><strong>[3] a-template.ts から作られたファイル（選択されたヤマト固有）:</strong> VCE試験対策や価格案内など、それぞれのペルソナ専用の専門知識や対話の流れを定義するひな形。<strong>同期データのうち個別のヤマトに必要なデータ（pricePlans等）を取り込む場所</strong>。</li>
                 <li><strong>[4] YamatoApiCommon.tsx（すべての通信を支える共通窓口）:</strong> 選択されたペルソナ固有のロジックと共通基盤を安全に結合・中継するバックエンドの共通パイプライン。</li>

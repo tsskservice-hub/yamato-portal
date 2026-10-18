@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（画像アップロード・フォントサイズ切替・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐・収縮時ボタン詳細カラー指定対応版）
+ * @description ヤマトAIチャットウィジェット（画像アップロード・フォントサイズ切替・新9色テーマカラー対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,12 +25,16 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.8.1",
-  role: "ポータル共通AIチャットウィジェット（収縮時ボタンの枠線・背景・文字色個別指定対応版）",
+  version: "2.9.0",
+  role: "ポータル共通AIチャットウィジェット（新9色テーマ対応版）",
   features: [
     {
+      featureName: "New 9 Color Themes",
+      description: "赤、青、黒、緑、黄色、オレンジ、紫、水色、ピンクの新しい9色テーマに対応"
+    },
+    {
       featureName: "Customizable Floating Button Styles",
-      description: "画面右下に収まっているときのトグルボタンの枠線色、ボタン背景・ホバー色、文字色をテーマごと、またはプロパティで個別に指定可能"
+      description: "画面右下に収まっているときのトグルボタンの枠線色、ボタン背景、文字色を個別に指定可能"
     },
     {
       featureName: "Image Upload & Vision Support",
@@ -39,10 +43,6 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Font Size Customization",
       description: "チャット内の文字サイズを「小・中・大・特大」の4段階に動的切替可能"
-    },
-    {
-      featureName: "Theme Customization",
-      description: "emerald, blue, yellow, purple, cyan, orange, black, green, navy などの多様なカラーテーマスタイルを動的に適用"
     },
     {
       featureName: "Learning Pace Synchronization",
@@ -54,10 +54,10 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     },
     {
       featureName: "Smart Credit Handling",
-      description: "残高ゼロ（ZERO_CREDITS）と部分的な残高不足（PARTIAL_SHORTAGE）を検知し、温かい英語のメッセージで案内"
+      description: "残高ゼロ（ZERO_CREDITS）と部分的な残高不足（PARTIAL_SHORTAGE）を検知し案内"
     }
   ],
-  supportedThemes: ["emerald", "blue", "yellow", "purple", "cyan", "orange", "black", "green", "navy"],
+  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink"],
   learningPaces: ["steady", "normal", "accelerated"]
 };
 
@@ -67,47 +67,41 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// 外部から受け取るプロパティ（Props）の型定義
+// 外部から受け取るプロパティ（Props）の型定義（新しい9色に対応）
 export type YamatoChatCommonProps = {
-  characterName?: string;             // チャット窓のタイトルに表示する名前
-  initialGreeting?: string;           // 最初の一言メッセージ
-  systemPrompt?: string;              // キャラクター固有の指示
-  appType?: "concierge" | "writing" | "oral" | "general" | string;  
-  
-  // 共通の初期非表示仕様とテーマカラー設定
-  defaultOpen?: boolean;              // 初期状態で開いておくか
-  themeColor?: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy" | string; 
-  
-  // 💡 追加：画面右下に収まっているときのトグルボタン専用のカスタムクラスおよびインラインスタイル指定
-  floatingButtonClassName?: string;   // 例: "bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-300"
+  characterName?: string;
+  initialGreeting?: string;
+  systemPrompt?: string;
+  appType?: "concierge" | "writing" | "oral" | "general" | string;
+  defaultOpen?: boolean;
+  themeColor?: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | string;
+  floatingButtonClassName?: string;
   buttonStyle?: {
     border?: string;
     background?: string;
     color?: string;
   };
-
-  // 学習ペースの初期値、Supabase更新用のユーザーID、ユーザーのニックネーム
   initialLearningPace?: "steady" | "normal" | "accelerated";
-  userId?: string; 
-  userNickname?: string;              // ユーザーのニックネームを受け取るプロパティ
+  userId?: string;
+  userNickname?: string;
 };
 
-// カラーテーマごとのスタイル定義（収縮時ボタンの枠線・背景・文字色の個別指定プロパティを内包）
+// 💡 新しい9色（赤、青、黒、緑、黄色、オレンジ、紫、水色、ピンク）のテーマカラーごとのスタイル定義
 const themeStyles = {
-  emerald: {
-    floatingBg: "bg-emerald-600 hover:bg-emerald-700",
+  red: {
+    floatingBg: "bg-red-600 hover:bg-red-700",
     floatingText: "text-white",
-    floatingBorder: "border border-emerald-400",
-    button: "bg-emerald-600 hover:bg-emerald-700 text-white",
-    border: "border-emerald-300",
-    headerText: "text-emerald-900",
-    badgeBg: "bg-emerald-50 border-emerald-200",
-    badgeText: "text-emerald-900",
-    buttonActive: "bg-emerald-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-emerald-700",
-    userBubble: "bg-emerald-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-emerald-500",
-    submitBtn: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    floatingBorder: "border border-red-400",
+    button: "bg-red-600 hover:bg-red-700 text-white",
+    border: "border-red-300",
+    headerText: "text-red-900",
+    badgeBg: "bg-red-50 border-red-200",
+    badgeText: "text-red-900",
+    buttonActive: "bg-red-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-red-700",
+    userBubble: "bg-red-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-red-500",
+    submitBtn: "bg-red-600 hover:bg-red-700 text-white",
   },
   blue: {
     floatingBg: "bg-blue-600 hover:bg-blue-700",
@@ -123,66 +117,6 @@ const themeStyles = {
     userBubble: "bg-blue-600 text-white rounded-br-xs",
     inputRing: "focus:ring-blue-500",
     submitBtn: "bg-blue-600 hover:bg-blue-700 text-white",
-  },
-  yellow: {
-    floatingBg: "bg-yellow-500 hover:bg-yellow-600",
-    floatingText: "text-slate-900",
-    floatingBorder: "border border-yellow-300",
-    button: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
-    border: "border-yellow-300",
-    headerText: "text-yellow-900",
-    badgeBg: "bg-yellow-50 border-yellow-200",
-    badgeText: "text-yellow-900",
-    buttonActive: "bg-yellow-500 text-slate-900 shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-yellow-700",
-    userBubble: "bg-yellow-500 text-slate-900 rounded-br-xs",
-    inputRing: "focus:ring-yellow-500",
-    submitBtn: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
-  },
-  purple: {
-    floatingBg: "bg-purple-600 hover:bg-purple-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-purple-400",
-    button: "bg-purple-600 hover:bg-purple-700 text-white",
-    border: "border-purple-300",
-    headerText: "text-purple-900",
-    badgeBg: "bg-purple-50 border-purple-200",
-    badgeText: "text-purple-900",
-    buttonActive: "bg-purple-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-purple-700",
-    userBubble: "bg-purple-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-purple-500",
-    submitBtn: "bg-purple-600 hover:bg-purple-700 text-white",
-  },
-  cyan: {
-    floatingBg: "bg-cyan-600 hover:bg-cyan-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-cyan-400",
-    button: "bg-cyan-600 hover:bg-cyan-700 text-white",
-    border: "border-cyan-300",
-    headerText: "text-cyan-900",
-    badgeBg: "bg-cyan-50 border-cyan-200",
-    badgeText: "text-cyan-900",
-    buttonActive: "bg-cyan-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-cyan-700",
-    userBubble: "bg-cyan-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-cyan-500",
-    submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
-  },
-  orange: {
-    floatingBg: "bg-orange-500 hover:bg-orange-600",
-    floatingText: "text-white",
-    floatingBorder: "border border-orange-300",
-    button: "bg-orange-500 hover:bg-orange-600 text-white",
-    border: "border-orange-300",
-    headerText: "text-orange-900",
-    badgeBg: "bg-orange-50 border-orange-200",
-    badgeText: "text-orange-900",
-    buttonActive: "bg-orange-500 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-orange-700",
-    userBubble: "bg-orange-500 text-white rounded-br-xs",
-    inputRing: "focus:ring-orange-500",
-    submitBtn: "bg-orange-500 hover:bg-orange-600 text-white",
   },
   black: {
     floatingBg: "bg-slate-900 hover:bg-black",
@@ -214,20 +148,80 @@ const themeStyles = {
     inputRing: "focus:ring-green-500",
     submitBtn: "bg-green-600 hover:bg-green-700 text-white",
   },
-  navy: {
-    floatingBg: "bg-indigo-900 hover:bg-indigo-950",
+  yellow: {
+    floatingBg: "bg-yellow-500 hover:bg-yellow-600",
+    floatingText: "text-slate-900",
+    floatingBorder: "border border-yellow-300",
+    button: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
+    border: "border-yellow-300",
+    headerText: "text-yellow-900",
+    badgeBg: "bg-yellow-50 border-yellow-200",
+    badgeText: "text-yellow-900",
+    buttonActive: "bg-yellow-500 text-slate-900 shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-yellow-700",
+    userBubble: "bg-yellow-500 text-slate-900 rounded-br-xs",
+    inputRing: "focus:ring-yellow-500",
+    submitBtn: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
+  },
+  orange: {
+    floatingBg: "bg-orange-500 hover:bg-orange-600",
     floatingText: "text-white",
-    floatingBorder: "border border-indigo-400",
-    button: "bg-indigo-900 hover:bg-indigo-950 text-white",
-    border: "border-indigo-300",
-    headerText: "text-indigo-950",
-    badgeBg: "bg-indigo-50 border-indigo-200",
-    badgeText: "text-indigo-950",
-    buttonActive: "bg-indigo-900 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-indigo-900",
-    userBubble: "bg-indigo-900 text-white rounded-br-xs",
-    inputRing: "focus:ring-indigo-900",
-    submitBtn: "bg-indigo-900 hover:bg-indigo-950 text-white",
+    floatingBorder: "border border-orange-300",
+    button: "bg-orange-500 hover:bg-orange-600 text-white",
+    border: "border-orange-300",
+    headerText: "text-orange-900",
+    badgeBg: "bg-orange-50 border-orange-200",
+    badgeText: "text-orange-900",
+    buttonActive: "bg-orange-500 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-orange-700",
+    userBubble: "bg-orange-500 text-white rounded-br-xs",
+    inputRing: "focus:ring-orange-500",
+    submitBtn: "bg-orange-500 hover:bg-orange-600 text-white",
+  },
+  purple: {
+    floatingBg: "bg-purple-600 hover:bg-purple-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-purple-400",
+    button: "bg-purple-600 hover:bg-purple-700 text-white",
+    border: "border-purple-300",
+    headerText: "text-purple-900",
+    badgeBg: "bg-purple-50 border-purple-200",
+    badgeText: "text-purple-900",
+    buttonActive: "bg-purple-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-purple-700",
+    userBubble: "bg-purple-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-purple-500",
+    submitBtn: "bg-purple-600 hover:bg-purple-700 text-white",
+  },
+  cyan: {
+    floatingBg: "bg-cyan-600 hover:bg-cyan-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-cyan-400",
+    button: "bg-cyan-600 hover:bg-cyan-700 text-white",
+    border: "border-cyan-300",
+    headerText: "text-cyan-900",
+    badgeBg: "bg-cyan-50 border-cyan-200",
+    badgeText: "text-cyan-900",
+    buttonActive: "bg-cyan-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-cyan-700",
+    userBubble: "bg-cyan-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-cyan-500",
+    submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
+  },
+  pink: {
+    floatingBg: "bg-pink-600 hover:bg-pink-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-pink-400",
+    button: "bg-pink-600 hover:bg-pink-700 text-white",
+    border: "border-pink-300",
+    headerText: "text-pink-900",
+    badgeBg: "bg-pink-50 border-pink-200",
+    badgeText: "text-pink-900",
+    buttonActive: "bg-pink-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-pink-700",
+    userBubble: "bg-pink-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-pink-500",
+    submitBtn: "bg-pink-600 hover:bg-pink-700 text-white",
   },
 };
 
@@ -243,30 +237,26 @@ export function YamatoChatCommon({
   initialGreeting = "Hello, my friend! 🌟 Welcome to Yamato AI Tutor. How can I assist your Japanese learning today?",
   systemPrompt = "",
   appType = "general",
-  defaultOpen = false,      
-  themeColor = "emerald",    
-  floatingButtonClassName, // 💡 追加：右下の収縮ボタン用カスタムクラス
-  buttonStyle,             // 💡 追加：インスタイルでの配色指定
-  initialLearningPace = "normal", 
-  userId, 
-  userNickname = "My friend", 
+  defaultOpen = false,
+  themeColor = "blue",
+  floatingButtonClassName,
+  buttonStyle,
+  initialLearningPace = "normal",
+  userId,
+  userNickname = "My friend",
 }: YamatoChatCommonProps) {
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // フォントサイズの管理ステート
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
 
-  // 画像アップロード用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
-  // 選択されたテーマのスタイルセットを取得
-  const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.emerald;
+  const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.blue;
 
-  // 💡 画面右下のボタンのクラスおよびインスタイル決定ロジック
   const finalFloatingButtonClass = floatingButtonClassName || `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
   
   const floatingInlineStyle = buttonStyle ? {
@@ -286,7 +276,6 @@ export function YamatoChatCommon({
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
 
-  // 拡大用画像モーダル用ステート
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -308,20 +297,13 @@ export function YamatoChatCommon({
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
     setTutorLevel(newLevel);
 
-    if (!userId) {
-      console.warn("userIdが渡されていないため、Supabaseのprofiles更新はスキップされました。");
-      return;
-    }
+    if (!userId) return;
 
     try {
-      const { error } = await supabase
+      await supabase
         .from("profiles")
         .update({ learning_pace: newLevel })
         .eq("id", userId);
-
-      if (error) {
-        console.error("学習ペースのSupabase更新に失敗しました:", error.message);
-      }
     } catch (err) {
       console.error("学習ペース更新時の通信エラー:", err);
     }
@@ -329,7 +311,6 @@ export function YamatoChatCommon({
 
   const toggleAiFullscreen = async () => {
     if (!aiChatRef.current) return;
-
     try {
       if (!document.fullscreenElement) {
         await aiChatRef.current.requestFullscreen();
@@ -345,21 +326,16 @@ export function YamatoChatCommon({
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        setIsAiFullscreen(false);
-      }
+      if (!document.fullscreenElement) setIsAiFullscreen(false);
     };
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
         setIsAiFullscreen(false);
       }
     };
-
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       window.removeEventListener("keydown", handleKeyDown);
@@ -393,7 +369,7 @@ export function YamatoChatCommon({
     if (fileInputRef.current) fileInputRef.current.value = '';
 
     const newMessages: ChatMessage[] = [
-      ...tutorMessages, 
+      ...tutorMessages,
       { role: "user", content: userMsg, imageUrl: imageBase64 || undefined },
     ];
     setTutorMessages(newMessages);
@@ -414,7 +390,7 @@ export function YamatoChatCommon({
           userNickname: userNickname,
           appType: appType,
           systemPrompt: systemPrompt,
-          visualPrompt: visualPrompt, 
+          visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,
           userId: userId,
@@ -422,11 +398,10 @@ export function YamatoChatCommon({
       });
 
       const responseText = await response.text();
-      
       let data: any;
       try {
         data = JSON.parse(responseText);
-      } catch (parseErr) {
+      } catch {
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
@@ -434,28 +409,20 @@ export function YamatoChatCommon({
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
-
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
-              {
-                role: "assistant",
-                content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
-              }
+              { role: "assistant", content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! Please top up your credits to continue!` }
             ]);
             return;
           } else if (errorCode === "PARTIAL_SHORTAGE") {
             setTutorMessages([
               ...newMessages,
-              {
-                role: "assistant",
-                content: `⚠️ **[Insufficient Credits]**\n\nMy friend, this action requires more credits than your current balance. Don't worry—standard text chat (2 credits) is still available, or you can top up for full access! 💬`
-              }
+              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\nMy friend, standard text chat (2 credits) is available!` }
             ]);
             return;
           }
         }
-
         throw new Error(data?.error || `APIエラー (${response.status})`);
       }
 
@@ -468,7 +435,6 @@ export function YamatoChatCommon({
         ...newMessages,
         { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
       ]);
-
     } catch (err: any) {
       console.error(err);
       setIsTutorLoading(false);
@@ -492,7 +458,7 @@ export function YamatoChatCommon({
             <span>🤖</span>
             <span>{characterName}</span>
             {selectedImagePreview && (
-              <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
+              <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
           </button>
         ) : (
@@ -597,9 +563,9 @@ export function YamatoChatCommon({
                           {msg.content}
                           {msg.imageUrl && (
                             <div className="mt-2">
-                              <img 
-                                src={msg.imageUrl} 
-                                alt="User Upload" 
+                              <img
+                                src={msg.imageUrl}
+                                alt="User Upload"
                                 className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
                                 onClick={() => setModalImageSrc(msg.imageUrl || null)}
                               />
@@ -611,9 +577,9 @@ export function YamatoChatCommon({
                           <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                           {msg.imageUrl && (
                             <div className="mt-2">
-                              <img 
-                                src={msg.imageUrl} 
-                                alt="AI Generated Visual Aid" 
+                              <img
+                                src={msg.imageUrl}
+                                alt="AI Generated Visual Aid"
                                 className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
                                 onClick={() => setModalImageSrc(msg.imageUrl || null)}
                               />
@@ -671,9 +637,9 @@ export function YamatoChatCommon({
                   </button>
 
                   <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
-                    <input 
-                      type="checkbox" 
-                      checked={requestVisualAid} 
+                    <input
+                      type="checkbox"
+                      checked={requestVisualAid}
                       onChange={(e) => setRequestVisualAid(e.target.checked)}
                       className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
                     />
@@ -706,26 +672,26 @@ export function YamatoChatCommon({
 
       {/* 画像拡大表示モーダル */}
       {modalImageSrc && (
-        <div 
+        <div
           className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4"
           onClick={() => setModalImageSrc(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh]">
-            <button 
+            <button
               onClick={() => setModalImageSrc(null)}
               className="absolute -top-10 right-0 text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition cursor-pointer"
             >
               ✕ Close
             </button>
-            <img 
-              src={modalImageSrc} 
-              alt="Enlarged View" 
-              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" 
+            <img
+              src={modalImageSrc}
+              alt="Enlarged View"
+              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white"
             />
           </div>
         </div>
       )}
-    </>
+  </>
   );
 }
 
