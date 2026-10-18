@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "remix vite:dev",
     "build": "remix vite:build && npx esbuild server.ts --bundle --format=esm --platform=browser --external:@cloudflare/* --external:@remix-run/* --external:react --external:react-dom --outfile=functions/[[path]].js",
+    "sync:knowledge": "node scripts/sync-knowledge.js",
+    "deploy:full": "npm run build && npm run sync:knowledge",
     "start": "npm run build && wrangler pages dev build/client"
   },
   "dependencies": {

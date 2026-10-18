@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（PageLayout完全連動・重複認証削除版）
+ * @description AI Yamato Portal のランディングページ（PageLayout完全連動・API同期ナレッジ完全移行版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -40,9 +40,6 @@ import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/
 
 // 💡 Quiz data and helper functions imported from external file
 import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
-
-// ★法的・サポートコンテンツデータをインポート
-import { LEGAL_CONTENT } from '../data/legal-content';
 
 // Auto demo conversations in English
 const DEMO_CONVERSATIONS = [
@@ -319,15 +316,6 @@ export default function Home() {
     } finally {
       setCheckoutLoadingPriceId(null);
     }
-  };
-
-  const portalContextData = {
-    userNickname: nickname || "My friend",
-    pricePlans: PRICE_PLANS,
-    creditGuide: CREDIT_CONSUMPTION_GUIDE,
-    todayQuiz: currentQuiz,
-    allQuizzes: DAILY_QUIZZES,
-    legalContent: LEGAL_CONTENT,
   };
 
   return (
@@ -852,9 +840,8 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト */}
+        {/* 🤖 右下に常駐するコンシェルジュヤマト（軽量化完了） */}
         <ChatYamatoConcierge 
-          additionalContext={portalContextData} 
           initialLearningPace={learningPace}
           userId={user?.id}
           credits={credits}

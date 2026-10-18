@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（未ログインガード・userId送信・クレジット連動・リロードなし残高同期・スマートクレジットエラー分岐・英語案内対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（API同期ナレッジ対応・データ送信完全軽量化版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -29,22 +29,8 @@ const FEATURE_COSTS = {
   mockFull: 10,      // フル模試
 };
 
-// 💡 _index.tsx から渡される additionalContext および学習ペース・ユーザーID・クレジットの型定義
+// 💡 学習ペース・ユーザーID・クレジットの型定義（data/ への依存を排除）
 export interface ChatYamatoConciergeProps {
-  additionalContext?: {
-    pricePlans?: Record<string, any>;
-    creditGuide?: Array<{ item: string; cost: string }>;
-    todayQuiz?: any;
-    allQuizzes?: Array<any>;
-    legalContent?: {
-      terms?: any;
-      disclaimer?: any;
-      privacy?: any;
-      contact?: any;
-    };
-    cityName?: string;
-    timeZone?: string;
-  };
   initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string;
   credits?: number; // クレジット残高
@@ -52,7 +38,6 @@ export interface ChatYamatoConciergeProps {
 }
 
 export function ChatYamatoConcierge({ 
-  additionalContext, 
   initialLearningPace = "normal", 
   userId,
   credits: initialCredits = 10,
@@ -207,24 +192,8 @@ export function ChatYamatoConcierge({
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
 
-    const portalContextPayload = {
-      quizzes: additionalContext?.allQuizzes?.map(q => ({
-        title: q.topic || q.title,
-        description: q.question || q.description
-      })) || [
-        { title: "VCE Japanese Kanji & Vocabulary", description: "Interactive practice aligned with Australian secondary curricula." },
-        { title: "Mini Shogi & Go", description: "Traditional Japanese board games adapted for language learners." },
-        { title: "Karuta & Typing Games", description: "Engaging drills to master Japanese reading and kana/kanji." }
-      ],
-      todayQuiz: additionalContext?.todayQuiz || null,
-      pricePlans: additionalContext?.pricePlans || null,
-      creditGuide: additionalContext?.creditGuide || null,
-      legalContent: additionalContext?.legalContent || null,
-      cityName: additionalContext?.cityName || "Melbourne, Australia",
-      timeZone: additionalContext?.timeZone || "Australia/Melbourne"
-    };
-
     try {
+      // 💡 data/ からのデータを一切排除した軽量なリクエストペイロード
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -234,7 +203,6 @@ export function ChatYamatoConcierge({
           learningPace: tutorLevel,
           userNickname: "my friend",
           appType: "concierge",
-          portalData: portalContextPayload,
           userId: userId, // ★重要：バックエンドでクレジットを減算するためにユーザーIDを確実に送信
         }),
       });

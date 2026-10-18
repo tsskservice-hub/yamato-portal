@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（未ログインガード削除・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐・英語案内対応版）
+ * @description ヤマトAIチャットウィジェット（未ログインガード削除・全テーマカラー・Supabase即時更新・スマートクレジットエラー分岐・英語案内・portalData完全排除軽量版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.3.1",
-  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・スマートクレジットエラー分岐・英語案内対応）",
+  version: "2.6.0",
+  role: "ポータル共通AIチャットウィジェット（全テーマカラー対応・Supabase即時更新・フルスクリーン切替・スマートクレジットエラー分岐・英語案内・API同期ナレッジ参照・portalData完全排除）",
   features: [
     {
       featureName: "Theme Customization",
@@ -43,6 +43,10 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Smart Credit Handling",
       description: "残高ゼロ（ZERO_CREDITS）と部分的な残高不足（PARTIAL_SHORTAGE）を検知し、温かい英語のメッセージで案内"
+    },
+    {
+      featureName: "API-Side Synchronized Knowledge",
+      description: "API側で一元管理・同期されたFAQやVCE基準データを自動参照し、通信量を完全に最小限に抑えつつ指導方針を維持"
     }
   ],
   supportedThemes: ["emerald", "blue", "yellow", "purple", "cyan", "orange", "black", "green", "navy"],
@@ -55,13 +59,12 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// 外部から受け取るプロパティ（Props）の型定義
+// 外部から受け取るプロパティ（Props）の型定義（additionalContext を完全に排除）
 export type YamatoChatCommonProps = {
   characterName?: string;        // チャット窓のタイトルに表示する名前
   initialGreeting?: string;      // 最初の一言メッセージ
   systemPrompt?: string;         // キャラクター固有の指示
   appType?: "concierge" | "writing" | "oral" | "general" | string;  
-  additionalContext?: any;       // コンシェルジュ等に渡す追加のポータルデータ
   
   // 共通の初期非表示仕様とテーマカラー設定
   defaultOpen?: boolean;         // 初期状態で開いておくか
@@ -197,8 +200,7 @@ export function YamatoChatCommon({
   initialGreeting = "Hello, my friend! 🌟 Welcome to Yamato AI Tutor. How can I assist your Japanese learning today?",
   systemPrompt = "",
   appType = "general",
-  additionalContext,
-  defaultOpen = false,        
+  defaultOpen = false,      
   themeColor = "emerald",    
   initialLearningPace = "normal", 
   userId, 
@@ -312,7 +314,7 @@ export function YamatoChatCommon({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      // 💡 api.jptutoraiyamato.com/chat へリクエスト送信
+      // 💡 api.jptutoraiyamato.com/chat へリクエスト送信（portalDataを完全に排除した超軽量ペイロード）
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -325,7 +327,6 @@ export function YamatoChatCommon({
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt, 
           requestVisualAid: needsVisual,
-          portalData: additionalContext,
           userId: userId,
         }),
       });
