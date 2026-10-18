@@ -12,6 +12,22 @@ import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting"; // ★ Ch
 import questionsData from "../data/writing-exam-questions.json";
 import textTypesData from "../data/texttypes.json";
 
+function BugReportCard() {
+  return (
+    <div className="w-full p-4 bg-white hover:bg-amber-50 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl font-bold text-lg shadow-sm transition-all cursor-pointer">
+      🐛 Report a Bug / Issue
+    </div>
+  );
+}
+
+function QuickFeedbackCard() {
+  return (
+    <div className="w-full p-4 bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 hover:border-blue-300 rounded-xl font-bold text-lg shadow-sm transition-all cursor-pointer">
+      💬 Quick Feedback & Suggestions
+    </div>
+  );
+}
+
 const questions = questionsData as any[];
 const modalData: { [key: string]: any } = textTypesData;
 
