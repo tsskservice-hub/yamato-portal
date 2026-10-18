@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（収縮時ボタンの枠線・背景・文字色個別指定対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（収縮時ボタンの枠線・背景・文字色個別指定対応版・Supabaseセッション自動検知強化版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -41,7 +41,7 @@ export interface ChatYamatoConciergeProps {
 
 export function ChatYamatoConcierge({ 
   initialLearningPace = "normal", 
-  userId,
+  userId: propUserId,
   credits: initialCredits = 10,
   onOpenAuth,
   floatingButtonClassName = "bg-white hover:bg-slate-50 text-slate-900 border-2 border-red-500", // デフォルトでご指定の「枠線：赤、背景：白、文字：黒」を設定
@@ -50,13 +50,73 @@ export function ChatYamatoConcierge({
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
 
-  // 💡 コンポーネント内でクレジット残高を管理するステート（リアルタイム更新用）
+  // 💡 内部で管理する実質的な userId（プロパティがない場合、Supabaseセッションから自動取得・補完）
+  const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
+
+  // 親から渡された propUserId が更新されたら同期
+  useEffect(() => {
+    if (propUserId) {
+      setActiveUserId(propUserId);
+    }
+  }, [propUserId]);
 
   // 親から渡された初期 credits が更新されたら反映
   useEffect(() => {
     setCurrentCredits(initialCredits);
   }, [initialCredits]);
+
+  // 💡 安全策：親からの `userId` が渡されていなくても、コンポーネント内で Supabase のセッションを直接監視・取得する
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkAuthSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id && isMounted && !activeUserId) {
+          setActiveUserId(session.user.id);
+          // ユーザーIDが判明したらクレジットも最新化する
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', session.user.id)
+            .single();
+          if (profileData && typeof profileData.credits === 'number') {
+            setCurrentCredits(profileData.credits);
+          }
+        }
+      } catch (err) {
+        console.error("Session check error in ChatYamatoConcierge:", err);
+      }
+    }
+
+    if (!activeUserId) {
+      checkAuthSession();
+    }
+
+    // Auth state の変更をリアルタイムに検知
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (isMounted) {
+        const newUid = session?.user?.id;
+        setActiveUserId(newUid);
+        if (newUid) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', newUid)
+            .single();
+          if (profileData && typeof profileData.credits === 'number') {
+            setCurrentCredits(profileData.credits);
+          }
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [activeUserId]);
 
   const characterName = "やまと先生";
   const initialGreeting = "Hello, my friend! 🌟 Welcome to the Yamato Portal. I am Yamato-sensei, your guide and concierge. Please feel free to ask me anything about our Japanese quizzes, mini-games, pricing plans, or portal features!";
@@ -83,13 +143,13 @@ export function ChatYamatoConcierge({
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
     setTutorLevel(newLevel);
 
-    if (!userId) return;
+    if (!activeUserId) return;
 
     try {
       const { error } = await supabase
         .from("profiles")
         .update({ learning_pace: newLevel })
-        .eq("id", userId);
+        .eq("id", activeUserId);
 
       if (error) {
         console.error("学習ペースのSupabase更新に失敗しました:", error.message);
@@ -127,12 +187,12 @@ export function ChatYamatoConcierge({
 
   // 💡 Supabaseから最新のクレジット残高を非同期で再取得する関数
   const refreshUserCredits = async () => {
-    if (!userId) return;
+    if (!activeUserId) return;
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('credits')
-        .eq('id', userId)
+        .eq('id', activeUserId)
         .single();
       
       if (data && !error && typeof data.credits === 'number') {
@@ -143,13 +203,13 @@ export function ChatYamatoConcierge({
     }
   };
 
-  // メッセージ送信処理（未ログインガード ＆ userId ＆ 402スマートクレジットエラー分岐ハンドリング）
+  // メッセージ送信処理（未ログインガード ＆ activeUserId ＆ 402スマートクレジットエラー分岐ハンドリング）
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tutorInput.trim() || isTutorLoading) return;
 
     // 💡 ガード1: 未ログインの場合はチャットをブロックして認証モーダルを開く
-    if (!userId) {
+    if (!activeUserId) {
       alert("やまと先生とお話しするには、無料サインアップまたはログインが必要です！");
       if (onOpenAuth) {
         onOpenAuth();
@@ -196,7 +256,6 @@ export function ChatYamatoConcierge({
     setIsTutorLoading(true);
 
     try {
-      // 💡 data/ からのデータを一切排除した軽量なリクエストペイロード
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -206,7 +265,7 @@ export function ChatYamatoConcierge({
           learningPace: tutorLevel,
           userNickname: "my friend",
           appType: "concierge",
-          userId: userId, // ★重要：バックエンドでクレジットを減算するためにユーザーIDを確実に送信
+          userId: activeUserId, // ★確実なユーザーIDを送信
         }),
       });
 
@@ -252,7 +311,7 @@ export function ChatYamatoConcierge({
 
       const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
       const sanitizedReply = sanitizeAiOutput(replyText);
-      const aiImageUrl = data.imageUrl; // バックエンドから返却される可能性のある画像URL
+      const aiImageUrl = data.imageUrl;
 
       setIsTutorLoading(false);
       setTutorMessages([
@@ -260,7 +319,6 @@ export function ChatYamatoConcierge({
         { role: "assistant", content: sanitizedReply, imageUrl: aiImageUrl }
       ]);
 
-      // 💡 リロードせず、バックグラウンドで最新のクレジット残高を非同期取得して更新
       await refreshUserCredits();
 
     } catch (err: any) {
@@ -273,9 +331,8 @@ export function ChatYamatoConcierge({
     }
   };
 
-  // 💡 画像AI機能などを利用する際の手前チェック用ヘルパー関数
   const handleRequestImageAiFeature = () => {
-    if (!userId) {
+    if (!activeUserId) {
       alert("Login required");
       if (onOpenAuth) onOpenAuth();
       return false;
@@ -298,7 +355,7 @@ export function ChatYamatoConcierge({
         >
           <span>🤖</span>
           <span>{characterName}</span>
-          {userId && currentCredits < FEATURE_COSTS.textAi && (
+          {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
               !
             </span>
@@ -321,7 +378,7 @@ export function ChatYamatoConcierge({
                   <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> 
                   {characterName}
                 </h3>
-                {userId ? (
+                {activeUserId ? (
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                     🪙 {currentCredits} credits
                   </span>
@@ -377,7 +434,7 @@ export function ChatYamatoConcierge({
             </div>
 
             {/* 未ログイン時のガード画面 */}
-            {!userId ? (
+            {!activeUserId ? (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                 <div className="text-3xl">🔒</div>
                 <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>

@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（未ログインガード・クレジット残高表示・402スマートクレジット制御・新9色テーマ対応版）
+ * @description ヤマトAIチャットウィジェット（未ログインガード・クレジット残高表示・402スマートクレジット制御・新9色テーマ対応・Supabaseセッション自動検知強化版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.0.0",
-  role: "ポータル共通AIチャットウィジェット（ログインガード・クレジット管理完全統合版）",
+  version: "3.1.0",
+  role: "ポータル共通AIチャットウィジェット（ログインガード・クレジット管理・セッション自動検知統合版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -250,7 +250,7 @@ export function YamatoChatCommon({
   floatingButtonClassName,
   buttonStyle,
   initialLearningPace = "normal",
-  userId,
+  userId: propUserId,
   userNickname = "My friend",
   credits: initialCredits = 10,
   onOpenAuth,
@@ -260,12 +260,70 @@ export function YamatoChatCommon({
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 クレジット残高の管理ステート
+  // 💡 内部で管理する実質的な userId（プロパティがない場合、Supabaseセッションから自動取得）
+  const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
+
+  // propUserId が変更されたら同期
+  useEffect(() => {
+    if (propUserId) {
+      setActiveUserId(propUserId);
+    }
+  }, [propUserId]);
 
   useEffect(() => {
     setCurrentCredits(initialCredits);
   }, [initialCredits]);
+
+  // 💡 安全策：親からの `userId` が未設定の場合でも、Supabase セッションを自動検知してログイン状態を復元
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkAuthSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id && isMounted && !activeUserId) {
+          setActiveUserId(session.user.id);
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', session.user.id)
+            .single();
+          if (profileData && typeof profileData.credits === 'number') {
+            setCurrentCredits(profileData.credits);
+          }
+        }
+      } catch (err) {
+        console.error("Session check error in YamatoChatCommon:", err);
+      }
+    }
+
+    if (!activeUserId) {
+      checkAuthSession();
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (isMounted) {
+        const newUid = session?.user?.id;
+        setActiveUserId(newUid);
+        if (newUid) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', newUid)
+            .single();
+          if (profileData && typeof profileData.credits === 'number') {
+            setCurrentCredits(profileData.credits);
+          }
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [activeUserId]);
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
 
@@ -314,13 +372,13 @@ export function YamatoChatCommon({
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
     setTutorLevel(newLevel);
 
-    if (!userId) return;
+    if (!activeUserId) return;
 
     try {
       await supabase
         .from("profiles")
         .update({ learning_pace: newLevel })
-        .eq("id", userId);
+        .eq("id", activeUserId);
     } catch (err) {
       console.error("学習ペース更新時の通信エラー:", err);
     }
@@ -361,12 +419,12 @@ export function YamatoChatCommon({
 
   // 💡 Supabaseから最新のクレジット残高を再取得する関数
   const refreshUserCredits = async () => {
-    if (!userId) return;
+    if (!activeUserId) return;
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('credits')
-        .eq('id', userId)
+        .eq('id', activeUserId)
         .single();
       
       if (data && !error && typeof data.credits === 'number') {
@@ -394,7 +452,7 @@ export function YamatoChatCommon({
     if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
 
     // 💡 ガード1: 未ログインの場合はチャットをブロックして認証モーダルを開く
-    if (!userId) {
+    if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
       if (onOpenAuth) {
         onOpenAuth();
@@ -465,7 +523,7 @@ export function YamatoChatCommon({
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,
-          userId: userId, // 💡 バックエンドでクレジットを減算するためにユーザーIDを送信
+          userId: activeUserId, // 💡 確実なユーザーIDを送信
         }),
       });
 
@@ -511,7 +569,6 @@ export function YamatoChatCommon({
         { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
       ]);
 
-      // 💡 リロードせずにバックグラウンドでクレジット残高を最新化
       await refreshUserCredits();
 
     } catch (err: any) {
@@ -539,7 +596,7 @@ export function YamatoChatCommon({
             {selectedImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
-            {userId && currentCredits < FEATURE_COSTS.textAi && (
+            {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
                 !
               </span>
@@ -561,7 +618,7 @@ export function YamatoChatCommon({
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
                   </h3>
-                  {userId ? (
+                  {activeUserId ? (
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                       🪙 {currentCredits} credits
                     </span>
@@ -643,7 +700,7 @@ export function YamatoChatCommon({
               </div>
 
               {/* 💡 未ログイン時の新規登録・ログインガード画面 */}
-              {!userId ? (
+              {!activeUserId ? (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                   <div className="text-3xl">🔒</div>
                   <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
