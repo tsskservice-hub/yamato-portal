@@ -10,10 +10,9 @@ import {
   HelpCircle, 
   ChevronDown, 
   ChevronUp, 
-  BookOpen, 
-  PenTool, 
-  Mic, 
   FileText, 
+  Mic, 
+  PenTool, 
   LayoutDashboard,
   ArrowLeft
 } from 'lucide-react';
@@ -171,15 +170,6 @@ export default function FaqPage() {
                           className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
                           dangerouslySetInnerHTML={{ __html: faq.answerHtml }}
                         />
-                        
-                        {/* AI Advisor & Expert Guidance Preview */}
-                        <div className="mt-3 p-3 rounded-xl bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-900 flex items-start space-x-2">
-                          <BookOpen className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                          <div>
-                            <strong className="font-semibold block text-indigo-950 mb-0.5">AI Yamato Expert Guideline Ref:</strong>
-                            <span className="text-indigo-800 leading-normal">{faq.expertGuidance}</span>
-                          </div>
-                        </div>
                       </div>
                     )}
                   </div>
