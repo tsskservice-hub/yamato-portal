@@ -331,20 +331,6 @@ export function ChatYamatoConcierge({
     }
   };
 
-  const handleRequestImageAiFeature = () => {
-    if (!activeUserId) {
-      alert("Login required");
-      if (onOpenAuth) onOpenAuth();
-      return false;
-    }
-    if (currentCredits < FEATURE_COSTS.imageAi) {
-      alert(`Image AI requires ${FEATURE_COSTS.imageAi} credits, but you currently have ${currentCredits} credits (Note: standard text chat at 2 credits is still available).`);
-      return false;
-    }
-    alert("Accessing Image AI feature (sufficient credits).");
-    return true;
-  };
-
   return (
     <aside aria-label="Yamato Concierge" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
       {!isAiTutorOpen ? (
@@ -497,7 +483,7 @@ export function ChatYamatoConcierge({
                   )}
                 </div>
 
-                {/* 入力フォーム ＆ 画像AI機能テストボタン */}
+                {/* 入力フォーム */}
                 <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                   <div className="flex gap-2">
                     <input
@@ -516,15 +502,9 @@ export function ChatYamatoConcierge({
                       Send
                     </button>
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                    <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
-                    <button
-                      type="button"
-                      onClick={handleRequestImageAiFeature}
-                      className="text-blue-600 hover:underline font-semibold cursor-pointer"
-                    >
-                      Test Image AI Check
-                    </button>
+                  {/* 💡 消費クレジット案内 */}
+                  <div className="text-[10px] text-slate-400 px-1 text-left">
+                    💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr
                   </div>
                 </form>
               </>

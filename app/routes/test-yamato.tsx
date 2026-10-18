@@ -196,6 +196,89 @@ export default function TestYamatoPage() {
       {/* メインコンテンツ（上下フルワイド配置） */}
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
+        {/* 追加セクション：test-yamato.tsxで変えられるもの・変わらないもの */}
+        <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <span>🔍</span> test-yamato.tsx でペルソナ切替時に変わるもの・変わらないもの
+          </h2>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px", fontSize: "13px" }}>
+            
+            {/* 🔄 変わるもの */}
+            <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "16px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: "bold", color: "#166534", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>🔄</span> 変わるもの
+              </h3>
+              <ul style={{ margin: 0, paddingLeft: "18px", color: "#334155", display: "flex", flexDirection: "column", gap: "10px", lineHeight: "1.5" }}>
+                <li>
+                  <strong>AIのペルソナ頭脳とバックエンド処理 (appType):</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    バックエンドのAPIに送信される <code>appType</code> が切り替わり、それぞれの専門分野（一般コンシェルジュ、囲碁、VCEライティング、口頭試験対策など）に応じた固有のシステムプロンプトや知識データが適用されます。
+                  </div>
+                </li>
+                <li>
+                  <strong>キャラクターの名前 (characterName):</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    チャットヘッダーやフローティングボタンに表示される名前（「やまと先生」、「囲碁ヤマト」、「VCE Writing Practice」など）が各ペルソナの名称に変わります。
+                  </div>
+                </li>
+                <li>
+                  <strong>初期の挨拶メッセージ (initialGreeting):</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    チャットを開いた際に最初に表示されるウェルカムメッセージが、各ペルソナ固有の挨拶に変わります。
+                  </div>
+                </li>
+                <li>
+                  <strong>テーマカラーとボタンスタイル (themeColor / buttonStyle):</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    ウィジェットのヘッダー色、バッジ、入力欄のフォーカスリング、ユーザーの吹き出し背景、およびボタンの枠線・背景・文字色（赤、黒、水色、緑、紫など）が各ペルソナの設定に合わせて変化します。
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            {/* 🔒 変わらないもの */}
+            <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "16px" }}>
+              <h3 style={{ fontSize: "14px", fontWeight: "bold", color: "#1e40af", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>🔒</span> 変わらないもの（共通の機能・レイアウト）
+              </h3>
+              <ul style={{ margin: 0, paddingLeft: "18px", color: "#334155", display: "flex", flexDirection: "column", gap: "10px", lineHeight: "1.5" }}>
+                <li>
+                  <strong>ユーザーのログイン状態とクレジット残高管理:</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    どのペルソナに切り替えても、Supabaseによる認証セッションの自動検知、リアルタイムのクレジット残高表示（🪙 XX credits）、およびゼロクレジット時のガード機能は共通して動き続けます。
+                  </div>
+                </li>
+                <li>
+                  <strong>学習ペースの切替機能:</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    <code>steady</code>（じっくり）、<code>normal</code>（標準）、<code>accelerated</code>（加速）の学習ペース切替UIと、Supabaseの <code>profiles</code> テーブルへの即時保存の仕組みはすべてのペルソナで共通です。
+                  </div>
+                </li>
+                <li>
+                  <strong>文字サイズの動的変更機能:</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    チャット内のフォントサイズ（小・中・大・特大）を切り替えるUIと機能は共通です。
+                  </div>
+                </li>
+                <li>
+                  <strong>画像アップロード & ビジョン解析・全画面表示機能:</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    手書き答案などの画像を添付してプレビューする機能、視覚支援（Visual Aid）チェックボックス、およびチャット画面の最大化（フルスクリーン）機能は共通で利用できます。
+                  </div>
+                </li>
+                <li>
+                  <strong>消費クレジットのルールとスマートエラーハンドリング:</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    テキストチャット（2クレジット）および画像AI（4クレジット）の消費ルールや、402エラー時のスマートなクレジット不足ハンドリングはすべてのペルソナで共通です。
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
 {/* セクション1：ヤマトAI 独立APIテスト画面 */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -221,7 +304,7 @@ export default function TestYamatoPage() {
                     cursor: "pointer",
                     border: appConfig.concierge.buttonStyle.border,
                     backgroundColor: appConfig.concierge.buttonStyle.background, // 💡 選択時も元の背景色を維持
-                    color: appConfig.concierge.buttonStyle.color                 // 💡 選択時も元の文字色を維持
+                    color: appConfig.concierge.buttonStyle.color               // 💡 選択時も元の文字色を維持
                   }}
                 >
                   👋 LP Concierge (コンシェルジュ) {activeAppType === "concierge" && " ✓"}
@@ -251,7 +334,7 @@ export default function TestYamatoPage() {
                         cursor: "pointer",
                         border: cfg.buttonStyle.border,
                         backgroundColor: cfg.buttonStyle.background, // 💡 選択時も元の背景色を維持
-                        color: cfg.buttonStyle.color                 // 💡 選択時も元の文字色を維持
+                        color: cfg.buttonStyle.color               // 💡 選択時も元の文字色を維持
                       }}
                     >
                       {type === "genkoyoshi-editor-general" && (<span>📄 原稿用紙 (一般) {isSelected && " ✓"}</span>)}
@@ -293,7 +376,7 @@ export default function TestYamatoPage() {
                         cursor: "pointer",
                         border: cfg.buttonStyle.border,
                         backgroundColor: cfg.buttonStyle.background, // 💡 選択時も元の背景色を維持
-                        color: cfg.buttonStyle.color                 // 💡 選択時も元の文字色を維持
+                        color: cfg.buttonStyle.color               // 💡 選択時も元の文字色を維持
                       }}
                     >
                       {type === "genkoyoshi-editor-vce" && (<span>📄 原稿用紙 (VCE) {isSelected && " ✓"}</span>)}

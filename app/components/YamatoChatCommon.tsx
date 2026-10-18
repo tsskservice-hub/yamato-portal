@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（未ログインガード・クレジット残高表示・402スマートクレジット制御・新9色テーマ対応・Supabaseセッション自動検知強化版）
+ * @description ヤマトAIチャットウィジェット（未ログインガード・クレジット残高表示・402スマートクレジット制御・新9色テーマ・消費クレジット案内対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.1.0",
-  role: "ポータル共通AIチャットウィジェット（ログインガード・クレジット管理・セッション自動検知統合版）",
+  version: "3.2.0",
+  role: "ポータル共通AIチャットウィジェット（ログインガード・クレジット管理・セッション自動検知・消費クレジット案内統合版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -55,6 +55,10 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Learning Pace Synchronization",
       description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
+    },
+    {
+      featureName: "Credit Cost & Feature Test Footer",
+      description: "チャット下部にクレジット消費案内（Chat / Image）と画像AIテスト機能へのリンクを配置"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink"],
@@ -447,6 +451,21 @@ export function YamatoChatCommon({
     }
   };
 
+  // 💡 画像AI機能テストボタン用のハンドラー
+  const handleRequestImageAiFeature = () => {
+    if (!activeUserId) {
+      alert("Login required");
+      if (onOpenAuth) onOpenAuth();
+      return false;
+    }
+    if (currentCredits < FEATURE_COSTS.imageAi) {
+      alert(`Image AI requires ${FEATURE_COSTS.imageAi} credits, but you currently have ${currentCredits} credits (Note: standard text chat at 2 credits is still available).`);
+      return false;
+    }
+    alert("Accessing Image AI feature (sufficient credits).");
+    return true;
+  };
+
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
@@ -481,7 +500,7 @@ export function YamatoChatCommon({
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request. Please top up your account! 🪙`
+          content: `⚠️ **[Insufficient Credits]**\n\nMyself, your current balance (${currentCredits} credits) is not enough for this request. Please top up your account! 🪙`
         }
       ]);
       setTutorInput("");
@@ -835,6 +854,18 @@ export function YamatoChatCommon({
                         className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                       >
                         Send
+                      </button>
+                    </div>
+
+                    {/* 💡 消費クレジット案内 ＆ 画像AIテストリンク */}
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
+                      <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
+                      <button
+                        type="button"
+                        onClick={handleRequestImageAiFeature}
+                        className="text-blue-600 hover:underline font-semibold cursor-pointer"
+                      >
+                        Test Image AI Check
                       </button>
                     </div>
                   </form>
