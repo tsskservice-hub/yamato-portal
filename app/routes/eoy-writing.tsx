@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（Useful Resources削除・Genkooyooshiガイド移動版）
+ * @description EOY Writing Practice モジュール（原稿用紙とチェッカーの横並びコンパクト配置版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -209,25 +209,28 @@ export default function Dashboard() {
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           
-          {/* 💡 Dedicated Kanji & Grammar Checker Banner / Link */}
-          <div className="mb-8 p-6 bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-emerald-500/10 border-2 border-amber-400/40 rounded-2xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-left">
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white uppercase tracking-wider">
-                <span>Dedicated Tool</span>
+          {/* 💡 控えめでコンパクトな横並びグリッド（左: 原稿用紙の使い方 / 右: 漢字文法チェッカー） */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <button
+              onClick={() => setActiveModal("Genkooyooshi")}
+              className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
+            >
+              <div className="flex items-center space-x-2 truncate">
+                <span className="text-base">📝</span>
+                <span className="truncate">How to use Genkooyooshi</span>
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900">
-                ✨ VCE Kanji & Grammar Checker (New Dedicated Page)
-              </h2>
-              <p className="text-xs text-slate-600">
-                Check your unique VCE Kanji (<span className="text-amber-700 font-bold">🟡 Yellow</span>) and Grammar (<span className="text-emerald-700 font-bold">🟢 Green</span>) in a dedicated workspace!
-              </p>
-            </div>
+              <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2">View →</span>
+            </button>
+
             <Link
               to="/kanji-grammar-checker"
-              className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/20 transition-all flex items-center space-x-2 whitespace-nowrap cursor-pointer"
+              className="w-full text-left p-3.5 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border no-underline"
             >
-              <span>Open Checker Tool</span>
-              <span className="text-sm">→</span>
+              <div className="flex items-center space-x-2 truncate">
+                <span className="text-base">✨</span>
+                <span className="truncate">VCE Kanji & Grammar Checker</span>
+              </div>
+              <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-amber-200 shrink-0 ml-2">Open →</span>
             </Link>
           </div>
 
@@ -338,20 +341,6 @@ export default function Dashboard() {
             <h1 className="text-slate-800 text-2xl sm:text-3xl font-bold m-0">
               📚 Task List ({filteredQuestions.length} questions)
             </h1>
-          </div>
-
-          {/* 💡 How to use Genkooyooshi card placed neatly right above the filters */}
-          <div className="mb-6">
-            <button
-              onClick={() => setActiveModal("Genkooyooshi")}
-              className="w-full text-left p-4 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-2xl cursor-pointer font-bold text-base shadow-sm transition-all flex items-center justify-between box-border"
-            >
-              <div className="flex items-center space-x-2">
-                <span className="text-xl">📝</span>
-                <span>How to use Genkooyooshi (Manuscript Paper Guidelines)</span>
-              </div>
-              <span className="text-sm font-bold bg-white px-3 py-1 rounded-xl shadow-xs border border-rose-200">View Guide →</span>
-            </button>
           </div>
 
           <div className="mb-6">
