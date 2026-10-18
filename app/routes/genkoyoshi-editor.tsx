@@ -1,19 +1,13 @@
 /**
  * @file genkoyoshi-editor.tsx
- * @description 原稿用紙エディター（rootルートデータ・ニックネーム連携対応版）
+ * @description 原稿用紙エディター（PageLayoutのrefによる認証モーダル制御に統一版）
  */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import { Link, useNavigate, useRouteLoaderData } from "@remix-run/react";
-import { 
-  KeyRound, 
-  ShieldCheck, 
-  X, 
-  Loader2 
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
-import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
-import PageLayout from "../components/PageLayout";
+import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 
 type Item =
   | { type: "num"; value: string }
@@ -56,6 +50,9 @@ function ScrollTopButton() {
 export default function GenkoyoshiEditor() {
   const navigate = useNavigate();
 
+  // 💡 PageLayout の ref 参照用
+  const layoutRef = useRef<PageLayoutRef>(null);
+
   // 💡 root.tsx からグローバルデータを安全に取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -73,12 +70,6 @@ export default function GenkoyoshiEditor() {
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
   const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
-
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [emailInput, setEmailInput] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
 
   // 🤖 AIチューター常駐窓用のステート
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
@@ -149,37 +140,6 @@ export default function GenkoyoshiEditor() {
     await supabase.auth.signOut();
     setUser(null);
     setNickname("");
-  };
-
-  const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    setAuthMode(mode);
-    setIsAuthModalOpen(true);
-  };
-
-  const handlePasskeyAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthLoading(true);
-    setAuthError(null);
-
-    try {
-      if (authMode === 'signup') {
-        if (!emailInput) {
-          throw new Error('Please enter your email address for passkey registration.');
-        }
-        await signUpAndRegisterPasskey(emailInput);
-        alert('Passkey registration successful! Welcome to AI Yamato.');
-      } else {
-        await signInWithPasskey();
-        alert('Passkey sign in successful!');
-      }
-      setIsAuthModalOpen(false);
-      setEmailInput('');
-    } catch (err: any) {
-      console.error(err);
-      setAuthError(err.message || 'Passkey authentication failed. Please try again.');
-    } finally {
-      setAuthLoading(false);
-    }
   };
 
   const isPunctuation = (char: string): boolean => {
@@ -380,11 +340,10 @@ export default function GenkoyoshiEditor() {
 
   return (
     <PageLayout 
+      ref={layoutRef}
       user={user} 
       credits={credits} 
       nickname={nickname}
-      onOpenAuth={handleOpenAuthModal} 
-      onSignOut={handleSignOut}
     >
       <div className="genko-editor-root flex flex-col min-h-screen">
         <style>{`
@@ -520,7 +479,7 @@ export default function GenkoyoshiEditor() {
             border: 1px solid #999;
             box-sizing: border-box;
             display: flex;
-            align-items: flex-end;   
+            align-items: flex-end;    
             justify-content: center;    
             padding-bottom: 2mm;        
             font-size: 1.35rem;         
@@ -816,85 +775,6 @@ export default function GenkoyoshiEditor() {
             </div>
           )}
         </aside>
-
-        {/* 💡 Passkey Authentication / Registration Modal */}
-        {isAuthModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative bg-white border-slate-200 text-slate-900">
-              <button 
-                onClick={() => setIsAuthModalOpen(false)}
-                className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-                    <KeyRound className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-xl font-extrabold tracking-tight">
-                    {authMode === 'signup' ? 'Create Account with Passkey' : 'Sign In with Passkey'}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    {authMode === 'signup' 
-                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.' 
-                      : 'Authenticate instantly with your registered biometric passkey.'}
-                  </p>
-                </div>
-
-                {authError && (
-                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">
-                    {authError}
-                  </div>
-                )}
-
-                <form onSubmit={handlePasskeyAuth} className="space-y-4">
-                  {authMode === 'signup' && (
-                    <div className="space-y-1.5 text-left">
-                      <label className="text-xs font-semibold text-slate-500">Email Address</label>
-                      <input 
-                        type="email"
-                        required
-                        placeholder="your.email@school.vic.edu.au"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900"
-                      />
-                    </div>
-                  )}
-
-                  <button 
-                    type="submit"
-                    disabled={authLoading}
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>{authLoading ? 'Verifying Passkey...' : authMode === 'signup' ? 'Register Passkey' : 'Sign In'}</span>
-                  </button>
-                </form>
-
-                <div className="text-center text-xs">
-                  {authMode === 'signup' ? (
-                    <p className="text-slate-500">
-                      Already have a passkey?{' '}
-                      <button onClick={() => setAuthMode('signin')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
-                        Sign In
-                      </button>
-                    </p>
-                  ) : (
-                    <p className="text-slate-500">
-                      New to AI Yamato?{' '}
-                      <button onClick={() => setAuthMode('signup')} className="text-blue-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
-                        Create Account
-                      </button>
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </PageLayout>
   );

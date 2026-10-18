@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -11,7 +11,7 @@ import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
 export type PageLayoutRef = {
-  openAuthModal: (mode: 'signin' | 'signup') => void;
+  openAuthModal: (mode: 'signin' | 'signup' | string) => void;
 };
 
 type PageLayoutProps = {
@@ -110,8 +110,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    setAuthMode(mode);
+  const handleOpenAuthModal = (mode: 'signin' | 'signup' | string) => {
+    setAuthMode(mode === 'signup' ? 'signup' : 'signin');
     setAuthError(null);
     setEmailInput('');
     setIsToggleOpen(false);
@@ -123,8 +123,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setIsAuthModalOpen(true);
   };
 
+  // 💡 外部（各ページ）の ref から呼び出し可能にする公開メソッド
   useImperativeHandle(ref, () => ({
-    openAuthModal: (mode: 'signin' | 'signup') => {
+    openAuthModal: (mode: 'signin' | 'signup' | string) => {
       handleOpenAuthModal(mode);
     }
   }));

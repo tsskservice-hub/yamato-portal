@@ -1,9 +1,9 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（PageLayout完全連動・API同期ナレッジ完全移行版）
+ * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useRouteLoaderData } from '@remix-run/react';
+import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
 import { 
   Sparkles, 
   Coins, 
@@ -64,6 +64,8 @@ const MAX_ESTIMATED_CREDITS = {
 };
 
 export default function Home() {
+  const navigate = useNavigate();
+
   // 💡 root.tsx からグローバルデータを安全に取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -683,7 +685,7 @@ export default function Home() {
                     type="button"
                     onClick={async () => {
                       if (await validateFeatureCredits('imageAi')) {
-                        window.location.href = "/genkoyoshi-editor-general";
+                        navigate("/genkoyoshi-editor-general");
                       }
                     }}
                     className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
@@ -733,7 +735,7 @@ export default function Home() {
                     type="button"
                     onClick={async () => {
                       if (await validateFeatureCredits('imageAi')) {
-                        window.location.href = "/genkoyoshi-editor-vce";
+                        navigate("/genkoyoshi-editor-vce");
                       }
                     }}
                     className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
@@ -808,7 +810,7 @@ export default function Home() {
                     type="button"
                     onClick={async () => {
                       if (await validateFeatureCredits('textAi')) {
-                        window.location.href = "/eoy-writing";
+                        navigate("/eoy-writing");
                       }
                     }}
                     className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
