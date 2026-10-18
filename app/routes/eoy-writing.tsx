@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（Uploadボタン位置変更版・ChatYamatoEoyWriting連携）
+ * @description EOY Writing Practice モジュール（ボタン位置調整版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -34,7 +34,6 @@ export default function Dashboard() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ダッシュボード側の画像アップロード用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
@@ -114,7 +113,7 @@ export default function Dashboard() {
           <div>
             <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
               
-              {/* 💡 「AI Yamato is ready for you」の右隣に Upload Answer Photo ボタンを配置 */}
+              {/* 💡 「AI Yamato is ready for you」のすぐ右隣にボタンを配置 */}
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
                   <span>🤖</span> AI Yamato is ready for you
@@ -294,7 +293,6 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* 💡 チャットウィジェットとの連携 */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
