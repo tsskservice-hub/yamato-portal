@@ -36,6 +36,11 @@ type AppConfig = {
     background: string;
     color: string;
   };
+  floatingButtonStyle: {
+    border: string;
+    background: string;
+    color: string;
+  };
 };
 
 export default function TestYamatoPage() {
@@ -106,7 +111,8 @@ export default function TestYamatoPage() {
       themeColor: "blue",
       apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
       targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
-      buttonStyle: { border: "2px solid red", background: "white", color: "black" },
+      buttonStyle: { border: "2px solid #ef4444", background: "#ffffff", color: "#000000" },
+      floatingButtonStyle: { border: "2px solid #ef4444", background: "#ffffff", color: "#000000" },
     },
     "game-igo": {
       name: "囲碁ヤマト",
@@ -114,7 +120,8 @@ export default function TestYamatoPage() {
       themeColor: "black",
       apiSourceFile: "game-igo.ts (経由: FoundationLayout.ts)",
       targetAudience: "囲碁に興味のある日本語学習者",
-      buttonStyle: { border: "2px solid white", background: "black", color: "white" },
+      buttonStyle: { border: "2px solid #ffffff", background: "#000000", color: "#ffffff" },
+      floatingButtonStyle: { border: "2px solid #ffffff", background: "#000000", color: "#ffffff" },
     },
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
@@ -122,7 +129,8 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-general.ts (経由: FoundationLayout.ts)",
       targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
-      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "white" }, // 水色・青・白
+      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
+      floatingButtonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
     },
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
@@ -130,7 +138,8 @@ export default function TestYamatoPage() {
       themeColor: "navy",
       apiSourceFile: "genkoyoshi-editor-vce.ts (経由: FoundationLayout.ts)",
       targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
-      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "white" }, // 水色・青・白
+      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
+      floatingButtonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
     },
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
@@ -138,7 +147,8 @@ export default function TestYamatoPage() {
       themeColor: "yellow",
       apiSourceFile: "eoy-oral-drill.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
-      buttonStyle: { border: "2px solid #eab308", background: "#bbf7d0", color: "black" }, // 黄色・薄い緑・黒
+      buttonStyle: { border: "2px solid #eab308", background: "#dcfce7", color: "#000000" },
+      floatingButtonStyle: { border: "2px solid #eab308", background: "#dcfce7", color: "#000000" },
     },
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
@@ -146,7 +156,8 @@ export default function TestYamatoPage() {
       themeColor: "purple",
       apiSourceFile: "eoy-oral-elaborate.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
-      buttonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "black" }, // 紫・うすい紫・黒
+      buttonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "#000000" },
+      floatingButtonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "#000000" },
     },
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
@@ -154,15 +165,17 @@ export default function TestYamatoPage() {
       themeColor: "cyan",
       apiSourceFile: "eoy-oral-mock.ts (経由: FoundationLayout.ts)",
       targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
-      buttonStyle: { border: "2px solid red", background: "#3b82f6", color: "white" }, // 赤・青・白
+      buttonStyle: { border: "2px solid #ef4444", background: "#3b82f6", color: "#ffffff" },
+      floatingButtonStyle: { border: "2px solid #ef4444", background: "#3b82f6", color: "#ffffff" },
     },
     "eoy-writing": {
-      name: "EOY Writing Practice",
+      name: "VCE Writing Practice",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills.",
       themeColor: "orange",
       apiSourceFile: "eoy-writing.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末ライティング試験対策を行う生徒",
-      buttonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "black" }, // 青・うすい水色・黒
+      buttonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "#000000" },
+      floatingButtonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "#000000" },
     },
     "oral-exam-questions": {
       name: "語彙文法チェッカー",
@@ -170,7 +183,8 @@ export default function TestYamatoPage() {
       themeColor: "green",
       apiSourceFile: "oral-exam-questions.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE日本語の語彙や文法を確認したい生徒・教員",
-      buttonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "black" }, // 緑・黄色・黒
+      buttonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "#000000" },
+      floatingButtonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "#000000" },
     },
   };
 
@@ -182,10 +196,7 @@ export default function TestYamatoPage() {
       {/* メインコンテンツ（上下フルワイド配置） */}
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
-
-
-
-{/* セクション1：ヤマトAI 独立APIテスト画面 */}
+        {/* セクション1：ヤマトAI 独立APIテスト画面 */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
@@ -208,9 +219,9 @@ export default function TestYamatoPage() {
                     fontSize: "12px",
                     fontWeight: "600",
                     cursor: "pointer",
-                    border: "2px solid #ef4444", // 枠線：赤
-                    backgroundColor: activeAppType === "concierge" ? "#0f172a" : "#ffffff", // ボタン背景：白 (選択時は濃色)
-                    color: activeAppType === "concierge" ? "#ffffff" : "#000000" // 文字：黒 (選択時は白)
+                    border: appConfig.concierge.buttonStyle.border,
+                    backgroundColor: activeAppType === "concierge" ? "#0f172a" : appConfig.concierge.buttonStyle.background,
+                    color: activeAppType === "concierge" ? "#ffffff" : appConfig.concierge.buttonStyle.color
                   }}
                 >
                   👋 LP Concierge (コンシェルジュ)
@@ -225,13 +236,8 @@ export default function TestYamatoPage() {
               </h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {(["genkoyoshi-editor-general", "game-igo"] as const).map((type) => {
+                  const cfg = appConfig[type];
                   const isSelected = activeAppType === type;
-                  // 原稿用紙一般: 枠線水色(#38bdf8)、背景青(#3b82f6)、文字白(#ffffff)
-                  // 囲碁ヤマト: 枠線白(#ffffff)、背景黒(#000000)、文字白(#ffffff)
-                  const borderStyle = type === "genkoyoshi-editor-general" ? "2px solid #38bdf8" : "2px solid #ffffff";
-                  const bgStyle = type === "genkoyoshi-editor-general" ? "#3b82f6" : "#000000";
-                  const colorStyle = "#ffffff";
-
                   return (
                     <button
                       key={type}
@@ -243,9 +249,9 @@ export default function TestYamatoPage() {
                         fontSize: "12px",
                         fontWeight: "600",
                         cursor: "pointer",
-                        border: borderStyle,
-                        backgroundColor: isSelected ? "#0f172a" : bgStyle,
-                        color: colorStyle
+                        border: cfg.buttonStyle.border,
+                        backgroundColor: isSelected ? "#0f172a" : cfg.buttonStyle.background,
+                        color: isSelected ? "#ffffff" : cfg.buttonStyle.color
                       }}
                     >
                       {type === "genkoyoshi-editor-general" && "📄 原稿用紙 (一般)"}
@@ -272,45 +278,8 @@ export default function TestYamatoPage() {
                     "oral-exam-questions",
                   ] as const
                 ).map((type) => {
+                  const cfg = appConfig[type];
                   const isSelected = activeAppType === type;
-
-                  // 各ボタンごとの配色定義
-                  let border = "";
-                  let background = "";
-                  let textColor = "";
-
-                  if (type === "genkoyoshi-editor-vce") {
-                    // 原稿用紙VCE: 枠線水色、ボタン背景青、文字白
-                    border = "2px solid #38bdf8";
-                    background = "#3b82f6";
-                    textColor = "#ffffff";
-                  } else if (type === "eoy-oral-drill") {
-                    // Oral Drill: 枠線黄色、ボタン背景薄い緑、文字黒
-                    border = "2px solid #eab308";
-                    background = "#dcfce7";
-                    textColor = "#000000";
-                  } else if (type === "eoy-oral-elaborate") {
-                    // Oral Elaborate: 枠線紫、ボタン背景うすい紫、文字黒
-                    border = "2px solid #a855f7";
-                    background = "#f3e8ff";
-                    textColor = "#000000";
-                  } else if (type === "eoy-oral-mock") {
-                    // Oral Mock: 枠線赤、ボタン背景青、文字白
-                    border = "2px solid #ef4444";
-                    background = "#3b82f6";
-                    textColor = "#ffffff";
-                  } else if (type === "eoy-writing") {
-                    // VCE Writing: 枠線青、ボタン背景うすい水色、文字黒
-                    border = "2px solid #3b82f6";
-                    background = "#e0f2fe";
-                    textColor = "#000000";
-                  } else if (type === "oral-exam-questions") {
-                    // 語彙文法チェッカー: 枠線緑、ボタン背景黄色、文字黒
-                    border = "2px solid #22c55e";
-                    background = "#fde047";
-                    textColor = "#000000";
-                  }
-
                   return (
                     <button
                       key={type}
@@ -322,9 +291,9 @@ export default function TestYamatoPage() {
                         fontSize: "12px",
                         fontWeight: "600",
                         cursor: "pointer",
-                        border: border,
-                        backgroundColor: isSelected ? "#0f172a" : background,
-                        color: isSelected ? "#ffffff" : textColor
+                        border: cfg.buttonStyle.border,
+                        backgroundColor: isSelected ? "#0f172a" : cfg.buttonStyle.background,
+                        color: isSelected ? "#ffffff" : cfg.buttonStyle.color
                       }}
                     >
                       {type === "genkoyoshi-editor-vce" && "📄 原稿用紙 (VCE)"}
@@ -345,10 +314,6 @@ export default function TestYamatoPage() {
             <span style={{ fontFamily: "monospace", backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#334155" }}>{activeAppType}</span>
           </div>
         </div>
-
-
-
-
 
         {/* セクション2：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 詳細コラム（1列縦並び：API先行配置） */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
@@ -586,12 +551,13 @@ export default function TestYamatoPage() {
 
       </main>
 
-      {/* 💡 YamatoChatCommon 呼び出し */}
+      {/* 💡 YamatoChatCommon 呼び出し（右下ボタンにも配色を完全連動） */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig.name}
         initialGreeting={currentConfig.greeting}
         themeColor={currentConfig.themeColor as any}
+        buttonStyle={currentConfig.floatingButtonStyle}
         defaultOpen={false}
       />
 

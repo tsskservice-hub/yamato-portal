@@ -25,7 +25,7 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "2.8.0",
+  version: "2.8.1",
   role: "ポータル共通AIチャットウィジェット（収縮時ボタンの枠線・背景・文字色個別指定対応版）",
   features: [
     {
@@ -78,8 +78,13 @@ export type YamatoChatCommonProps = {
   defaultOpen?: boolean;              // 初期状態で開いておくか
   themeColor?: "emerald" | "blue" | "yellow" | "purple" | "cyan" | "orange" | "black" | "green" | "navy" | string; 
   
-  // 💡 追加：画面右下に収まっているときのトグルボタン専用のカスタムカラー指定（オプショナル）
+  // 💡 追加：画面右下に収まっているときのトグルボタン専用のカスタムクラスおよびインラインスタイル指定
   floatingButtonClassName?: string;   // 例: "bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-300"
+  buttonStyle?: {
+    border?: string;
+    background?: string;
+    color?: string;
+  };
 
   // 学習ペースの初期値、Supabase更新用のユーザーID、ユーザーのニックネーム
   initialLearningPace?: "steady" | "normal" | "accelerated";
@@ -241,6 +246,7 @@ export function YamatoChatCommon({
   defaultOpen = false,      
   themeColor = "emerald",    
   floatingButtonClassName, // 💡 追加：右下の収縮ボタン用カスタムクラス
+  buttonStyle,             // 💡 追加：インスタイルでの配色指定
   initialLearningPace = "normal", 
   userId, 
   userNickname = "My friend", 
@@ -260,8 +266,14 @@ export function YamatoChatCommon({
   // 選択されたテーマのスタイルセットを取得
   const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.emerald;
 
-  // 💡 画面右下のボタンのクラス決定ロジック（個別指定 className があれば最優先、なければテーマの個別指定を合体）
+  // 💡 画面右下のボタンのクラスおよびインスタイル決定ロジック
   const finalFloatingButtonClass = floatingButtonClassName || `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
+  
+  const floatingInlineStyle = buttonStyle ? {
+    border: buttonStyle.border,
+    backgroundColor: buttonStyle.background,
+    color: buttonStyle.color,
+  } : undefined;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     {
@@ -474,6 +486,7 @@ export function YamatoChatCommon({
           <button
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
+            style={floatingInlineStyle}
             className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm`}
           >
             <span>🤖</span>
