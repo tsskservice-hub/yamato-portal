@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（ダッシュボードからの画像アップロード・ChatYamatoEoyWriting連携版）
+ * @description EOY Writing Practice モジュール（Uploadボタン位置変更版・ChatYamatoEoyWriting連携）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -34,7 +34,7 @@ export default function Dashboard() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 ダッシュボード側の画像アップロード用ステート
+  // ダッシュボード側の画像アップロード用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
@@ -113,11 +113,37 @@ export default function Dashboard() {
 
           <div>
             <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
-              <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg flex-wrap">
-                <span>🤖</span> AI Yamato is ready for you
+              
+              {/* 💡 「AI Yamato is ready for you」の右隣に Upload Answer Photo ボタンを配置 */}
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
+                  <span>🤖</span> AI Yamato is ready for you
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <span>📷</span>
+                    <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
+                  </button>
+                  {selectedImagePreview && (
+                    <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
+                      ✓ Attached
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* 💡 ダッシュボード側の画像アップロードボタン */}
               <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span>🎯 Active Question Q</span>
@@ -144,29 +170,6 @@ export default function Dashboard() {
                     </span>
                   ) : (
                     <span className="text-sm font-normal text-amber-700">⚠️ None selected</span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>📷</span>
-                    <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
-                  </button>
-                  {selectedImagePreview && (
-                    <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
-                      ✓ Attached
-                    </span>
                   )}
                 </div>
               </div>
@@ -291,7 +294,7 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* 💡 ChatYamatoEoyWriting にダッシュボードの画像と設問情報を渡して統合 */}
+          {/* 💡 チャットウィジェットとの連携 */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
