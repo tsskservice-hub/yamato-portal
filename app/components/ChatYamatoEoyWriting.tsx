@@ -1,13 +1,10 @@
 /**
  * @file ChatYamatoEoyWriting.tsx
- * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（水色テーマ・Eoy Writing頭脳・指定挨拶固定版）
+ * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（ダッシュボード画像連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-/**
- * ChatYamatoEoyWriting のメタデータおよび仕様の型定義
- */
 export interface ChatYamatoEoyWritingMetaType {
   componentName: string;
   version: string;
@@ -20,14 +17,15 @@ export interface ChatYamatoEoyWritingMetaType {
   learningPaces: string[];
 }
 
-/**
- * 構造化メタデータ（コード近接配置）
- */
 export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
   componentName: "ChatYamatoEoyWriting",
-  version: "3.2.0",
-  role: "VCE Writing Practice専用AIチャットウィジェット（固定頭脳・水色テーマ統合版）",
+  version: "3.5.0",
+  role: "VCE Writing Practice専用AIチャットウィジェット（ダッシュボード画像連携版）",
   features: [
+    {
+      featureName: "Dashboard Image Integration",
+      description: "ダッシュボード側でアップロードされた答案画像を受け取り、チャット内でプレビュー・送信"
+    },
     {
       featureName: "Login Guard & Auth Modal Trigger",
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
@@ -37,28 +35,12 @@ export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
       description: "ヘッダーに現在のクレジット残高をリアルタイム表示し、不足時に警告バッジを点灯"
     },
     {
-      featureName: "Smart 402 Credit Error Handling",
-      description: "バックエンドからの ZERO_CREDITS および PARTIAL_SHORTAGE エラーをスマートにハンドリング"
-    },
-    {
       featureName: "Cyan Color Theme Fixed",
       description: "VCE Writing専用の水色（cyan）テーマをデフォルト固定"
     },
     {
-      featureName: "Image Upload & Vision Support",
-      description: "手書き答案などの画像を選択・プレビュー付きでアップロードし、AI家庭教師に画像付きで質問送信可能"
-    },
-    {
       featureName: "Font Size Customization",
-      description: "チャット内の文字サイズを「小・中・大・特大」の4段階に動的切替可能"
-    },
-    {
-      featureName: "Learning Pace Synchronization",
-      description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
-    },
-    {
-      featureName: "Credit Cost & Feature Test Footer",
-      description: "チャット下部にクレジット消費案内（Chat / Image）と画像AIテスト機能へのリンクを配置"
+      description: "チャット内の文字サイズを4段階に動的切替可能"
     }
   ],
   supportedThemes: ["cyan"],
@@ -71,23 +53,24 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// 💡 機能ごとの消費クレジット定義（バックエンドの credit-rules.ts と完全に一致）
 const FEATURE_COSTS = {
   textAi: 2,         // 通常のテキストチャット
-  imageAi: 4,        // 画像付きチャット・ビジュアル解説
+  imageAi: 4,        // 画像付きチャット
 };
 
-// 外部から受け取るプロパティ（Props）の型定義
 export type ChatYamatoEoyWritingProps = {
-  systemPrompt?: string; // 💡 選択された設問情報を親から受け取る
+  systemPrompt?: string;
   defaultOpen?: boolean;
   userId?: string;
   userNickname?: string;
-  credits?: number; // クレジット残高初期値
-  onOpenAuth?: () => void; // 未ログイン時に認証モーダルを開くコールバック
+  credits?: number;
+  onOpenAuth?: () => void;
+  // 💡 ダッシュボードから画像を受け取るためのプロパティ
+  externalImageFile?: File | null;
+  externalImagePreview?: string | null;
+  onClearExternalImage?: () => void;
 };
 
-// 💡 Eoy Writing で使用されている水色（cyan）テーマのスタイル定義
 const themeStyles = {
   cyan: {
     floatingBg: "bg-cyan-600 hover:bg-cyan-700",
@@ -120,26 +103,23 @@ export function ChatYamatoEoyWriting({
   userNickname = "My friend",
   credits: initialCredits = 10,
   onOpenAuth,
+  externalImageFile,
+  externalImagePreview,
+  onClearExternalImage,
 }: ChatYamatoEoyWritingProps) {
-  // 💡 ご指定のパラメータを固定で適用
   const characterName = "Eoy Writing Practice";
   const appType = "eoy-writing";
-  const themeColor = "cyan";
-  // 「年末の筆記試験に向けて勉強頑張っていますか。今日もあなたの学力向上を一生懸命サポートします！」の英語翻訳版
   const initialGreeting = "Hello, my friend! 🌟 How are your studies going for the end-of-year written exam? I'm here to support your academic improvement with all my heart today too!";
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
 
   useEffect(() => {
-    if (propUserId) {
-      setActiveUserId(propUserId);
-    }
+    if (propUserId) setActiveUserId(propUserId);
   }, [propUserId]);
 
   useEffect(() => {
@@ -164,13 +144,11 @@ export function ChatYamatoEoyWriting({
           }
         }
       } catch (err) {
-        console.error("Session check error in ChatYamatoEoyWriting:", err);
+        console.error("Session check error:", err);
       }
     }
 
-    if (!activeUserId) {
-      checkAuthSession();
-    }
+    if (!activeUserId) checkAuthSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (isMounted) {
@@ -196,26 +174,18 @@ export function ChatYamatoEoyWriting({
   }, [activeUserId]);
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
-
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   const currentTheme = themeStyles.cyan;
-
   const finalFloatingButtonClass = `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content: initialGreeting,
-    },
+    { role: "assistant", content: initialGreeting },
   ]);
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
-
-  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   const getFontSizeClass = () => {
     switch (chatFontSize) {
@@ -229,16 +199,14 @@ export function ChatYamatoEoyWriting({
 
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
     setTutorLevel(newLevel);
-
     if (!activeUserId) return;
-
     try {
       await supabase
         .from("profiles")
         .update({ learning_pace: newLevel })
         .eq("id", activeUserId);
     } catch (err) {
-      console.error("学習ペース更新時の通信エラー:", err);
+      console.error("学習ペース更新エラー:", err);
     }
   };
 
@@ -283,7 +251,6 @@ export function ChatYamatoEoyWriting({
         .select('credits')
         .eq('id', activeUserId)
         .single();
-      
       if (data && !error && typeof data.credits === 'number') {
         setCurrentCredits(data.credits);
       }
@@ -292,41 +259,13 @@ export function ChatYamatoEoyWriting({
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRequestImageAiFeature = () => {
-    if (!activeUserId) {
-      alert("Login required");
-      if (onOpenAuth) onOpenAuth();
-      return false;
-    }
-    if (currentCredits < FEATURE_COSTS.imageAi) {
-      alert(`Image AI requires ${FEATURE_COSTS.imageAi} credits, but you currently have ${currentCredits} credits (Note: standard text chat at 2 credits is still available).`);
-      return false;
-    }
-    alert("Accessing Image AI feature (sufficient credits).");
-    return true;
-  };
-
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
+    if ((!tutorInput.trim() && !externalImagePreview) || isTutorLoading) return;
 
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
-      if (onOpenAuth) {
-        onOpenAuth();
-      }
+      if (onOpenAuth) onOpenAuth();
       return;
     }
 
@@ -336,20 +275,21 @@ export function ChatYamatoEoyWriting({
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
+          content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. Please top up your credits! 📚✨`
         }
       ]);
       setTutorInput("");
       return;
     }
 
-    if (currentCredits < FEATURE_COSTS.textAi) {
+    const requiredCost = externalImagePreview ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    if (currentCredits < requiredCost) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() },
+        { role: "user", content: tutorInput.trim(), imageUrl: externalImagePreview || undefined },
         {
           role: "assistant",
-          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request. Please top up your account! 🪙`
+          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCost} credits). 🪙`
         }
       ]);
       setTutorInput("");
@@ -358,13 +298,14 @@ export function ChatYamatoEoyWriting({
 
     const userMsg = tutorInput.trim() || "Please check this answer image.";
     const needsVisual = requestVisualAid;
-    const imageBase64 = selectedImagePreview;
+    const imageBase64 = externalImagePreview;
 
     setTutorInput("");
-    setSelectedImage(null);
-    setSelectedImagePreview(null);
     setRequestVisualAid(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    // 送信完了時にダッシュボード側の画像をクリア
+    if (onClearExternalImage) {
+      onClearExternalImage();
+    }
 
     const newMessages: ChatMessage[] = [
       ...tutorMessages,
@@ -410,14 +351,14 @@ export function ChatYamatoEoyWriting({
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
-              { role: "assistant", content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! Please top up your credits to continue!` }
+              { role: "assistant", content: `🌟 **[Zero Credits Remaining]**\n\nPlease top up your credits to continue!` }
             ]);
             await refreshUserCredits();
             return;
           } else if (errorCode === "PARTIAL_SHORTAGE") {
             setTutorMessages([
               ...newMessages,
-              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\nMy friend, standard text chat (2 credits) is available, but this action requires more credits.` }
+              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\nStandard text chat (2 credits) is available, but this action requires more credits.` }
             ]);
             await refreshUserCredits();
             return;
@@ -459,7 +400,7 @@ export function ChatYamatoEoyWriting({
           >
             <span>🤖</span>
             <span>{characterName}</span>
-            {selectedImagePreview && (
+            {externalImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
             {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
@@ -478,7 +419,7 @@ export function ChatYamatoEoyWriting({
             }`}
           >
             <div className="w-full h-full flex flex-col">
-              {/* ヘッダー（クレジット残高表示対応） */}
+              {/* ヘッダー */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
@@ -565,13 +506,13 @@ export function ChatYamatoEoyWriting({
                 </div>
               </div>
 
-              {/* 💡 未ログイン時の新規登録・ログインガード画面 */}
+              {/* 未ログインガード画面 */}
               {!activeUserId ? (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                   <div className="text-3xl">🔒</div>
                   <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Please sign up or log in to chat with {characterName} and receive welcome credits!
+                    Please sign up or log in to chat with {characterName}!
                   </p>
                   <button
                     type="button"
@@ -618,7 +559,7 @@ export function ChatYamatoEoyWriting({
                                 <div className="mt-2">
                                   <img
                                     src={msg.imageUrl}
-                                    alt="AI Generated Visual Aid"
+                                    alt="AI Visual Aid"
                                     className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
                                     onClick={() => setModalImageSrc(msg.imageUrl || null)}
                                   />
@@ -637,44 +578,26 @@ export function ChatYamatoEoyWriting({
                     )}
                   </div>
 
-                  {/* 添付画像のプレビューバー */}
-                  {selectedImagePreview && (
+                  {/* 💡 ダッシュボードから連携された添付画像のプレビューバー */}
+                  {externalImagePreview && (
                     <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                      <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
-                      <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedImage(null);
-                          setSelectedImagePreview(null);
-                          if (fileInputRef.current) fileInputRef.current.value = '';
-                        }}
-                        className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
-                      >
-                        ✕
-                      </button>
+                      <img src={externalImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                      <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached from Dashboard</span>
+                      {onClearExternalImage && (
+                        <button
+                          type="button"
+                          onClick={onClearExternalImage}
+                          className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
                   )}
 
                   {/* 入力フォーム */}
                   <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                    <div className="flex items-center justify-between">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
-                      >
-                        <span>📷</span>
-                        <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
-                      </button>
-
+                    <div className="flex items-center justify-end">
                       <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
                         <input
                           type="checkbox"
@@ -691,29 +614,21 @@ export function ChatYamatoEoyWriting({
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        placeholder={externalImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
                         className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                       />
                       <button
                         type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
+                        disabled={isTutorLoading || (!tutorInput.trim() && !externalImagePreview)}
                         className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                       >
                         Send
                       </button>
                     </div>
 
-                    {/* 💡 消費クレジット案内 ＆ 画像AIテストリンク */}
                     <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
                       <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
-                      <button
-                        type="button"
-                        onClick={handleRequestImageAiFeature}
-                        className="text-blue-600 hover:underline font-semibold cursor-pointer"
-                      >
-                        Test Image AI Check
-                      </button>
                     </div>
                   </form>
                 </>
@@ -723,7 +638,6 @@ export function ChatYamatoEoyWriting({
         )}
       </aside>
 
-      {/* 画像拡大表示モーダル */}
       {modalImageSrc && (
         <div
           className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4"

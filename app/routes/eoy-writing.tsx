@@ -1,32 +1,15 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（原稿用紙とチェッカーの横並びコンパクト配置版・ChatYamatoEoyWriting統合版）
+ * @description EOY Writing Practice モジュール（ダッシュボードからの画像アップロード・ChatYamatoEoyWriting連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting"; // ★ ChatYamatoEoyWriting のインポート
+import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-// --- 📦 外部のJSONファイルから正式なデータをインポート ---
 import questionsData from "../data/writing-exam-questions.json";
 import textTypesData from "../data/texttypes.json";
-
-function BugReportCard() {
-  return (
-    <div className="w-full p-4 bg-white hover:bg-amber-50 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl font-bold text-lg shadow-sm transition-all cursor-pointer">
-      🐛 Report a Bug / Issue
-    </div>
-  );
-}
-
-function QuickFeedbackCard() {
-  return (
-    <div className="w-full p-4 bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 hover:border-blue-300 rounded-xl font-bold text-lg shadow-sm transition-all cursor-pointer">
-      💬 Quick Feedback & Suggestions
-    </div>
-  );
-}
 
 const questions = questionsData as any[];
 const modalData: { [key: string]: any } = textTypesData;
@@ -38,7 +21,6 @@ export default function Dashboard() {
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
-  // 💡 root.tsx からグローバルデータを安全に取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -52,7 +34,7 @@ export default function Dashboard() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 画像アップロード用ステート
+  // 💡 ダッシュボード側の画像アップロード用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
@@ -96,12 +78,15 @@ export default function Dashboard() {
     return matchesCategory && matchesTextType;
   });
 
+  const currentSystemPrompt = selectedQuestion
+    ? `[Selected VCE EOY Writing Question Q${selectedQuestion.id}]\nCategory: ${selectedQuestion.category}\nText Type: ${selectedQuestion.textType}\nPrompt (English): ${selectedQuestion.english}\nPrompt (Japanese): ${selectedQuestion.japanese}`
+    : "";
+
   return (
     <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           
-          {/* 💡 控えめでコンパクトな横並びグリッド（左: 原稿用紙の使い方 / 右: 漢字文法チェッカー） */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <button
               onClick={() => setActiveModal("Genkooyooshi")}
@@ -132,6 +117,7 @@ export default function Dashboard() {
                 <span>🤖</span> AI Yamato is ready for you
               </div>
 
+              {/* 💡 ダッシュボード側の画像アップロードボタン */}
               <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span>🎯 Active Question Q</span>
@@ -157,7 +143,7 @@ export default function Dashboard() {
                       ({selectedQuestion.textType}) {selectedQuestion.english}
                     </span>
                   ) : (
-                    <span className="text-sm font-normal text-amber-700">⚠️ None selected (Type ID or select below)</span>
+                    <span className="text-sm font-normal text-amber-700">⚠️ None selected</span>
                   )}
                 </div>
 
@@ -210,19 +196,14 @@ export default function Dashboard() {
                 <div className="mb-2 text-indigo-900 font-bold">
                   To get started, please follow these two quick steps:
                 </div>
-
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <span className="font-bold text-indigo-900 shrink-0">1️⃣</span>
-                    <div>
-                      <strong>Select your question & photo:</strong> Enter the question number above (or click task button) and upload your handwritten answer photo using the button above. 📋📸
-                    </div>
+                    <div><strong>Select question & photo:</strong> Enter the question number and upload your handwritten answer photo using the button above. 📋📸</div>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-bold text-indigo-900 shrink-0">2️⃣</span>
-                    <div>
-                      <strong>Chat with AI Yamato:</strong> Open the chat bubble at the bottom-right and click send!
-                    </div>
+                    <div><strong>Chat with AI Yamato:</strong> Open the chat bubble at the bottom-right and send it!</div>
                   </div>
                 </div>
               </div>
@@ -236,25 +217,14 @@ export default function Dashboard() {
           </div>
 
           <div className="mb-6">
-            <div className="mb-2 text-lg font-bold text-slate-600">
-              Filter by Writing Style
-            </div>
+            <div className="mb-2 text-lg font-bold text-slate-600">Filter by Writing Style</div>
             <div className="flex gap-2.5 flex-wrap mb-4">
-              {[
-                "all",
-                "Informative",
-                "Evaluative",
-                "Persuasive",
-                "Personal",
-                "Imaginative",
-              ].map((cat) => (
+              {["all", "Informative", "Evaluative", "Persuasive", "Personal", "Imaginative"].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
                   className={`px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${
-                    activeCategory === cat
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                    activeCategory === cat ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
                   }`}
                 >
                   {cat === "all" ? "All" : cat}
@@ -262,47 +232,20 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div className="mb-2 text-lg font-bold text-slate-600">
-              Filter by Text Type
-            </div>
+            <div className="mb-2 text-lg font-bold text-slate-600">Filter by Text Type</div>
             <div className="flex gap-2.5 flex-wrap">
-              {[
-                "all",
-                "Speech",
-                "Email",
-                "Letter",
-                "Article",
-                "Journal",
-                "Essay",
-                "Story",
-                "Report",
-                "Account",
-                "Message",
-                "Review",
-                "Summary",
-                "Official Report"
-              ].map((type) => (
+              {["all", "Speech", "Email", "Letter", "Article", "Journal", "Essay", "Story", "Report", "Account", "Message", "Review", "Summary", "Official Report"].map((type) => (
                 <button
                   key={type}
                   onClick={() => setActiveTextType(type)}
                   className={`px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${
-                    activeTextType === type
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                    activeTextType === type ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
                   }`}
                 >
                   {type === "all" ? "All" : type}
                 </button>
               ))}
             </div>
-          </div>
-
-          <div id="text-type-instruction" className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 text-lg text-emerald-800 flex items-center gap-3 shadow-sm">
-            <span className="text-xl">💡</span>
-            <span>
-              Click on the green text type tag on each question to see what is
-              required for that text type and view a sample.
-            </span>
           </div>
 
           <div className="flex flex-col gap-6 mb-12">
@@ -317,9 +260,7 @@ export default function Dashboard() {
                 >
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex gap-2 flex-wrap">
-                      <span className="text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold">
-                        {q.category}
-                      </span>
+                      <span className="text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold">{q.category}</span>
                       <span
                         onClick={() => setActiveModal(q.textType)}
                         className="text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 transition-colors"
@@ -327,32 +268,20 @@ export default function Dashboard() {
                         {q.textType}
                       </span>
                     </div>
-                    <span className="text-lg text-slate-600 font-bold">
-                      Q{q.id}
-                    </span>
+                    <span className="text-lg text-slate-600 font-bold">Q{q.id}</span>
                   </div>
 
-                  <p className="text-[20px] text-slate-800 mb-3 leading-relaxed font-medium">
-                    {q.english}
-                  </p>
-
-                  <div
-                    className="text-lg sm:text-[20px] text-slate-700 mb-4 border-l-4 border-slate-200 pl-4 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: q.japanese }}
-                  />
+                  <p className="text-[20px] text-slate-800 mb-3 leading-relaxed font-medium">{q.english}</p>
+                  <div className="text-lg sm:text-[20px] text-slate-700 mb-4 border-l-4 border-slate-200 pl-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: q.japanese }} />
 
                   <button
                     onClick={() => {
                       setSelectedQuestion(q);
                       const banner = document.getElementById("active-ai-tutor-banner");
-                      if (banner) {
-                        banner.scrollIntoView({ behavior: "smooth", block: "start" });
-                      }
+                      if (banner) banner.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
                     className={`px-4 py-2 text-base rounded-lg cursor-pointer font-bold transition-colors shadow-sm ${
-                      isSelected
-                        ? "bg-indigo-600 text-white"
-                        : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-700"
+                      isSelected ? "bg-indigo-600 text-white" : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-700"
                     }`}
                   >
                     {isSelected ? "🤖 Currently Active in AI Tutor Bubble" : "🎯 Select for AI Tutor"}
@@ -362,11 +291,19 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* 💡 ChatYamatoEoyWriting 専用コンポーネントの配置（プロパティ不要） */}
+          {/* 💡 ChatYamatoEoyWriting にダッシュボードの画像と設問情報を渡して統合 */}
           <ChatYamatoEoyWriting
+            systemPrompt={currentSystemPrompt}
             userId={user?.id}
             userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
             credits={credits}
+            externalImageFile={selectedImage}
+            externalImagePreview={selectedImagePreview}
+            onClearExternalImage={() => {
+              setSelectedImage(null);
+              setSelectedImagePreview(null);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }}
           />
 
           {showScrollTop && (
@@ -376,12 +313,7 @@ export default function Dashboard() {
                 className="p-3.5 bg-white hover:bg-slate-50 rounded-full shadow-xl cursor-pointer transition-all flex items-center justify-center w-12 h-12 border-2 border-red-500"
                 aria-label="Scroll to top"
               >
-                <svg
-                  className="w-5 h-5 text-red-600"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 4l-8 8h5v8h6v-8h5z" />
                 </svg>
               </button>
@@ -389,22 +321,12 @@ export default function Dashboard() {
           )}
 
           {modalImageSrc && (
-            <div 
-              className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4"
-              onClick={() => setModalImageSrc(null)}
-            >
+            <div className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
               <div className="relative max-w-4xl max-h-[90vh]">
-                <button 
-                  onClick={() => setModalImageSrc(null)}
-                  className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition"
-                >
+                <button onClick={() => setModalImageSrc(null)} className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition">
                   ✕ Close
                 </button>
-                <img 
-                  src={modalImageSrc} 
-                  alt="Enlarged View" 
-                  className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" 
-                />
+                <img src={modalImageSrc} alt="Enlarged View" className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" />
               </div>
             </div>
           )}
