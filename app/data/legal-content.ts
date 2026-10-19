@@ -1,6 +1,6 @@
 /**
  * @file legal-content.ts
- * @description AI Yamato Portal の利用規約・免責事項・プライバシーポリシー・お問い合わせの公式テキストデータ（カスタム・過去問持ち込み免責事項統合版）
+ * @description AI Yamato Portal の利用規約・免責事項・プライバシーポリシー・お問い合わせの公式テキストデータ（全免責事項・PDF・過去問規約完全統合版）
  */
 
 export const LEGAL_CONTENT = {
@@ -46,27 +46,50 @@ export const LEGAL_CONTENT = {
     sections: [
       {
         heading: "1. General Educational Purpose",
-        content: "Designed exclusively as an educational learning aid to support secondary school students, adult learners, and international learners globally, including VCE Japanese learners in Victoria, Australia."
+        content: "The AI Yamato platform, including all AI-powered writing assistants, oral practice modules, grammar checkers, vocabulary drills, audio generation, and visual diagrams (collectively, the 'Service'), is designed exclusively as an educational learning aid. The Service is intended to support a global community of learners—including middle school students, high school students, and adult learners worldwide—in practicing and improving their Japanese language skills."
       },
       {
-        heading: "2. Custom Practice & External Past Exam Materials",
-        content: "The custom practice workspace (Custom EOY Writing Practice) allows users to input external questions, textbook prompts, or past exam materials for AI evaluation. Users acknowledge and agree that: (a) External prompts and past exam questions are inputted solely for personal study, formative feedback, and individual skill improvement; (b) AI Yamato does not claim ownership of external exam questions or third-party educational content; (c) Users are strictly prohibited from publicly redistributing, commercially selling, or sharing copyrighted examination materials or AI-generated feedback reports outside the scope of fair dealing / personal educational use."
+        heading: "2. No Guarantee of Exam Results or Academic Scores",
+        globalContent: "While we strive to provide high-quality tutoring logic, standard curricula alignment, and comprehensive practice tools, AI Yamato does not guarantee 100% specific academic results, language proficiency test scores (such as JLPT or school exams), or certification outcomes. Learner performance depends heavily on individual effort, consistency, external instruction, and various personal factors beyond our control.",
+        vceContent: "While we strive to align our curriculum and tutoring logic with Victorian Curriculum standards and VCE assessment frameworks (such as detailed study and general conversation practice), AI Yamato does not guarantee specific VCE study scores, ATAR contributions, or exam outcomes.",
+        vceNote: "For VCE students in Victoria, Australia, ultimate academic results depend on formal school assessments, independent study habits, and official Victorian Curriculum and Assessment Authority (VCAA) guidelines."
       },
       {
-        heading: "3. PDF Feedback Export & Private Study Scope",
-        content: "Features allowing users to export AI feedback reports and session data as PDF files are provided strictly for private study, personal portfolio building, and non-commercial educational review. Users assume full responsibility for complying with applicable copyright laws regarding any third-party source texts or extracts included in their custom prompts."
+        heading: "3. Custom Practice & External Past Exam Materials",
+        content: "The custom practice workspace (Custom EOY Writing Practice) allows users to input external questions, textbook prompts, or past exam materials for AI evaluation. Users acknowledge and agree that:",
+        listItems: [
+          { strong: "Personal Study Scope", text: "External prompts and past exam questions are inputted solely for personal study, formative feedback, and individual skill improvement." },
+          { strong: "No Ownership Claim", text: "AI Yamato does not claim ownership of external exam questions or third-party educational content." },
+          { strong: "Prohibition of Redistribution", text: "Users are strictly prohibited from publicly redistributing, commercially selling, or sharing copyrighted examination materials or AI-generated feedback reports outside the scope of fair dealing or personal educational use." }
+        ]
       },
       {
-        heading: "4. No Guarantee of Exam Results",
-        content: "AI Yamato does not guarantee specific academic results, study scores, ATAR contributions, or VCE exam outcomes. Performance depends on individual effort and formal school instruction."
+        heading: "4. PDF Feedback Export & Private Study Scope",
+        content: "Features allowing users to export AI feedback reports and session data as PDF files are provided strictly for private study, personal portfolio building, and non-commercial educational review. Users assume full responsibility for complying with applicable copyright laws regarding any third-party source texts or extracts included in their custom prompts or exported reports."
       },
       {
         heading: "5. AI-Generated Content and Accuracy",
-        content: "AI models can occasionally produce errors or misinterpretations. Students are solely responsible for verifying the accuracy of AI feedback before school submissions."
+        content: "The Service utilizes advanced artificial intelligence models (such as LLMs) to generate feedback, translations, essay corrections, and conversational responses.",
+        listItems: [
+          { strong: "Potential for Inaccuracies", text: "AI models can occasionally produce errors, misinterpretations, or unnatural phrasing." },
+          { strong: "User Responsibility", text: "Users, students, and adult learners are solely responsible for verifying the accuracy, appropriateness, and academic integrity of any feedback, corrections, or content generated by the AI before submitting work to schools, teachers, or professional institutions." }
+        ]
       },
       {
-        heading: "6. Service Availability",
-        content: "We maintain high availability via Cloudflare and Supabase but do not warrant uninterrupted service or immunity from maintenance downtime."
+        heading: "6. Service Availability and Technical Interruption",
+        content: "We endeavor to maintain high availability of the Service through robust cloud infrastructure (Cloudflare and Supabase). However, we do not warrant that the Service will be uninterrupted, timely, secure, or error-free. We shall not be held liable for any temporary service disruptions, maintenance downtime, third-party API outages, or data loss beyond our reasonable control."
+      },
+      {
+        heading: "7. Credits, Campaigns, and Promotional Terms",
+        content: "Any promotional campaigns, daily login bonuses, or complimentary credit grants are subject to specific terms and validity periods (e.g., expiration dates specified during campaign periods). Unused promotional credits will automatically expire upon the conclusion of the stated validity term. We reserve the right to modify or terminate credit promotion rules at any time without prior notice."
+      },
+      {
+        heading: "8. External Links and Third-Party Services",
+        content: "The Service may contain links to external websites, payment gateways (e.g., Stripe), or resources not operated by us. We assume no responsibility or liability for the content, privacy policies, or practices of any third-party websites or services."
+      },
+      {
+        heading: "9. Contact Information",
+        isContactLink: true
       }
     ]
   },
