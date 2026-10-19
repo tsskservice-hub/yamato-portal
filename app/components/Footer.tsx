@@ -50,44 +50,44 @@ export default function Footer({}: FooterProps) {
   return (
     <footer className="bg-white border-t border-slate-200 mt-auto">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
           
-          {/* Copyright & 2つのボタン（法的リンクの左側） */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-slate-500 text-center md:text-left">
+          {/* Copyright, ボタン類、法的リンクをすべて左側にまとめて配置 */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-sm text-slate-500">
             <span>&copy; {currentYear} AI Yamato. All rights reserved.</span>
             
             <div className="flex items-center gap-2">
               <BugReportButton />
               <QuickFeedbackButton />
             </div>
-          </div>
 
-          {/* Legal and Support Links */}
-          <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm text-slate-600 mr-0 md:mr-4">
-            <Link
-              to="/terms"
-              className="hover:text-indigo-600 transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              to="/privacy"
-              className="hover:text-indigo-600 transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              to="/disclaimer"
-              className="hover:text-indigo-600 transition-colors"
-            >
-              Disclaimer
-            </Link>
-            <Link
-              to="/contact"
-              className="hover:text-indigo-600 transition-colors"
-            >
-              Contact
-            </Link>
+            {/* Quick Feedback のすぐ隣に4つの法律関係のリンクを配置 */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-slate-600">
+              <Link
+                to="/terms"
+                className="hover:text-indigo-600 transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                to="/privacy"
+                className="hover:text-indigo-600 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/disclaimer"
+                className="hover:text-indigo-600 transition-colors"
+              >
+                Disclaimer
+              </Link>
+              <Link
+                to="/contact"
+                className="hover:text-indigo-600 transition-colors"
+              >
+                Contact
+              </Link>
+            </div>
           </div>
 
         </div>
