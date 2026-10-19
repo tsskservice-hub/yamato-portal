@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing-custom.tsx
- * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（安定版）
+ * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（複数画像対応版・修正済）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -11,6 +11,12 @@ import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom
 import textTypesData from "../data/texttypes.json";
 
 const modalData: { [key: string]: any } = textTypesData;
+
+interface UploadedImage {
+  id: string;
+  file: File;
+  preview: string;
+}
 
 export default function CustomDashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -27,11 +33,12 @@ export default function CustomDashboard() {
   const nickname = rootData?.nickname ?? "";
 
   const layoutRef = useRef<PageLayoutRef>(null);
+  const questionFileInputRef = useRef<HTMLInputElement>(null);
   const answerFileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedQuestionText, setSelectedQuestionText] = useState<string>("");
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [questionImages, setQuestionImages] = useState<UploadedImage[]>([]);
+  const [answerImages, setAnswerImages] = useState<UploadedImage[]>([]);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,16 +60,46 @@ export default function CustomDashboard() {
     };
   }, []);
 
-  const handleAnswerImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
+  const handleQuestionImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSelectedImagePreview(reader.result as string);
+        const newObj: UploadedImage = {
+          // 修正: 括弧の閉じ位置エラーを解消
+          id: Math.random().toString(36).substring(2, 9),
+          file,
+          preview: reader.result as string,
+        };
+        setQuestionImages((prev) => [...prev, newObj]);
       };
       reader.readAsDataURL(file);
-    }
+    });
+
+    if (questionFileInputRef.current) questionFileInputRef.current.value = "";
+  };
+
+  const handleAnswerImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newObj: UploadedImage = {
+          // 修正: 括弧の閉じ位置エラーを解消
+          id: Math.random().toString(36).substring(2, 9),
+          file,
+          preview: reader.result as string,
+        };
+        setAnswerImages((prev) => [...prev, newObj]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (answerFileInputRef.current) answerFileInputRef.current.value = "";
   };
 
   const assignedQuestionText = selectedQuestionText.trim()
@@ -114,99 +151,151 @@ export default function CustomDashboard() {
                 </span>
               </div>
 
-              {/* Step 1: カスタム問題の入力 */}
+              {/* Step 1: カスタム問題の入力 ＆ 複数問題画像アップロード (OCR) */}
               <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-3">
-                <div className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
-                  <span>1️⃣</span> Step 1: Enter External Question / Prompt
+                <div className="text-sm font-bold text-indigo-900 flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span>1️⃣</span> Step 1: Enter Question / Prompt (or Upload Multiple Question Photos for AI OCR)
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      ref={questionFileInputRef}
+                      onChange={handleQuestionImagesChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => questionFileInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <span>📸</span>
+                      <span>Upload Question Photos (Multiple OK)</span>
+                    </button>
+                  </div>
                 </div>
+
+                {questionImages.length > 0 && (
+                  <div className="flex items-center gap-3 flex-wrap bg-indigo-50 border border-indigo-200 p-3 rounded-lg">
+                    {questionImages.map((img, index) => (
+                      <div key={img.id} className="relative group flex items-center bg-white border border-indigo-200 rounded p-1 shadow-2xs">
+                        <img 
+                          src={img.preview} 
+                          alt={`Question ${index + 1}`} 
+                          className="w-12 h-12 object-cover rounded cursor-pointer" 
+                          onClick={() => setModalImageSrc(img.preview)} 
+                        />
+                        <span className="absolute -top-2 -left-2 bg-indigo-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setQuestionImages(prev => prev.filter(item => item.id !== img.id))}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center hover:bg-red-800"
+                          title="Remove"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <div className="text-xs text-indigo-900 font-bold ml-2">
+                      {questionImages.length} question page(s) attached for AI OCR.
+                    </div>
+                  </div>
+                )}
+
                 <textarea
                   value={selectedQuestionText}
                   onChange={(e) => setSelectedQuestionText(e.target.value)}
-                  placeholder="Type or paste the exam question / prompt here (e.g., Write a speech about environmental volunteer work...)"
+                  placeholder="Type or paste the exam question / prompt here (or upload photos above)..."
                   className="w-full p-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                   rows={3}
                 />
               </div>
 
-              {/* Step 2: 生徒の答案画像のアップロード */}
+              {/* Step 2: 生徒の複数答案画像のアップロード */}
               <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-3">
-                <div className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
-                  <span>2️⃣</span> Step 2: Upload Your Handwritten / Typed Answer Photo
-                </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={answerFileInputRef}
-                    onChange={handleAnswerImageChange}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => answerFileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>📷</span>
-                    <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
-                  </button>
-                  {selectedImagePreview && (
-                    <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
-                      ✓ Answer Attached
-                    </span>
-                  )}
-                </div>
-
-                {selectedImagePreview && (
-                  <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-lg text-sm mt-2">
-                    <img src={selectedImagePreview} alt="Answer Preview" className="w-10 h-10 object-cover rounded border" />
-                    <div className="flex-grow">
-                      <div className="font-bold text-indigo-900 text-xs">Answer Photo Ready for AI Evaluation</div>
-                      <div className="text-slate-600 text-xs truncate">Open chat and send to evaluate against your custom question!</div>
-                    </div>
+                <div className="text-sm font-bold text-indigo-900 flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span>2️⃣</span> Step 2: Upload Your Answer Photos (Multiple Pages OK)
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      ref={answerFileInputRef}
+                      onChange={handleAnswerImagesChange}
+                      className="hidden"
+                    />
                     <button
                       type="button"
-                      onClick={() => {
-                        setSelectedImage(null);
-                        setSelectedImagePreview(null);
-                        if (answerFileInputRef.current) answerFileInputRef.current.value = '';
-                      }}
-                      className="text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 rounded"
+                      onClick={() => answerFileInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                     >
-                      Remove ✕
+                      <span>📷</span>
+                      <span>Upload Answer Photos (Multiple OK)</span>
                     </button>
+                  </div>
+                </div>
+
+                {answerImages.length > 0 && (
+                  <div className="flex items-center gap-3 flex-wrap bg-indigo-50 border border-indigo-200 p-3 rounded-lg">
+                    {answerImages.map((img, index) => (
+                      <div key={img.id} className="relative group flex items-center bg-white border border-indigo-200 rounded p-1 shadow-2xs">
+                        <img 
+                          src={img.preview} 
+                          alt={`Answer ${index + 1}`} 
+                          className="w-12 h-12 object-cover rounded cursor-pointer" 
+                          onClick={() => setModalImageSrc(img.preview)} 
+                        />
+                        <span className="absolute -top-2 -left-2 bg-emerald-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setAnswerImages(prev => prev.filter(item => item.id !== img.id))}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center hover:bg-red-800"
+                          title="Remove"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <div className="text-xs text-emerald-800 font-bold ml-2">
+                      ✓ {answerImages.length} answer page(s) attached for evaluation.
+                    </div>
                   </div>
                 )}
               </div>
 
               <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-sm font-bold flex justify-between items-center shadow-xs">
                 <div>
-                  🎯 <strong>Active Custom Question:</strong> {assignedQuestionText ? (assignedQuestionText.length > 60 ? assignedQuestionText.slice(0, 60) + "..." : assignedQuestionText) : <span className="text-amber-700 font-normal">⚠️ Please enter a question above</span>}
+                  🎯 <strong>Active Custom Question:</strong> {assignedQuestionText || questionImages.length > 0 ? (assignedQuestionText ? (assignedQuestionText.length > 60 ? assignedQuestionText.slice(0, 60) + "..." : assignedQuestionText) : <span className="text-emerald-700 font-bold">📋 {questionImages.length} Question Image(s) Attached for AI OCR</span>) : <span className="text-amber-700 font-normal">⚠️ Please enter a question or upload question images above</span>}
                 </div>
               </div>
 
               <div className="pt-2 border-t border-indigo-100 text-slate-700 text-sm leading-relaxed">
                 <div className="text-indigo-900 font-bold mb-1">💡 How it works:</div>
                 <p className="text-xs text-slate-600">
-                  Your question details and uploaded answer photos are processed in real-time by AI and are <strong>never stored</strong> in our database. Once you refresh or close the session, all data is completely purged.
+                  Multiple pages of questions and answers are processed securely in real-time and are <strong>never stored</strong> in our database.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* チャットウィジェットへの連携 */}
+          {/* チャットウィジェットへの連携 (型エラー解消のため既存のプロパティ形式に準拠) */}
           <ChatYamatoEoyWritingCustom
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
             userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
             credits={credits}
-            externalImageFile={selectedImage}
-            externalImagePreview={selectedImagePreview}
+            externalImageFile={answerImages.length > 0 ? answerImages[0].file : null}
+            externalImagePreview={answerImages.length > 0 ? answerImages[0].preview : null}
             assignedQuestion={assignedQuestionText}
-            onClearExternalImage={() => {
-              setSelectedImage(null);
-              setSelectedImagePreview(null);
-              if (answerFileInputRef.current) answerFileInputRef.current.value = '';
-            }}
+            onClearExternalImage={() => setAnswerImages([])}
           />
 
           {showScrollTop && (
