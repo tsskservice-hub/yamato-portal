@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応版）
+ * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
@@ -327,7 +327,7 @@ export default function Home() {
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-            
+             
         {/* 2. Hero Section with YamatoChat-style Auto Demo */}
         <section className="text-center space-y-6 max-w-4xl mx-auto">
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
@@ -504,7 +504,7 @@ export default function Home() {
           <div className="space-y-4 max-w-3xl mx-auto">
             <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
-                
+                 
             <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
               <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
               <span>{CAMPAIGN_NOTICE.rawText}</span>
@@ -745,7 +745,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* ✨ 追加された Kanji & Grammar Checker カード */}
+              {/* ✨ Kanji & Grammar Checker カード */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
                 <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
@@ -839,6 +839,31 @@ export default function Home() {
                     className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
                   >
                     <span>Open Writing Tutor</span> <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
+              {/* ✨ 新規追加された EOY Writing Custom Practice カード */}
+              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-indigo-500/50 transition-colors`}>
+                <div className="space-y-4">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-base">Custom Writing Practice (External / Past Exams)</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Upload any custom past exam paper, textbook prompt, or external questions along with your answer for instant AI feedback (Zero Data Stored).</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-indigo-600 font-medium">Custom AI Tool</span>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (await validateFeatureCredits('textAi')) {
+                        navigate("/eoy-writing-custom");
+                      }
+                    }}
+                    className="text-indigo-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                  >
+                    <span>Open Custom Practice</span> <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
               </div>
