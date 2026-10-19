@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWriting.tsx
- * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（ダッシュボード画像・設問情報連携版）
+ * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（ダッシュボード画像・設問情報・クレジット残高・選択中設問ウィジェット統合版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,24 +19,24 @@ export interface ChatYamatoEoyWritingMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
   componentName: "ChatYamatoEoyWriting",
-  version: "3.6.0",
-  role: "VCE Writing Practice専用AIチャットウィジェット（ダッシュボード画像・設問情報連携版）",
+  version: "3.7.0",
+  role: "VCE Writing Practice専用AIチャットウィジェット（クレジット・選択中設問ウィジェット内移動版）",
   features: [
     {
       featureName: "Dashboard Image Integration",
       description: "ダッシュボード側でアップロードされた答案画像を受け取り、チャット内でプレビュー・送信"
     },
     {
-      featureName: "Assigned Question Integration",
-      description: "ダッシュボードで選択された設問情報をバックエンドに送信し、厳密なディスクレパンシーチェックを実現"
+      featureName: "Assigned Question Widget Integration",
+      description: "Learning Pace等と同じデザインのブロックで、選択された質問情報をチャット内上部に分かりやすく表示"
+    },
+    {
+      featureName: "Credits Moved to Widget Section",
+      description: "クレジット残高表示をチャット内上部ウィジェット群の最上部に移動"
     },
     {
       featureName: "Login Guard & Auth Modal Trigger",
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
-    },
-    {
-      featureName: "Live Credit Display & Warning Badge",
-      description: "ヘッダーに現在のクレジット残高をリアルタイム表示し、不足時に警告バッジを点灯"
     },
     {
       featureName: "Cyan Color Theme Fixed",
@@ -73,7 +73,7 @@ export type ChatYamatoEoyWritingProps = {
   externalImageFile?: File | null;
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
-  assignedQuestion?: string; // 💡 追加：選択中の設問情報
+  assignedQuestion?: string; // 💡 選択中の設問情報
 };
 
 const themeStyles = {
@@ -111,7 +111,7 @@ export function ChatYamatoEoyWriting({
   externalImageFile,
   externalImagePreview,
   onClearExternalImage,
-  assignedQuestion = "", // 💡 追加
+  assignedQuestion = "",
 }: ChatYamatoEoyWritingProps) {
   const characterName = "Eoy Writing Practice";
   const appType = "eoy-writing";
@@ -324,7 +324,6 @@ export function ChatYamatoEoyWriting({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      // 💡 APIへ送信するボディに assignedQuestion を含める
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -335,7 +334,7 @@ export function ChatYamatoEoyWriting({
           userNickname: userNickname,
           appType: appType,
           systemPrompt: systemPrompt,
-          assignedQuestion: assignedQuestion, // 💡 ダッシュボードで選択中の設問情報を渡す
+          assignedQuestion: assignedQuestion,
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,
@@ -426,21 +425,12 @@ export function ChatYamatoEoyWriting({
             }`}
           >
             <div className="w-full h-full flex flex-col">
-              {/* ヘッダー */}
+              {/* ヘッダー（クレジット表示を削除） */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
                   </h3>
-                  {activeUserId ? (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                      🪙 {currentCredits} credits
-                    </span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                      🔒 Guest (Login Required)
-                    </span>
-                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -466,6 +456,20 @@ export function ChatYamatoEoyWriting({
                 </div>
               </div>
 
+              {/* 💡 クレジット残高表示セクション（Learning Pace等の上部へ移動） */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-amber-800">Credits Balance</span>
+                {activeUserId ? (
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
+                    🪙 {currentCredits} credits
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    🔒 Guest
+                  </span>
+                )}
+              </div>
+
               {/* 学習ペース選択UI */}
               <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
                 <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
@@ -486,7 +490,7 @@ export function ChatYamatoEoyWriting({
               </div>
 
               {/* フォントサイズ変更UI */}
-              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
+              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(
@@ -511,6 +515,14 @@ export function ChatYamatoEoyWriting({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* 💡 選択された質問番号表示UI（Fontsの下・Learning Pace等と同じデザイン） */}
+              <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-indigo-900">Active Question</span>
+                <span className="text-xs font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-indigo-200 truncate max-w-[170px]">
+                  {assignedQuestion ? assignedQuestion.split(':')[0] : "None selected"}
+                </span>
               </div>
 
               {/* 未ログインガード画面 */}
