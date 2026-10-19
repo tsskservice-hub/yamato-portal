@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWriting.tsx
- * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（ダッシュボード画像・設問情報・クレジット残高・選択中設問ウィジェット統合版）
+ * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（安全な文字列処理・完全版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,8 +19,8 @@ export interface ChatYamatoEoyWritingMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
   componentName: "ChatYamatoEoyWriting",
-  version: "3.7.0",
-  role: "VCE Writing Practice専用AIチャットウィジェット（クレジット・選択中設問ウィジェット内移動版）",
+  version: "3.7.1",
+  role: "VCE Writing Practice専用AIチャットウィジェット（安全な文字列処理版）",
   features: [
     {
       featureName: "Dashboard Image Integration",
@@ -69,11 +69,10 @@ export type ChatYamatoEoyWritingProps = {
   userNickname?: string;
   credits?: number;
   onOpenAuth?: () => void;
-  // 💡 ダッシュボードから画像および設問情報を受け取るためのプロパティ
   externalImageFile?: File | null;
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
-  assignedQuestion?: string; // 💡 選択中の設問情報
+  assignedQuestion?: string;
 };
 
 const themeStyles = {
@@ -425,7 +424,7 @@ export function ChatYamatoEoyWriting({
             }`}
           >
             <div className="w-full h-full flex flex-col">
-              {/* ヘッダー（クレジット表示を削除） */}
+              {/* ヘッダー */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
@@ -456,7 +455,7 @@ export function ChatYamatoEoyWriting({
                 </div>
               </div>
 
-              {/* 💡 クレジット残高表示セクション（Learning Pace等の上部へ移動） */}
+              {/* クレジット残高表示セクション */}
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-amber-800">Credits Balance</span>
                 {activeUserId ? (
@@ -517,11 +516,13 @@ export function ChatYamatoEoyWriting({
                 </div>
               </div>
 
-              {/* 💡 選択された質問番号表示UI（Fontsの下・Learning Pace等と同じデザイン） */}
+              {/* 💡 安全な文字列処理を行った Active Question 表示UI */}
               <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-indigo-900">Active Question</span>
                 <span className="text-xs font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-indigo-200 truncate max-w-[170px]">
-                  {assignedQuestion ? assignedQuestion.split(':')[0] : "None selected"}
+                  {assignedQuestion && typeof assignedQuestion === 'string' && assignedQuestion.trim()
+                    ? assignedQuestion.split(':')[0]
+                    : "None selected"}
                 </span>
               </div>
 
@@ -597,7 +598,7 @@ export function ChatYamatoEoyWriting({
                     )}
                   </div>
 
-                  {/* 💡 ダッシュボードから連携された添付画像のプレビューバー */}
+                  {/* ダッシュボードから連携された添付画像のプレビューバー */}
                   {externalImagePreview && (
                     <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
                       <img src={externalImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
