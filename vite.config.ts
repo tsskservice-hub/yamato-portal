@@ -1,6 +1,6 @@
 /**
  * @file vite.config.ts
- * @description Cloudflare Pages / Remix 向け安定版 Vite 設定
+ * @description Cloudflare Pages / Remix 向け正しい Vite 設定
  */
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
@@ -21,9 +21,6 @@ export default defineConfig({
   ],
   ssr: {
     target: "webworker",
-    noExternal: true, // Cloudflare Workers 環境で依存関係をバンドル内に正しく取り込む設定
-  },
-  resolve: {
-    mainFields: ["browser", "module", "main"],
+    // 💡 noExternal を削除し、外部モジュールとして正しく扱うことで node:stream のバンドルエラーを防ぐ
   },
 });
