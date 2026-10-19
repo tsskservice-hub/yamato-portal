@@ -1,12 +1,12 @@
 /**
  * @file eoy-writing-custom.tsx
- * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（揮発型セッション・完全非保存版）
+ * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（揮発型セッション・完全非保存版・問題画像連携対応）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
+import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom";
 
 import textTypesData from "../data/texttypes.json";
 
@@ -244,8 +244,8 @@ export default function CustomDashboard() {
             </div>
           </div>
 
-          {/* 💡 チャットウィジェットへの連携 */}
-          <ChatYamatoEoyWriting
+          {/* 💡 カスタムチャットウィジェットへの連携（問題写真のプレビューも渡すように修正） */}
+          <ChatYamatoEoyWritingCustom
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
             userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
@@ -253,6 +253,7 @@ export default function CustomDashboard() {
             externalImageFile={selectedImage}
             externalImagePreview={selectedImagePreview}
             assignedQuestion={assignedQuestionText}
+            questionImagePreview={questionImagePreview}
             onClearExternalImage={() => {
               setSelectedImage(null);
               setSelectedImagePreview(null);
