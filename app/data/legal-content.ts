@@ -1,12 +1,12 @@
 /**
  * @file legal-content.ts
- * @description AI Yamato Portal の利用規約・免責事項・プライバシーポリシー・お問い合わせの公式テキストデータ（一元管理用）
+ * @description AI Yamato Portal の利用規約・免責事項・プライバシーポリシー・お問い合わせの公式テキストデータ（カスタム・過去問持ち込み免責事項統合版）
  */
 
 export const LEGAL_CONTENT = {
   terms: {
     title: "Terms of Service",
-    lastUpdated: "October 12, 2026",
+    lastUpdated: "October 19, 2026",
     summary: "AI Yamato terms governing educational use of AI Japanese tutoring, passkey authentication, credit-based interactions, and user responsibilities.",
     sections: [
       {
@@ -41,30 +41,38 @@ export const LEGAL_CONTENT = {
   },
   disclaimer: {
     title: "Disclaimer",
-    lastUpdated: "October 12, 2026",
-    summary: "Educational use limitations, AI output disclaimers, VCE preparation scope, and service availability guidelines for AI Yamato.",
+    lastUpdated: "October 19, 2026",
+    summary: "Educational use limitations, AI output disclaimers, custom prompt/past exam handling, PDF export guidelines, and service availability for AI Yamato.",
     sections: [
       {
         heading: "1. General Educational Purpose",
-        content: "Designed exclusively as an educational learning aid to support secondary school students, including VCE Japanese learners in Victoria, Australia."
+        content: "Designed exclusively as an educational learning aid to support secondary school students, adult learners, and international learners globally, including VCE Japanese learners in Victoria, Australia."
       },
       {
-        heading: "2. No Guarantee of Exam Results",
+        heading: "2. Custom Practice & External Past Exam Materials",
+        content: "The custom practice workspace (Custom EOY Writing Practice) allows users to input external questions, textbook prompts, or past exam materials for AI evaluation. Users acknowledge and agree that: (a) External prompts and past exam questions are inputted solely for personal study, formative feedback, and individual skill improvement; (b) AI Yamato does not claim ownership of external exam questions or third-party educational content; (c) Users are strictly prohibited from publicly redistributing, commercially selling, or sharing copyrighted examination materials or AI-generated feedback reports outside the scope of fair dealing / personal educational use."
+      },
+      {
+        heading: "3. PDF Feedback Export & Private Study Scope",
+        content: "Features allowing users to export AI feedback reports and session data as PDF files are provided strictly for private study, personal portfolio building, and non-commercial educational review. Users assume full responsibility for complying with applicable copyright laws regarding any third-party source texts or extracts included in their custom prompts."
+      },
+      {
+        heading: "4. No Guarantee of Exam Results",
         content: "AI Yamato does not guarantee specific academic results, study scores, ATAR contributions, or VCE exam outcomes. Performance depends on individual effort and formal school instruction."
       },
       {
-        heading: "3. AI-Generated Content and Accuracy",
+        heading: "5. AI-Generated Content and Accuracy",
         content: "AI models can occasionally produce errors or misinterpretations. Students are solely responsible for verifying the accuracy of AI feedback before school submissions."
       },
       {
-        heading: "4. Service Availability",
+        heading: "6. Service Availability",
         content: "We maintain high availability via Cloudflare and Supabase but do not warrant uninterrupted service or immunity from maintenance downtime."
       }
     ]
   },
   privacy: {
     title: "Privacy Policy",
-    lastUpdated: "October 12, 2026",
+    lastUpdated: "October 19, 2026",
     summary: "How AI Yamato handles user data, Supabase secure database storage, third-party payments, and Passkey biometric security.",
     sections: [
       {
@@ -87,7 +95,7 @@ export const LEGAL_CONTENT = {
   },
   contact: {
     title: "Contact Us",
-    lastUpdated: "October 12, 2026",
+    lastUpdated: "October 19, 2026",
     summary: "Support channels, feedback options, and School License inquiries for teachers and students using AI Yamato.",
     directEmail: "support@jptutoraiyamato.com",
     inquiryTypes: [
