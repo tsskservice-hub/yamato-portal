@@ -19,8 +19,8 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "4.0.0",
-  role: "生徒持参問題対応 VCE Writing 添削・フィードバック専用AIチャット",
+  version: "4.1.0",
+  role: "生徒持参問題対応 VCE Writing 添削・フィードバック専用AIチャット（プロンプト完全制御版）",
   features: [
     {
       featureName: "Student-Provided Question & Answer Feedback",
@@ -374,16 +374,6 @@ export function ChatYamatoEoyWritingCustom({
         ? `Educational instructional diagram and visual aid explaining feedback for: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      // 生徒が持参した問題(assignedQuestion)と答案を組み合わせたカスタムシステムプロンプトの構築
-      const enhancedSystemPrompt = `
-        ${systemPrompt}
-        [Context Instructions for Custom Writing Feedback]
-        - The student has brought their own question/prompt: "${assignedQuestion || 'Not specified (please check user message or image)'}".
-        - Your role as Yamato is to carefully analyze the student's answer (provided via text or uploaded image) in relation to their brought question.
-        - Provide constructive, encouraging, and detailed VCE-style feedback (evaluating content, grammar, vocabulary, and structure).
-        - NEVER terminate the session or treat questions as mismatched. Always give helpful feedback based on what the student provides.
-      `.trim();
-
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -393,7 +383,7 @@ export function ChatYamatoEoyWritingCustom({
           learningPace: tutorLevel,
           userNickname: userNickname,
           appType: appType,
-          systemPrompt: enhancedSystemPrompt,
+          systemPrompt: systemPrompt,
           assignedQuestion: assignedQuestion,
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
