@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（ボタン位置修正版）
+ * @description EOY Writing Practice モジュール（設問情報連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -81,6 +81,11 @@ export default function Dashboard() {
     ? `[Selected VCE EOY Writing Question Q${selectedQuestion.id}]\nCategory: ${selectedQuestion.category}\nText Type: ${selectedQuestion.textType}\nPrompt (English): ${selectedQuestion.english}\nPrompt (Japanese): ${selectedQuestion.japanese}`
     : "";
 
+  // 💡 選択中の設問情報をバックエンドおよびチャットウィジェットへ渡す文字列を定義
+  const assignedQuestionText = selectedQuestion
+    ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
+    : "";
+
   return (
     <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
@@ -113,7 +118,6 @@ export default function Dashboard() {
           <div>
             <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
               
-              {/* 💡 「AI Yamato is ready for you」のすぐ右隣に配置（justify-betweenを削除し、flex items-center gap-4に変更） */}
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
                   <span>🤖</span> AI Yamato is ready for you
@@ -293,6 +297,7 @@ export default function Dashboard() {
             })}
           </div>
 
+          {/* 💡 修正点: assignedQuestion={assignedQuestionText} を追加 */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
@@ -300,6 +305,7 @@ export default function Dashboard() {
             credits={credits}
             externalImageFile={selectedImage}
             externalImagePreview={selectedImagePreview}
+            assignedQuestion={assignedQuestionText}
             onClearExternalImage={() => {
               setSelectedImage(null);
               setSelectedImagePreview(null);

@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWriting.tsx
- * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（ダッシュボード画像連携版）
+ * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（ダッシュボード画像・設問情報連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,12 +19,16 @@ export interface ChatYamatoEoyWritingMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
   componentName: "ChatYamatoEoyWriting",
-  version: "3.5.0",
-  role: "VCE Writing Practice専用AIチャットウィジェット（ダッシュボード画像連携版）",
+  version: "3.6.0",
+  role: "VCE Writing Practice専用AIチャットウィジェット（ダッシュボード画像・設問情報連携版）",
   features: [
     {
       featureName: "Dashboard Image Integration",
       description: "ダッシュボード側でアップロードされた答案画像を受け取り、チャット内でプレビュー・送信"
+    },
+    {
+      featureName: "Assigned Question Integration",
+      description: "ダッシュボードで選択された設問情報をバックエンドに送信し、厳密なディスクレパンシーチェックを実現"
     },
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -65,10 +69,11 @@ export type ChatYamatoEoyWritingProps = {
   userNickname?: string;
   credits?: number;
   onOpenAuth?: () => void;
-  // 💡 ダッシュボードから画像を受け取るためのプロパティ
+  // 💡 ダッシュボードから画像および設問情報を受け取るためのプロパティ
   externalImageFile?: File | null;
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
+  assignedQuestion?: string; // 💡 追加：選択中の設問情報
 };
 
 const themeStyles = {
@@ -106,6 +111,7 @@ export function ChatYamatoEoyWriting({
   externalImageFile,
   externalImagePreview,
   onClearExternalImage,
+  assignedQuestion = "", // 💡 追加
 }: ChatYamatoEoyWritingProps) {
   const characterName = "Eoy Writing Practice";
   const appType = "eoy-writing";
@@ -302,7 +308,6 @@ export function ChatYamatoEoyWriting({
 
     setTutorInput("");
     setRequestVisualAid(false);
-    // 送信完了時にダッシュボード側の画像をクリア
     if (onClearExternalImage) {
       onClearExternalImage();
     }
@@ -319,6 +324,7 @@ export function ChatYamatoEoyWriting({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
+      // 💡 APIへ送信するボディに assignedQuestion を含める
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -329,6 +335,7 @@ export function ChatYamatoEoyWriting({
           userNickname: userNickname,
           appType: appType,
           systemPrompt: systemPrompt,
+          assignedQuestion: assignedQuestion, // 💡 ダッシュボードで選択中の設問情報を渡す
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,
