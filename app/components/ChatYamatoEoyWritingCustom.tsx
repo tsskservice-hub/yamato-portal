@@ -1,301 +1,671 @@
 /**
- * @file eoy-writing-custom.tsx
- * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（揮発型セッション・完全非保存版・問題画像連携対応）
+ * @file ChatYamatoEoyWritingCustom.tsx
+ * @description カスタム教材・過去問対応版ヤマトAIチャットウィジェット（安定版・問題写真連携除外）
  */
 import { useState, useEffect, useRef } from "react";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import TextTypeModal from "../components/TextTypeModal";
-import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom";
+import { supabase } from "../lib/supabaseClient";
 
-import textTypesData from "../data/texttypes.json";
+export interface ChatYamatoEoyWritingCustomMetaType {
+  componentName: string;
+  version: string;
+  role: string;
+  features: {
+    featureName: string;
+    description: string;
+  }[];
+  supportedThemes: string[];
+  learningPaces: string[];
+}
 
-const modalData: { [key: string]: any } = textTypesData;
+export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
+  componentName: "ChatYamatoEoyWritingCustom",
+  version: "3.8.0",
+  role: "カスタム教材・過去問対応版ヤマトAIチャットウィジェット",
+  features: [
+    {
+      featureName: "Dashboard Answer Image Integration",
+      description: "ダッシュボード側でアップロードされた答案画像を受け取り、チャット内でプレビュー・送信"
+    },
+    {
+      featureName: "Credits Display",
+      description: "クレジット残高表示をチャット内上部ウィジェット群に配置"
+    },
+    {
+      featureName: "Login Guard & Auth Modal Trigger",
+      description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
+    },
+    {
+      featureName: "Cyan Color Theme Fixed",
+      description: "VCE Writing専用の水色（cyan）テーマをデフォルト固定"
+    },
+    {
+      featureName: "Font Size Customization",
+      description: "チャット内の文字サイズを4段階に動的切替可能"
+    }
+  ],
+  supportedThemes: ["cyan"],
+  learningPaces: ["steady", "normal", "accelerated"]
+};
 
-export default function CustomDashboard() {
-  const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
-  
-  const rootData = useRouteLoaderData("root") as {
-    user?: any;
-    credits?: number;
-    nickname?: string;
-  } | undefined;
+type ChatMessage = {
+  role: "assistant" | "user";
+  content: string;
+  imageUrl?: string;
+};
 
-  const user = rootData?.user ?? null;
-  const credits = rootData?.credits ?? 10;
-  const nickname = rootData?.nickname ?? "";
+const FEATURE_COSTS = {
+  textAi: 2,         // 通常のテキストチャット
+  imageAi: 4,        // 画像付きチャット
+};
 
-  const layoutRef = useRef<PageLayoutRef>(null);
-  const answerFileInputRef = useRef<HTMLInputElement>(null);
-  const questionFileInputRef = useRef<HTMLInputElement>(null);
+export type ChatYamatoEoyWritingCustomProps = {
+  systemPrompt?: string;
+  defaultOpen?: boolean;
+  userId?: string;
+  userNickname?: string;
+  credits?: number;
+  onOpenAuth?: () => void;
+  externalImageFile?: File | null;
+  externalImagePreview?: string | null;
+  onClearExternalImage?: () => void;
+  assignedQuestion?: string;
+};
 
-  // 💡 すべてブラウザのメモリ（State）のみで管理し、データベースやストレージへの保存は一切行わない揮発型データ
-  const [selectedQuestionText, setSelectedQuestionText] = useState<string>("");
-  const [questionImagePreview, setQuestionImagePreview] = useState<string | null>(null);
+const themeStyles = {
+  cyan: {
+    floatingBg: "bg-cyan-600 hover:bg-cyan-700",
+    floatingText: "text-white",
+    floatingBorder: "border border-cyan-400",
+    button: "bg-cyan-600 hover:bg-cyan-700 text-white",
+    border: "border-cyan-300",
+    headerText: "text-cyan-900",
+    badgeBg: "bg-cyan-50 border-cyan-200",
+    badgeText: "text-cyan-900",
+    buttonActive: "bg-cyan-600 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-cyan-700",
+    userBubble: "bg-cyan-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-cyan-500",
+    submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
+  },
+};
 
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+function sanitizeAiOutput(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*/g, '');
+}
+
+export function ChatYamatoEoyWritingCustom({
+  systemPrompt = "",
+  defaultOpen = false,
+  userId: propUserId,
+  userNickname = "My friend",
+  credits: initialCredits = 10,
+  onOpenAuth,
+  externalImageFile,
+  externalImagePreview,
+  onClearExternalImage,
+  assignedQuestion = "",
+}: ChatYamatoEoyWritingCustomProps) {
+  const characterName = "Custom Writing Practice";
+  const appType = "eoy-writing-custom";
+  const initialGreeting = "Hello, my friend! 🌟 Ready to practice with your custom questions or past exam papers? Upload your prompt and answer, and I'll give you thorough feedback!";
+
+  const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
+  const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
+  const aiChatRef = useRef<HTMLDivElement>(null);
+
+  const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
+  const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
+
+  useEffect(() => {
+    if (propUserId) setActiveUserId(propUserId);
+  }, [propUserId]);
+
+  useEffect(() => {
+    setCurrentCredits(initialCredits);
+  }, [initialCredits]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkAuthSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id && isMounted && !activeUserId) {
+          setActiveUserId(session.user.id);
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', session.user.id)
+            .single();
+          if (profileData && typeof profileData.credits === 'number') {
+            setCurrentCredits(profileData.credits);
+          }
+        }
+      } catch (err) {
+        console.error("Session check error:", err);
+      }
+    }
+
+    if (!activeUserId) checkAuthSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (isMounted) {
+        const newUid = session?.user?.id;
+        setActiveUserId(newUid);
+        if (newUid) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', newUid)
+            .single();
+          if (profileData && typeof profileData.credits === 'number') {
+            setCurrentCredits(profileData.credits);
+          }
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [activeUserId]);
+
+  const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = "Custom Practice | VCE EOY Exam Writing Tutor";
-  }, []);
+  const currentTheme = themeStyles.cyan;
+  const finalFloatingButtonClass = `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
+
+  const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
+    { role: "assistant", content: initialGreeting },
+  ]);
+  const [tutorInput, setTutorInput] = useState<string>("");
+  const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
+  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
+  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
+
+  const getFontSizeClass = () => {
+    switch (chatFontSize) {
+      case 'sm': return 'text-xs';
+      case 'base': return 'text-sm';
+      case 'lg': return 'text-base';
+      case 'xl': return 'text-lg';
+      default: return 'text-sm';
+    }
+  };
+
+  const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
+    setTutorLevel(newLevel);
+    if (!activeUserId) return;
+    try {
+      await supabase
+        .from("profiles")
+        .update({ learning_pace: newLevel })
+        .eq("id", activeUserId);
+    } catch (err) {
+      console.error("学習ペース更新エラー:", err);
+    }
+  };
+
+  const toggleAiFullscreen = async () => {
+    if (!aiChatRef.current) return;
+    try {
+      if (!document.fullscreenElement) {
+        await aiChatRef.current.requestFullscreen();
+        setIsAiFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsAiFullscreen(false);
+      }
+    } catch (err) {
+      console.error("Fullscreen toggle failed:", err);
+    }
+  };
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) setIsAiFullscreen(false);
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+        setIsAiFullscreen(false);
       }
     };
-
-    window.addEventListener("scroll", handleScroll);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
-  const handleAnswerImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const refreshUserCredits = async () => {
+    if (!activeUserId) return;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', activeUserId)
+        .single();
+      if (data && !error && typeof data.credits === 'number') {
+        setCurrentCredits(data.credits);
+      }
+    } catch (err) {
+      console.error("Failed to refresh credits:", err);
     }
   };
 
-  const handleQuestionImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setQuestionImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleSendTutorMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if ((!tutorInput.trim() && !externalImagePreview) || isTutorLoading) return;
+
+    if (!activeUserId) {
+      alert("お話しするには、無料サインアップまたはログインが必要です！");
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
+
+    if (currentCredits <= 0) {
+      setTutorMessages((prev) => [
+        ...prev,
+        { role: "user", content: tutorInput.trim() },
+        {
+          role: "assistant",
+          content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. Please top up your credits! 📚✨`
+        }
+      ]);
+      setTutorInput("");
+      return;
+    }
+
+    const requiredCost = externalImagePreview ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    if (currentCredits < requiredCost) {
+      setTutorMessages((prev) => [
+        ...prev,
+        { role: "user", content: tutorInput.trim(), imageUrl: externalImagePreview || undefined },
+        {
+          role: "assistant",
+          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCost} credits). 🪙`
+        }
+      ]);
+      setTutorInput("");
+      return;
+    }
+
+    const userMsg = tutorInput.trim() || "Please check this answer image.";
+    const needsVisual = requestVisualAid;
+    const imageBase64 = externalImagePreview;
+
+    setTutorInput("");
+    setRequestVisualAid(false);
+    if (onClearExternalImage) {
+      onClearExternalImage();
+    }
+
+    const newMessages: ChatMessage[] = [
+      ...tutorMessages,
+      { role: "user", content: userMsg, imageUrl: imageBase64 || undefined },
+    ];
+    setTutorMessages(newMessages);
+    setIsTutorLoading(true);
+
+    try {
+      const visualPrompt = needsVisual
+        ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
+        : undefined;
+
+      const response = await fetch("https://api.jptutoraiyamato.com/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMsg,
+          history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
+          learningPace: tutorLevel,
+          userNickname: userNickname,
+          appType: appType,
+          systemPrompt: systemPrompt,
+          assignedQuestion: assignedQuestion,
+          visualPrompt: visualPrompt,
+          requestVisualAid: needsVisual,
+          imageBase64: imageBase64,
+          userId: activeUserId,
+        }),
+      });
+
+      const responseText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
+      }
+
+      if (!response.ok) {
+        if (response.status === 402) {
+          setIsTutorLoading(false);
+          const errorCode = data?.error;
+          if (errorCode === "ZERO_CREDITS") {
+            setTutorMessages([
+              ...newMessages,
+              { role: "assistant", content: `🌟 **[Zero Credits Remaining]**\n\nPlease top up your credits to continue!` }
+            ]);
+            await refreshUserCredits();
+            return;
+          } else if (errorCode === "PARTIAL_SHORTAGE") {
+            setTutorMessages([
+              ...newMessages,
+              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\nStandard text chat (2 credits) is available, but this action requires more credits.` }
+            ]);
+            await refreshUserCredits();
+            return;
+          }
+        }
+        throw new Error(data?.error || `APIエラー (${response.status})`);
+      }
+
+      const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
+      const imageUrl = data.imageUrl;
+      const sanitizedReply = sanitizeAiOutput(replyText);
+
+      setIsTutorLoading(false);
+      setTutorMessages([
+        ...newMessages,
+        { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
+      ]);
+
+      await refreshUserCredits();
+
+    } catch (err: any) {
+      console.error(err);
+      setIsTutorLoading(false);
+      setTutorMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `Sorry, an error occurred: ${err.message || "Communication error"}` },
+      ]);
     }
   };
-
-  // チャットウィジェットおよびバックエンドに渡すアサインされた質問情報（カスタム問題）
-  const assignedQuestionText = selectedQuestionText.trim()
-    ? `Custom Prompt: ${selectedQuestionText}`
-    : questionImagePreview
-    ? `Custom Prompt Image Attached`
-    : "";
-
-  const currentSystemPrompt = assignedQuestionText
-    ? `[Custom External Exam / Textbook Writing Task]\nDetails: ${assignedQuestionText}`
-    : "";
 
   return (
-    <PageLayout ref={layoutRef} breadcrumbTitle="Custom Practice (External / Past Exams)">
-      <div className="min-h-screen bg-white text-slate-800 font-sans relative">
-        <main className="max-w-4xl mx-auto px-4 py-8 relative">
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <button
-              onClick={() => setActiveModal("Genkooyooshi")}
-              className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
-            >
-              <div className="flex items-center space-x-2 truncate">
-                <span className="text-base">📝</span>
-                <span className="truncate">How to use Genkooyooshi</span>
-              </div>
-              <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2">View →</span>
-            </button>
-
-            <Link
-              to="/kanji-grammar-checker"
-              className="w-full text-left p-3.5 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border no-underline"
-            >
-              <div className="flex items-center space-x-2 truncate">
-                <span className="text-base">✨</span>
-                <span className="truncate">VCE Kanji & Grammar Checker</span>
-              </div>
-              <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-amber-200 shrink-0 ml-2">Open →</span>
-            </Link>
-          </div>
-
-          <div>
-            <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
-              
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
-                  <span>🤖</span> Custom AI Yamato Workspace (Volatile Session)
+    <>
+      <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
+        {!isAiTutorOpen ? (
+          <button
+            type="button"
+            onClick={() => setIsAiTutorOpen(true)}
+            className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
+          >
+            <span>🤖</span>
+            <span>{characterName}</span>
+            {externalImagePreview && (
+              <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
+            )}
+            {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
+                !
+              </span>
+            )}
+          </button>
+        ) : (
+          <div
+            ref={aiChatRef}
+            className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+              isAiFullscreen
+                ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
+                : "w-80 sm:w-96 h-[540px] min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
+            }`}
+          >
+            <div className="w-full h-full flex flex-col">
+              {/* ヘッダー */}
+              <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
+                <div className="flex items-center gap-2">
+                  <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
+                    <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
+                  </h3>
                 </div>
-                <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">
-                  🔒 No Data Stored (Zero Persistence)
-                </span>
-              </div>
-
-              {/* Step 1: カスタム問題の入力または画像アップロード */}
-              <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-3">
-                <div className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
-                  <span>1️⃣</span> Step 1: Enter or Upload External Question / Prompt
-                </div>
-                <textarea
-                  value={selectedQuestionText}
-                  onChange={(e) => setSelectedQuestionText(e.target.value)}
-                  placeholder="Type or paste the exam question / prompt here (e.g., Write a speech about environmental volunteer work...)"
-                  className="w-full p-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                  rows={3}
-                />
-                <div className="flex items-center gap-3 flex-wrap">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={questionFileInputRef}
-                    onChange={handleQuestionImageChange}
-                    className="hidden"
-                  />
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={() => questionFileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    onClick={toggleAiFullscreen}
+                    className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
                   >
-                    <span>📸</span>
-                    <span>{questionImagePreview ? "Change Question Photo" : "Upload Question Photo (Optional)"}</span>
+                    {isAiFullscreen ? "🗗 縮小" : "🗖 最大化"}
                   </button>
-                  {questionImagePreview && (
-                    <div className="flex items-center gap-2">
-                      <img src={questionImagePreview} alt="Question Preview" className="w-8 h-8 object-cover rounded border" />
-                      <span className="text-xs text-emerald-700 font-bold">✓ Question Photo Attached</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setQuestionImagePreview(null);
-                          if (questionFileInputRef.current) questionFileInputRef.current.value = '';
-                        }}
-                        className="text-red-600 hover:text-red-800 text-xs font-bold px-1"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(() => {});
+                      }
+                      setIsAiTutorOpen(false);
+                      setIsAiFullscreen(false);
+                    }}
+                    className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
+                  >
+                    ✕ Close
+                  </button>
                 </div>
               </div>
 
-              {/* Step 2: 生徒の答案画像のアップロード */}
-              <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-3">
-                <div className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
-                  <span>2️⃣</span> Step 2: Upload Your Handwritten / Typed Answer Photo
-                </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={answerFileInputRef}
-                    onChange={handleAnswerImageChange}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => answerFileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>📷</span>
-                    <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
-                  </button>
-                  {selectedImagePreview && (
-                    <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
-                      ✓ Answer Attached
-                    </span>
-                  )}
-                </div>
-
-                {selectedImagePreview && (
-                  <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-lg text-sm mt-2">
-                    <img src={selectedImagePreview} alt="Answer Preview" className="w-10 h-10 object-cover rounded border" />
-                    <div className="flex-grow">
-                      <div className="font-bold text-indigo-900 text-xs">Answer Photo Ready for AI Evaluation</div>
-                      <div className="text-slate-600 text-xs truncate">Open chat and send to evaluate against your custom question!</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedImage(null);
-                        setSelectedImagePreview(null);
-                        if (answerFileInputRef.current) answerFileInputRef.current.value = '';
-                      }}
-                      className="text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 rounded"
-                    >
-                      Remove ✕
-                    </button>
-                  </div>
+              {/* クレジット残高表示セクション */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-amber-800">Credits Balance</span>
+                {activeUserId ? (
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
+                    🪙 {currentCredits} credits
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    🔒 Guest
+                  </span>
                 )}
               </div>
 
-              <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-sm font-bold flex justify-between items-center shadow-xs">
-                <div>
-                  🎯 <strong>Active Custom Question:</strong> {assignedQuestionText ? (assignedQuestionText.length > 60 ? assignedQuestionText.slice(0, 60) + "..." : assignedQuestionText) : <span className="text-amber-700 font-normal">⚠️ Please enter or upload a question above</span>}
+              {/* 学習ペース選択UI */}
+              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
+                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
+                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
+                  {(["steady", "normal", "accelerated"] as const).map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => handlePaceChange(level)}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize transition ${
+                        tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-indigo-100 text-slate-700 text-sm leading-relaxed">
-                <div className="text-indigo-900 font-bold mb-1">💡 How it works:</div>
-                <p className="text-xs text-slate-600">
-                  Your question details and uploaded answer photos are processed in real-time by AI and are <strong>never stored</strong> in our database. Once you refresh or close the session, all data is completely purged.
-                </p>
+              {/* フォントサイズ変更UI */}
+              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-slate-700">Font Size</span>
+                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
+                  {(
+                    [
+                      { key: 'sm', label: '小' },
+                      { key: 'base', label: '中' },
+                      { key: 'lg', label: '大' },
+                      { key: 'xl', label: '特大' },
+                    ] as const
+                  ).map((size) => (
+                    <button
+                      key={size.key}
+                      type="button"
+                      onClick={() => setChatFontSize(size.key)}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
+                        chatFontSize === size.key
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-blue-700"
+                      }`}
+                    >
+                      {size.label}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* 未ログインガード画面 */}
+              {!activeUserId ? (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="text-3xl">🔒</div>
+                  <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Please sign up or log in to chat with {characterName}!
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAiTutorOpen(false);
+                      if (onOpenAuth) onOpenAuth();
+                    }}
+                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
+                  >
+                    Sign In / Sign Up Now
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* チャット履歴エリア */}
+                  <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
+                    {tutorMessages.map((msg, idx) => (
+                      <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                        <div
+                          className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
+                            msg.role === "user"
+                              ? currentTheme.userBubble
+                              : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                          }`}
+                        >
+                          {msg.role === "user" ? (
+                            <div>
+                              {msg.content}
+                              {msg.imageUrl && (
+                                <div className="mt-2">
+                                  <img
+                                    src={msg.imageUrl}
+                                    alt="User Upload"
+                                    className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
+                                    onClick={() => setModalImageSrc(msg.imageUrl || null)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                              {msg.imageUrl && (
+                                <div className="mt-2">
+                                  <img
+                                    src={msg.imageUrl}
+                                    alt="AI Visual Aid"
+                                    className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
+                                    onClick={() => setModalImageSrc(msg.imageUrl || null)}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {isTutorLoading && (
+                      <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
+                        <span className="inline-block animate-spin text-sm">🤖</span>
+                        <span>Yamato is thinking...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ダッシュボードから連携された添付画像のプレビューバー */}
+                  {externalImagePreview && (
+                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
+                      <img src={externalImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                      <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
+                      {onClearExternalImage && (
+                        <button
+                          type="button"
+                          onClick={onClearExternalImage}
+                          className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 入力フォーム */}
+                  <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
+                    <div className="flex items-center justify-end">
+                      <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={requestVisualAid}
+                          onChange={(e) => setRequestVisualAid(e.target.checked)}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+                        />
+                        <span>Visual Aid</span>
+                      </label>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={tutorInput}
+                        onChange={(e) => setTutorInput(e.target.value)}
+                        placeholder={externalImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        disabled={isTutorLoading}
+                        className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
+                      />
+                      <button
+                        type="submit"
+                        disabled={isTutorLoading || (!tutorInput.trim() && !externalImagePreview)}
+                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
+                      >
+                        Send
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
+                      <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
+                    </div>
+                  </form>
+                </>
+              )}
             </div>
           </div>
+        )}
+      </aside>
 
-          {/* 💡 カスタムチャットウィジェットへの連携（問題写真のプレビューも渡すように修正） */}
-          <ChatYamatoEoyWritingCustom
-            systemPrompt={currentSystemPrompt}
-            userId={user?.id}
-            userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
-            credits={credits}
-            externalImageFile={selectedImage}
-            externalImagePreview={selectedImagePreview}
-            assignedQuestion={assignedQuestionText}
-            questionImagePreview={questionImagePreview}
-            onClearExternalImage={() => {
-              setSelectedImage(null);
-              setSelectedImagePreview(null);
-              if (answerFileInputRef.current) answerFileInputRef.current.value = '';
-            }}
-          />
-
-          {showScrollTop && (
-            <aside aria-label="Scroll controls" className="fixed bottom-24 right-6 z-40 flex flex-col items-end gap-3">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="p-3.5 bg-white hover:bg-slate-50 rounded-full shadow-xl cursor-pointer transition-all flex items-center justify-center w-12 h-12 border-2 border-red-500"
-                aria-label="Scroll to top"
-              >
-                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4l-8 8h5v8h6v-8h5z" />
-                </svg>
-              </button>
-            </aside>
-          )}
-
-          {modalImageSrc && (
-            <div className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
-              <div className="relative max-w-4xl max-h-[90vh]">
-                <button onClick={() => setModalImageSrc(null)} className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition">
-                  ✕ Close
-                </button>
-                <img src={modalImageSrc} alt="Enlarged View" className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" />
-              </div>
-            </div>
-          )}
-
-          {activeModal && modalData[activeModal] && (
-            <TextTypeModal
-              isOpen={true}
-              onClose={() => setActiveModal(null)}
-              modalKey={activeModal}
-              {...modalData[activeModal]}
+      {modalImageSrc && (
+        <div
+          className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setModalImageSrc(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setModalImageSrc(null)}
+              className="absolute -top-10 right-0 text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition cursor-pointer"
+            >
+              ✕ Close
+            </button>
+            <img
+              src={modalImageSrc}
+              alt="Enlarged View"
+              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white"
             />
-          )}
-        </main>
-      </div>
-    </PageLayout>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
+
+export default ChatYamatoEoyWritingCustom;

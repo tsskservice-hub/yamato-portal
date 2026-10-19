@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing-custom.tsx
- * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（揮発型セッション・完全非保存版・問題画像連携対応）
+ * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（安定版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -28,12 +28,8 @@ export default function CustomDashboard() {
 
   const layoutRef = useRef<PageLayoutRef>(null);
   const answerFileInputRef = useRef<HTMLInputElement>(null);
-  const questionFileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 すべてブラウザのメモリ（State）のみで管理し、データベースやストレージへの保存は一切行わない揮発型データ
   const [selectedQuestionText, setSelectedQuestionText] = useState<string>("");
-  const [questionImagePreview, setQuestionImagePreview] = useState<string | null>(null);
-
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
@@ -69,22 +65,8 @@ export default function CustomDashboard() {
     }
   };
 
-  const handleQuestionImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setQuestionImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // チャットウィジェットおよびバックエンドに渡すアサインされた質問情報（カスタム問題）
   const assignedQuestionText = selectedQuestionText.trim()
     ? `Custom Prompt: ${selectedQuestionText}`
-    : questionImagePreview
-    ? `Custom Prompt Image Attached`
     : "";
 
   const currentSystemPrompt = assignedQuestionText
@@ -132,10 +114,10 @@ export default function CustomDashboard() {
                 </span>
               </div>
 
-              {/* Step 1: カスタム問題の入力または画像アップロード */}
+              {/* Step 1: カスタム問題の入力 */}
               <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-3">
                 <div className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
-                  <span>1️⃣</span> Step 1: Enter or Upload External Question / Prompt
+                  <span>1️⃣</span> Step 1: Enter External Question / Prompt
                 </div>
                 <textarea
                   value={selectedQuestionText}
@@ -144,39 +126,6 @@ export default function CustomDashboard() {
                   className="w-full p-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                   rows={3}
                 />
-                <div className="flex items-center gap-3 flex-wrap">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={questionFileInputRef}
-                    onChange={handleQuestionImageChange}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => questionFileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>📸</span>
-                    <span>{questionImagePreview ? "Change Question Photo" : "Upload Question Photo (Optional)"}</span>
-                  </button>
-                  {questionImagePreview && (
-                    <div className="flex items-center gap-2">
-                      <img src={questionImagePreview} alt="Question Preview" className="w-8 h-8 object-cover rounded border" />
-                      <span className="text-xs text-emerald-700 font-bold">✓ Question Photo Attached</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setQuestionImagePreview(null);
-                          if (questionFileInputRef.current) questionFileInputRef.current.value = '';
-                        }}
-                        className="text-red-600 hover:text-red-800 text-xs font-bold px-1"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                </div>
               </div>
 
               {/* Step 2: 生徒の答案画像のアップロード */}
@@ -231,7 +180,7 @@ export default function CustomDashboard() {
 
               <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-sm font-bold flex justify-between items-center shadow-xs">
                 <div>
-                  🎯 <strong>Active Custom Question:</strong> {assignedQuestionText ? (assignedQuestionText.length > 60 ? assignedQuestionText.slice(0, 60) + "..." : assignedQuestionText) : <span className="text-amber-700 font-normal">⚠️ Please enter or upload a question above</span>}
+                  🎯 <strong>Active Custom Question:</strong> {assignedQuestionText ? (assignedQuestionText.length > 60 ? assignedQuestionText.slice(0, 60) + "..." : assignedQuestionText) : <span className="text-amber-700 font-normal">⚠️ Please enter a question above</span>}
                 </div>
               </div>
 
@@ -244,7 +193,7 @@ export default function CustomDashboard() {
             </div>
           </div>
 
-          {/* 💡 カスタムチャットウィジェットへの連携（問題写真のプレビューも渡すように修正） */}
+          {/* チャットウィジェットへの連携 */}
           <ChatYamatoEoyWritingCustom
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
@@ -253,7 +202,6 @@ export default function CustomDashboard() {
             externalImageFile={selectedImage}
             externalImagePreview={selectedImagePreview}
             assignedQuestion={assignedQuestionText}
-            questionImagePreview={questionImagePreview}
             onClearExternalImage={() => {
               setSelectedImage(null);
               setSelectedImagePreview(null);
