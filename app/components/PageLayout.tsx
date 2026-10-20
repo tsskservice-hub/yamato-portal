@@ -1,10 +1,10 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成・スクロールトップボタン内蔵版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成・ダークスレート丸型スクロールトップボタン内蔵版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
-import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles, Home, ChevronRight, ArrowUp } from "lucide-react";
+import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles, Home, ChevronRight } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
 import { supabase } from "../lib/supabaseClient";
@@ -253,16 +253,16 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       
       <Footer onOpenAuth={handleOpenAuthModal} />
 
-      {/* ⬆️ ページトップへ戻るボタン（全ページ共通） */}
+      {/* ⬆️ ページトップへ戻るボタン（ダークスレートの円形・▲アイコン仕様） */}
       {showScrollTop && (
         <div className="fixed bottom-24 right-6 z-40">
           <button
             type="button"
             onClick={scrollToTop}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all cursor-pointer text-sm flex items-center justify-center"
-            title="Scroll to top"
+            className="bg-slate-800 hover:bg-slate-700 text-white w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center"
+            title="ページトップへ戻る"
           >
-            <ArrowUp className="w-4 h-4" />
+            ▲
           </button>
         </div>
       )}
