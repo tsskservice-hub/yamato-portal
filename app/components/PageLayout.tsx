@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成・ダークスレート丸型スクロールトップボタン内蔵版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成・カスタマイズ可能スクロールトップボタン内蔵版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -22,6 +22,7 @@ type PageLayoutProps = {
   learningPace?: "steady" | "normal" | "accelerated"; 
   isDarkMode?: boolean;
   breadcrumbTitle?: string; // 💡 個別ページでカスタム名称を指定したい場合のオプション
+  scrollTopClassName?: string; // 💡 個別ページからスクロールトップボタンのスタイル/色を上書きするためのオプション
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -31,7 +32,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   nickname: propNickname,
   learningPace: propLearningPace, 
   isDarkMode = false,
-  breadcrumbTitle
+  breadcrumbTitle,
+  scrollTopClassName = "bg-slate-800 hover:bg-slate-700 text-white" // 💡 デフォルトのスタイル
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
@@ -253,13 +255,13 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       
       <Footer onOpenAuth={handleOpenAuthModal} />
 
-      {/* ⬆️ ページトップへ戻るボタン（ダークスレートの円形・▲アイコン仕様） */}
+      {/* ⬆️ ページトップへ戻るボタン（ページごとに色やスタイルを変更可能） */}
       {showScrollTop && (
         <div className="fixed bottom-24 right-6 z-40">
           <button
             type="button"
             onClick={scrollToTop}
-            className="bg-slate-800 hover:bg-slate-700 text-white w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center"
+            className={`w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center ${scrollTopClassName}`}
             title="ページトップへ戻る"
           >
             ▲
