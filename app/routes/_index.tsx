@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加版）
+ * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加・クイズ移動版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
@@ -112,25 +112,6 @@ export default function Home() {
 
   // 自動スクロール用のref
   const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to top states & listener
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   // チャット欄が更新されたら自動で一番下へスクロール
   useEffect(() => {
@@ -327,7 +308,7 @@ export default function Home() {
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-           
+            
 
 {/* 2. Hero Section with YamatoChat-style Auto Demo */}
         <section className="text-center space-y-6 max-w-4xl mx-auto">
@@ -349,7 +330,7 @@ export default function Home() {
             Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
           </p>
 
-          {/* 💡 Daily Quiz Banner for Logged-in Users */}
+          {/* 💡 Daily Quiz Banner for Logged-in Users (ヤマトチャットデモの上に配置) */}
           {user && (
             <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-red-600/10 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
               <div className="flex items-center space-x-3">
@@ -900,20 +881,6 @@ export default function Home() {
           credits={credits}
           onOpenAuth={() => handleOpenAuthModal('signup')}
         />
-
-        {/* ページトップへ戻るボタン */}
-        {showScrollTop && (
-          <div className="fixed bottom-24 right-6 z-40">
-            <button
-              type="button"
-              onClick={scrollToTop}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all cursor-pointer text-sm flex items-center justify-center"
-              title="Scroll to top"
-            >
-              ⬆️
-            </button>
-          </div>
-        )}
 
         {/* 💡 Daily Quiz Modal */}
         {isQuizModalOpen && (
