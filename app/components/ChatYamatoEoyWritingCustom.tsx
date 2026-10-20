@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット
+ * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（複数問題画像・OCR対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,16 +19,16 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "4.1.0",
-  role: "生徒持参問題対応 VCE Writing 添削・フィードバック専用AIチャット（PDF出力対応）",
+  version: "4.2.0",
+  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF出力対応）",
   features: [
     {
       featureName: "Export PDF Feedback",
       description: "VCE End of Year Writingの添削・フィードバック結果をワンクリックでPDFレポートとして保存・印刷可能"
     },
     {
-      featureName: "Dashboard Image Integration",
-      description: "ダッシュボード側でアップロードされた答案画像を受け取り、チャット内でプレビュー・送信"
+      featureName: "Dashboard Multiple Image Integration",
+      description: "ダッシュボード側でアップロードされた複数の問題画像および答案画像を受け取り、チャット内でプレビュー・送信"
     },
     {
       featureName: "Assigned Question Widget Integration",
@@ -73,6 +73,7 @@ export type ChatYamatoEoyWritingCustomProps = {
   userNickname?: string;
   credits?: number;
   onOpenAuth?: () => void;
+  externalQuestionFiles?: File[]; // 💡 複数問題画像ファイルに対応
   externalImageFile?: File | null;
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
@@ -104,6 +105,16 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
+// 💡 Helper: FileをBase64文字列に変換する関数
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 export function ChatYamatoEoyWritingCustom({
   systemPrompt = "",
   defaultOpen = false,
@@ -111,6 +122,7 @@ export function ChatYamatoEoyWritingCustom({
   userNickname = "My friend",
   credits: initialCredits = 10,
   onOpenAuth,
+  externalQuestionFiles = [],
   externalImageFile,
   externalImagePreview,
   onClearExternalImage,
@@ -321,7 +333,7 @@ export function ChatYamatoEoyWritingCustom({
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !externalImagePreview) || isTutorLoading) return;
+    if ((!tutorInput.trim() && !externalImagePreview && externalQuestionFiles.length === 0) || isTutorLoading) return;
 
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
@@ -332,7 +344,7 @@ export function ChatYamatoEoyWritingCustom({
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() },
+        { role: "user", content: tutorInput.trim() || "Please evaluate my submission." },
         {
           role: "assistant",
           content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. Please top up your credits! 📚✨`
@@ -342,11 +354,12 @@ export function ChatYamatoEoyWritingCustom({
       return;
     }
 
-    const requiredCost = externalImagePreview ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    const hasImages = Boolean(externalImagePreview) || externalQuestionFiles.length > 0;
+    const requiredCost = hasImages ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
     if (currentCredits < requiredCost) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim(), imageUrl: externalImagePreview || undefined },
+        { role: "user", content: tutorInput.trim() || "Please evaluate my submission.", imageUrl: externalImagePreview || undefined },
         {
           role: "assistant",
           content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCost} credits). 🪙`
@@ -356,9 +369,21 @@ export function ChatYamatoEoyWritingCustom({
       return;
     }
 
-    const userMsg = tutorInput.trim() || "Please check this answer image.";
+    const userMsg = tutorInput.trim() || (hasImages ? "Please evaluate these attached question/answer images." : "Please check this text.");
     const needsVisual = requestVisualAid;
     const imageBase64 = externalImagePreview;
+
+    // 💡 複数問題画像ファイルが渡されている場合、すべてBase64に変換して配列化する
+    let questionImagesBase64: string[] = [];
+    try {
+      if (externalQuestionFiles && externalQuestionFiles.length > 0) {
+        questionImagesBase64 = await Promise.all(
+          externalQuestionFiles.map((file) => fileToBase64(file))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to convert question files to base64:", err);
+    }
 
     setTutorInput("");
     setRequestVisualAid(false);
@@ -389,6 +414,7 @@ export function ChatYamatoEoyWritingCustom({
           appType: appType,
           systemPrompt: systemPrompt,
           assignedQuestion: assignedQuestion,
+          questionImagesBase64: questionImagesBase64, // 💡 バックエンドへ複数問題画像（OCR用）を送信
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,
@@ -577,6 +603,8 @@ export function ChatYamatoEoyWritingCustom({
                 <span className="text-xs font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-indigo-200 truncate max-w-[170px]">
                   {assignedQuestion && typeof assignedQuestion === 'string' && assignedQuestion.trim()
                     ? assignedQuestion
+                    : externalQuestionFiles.length > 0
+                    ? `[${externalQuestionFiles.length} Question Image(s) Attached for OCR]`
                     : "None provided"}
                 </span>
               </div>
@@ -701,13 +729,13 @@ export function ChatYamatoEoyWritingCustom({
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={externalImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        placeholder={externalImagePreview || externalQuestionFiles.length > 0 ? "Ask feedback for photos..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
                         className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                       />
                       <button
                         type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !externalImagePreview)}
+                        disabled={isTutorLoading || (!tutorInput.trim() && !externalImagePreview && externalQuestionFiles.length === 0)}
                         className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                       >
                         Send
