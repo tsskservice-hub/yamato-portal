@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加・クイズ完全対応版）
+ * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加・クイズ完全対応版・期限切れクレジット失効処理対応）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
@@ -80,19 +80,85 @@ export default function Home() {
   // 💡 rootData から初期値を安全に連動
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
-  const nickname = rootData?.nickname ?? "";
-  const learningPace = rootData?.learningPace ?? "normal";
+  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
+  const [learningPace, setLearningPace] = useState<"steady" | "normal" | "accelerated">(rootData?.learningPace ?? "normal");
 
-  // セッションのフォールバック取得（ログイン状態の確実な同期用）
+  // 💡 ユーザーデータ取得・失効チェック関数 (fetchUserData)
+  const fetchUserData = async (userId: string) => {
+    try {
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // 1. プロフィールデータ（残高・最終クイズ解答日）を取得
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('credits, last_quiz_date, nickname, learning_pace')
+        .eq('id', userId)
+        .single();
+
+      if (profile && !error) {
+        let currentCredits = profile.credits ?? 10;
+
+        // 💡 今日クイズ済みかどうかのチェック (1日1回限定のUI反映)
+        if (profile.last_quiz_date === todayStr) {
+          setHasCompletedTodayQuiz(true);
+        }
+
+        // 2. 期限切れの未処理クイズクレジットがあるかチェック＆失効処理
+        const { data: expiredLogs } = await supabase
+          .from('credit_transactions')
+          .select('id, amount')
+          .eq('user_id', userId)
+          .eq('feature_used', 'dailyQuiz')
+          .lt('expires_at', new Date().toISOString()) // 有効期限 < 現在日時
+          .gt('amount', 0); // まだ失効フラグ化（マイナス化）されていないログ
+
+        if (expiredLogs && expiredLogs.length > 0) {
+          // 期限切れになったポイントの合計
+          const totalExpired = expiredLogs.reduce((sum, log) => sum + log.amount, 0);
+          
+          // 残高から失効分を減算（マイナスにならないようガード）
+          const updatedCredits = Math.max(0, currentCredits - totalExpired);
+
+          // profiles の残高を更新
+          await supabase
+            .from('profiles')
+            .update({ credits: updatedCredits })
+            .eq('id', userId);
+
+          // 処理済みマークとして、対象ログの amount を 0 に更新（重複減算防止）
+          const expiredIds = expiredLogs.map(log => log.id);
+          await supabase
+            .from('credit_transactions')
+            .update({ description: 'Expired (7 days limit reached)', amount: 0 })
+            .in('id', expiredIds);
+
+          currentCredits = updatedCredits;
+        }
+
+        setCredits(currentCredits);
+        if (profile.nickname) setNickname(profile.nickname);
+        if (profile.learning_pace) setLearningPace(profile.learning_pace);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user data:', err);
+    }
+  };
+
+  // セッションのフォールバック取得（ログイン状態の確実な同期用 & fetchUserData 呼び出し）
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
+        fetchUserData(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const activeSessionUser = session?.user ?? null;
+      setUser(activeSessionUser);
+      if (activeSessionUser) {
+        fetchUserData(activeSessionUser.id);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -236,7 +302,7 @@ export default function Home() {
     return true;
   };
 
-  // 💡 3. 解答処理ロジック（handleAnswerQuiz - トランザクションログ記録対応版）
+  // 💡 3. 解答処理ロジック（1日1回制限 & 7日後の有効期限設定付き）
   const handleAnswerQuiz = async (selectedIndex: number) => {
     let activeUser = user;
     if (!activeUser) {
@@ -244,7 +310,9 @@ export default function Home() {
       activeUser = session?.user ?? null;
     }
 
-    if (isAnswerSubmitted || !activeUser) return;
+    // 💡 1日1回制限のガード（すでに回答済み、または未ログインなら受け付けない）
+    if (isAnswerSubmitted || hasCompletedTodayQuiz || !activeUser) return;
+
     setSelectedOption(selectedIndex);
     setIsAnswerSubmitted(true);
 
@@ -252,30 +320,34 @@ export default function Home() {
     setIsQuizCorrect(correct);
 
     if (correct) {
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = new Date().toISOString().split('T')[0]; // "2026-10-20" 形式
+      
+      // 💡 7日後の日時（ISO文字列）を算出
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const newCredits = credits + 2;
 
-      // 1. profiles テーブルの残高と解答日を更新
-      const { error } = await supabase
+      // 1. profiles テーブルの残高と本日の解答日 (last_quiz_date) を更新
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          credits: newCredits, 
+          credits: newCredits,
           last_quiz_date: todayStr 
         })
         .eq('id', activeUser.id);
 
-      if (!error) {
+      if (!profileError) {
         setCredits(newCredits);
         setHasCompletedTodayQuiz(true);
 
-        // 2. 💡 credit_transactions テーブルへ獲得ログ (+2) を記録
+        // 2. credit_transactions テーブルへ有効期限付きの獲得ログ (+2) を挿入
         await supabase
           .from('credit_transactions')
           .insert({
             user_id: activeUser.id,
             amount: 2, // 獲得のためプラス値
             feature_used: 'dailyQuiz',
-            description: 'Earned from Daily Quiz'
+            description: 'Earned from Daily Quiz (+2 credits, valid for 7 days)',
+            expires_at: expiresAt // 💡 7日後の日時を記録
           });
       }
     }
