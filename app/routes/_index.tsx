@@ -332,6 +332,7 @@ export default function Home() {
     <PageLayout 
       ref={layoutRef}
       isDarkMode={isDarkMode}
+      scrollTopClassName="bg-white border-2 border-red-500 text-red-500 hover:bg-red-50"
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
