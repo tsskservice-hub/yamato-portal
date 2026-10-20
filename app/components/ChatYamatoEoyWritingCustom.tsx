@@ -19,7 +19,7 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "5.2.1",
+  version: "5.2.2",
   role: "生徒持参問題・直書き＆画像両対応 VCE Writing 3セクション対応 添削・フィードバック専用AIチャット",
   features: [
     {
@@ -83,7 +83,8 @@ type ChatMessage = {
 
 const FEATURE_COSTS = {
   textAi: 2,         // 通常のテキストチャット
-  imageAi: 4,        // 画像付きチャット
+  imageAi: 4,        // 画像付きチャット（1枚）
+  multiImageAi: 6,   // 画像付きチャット（2枚）
 };
 
 export type ChatYamatoEoyWritingCustomProps = {
@@ -414,7 +415,9 @@ export function ChatYamatoEoyWritingCustom({
     }
 
     const hasImages = Boolean(externalImagePreview) || externalQuestionFiles.length > 0;
-    const requiredCost = hasImages ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    const totalImagesCount = (externalImagePreview ? 1 : 0) + externalQuestionFiles.length;
+    const requiredCost = totalImagesCount >= 2 ? FEATURE_COSTS.multiImageAi : (hasImages ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi);
+
     if (currentCredits < requiredCost) {
       setTutorMessages((prev) => [
         ...prev,
@@ -825,7 +828,7 @@ export function ChatYamatoEoyWritingCustom({
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                      <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
+                      <span>💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / 2 Photos: {FEATURE_COSTS.multiImageAi} cr</span>
                     </div>
                   </form>
                 </>

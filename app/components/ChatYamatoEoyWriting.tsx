@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWriting.tsx
- * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（Export PDF機能搭載版）
+ * @description VCE Writing Practice専用ヤマトAIチャットウィジェット（Export PDF機能搭載版・クレジット仕様対応）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,7 +19,7 @@ export interface ChatYamatoEoyWritingMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
   componentName: "ChatYamatoEoyWriting",
-  version: "3.8.0",
+  version: "3.9.0",
   role: "VCE Writing Practice専用AIチャットウィジェット（PDF出力対応）",
   features: [
     {
@@ -63,7 +63,8 @@ type ChatMessage = {
 
 const FEATURE_COSTS = {
   textAi: 2,         // 通常のテキストチャット
-  imageAi: 4,        // 画像付きチャット
+  imageAi: 4,        // 画像付きチャット（1枚）
+  multiImageAi: 6,   // 画像付きチャット（2枚）
 };
 
 export type ChatYamatoEoyWritingProps = {
@@ -74,7 +75,9 @@ export type ChatYamatoEoyWritingProps = {
   credits?: number;
   onOpenAuth?: () => void;
   externalImageFile?: File | null;
+  externalImageFile2?: File | null; // 💡 2枚目の画像対応用（オプション）
   externalImagePreview?: string | null;
+  externalImagePreview2?: string | null; // 💡 2枚目のプレビュー対応用（オプション）
   onClearExternalImage?: () => void;
   assignedQuestion?: string;
 };
@@ -113,6 +116,7 @@ export function ChatYamatoEoyWriting({
   onOpenAuth,
   externalImageFile,
   externalImagePreview,
+  externalImagePreview2,
   onClearExternalImage,
   assignedQuestion = "",
 }: ChatYamatoEoyWritingProps) {
@@ -321,7 +325,7 @@ export function ChatYamatoEoyWriting({
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !externalImagePreview) || isTutorLoading) return;
+    if ((!tutorInput.trim() && !externalImagePreview && !externalImagePreview2) || isTutorLoading) return;
 
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
@@ -342,7 +346,10 @@ export function ChatYamatoEoyWriting({
       return;
     }
 
-    const requiredCost = externalImagePreview ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    // 💡 添付画像の枚数に応じたコスト計算 (1枚なら4、2枚なら6、なしなら2)
+    const imagesCount = (externalImagePreview ? 1 : 0) + (externalImagePreview2 ? 1 : 0);
+    const requiredCost = imagesCount >= 2 ? FEATURE_COSTS.multiImageAi : (imagesCount === 1 ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi);
+
     if (currentCredits < requiredCost) {
       setTutorMessages((prev) => [
         ...prev,
@@ -715,7 +722,7 @@ export function ChatYamatoEoyWriting({
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                      <span>💡 Chat: {FEATURE_COSTS.textAi} cr / Image: {FEATURE_COSTS.imageAi} cr</span>
+                      <span>💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / 2 Photos: {FEATURE_COSTS.multiImageAi} cr</span>
                     </div>
                   </form>
                 </>
