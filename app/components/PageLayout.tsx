@@ -1,10 +1,10 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成機能付き）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成・スクロールトップボタン内蔵版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
-import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles, Home, ChevronRight } from "lucide-react";
+import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles, Home, ChevronRight, ArrowUp } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
 import { supabase } from "../lib/supabaseClient";
@@ -42,6 +42,25 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const location = useLocation();
 
+  // 💡 Scroll to top states & listener
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   // 💡 パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
     const paths = location.pathname.split("/").filter(Boolean);
@@ -51,7 +70,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     paths.forEach((segment, index) => {
       currentPath += `/${segment}`;
       
-      // パスセグメントに応じた分かりやすい日本語・英語のラベル変換マップ
       let label = segment.replace(/-/g, " ");
       label = label.charAt(0).toUpperCase() + label.slice(1);
       
@@ -59,7 +77,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       if (segment === "kanji-grammar-checker") label = "Kanji & Grammar Checker";
       if (segment === "dashboard") label = "Dashboard";
 
-      // 最後のセグメントかつ prop で custom title が指定されている場合はそちらを優先
       if (index === paths.length - 1 && breadcrumbTitle) {
         label = breadcrumbTitle;
       }
@@ -72,7 +89,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const breadcrumbs = generateBreadcrumbs();
 
-  // 💡 ユーザー情報・クレジット・ニックネーム・学習ペースの状態管理（props > rootData > local state）
   const [user, setUser] = useState<any>(propUser !== undefined ? propUser : (rootData?.user ?? null));
   const [credits, setCredits] = useState<number>(propCredits !== undefined ? propCredits : (rootData?.credits ?? 10));
   const [nickname, setNickname] = useState<string>(propNickname !== undefined ? propNickname : (rootData?.nickname ?? ""));
@@ -83,7 +99,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       ? rawLearningPace
       : "normal";
 
-  // 💡 Supabase セッション監視とプロフィール情報の同期
   const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -135,7 +150,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setNickname("");
   };
 
-  // 💡 認証モーダル・パスキーのステート管理
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGuideStep, setIsGuideStep] = useState(false);
@@ -157,7 +171,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setIsAuthModalOpen(true);
   };
 
-  // 💡 外部（各ページ）の ref から呼び出し可能にする公開メソッド
   useImperativeHandle(ref, () => ({
     openAuthModal: (mode: 'signin' | 'signup' | string) => {
       handleOpenAuthModal(mode);
@@ -239,6 +252,20 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       </main>
       
       <Footer onOpenAuth={handleOpenAuthModal} />
+
+      {/* ⬆️ ページトップへ戻るボタン（全ページ共通） */}
+      {showScrollTop && (
+        <div className="fixed bottom-24 right-6 z-40">
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all cursor-pointer text-sm flex items-center justify-center"
+            title="Scroll to top"
+          >
+            <ArrowUp className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (
