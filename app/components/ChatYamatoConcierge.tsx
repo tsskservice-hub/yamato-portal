@@ -367,7 +367,7 @@ export function ChatYamatoConcierge({
         ) : (
           <div
             ref={aiChatRef}
-            className={`bg-white border-2 border-blue-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+            className={`bg-white border-2 border-red-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                 : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
@@ -377,7 +377,7 @@ export function ChatYamatoConcierge({
               {/* ヘッダー */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-blue-900 flex items-center gap-1.5 m-0">
+                  <h3 className="text-sm font-bold text-red-900 flex items-center gap-1.5 m-0">
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> 
                     {characterName}
                   </h3>
@@ -416,8 +416,8 @@ export function ChatYamatoConcierge({
               </div>
 
               {/* 学習ペース選択UI */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-blue-900">Learning Pace</span>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-red-900">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
@@ -426,8 +426,8 @@ export function ChatYamatoConcierge({
                       onClick={() => handlePaceChange(level)}
                       className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition cursor-pointer ${
                         tutorLevel === level 
-                          ? "bg-blue-600 text-white shadow-xs" 
-                          : "text-slate-600 hover:text-blue-700"
+                          ? "bg-red-600 text-white shadow-xs" 
+                          : "text-slate-600 hover:text-red-700"
                       }`}
                     >
                       {level}
@@ -450,7 +450,7 @@ export function ChatYamatoConcierge({
                       setIsAiTutorOpen(false);
                       if (onOpenAuth) onOpenAuth();
                     }}
-                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
+                    className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-red-600/20 cursor-pointer"
                   >
                     Sign In / Sign Up Now
                   </button>
@@ -469,7 +469,7 @@ export function ChatYamatoConcierge({
                         <div
                           className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
                             msg.role === "user"
-                              ? "bg-blue-600 text-white rounded-br-xs"
+                              ? "bg-red-600 text-white rounded-br-xs"
                               : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
                           }`}
                         >
@@ -486,7 +486,7 @@ export function ChatYamatoConcierge({
                                   />
                                 </div>
                               )}
-                            </div>
+                          </div>
                           ) : (
                             <div className="space-y-2">
                               <div dangerouslySetInnerHTML={{ __html: msg.content }} />
@@ -506,7 +506,7 @@ export function ChatYamatoConcierge({
                       </div>
                     ))}
                     {isTutorLoading && (
-                      <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-blue-50/70 border border-blue-100 p-2 rounded-xl w-fit">
+                      <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-red-50/70 border border-red-100 p-2 rounded-xl w-fit">
                         <span className="inline-block animate-spin text-sm">🤖</span>
                         <span>Yamato-sensei is thinking...</span>
                       </div>
@@ -515,9 +515,9 @@ export function ChatYamatoConcierge({
 
                   {/* ダッシュボードから連携された添付画像のプレビューバー */}
                   {externalImagePreview && (
-                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
+                    <div className="flex items-center gap-2 bg-red-50 border border-red-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
                       <img src={externalImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
-                      <span className="truncate flex-grow text-blue-900 font-medium">Photo attached from Dashboard</span>
+                      <span className="truncate flex-grow text-red-900 font-medium">Photo attached from Dashboard</span>
                       {onClearExternalImage && (
                         <button
                           type="button"
@@ -539,12 +539,12 @@ export function ChatYamatoConcierge({
                         onChange={(e) => setTutorInput(e.target.value)}
                         placeholder={externalImagePreview ? "Ask about attached photo..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
-                        className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50"
+                        className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-slate-50/50"
                       />
                       <button
                         type="submit"
                         disabled={isTutorLoading || (!tutorInput.trim() && !externalImagePreview)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
                       >
                         Send
                       </button>
