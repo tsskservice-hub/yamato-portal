@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（複数問題画像・OCR対応版）
+ * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（完全連動版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,7 +19,7 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "4.2.0",
+  version: "4.4.0",
   role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF出力対応）",
   features: [
     {
@@ -73,7 +73,7 @@ export type ChatYamatoEoyWritingCustomProps = {
   userNickname?: string;
   credits?: number;
   onOpenAuth?: () => void;
-  externalQuestionFiles?: File[]; // 💡 複数問題画像ファイルに対応
+  externalQuestionFiles?: File[];
   externalImageFile?: File | null;
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
@@ -105,7 +105,6 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-// 💡 Helper: FileをBase64文字列に変換する関数
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -208,7 +207,6 @@ export function ChatYamatoEoyWritingCustom({
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
 
-  // 💡 VCE Writingフィードバック用PDF出力関数
   const handleExportPdf = (contentHtml: string) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -373,7 +371,6 @@ export function ChatYamatoEoyWritingCustom({
     const needsVisual = requestVisualAid;
     const imageBase64 = externalImagePreview;
 
-    // 💡 複数問題画像ファイルが渡されている場合、すべてBase64に変換して配列化する
     let questionImagesBase64: string[] = [];
     try {
       if (externalQuestionFiles && externalQuestionFiles.length > 0) {
@@ -384,6 +381,13 @@ export function ChatYamatoEoyWritingCustom({
     } catch (err) {
       console.error("Failed to convert question files to base64:", err);
     }
+
+    // 💡 確実にバックエンドへ渡すための assignedQuestion（空でも画像があれば自動補完）
+    const effectiveAssignedQuestion = assignedQuestion && assignedQuestion.trim()
+      ? assignedQuestion
+      : questionImagesBase64.length > 0
+      ? `[External Question Images Attached for AI OCR (${questionImagesBase64.length} page(s))]`
+      : "None provided";
 
     setTutorInput("");
     setRequestVisualAid(false);
@@ -413,8 +417,8 @@ export function ChatYamatoEoyWritingCustom({
           userNickname: userNickname,
           appType: appType,
           systemPrompt: systemPrompt,
-          assignedQuestion: assignedQuestion,
-          questionImagesBase64: questionImagesBase64, // 💡 バックエンドへ複数問題画像（OCR用）を送信
+          assignedQuestion: effectiveAssignedQuestion, // 💡 確実な問題情報を送信
+          questionImagesBase64: questionImagesBase64,  // 💡 複数問題画像（OCR用）を送信
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
           imageBase64: imageBase64,

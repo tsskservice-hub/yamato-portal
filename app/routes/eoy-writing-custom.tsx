@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing-custom.tsx
- * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（複数画像対応版・修正済）
+ * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（複数画像・OCR完全連動版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -68,7 +68,6 @@ export default function CustomDashboard() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const newObj: UploadedImage = {
-          // 修正: 括弧の閉じ位置エラーを解消
           id: Math.random().toString(36).substring(2, 9),
           file,
           preview: reader.result as string,
@@ -89,7 +88,6 @@ export default function CustomDashboard() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const newObj: UploadedImage = {
-          // 修正: 括弧の閉じ位置エラーを解消
           id: Math.random().toString(36).substring(2, 9),
           file,
           preview: reader.result as string,
@@ -102,8 +100,11 @@ export default function CustomDashboard() {
     if (answerFileInputRef.current) answerFileInputRef.current.value = "";
   };
 
+  // 💡 テキストまたは問題画像の状態に応じて確実な assignedQuestion 文字列を生成
   const assignedQuestionText = selectedQuestionText.trim()
     ? `Custom Prompt: ${selectedQuestionText}`
+    : questionImages.length > 0
+    ? `[External Question Images Attached for AI OCR (${questionImages.length} page(s))]`
     : "";
 
   const currentSystemPrompt = assignedQuestionText
@@ -273,7 +274,7 @@ export default function CustomDashboard() {
 
               <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-sm font-bold flex justify-between items-center shadow-xs">
                 <div>
-                  🎯 <strong>Active Custom Question:</strong> {assignedQuestionText || questionImages.length > 0 ? (assignedQuestionText ? (assignedQuestionText.length > 60 ? assignedQuestionText.slice(0, 60) + "..." : assignedQuestionText) : <span className="text-emerald-700 font-bold">📋 {questionImages.length} Question Image(s) Attached for AI OCR</span>) : <span className="text-amber-700 font-normal">⚠️ Please enter a question or upload question images above</span>}
+                  🎯 <strong>Active Custom Question:</strong> {assignedQuestionText ? (assignedQuestionText.length > 60 ? assignedQuestionText.slice(0, 60) + "..." : assignedQuestionText) : <span className="text-amber-700 font-normal">⚠️ Please enter a question or upload question images above</span>}
                 </div>
               </div>
 
@@ -286,12 +287,13 @@ export default function CustomDashboard() {
             </div>
           </div>
 
-          {/* チャットウィジェットへの連携 (型エラー解消のため既存のプロパティ形式に準拠) */}
+          {/* チャットウィジェットへの連携（問題写真の配列 externalQuestionFiles を確実に渡す） */}
           <ChatYamatoEoyWritingCustom
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
             userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
             credits={credits}
+            externalQuestionFiles={questionImages.map(i => i.file)}
             externalImageFile={answerImages.length > 0 ? answerImages[0].file : null}
             externalImagePreview={answerImages.length > 0 ? answerImages[0].preview : null}
             assignedQuestion={assignedQuestionText}
