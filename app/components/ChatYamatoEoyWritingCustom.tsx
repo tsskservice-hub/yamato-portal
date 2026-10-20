@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（カスタムP.S.タイトル付きPDF出力対応版）
+ * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（PDF改ページ対策版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,9 +19,13 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "4.7.0",
-  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（カスタムP.S.タイトル付きPDF出力対応）",
+  version: "4.7.1",
+  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF改ページ対策版）",
   features: [
+    {
+      featureName: "Page Break Prevention for P.S.",
+      description: "PDF出力時にP.S.ボックスがページをまたいで分断されないようにCSS制御を最適化"
+    },
     {
       featureName: "Customizable Teacher Notes Title & P.S.",
       description: "PDF出力時に先生が備考のタイトル（デフォルト「P.S.」）およびコメントを自由に編集してレポートに含めることが可能"
@@ -138,7 +142,6 @@ export function ChatYamatoEoyWritingCustom({
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
 
-  // 💡 先生用備考モーダル管理用のステート（タイトルをデフォルト "P.S." に設定）
   const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
   const [pendingPdfContent, setPendingPdfContent] = useState<string>("");
   const [teacherNotesTitleInput, setTeacherNotesTitleInput] = useState<string>("P.S.");
@@ -213,7 +216,6 @@ export function ChatYamatoEoyWritingCustom({
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
 
-  // 💡 PDF出力ボタンが押されたとき（モーダルを開き、デフォルトを "P.S." にセット）
   const handleOpenPdfModal = (contentHtml: string) => {
     setPendingPdfContent(contentHtml);
     setTeacherNotesTitleInput("P.S.");
@@ -221,7 +223,6 @@ export function ChatYamatoEoyWritingCustom({
     setIsPdfModalOpen(true);
   };
 
-  // 💡 モーダルで「PDFを生成・印刷」が押されたときの実際のPDF出力処理
   const handleExecutePdfExport = () => {
     setIsPdfModalOpen(false);
     const printWindow = window.open('', '_blank');
@@ -249,9 +250,20 @@ export function ChatYamatoEoyWritingCustom({
             h1 { color: #0891b2; font-size: 22px; margin: 0 0 5px 0; }
             .meta { font-size: 13px; color: #64748b; }
             .content { font-size: 14px; white-space: pre-wrap; word-break: break-word; }
-            .teacher-notes-box { margin-top: 40px; border: 2px dashed #0891b2; background-color: #ecfeff; padding: 20px; border-radius: 8px; }
+            
+            /* 💡 P.S.ボックスがページをまたいで分断されないようにする設定 */
+            .teacher-notes-box {
+              margin-top: 40px;
+              border: 2px dashed #0891b2;
+              background-color: #ecfeff;
+              padding: 20px;
+              border-radius: 8px;
+              break-inside: avoid;
+              page-break-inside: avoid;
+            }
             .teacher-notes-title { font-weight: bold; color: #0e7490; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
             .teacher-notes-text { font-size: 14px; color: #164e63; white-space: pre-wrap; }
+            
             @media print {
               body { padding: 20px; }
               button { display: none; }
