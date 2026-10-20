@@ -110,7 +110,7 @@ export default function Home() {
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
   
-  // ★ クイズが勝手に変わらないよう、ステートとして保持する（インデックス [0] を修正済み）
+  // ★ クイズが勝手に変わらないよう、ステートとして保持する
   const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(DAILY_QUIZZES[0]);
 
   // 初回ロード時に一度だけランダムなクイズをセット
@@ -236,7 +236,7 @@ export default function Home() {
     return true;
   };
 
-  // 💡 3. 解答処理ロジック（handleAnswerQuiz）
+  // 💡 3. 解答処理ロジック（handleAnswerQuiz - トランザクションログ記録対応版）
   const handleAnswerQuiz = async (selectedIndex: number) => {
     let activeUser = user;
     if (!activeUser) {
@@ -255,10 +255,11 @@ export default function Home() {
       const todayStr = new Date().toISOString().split('T')[0];
       const newCredits = credits + 2;
 
+      // 1. profiles テーブルの残高と解答日を更新
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          credits: newCredits,
+          credits: newCredits, 
           last_quiz_date: todayStr 
         })
         .eq('id', activeUser.id);
@@ -266,6 +267,16 @@ export default function Home() {
       if (!error) {
         setCredits(newCredits);
         setHasCompletedTodayQuiz(true);
+
+        // 2. 💡 credit_transactions テーブルへ獲得ログ (+2) を記録
+        await supabase
+          .from('credit_transactions')
+          .insert({
+            user_id: activeUser.id,
+            amount: 2, // 獲得のためプラス値
+            feature_used: 'dailyQuiz',
+            description: 'Earned from Daily Quiz'
+          });
       }
     }
   };
