@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（PDF改ページ対策版）
+ * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（PDF改ページ対策・フィードバック編集対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,9 +19,13 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "4.7.1",
-  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF改ページ対策版）",
+  version: "4.8.0",
+  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF編集対応版）",
   features: [
+    {
+      featureName: "Editable Feedback for PDF Export",
+      description: "PDF出力前に、先生がヤマトの添削フィードバック本文を自由に編集・修正が可能"
+    },
     {
       featureName: "Page Break Prevention for P.S.",
       description: "PDF出力時にP.S.ボックスがページをまたいで分断されないようにCSS制御を最適化"
@@ -144,6 +148,7 @@ export function ChatYamatoEoyWritingCustom({
 
   const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
   const [pendingPdfContent, setPendingPdfContent] = useState<string>("");
+  const [editablePdfContent, setEditablePdfContent] = useState<string>(""); // 💡 編集用ステート
   const [teacherNotesTitleInput, setTeacherNotesTitleInput] = useState<string>("P.S.");
   const [teacherNotesInput, setTeacherNotesInput] = useState<string>("");
 
@@ -218,6 +223,12 @@ export function ChatYamatoEoyWritingCustom({
 
   const handleOpenPdfModal = (contentHtml: string) => {
     setPendingPdfContent(contentHtml);
+    // HTMLタグを除去したプレーンテキストを初期編集内容としてセット
+    const cleanForEdit = contentHtml
+      .replace(/<br\s*[\/]?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<[^>]*>?/gm, '');
+    setEditablePdfContent(cleanForEdit);
     setTeacherNotesTitleInput("P.S.");
     setTeacherNotesInput("");
     setIsPdfModalOpen(true);
@@ -231,10 +242,8 @@ export function ChatYamatoEoyWritingCustom({
       return;
     }
 
-    const cleanContent = pendingPdfContent
-      .replace(/<br\s*[\/]?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n\n')
-      .replace(/<[^>]*>?/gm, '');
+    // 編集されたテキスト（editablePdfContent）を使用
+    const cleanContent = editablePdfContent.trim();
 
     const sanitizedTitle = teacherNotesTitleInput.trim() || "P.S.";
     const sanitizedNotes = teacherNotesInput.trim();
@@ -782,19 +791,29 @@ export function ChatYamatoEoyWritingCustom({
         )}
       </aside>
 
-      {/* 💡 先生用備考（タイトル＆コメント編集）モーダル */}
+      {/* 💡 先生用PDF編集・備考追加モーダル */}
       {isPdfModalOpen && (
         <div className="fixed inset-0 z-[2147483648] bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200">
-            <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2">
-              <span>✏️</span> Add P.S. / Teacher's Notes to PDF
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+            <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2 shrink-0">
+              <span>✏️</span> Edit Feedback & Add P.S. for PDF
             </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              PDFレポートの末尾に追加するコメントのタイトルと内容を自由に設定できます。
+            <p className="text-xs text-slate-500 mb-3 shrink-0">
+              PDFに出力する添削内容の修正および、末尾の先生からのコメント（P.S.等）を自由に編集できます。
             </p>
 
-            <div className="mb-3">
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">Title (Default: P.S.)</label>
+            <div className="mb-3 flex-grow flex flex-col overflow-hidden">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Feedback Content (Editable)</label>
+              <textarea
+                value={editablePdfContent}
+                onChange={(e) => setEditablePdfContent(e.target.value)}
+                rows={8}
+                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-50 resize-y font-mono leading-relaxed"
+              />
+            </div>
+
+            <div className="mb-3 shrink-0">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Notes Title (Default: P.S.)</label>
               <input
                 type="text"
                 value={teacherNotesTitleInput}
@@ -804,18 +823,18 @@ export function ChatYamatoEoyWritingCustom({
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">Content / Comments</label>
+            <div className="mb-4 shrink-0">
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Teacher's Notes / Comments</label>
               <textarea
                 value={teacherNotesInput}
                 onChange={(e) => setTeacherNotesInput(e.target.value)}
                 placeholder="例: よく頑張りました！次回は文末の表現（〜と思います）に気をつけましょう。"
-                rows={4}
+                rows={3}
                 className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-50 resize-none"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsPdfModalOpen(false)}
