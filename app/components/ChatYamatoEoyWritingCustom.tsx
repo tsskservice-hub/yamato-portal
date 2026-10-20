@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式（Section 2 Part B / Section 3 / その他）で詳細な添削・フィードバックを行う専用AIチャットウィジェット
+ * @description 生徒が持参した問題と解答（画像および直書きテキスト両対応）に基づき、VCE形式（Section 2 Part B / Section 3 / その他）で詳細な添削・フィードバックを行う専用AIチャットウィジェット
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,9 +19,13 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "5.0.0",
-  role: "生徒持参問題・複数画像OCR対応 VCE Writing 3セクション対応 添削・フィードバック専用AIチャット",
+  version: "5.2.1",
+  role: "生徒持参問題・直書き＆画像両対応 VCE Writing 3セクション対応 添削・フィードバック専用AIチャット",
   features: [
+    {
+      featureName: "Flexible Input Support (Text & Images)",
+      description: "問題および答案が画像でアップロードされた場合だけでなく、テキストとして直接書き込まれた場合でも正確に認識して添削"
+    },
     {
       featureName: "3 VCE Writing Sections Selection",
       description: "Section 2 Part B、Section 3、その他の3つのセクション選択UIを搭載し、それぞれの基準に沿ったフィードバックを提供"
@@ -145,7 +149,7 @@ export function ChatYamatoEoyWritingCustom({
 }: ChatYamatoEoyWritingCustomProps) {
   const characterName = "VCE Writing Tutor (Yamato)";
   const appType = "eoy-writing-custom";
-  const initialGreeting = "Hello, my friend! 🌟 Please select your writing section (Section 2 Part B, Section 3, or Other) and share your brought question and answer. I am ready to give you detailed VCE feedback!";
+  const initialGreeting = "Hello, my friend! 🌟 Please select your writing section (Section 2 Part B, Section 3, or Other) and share your brought question and answer (via text or image). I am ready to give you detailed VCE feedback!";
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -439,11 +443,12 @@ export function ChatYamatoEoyWritingCustom({
       console.error("Failed to convert question files to base64:", err);
     }
 
+    // 💡 問題文がpropsや画像から取得できない場合のフォールバック（直書きテキストなど）
     const effectiveAssignedQuestion = assignedQuestion && assignedQuestion.trim()
       ? assignedQuestion
       : questionImagesBase64.length > 0
       ? `[External Question Images Attached for AI OCR (${questionImagesBase64.length} page(s))]`
-      : "None provided";
+      : userMsg; // 直書きされたテキストを問題/答案として柔軟に扱う
 
     setTutorInput("");
     setRequestVisualAid(false);
@@ -463,27 +468,19 @@ export function ChatYamatoEoyWritingCustom({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      // 💡 選択されたセクションに応じたプロンプト指示を追加
-      let sectionInstruction = "";
-      if (writingSection === "section3") {
-        sectionInstruction = " [Target Section: VCE Section 3 Writing. Feedback Guidance: The student must write at least 400 characters (400字以上は必ず書くべき), and the upper limit should be slightly over 500 characters (上限は500字を少し上回るぐらいまでがよい). Evaluate strictly based on this character count rule.]";
-      } else if (writingSection === "section2b") {
-        sectionInstruction = " [Target Section: VCE Section 2 Part B Writing.]";
-      } else {
-        sectionInstruction = " [Target Section: Other General Japanese Writing.]";
-      }
-
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMsg + sectionInstruction,
+          message: userMsg,
+          writingSection: writingSection, // 💡 選択されたセクション情報をバックエンドへ送信
+          assignedQuestion: effectiveAssignedQuestion, // 💡 直書き・画像両対応のassignedQuestion
+          studentEssay: userMsg, // 💡 直書きテキストを答案（studentEssay）としても確実に渡す
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
           userNickname: userNickname,
           appType: appType,
           systemPrompt: systemPrompt,
-          assignedQuestion: effectiveAssignedQuestion,
           questionImagesBase64: questionImagesBase64,
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
@@ -814,7 +811,7 @@ export function ChatYamatoEoyWritingCustom({
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={externalImagePreview || externalQuestionFiles.length > 0 ? "Ask feedback for photos..." : "Ask Yamato anything..."}
+                        placeholder={externalImagePreview || externalQuestionFiles.length > 0 ? "Ask feedback for photos..." : "Enter question & your writing text..."}
                         disabled={isTutorLoading}
                         className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                       />
