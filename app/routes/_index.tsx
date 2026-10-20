@@ -327,8 +327,9 @@ export default function Home() {
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-             
-        {/* 2. Hero Section with YamatoChat-style Auto Demo */}
+           
+
+{/* 2. Hero Section with YamatoChat-style Auto Demo */}
         <section className="text-center space-y-6 max-w-4xl mx-auto">
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
             <Flame className="w-3.5 h-3.5 text-red-600 animate-pulse" />
@@ -336,11 +337,18 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
-            Your Gateway to <br />
             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-red-600 bg-clip-text text-transparent">
-              Japanese Mastery
+              Japanese Tutor AI Yamato
+            </span>
+            <span className="block text-2xl sm:text-3xl font-bold mt-3 text-slate-700 dark:text-slate-300">
+              Your Gateway to Japanese Mastery
             </span>
           </h1>
+
+          <p className={`text-base sm:text-lg max-w-2xl mx-auto ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+            Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
+          </p>
+
 
           <p className={`text-base sm:text-lg max-w-2xl mx-auto ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
             Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
