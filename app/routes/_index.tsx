@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加・クイズ移動版）
+ * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加・クイズ完全対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
@@ -38,7 +38,7 @@ import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
 // 💡 共通の price-plans から price-plans およびキャンペーン文言をインポート
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/price-plans';
 
-// 💡 Quiz data and helper functions imported from external file
+// 💡 1. インポート部：Quiz data and helper functions imported from external file
 import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
 
 // Auto demo conversations in English
@@ -78,24 +78,39 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   // 💡 rootData から初期値を安全に連動
-  const user = rootData?.user ?? null;
-  const credits = rootData?.credits ?? 10;
+  const [user, setUser] = useState<any>(rootData?.user ?? null);
+  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
   const nickname = rootData?.nickname ?? "";
   const learningPace = rootData?.learningPace ?? "normal";
+
+  // セッションのフォールバック取得（ログイン状態の確実な同期用）
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
   // 💡 PageLayout の認証モーダルを外部から操作するための ref
   const layoutRef = useRef<PageLayoutRef>(null);
 
-  // 💡 Daily Quiz States
+  // 💡 2. ステート定義：Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
   
-  // ★ クイズが勝手に変わらないよう、ステートとして保持する
+  // ★ クイズが勝手に変わらないよう、ステートとして保持する（インデックス [0] を修正済み）
   const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(DAILY_QUIZZES[0]);
 
   // 初回ロード時に一度だけランダムなクイズをセット
@@ -195,7 +210,7 @@ export default function Home() {
     }
   }, []);
 
-  // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数（Supabaseセッションフォールバック付き）
+  // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数
   const validateFeatureCredits = async (featureType: 'textAi' | 'imageAi'): Promise<boolean> => {
     let activeUser = user;
     if (!activeUser) {
@@ -221,7 +236,7 @@ export default function Home() {
     return true;
   };
 
-  // Daily Quiz Answer Handler
+  // 💡 3. 解答処理ロジック（handleAnswerQuiz）
   const handleAnswerQuiz = async (selectedIndex: number) => {
     let activeUser = user;
     if (!activeUser) {
@@ -249,6 +264,7 @@ export default function Home() {
         .eq('id', activeUser.id);
 
       if (!error) {
+        setCredits(newCredits);
         setHasCompletedTodayQuiz(true);
       }
     }
@@ -310,7 +326,7 @@ export default function Home() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
             
 
-{/* 2. Hero Section with YamatoChat-style Auto Demo */}
+        {/* 2. Hero Section with YamatoChat-style Auto Demo */}
         <section className="text-center space-y-6 max-w-4xl mx-auto">
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
             <Flame className="w-3.5 h-3.5 text-red-600 animate-pulse" />
@@ -330,41 +346,45 @@ export default function Home() {
             Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
           </p>
 
-          {/* 💡 Daily Quiz Banner for Logged-in Users (ヤマトチャットデモの上に配置) */}
-          {user && (
-            <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-red-600/10 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
-                  🧠
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge</span>
-                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300">+2 Credits</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Today's Japanese & Culture Quiz</h3>
-                  <p className="text-xs text-slate-500">
-                    {hasCompletedTodayQuiz 
-                      ? "You've already completed today's quiz! Come back tomorrow for more ✨" 
-                      : "Answer correctly to earn 2 credits! (Available once per day)"}
-                  </p>
-                </div>
+          {/* 💡 4. UI 描画コード①：Daily Quiz Banner (ログイン/未ログイン両対応で常に表示してアピール) */}
+          <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-red-600/10 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                🧠
               </div>
-              <button
-                onClick={() => {
-                  setIsQuizModalOpen(true);
-                }}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
-                  hasCompletedTodayQuiz 
-                    ? "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300" 
-                    : "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20"
-                }`}
-              >
-                <span>{hasCompletedTodayQuiz ? "View Quiz Results & Explanation" : "Take Today's Quiz"}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge</span>
+                  <span className="text-xs font-bold text-blue-700 dark:text-blue-300">+2 Credits</span>
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Today's Japanese & Culture Quiz</h3>
+                <p className="text-xs text-slate-500">
+                  {!user 
+                    ? "Sign in to take today's quiz and earn 2 free credits! ✨" 
+                    : hasCompletedTodayQuiz 
+                    ? "You've already completed today's quiz! Come back tomorrow for more ✨" 
+                    : "Answer correctly to earn 2 credits! (Available once per day)"}
+                </p>
+              </div>
             </div>
-          )}
+            <button
+              onClick={() => {
+                if (!user) {
+                  handleOpenAuthModal('signup');
+                } else {
+                  setIsQuizModalOpen(true);
+                }
+              }}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
+                user && hasCompletedTodayQuiz 
+                  ? "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300" 
+                  : "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20"
+              }`}
+            >
+              <span>{!user ? "Sign In to Play Quiz" : hasCompletedTodayQuiz ? "View Quiz Results & Explanation" : "Take Today's Quiz"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           <div className={`mt-8 p-5 sm:p-6 rounded-2xl border-2 border-blue-400 shadow-2xl backdrop-blur-sm text-left ${isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white'}`}>
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
@@ -874,7 +894,7 @@ export default function Home() {
 
       </main>
 
-        {/* 🤖 右下に常駐するコンシェルジュヤマト（軽量化完了） */}
+        {/* 🤖 右下に常駐するコンシェルジュヤマト */}
         <ChatYamatoConcierge 
           initialLearningPace={learningPace}
           userId={user?.id}
@@ -882,7 +902,7 @@ export default function Home() {
           onOpenAuth={() => handleOpenAuthModal('signup')}
         />
 
-        {/* 💡 Daily Quiz Modal */}
+        {/* 💡 4. UI 描画コード②：Daily Quiz Modal */}
         {isQuizModalOpen && (
           <div 
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
@@ -911,11 +931,11 @@ export default function Home() {
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-left">
-                  <p className="text-sm font-semibold leading-relaxed">{currentQuiz.question}</p>
+                  <p className="text-sm font-semibold leading-relaxed">{currentQuiz?.question}</p>
                 </div>
 
                 <div className="space-y-2.5">
-                  {currentQuiz.options.map((option, idx) => {
+                  {currentQuiz?.options?.map((option, idx) => {
                     let btnStyle = "border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/20";
                     if (isAnswerSubmitted || hasCompletedTodayQuiz) {
                       if (idx === currentQuiz.answer) {
