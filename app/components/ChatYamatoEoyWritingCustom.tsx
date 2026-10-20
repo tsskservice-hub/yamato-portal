@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（PDF改ページ対策・フィードバック編集対応版）
+ * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（PDF編集フルスクリーン対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,9 +19,13 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "4.8.0",
-  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF編集対応版）",
+  version: "4.9.0",
+  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF編集フルスクリーン対応版）",
   features: [
+    {
+      featureName: "Fullscreen PDF Edit Modal",
+      description: "PDF編集モーダルをフルスクリーン（最大化／縮小）に切り替え可能にし、長文の添削内容の編集を快適化"
+    },
     {
       featureName: "Editable Feedback for PDF Export",
       description: "PDF出力前に、先生がヤマトの添削フィードバック本文を自由に編集・修正が可能"
@@ -147,8 +151,9 @@ export function ChatYamatoEoyWritingCustom({
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
 
   const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
+  const [isPdfFullscreen, setIsPdfFullscreen] = useState<boolean>(false); // 💡 PDFモーダル用フルスクリーン状態
   const [pendingPdfContent, setPendingPdfContent] = useState<string>("");
-  const [editablePdfContent, setEditablePdfContent] = useState<string>(""); // 💡 編集用ステート
+  const [editablePdfContent, setEditablePdfContent] = useState<string>("");
   const [teacherNotesTitleInput, setTeacherNotesTitleInput] = useState<string>("P.S.");
   const [teacherNotesInput, setTeacherNotesInput] = useState<string>("");
 
@@ -223,7 +228,6 @@ export function ChatYamatoEoyWritingCustom({
 
   const handleOpenPdfModal = (contentHtml: string) => {
     setPendingPdfContent(contentHtml);
-    // HTMLタグを除去したプレーンテキストを初期編集内容としてセット
     const cleanForEdit = contentHtml
       .replace(/<br\s*[\/]?>/gi, '\n')
       .replace(/<\/p>/gi, '\n\n')
@@ -231,20 +235,20 @@ export function ChatYamatoEoyWritingCustom({
     setEditablePdfContent(cleanForEdit);
     setTeacherNotesTitleInput("P.S.");
     setTeacherNotesInput("");
+    setIsPdfFullscreen(false);
     setIsPdfModalOpen(true);
   };
 
   const handleExecutePdfExport = () => {
     setIsPdfModalOpen(false);
+    setIsPdfFullscreen(false);
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       alert("ポップアップがブロックされました。ブラウザの設定をご確認ください。");
       return;
     }
 
-    // 編集されたテキスト（editablePdfContent）を使用
     const cleanContent = editablePdfContent.trim();
-
     const sanitizedTitle = teacherNotesTitleInput.trim() || "P.S.";
     const sanitizedNotes = teacherNotesInput.trim();
 
@@ -791,24 +795,53 @@ export function ChatYamatoEoyWritingCustom({
         )}
       </aside>
 
-      {/* 💡 先生用PDF編集・備考追加モーダル */}
+      {/* 💡 先生用PDF編集・備考追加モーダル（フルスクリーン切替対応） */}
       {isPdfModalOpen && (
         <div className="fixed inset-0 z-[2147483648] bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
-            <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2 shrink-0">
-              <span>✏️</span> Edit Feedback & Add P.S. for PDF
-            </h3>
+          <div className={`bg-white shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200 flex flex-col transition-all ${
+            isPdfFullscreen
+              ? "w-screen h-screen rounded-none p-6 sm:p-10"
+              : "rounded-2xl p-6 max-w-2xl w-full max-h-[92vh]"
+          }`}>
+            {/* モーダルヘッダー */}
+            <div className="flex items-center justify-between border-b pb-3 mb-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 m-0">
+                  <span>✏️</span> Edit Feedback & Add P.S. for PDF
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPdfFullscreen(!isPdfFullscreen)}
+                  className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
+                >
+                  {isPdfFullscreen ? "🗗 縮小" : "🗖 最大化"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPdfModalOpen(false);
+                    setIsPdfFullscreen(false);
+                  }}
+                  className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
+                >
+                  ✕ Close
+                </button>
+              </div>
+            </div>
+
             <p className="text-xs text-slate-500 mb-3 shrink-0">
-              PDFに出力する添削内容の修正および、末尾の先生からのコメント（P.S.等）を自由に編集できます。
+              PDFに出力する添削内容の修正および、末尾の先生からのコメント（P.S.等）を自由に編集できます。最大化して広々編集することも可能です。
             </p>
 
-            <div className="mb-3 flex-grow flex flex-col overflow-hidden">
+            {/* 添削本文の編集エリア（フルスクリーン時は高さを自動拡張） */}
+            <div className={`mb-3 flex flex-col overflow-hidden ${isPdfFullscreen ? "flex-grow" : "h-56"}`}>
               <label className="block text-[11px] font-bold text-slate-700 mb-1">Feedback Content (Editable)</label>
               <textarea
                 value={editablePdfContent}
                 onChange={(e) => setEditablePdfContent(e.target.value)}
-                rows={8}
-                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-50 resize-y font-mono leading-relaxed"
+                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-50 resize-none font-mono leading-relaxed flex-grow h-full"
               />
             </div>
 
@@ -834,10 +867,13 @@ export function ChatYamatoEoyWritingCustom({
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 shrink-0">
+            <div className="flex items-center justify-end gap-2 shrink-0 pt-2 border-t">
               <button
                 type="button"
-                onClick={() => setIsPdfModalOpen(false)}
+                onClick={() => {
+                  setIsPdfModalOpen(false);
+                  setIsPdfFullscreen(false);
+                }}
                 className="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer"
               >
                 Cancel
