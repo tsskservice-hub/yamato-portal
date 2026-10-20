@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式で詳細な添削・フィードバックを行う専用AIチャットウィジェット（PDF編集フルスクリーン対応版）
+ * @description 生徒が持参した問題と解答画像/テキストに基づき、VCE形式（Section 2 Part B / Section 3 / その他）で詳細な添削・フィードバックを行う専用AIチャットウィジェット
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -19,9 +19,17 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "4.9.0",
-  role: "生徒持参問題・複数画像OCR対応 VCE Writing 添削・フィードバック専用AIチャット（PDF編集フルスクリーン対応版）",
+  version: "5.0.0",
+  role: "生徒持参問題・複数画像OCR対応 VCE Writing 3セクション対応 添削・フィードバック専用AIチャット",
   features: [
+    {
+      featureName: "3 VCE Writing Sections Selection",
+      description: "Section 2 Part B、Section 3、その他の3つのセクション選択UIを搭載し、それぞれの基準に沿ったフィードバックを提供"
+    },
+    {
+      featureName: "Section 3 Word Count Guidance",
+      description: "Section 3選択時、400字以上は必ず書き、上限は500字を少し上回るぐらいまでが望ましいという基準でアドバイスを最適化"
+    },
     {
       featureName: "Fullscreen PDF Edit Modal",
       description: "PDF編集モーダルをフルスクリーン（最大化／縮小）に切り替え可能にし、長文の添削内容の編集を快適化"
@@ -40,15 +48,11 @@ export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMeta
     },
     {
       featureName: "Export PDF Feedback",
-      description: "VCE Section 2 Part Bの添削・フィードバック結果をクリーンなフォーマットでPDFレポートとして保存・印刷可能"
+      description: "添削・フィードバック結果をクリーンなフォーマットでPDFレポートとして保存・印刷可能"
     },
     {
       featureName: "Dashboard Multiple Image Integration",
       description: "ダッシュボード側でアップロードされた複数の問題画像および答案画像を受け取り、チャット内でプレビュー・送信"
-    },
-    {
-      featureName: "Assigned Question Widget Integration",
-      description: "Learning Pace等と同じデザインのブロックで、選択された質問情報をチャット内上部に分かりやすく表示"
     },
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -141,7 +145,7 @@ export function ChatYamatoEoyWritingCustom({
 }: ChatYamatoEoyWritingCustomProps) {
   const characterName = "VCE Writing Tutor (Yamato)";
   const appType = "eoy-writing-custom";
-  const initialGreeting = "Hello, my friend! 🌟 Please share your brought question and your answer (image or text). I am ready to give you detailed feedback and advice to help you excel in your VCE Japanese writing!";
+  const initialGreeting = "Hello, my friend! 🌟 Please select your writing section (Section 2 Part B, Section 3, or Other) and share your brought question and answer. I am ready to give you detailed VCE feedback!";
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -150,8 +154,11 @@ export function ChatYamatoEoyWritingCustom({
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
 
+  // 💡 VCE Writing セクション選択用ステート ("section2b" | "section3" | "other")
+  const [writingSection, setWritingSection] = useState<"section2b" | "section3" | "other">("section2b");
+
   const [isPdfModalOpen, setIsPdfModalOpen] = useState<boolean>(false);
-  const [isPdfFullscreen, setIsPdfFullscreen] = useState<boolean>(false); // 💡 PDFモーダル用フルスクリーン状態
+  const [isPdfFullscreen, setIsPdfFullscreen] = useState<boolean>(false);
   const [pendingPdfContent, setPendingPdfContent] = useState<string>("");
   const [editablePdfContent, setEditablePdfContent] = useState<string>("");
   const [teacherNotesTitleInput, setTeacherNotesTitleInput] = useState<string>("P.S.");
@@ -264,7 +271,6 @@ export function ChatYamatoEoyWritingCustom({
             .meta { font-size: 13px; color: #64748b; }
             .content { font-size: 14px; white-space: pre-wrap; word-break: break-word; }
             
-            /* 💡 P.S.ボックスがページをまたいで分断されないようにする設定 */
             .teacher-notes-box {
               margin-top: 40px;
               border: 2px dashed #0891b2;
@@ -285,7 +291,7 @@ export function ChatYamatoEoyWritingCustom({
         </head>
         <body>
           <div class="header">
-            <h1>🌟 VCE Japanese Writing Feedback Report</h1>
+            <h1>🌟 VCE Japanese Writing Feedback Report (${writingSection.toUpperCase()})</h1>
             <div class="meta">Date: ${new Date().toLocaleDateString()}</div>
           </div>
           <div class="content">${cleanContent}</div>
@@ -457,11 +463,21 @@ export function ChatYamatoEoyWritingCustom({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
+      // 💡 選択されたセクションに応じたプロンプト指示を追加
+      let sectionInstruction = "";
+      if (writingSection === "section3") {
+        sectionInstruction = " [Target Section: VCE Section 3 Writing. Feedback Guidance: The student must write at least 400 characters (400字以上は必ず書くべき), and the upper limit should be slightly over 500 characters (上限は500字を少し上回るぐらいまでがよい). Evaluate strictly based on this character count rule.]";
+      } else if (writingSection === "section2b") {
+        sectionInstruction = " [Target Section: VCE Section 2 Part B Writing.]";
+      } else {
+        sectionInstruction = " [Target Section: Other General Japanese Writing.]";
+      }
+
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMsg,
+          message: userMsg + sectionInstruction,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
           userNickname: userNickname,
@@ -555,12 +571,12 @@ export function ChatYamatoEoyWritingCustom({
             className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                : "w-80 sm:w-96 h-[540px] min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
+                : "w-80 sm:w-96 h-[580px] min-w-[280px] min-h-[400px] max-w-[90vw] max-h-[88vh] resize overflow-auto"
             }`}
           >
             <div className="w-full h-full flex flex-col">
               {/* ヘッダー */}
-              <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
+              <div className="flex items-center justify-between border-b pb-2 mb-2.5 shrink-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
@@ -602,6 +618,33 @@ export function ChatYamatoEoyWritingCustom({
                     🔒 Guest
                   </span>
                 )}
+              </div>
+
+              {/* 💡 VCE Writing セクション選択UI */}
+              <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-2 mb-2 flex flex-col gap-1.5 shrink-0">
+                <span className="text-[11px] font-bold text-cyan-900">Select Writing Section</span>
+                <div className="grid grid-cols-3 gap-1">
+                  {(
+                    [
+                      { key: 'section2b', label: 'Sec 2 Part B' },
+                      { key: 'section3', label: 'Sec 3 (400-500字)' },
+                      { key: 'other', label: 'Other' },
+                    ] as const
+                  ).map((sec) => (
+                    <button
+                      key={sec.key}
+                      type="button"
+                      onClick={() => setWritingSection(sec.key)}
+                      className={`py-1 px-1 rounded-md text-[10px] font-bold transition text-center truncate ${
+                        writingSection === sec.key
+                          ? "bg-cyan-600 text-white shadow-xs"
+                          : "bg-white text-slate-700 hover:bg-cyan-100 border border-cyan-200"
+                      }`}
+                    >
+                      {sec.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* 学習ペース選択UI */}
@@ -807,7 +850,7 @@ export function ChatYamatoEoyWritingCustom({
             <div className="flex items-center justify-between border-b pb-3 mb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 m-0">
-                  <span>✏️</span> Edit Feedback & Add P.S. for PDF
+                  <span>✏️</span> Edit Feedback & Add P.S. for PDF ({writingSection.toUpperCase()})
                 </h3>
               </div>
               <div className="flex items-center gap-2">
