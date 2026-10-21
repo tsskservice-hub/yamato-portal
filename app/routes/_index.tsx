@@ -76,7 +76,7 @@ export default function Home() {
   } | undefined;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
-  
+   
   // 💡 rootData から初期値を安全に連動
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
@@ -115,7 +115,7 @@ export default function Home() {
         if (expiredLogs && expiredLogs.length > 0) {
           // 期限切れになったポイントの合計
           const totalExpired = expiredLogs.reduce((sum, log) => sum + log.amount, 0);
-          
+           
           // 残高から失効分を減算（マイナスにならないようガード）
           const updatedCredits = Math.max(0, currentCredits - totalExpired);
 
@@ -175,7 +175,7 @@ export default function Home() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
-  
+   
   // ★ クイズが勝手に変わらないよう、ステートとして保持する
   const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(DAILY_QUIZZES[0]);
 
@@ -321,7 +321,7 @@ export default function Home() {
 
     if (correct) {
       const todayStr = new Date().toISOString().split('T')[0]; // "2026-10-20" 形式
-      
+       
       // 💡 7日後の日時（ISO文字列）を算出
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const newCredits = credits + 2;
@@ -759,43 +759,43 @@ export default function Home() {
               <h3 className="text-xl font-extrabold tracking-tight">Section 1: Global & General Japanese Learners</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Go (Igo) Mini Game - Card 1 (Active) */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
                 <div className="space-y-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                    <Grid className="w-5 h-5" />
+                    <Gamepad2 className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-base">Go (Igo) Mini Game</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                  <span className="text-blue-600 font-medium">Mini Game</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigate("/game-igo");
+                    }}
+                    className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                  >
+                    <span>Play Game</span> <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Genkoyoshi Editor (General) - Card 2 (Coming Soon) */}
+              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                      <Grid className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
                   </div>
                   <h4 className="font-bold text-base">Genkoyoshi Editor (General)</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor with image/text AI layout analysis (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
                   <span className="text-slate-400 font-medium">AI Tool</span>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (await validateFeatureCredits('imageAi')) {
-                        navigate("/genkoyoshi-editor-general");
-                      }
-                    }}
-                    className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                  >
-                    <span>Open Editor</span> <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                      <Gamepad2 className="w-5 h-5" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                  </div>
-                  <h4 className="font-bold text-base">Go (Igo) Mini Game</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Mini Game</span>
                   <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
                 </div>
               </div>
