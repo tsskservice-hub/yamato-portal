@@ -1,17 +1,17 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（PageLayout完全連動・重複認証ロジック削除版）
+ * @description アカウント設定画面（PageLayout完全連動・クレジット履歴表示対応版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { UserCheck, Gauge } from "lucide-react";
+import { UserCheck, Gauge, History, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
 import { supabase } from "../lib/supabaseClient";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側で認証ユーザーを取得し、初期プロフィールデータを取得する
+// Loader: サーバー側で認証ユーザーを取得し、プロフィールとクレジット履歴を取得する
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
@@ -20,8 +20,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let initialPace = "normal";
   let initialPlan = "Free Plan";
   let initialCredits = 10;
+  let creditTransactions: Array<{
+    id: string;
+    amount: number;
+    feature_used: string | null;
+    description: string | null;
+    created_at: string;
+    expires_at: string | null;
+  }> = [];
 
   if (user) {
+    // 1. プロフィールデータの取得
     const { data: profile } = await serverSupabase
       .from("profiles")
       .select("credits, nickname, learning_pace")
@@ -33,6 +42,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       initialNickname = (profile as any).nickname ?? "";
       initialPace = (profile as any).learning_pace ?? "normal";
     }
+
+    // 2. クレジット履歴 (credit_transactions) の取得（新しい順）
+    const { data: transactions, error: txError } = await serverSupabase
+      .from("credit_transactions")
+      .select("id, amount, feature_used, description, created_at, expires_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!txError && transactions) {
+      creditTransactions = transactions;
+    }
   }
 
   return json({
@@ -43,6 +63,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     nickname: initialNickname,
     learningPace: initialPace,
     createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
+    transactions: creditTransactions,
   });
 }
 
@@ -87,7 +108,6 @@ export default function AccountSettingsRoute() {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
 
-  // root.tsx からのグローバルデータを取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -97,7 +117,6 @@ export default function AccountSettingsRoute() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
 
-  // ステート初期化
   const [nicknameInput, setNicknameInput] = useState(() => {
     return (rootData?.nickname && rootData.nickname.trim() !== "")
       ? rootData.nickname
@@ -107,9 +126,9 @@ export default function AccountSettingsRoute() {
   });
 
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
-  const [userEmail, setUserEmail] = useState(initialData.email);
-  const [userPlan, setUserPlan] = useState(initialData.plan);
-  const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
+  const [userEmail] = useState(initialData.email);
+  const [userPlan] = useState(initialData.plan);
+  const [userCreatedAt] = useState(initialData.createdAt);
 
   const [user, setUser] = useState<any>(rootData?.user ?? initialData.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
@@ -118,7 +137,6 @@ export default function AccountSettingsRoute() {
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // rootData が更新された場合の同期
   useEffect(() => {
     if (rootData) {
       if (rootData.user !== undefined && rootData.user !== null) {
@@ -133,7 +151,6 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
-  // クライアント側でのプロフィール保存処理（Supabaseセッションフォールバック付き）
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -164,8 +181,7 @@ export default function AccountSettingsRoute() {
         throw error;
       }
 
-      revalidator.revalidate();
-
+      validatorRevalidate();
       setShowSavedIndicator(true);
       setTimeout(() => {
         setShowSavedIndicator(false);
@@ -178,22 +194,17 @@ export default function AccountSettingsRoute() {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setNicknameInput("");
-    navigate("/");
+  const validatorRevalidate = () => {
+    revalidator.revalidate();
   };
 
   return (
-    <PageLayout 
-      
-    >
+    <PageLayout>
       <div className="max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Manage your AI tutor preferences, registration details, subscription plan, and account cancellation.
+            Manage your AI tutor preferences, registration details, subscription plan, and credit history.
           </p>
         </div>
 
@@ -205,7 +216,6 @@ export default function AccountSettingsRoute() {
 
           <form onSubmit={handleUpdateProfile} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* ニックネーム入力 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Your Nickname (AI呼びかけ用)
@@ -222,7 +232,6 @@ export default function AccountSettingsRoute() {
                 </p>
               </div>
 
-              {/* 学習ペース選択 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
                   <Gauge className="w-4 h-4 text-blue-600" /> Default Learning Pace
@@ -237,7 +246,7 @@ export default function AccountSettingsRoute() {
                   <option value="accelerated">Accelerated (高速・発展重視)</option>
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  Let Yamato know whether you want to learn at a steady, normal, or accelerated pace. Yamato will tailor his conversation accordingly. You can also change this anytime right from Yamato's chat window.
+                  Let Yamato know whether you want to learn at a steady, normal, or accelerated pace.
                 </p>
               </div>
             </div>
@@ -286,7 +295,75 @@ export default function AccountSettingsRoute() {
           </div>
         </div>
 
-        {/* 3. 危険なエリア（アカウント削除セクション） */}
+        {/* 💡 3. クレジット履歴セクション (新規追加) */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
+            <History className="w-5 h-5 text-blue-600" /> Credit Transactions History
+          </h2>
+          <p className="text-xs text-gray-500">
+            A complete record of all credits earned (such as daily quizzes or top-ups) and credits consumed across AI features.
+          </p>
+
+          {initialData.transactions.length === 0 ? (
+            <div className="text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg">
+              No credit transactions recorded yet.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 text-gray-600">
+                    <th className="py-2.5 px-3 font-semibold">Date / Time</th>
+                    <th className="py-2.5 px-3 font-semibold">Feature / Type</th>
+                    <th className="py-2.5 px-3 font-semibold">Description</th>
+                    <th className="py-2.5 px-3 font-semibold text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {initialData.transactions.map((tx) => {
+                    const isPositive = tx.amount > 0;
+                    const formattedDate = new Date(tx.created_at).toLocaleString("en-AU", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    });
+
+                    return (
+                      <tr key={tx.id} className="hover:bg-gray-50/50">
+                        <td className="py-3 px-3 text-gray-600 whitespace-nowrap">
+                          {formattedDate}
+                        </td>
+                        <td className="py-3 px-3 font-medium text-gray-900 whitespace-nowrap">
+                          {tx.feature_used || "general"}
+                        </td>
+                        <td className="py-3 px-3 text-gray-600 max-w-xs truncate" title={tx.description || ""}>
+                          {tx.description || "-"}
+                        </td>
+                        <td className="py-3 px-3 text-right whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-full font-bold ${
+                              isPositive
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-rose-50 text-rose-700"
+                            }`}
+                          >
+                            {isPositive ? (
+                              <ArrowUpRight className="w-3.5 h-3.5" />
+                            ) : (
+                              <ArrowDownRight className="w-3.5 h-3.5" />
+                            )}
+                            {isPositive ? `+${tx.amount}` : tx.amount} pts
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* 4. 危険なエリア（アカウント削除セクション） */}
         <div className="bg-white border border-red-200 rounded-lg shadow-sm p-6 space-y-4">
           <div className="border-b border-red-100 pb-4">
             <h2 className="text-lg font-semibold text-red-600">Delete Account</h2>
