@@ -33,7 +33,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   learningPace: propLearningPace, 
   isDarkMode = false,
   breadcrumbTitle,
-  scrollTopClassName = "bg-slate-800 hover:bg-slate-700 text-white" // 💡 デフォルトのスタイル
+  scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50" // 💡 デフォルト：枠青線、三角青、背景白
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
@@ -255,7 +255,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       
       <Footer onOpenAuth={handleOpenAuthModal} />
 
-      {/* ⬆️ ページトップへ戻るボタン（ページごとに色やスタイルを変更可能） */}
+      {/* ⬆️ ページトップへ戻るボタン（デフォルト：枠青線、三角青、背景白） */}
       {showScrollTop && (
         <div className="fixed bottom-24 right-6 z-40">
           <button

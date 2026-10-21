@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クライアントサイド・セキュア履歴取得対応版）
+ * @description アカウント設定画面（クレジット残高・履歴のクライアント同期対応版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
@@ -112,7 +112,7 @@ export default function AccountSettingsRoute() {
   const [user, setUser] = useState<any>(rootData?.user ?? initialData.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
 
-  // 💡 クレジット履歴をクライアント側で確実に取得・保持するステート
+  // クレジット履歴ステート
   const [transactions, setTransactions] = useState<Array<any>>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
 
@@ -120,9 +120,9 @@ export default function AccountSettingsRoute() {
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // 💡 クライアント側での認証セッション確認 & 履歴データの非同期フェッチ
+  // 💡 クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
   useEffect(() => {
-    const fetchSessionAndTransactions = async () => {
+    const fetchUserDataAndTransactions = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const activeUser = session?.user ?? rootData?.user ?? initialData.user;
@@ -134,7 +134,18 @@ export default function AccountSettingsRoute() {
             setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
           }
 
-          // credit_transactions テーブルから最新の履歴を取得
+          // 1. profiles から最新の正確なクレジット残高を取得
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("credits")
+            .eq("id", activeUser.id)
+            .maybeSingle();
+
+          if (profileData && profileData.credits !== undefined) {
+            setCredits(profileData.credits);
+          }
+
+          // 2. credit_transactions から履歴を取得
           const { data: txData, error: txError } = await supabase
             .from("credit_transactions")
             .select("id, amount, feature_used, description, created_at, expires_at")
@@ -146,13 +157,13 @@ export default function AccountSettingsRoute() {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch transactions on client:", err);
+        console.error("Failed to fetch user data on client:", err);
       } finally {
         setIsLoadingTransactions(false);
       }
     };
 
-    fetchSessionAndTransactions();
+    fetchUserDataAndTransactions();
   }, [rootData]);
 
   useEffect(() => {
@@ -313,7 +324,7 @@ export default function AccountSettingsRoute() {
           </div>
         </div>
 
-        {/* 💡 3. クレジット履歴セクション (クライアント非同期取得版) */}
+        {/* 3. クレジット履歴セクション */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
             <History className="w-5 h-5 text-blue-600" /> Credit Transactions History
