@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.4.0",
-  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知統合版）",
+  version: "3.5.0",
+  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -74,7 +74,7 @@ type ChatMessage = {
 // 💡 機能ごとの消費クレジット定義
 const FEATURE_COSTS = {
   textAi: 2,         // 通常のテキストチャット
-  imageAi: 4,        // 画像付きチャット（1枚）
+  imageAi: 4,        // 画像付きチャット（1枚）または画像生成AI
   multiImageAi: 6,   // 画像付きチャット（2枚）
 };
 
@@ -373,7 +373,15 @@ export function YamatoChatCommon({
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
-  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
+  
+  // 💡 絵で説明ヤマト（image-explanation）の場合はデフォルトで Visual Aid チェックをONにする
+  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(appType === "image-explanation");
+
+  useEffect(() => {
+    if (appType === "image-explanation") {
+      setRequestVisualAid(true);
+    }
+  }, [appType]);
 
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
@@ -470,18 +478,28 @@ export function YamatoChatCommon({
     }
   };
 
-  const handleRequestImageAiFeature = () => {
-    if (!activeUserId) {
-      alert("Login required");
-      if (onOpenAuth) onOpenAuth();
-      return false;
+  const handleRequestImageAiFeature = async () => {
+    try {
+      const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+      const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
+      
+      const res = await fetch(`${apiBaseUrl}/api/test-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: "A beautiful educational diagram of Japanese cherry blossoms" })
+      });
+      const data = await res.json() as any;
+      if (data.success && data.imageUrl) {
+        setTutorMessages(prev => [
+          ...prev,
+          { role: "assistant", content: "🎨 **[Image AI Test Successful]**\nHere is a test image generated via Vertex AI (gemini-3.1-flash-lite-image):", imageUrl: data.imageUrl }
+        ]);
+      } else {
+        alert(`Image AI Test failed: ${data.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      alert(`Image AI Test exception: ${err.message}`);
     }
-    if (currentCredits < FEATURE_COSTS.imageAi) {
-      alert(`Image AI requires ${FEATURE_COSTS.imageAi} credits, but you currently have ${currentCredits} credits.`);
-      return false;
-    }
-    alert("Accessing Image AI feature (sufficient credits).");
-    return true;
   };
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
@@ -510,7 +528,8 @@ export function YamatoChatCommon({
     }
 
     const hasImage = Boolean(activeImagePreview);
-    const requiredCost = hasImage ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    const needsVisual = requestVisualAid || appType === "image-explanation";
+    const requiredCost = (hasImage || needsVisual) ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
 
     if (currentCredits < requiredCost) {
       setTutorMessages((prev) => [
@@ -526,13 +545,14 @@ export function YamatoChatCommon({
     }
 
     const userMsg = tutorInput.trim() || (hasImage ? "Please check this attached photo." : "");
-    const needsVisual = requestVisualAid;
     const imageBase64 = activeImagePreview;
 
     setTutorInput("");
     setSelectedImage(null);
     setInternalImagePreview(null);
-    setRequestVisualAid(false);
+    if (appType !== "image-explanation") {
+      setRequestVisualAid(false);
+    }
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (onClearExternalImage) {
       onClearExternalImage();
@@ -547,10 +567,13 @@ export function YamatoChatCommon({
 
     try {
       const visualPrompt = needsVisual
-        ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
+        ? `Educational instructional diagram and visual aid for Japanese language learners explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      const response = await fetch("https://api.jptutoraiyamato.com/chat", {
+      const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+      const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
+
+      const response = await fetch(`${apiBaseUrl}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -880,7 +903,7 @@ export function YamatoChatCommon({
 
                     {/* 消費クレジット案内 ＆ 画像AIテストリンク */}
                     <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                      <span>💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / 2 Photos: {FEATURE_COSTS.multiImageAi} cr</span>
+                      <span>💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr</span>
                       <button
                         type="button"
                         onClick={handleRequestImageAiFeature}

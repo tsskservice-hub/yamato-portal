@@ -3,7 +3,7 @@
  * @description ヤマトAI 独立APIテスト画面（絵で説明ヤマト・虹色テーマ対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
-import { useSearchParams } from "@remix-run/react";
+import { Link, useSearchParams } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { YamatoChatCommon } from "../components/YamatoChatCommon";
 
@@ -29,7 +29,7 @@ type AppType =
 type AppConfig = {
   name: string;
   greeting: string;
-  themeColor: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | "rainbow"; // 💡 rainbow追加
+  themeColor: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | "rainbow"; // 💡 rainbow対応
   apiSourceFile: string;
   targetAudience: string;
   buttonStyle: {
@@ -47,6 +47,7 @@ type AppConfig = {
 export default function TestYamatoPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const tokenQuery = token ? `?token=${token}` : "";
 
   const SECRET_TOKEN = "tssk224";
 
@@ -109,7 +110,7 @@ export default function TestYamatoPage() {
     concierge: {
       name: "やまと先生",
       greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
-      themeColor: "red", // 💡 やまと先生（赤）
+      themeColor: "red",
       apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
       targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
       buttonStyle: { border: "2px solid #ef4444", background: "#ffffff", color: "#000000" },
@@ -118,7 +119,7 @@ export default function TestYamatoPage() {
     "game-igo": {
       name: "囲碁ヤマト",
       greeting: "こんにちは！囲碁AIヤマトです。一局打ってみましょうか？それともルールや定石について質問しますか？",
-      themeColor: "black", // 💡 囲碁ヤマト（黒）
+      themeColor: "black",
       apiSourceFile: "game-igo.ts (経由: FoundationLayout.ts)",
       targetAudience: "囲碁に興味のある日本語学習者",
       buttonStyle: { border: "2px solid #ffffff", background: "#000000", color: "#ffffff" },
@@ -127,7 +128,7 @@ export default function TestYamatoPage() {
     "genkoyoshi-editor-general": {
       name: "原稿用紙エディター (一般)",
       greeting: "こんにちは！一般向け原稿用紙エディターです。日本語の文章構成や推敲をサポートします。",
-      themeColor: "blue", // 💡 原稿用紙一般（青）
+      themeColor: "blue",
       apiSourceFile: "genkoyoshi-editor-general.ts (経由: FoundationLayout.ts)",
       targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
       buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
@@ -136,7 +137,7 @@ export default function TestYamatoPage() {
     "genkoyoshi-editor-vce": {
       name: "原稿用紙エディター (VCE)",
       greeting: "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards.",
-      themeColor: "blue", // 💡 原稿用紙VCE（青）
+      themeColor: "blue",
       apiSourceFile: "genkoyoshi-editor-vce.ts (経由: FoundationLayout.ts)",
       targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
       buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
@@ -145,7 +146,7 @@ export default function TestYamatoPage() {
     "eoy-oral-drill": {
       name: "EOY Oral Drill",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Drill practice session! Let's sharpen your speaking skills.",
-      themeColor: "green", // 💡 Oral Drill（緑）
+      themeColor: "green",
       apiSourceFile: "eoy-oral-drill.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
       buttonStyle: { border: "2px solid #eab308", background: "#dcfce7", color: "#000000" },
@@ -154,7 +155,7 @@ export default function TestYamatoPage() {
     "eoy-oral-elaborate": {
       name: "EOY Oral Elaborate",
       greeting: "Hello, my friend! 🌟 Welcome to the EOY Oral Elaborate session. Let's dive deeper into your detailed study and responses.",
-      themeColor: "purple", // 💡 Oral Elaborate（紫）
+      themeColor: "purple",
       apiSourceFile: "eoy-oral-elaborate.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
       buttonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "#000000" },
@@ -163,7 +164,7 @@ export default function TestYamatoPage() {
     "eoy-oral-mock": {
       name: "EOY Oral Mock Exam",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Mock Exam. Ready to simulate the real exam experience?",
-      themeColor: "pink", // 💡 Oral Mock（ピンク）
+      themeColor: "pink",
       apiSourceFile: "eoy-oral-mock.ts (経由: FoundationLayout.ts)",
       targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
       buttonStyle: { border: "2px solid #ef4444", background: "#3b82f6", color: "#ffffff" },
@@ -172,7 +173,7 @@ export default function TestYamatoPage() {
     "eoy-writing": {
       name: "VCE Writing Practice",
       greeting: "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills.",
-      themeColor: "cyan", // 💡 VCE Writing（水色）
+      themeColor: "cyan",
       apiSourceFile: "eoy-writing.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE期末ライティング試験対策を行う生徒",
       buttonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "#000000" },
@@ -181,7 +182,7 @@ export default function TestYamatoPage() {
     "oral-exam-questions": {
       name: "語彙文法チェッカー",
       greeting: "Hello, my friend! 🌟 Welcome to the Vocabulary & Grammar Checker. What expressions or sentences would you like to check today?",
-      themeColor: "orange", // 💡 語彙文法チェッカー（オレンジ）
+      themeColor: "orange",
       apiSourceFile: "oral-exam-questions.ts (経由: FoundationLayout.ts)",
       targetAudience: "VCE日本語の語彙や文法を確認したい生徒・教員",
       buttonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "#000000" },
@@ -190,7 +191,7 @@ export default function TestYamatoPage() {
     "image-explanation": {
       name: "絵で説明ヤマト",
       greeting: "Hello, my friend! 🎨 Welcome to Image Explanation Yamato. Ask me anything about Japanese culture, customs, or vocabulary, and I will generate vivid visual illustrations to explain it!",
-      themeColor: "rainbow", // 💡 絵で説明ヤマト（虹色）
+      themeColor: "rainbow",
       apiSourceFile: "image-explanation.ts (経由: FoundationLayout.ts & imagen-service.ts)",
       targetAudience: "日本語や日本文化を視覚的な図解・イラストで学びたい全学習者",
       buttonStyle: { border: "2px solid #ec4899", background: "linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6)", color: "#ffffff" },
@@ -206,6 +207,29 @@ export default function TestYamatoPage() {
       {/* メインコンテンツ（上下フルワイド配置） */}
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
+        {/* 💡 最上部に配置した test-yamato-note への遷移リンクバナー */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "14px", padding: "14px 20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#1e40af", fontWeight: "bold" }}>
+            <span>💡</span> AIヤマト・エコシステムの仕組みやアーキテクチャ詳細を確認したいですか？
+          </div>
+          <Link
+            to={`/test-yamato-note${tokenQuery}`}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              borderRadius: "8px",
+              textDecoration: "none",
+              fontSize: "13px",
+              fontWeight: "bold",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              whiteSpace: "nowrap"
+            }}
+          >
+            📖 アーキテクチャノートを見る →
+          </Link>
+        </div>
+
         {/* 追加セクション：test-yamato.tsxで変えられるもの・変わらないもの */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h2 style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -414,196 +438,9 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* セクション2：AIヤマト・エコシステム アーキテクチャ構成表 ＆ 詳細コラム */}
-        <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
-            <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-              <span>🚀</span> AIヤマト・エコシステム 構成表 & メタデータ (プロジェクト別詳細解説)
-            </h2>
-            <span style={{ fontSize: "11px", backgroundColor: "#eff6ff", color: "#1d4ed8", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bfdbfe", fontWeight: "600" }}>
-              Live API Synced
-            </span>
-          </div>
-
-          <div style={{ maxHeight: "850px", overflowY: "auto", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "24px" }}>
-            
-            {/* 基本構成テーブル */}
-            <table style={{ width: "100%", textAlign: "left", fontSize: "14px", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid #e2e8f0", color: "#475569", backgroundColor: "#f8fafc", position: "sticky", top: 0, zIndex: 10 }}>
-                  <th style={{ padding: "12px", fontWeight: "bold", width: "25%" }}>役割・レイヤー</th>
-                  <th style={{ padding: "12px", fontWeight: "bold", width: "37.5%" }}>バックエンド (api)</th>
-                  <th style={{ padding: "12px", fontWeight: "bold", width: "37.5%" }}>フロントエンド (portal)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>土台 (機体)</td>
-                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#2563eb" }}>🚀 FoundationLayout.ts</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      すべてのプロンプトの根本的なルールやエンジンを組み立てる大元（同期データのうち全てのヤマトに必要なデータを取り込む場所）
-                    </p>
-                  </td>
-                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#94a3b8" }}>(🚀 PageLayout.tsx)</span>
-                    <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px", lineHeight: "1.4" }}>
-                      ポータル全体の共通レイアウト（※ヤマトチャット作成には直接関与しません）
-                    </p>
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>窓口・外装</td>
-                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoApiCommon.tsx</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      共通プロンプト構造やオプションを受け渡す基盤
-                    </p>
-                  </td>
-                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#9333ea" }}>🛠️ YamatoChatCommon.tsx</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      対話UIの汎用テンプレート・操縦士コックピット
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: "14px 12px", fontWeight: "bold", color: "#0f172a", verticalAlign: "top" }}>乗組員 (ひな形)</td>
-                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#d97706" }}>👨‍✈️ a-template.ts / image-explanation.ts</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>
-                      FoundationLayout のデータが内包されている YamatoApiCommon.tsx をインポートしてペルソナを記述するひな形（同期データのうち個別のヤマトに必要なデータを取り込む場所）
-                    </p>
-                  </td>
-                  <td style={{ padding: "14px 12px", verticalAlign: "top" }}>
-                    <span style={{ fontWeight: "bold", color: "#d97706" }}>👨‍✈️ YamatoChatCommon をコピーして新規作成</span>
-                    <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", lineHeight: "1.4" }}>固有の名前・テーマ・プロンプトをカスタマイズ</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* プロジェクト別詳細解説 */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              
-              {/* APIプロジェクト側コラム */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px" }}>
-                <div style={{ fontSize: "13px", fontWeight: "bold", color: "#1d4ed8", borderBottom: "2px solid #93c5fd", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span>⚙️</span> APIプロジェクト側（バックエンド / Cloudflare Workers）
-                </div>
-
-                <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#1e40af", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>🚀</span> FoundationLayout.ts (基盤エンジン)
-                  </h4>
-                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
-                    <li><strong>コア機体設計:</strong> 全ペルソナ共通のLLMシステムプロンプトの根本大元。<strong>同期データのうち全てのヤマトに必要なデータ（FAQ等）を取り込む場所</strong>として機能。</li>
-                    <li><strong>👤 命名規則管理:</strong> ユーザーニックネームが存在する場合はその名前で親しみやすく呼びかけ、未設定時は「my friend」に自動フォールバック。</li>
-                    <li><strong>🗣️ 通信・言語規則:</strong> 厳格な英語強制（AIの応答原則はすべて英語、日本語はターゲット語句や例文・漢字等の解説時のみ許可）。オーストラリア英語標準を厳守。</li>
-                  </ul>
-                </div>
-
-                <div style={{ backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#6b21a8", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>🛠️</span> YamatoApiCommon.tsx (バックエンド共通層)
-                  </h4>
-                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
-                    <li><strong>共通プロンプトインジェクション:</strong> 各ペルソナ固有のロジックに共通基盤を安全に注入するAPI層のパイプライン。</li>
-                    <li><strong>🔌 エンドポイント中継:</strong> HonoベースのCloudflare WorkersワーカーとVertex AI（Gemini）間のシームレスな通信制御。</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* yamato-portalプロジェクト側コラム */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px", backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "16px" }}>
-                <div style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", borderBottom: "2px solid #86efac", paddingBottom: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span>🌐</span> yamato-portalプロジェクト側（フロントエンド / Remix）
-                </div>
-
-                <div style={{ backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <h4 style={{ fontSize: "12px", fontWeight: "bold", color: "#92400e", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>🛠️</span> YamatoChatCommon.tsx (フロントAIウィジェット)
-                  </h4>
-                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "#334155", display: "flex", flexDirection: "column", gap: "5px", lineHeight: "1.4" }}>
-                    <li><strong>汎用対話UIコックピット:</strong> すべてのペルソナテスト画面や学習ポータルで共有される高機能AIチャットウィジェット。</li>
-                    <li><strong>🎨 多彩なテーマカラー対応:</strong> 虹色テーマを含む多彩なカラーテーマの動的切り替え。</li>
-                    <li><strong>⚡ Supabase即時DB同期:</strong> 学習ペースやクレジット残高の変更をリアルタイム同期。</li>
-                  </ul>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
-        {/* セクション3：独立した「AIヤマト・エコシステム 往来ライフサイクル & 3大ファイル連携フロー図」カード */}
-        <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
-            <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#1e3a8a", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
-              <span>🗺️</span> AIヤマト・エコシステム 往来ライフサイクル & 3大ファイル連携フロー図
-            </h2>
-            <span style={{ fontSize: "11px", backgroundColor: "#f0fdf4", color: "#166534", padding: "4px 8px", borderRadius: "6px", border: "1px solid #bbf7d0", fontWeight: "600" }}>
-              Architecture Guide
-            </span>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", fontSize: "12px", color: "#334155" }}>
-              
-              {/* 往路（往き） */}
-              <div style={{ backgroundColor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#1e40af", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span>🚀</span> 往路（往き）: 生徒の質問からAI送信まで
-                </h3>
-                <div style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "white", padding: "10px", borderRadius: "8px", border: "1px solid #dbeafe", lineHeight: "1.5" }}>
-                  [1] YamatoChatCommon.tsx (フロント)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;│ (POST /chat + appType送信)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [2] index.ts (APIサーバー / ルーター)<br/>
-                  
-                  <div style={{ backgroundColor: "#f0fdf4", border: "2px solid #22c55e", borderRadius: "8px", padding: "8px", margin: "6px 0" }}>
-                    <div style={{ fontSize: "10px", fontWeight: "bold", color: "#15803d", marginBottom: "4px" }}>
-                      ⚙️ APIプロジェクト側（バックエンド処理ブロック）
-                    </div>
-                    [3] a-template.ts 派生ファイル (各ヤマトの固有頭脳)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [4] YamatoApiCommon.tsx (共通パイプライン)<br/>
-                    &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                    [5] FoundationLayout.ts (基盤エンジン)
-                  </div>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [6] Vertex AI (Gemini) へ送信
-                </div>
-              </div>
-
-              {/* 復路（帰り） */}
-              <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#166534", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span>✨</span> 復路（帰り）: AI生成から生徒への到達まで
-                </h3>
-                <div style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "white", padding: "10px", borderRadius: "8px", border: "1px solid #dcfce7", lineHeight: "1.5" }}>
-                  [1] Vertex AI (Gemini) が回答生成<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;│<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [2] index.ts (APIサーバー後半処理)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;│ (テキスト抽出・画像生成・クレジット減算)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [3] YamatoChatCommon.tsx (フロントUI)<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
-                  [4] 生徒の目に届く（画面表示完了 🎉）
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-
       </main>
 
-      {/* 💡 YamatoChatCommon 呼び出し（虹色テーマ対応） */}
+      {/* 💡 YamatoChatCommon 呼び出し（虹色テーマ & 画像生成対応） */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig.name}

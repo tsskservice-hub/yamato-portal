@@ -1,6 +1,6 @@
 /**
  * @file vite.config.ts
- * @description Cloudflare Pages / Remix 向け正しい Vite 設定
+ * @description Cloudflare Pages / Remix 向け（rollupOptions による CommonJS 対策版）
  */
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
@@ -21,6 +21,14 @@ export default defineConfig({
   ],
   ssr: {
     target: "webworker",
-    // 💡 noExternal を削除し、外部モジュールとして正しく扱うことで node:stream のバンドルエラーを防ぐ
+    noExternal: true,
+  },
+  // 💡 追加: バンドル時の CommonJS 変換・グローバル変数補正を Rollup レベルで行う
+  build: {
+    rollupOptions: {
+      output: {
+        format: "esm",
+      },
+    },
   },
 });
