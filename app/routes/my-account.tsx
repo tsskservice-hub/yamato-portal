@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（PageLayout完全連動・クレジット履歴表示対応版）
+ * @description アカウント設定画面（デバッグログ追加版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
@@ -11,10 +11,14 @@ import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/su
 import { supabase } from "../lib/supabaseClient";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側で認証ユーザーを取得し、プロフィールとクレジット履歴を取得する
+// Loader: サーバー側で認証ユーザーを取得し、プロフィールとクレジット履歴を取得する（デバッグ出力付き）
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
+
+  console.log("=== [DEBUG] Account Loader START ===");
+  console.log("Logged-in User ID:", user?.id);
+  console.log("Logged-in User Email:", user?.email);
 
   let initialNickname = "";
   let initialPace = "normal";
@@ -31,11 +35,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   if (user) {
     // 1. プロフィールデータの取得
-    const { data: profile } = await serverSupabase
+    const { data: profile, error: profileError } = await serverSupabase
       .from("profiles")
       .select("credits, nickname, learning_pace")
       .eq("id", user.id)
       .maybeSingle();
+
+    console.log("[DEBUG] Profile fetch error:", profileError);
+    console.log("[DEBUG] Profile data found:", profile);
 
     if (profile) {
       initialCredits = (profile as any).credits ?? 10;
@@ -43,17 +50,25 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       initialPace = (profile as any).learning_pace ?? "normal";
     }
 
-    // 2. クレジット履歴 (credit_transactions) の取得（新しい順）
+    // 2. クレジット履歴 (credit_transactions) の取得
     const { data: transactions, error: txError } = await serverSupabase
       .from("credit_transactions")
       .select("id, amount, feature_used, description, created_at, expires_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
+    console.log("[DEBUG] Transactions query error:", txError);
+    console.log("[DEBUG] Transactions fetched count:", transactions?.length);
+    console.log("[DEBUG] Transactions data:", transactions);
+
     if (!txError && transactions) {
       creditTransactions = transactions;
     }
+  } else {
+    console.log("[DEBUG] No authenticated user session found in loader.");
   }
+
+  console.log("=== [DEBUG] Account Loader END ===");
 
   return json({
     user: user ? { id: user.id, email: user.email } : null,
@@ -295,7 +310,7 @@ export default function AccountSettingsRoute() {
           </div>
         </div>
 
-        {/* 💡 3. クレジット履歴セクション (新規追加) */}
+        {/* 3. クレジット履歴セクション */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
             <History className="w-5 h-5 text-blue-600" /> Credit Transactions History
