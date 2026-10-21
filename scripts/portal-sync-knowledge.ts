@@ -7,10 +7,11 @@ async function main() {
   try {
     const payload = {
       // 1. アプリ全体で汎用的なデータ
-      faqList: await import('../app/data/faq-database.ts').then((m: any) => m.default || m),
-      legalContent: await import('../app/data/legal-content.ts').then((m: any) => m.default || m),
-      pricePlans: await import('../app/data/price-plans.ts').then((m: any) => m.default || m),
-      quizzes: await import('../app/data/quizzes.ts').then((m: any) => m.default || m),
+      faqList: await import('../app/data/faq-database').then((m: any) => m.default || m),
+      legalContent: await import('../app/data/legal-content').then((m: any) => m.default || m),
+      pricePlans: await import('../app/data/price-plans').then((m: any) => m.default || m),
+      quizzes: await import('../app/data/quizzes').then((m: any) => m.default || m),
+      portalContent: await import('../app/data/portal-content').then((m: any) => m.default || m),
 
       // 2. VCE関連の教材・問題・各種リストデータ
       vceResources: {
@@ -19,25 +20,25 @@ async function main() {
         oralExamQuestions: JSON.parse(fs.readFileSync('./app/data/oral-exam-questions.json', 'utf-8')),
         writingExamQuestions: JSON.parse(fs.readFileSync('./app/data/writing-exam-questions.json', 'utf-8')),
         textTypes: JSON.parse(fs.readFileSync('./app/data/texttypes.json', 'utf-8')),
-        grammarList: await import('../app/data/vce-grammar-list.ts').then((m: any) => m.default || m),
-        writingStyles: await import('../app/data/writing-styles.ts').then((m: any) => m.default || m),
+        grammarList: await import('../app/data/vce-grammar-list').then((m: any) => m.default || m),
+        writingStyles: await import('../app/data/writing-styles').then((m: any) => m.default || m),
       },
 
       // 3. VCEの評価基準・レポート・ディスクリプター（純粋な基準データ）
       vceCriteria: {
-        eoyWrittenCriteria: await import('../app/data/vce-eoy-written-criteria.ts').then((m: any) => m.default || m),
-        eoyWrittenReport2025: await import('../app/data/vce-eoy-written-report2025.ts').then((m: any) => m.default || m),
-        eoyWrittenSpec: await import('../app/data/vce-eoy-written-spec.ts').then((m: any) => m.default || m),
-        eoyOralAdvice2026: await import('../app/data/vce-eoy-oral-advice2026.ts').then((m: any) => m.default || m),
-        eoyOralReport2025: await import('../app/data/vce-eoy-oral-report2025.ts').then((m: any) => m.default || m),
-        eoyOralSpec: await import('../app/data/vce-eoy-oral-spec.ts').then((m: any) => m.default || m),
-        oralCriteria: await import('../app/data/vce-oral-criteria.ts').then((m: any) => m.default || m),
-        u3o1Descriptor: await import('../app/data/vce-u3o1-descriptor.ts').then((m: any) => m.default || m),
-        u3o2Descriptor: await import('../app/data/vce-u3o2-descriptor.ts').then((m: any) => m.default || m),
-        u3o3Descriptor: await import('../app/data/vce-u3o3-descriptor.ts').then((m: any) => m.default || m),
-        u4o1Descriptor: await import('../app/data/vce-u4o1-descriptor.ts').then((m: any) => m.default || m),
-        u4o2Descriptor: await import('../app/data/vce-u4o2-descriptor.ts').then((m: any) => m.default || m),
-        u4o3Descriptor: await import('../app/data/vce-u4o3-descriptor.ts').then((m: any) => m.default || m),
+        eoyWrittenCriteria: await import('../app/data/vce-eoy-written-criteria').then((m: any) => m.default || m),
+        eoyWrittenReport2025: await import('../app/data/vce-eoy-written-report2025').then((m: any) => m.default || m),
+        eoyWrittenSpec: await import('../app/data/vce-eoy-written-spec').then((m: any) => m.default || m),
+        eoyOralAdvice2026: await import('../app/data/vce-eoy-oral-advice2026').then((m: any) => m.default || m),
+        eoyOralReport2025: await import('../app/data/vce-eoy-oral-report2025').then((m: any) => m.default || m),
+        eoyOralSpec: await import('../app/data/vce-eoy-oral-spec').then((m: any) => m.default || m),
+        oralCriteria: await import('../app/data/vce-oral-criteria').then((m: any) => m.default || m),
+        u3o1Descriptor: await import('../app/data/vce-u3o1-descriptor').then((m: any) => m.default || m),
+        u3o2Descriptor: await import('../app/data/vce-u3o2-descriptor').then((m: any) => m.default || m),
+        u3o3Descriptor: await import('../app/data/vce-u3o3-descriptor').then((m: any) => m.default || m),
+        u4o1Descriptor: await import('../app/data/vce-u4o1-descriptor').then((m: any) => m.default || m),
+        u4o2Descriptor: await import('../app/data/vce-u4o2-descriptor').then((m: any) => m.default || m),
+        u4o3Descriptor: await import('../app/data/vce-u4o3-descriptor').then((m: any) => m.default || m),
       }
     };
 
