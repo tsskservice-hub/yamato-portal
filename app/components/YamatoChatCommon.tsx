@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（未ログインガード・クレジット残高表示・402スマートクレジット制御・新9色テーマ・消費クレジット案内対応版）
+ * @description ヤマトAIチャットウィジェット（虹色テーマ対応・未ログインガード・クレジット残高・スマートクレジット制御版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.3.0",
-  role: "ポータル共通AIチャットウィジェット（ログインガード・クレジット管理・セッション自動検知・消費クレジット案内統合版）",
+  version: "3.4.0",
+  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知統合版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -41,8 +41,8 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "バックエンドからの ZERO_CREDITS および PARTIAL_SHORTAGE エラーをスマートにハンドリング"
     },
     {
-      featureName: "New 9 Color Themes",
-      description: "赤、青、黒、緑、黄色、オレンジ, 紫、水色、ピンクの新しい9色テーマに対応"
+      featureName: "New Theme Support (including Rainbow)",
+      description: "虹色テーマを含む多彩なカラーテーマに対応"
     },
     {
       featureName: "Image Upload & Vision Support",
@@ -61,7 +61,7 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "チャット下部にクレジット消費案内（Chat / Image）と画像AIテスト機能へのリンクを配置"
     }
   ],
-  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink"],
+  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "rainbow"],
   learningPaces: ["steady", "normal", "accelerated"]
 };
 
@@ -85,7 +85,7 @@ export type YamatoChatCommonProps = {
   systemPrompt?: string;
   appType?: "concierge" | "writing" | "oral" | "general" | string;
   defaultOpen?: boolean;
-  themeColor?: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | string;
+  themeColor?: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | "rainbow" | string;
   floatingButtonClassName?: string;
   buttonStyle?: {
     border?: string;
@@ -102,7 +102,7 @@ export type YamatoChatCommonProps = {
   onClearExternalImage?: () => void;
 };
 
-// 新9色のテーマカラーごとのスタイル定義
+// テーマカラーごとのスタイル定義（rainbow を追加）
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -239,6 +239,21 @@ const themeStyles = {
     inputRing: "focus:ring-pink-500",
     submitBtn: "bg-pink-600 hover:bg-pink-700 text-white",
   },
+  rainbow: {
+    floatingBg: "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 hover:opacity-90",
+    floatingText: "text-white",
+    floatingBorder: "border-2 border-pink-400",
+    button: "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 text-white",
+    border: "border-pink-300",
+    headerText: "text-purple-900 font-extrabold",
+    badgeBg: "bg-purple-50 border-purple-200",
+    badgeText: "text-purple-900",
+    buttonActive: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500 text-white shadow-xs",
+    buttonInactive: "text-slate-600 hover:text-purple-700",
+    userBubble: "bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-br-xs",
+    inputRing: "focus:ring-purple-500",
+    submitBtn: "bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white",
+  },
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -270,11 +285,9 @@ export function YamatoChatCommon({
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 内部で管理する実質的な userId
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
 
-  // propUserId が変更されたら同期
   useEffect(() => {
     if (propUserId) {
       setActiveUserId(propUserId);
@@ -285,7 +298,6 @@ export function YamatoChatCommon({
     setCurrentCredits(initialCredits);
   }, [initialCredits]);
 
-  // 💡 安全策：親からの `userId` が未設定の場合でも、Supabase セッションを自動検知してログイン状態を復元
   useEffect(() => {
     let isMounted = true;
 
@@ -340,7 +352,6 @@ export function YamatoChatCommon({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [internalImagePreview, setInternalImagePreview] = useState<string | null>(null);
 
-  // 外部からのプレビューがある場合はそれを優先、なければ内部のプレビューを使用
   const activeImagePreview = externalImagePreview || internalImagePreview;
 
   const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.blue;
@@ -349,7 +360,7 @@ export function YamatoChatCommon({
   
   const floatingInlineStyle = buttonStyle ? {
     border: buttonStyle.border,
-    backgroundColor: buttonStyle.background,
+    background: buttonStyle.background,
     color: buttonStyle.color,
   } : undefined;
 
@@ -430,7 +441,6 @@ export function YamatoChatCommon({
     };
   }, []);
 
-  // 💡 Supabaseから最新のクレジット残高を再取得する関数
   const refreshUserCredits = async () => {
     if (!activeUserId) return;
     try {
@@ -460,7 +470,6 @@ export function YamatoChatCommon({
     }
   };
 
-  // 💡 画像AI機能テストボタン用のハンドラー
   const handleRequestImageAiFeature = () => {
     if (!activeUserId) {
       alert("Login required");
@@ -479,7 +488,6 @@ export function YamatoChatCommon({
     e.preventDefault();
     if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
 
-    // 💡 ガード1: 未ログインの場合はチャットをブロックして認証モーダルを開く
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
       if (onOpenAuth) {
@@ -488,7 +496,6 @@ export function YamatoChatCommon({
       return;
     }
 
-    // 💡 ガード2: クレジット残高がゼロの場合の事前ブロック
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
         ...prev,
@@ -502,7 +509,6 @@ export function YamatoChatCommon({
       return;
     }
 
-    // 💡 添付画像の有無に応じたコスト計算 (画像ありなら4、なしなら2)
     const hasImage = Boolean(activeImagePreview);
     const requiredCost = hasImage ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
 
@@ -569,7 +575,6 @@ export function YamatoChatCommon({
         throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
       }
 
-      // 💡 402スマートクレジットエラーハンドリング
       if (!response.ok) {
         if (response.status === 402) {
           setIsTutorLoading(false);
@@ -646,7 +651,7 @@ export function YamatoChatCommon({
             }`}
           >
             <div className="w-full h-full flex flex-col">
-              {/* ヘッダー（クレジット残高表示対応） */}
+              {/* ヘッダー */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
@@ -733,7 +738,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* 💡 未ログイン時の新規登録・ログインガード画面 */}
+              {/* 未ログイン時の新規登録・ログインガード画面 */}
               {!activeUserId ? (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                   <div className="text-3xl">🔒</div>
@@ -800,7 +805,7 @@ export function YamatoChatCommon({
                     {isTutorLoading && (
                       <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
                         <span className="inline-block animate-spin text-sm">🤖</span>
-                        <span>Yamato is thinking & reading...</span>
+                        <span>Yamato is thinking & generating visual aid...</span>
                       </div>
                     )}
                   </div>
@@ -873,7 +878,7 @@ export function YamatoChatCommon({
                       </button>
                     </div>
 
-                    {/* 💡 消費クレジット案内 ＆ 画像AIテストリンク */}
+                    {/* 消費クレジット案内 ＆ 画像AIテストリンク */}
                     <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
                       <span>💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / 2 Photos: {FEATURE_COSTS.multiImageAi} cr</span>
                       <button
