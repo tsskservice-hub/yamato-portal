@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（デバッグログ追加版）
+ * @description アカウント設定画面（クライアントサイド・セキュア履歴取得対応版）
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
@@ -11,64 +11,29 @@ import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/su
 import { supabase } from "../lib/supabaseClient";
 import PageLayout from "../components/PageLayout";
 
-// Loader: サーバー側で認証ユーザーを取得し、プロフィールとクレジット履歴を取得する（デバッグ出力付き）
+// Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
-
-  console.log("=== [DEBUG] Account Loader START ===");
-  console.log("Logged-in User ID:", user?.id);
-  console.log("Logged-in User Email:", user?.email);
 
   let initialNickname = "";
   let initialPace = "normal";
   let initialPlan = "Free Plan";
   let initialCredits = 10;
-  let creditTransactions: Array<{
-    id: string;
-    amount: number;
-    feature_used: string | null;
-    description: string | null;
-    created_at: string;
-    expires_at: string | null;
-  }> = [];
 
   if (user) {
-    // 1. プロフィールデータの取得
-    const { data: profile, error: profileError } = await serverSupabase
+    const { data: profile } = await serverSupabase
       .from("profiles")
       .select("credits, nickname, learning_pace")
       .eq("id", user.id)
       .maybeSingle();
-
-    console.log("[DEBUG] Profile fetch error:", profileError);
-    console.log("[DEBUG] Profile data found:", profile);
 
     if (profile) {
       initialCredits = (profile as any).credits ?? 10;
       initialNickname = (profile as any).nickname ?? "";
       initialPace = (profile as any).learning_pace ?? "normal";
     }
-
-    // 2. クレジット履歴 (credit_transactions) の取得
-    const { data: transactions, error: txError } = await serverSupabase
-      .from("credit_transactions")
-      .select("id, amount, feature_used, description, created_at, expires_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    console.log("[DEBUG] Transactions query error:", txError);
-    console.log("[DEBUG] Transactions fetched count:", transactions?.length);
-    console.log("[DEBUG] Transactions data:", transactions);
-
-    if (!txError && transactions) {
-      creditTransactions = transactions;
-    }
-  } else {
-    console.log("[DEBUG] No authenticated user session found in loader.");
   }
-
-  console.log("=== [DEBUG] Account Loader END ===");
 
   return json({
     user: user ? { id: user.id, email: user.email } : null,
@@ -78,11 +43,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     nickname: initialNickname,
     learningPace: initialPace,
     createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
-    transactions: creditTransactions,
   });
 }
 
-// Action: アカウント削除処理のみサーバー側で保持
+// Action: アカウント削除処理
 export async function action({ request, context }: LoaderFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -141,16 +105,55 @@ export default function AccountSettingsRoute() {
   });
 
   const [paceInput, setPaceInput] = useState(initialData.learningPace);
-  const [userEmail] = useState(initialData.email);
+  const [userEmail, setUserEmail] = useState(initialData.email);
   const [userPlan] = useState(initialData.plan);
-  const [userCreatedAt] = useState(initialData.createdAt);
+  const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
 
   const [user, setUser] = useState<any>(rootData?.user ?? initialData.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
 
+  // 💡 クレジット履歴をクライアント側で確実に取得・保持するステート
+  const [transactions, setTransactions] = useState<Array<any>>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // 💡 クライアント側での認証セッション確認 & 履歴データの非同期フェッチ
+  useEffect(() => {
+    const fetchSessionAndTransactions = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const activeUser = session?.user ?? rootData?.user ?? initialData.user;
+
+        if (activeUser) {
+          setUser(activeUser);
+          setUserEmail(activeUser.email ?? "");
+          if (activeUser.created_at) {
+            setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
+          }
+
+          // credit_transactions テーブルから最新の履歴を取得
+          const { data: txData, error: txError } = await supabase
+            .from("credit_transactions")
+            .select("id, amount, feature_used, description, created_at, expires_at")
+            .eq("user_id", activeUser.id)
+            .order("created_at", { ascending: false });
+
+          if (!txError && txData) {
+            setTransactions(txData);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch transactions on client:", err);
+      } finally {
+        setIsLoadingTransactions(false);
+      }
+    };
+
+    fetchSessionAndTransactions();
+  }, [rootData]);
 
   useEffect(() => {
     if (rootData) {
@@ -310,7 +313,7 @@ export default function AccountSettingsRoute() {
           </div>
         </div>
 
-        {/* 3. クレジット履歴セクション */}
+        {/* 💡 3. クレジット履歴セクション (クライアント非同期取得版) */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
             <History className="w-5 h-5 text-blue-600" /> Credit Transactions History
@@ -319,7 +322,11 @@ export default function AccountSettingsRoute() {
             A complete record of all credits earned (such as daily quizzes or top-ups) and credits consumed across AI features.
           </p>
 
-          {initialData.transactions.length === 0 ? (
+          {isLoadingTransactions ? (
+            <div className="text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg animate-pulse">
+              Loading transactions history...
+            </div>
+          ) : transactions.length === 0 ? (
             <div className="text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg">
               No credit transactions recorded yet.
             </div>
@@ -335,7 +342,7 @@ export default function AccountSettingsRoute() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {initialData.transactions.map((tx) => {
+                  {transactions.map((tx) => {
                     const isPositive = tx.amount > 0;
                     const formattedDate = new Date(tx.created_at).toLocaleString("en-AU", {
                       dateStyle: "medium",
