@@ -1,11 +1,11 @@
 /**
  * @file prices.tsx
- * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版・クレジット解説付き）
+ * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版・クレジット解説＆モーダル対応）
  */
 import { useState, useEffect } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, Sparkles } from "lucide-react";
+import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, Sparkles, HelpCircle, X } from "lucide-react";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from "../data/price-plans";
 import { useRef } from "react";
@@ -22,6 +22,7 @@ export const meta: MetaFunction = () => {
 
 export default function Prices() {
   const [isSpecsOpen, setIsSpecsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
   const pageLayoutRef = useRef<PageLayoutRef>(null);
 
@@ -89,32 +90,48 @@ export default function Prices() {
               Start for free with daily credits, or top up with prepaid charge packs for intensive study.
             </p>
 
-            {/* クレジット消費ガイド ＆ まとめ割解説セクション（直書き） */}
+            {/* クレジット消費ガイド ＆ まとめ割モーダル起動トリガー */}
             <div className="max-w-xl mx-auto mt-6 p-5 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left">
-              <div className="flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200 text-sm">
-                <Coins className="w-4 h-4 text-amber-500" />
-                <span>Credit Consumption Guide</span>
-              </div>
-              <div className="space-y-2 text-slate-500 dark:text-slate-400">
-                {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
-                  <div key={idx} className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                    <span>{row.item}</span>
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                <div className="flex items-center space-x-2 font-bold text-slate-800 dark:text-slate-200 text-sm">
+                  <Coins className="w-4 h-4 text-amber-500" />
+                  <span>Credit Consumption Guide</span>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="inline-flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:underline font-semibold cursor-pointer text-[11px]"
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Why 6 credits for 2 images?</span>
+                </button>
               </div>
 
-              {/* まとめ割の理由・使い方のアピール注記 */}
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 bg-blue-50/50 dark:bg-blue-950/30 -mx-5 -mb-5 p-4 rounded-b-2xl">
-                <div className="flex items-start space-x-2 text-blue-800 dark:text-blue-200">
-                  <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="font-bold">Why 6 credits for 2 image attachments?</p>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                      For the best learning experience, students often submit <strong>"Question Photo (1)" + "Handwritten Answer Photo (1)"</strong> together. Instead of charging 8 credits separately (4 + 4), we apply a <strong>multi-image discount</strong> so you can study more affordably!
-                    </p>
-                  </div>
+              <div className="space-y-2 text-slate-500 dark:text-slate-400">
+                {/* 固定の基本項目（Text Chatは 2 credits / turn に固定） */}
+                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                  <span>Text Chat (Q&A / Vocabulary)</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">2 credits / turn</span>
                 </div>
+                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                  <span>Image Attachment (1) / Image Gen</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">4 credits</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                  <span>Image Attachments (2) [Multi-image discount]</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">6 credits</span>
+                </div>
+
+                {/* price-plans.ts からのその他のガイド項目 */}
+                {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => {
+                  // 重複を避けるためText Chatはスキップ
+                  if (row.item.toLowerCase().includes("text chat")) return null;
+                  return (
+                    <div key={idx} className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                      <span>{row.item}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -313,6 +330,47 @@ export default function Prices() {
             </div>
           </section>
         </main>
+
+        {/* --- 画像2枚で6クレジットの理由を説明するモーダル --- */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="p-2.5 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  Why 6 credits for 2 image attachments?
+                </h3>
+              </div>
+
+              <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p>
+                  For the best learning experience, students often submit <strong>"Question Photo (1)" + "Handwritten Answer Photo (1)"</strong> together.
+                </p>
+                <p>
+                  Instead of charging 8 credits separately (4 + 4), we apply a <strong>multi-image discount</strong> so you can study more affordably!
+                </p>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-md shadow-blue-600/20 cursor-pointer"
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PageLayout>
   );

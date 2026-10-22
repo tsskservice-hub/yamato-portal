@@ -281,13 +281,13 @@ export const DAILY_QUIZZES: QuizItem[] = [
     answer: 1,
     explanation: "The Shinano River is the longest river in Japan, measuring approximately 367 kilometers in length."
   },
-  {
+{
     id: "river-002",
     topic: "River",
-    question: "Which river, located in the Kanto region, has the largest catchment area of any river in Japan and flows into Tokyo Bay?",
+    question: "Which river, located in the Kanto region, has the largest catchment area of any river in Japan and flows out to the Pacific Ocean at Choshi in Chiba Prefecture after historical diversion works?",
     options: ["Sumida River", "Tone River", "Tama River", "Arakawa River"],
     answer: 1,
-    explanation: "The Tone River has the largest basin area of all rivers in Japan and is historically referred to as 'Chisaburo-ro'."
+    explanation: "The Tone River has the largest basin area of all rivers in Japan. Although it historically emptied into Tokyo Bay, major Edo-period diversion works redirected its flow eastward to empty into the Pacific Ocean at Choshi, Chiba Prefecture."
   },
   {
     id: "river-003",
