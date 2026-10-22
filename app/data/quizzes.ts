@@ -15,6 +15,36 @@ export type QuizItem = {
 };
 
 /**
+ * 💡 デイリークイズのサンプルデータリスト (DAILY_QUIZZES)
+ */
+export const DAILY_QUIZZES: QuizItem[] = [
+  {
+    id: "quiz-1",
+    topic: "Grammar",
+    question: "Which particle is used to indicate the direct object of an action in Japanese?",
+    options: ["に (ni)", "で (de)", "を (wo)", "が (ga)"],
+    answer: 2,
+    explanation: "The particle を (wo) marks the direct object of a transitive verb in a Japanese sentence."
+  },
+  {
+    id: "quiz-2",
+    topic: "Culture",
+    question: "What is the traditional Japanese art of flower arrangement called?",
+    options: ["Origami", "Ikebana", "Bonsai", "Sadou"],
+    answer: 1,
+    explanation: "Ikebana is the traditional Japanese art of flower arrangement, also known as kado."
+  },
+  {
+    id: "quiz-3",
+    topic: "Kanji",
+    question: "What is the correct reading for the kanji '学校'?",
+    options: ["がっこう (gakkou)", "せんせい (sensei)", "ともだち (tomodachi)", "きょうしつ (kyoushitsu)"],
+    answer: 0,
+    explanation: "学校 is read as がっこう (gakkou), which means 'school'."
+  }
+];
+
+/**
  * 全トピック（Supabase等から取得したクイズ配列）からランダムに1つのクイズを取得する関数
  * @param quizzes List of quiz items fetched from Supabase
  */

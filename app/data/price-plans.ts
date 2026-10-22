@@ -21,6 +21,64 @@ export interface PlanConfig {
 }
 
 /**
+ * 💡 プラン定義の追加
+ */
+export const PRICE_PLANS = {
+  free: {
+    id: "free",
+    name: "Free Plan",
+    price: "$0",
+    period: "forever",
+    priceAUD: 0,
+    regularCredits: 10,
+    bonusCredits: 0,
+    description: "Basic access with daily free credits.",
+    badge: "Free",
+    features: ["10 Free Welcome Credits", "Daily Quiz (+2 Credits)", "Community Access"],
+    ctaText: "Get Started Free"
+  },
+  starter: {
+    id: "price_starter",
+    name: "Starter Pack",
+    price: "$9",
+    period: "one-time",
+    priceAUD: 9,
+    regularCredits: 50,
+    bonusCredits: 10,
+    description: "Great for casual practice.",
+    badge: "Starter",
+    features: ["50 Credits", "Standard Support"],
+    ctaText: "Buy Starter"
+  },
+  standard: {
+    id: "price_standard",
+    name: "Standard Pack",
+    price: "$19",
+    period: "one-time",
+    priceAUD: 19,
+    regularCredits: 120,
+    bonusCredits: 30,
+    description: "Most popular for exam preparation.",
+    badge: "Most Popular",
+    features: ["120 Credits", "Priority Support", "All Tools Access"],
+    ctaText: "Buy Standard"
+  },
+  pro: {
+    id: "price_pro",
+    name: "Pro Intensivist",
+    price: "$39",
+    period: "one-time",
+    priceAUD: 39,
+    regularCredits: 300,
+    bonusCredits: 100,
+    description: "For intensive full-scale study.",
+    badge: "Pro",
+    features: ["300 Credits", "VIP Support", "Unlimited Advanced AI Access"],
+    ctaText: "Buy Pro"
+  }
+};
+
+/**
  * 💡 キャンペーンおよびボーナスクレジットの有効期限に関する共通文言の定義
  */
 export const CAMPAIGN_NOTICE = {

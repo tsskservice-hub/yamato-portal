@@ -86,7 +86,13 @@ export default function Home() {
   // 💡 ユーザーデータ取得・失効チェック関数 (fetchUserData)
   const fetchUserData = async (userId: string) => {
     try {
-      const todayStr = new Date().toISOString().split('T')[0];
+      // 💡 オーストラリア（メルボルン）の現地タイムゾーンで本日の日付 (YYYY-MM-DD) を取得
+      const todayStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Australia/Melbourne',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
 
       // 1. プロフィールデータ（残高・最終クイズ解答日）を取得
       const { data: profile, error } = await supabase
@@ -115,7 +121,7 @@ export default function Home() {
         if (expiredLogs && expiredLogs.length > 0) {
           // 期限切れになったポイントの合計
           const totalExpired = expiredLogs.reduce((sum, log) => sum + log.amount, 0);
-           
+          
           // 残高から失効分を減算（マイナスにならないようガード）
           const updatedCredits = Math.max(0, currentCredits - totalExpired);
 
@@ -181,9 +187,12 @@ export default function Home() {
 
   // 初回ロード時に一度だけランダムなクイズをセット
   useEffect(() => {
-    setCurrentQuiz(getRandomQuiz());
+    const randomQuiz = getRandomQuiz(DAILY_QUIZZES);
+    if (randomQuiz) {
+      setCurrentQuiz(randomQuiz);
+    }
   }, []);
-
+  
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
   const [chatHistory, setChatHistory] = useState<Array<{ user: string; yamato?: string }>>([]);
@@ -320,7 +329,13 @@ export default function Home() {
     setIsQuizCorrect(correct);
 
     if (correct) {
-      const todayStr = new Date().toISOString().split('T')[0]; // "2026-10-20" 形式
+      // 💡 メルボルン現地日付を取得
+      const todayStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Australia/Melbourne',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
        
       // 💡 7日後の日時（ISO文字列）を算出
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -562,421 +577,421 @@ export default function Home() {
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 pl-5">
                   Answer today's Daily Quiz to earn 2 credits, or sign up now to receive 10 welcome credits!
-                </div>
               </div>
-              <button 
-                onClick={async () => {
-                  let activeUser = user;
-                  if (!activeUser) {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    activeUser = session?.user ?? null;
-                  }
-
-                  if (!activeUser) {
-                    handleOpenAuthModal('signup');
-                  } else if (await validateFeatureCredits('textAi')) {
-                    alert("You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!");
-                  }
-                }}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
-              >
-                <span>{user ? "Chat with Yamato" : "Free Sign Up"}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
             </div>
-          </div>
-        </section>
+            <button 
+              onClick={async () => {
+                let activeUser = user;
+                if (!activeUser) {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  activeUser = session?.user ?? null;
+                }
 
-        {/* 3. Pricing & Credit Packs */}
-        <section className="space-y-12 text-center" id="pricing">
-          <div className="space-y-4 max-w-3xl mx-auto">
-            <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
-            <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
+                if (!activeUser) {
+                  handleOpenAuthModal('signup');
+                } else if (await validateFeatureCredits('textAi')) {
+                  alert("You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!");
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <span>{user ? "Chat with Yamato" : "Free Sign Up"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Pricing & Credit Packs */}
+      <section className="space-y-12 text-center" id="pricing">
+        <div className="space-y-4 max-w-3xl mx-auto">
+          <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
+          <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
                  
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
-              <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
-              <span>{CAMPAIGN_NOTICE.rawText}</span>
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
+            <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
+            <span>{CAMPAIGN_NOTICE.rawText}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+          {/* Free Plan */}
+          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICE_PLANS.free.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICE_PLANS.free.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.free.period}</span>
+              </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+                {PRICE_PLANS.free.badge}
+              </div>
+              <p className="text-xs text-slate-500">{PRICE_PLANS.free.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICE_PLANS.free.features.map((feat: string, idx: number) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
             </div>
+            <button 
+              onClick={() => handleOpenAuthModal('signup')}
+              className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              {PRICE_PLANS.free.ctaText}
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-            {/* Free Plan */}
-            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICE_PLANS.free.name}</span>
-                <div>
-                  <span className="text-4xl font-black">{PRICE_PLANS.free.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.free.period}</span>
-                </div>
-                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                  {PRICE_PLANS.free.badge}
-                </div>
-                <p className="text-xs text-slate-500">{PRICE_PLANS.free.description}</p>
-                <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICE_PLANS.free.features.map((feat: string, idx: number) => (
-                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                  ))}
-                </ul>
+          {/* Starter Pack */}
+          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.starter.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICE_PLANS.starter.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.starter.period}</span>
               </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                {PRICE_PLANS.starter.badge}
+              </div>
+              <p className="text-xs text-slate-500">{PRICE_PLANS.starter.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICE_PLANS.starter.features.map((feat: string, idx: number) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6 space-y-3">
               <button 
-                onClick={() => handleOpenAuthModal('signup')}
-                className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                onClick={() => handleCheckout(PRICE_PLANS.starter.id)} 
+                disabled={checkoutLoadingPriceId === PRICE_PLANS.starter.id}
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
               >
-                {PRICE_PLANS.free.ctaText}
+                {checkoutLoadingPriceId === PRICE_PLANS.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Buy Starter Pack</span>
               </button>
-            </div>
-
-            {/* Starter Pack */}
-            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.starter.name}</span>
-                <div>
-                  <span className="text-4xl font-black">{PRICE_PLANS.starter.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.starter.period}</span>
-                </div>
-                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                  {PRICE_PLANS.starter.badge}
-                </div>
-                <p className="text-xs text-slate-500">{PRICE_PLANS.starter.description}</p>
-                <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICE_PLANS.starter.features.map((feat: string, idx: number) => (
-                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                  ))}
-                </ul>
-              </div>
-              <div className="mt-6 space-y-3">
-                <button 
-                  onClick={() => handleCheckout(PRICE_PLANS.starter.id)} 
-                  disabled={checkoutLoadingPriceId === PRICE_PLANS.starter.id}
-                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                >
-                  {checkoutLoadingPriceId === PRICE_PLANS.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>Buy Starter Pack</span>
-                </button>
-                <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                  By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                </p>
-              </div>
-            </div>
-
-            {/* Standard Pack */}
-            <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-                Most Popular
-              </div>
-              <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.standard.name}</span>
-                <div>
-                  <span className="text-4xl font-black">{PRICE_PLANS.standard.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.standard.period}</span>
-                </div>
-                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                  {PRICE_PLANS.standard.badge}
-                </div>
-                <p className="text-xs text-slate-500">{PRICE_PLANS.standard.description}</p>
-                <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICE_PLANS.standard.features.map((feat: string, idx: number) => (
-                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                  ))}
-                </ul>
-              </div>
-              <div className="mt-6 space-y-3">
-                <button 
-                  onClick={() => handleCheckout(PRICE_PLANS.standard.id)} 
-                  disabled={checkoutLoadingPriceId === PRICE_PLANS.standard.id}
-                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                >
-                  {checkoutLoadingPriceId === PRICE_PLANS.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>Buy Standard Pack</span>
-                </button>
-                <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                  By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                </p>
-              </div>
-            </div>
-
-            {/* Pro Intensivist */}
-            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICE_PLANS.pro.name}</span>
-                <div>
-                  <span className="text-4xl font-black">{PRICE_PLANS.pro.price}</span>
-                  <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.pro.period}</span>
-                </div>
-                <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                  {PRICE_PLANS.pro.badge}
-                </div>
-                <p className="text-xs text-slate-500">{PRICE_PLANS.pro.description}</p>
-                <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                  {PRICE_PLANS.pro.features.map((feat: string, idx: number) => (
-                    <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>{feat}</span></li>
-                  ))}
-                </ul>
-              </div>
-              <div className="mt-6 space-y-3">
-                <button 
-                  onClick={() => handleCheckout(PRICE_PLANS.pro.id)} 
-                  disabled={checkoutLoadingPriceId === PRICE_PLANS.pro.id}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                >
-                  {checkoutLoadingPriceId === PRICE_PLANS.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>Buy Pro Pack</span>
-                </button>
-                <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                  By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                </p>
-              </div>
+              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+              </p>
             </div>
           </div>
 
-          <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm scroll-mt-20`}>
-            <div className="flex items-center justify-center space-x-2 font-bold mb-3">
-              <Coins className="w-4 h-4 text-amber-500" />
-              <span>Credit Consumption Guide (Max Cap Guard Active)</span>
+          {/* Standard Pack */}
+          <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
+              Most Popular
             </div>
-            <div className="space-y-2 text-slate-500">
-              {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
-                <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
-                  <span>{row.item}</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.standard.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICE_PLANS.standard.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.standard.period}</span>
+              </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                {PRICE_PLANS.standard.badge}
+              </div>
+              <p className="text-xs text-slate-500">{PRICE_PLANS.standard.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICE_PLANS.standard.features.map((feat: string, idx: number) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6 space-y-3">
+              <button 
+                onClick={() => handleCheckout(PRICE_PLANS.standard.id)} 
+                disabled={checkoutLoadingPriceId === PRICE_PLANS.standard.id}
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+              >
+                {checkoutLoadingPriceId === PRICE_PLANS.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Buy Standard Pack</span>
+              </button>
+              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+              </p>
+            </div>
+          </div>
+
+          {/* Pro Intensivist */}
+          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICE_PLANS.pro.name}</span>
+              <div>
+                <span className="text-4xl font-black">{PRICE_PLANS.pro.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.pro.period}</span>
+              </div>
+              <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
+                {PRICE_PLANS.pro.badge}
+              </div>
+              <p className="text-xs text-slate-500">{PRICE_PLANS.pro.description}</p>
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                {PRICE_PLANS.pro.features.map((feat: string, idx: number) => (
+                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>{feat}</span></li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6 space-y-3">
+              <button 
+                onClick={() => handleCheckout(PRICE_PLANS.pro.id)} 
+                disabled={checkoutLoadingPriceId === PRICE_PLANS.pro.id}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+              >
+                {checkoutLoadingPriceId === PRICE_PLANS.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Buy Pro Pack</span>
+              </button>
+              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm scroll-mt-20`}>
+          <div className="flex items-center justify-center space-x-2 font-bold mb-3">
+            <Coins className="w-4 h-4 text-amber-500" />
+            <span>Credit Consumption Guide (Max Cap Guard Active)</span>
+          </div>
+          <div className="space-y-2 text-slate-500">
+            {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
+              <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
+                <span>{row.item}</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Portal Pages Navigation Cards */}
+      <section className="space-y-12">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-extrabold tracking-tight">Portal Pages & Modules</h2>
+          <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Direct access to all specialized exam prep modules, tools, and learning spaces.</p>
+        </div>
+
+        {/* Section 1 */}
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <span className="text-2xl">🌍</span>
+            <h3 className="text-xl font-extrabold tracking-tight">Section 1: Global & General Japanese Learners</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Go (Igo) Mini Game - Card 1 (Active) */}
+            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
+              <div className="space-y-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <Gamepad2 className="w-5 h-5" />
                 </div>
-              ))}
+                <h4 className="font-bold text-base">Go (Igo) Mini Game</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                <span className="text-blue-600 font-medium">Mini Game</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/game-igo");
+                  }}
+                  className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                >
+                  <span>Play Game</span> <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
 
-        {/* 4. Portal Pages Navigation Cards */}
-        <section className="space-y-12">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-extrabold tracking-tight">Portal Pages & Modules</h2>
-            <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Direct access to all specialized exam prep modules, tools, and learning spaces.</p>
-          </div>
-
-          {/* Section 1 */}
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-              <span className="text-2xl">🌍</span>
-              <h3 className="text-xl font-extrabold tracking-tight">Section 1: Global & General Japanese Learners</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Go (Igo) Mini Game - Card 1 (Active) */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
-                <div className="space-y-4">
+            {/* Genkoyoshi Editor (General) - Card 2 (Coming Soon) */}
+            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                    <Gamepad2 className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-base">Go (Igo) Mini Game</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-blue-600 font-medium">Mini Game</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigate("/game-igo");
-                    }}
-                    className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                  >
-                    <span>Play Game</span> <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Genkoyoshi Editor (General) - Card 2 (Coming Soon) */}
-              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                      <Grid className="w-5 h-5" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                  </div>
-                  <h4 className="font-bold text-base">Genkoyoshi Editor (General)</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor with image/text AI layout analysis (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">AI Tool</span>
-                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 2 */}
-          <div className="space-y-6 pt-6">
-            <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-              <span className="text-2xl">🇦🇺🐨🦘</span>
-              <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
-                <div className="space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
                     <Grid className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-base">Genkoyoshi Editor (VCE)</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Specialized VCE manuscript editor with strict criteria check and image/text AI essay advisor (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">VCE AI Tool</span>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (await validateFeatureCredits('imageAi')) {
-                        navigate("/genkoyoshi-editor-vce");
-                      }
-                    }}
-                    className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                  >
-                    <span>Open VCE Editor</span> <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
+                <h4 className="font-bold text-base">Genkoyoshi Editor (General)</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor with image/text AI layout analysis (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
               </div>
-
-              {/* ✨ Kanji & Grammar Checker カード */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
-                <div className="space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-base">VCE Kanji & Grammar Checker</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Instantly verify unique VCE kanji and grammar patterns in your handwritten essay transcripts.</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-amber-600 font-medium">VCE Tool</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigate("/kanji-grammar-checker");
-                    }}
-                    className="text-amber-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                  >
-                    <span>Open Checker</span> <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                      <Mic className="w-5 h-5" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                  </div>
-                  <h4 className="font-bold text-base">EOY Oral Drill</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Module</span>
-                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-                      <Mic className="w-5 h-5" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                  </div>
-                  <h4 className="font-bold text-base">EOY Oral Elaboration</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Module</span>
-                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
-                      <Mic className="w-5 h-5" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                  </div>
-                  <h4 className="font-bold text-base">EOY Oral Mock Exam</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Module</span>
-                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
-                <div className="space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-base">EOY Writing Exam Tutor</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback (Req max {MAX_ESTIMATED_CREDITS.textAi} credits).</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-red-600 font-medium">VCE AI Tool</span>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (await validateFeatureCredits('textAi')) {
-                        navigate("/eoy-writing");
-                      }
-                    }}
-                    className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                  >
-                    <span>Open Writing Tutor</span> <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              {/* ✨ 新規追加された EOY Writing Custom Practice カード */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-indigo-500/50 transition-colors`}>
-                <div className="space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-base">Custom Writing Practice (External / Past Exams)</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Upload any custom past exam paper, textbook prompt, or external questions along with your answer for instant AI feedback (Zero Data Stored).</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-indigo-600 font-medium">Custom AI Tool</span>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (await validateFeatureCredits('textAi')) {
-                        navigate("/eoy-writing-custom");
-                      }
-                    }}
-                    className="text-indigo-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                  >
-                    <span>Open Custom Practice</span> <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-                  </div>
-                  <h4 className="font-bold text-base">Oral Exam Questions</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">Curated database of official and practice VCE oral examination questions with audio samples.</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Reference</span>
-                  <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-                </div>
-              </div>
+              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-medium">AI Tool</span>
+                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
             </div>
           </div>
-        </section>
+        </div>
+      </div>
 
-      </main>
+      {/* Section 2 */}
+      <div className="space-y-6 pt-6">
+        <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <span className="text-2xl">🇦🇺🐨🦘</span>
+          <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                <Grid className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-base">Genkoyoshi Editor (VCE)</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Specialized VCE manuscript editor with strict criteria check and image/text AI essay advisor (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">VCE AI Tool</span>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (await validateFeatureCredits('imageAi')) {
+                    navigate("/genkoyoshi-editor-vce");
+                  }
+                }}
+                className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+              >
+                <span>Open VCE Editor</span> <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* ✨ Kanji & Grammar Checker カード */}
+          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-base">VCE Kanji & Grammar Checker</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Instantly verify unique VCE kanji and grammar patterns in your handwritten essay transcripts.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-amber-600 font-medium">VCE Tool</span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/kanji-grammar-checker");
+                }}
+                className="text-amber-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+              >
+                <span>Open Checker</span> <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <Mic className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h4 className="font-bold text-base">EOY Oral Drill</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Module</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                  <Mic className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h4 className="font-bold text-base">EOY Oral Elaboration</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Module</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
+                  <Mic className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h4 className="font-bold text-base">EOY Oral Mock Exam</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Module</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-base">EOY Writing Exam Tutor</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback (Req max {MAX_ESTIMATED_CREDITS.textAi} credits).</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-red-600 font-medium">VCE AI Tool</span>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (await validateFeatureCredits('textAi')) {
+                    navigate("/eoy-writing");
+                  }
+                }}
+                className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+              >
+                <span>Open Writing Tutor</span> <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* ✨ 新規追加された EOY Writing Custom Practice カード */}
+          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-indigo-500/50 transition-colors`}>
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-base">Custom Writing Practice (External / Past Exams)</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Upload any custom past exam paper, textbook prompt, or external questions along with your answer for instant AI feedback (Zero Data Stored).</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-indigo-600 font-medium">Custom AI Tool</span>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (await validateFeatureCredits('textAi')) {
+                    navigate("/eoy-writing-custom");
+                  }
+                }}
+                className="text-indigo-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+              >
+                <span>Open Custom Practice</span> <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+              </div>
+              <h4 className="font-bold text-base">Oral Exam Questions</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">Curated database of official and practice VCE oral examination questions with audio samples.</p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">Reference</span>
+              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </section>
+
+    </main>
 
         {/* 🤖 右下に常駐するコンシェルジュヤマト */}
         <ChatYamatoConcierge 
