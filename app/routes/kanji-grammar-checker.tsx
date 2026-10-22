@@ -1,6 +1,6 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（PageLayout完全連動版・上戻りボタンカスタムスタイル）
+ * @description VCE Kanji & Grammar Checker 独立ページ（PageLayout完全連動版・黒い上戻りボタン削除＆ヤマトチャット追加対応）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -16,6 +16,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import PageLayout, { PageLayoutRef } from '../components/PageLayout';
+// ※ヤマトチャットの実際のパスに合わせて適宜変更してください
+import YamatoChat from '../components/ChatYamatoKanjiGrammarCheckerVce'; 
 
 // VCE Kanji List
 const VCE_KANJI_LIST = [
@@ -27,7 +29,7 @@ const VCE_GRAMMAR_LIST = [
   "しなければなりませんでした", "なければなりません", "なくてはいけません", "たくなかったです", "いたいと思っています", "にいったことがあります", "ことがある", "ことが好きじゃないです", "ことができました", "ことができます", "ことがはじまります", "ほうがいいです", "てもいいですか", "ていただけませんか", "てくださいませんか", "いでください", "かもしれません", "たのしみにしています", "にきょうみがあります", "としてしられています", "でゆう名です", "のおかげで、", "のほかに、", "だけでなく", "とchigaimasu", "にとにています", "をつうじて", "たいです", "たくないです", "たがります", "たがっている", "つもりです", "が上手です", "下手です", "やすい", "づらい", "にくい", "が好きです", "大好です", "きらいです", "ほしいです", "がいります", "分かります", "はじめました", "おえました", "に来ます", "行きます", "てしまいます", "試してみます", "みたいです", "もいいです", "はいけません", "てはだめです", "なくてもいいです", "なくてもよかったです", "べきです", "べきじゃないです", "べきでした", "ましょう", "ましょうか", "ませんか", "てください", "すぎます", "という", "などの", "ために", "あいだ", "まえに", "あとで", "からです", "ですから", "そうだです", "らしいです", "ようです", "でしょう", "だろう", "のようです", "と思います", "と言います", "んです", "られます", "といえば、", "たとえば、", "だから、", "しかし、", "また、", "そして、", "一方、", "によると、", "として", "は一番", "ことは", "ながら", "なので、", "てから、", "でから、", "から、", "ので、", "たら、", "ば、", "でも", "ても、", "けれど", "けど", "のに", "し、", "くて", "より", "など", "ほか", "て、", "ています", "でいます"
 ];
 
-// ページトップへ戻るボタン（ご指定のカスタムスタイル: 枠線は紺、背景は白、三角は紺）
+// ページトップへ戻るボタン（カスタムスタイル: 枠線は紺、背景は白、三角は紺）
 function ScrollTopButton() {
   const [visible, setVisible] = useState(false);
 
@@ -218,8 +220,9 @@ export default function KanjiGrammarCheckerPage() {
           </div>
         </main>
 
-        {/* 右下のフローティングエリア（上戻りボタン） */}
-        <aside aria-label="Scroll to top" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        {/* 右下のフローティングエリア（上戻りボタン ＆ ヤマトチャットの配置） */}
+        <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+          <YamatoChat />
           <ScrollTopButton />
         </aside>
       </div>

@@ -319,7 +319,7 @@ export default function TestYamatoPage() {
             <span>🇯🇵</span> ヤマト AI 独立APIテスト
           </h1>
           <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "12px" }}>
-            右下のチャット窓、または以下のセクション別ボタンから各ペルソナの動作テストを行えます。
+            新規ページに対するヤマトチャットを作るとき、YamatoChatCommon.tsx で必ず色などを登録する。でないと、その後PageLayoutで全てを流し込んでもらえない。
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", textAlign: "left" }}>
