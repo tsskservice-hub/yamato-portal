@@ -1266,7 +1266,7 @@ export default function UnifiedDrillMode() {
                     </div>
                   ))}
                   {isTutorLoading && (
-                    <div className="text-slate-500 italic">🤖 AI Yamato is thinking (and creating visual illustration)...</div>
+                    <div className="text-slate-500 italic">🤖 かんがえちゅう...</div>
                   )}
                 </div>
 

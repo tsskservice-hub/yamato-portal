@@ -517,7 +517,7 @@ export default function Home() {
                       isThinking && idx === chatHistory.length - 1 && (
                         <div className="p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex items-center space-x-2 shadow-xs">
                           <span className="inline-block animate-spin text-sm">🤖</span>
-                          <span className="italic font-medium animate-pulse">Yamato is thinking...</span>
+                          <span className="italic font-medium animate-pulse">かんがえちゅう...</span>
                         </div>
                       )
                     )}

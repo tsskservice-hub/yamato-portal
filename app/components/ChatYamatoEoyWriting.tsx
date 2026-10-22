@@ -667,7 +667,7 @@ export function ChatYamatoEoyWriting({
                     {isTutorLoading && (
                       <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
                         <span className="inline-block animate-spin text-sm">🤖</span>
-                        <span>Yamato is thinking & reading...</span>
+                        <span>かんがえちゅう...</span>
                       </div>
                     )}
                   </div>

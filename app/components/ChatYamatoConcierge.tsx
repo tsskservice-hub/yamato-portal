@@ -588,7 +588,7 @@ export function ChatYamatoConcierge({
                   {isTutorLoading && (
                     <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-red-50/70 border border-red-100 p-2 rounded-xl w-fit">
                       <span className="inline-block animate-spin text-sm">🤖</span>
-                      <span>Yamato-sensei is thinking & generating visual aid...</span>
+                      <span>かんがえちゅう...</span>
                     </div>
                   )}
                   </div>

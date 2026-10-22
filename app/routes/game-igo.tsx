@@ -73,7 +73,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
 
     setBoard(newBoard);
     setTurn(2);
-    setMessage('Yamato-sensei is thinking...');
+    setMessage('かんがえちゅう...');
     setIsAiThinking(true);
 
     const moveStr = `(${row + 1}, ${col + 1})`;

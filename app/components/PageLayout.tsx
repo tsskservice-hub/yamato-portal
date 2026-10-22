@@ -23,6 +23,7 @@ type PageLayoutProps = {
   isDarkMode?: boolean;
   breadcrumbTitle?: string; // 💡 個別ページでカスタム名称を指定したい場合のオプション
   scrollTopClassName?: string; // 💡 個別ページからスクロールトップボタンのスタイル/色を上書きするためのオプション
+  onSignOut?: () => void | Promise<void>; // 💡 各ルートファイルからの渡されるサインアウト処理に対応
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -33,7 +34,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   learningPace: propLearningPace, 
   isDarkMode = false,
   breadcrumbTitle,
-  scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50" // 💡 デフォルト：枠青線、三角青、背景白
+  scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50", // 💡 デフォルト：枠青線、三角青、背景白
+  onSignOut: propOnSignOut
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
@@ -147,7 +149,11 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    if (propOnSignOut) {
+      await propOnSignOut();
+    } else {
+      await supabase.auth.signOut();
+    }
     setUser(null);
     setNickname("");
   };
