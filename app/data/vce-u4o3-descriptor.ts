@@ -1,3 +1,12 @@
+/**
+ * @file vce-u4o3-descriptor.ts
+ * @description Decoupled TypeScript logic & Supabase client integration for VCE Unit 4 Outcome 3 Performance Descriptor.
+ * Stores data in Supabase 'app_knowledge' table under key: 'vce-u4o3-descriptor'.
+ */
+
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+// --- Type Definitions ---
 export interface PerformanceLevel {
   level: string;
   markRange: string;
@@ -12,56 +21,67 @@ export interface UnitOutcomeDescriptor {
   levels: PerformanceLevel[];
 }
 
-export const vceU4O3Descriptor: UnitOutcomeDescriptor = {
-  unit: "Unit 4",
-  outcome: "Outcome 3",
-  title: "Present information, concepts and ideas in evaluative or persuasive writing on an issue in Japanese.",
-  totalMarks: 15,
-  levels: [
-    {
-      level: "Very low",
-      markRange: "1–3",
-      descriptors: [
-        "Presents a very limited range of information, concepts and ideas on an issue associated with a subtopic and its cultural implications, some of which may not be relevant. Very limited Evaluative writing techniques are evident. Or Very limited Persuasive writing strategies are evident[cite: 13].",
-        "Uses a very narrow range of language (including spelling, grammar and punctuation and where relevant, script) with very limited accuracy. The language lacks clarity and uses very few writing conventions suited to the audience and purpose[cite: 13].",
-        "Ideas are disjointed with minimal sequence in the writing and for the text type. Includes a very limited use of an introduction, body and conclusion[cite: 13]."
-      ]
-    },
-    {
-      level: "Low",
-      markRange: "4–6",
-      descriptors: [
-        "Presents a limited range of relevant information, concepts and ideas on an issue associated with a subtopic and its cultural implications. Uses limited Evaluative writing techniques including identifying some different positions on the issue and identifying some relevant information to compare and draw conclusions. Or Uses limited Persuasive writing strategies including formulating a position on the issue and identifying relevant and compelling information to support it[cite: 13].",
-        "Uses a narrow range of language appropriately (including spelling, grammar and punctuation and where relevant, script) with limited accuracy and clarity. Demonstrates some writing conventions suited to the audience and purpose[cite: 13].",
-        "Some of the ideas are sequenced and organised in the writing, and for the text type. Includes some use of an introduction, body and conclusion[cite: 13]."
-      ]
-    },
-    {
-      level: "Medium",
-      markRange: "7–9",
-      descriptors: [
-        "Presents a satisfactory range of relevant information, concepts and ideas on an issue associated with a subtopic and its cultural implications. Uses Evaluative writing techniques to some effect, including identifying different positions on the issue and identifying relevant information to compare and draw conclusions. Or Uses Persuasive writing strategies to some effect, including formulating a position on the issue and identifying relevant and compelling information to support it[cite: 13].",
-        "Uses language appropriately (including spelling, grammar and punctuation and where relevant, script) with a satisfactory level of accuracy and clarity. Demonstrates sound writing conventions suited to the audience and purpose[cite: 13].",
-        "Ideas are organised and sequenced with some effectiveness within and between paragraphs and in the writing as a whole, and for the text type. Includes a satisfactory use of an introduction, body and conclusion[cite: 13]."
-      ]
-    },
-    {
-      level: "High",
-      markRange: "10–12",
-      descriptors: [
-        "Presents a broad range of detailed and relevant information, concepts and ideas on an issue associated with a subtopic and its cultural implications. Effective use of Evaluative writing techniques, including identifying different positions on the issue and identifying relevant information to compare and draw conclusions. Or Effective use of Persuasive writing strategies, including formulating a position on the issue and identifying relevant and compelling information to support it[cite: 13].",
-        "Uses a variety of language appropriately (including spelling, grammar and punctuation and where relevant, script) with a high level of accuracy and clarity. Demonstrates effective use of writing conventions suited to the audience and purpose[cite: 13].",
-        "Ideas are organised and sequenced effectively within and between paragraphs and with cohesiveness in the writing as a whole, and for the text type. Includes an effective use of an introduction, body and conclusion[cite: 13]."
-      ]
-    },
-    {
-      level: "Very high",
-      markRange: "13–15",
-      descriptors: [
-        "Presents a very broad range of detailed and highly relevant information, concepts and ideas on an issue associated with a subtopic and its cultural implications. Highly effective use of Evaluative writing techniques, including identifying different positions on the issue and identifying relevant information to compare and draw conclusions. Or Highly effective use of Persuasive writing strategies, including formulating a position on the issue and identifying relevant and compelling information to support it[cite: 13].",
-        "Uses a very broad variety of language appropriately (including spelling, grammar and punctuation and where relevant, script) and with a very high level of accuracy and clarity. Demonstrates highly effective use of writing conventions suited to the audience and purpose[cite: 13].",
-        "Ideas are organised and sequenced in a highly effective manner within and between paragraphs, achieving cohesiveness in the writing as a whole, and for the text type. Includes a highly effective use of an introduction, body and conclusion[cite: 13]."
-      ]
-    }
-  ]
-};
+export type UnitOutcomeDescriptorPayload = UnitOutcomeDescriptor;
+
+export interface AppKnowledgeRecord<T = any> {
+  id?: string;
+  key: string;
+  title: string;
+  category: string;
+  content_json: T;
+  created_at?: string;
+  updated_at?: string;
+}
+
+const KNOWLEDGE_KEY = 'vce-u4o3-descriptor';
+
+/**
+ * Fetch VCE Unit 4 Outcome 3 Performance Descriptor data from Supabase 'app_knowledge' table.
+ */
+export async function fetchUnitOutcomeDescriptor(supabaseClient: SupabaseClient): Promise<UnitOutcomeDescriptor | null> {
+  const { data, error } = await supabaseClient
+    .from('app_knowledge')
+    .select('content_json')
+    .eq('key', KNOWLEDGE_KEY)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, error);
+    return null;
+  }
+
+  return data?.content_json as UnitOutcomeDescriptor;
+}
+
+/**
+ * Upsert VCE Unit 4 Outcome 3 Performance Descriptor data to Supabase 'app_knowledge' table.
+ */
+export async function upsertUnitOutcomeDescriptor(
+  supabaseClient: SupabaseClient,
+  content: UnitOutcomeDescriptor,
+  category = 'VCE Japanese Data'
+): Promise<boolean> {
+  const { error } = await supabaseClient
+    .from('app_knowledge')
+    .upsert({
+      key: KNOWLEDGE_KEY,
+      title: 'VCE Unit 4 Outcome 3 Performance Descriptor',
+      category,
+      content_json: content,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'key' });
+
+  if (error) {
+    console.error(`Error upserting ${KNOWLEDGE_KEY} to Supabase:`, error);
+    return false;
+  }
+  return true;
+}
+
+// --- Helper & Utility Logic ---
+/**
+ * Get performance level descriptor by level name (e.g. 'Very high', 'High', etc.).
+ */
+export function getPerformanceLevel(descriptor: UnitOutcomeDescriptor, levelName: string): PerformanceLevel | null {
+  return descriptor.levels.find(l => l.level.toLowerCase() === levelName.toLowerCase()) || null;
+}
