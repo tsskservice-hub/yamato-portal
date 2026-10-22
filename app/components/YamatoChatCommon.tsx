@@ -25,12 +25,16 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.6.0",
+  version: "3.7.0",
   role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
+    },
+    {
+      featureName: "Theme-Aware Font Size Selector",
+      description: "フォントサイズ選択ボタンのアクティブ色を現在のテーマカラー（Yamato Theme）に連動"
     },
     {
       featureName: "Credits Moved Above Learning Pace",
@@ -47,10 +51,6 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Image Upload & Vision Support",
       description: "手書き答案などの画像を選択・プレビュー付きでアップロードし、AI家庭教師に画像付きで質問送信可能"
-    },
-    {
-      featureName: "Font Size Customization",
-      description: "チャット内の文字サイズを「小・中・大・特大」の4段階に動的切替可能"
     },
     {
       featureName: "Learning Pace Synchronization",
@@ -714,7 +714,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI */}
+              {/* フォントサイズ変更UI（テーマカラー連動） */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -732,8 +732,8 @@ export function YamatoChatCommon({
                       onClick={() => setChatFontSize(size.key)}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
                         chatFontSize === size.key
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-600 hover:text-blue-700"
+                          ? currentTheme.buttonActive
+                          : currentTheme.buttonInactive
                       }`}
                     >
                       {size.label}
