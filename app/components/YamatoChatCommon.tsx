@@ -25,7 +25,7 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.5.1",
+  version: "3.5.2",
   role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
   features: [
     {
@@ -58,7 +58,7 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     },
     {
       featureName: "Credit Cost & Feature Footer",
-      description: "チャット下部にクレジット消費案内（Chat / Image）を配置"
+      description: "チャット下部にクレジット消費案内（Text / Photo / Visual Aid）を配置"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "rainbow"],
@@ -879,7 +879,7 @@ export function YamatoChatCommon({
 
                     {/* 消費クレジット案内 */}
                     <div className="text-[10px] text-slate-400 px-1 text-left">
-                      💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr
+                      💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / Visual Aid: {FEATURE_COSTS.imageAi} cr
                     </div>
                   </form>
                 </>
