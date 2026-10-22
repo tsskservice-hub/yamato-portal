@@ -43,7 +43,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     ctaLink: "/",
   },
   starter: {
-    id: 'price_1UPzTeJtfpDoC5FGEK9FfWY6', // 実際のStripe Price IDに書き換えてください
+    id: 'price_1UPzTeJtfpDoC5FGEK9FfWY6',
     name: "STARTER PACK",
     price: "$10",
     period: "AUD",
@@ -59,7 +59,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     ],
   },
   standard: {
-    id: 'price_1UQ155JtfpDoC5FGR3uNtKXI', // 実際のStripe Price IDに書き換えてください
+    id: 'price_1UQ155JtfpDoC5FGR3uNtKXI',
     name: "STANDARD PACK",
     price: "$25",
     period: "AUD",
@@ -76,7 +76,7 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
     isMostPopular: true,
   },
   pro: {
-    id: 'price_1UQ164JtfpDoC5FGHJxsA4OQ', // 実際のStripe Price IDに書き換えてください
+    id: 'price_1UQ164JtfpDoC5FGHJxsA4OQ',
     name: "PRO INTENSIVIST",
     price: "$50",
     period: "AUD",
@@ -93,8 +93,11 @@ export const PRICE_PLANS: Record<string, PlanConfig> = {
   },
 };
 
+// 💡 画像の表と同じ内容にアップデートしたクレジット消費ガイド
 export const CREDIT_CONSUMPTION_GUIDE = [
-  { item: "Text Chat (Q&A / Vocabulary)", cost: "1-2 credits / turn" },
+  { item: "Text Chat (Q&A / Vocabulary)", cost: "2 credits / turn" },
+  { item: "Image Attachment (1) / Image Gen", cost: "4 credits" },
+  { item: "Image Attachments (2) [System multi-image discount]", cost: "6 credits" },
   { item: "Essay / Genkoyoshi Correctors", cost: "20-30 credits / session" },
   { item: "Oral Exam / Voice Roleplay", cost: "15-25 credits / min" },
   { item: "Mini Games & Drills", cost: "Free / 0.5 credits" },

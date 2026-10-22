@@ -736,7 +736,7 @@ export default function Home() {
             </div>
             <div className="space-y-2 text-slate-500">
               {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
-                <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5">
+                <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
                   <span>{row.item}</span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
                 </div>

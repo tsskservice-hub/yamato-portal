@@ -72,15 +72,6 @@ export default function FaqPage() {
         {/* Header Section */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-md">
           <div className="max-w-4xl mx-auto">
-            <div className="mb-4">
-              <Link 
-                to="/" 
-                className="inline-flex items-center space-x-1.5 text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full transition-all"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to Home</span>
-              </Link>
-            </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
               Frequently Asked Questions & AI Guide
             </h1>

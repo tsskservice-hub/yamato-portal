@@ -25,16 +25,6 @@ export default function PrivacyPolicy() {
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">
           
-          {/* Navigation back */}
-          <div className="mb-8">
-            <Link
-              to="/"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
-            >
-              &larr; Back to Home
-            </Link>
-          </div>
-
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
             {content.title}
           </h1>

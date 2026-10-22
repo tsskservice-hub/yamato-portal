@@ -107,28 +107,12 @@ export default function Prices() {
               </div>
 
               <div className="space-y-2 text-slate-500 dark:text-slate-400">
-                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span>Text Chat (Q&A / Vocabulary)</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">2 credits / turn</span>
-                </div>
-                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span>Image Attachment (1) / Image Gen</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">4 credits</span>
-                </div>
-                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span>Image Attachments (2) [System multi-image discount]</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">6 credits</span>
-                </div>
-
-                {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => {
-                  if (row.item.toLowerCase().includes("text chat")) return null;
-                  return (
-                    <div key={idx} className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                      <span>{row.item}</span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
-                    </div>
-                  );
-                })}
+                {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
+                  <div key={idx} className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5 last:border-0 last:pb-0">
+                    <span>{row.item}</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </section>

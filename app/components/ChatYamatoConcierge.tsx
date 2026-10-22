@@ -414,15 +414,6 @@ export function ChatYamatoConcierge({
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> 
                     {characterName}
                   </h3>
-                  {activeUserId ? (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                      🪙 {currentCredits} credits
-                    </span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                      🔒 Guest
-                    </span>
-                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -448,8 +439,22 @@ export function ChatYamatoConcierge({
                 </div>
               </div>
 
+              {/* クレジット残高表示セクション（学習ペースの上） */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-amber-800">Credits Balance</span>
+                {activeUserId ? (
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
+                    🪙 {currentCredits} credits
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    🔒 Guest
+                  </span>
+                )}
+              </div>
+
               {/* 学習ペース選択UI */}
-              <div className="bg-red-50 border border-red-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-red-900">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
@@ -615,7 +620,7 @@ export function ChatYamatoConcierge({
                     </div>
                     {/* 💡 消費クレジット案内 */}
                     <div className="text-[10px] text-slate-400 px-1 text-left">
-                      💡 Text: {FEATURE_COSTS.textAi} cr / Photo / Visual Aid: {FEATURE_COSTS.imageAi} cr
+                      💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / Visual Aid: {FEATURE_COSTS.imageAi} cr
                     </div>
                   </form>
                 </>
