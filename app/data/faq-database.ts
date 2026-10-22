@@ -25,6 +25,15 @@ export const faqList: FaqItem[] = [
     expertGuidance: `Explain the daily login bonus and credit consumption for AI interactions politely and encouragingly.`
   },
   {
+    id: "portal_credit_costs_and_discounts",
+    category: "portal_usage",
+    tags: ["credits", "pricing", "images", "discount", "chat", "generation"],
+    questionEn: "How many credits do text chats, image attachments, and image generations cost?",
+    questionJp: "How many credits do text chats, image attachments, and image generations cost?",
+    answerHtml: `Here is the credit consumption breakdown for each feature:<br><br><ul><li><strong>Text Chat:</strong> 2 credits / turn</li><li><strong>1 Image Attachment or Image Generation:</strong> 4 credits</li><li><strong>2 Image Attachments (e.g. Question Photo + Essay Photo):</strong> 6 credits</li></ul><br><em>Why 6 credits for 2 images instead of 8?</em><br>To help you study more effectively, we apply a <strong>multi-image discount</strong>. Since students frequently upload a question photo and a handwritten answer photo together, we lowered the cost from 8 credits (4 + 4) to 6 credits so you can get comprehensive feedback affordably!`,
+    expertGuidance: `Explain the exact credit costs clearly and highlight the multi-image discount rationale for sending question and answer photos together.`
+  },
+  {
     id: "portal_bug_feedback",
     category: "portal_usage",
     tags: ["bug", "feedback", "support", "issue"],
@@ -163,6 +172,7 @@ export const faqList: FaqItem[] = [
     answerHtml: "For students, <strong>emails</strong>, <strong>letters</strong>, <strong>speeches</strong>, and <strong>articles</strong> are generally easier choices. <strong>Emails</strong> and <strong>letters</strong> benefit from fixed formats like greetings and sign-offs, which help meet length requirements without needing extra body text. <strong>Speeches</strong> allow a natural, engaging tone using polite style（です、ます）, making it easier to connect with an audience. <strong>Articles</strong> are also manageable because they let you blend facts with personal insights creatively. Since these formats rely heavily on familiar phrasing and personal expression, you can write smoothly and manage the time limit much more comfortably under exam pressure.",
     expertGuidance: "Guide students on selecting student-friendly text formats with clear conventions."
   },
+  
   {
     id: "faq_011",
     category: "vce_written",
@@ -172,7 +182,7 @@ export const faqList: FaqItem[] = [
     answerHtml: "<strong>Diary entries</strong>, <strong>essays</strong>, <strong>creative stories</strong>, and <strong>reports</strong> are much more challenging. <strong>Diary entries</strong> can be difficult because reflecting on personal events naturally requires focusing on deep reflection and emotional expression rather than simple description. <strong>Essays</strong> demand strict academic structures and deep arguments under tight time limits. <strong>Creative stories</strong> require strong narrative imagination and plotting skills to avoid getting stuck. Finally, <strong>reports</strong> are the hardest because they require objective data, formal analysis, and logical proof rather than just personal opinions. Without pre-existing data or careful structural planning, these text types carry a high risk of running out of time.",
     expertGuidance: "Warn students about the advanced structural demands of diaries, essays, stories, and reports."
   },
-
+  
   // --- 4. VCE Oral Examination Related (vce_oral) ---
   {
     id: "oral_general_conversation",

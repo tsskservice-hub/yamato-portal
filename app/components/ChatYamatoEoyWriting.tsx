@@ -19,7 +19,7 @@ export interface ChatYamatoEoyWritingMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
   componentName: "ChatYamatoEoyWriting",
-  version: "3.9.0",
+  version: "3.9.1",
   role: "VCE Writing Practice専用AIチャットウィジェット（PDF出力対応）",
   features: [
     {
@@ -39,16 +39,16 @@ export const CHAT_YAMATO_EOY_WRITING_META: ChatYamatoEoyWritingMetaType = {
       description: "クレジット残高表示をチャット内上部ウィジェット群の最上部に移動"
     },
     {
+      featureName: "Theme-Aware Font Size Selector",
+      description: "フォントサイズ選択ボタンのアクティブ色をcyanテーマカラーに連動"
+    },
+    {
       featureName: "Login Guard & Auth Modal Trigger",
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
     },
     {
       featureName: "Cyan Color Theme Fixed",
       description: "VCE Writing専用の水色（cyan）テーマをデフォルト固定"
-    },
-    {
-      featureName: "Font Size Customization",
-      description: "チャット内の文字サイズを4段階に動的切替可能"
     }
   ],
   supportedThemes: ["cyan"],
@@ -568,8 +568,8 @@ export function ChatYamatoEoyWriting({
                       onClick={() => setChatFontSize(size.key)}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
                         chatFontSize === size.key
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-600 hover:text-blue-700"
+                          ? currentTheme.buttonActive
+                          : currentTheme.buttonInactive
                       }`}
                     >
                       {size.label}

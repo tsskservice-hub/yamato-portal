@@ -1,11 +1,11 @@
 /**
  * @file prices.tsx
- * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版）
+ * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版・クレジット解説付き）
  */
 import { useState, useEffect } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
+import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, Sparkles } from "lucide-react";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from "../data/price-plans";
 import { useRef } from "react";
@@ -89,8 +89,9 @@ export default function Prices() {
               Start for free with daily credits, or top up with prepaid charge packs for intensive study.
             </p>
 
-            <div className="max-w-xl mx-auto mt-6 p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left">
-              <div className="flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200">
+            {/* クレジット消費ガイド ＆ まとめ割解説セクション（直書き） */}
+            <div className="max-w-xl mx-auto mt-6 p-5 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left">
+              <div className="flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200 text-sm">
                 <Coins className="w-4 h-4 text-amber-500" />
                 <span>Credit Consumption Guide</span>
               </div>
@@ -101,6 +102,19 @@ export default function Prices() {
                     <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* まとめ割の理由・使い方のアピール注記 */}
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 bg-blue-50/50 dark:bg-blue-950/30 -mx-5 -mb-5 p-4 rounded-b-2xl">
+                <div className="flex items-start space-x-2 text-blue-800 dark:text-blue-200">
+                  <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-bold">Why 6 credits for 2 image attachments?</p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                      For the best learning experience, students often submit <strong>"Question Photo (1)" + "Handwritten Answer Photo (1)"</strong> together. Instead of charging 8 credits separately (4 + 4), we apply a <strong>multi-image discount</strong> so you can study more affordably!
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
