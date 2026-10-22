@@ -2,8 +2,8 @@
  * @file contact.tsx
  * @description お問い合わせページ（legal-content.ts 連携版・PageLayout完全連動版）
  */
-import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { MetaFunction, ActionFunctionArgs } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import { Link, useActionData, useNavigation } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { LEGAL_CONTENT } from "../data/legal-content";

@@ -4,8 +4,8 @@
  */
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json, redirect } from "@remix-run/cloudflare";
 import { UserCheck, Gauge, History, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
 import { supabase } from "../lib/supabaseClient";

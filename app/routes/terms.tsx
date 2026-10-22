@@ -2,7 +2,7 @@
  * @file terms.tsx
  * @description 利用規約ページ（legal-content.ts 連携版・PageLayout完全連動版）
  */
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { LEGAL_CONTENT } from "../data/legal-content";

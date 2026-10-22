@@ -3,7 +3,7 @@
  * @description 免責事項ページ（legal-content.ts完全データ駆動・動的マッピング版）
  */
 import { useState } from "react";
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { LEGAL_CONTENT } from "../data/legal-content";

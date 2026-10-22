@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { Link } from '@remix-run/react';
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/cloudflare";
 import { 
   Search, 
   HelpCircle, 

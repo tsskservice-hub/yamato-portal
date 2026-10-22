@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/cloudflare";
 import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from "../data/price-plans";
