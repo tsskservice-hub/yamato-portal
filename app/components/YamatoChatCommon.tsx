@@ -25,16 +25,16 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.7.0",
-  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
+  version: "3.7.1",
+  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応・入力欄フォント連動版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
     },
     {
-      featureName: "Theme-Aware Font Size Selector",
-      description: "フォントサイズ選択ボタンのアクティブ色を現在のテーマカラー（Yamato Theme）に連動"
+      featureName: "Theme-Aware Font Size Selector (Full Chat)",
+      description: "フォントサイズ選択ボタンをチャット履歴だけでなく入力スペースにも完全連動"
     },
     {
       featureName: "Credits Moved Above Learning Pace",
@@ -398,6 +398,17 @@ export function YamatoChatCommon({
       case 'lg': return 'text-base';
       case 'xl': return 'text-lg';
       default: return 'text-sm';
+    }
+  };
+
+  // 💡 入力欄やボタン用にバランスの取れたフォントサイズクラスを返す関数
+  const getInputFontSizeClass = () => {
+    switch (chatFontSize) {
+      case 'sm': return 'text-[11px]';
+      case 'base': return 'text-xs';
+      case 'lg': return 'text-sm';
+      case 'xl': return 'text-base';
+      default: return 'text-xs';
     }
   };
 
@@ -784,8 +795,8 @@ export function YamatoChatCommon({
                                     alt="User Upload"
                                     className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
                                     onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                  />
-                                </div>
+                                />
+                              </div>
                               )}
                             </div>
                           ) : (
@@ -801,7 +812,7 @@ export function YamatoChatCommon({
                                   />
                                 </div>
                               )}
-                            </div>
+                          </div>
                           )}
                         </div>
                       </div>
@@ -847,13 +858,13 @@ export function YamatoChatCommon({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
+                        className={`px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300 ${getInputFontSizeClass()}`}
                       >
                         <span>📷</span>
                         <span>{activeImagePreview ? "Change Photo" : "Upload Photo"}</span>
                       </button>
 
-                      <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
+                      <label className={`flex items-center gap-1 text-slate-600 cursor-pointer select-none ${getInputFontSizeClass()}`}>
                         <input
                           type="checkbox"
                           checked={requestVisualAid}
@@ -871,12 +882,12 @@ export function YamatoChatCommon({
                         onChange={(e) => setTutorInput(e.target.value)}
                         placeholder={activeImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
-                        className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
+                        className={`flex-grow p-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50 ${getInputFontSizeClass()}`}
                       />
                       <button
                         type="submit"
                         disabled={isTutorLoading || (!tutorInput.trim() && !activeImagePreview)}
-                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
+                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0 ${getInputFontSizeClass()}`}
                       >
                         Send
                       </button>
@@ -903,19 +914,19 @@ export function YamatoChatCommon({
           <div className="relative max-w-4xl max-h-[90vh]">
             <button
               onClick={() => setModalImageSrc(null)}
-              className="absolute -top-10 right-0 text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition cursor-pointer"
-            >
-              ✕ Close
-            </button>
-            <img
-              src={modalImageSrc}
-              alt="Enlarged View"
-              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white"
-            />
-          </div>
+            className="absolute -top-10 right-0 text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition cursor-pointer"
+          >
+            ✕ Close
+          </button>
+          <img
+            src={modalImageSrc}
+            alt="Enlarged View"
+            className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white"
+          />
+        </div>
         </div>
       )}
-    </>
+  </>
   );
 }
 
