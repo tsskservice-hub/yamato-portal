@@ -1,6 +1,6 @@
 /**
  * @file vite.config.ts
- * @description Cloudflare Pages / Remix 向け（rollupOptions による CommonJS 対策版）
+ * @description Cloudflare Pages / Remix 向け（rollupOptions による CommonJS & node:crypto 対策版）
  */
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
@@ -22,10 +22,13 @@ export default defineConfig({
   ssr: {
     target: "webworker",
     noExternal: true,
+    // 💡 追加: SSR時にも node:crypto をバンドル対象外にする
+    external: ["node:crypto", "crypto"],
   },
-  // 💡 追加: バンドル時の CommonJS 変換・グローバル変数補正を Rollup レベルで行う
   build: {
     rollupOptions: {
+      // 💡 追加: Cloudflare Workers のランタイム (nodejs_compat) に任せるため、node:crypto を外部化
+      external: ["node:crypto", "crypto"],
       output: {
         format: "esm",
       },
