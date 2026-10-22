@@ -1,6 +1,6 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（PageLayout完全連動版）
+ * @description VCE Kanji & Grammar Checker 独立ページ（PageLayout完全連動版・上戻りボタンカスタムスタイル）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -26,6 +26,40 @@ const VCE_KANJI_LIST = [
 const VCE_GRAMMAR_LIST = [
   "しなければなりませんでした", "なければなりません", "なくてはいけません", "たくなかったです", "いたいと思っています", "にいったことがあります", "ことがある", "ことが好きじゃないです", "ことができました", "ことができます", "ことがはじまります", "ほうがいいです", "てもいいですか", "ていただけませんか", "てくださいませんか", "いでください", "かもしれません", "たのしみにしています", "にきょうみがあります", "としてしられています", "でゆう名です", "のおかげで、", "のほかに、", "だけでなく", "とchigaimasu", "にとにています", "をつうじて", "たいです", "たくないです", "たがります", "たがっている", "つもりです", "が上手です", "下手です", "やすい", "づらい", "にくい", "が好きです", "大好です", "きらいです", "ほしいです", "がいります", "分かります", "はじめました", "おえました", "に来ます", "行きます", "てしまいます", "試してみます", "みたいです", "もいいです", "はいけません", "てはだめです", "なくてもいいです", "なくてもよかったです", "べきです", "べきじゃないです", "べきでした", "ましょう", "ましょうか", "ませんか", "てください", "すぎます", "という", "などの", "ために", "あいだ", "まえに", "あとで", "からです", "ですから", "そうだです", "らしいです", "ようです", "でしょう", "だろう", "のようです", "と思います", "と言います", "んです", "られます", "といえば、", "たとえば、", "だから、", "しかし、", "また、", "そして、", "一方、", "によると、", "として", "は一番", "ことは", "ながら", "なので、", "てから、", "でから、", "から、", "ので、", "たら、", "ば、", "でも", "ても、", "けれど", "けど", "のに", "し、", "くて", "より", "など", "ほか", "て、", "ています", "でいます"
 ];
+
+// ページトップへ戻るボタン（ご指定のカスタムスタイル: 枠線は紺、背景は白、三角は紺）
+function ScrollTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisible = () => {
+      if (window.scrollY > 300) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    };
+    window.addEventListener("scroll", toggleVisible);
+    return () => window.removeEventListener("scroll", toggleVisible);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={scrollToTop}
+      style={{ border: "2px solid #1e3a8a" }}
+      className="bg-white hover:bg-slate-50 text-indigo-900 w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center"
+      title="ページトップへ戻る"
+    >
+      ▲
+    </button>
+  );
+}
 
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -127,16 +161,12 @@ export default function KanjiGrammarCheckerPage() {
 
   return (
     <PageLayout ref={layoutRef}>
-      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans py-12 px-4 sm:px-6 lg:px-8 relative">
         <main className="max-w-4xl mx-auto space-y-8">
           {/* Header Card */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
-              VCE Kanji & Grammar Checker
-            </h1>
-            
             <p className="text-base text-slate-600 leading-relaxed">
-              Paste the text transcribed by your AI Tutor from the photo of your handwritten answer here to instantly check your unique VCE Kanji <span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 Yellow</span> and VCE Grammar <span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 Green</span>!
+              If you have a typed writing response, please paste it into the checker below. If you have a handwritten response, transcribe it below first, and then paste it into the checker. You can see at a glance how many unique VCE Kanji (highlighted in <span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 yellow</span>) and VCE Grammar points (highlighted in <span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 green</span>) you have used without any duplication!
             </p>
           </div>
 
@@ -187,6 +217,11 @@ export default function KanjiGrammarCheckerPage() {
             </div>
           </div>
         </main>
+
+        {/* 右下のフローティングエリア（上戻りボタン） */}
+        <aside aria-label="Scroll to top" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+          <ScrollTopButton />
+        </aside>
       </div>
     </PageLayout>
   );

@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（画像対応・クレジット仕様対応・Upload Photo & Visual Aid搭載版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（画像対応・クレジット仕様対応・Upload Photo & Visual Aid・フォントサイズ変更対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -60,6 +60,9 @@ export function ChatYamatoConcierge({
   // 💡 内部で管理する実質的な userId
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
+
+  // ★追加: フォントサイズ用のステート
+  const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
 
   // 親から渡された propUserId が更新されたら同期
   useEffect(() => {
@@ -153,6 +156,17 @@ export function ChatYamatoConcierge({
       setTutorLevel(initialLearningPace);
     }
   }, [initialLearningPace]);
+
+  // ★追加: フォントサイズに対応するTailwindクラスを返すヘルパー
+  const getFontSizeClass = () => {
+    switch (chatFontSize) {
+      case 'sm': return 'text-xs';
+      case 'base': return 'text-sm';
+      case 'lg': return 'text-base';
+      case 'xl': return 'text-lg';
+      default: return 'text-sm';
+    }
+  };
 
   // 学習ペース変更時にローカルステートと Supabase を即時更新する関数
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
@@ -474,6 +488,34 @@ export function ChatYamatoConcierge({
                 </div>
               </div>
 
+              {/* ★追加: フォントサイズ変更UI（赤系テーマ連動） */}
+              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-slate-700">Font Size</span>
+                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
+                  {(
+                    [
+                      { key: 'sm', label: '小' },
+                      { key: 'base', label: '中' },
+                      { key: 'lg', label: '大' },
+                      { key: 'xl', label: '特大' },
+                    ] as const
+                  ).map((size) => (
+                    <button
+                      key={size.key}
+                      type="button"
+                      onClick={() => setChatFontSize(size.key)}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition cursor-pointer ${
+                        chatFontSize === size.key
+                          ? "bg-red-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-red-700"
+                      }`}
+                    >
+                      {size.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* 未ログイン時のガード画面 */}
               {!activeUserId ? (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
@@ -495,8 +537,8 @@ export function ChatYamatoConcierge({
                 </div>
               ) : (
                 <>
-                  {/* チャット履歴エリア */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3">
+                  {/* チャット履歴エリア（★追加: getFontSizeClass() を適用） */}
+                  <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
                     {tutorMessages.map((msg, idx) => (
                       <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                         {msg.role === "assistant" && (
@@ -505,7 +547,7 @@ export function ChatYamatoConcierge({
                           </div>
                         )}
                         <div
-                          className={`max-w-[95%] p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
+                          className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
                             msg.role === "user"
                               ? "bg-red-600 text-white rounded-br-xs"
                               : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
@@ -524,8 +566,8 @@ export function ChatYamatoConcierge({
                                   />
                                 </div>
                               )}
-                            </div>
-                          ) : (
+                          </div>
+                        ) : (
                             <div className="space-y-2">
                               <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                               {msg.imageUrl && (
@@ -536,19 +578,19 @@ export function ChatYamatoConcierge({
                                     className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90" 
                                     onClick={() => setModalImageSrc(msg.imageUrl || null)}
                                   />
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    ))}
-                    {isTutorLoading && (
-                      <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-red-50/70 border border-red-100 p-2 rounded-xl w-fit">
-                        <span className="inline-block animate-spin text-sm">🤖</span>
-                        <span>Yamato-sensei is thinking & generating visual aid...</span>
-                      </div>
-                    )}
+                    </div>
+                  ))}
+                  {isTutorLoading && (
+                    <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-red-50/70 border border-red-100 p-2 rounded-xl w-fit">
+                      <span className="inline-block animate-spin text-sm">🤖</span>
+                      <span>Yamato-sensei is thinking & generating visual aid...</span>
+                    </div>
+                  )}
                   </div>
 
                   {/* 添付画像のプレビューバー */}
