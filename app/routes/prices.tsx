@@ -349,9 +349,7 @@ export default function Prices() {
               </div>
 
               <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                <p>
-                  For the best learning experience, students often submit <strong>"Question Photo (1)" + "Handwritten Answer Photo (1)"</strong> together.
-                </p>
+                
                 <p>
                   From a system architecture perspective, sending 2 images in <strong>1 unified request</strong> allows the AI server to process the system prompt, instructions, and context all at once, requiring far less backend overhead than sending 1 image across 2 separate requests.
                 </p>
