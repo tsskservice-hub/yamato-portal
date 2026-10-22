@@ -1,6 +1,6 @@
 /**
  * @file prices.tsx
- * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版・クレジット解説＆モーダル対応）
+ * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版・クレジット解説＆システム背景モーダル対応）
  */
 import { useState, useEffect } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -107,7 +107,6 @@ export default function Prices() {
               </div>
 
               <div className="space-y-2 text-slate-500 dark:text-slate-400">
-                {/* 固定の基本項目（Text Chatは 2 credits / turn に固定） */}
                 <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
                   <span>Text Chat (Q&A / Vocabulary)</span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">2 credits / turn</span>
@@ -117,13 +116,11 @@ export default function Prices() {
                   <span className="font-semibold text-slate-700 dark:text-slate-300">4 credits</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span>Image Attachments (2) [Multi-image discount]</span>
+                  <span>Image Attachments (2) [System multi-image discount]</span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">6 credits</span>
                 </div>
 
-                {/* price-plans.ts からのその他のガイド項目 */}
                 {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => {
-                  // 重複を避けるためText Chatはスキップ
                   if (row.item.toLowerCase().includes("text chat")) return null;
                   return (
                     <div key={idx} className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
@@ -331,7 +328,7 @@ export default function Prices() {
           </section>
         </main>
 
-        {/* --- 画像2枚で6クレジットの理由を説明するモーダル --- */}
+        {/* --- 画像2枚で6クレジットの理由（システム的背景）を説明するモーダル --- */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
@@ -356,7 +353,10 @@ export default function Prices() {
                   For the best learning experience, students often submit <strong>"Question Photo (1)" + "Handwritten Answer Photo (1)"</strong> together.
                 </p>
                 <p>
-                  Instead of charging 8 credits separately (4 + 4), we apply a <strong>multi-image discount</strong> so you can study more affordably!
+                  From a system architecture perspective, sending 2 images in <strong>1 unified request</strong> allows the AI server to process the system prompt, instructions, and context all at once, requiring far less backend overhead than sending 1 image across 2 separate requests.
+                </p>
+                <p>
+                  Therefore, instead of charging 8 credits separately (4 + 4), we pass that system efficiency back to you as a <strong>multi-image discount (6 credits)</strong> so you can study more affordably!
                 </p>
               </div>
 
