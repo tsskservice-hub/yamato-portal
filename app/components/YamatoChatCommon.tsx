@@ -25,7 +25,7 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.5.2",
+  version: "3.6.0",
   role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
   features: [
     {
@@ -33,8 +33,8 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
     },
     {
-      featureName: "Live Credit Display & Warning Badge",
-      description: "ヘッダーに現在のクレジット残高をリアルタイム表示し、不足時に警告バッジを点灯"
+      featureName: "Credits Moved Above Learning Pace",
+      description: "クレジット残高表示ブロックをLearning Paceの上の位置に移動"
     },
     {
       featureName: "Smart 402 Credit Error Handling",
@@ -656,15 +656,6 @@ export function YamatoChatCommon({
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
                   </h3>
-                  {activeUserId ? (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                      🪙 {currentCredits} credits
-                    </span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                      🔒 Guest
-                    </span>
-                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -688,6 +679,20 @@ export function YamatoChatCommon({
                     ✕ Close
                   </button>
                 </div>
+              </div>
+
+              {/* クレジット残高表示セクション（学習ペースの上） */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-amber-800">Credits Balance</span>
+                {activeUserId ? (
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
+                    🪙 {currentCredits} credits
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    🔒 Guest
+                  </span>
+                )}
               </div>
 
               {/* 学習ペース選択UI */}
