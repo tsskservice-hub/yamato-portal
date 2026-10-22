@@ -101,12 +101,18 @@ export default function Home() {
         .eq('id', userId)
         .single();
 
+      // 🔍 デバッグ用ログ：プログラムが認識している日付とDBの値をコンソールに表示
+      console.log("【Quiz Debug】算出された todayStr:", todayStr);
+      console.log("【Quiz Debug】Supabaseの last_quiz_date:", profile?.last_quiz_date);
+
       if (profile && !error) {
         let currentCredits = profile.credits ?? 10;
 
         // 💡 今日クイズ済みかどうかのチェック (1日1回限定のUI反映)
         if (profile.last_quiz_date === todayStr) {
           setHasCompletedTodayQuiz(true);
+        } else {
+          setHasCompletedTodayQuiz(false);
         }
 
         // 2. 期限切れの未処理クイズクレジットがあるかチェック＆失効処理
@@ -192,7 +198,7 @@ export default function Home() {
       setCurrentQuiz(randomQuiz);
     }
   }, []);
-  
+
   // Auto demo states for hero section
   const [currentStep, setCurrentStep] = useState(0);
   const [chatHistory, setChatHistory] = useState<Array<{ user: string; yamato?: string }>>([]);
@@ -885,7 +891,7 @@ export default function Home() {
             <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
               <span className="text-slate-400 font-medium">Module</span>
               <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-            </div>
+          </div>
           </div>
 
           <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
@@ -902,7 +908,7 @@ export default function Home() {
             <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
               <span className="text-slate-400 font-medium">Module</span>
               <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-            </div>
+          </div>
           </div>
 
           <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
@@ -919,7 +925,7 @@ export default function Home() {
             <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
               <span className="text-slate-400 font-medium">Module</span>
               <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-            </div>
+          </div>
           </div>
 
           <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
@@ -985,10 +991,10 @@ export default function Home() {
             <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
               <span className="text-slate-400 font-medium">Reference</span>
               <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-            </div>
           </div>
         </div>
       </div>
+    </div>  
       </section>
 
     </main>
