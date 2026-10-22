@@ -1,6 +1,6 @@
 /**
  * @file ChatYamatoConcierge.tsx
- * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（画像対応・クレジット仕様対応版）
+ * @description ヤマトポータル（_index.tsx）本番用のコンシェルジュヤマト専用チャットウィジェット（画像対応・クレジット仕様対応・Upload Photo & Visual Aid搭載版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient"; // ★ブラウザ用Supabaseクライアントのインポート
@@ -21,7 +21,7 @@ function sanitizeAiOutput(text: string): string {
 // 💡 機能ごとの消費クレジット定義
 const FEATURE_COSTS = {
   textAi: 2,         // 通常のテキストチャット
-  imageAi: 4,        // 画像付きチャット（1枚）
+  imageAi: 4,        // 画像付きチャット（1枚）または画像生成AI
   multiImageAi: 6,   // 画像付きチャット（2枚）
   voiceDrill: 3,     // 音声ドリル
   voiceElaborate: 4, // 音声詳細応答
@@ -55,6 +55,7 @@ export function ChatYamatoConcierge({
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // ★追加: 画像アップロード用ファイル入力の参照
 
   // 💡 内部で管理する実質的な userId
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
@@ -135,6 +136,14 @@ export function ChatYamatoConcierge({
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
+
+  // ★追加: 内部での画像選択・プレビューおよび Visual Aid チェックの状態管理
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [internalImagePreview, setInternalImagePreview] = useState<string | null>(null);
+  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
+
+  // 外部からの画像プレビューと内部選択の画像を統合
+  const activeImagePreview = externalImagePreview || internalImagePreview;
   
   // ★学習ペース用のステート
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
@@ -209,10 +218,23 @@ export function ChatYamatoConcierge({
     }
   };
 
+  // ★追加: ウィジェット内での画像選択ハンドラー
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setInternalImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // メッセージ送信処理
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !externalImagePreview) || isTutorLoading) return;
+    if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
 
     // 💡 ガード1: 未ログインの場合はチャットをブロックして認証モーダルを開く
     if (!activeUserId) {
@@ -236,14 +258,15 @@ export function ChatYamatoConcierge({
       return;
     }
 
-    // 💡 添付画像の枚数に応じたコスト計算 (1枚なら4、なしなら2)
-    const hasImage = Boolean(externalImagePreview);
-    const requiredCost = hasImage ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    // 💡 添付画像またはVisual Aidリクエストがある場合はimageAiコスト（4）を適用
+    const hasImage = Boolean(activeImagePreview);
+    const needsVisual = requestVisualAid;
+    const requiredCost = (hasImage || needsVisual) ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
 
     if (currentCredits < requiredCost) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() || "Please check this photo.", imageUrl: externalImagePreview || undefined },
+        { role: "user", content: tutorInput.trim() || "Please check this photo.", imageUrl: activeImagePreview || undefined },
         {
           role: "assistant",
           content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCost} credits). 🪙`
@@ -254,9 +277,13 @@ export function ChatYamatoConcierge({
     }
 
     const userMsg = tutorInput.trim() || (hasImage ? "Please check this attached photo." : "");
-    const imageBase64 = externalImagePreview;
+    const imageBase64 = activeImagePreview;
 
     setTutorInput("");
+    setSelectedImage(null);
+    setInternalImagePreview(null);
+    setRequestVisualAid(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
     if (onClearExternalImage) {
       onClearExternalImage();
     }
@@ -269,6 +296,10 @@ export function ChatYamatoConcierge({
     setIsTutorLoading(true);
 
     try {
+      const visualPrompt = needsVisual
+        ? `Educational instructional diagram and visual aid for Japanese language learners explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
+        : undefined;
+
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -280,6 +311,8 @@ export function ChatYamatoConcierge({
           appType: "concierge",
           userId: activeUserId,
           imageBase64: imageBase64,
+          visualPrompt: visualPrompt,
+          requestVisualAid: needsVisual,
         }),
       });
 
@@ -355,7 +388,7 @@ export function ChatYamatoConcierge({
           >
             <span>🤖</span>
             <span>{characterName}</span>
-            {externalImagePreview && (
+            {activeImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
             {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
@@ -370,7 +403,7 @@ export function ChatYamatoConcierge({
             className={`bg-white border-2 border-red-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                : "w-80 sm:w-96 h-[500px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
+                : "w-80 sm:w-96 h-[540px] min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
             }`}
           >
             <div className="w-full h-full flex flex-col">
@@ -486,7 +519,7 @@ export function ChatYamatoConcierge({
                                   />
                                 </div>
                               )}
-                          </div>
+                            </div>
                           ) : (
                             <div className="space-y-2">
                               <div dangerouslySetInnerHTML={{ __html: msg.content }} />
@@ -508,42 +541,73 @@ export function ChatYamatoConcierge({
                     {isTutorLoading && (
                       <div className="flex items-center gap-2 text-xs text-slate-600 italic mt-1 bg-red-50/70 border border-red-100 p-2 rounded-xl w-fit">
                         <span className="inline-block animate-spin text-sm">🤖</span>
-                        <span>Yamato-sensei is thinking...</span>
+                        <span>Yamato-sensei is thinking & generating visual aid...</span>
                       </div>
                     )}
                   </div>
 
-                  {/* ダッシュボードから連携された添付画像のプレビューバー */}
-                  {externalImagePreview && (
+                  {/* 添付画像のプレビューバー */}
+                  {activeImagePreview && (
                     <div className="flex items-center gap-2 bg-red-50 border border-red-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                      <img src={externalImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
-                      <span className="truncate flex-grow text-red-900 font-medium">Photo attached from Dashboard</span>
-                      {onClearExternalImage && (
-                        <button
-                          type="button"
-                          onClick={onClearExternalImage}
-                          className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      )}
+                      <img src={activeImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                      <span className="truncate flex-grow text-red-900 font-medium">Photo attached</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedImage(null);
+                          setInternalImagePreview(null);
+                          if (fileInputRef.current) fileInputRef.current.value = '';
+                          if (onClearExternalImage) onClearExternalImage();
+                        }}
+                        className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
                     </div>
                   )}
 
                   {/* 入力フォーム */}
                   <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
+                      >
+                        <span>📷</span>
+                        <span>{activeImagePreview ? "Change Photo" : "Upload Photo"}</span>
+                      </button>
+
+                      <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={requestVisualAid}
+                          onChange={(e) => setRequestVisualAid(e.target.checked)}
+                          className="rounded border-slate-300 text-red-600 focus:ring-red-500 w-3.5 h-3.5"
+                        />
+                        <span>Visual Aid</span>
+                      </label>
+                    </div>
+
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={externalImagePreview ? "Ask about attached photo..." : "Ask Yamato anything..."}
+                        placeholder={activeImagePreview ? "Ask about attached photo..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
                         className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-slate-50/50"
                       />
                       <button
                         type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !externalImagePreview)}
+                        disabled={isTutorLoading || (!tutorInput.trim() && !activeImagePreview)}
                         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
                       >
                         Send
@@ -551,7 +615,7 @@ export function ChatYamatoConcierge({
                     </div>
                     {/* 💡 消費クレジット案内 */}
                     <div className="text-[10px] text-slate-400 px-1 text-left">
-                      💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / 2 Photos: {FEATURE_COSTS.multiImageAi} cr
+                      💡 Text: {FEATURE_COSTS.textAi} cr / Photo / Visual Aid: {FEATURE_COSTS.imageAi} cr
                     </div>
                   </form>
                 </>

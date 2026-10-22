@@ -25,7 +25,7 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.5.0",
+  version: "3.5.1",
   role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
   features: [
     {
@@ -57,8 +57,8 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
     },
     {
-      featureName: "Credit Cost & Feature Test Footer",
-      description: "チャット下部にクレジット消費案内（Chat / Image）と画像AIテスト機能へのリンクを配置"
+      featureName: "Credit Cost & Feature Footer",
+      description: "チャット下部にクレジット消費案内（Chat / Image）を配置"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "rainbow"],
@@ -478,30 +478,6 @@ export function YamatoChatCommon({
     }
   };
 
-  const handleRequestImageAiFeature = async () => {
-    try {
-      const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
-      const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
-      
-      const res = await fetch(`${apiBaseUrl}/api/test-image`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: "A beautiful educational diagram of Japanese cherry blossoms" })
-      });
-      const data = await res.json() as any;
-      if (data.success && data.imageUrl) {
-        setTutorMessages(prev => [
-          ...prev,
-          { role: "assistant", content: "🎨 **[Image AI Test Successful]**\nHere is a test image generated via Vertex AI (gemini-3.1-flash-lite-image):", imageUrl: data.imageUrl }
-        ]);
-      } else {
-        alert(`Image AI Test failed: ${data.error || "Unknown error"}`);
-      }
-    } catch (err: any) {
-      alert(`Image AI Test exception: ${err.message}`);
-    }
-  };
-
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
@@ -901,16 +877,9 @@ export function YamatoChatCommon({
                       </button>
                     </div>
 
-                    {/* 消費クレジット案内 ＆ 画像AIテストリンク */}
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                      <span>💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr</span>
-                      <button
-                        type="button"
-                        onClick={handleRequestImageAiFeature}
-                        className="text-blue-600 hover:underline font-semibold cursor-pointer"
-                      >
-                        Test Image AI Check
-                      </button>
+                    {/* 消費クレジット案内 */}
+                    <div className="text-[10px] text-slate-400 px-1 text-left">
+                      💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr
                     </div>
                   </form>
                 </>
