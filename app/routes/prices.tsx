@@ -1,11 +1,11 @@
 /**
  * @file prices.tsx
- * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版・クレジット解説＆システム背景モーダル対応）
+ * @description 料金プランページ（price-plans.ts 連携版・PageLayout完全連動版・FAQ遷移対応）
  */
 import { useState, useEffect } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, Sparkles, HelpCircle, X } from "lucide-react";
+import { ShieldCheck, Check, Coins, Flame, ChevronDown, ChevronUp, SlidersHorizontal, Sparkles, HelpCircle, X, ExternalLink } from "lucide-react";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from "../data/price-plans";
 import { useRef } from "react";
@@ -328,7 +328,7 @@ export default function Prices() {
           </section>
         </main>
 
-        {/* --- 画像2枚で6クレジットの理由（システム的背景）を説明するモーダル --- */}
+        {/* --- 画像2枚で6クレジットの理由（FAQページへ誘導するモーダル） --- */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
@@ -344,21 +344,28 @@ export default function Prices() {
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
-                  Why 6 credits for 2 image attachments?
+                  Why 6 credits for 2 images?
                 </h3>
               </div>
 
               <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                
                 <p>
                   From a system architecture perspective, sending 2 images in <strong>1 unified request</strong> allows the AI server to process the system prompt, instructions, and context all at once, requiring far less backend overhead than sending 1 image across 2 separate requests.
                 </p>
                 <p>
-                  Therefore, instead of charging 8 credits separately (4 + 4), we pass that system efficiency back to you as a <strong>multi-image discount (6 credits)</strong> so you can study more affordably!
+                  Therefore, instead of charging 8 credits separately (4 + 4), we apply a <strong>multi-image discount</strong> to pass that system efficiency back to you so you can study more affordably!
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <Link
+                  to="/faq#portal_credit_costs_and_discounts"
+                  onClick={() => setIsModalOpen(false)}
+                  className="inline-flex items-center space-x-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  <span>View in FAQ page</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
                 <button
                   onClick={() => setIsModalOpen(false)}
                   className="px-5 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-md shadow-blue-600/20 cursor-pointer"
