@@ -27,39 +27,6 @@ const FEATURE_COSTS = {
   multiImageAi: 6,   // 画像付きチャット（2枚）
 };
 
-// ページトップへ戻るボタン（右下のフローティングエリアに統合）
-function ScrollTopButton() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const toggleVisible = () => {
-      if (window.scrollY > 300) {
-        setVisible(true);
-      } else {
-        setVisible(false);
-      }
-    };
-    window.addEventListener("scroll", toggleVisible);
-    return () => window.removeEventListener("scroll", toggleVisible);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  if (!visible) return null;
-
-  return (
-    <button
-      onClick={scrollToTop}
-      className="bg-slate-800 hover:bg-slate-700 text-white w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center"
-      title="ページトップへ戻る"
-    >
-      ▲
-    </button>
-  );
-}
-
 function sanitizeAiOutput(text: string): string {
   if (!text) return "";
   return text
@@ -882,10 +849,8 @@ export default function GenkoyoshiEditor() {
           </div>
         </div>
 
-        {/* 🤖 右下常駐・上戻りボタン & AIチューター常駐窓の統合エリア */}
+        {/* 🤖 右下常駐・AIチューター常駐窓の統合エリア（不要な上戻りボタンを削除） */}
         <aside aria-label="AI Tutor and Scroll" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
-          <ScrollTopButton />
-
           {!isAiTutorOpen ? (
             <button
               type="button"

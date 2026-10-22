@@ -1,6 +1,6 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（PageLayout完全連動版・黒い上戻りボタン削除＆ヤマトチャット追加対応）
+ * @description VCE Kanji & Grammar Checker 独立ページ（手書き解答の画像アップロード＆チャット連携対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -19,15 +19,9 @@ import PageLayout, { PageLayoutRef } from '../components/PageLayout';
 // ※ヤマトチャットの実際のパスに合わせて適宜変更してください
 import YamatoChat from '../components/ChatYamatoKanjiGrammarCheckerVce'; 
 
-// VCE Kanji List
-const VCE_KANJI_LIST = [
-  "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "本", "人", "回", "才", "円", "番", "春", "夏", "秋", "冬", "日", "月", "火", "水", "木", "金", "土", "曜", "年", "時", "分", "夕", "半", "午", "毎", "週", "間", "今", "先", "朝", "晩", "昼", "夜", "去", "目", "口", "耳", "手", "体", "上", "中", "下", "右", "左", "前", "後", "東", "西", "南", "北", "外", "学", "校", "英", "語", "文", "漢", "字", "勉", "強", "父", "母", "子", "家", "族", "兄", "弟", "姉", "妹", "友", "私", "男", "女", "大", "小", "好", "安", "高", "新", "古", "多", "少", "楽", "長", "近", "正", "広", "早", "明", "行", "来", "休", "出", "入", "生", "見", "思", "書", "言", "話", "読", "売", "買", "食", "飲", "知", "作", "住", "会", "使", "着", "発", "聞", "帰", "持", "待", "教", "乗", "働", "動", "歩", "終", "始", "泊", "洗", "立", "考", "習", "山", "川", "田", "花", "島", "海", "天", "雨", "雪", "牛", "魚", "馬", "犬", "京", "都", "市", "県", "州", "国", "町", "神", "寺", "駅", "店", "電", "車", "道", "旅", "赤", "青", "白", "黒", "色", "銀", "々", "何", "紙", "元", "気", "活", "社", "自", "物", "名", "方", "院", "所", "屋", "肉", "場", "飯", "洋", "和", "病", "次", "同", "仕", "事", "点"
-];
-
-// VCE Grammar List
-const VCE_GRAMMAR_LIST = [
-  "しなければなりませんでした", "なければなりません", "なくてはいけません", "たくなかったです", "いたいと思っています", "にいったことがあります", "ことがある", "ことが好きじゃないです", "ことができました", "ことができます", "ことがはじまります", "ほうがいいです", "てもいいですか", "ていただけませんか", "てくださいませんか", "いでください", "かもしれません", "たのしみにしています", "にきょうみがあります", "としてしられています", "でゆう名です", "のおかげで、", "のほかに、", "だけでなく", "とchigaimasu", "にとにています", "をつうじて", "たいです", "たくないです", "たがります", "たがっている", "つもりです", "が上手です", "下手です", "やすい", "づらい", "にくい", "が好きです", "大好です", "きらいです", "ほしいです", "がいります", "分かります", "はじめました", "おえました", "に来ます", "行きます", "てしまいます", "試してみます", "みたいです", "もいいです", "はいけません", "てはだめです", "なくてもいいです", "なくてもよかったです", "べきです", "べきじゃないです", "べきでした", "ましょう", "ましょうか", "ませんか", "てください", "すぎます", "という", "などの", "ために", "あいだ", "まえに", "あとで", "からです", "ですから", "そうだです", "らしいです", "ようです", "でしょう", "だろう", "のようです", "と思います", "と言います", "んです", "られます", "といえば、", "たとえば、", "だから、", "しかし、", "また、", "そして、", "一方、", "によると、", "として", "は一番", "ことは", "ながら", "なので、", "てから、", "でから、", "から、", "ので、", "たら、", "ば、", "でも", "ても、", "けれど", "けど", "のに", "し、", "くて", "より", "など", "ほか", "て、", "ています", "でいます"
-];
+// 外部データファイルからのインポート
+import { VCE_KANJI_LIST } from '../data/kanji-list';
+import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
 
 // ページトップへ戻るボタン（カスタムスタイル: 枠線は紺、背景は白、三角は紺）
 function ScrollTopButton() {
@@ -65,6 +59,11 @@ function ScrollTopButton() {
 
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 画像アップロード用ステート
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
   // rootData からグローバルデータを安全に取得
   const rootData = useRouteLoaderData("root") as {
@@ -75,6 +74,7 @@ export default function KanjiGrammarCheckerPage() {
 
   const user = rootData?.user ?? null;
   const credits = rootData?.credits ?? 10;
+  const nickname = rootData?.nickname ?? "";
 
   const [text, setText] = useState(
     "私は日本へ行って、日本語の勉強をたくさんしなければなりません。"
@@ -83,6 +83,19 @@ export default function KanjiGrammarCheckerPage() {
   useEffect(() => {
     document.title = "VCE Kanji & Grammar Checker | AI Yamato Portal";
   }, []);
+
+  // 画像選択時の処理
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const getHighlightedText = () => {
     let processedText = text;
@@ -172,6 +185,58 @@ export default function KanjiGrammarCheckerPage() {
             </p>
           </div>
 
+          {/* 手書き答案のアップロードセクション */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <span>📷</span> Handwriting Transcription & AI Assist
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Upload a photo of your handwritten response to transcribe it with AI Yamato.
+                </p>
+              </div>
+              <div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <span>📷</span>
+                  <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
+                </button>
+              </div>
+            </div>
+
+            {selectedImagePreview && (
+              <div className="flex items-center gap-4 bg-slate-50 border border-indigo-200 p-3 rounded-2xl">
+                <img src={selectedImagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-xl border shadow-xs" />
+                <div className="flex-grow">
+                  <div className="font-bold text-indigo-900 text-sm">Handwritten Answer Ready for AI Tutor</div>
+                  <div className="text-slate-600 text-xs">Open the chat widget below and send it to transcribe!</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedImage(null);
+                    setSelectedImagePreview(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className="text-red-600 hover:text-red-800 text-xs font-bold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition"
+                >
+                  Remove ✕
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Checker Workspace */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             <div className="space-y-2">
@@ -222,7 +287,18 @@ export default function KanjiGrammarCheckerPage() {
 
         {/* 右下のフローティングエリア（上戻りボタン ＆ ヤマトチャットの配置） */}
         <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-          <YamatoChat />
+          <YamatoChat
+            userId={user?.id}
+            userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
+            credits={credits}
+            externalImageFile={selectedImage}
+            externalImagePreview={selectedImagePreview}
+            onClearExternalImage={() => {
+              setSelectedImage(null);
+              setSelectedImagePreview(null);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }}
+          />
           <ScrollTopButton />
         </aside>
       </div>

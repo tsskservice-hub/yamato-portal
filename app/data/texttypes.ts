@@ -18,6 +18,42 @@ export type TextTypesData = Record<string, TextTypeDetail>;
 
 export type TextTypesDataPayload = TextTypesData;
 
+// --- Default Text Types Data (デフォルトエクスポート用) ---
+export const TEXT_TYPES_DATA: TextTypesData = {
+  "Speech": {
+    "title": "Speech",
+    "purpose": "To persuade, inform, or entertain an audience through spoken delivery.",
+    "structure": [
+      "Catchy opening / Greeting",
+      "Clear thesis statement",
+      "Body paragraphs with supporting arguments",
+      "Strong concluding call to action"
+    ]
+  },
+  "Journal": {
+    "title": "Journal",
+    "purpose": "To record personal thoughts, feelings, and reflections on daily experiences.",
+    "structure": [
+      "Date / Salutation",
+      "Personal tone and emotional expression",
+      "Chronological or thematic reflection",
+      "Closing personal thought"
+    ]
+  },
+  "Article": {
+    "title": "Article",
+    "purpose": "To inform and engage readers in magazines or newspapers on specific topics.",
+    "structure": [
+      "Catchy headline",
+      "Introduction outlining the main theme",
+      "Informative body sections with subheadings",
+      "Conclusion summarizing key takeaways"
+    ]
+  }
+};
+
+export default TEXT_TYPES_DATA;
+
 export interface AppKnowledgeRecord<T = any> {
   id?: string;
   key: string;

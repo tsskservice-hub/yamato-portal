@@ -19,6 +19,33 @@ export type WritingExamQuestionsData = WritingExamQuestion[];
 
 export type WritingExamQuestionsDataPayload = WritingExamQuestionsData;
 
+// --- Default Questions Data (デフォルトエクスポート用) ---
+export const WRITING_EXAM_QUESTIONS: WritingExamQuestion[] = [
+  {
+    id: 1,
+    category: "Persuasive",
+    textType: "Speech",
+    english: "Write a speech persuading your peers to adopt sustainable living practices.",
+    japanese: "持続可能な生活習慣を取り入れるよう仲間に説得するスピーチを書く。"
+  },
+  {
+    id: 2,
+    category: "Personal",
+    textType: "Journal",
+    english: "Write a journal entry reflecting on an unforgettable experience during a trip to Japan.",
+    japanese: "日本旅行中の忘れられない経験を振り返る日記を書く。"
+  },
+  {
+    id: 3,
+    category: "Informative",
+    textType: "Article",
+    english: "Write an article introducing Japanese traditional culture to Australian high school students.",
+    japanese: "オーストラリアの高校生に日本の伝統文化を紹介する記事を書く。"
+  }
+];
+
+export default WRITING_EXAM_QUESTIONS;
+
 export interface AppKnowledgeRecord<T = any> {
   id?: string;
   key: string;

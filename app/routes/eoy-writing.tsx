@@ -8,8 +8,8 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-import questionsData from "../data/writing-exam-questions.json";
-import textTypesData from "../data/texttypes.json";
+import questionsData from "../data/writing-exam-questions";
+import textTypesData from "../data/texttypes";
 
 const questions = questionsData as any[];
 const modalData: { [key: string]: any } = textTypesData;
