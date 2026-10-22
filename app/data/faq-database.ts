@@ -24,15 +24,17 @@ export const faqList: FaqItem[] = [
     answerHtml: `You can earn credits by logging into the portal daily or through special missions. Credits are used when chatting with AI Yamato or getting your essays reviewed. Check your balance at the top right of your dashboard!`,
     expertGuidance: `Explain the daily login bonus and credit consumption for AI interactions politely and encouragingly.`
   },
+  
   {
     id: "portal_credit_costs_and_discounts",
     category: "portal_usage",
     tags: ["credits", "pricing", "images", "discount", "chat", "generation"],
     questionEn: "How many credits do text chats, image attachments, and image generations cost?",
     questionJp: "How many credits do text chats, image attachments, and image generations cost?",
-    answerHtml: `Here is the credit consumption breakdown for each feature:<br><br><ul><li><strong>Text Chat:</strong> 2 credits / turn</li><li><strong>1 Image Attachment or Image Generation:</strong> 4 credits</li><li><strong>2 Image Attachments (e.g. Question Photo + Essay Photo):</strong> 6 credits</li></ul><br><em>Why 6 credits for 2 images instead of 8?</em><br>To help you study more effectively, we apply a <strong>multi-image discount</strong>. Since students frequently upload a question photo and a handwritten answer photo together, we lowered the cost from 8 credits (4 + 4) to 6 credits so you can get comprehensive feedback affordably!`,
-    expertGuidance: `Explain the exact credit costs clearly and highlight the multi-image discount rationale for sending question and answer photos together.`
+    answerHtml: `Here is the credit consumption breakdown for each feature:<br><br><ul><li><strong>Text Chat:</strong> 2 credits / turn</li><li><strong>1 Image Attachment or Image Generation:</strong> 4 credits</li><li><strong>2 Image Attachments (e.g. Question Photo + Essay Photo):</strong> 6 credits</li></ul><br><em>Why 6 credits for 2 images instead of 8?</em><br>For the best learning experience, students often submit <strong>"Question Photo (1)" + "Handwritten Answer Photo (1)"</strong> together. From a system architecture perspective, sending 2 images in 1 unified request allows the AI server to process the system prompt, instructions, and context all at once, requiring far less backend overhead than sending 1 image across 2 separate requests. Therefore, instead of charging 8 credits separately (4 + 4), we apply a <strong>multi-image discount</strong> to pass that system efficiency back to you so you can study more affordably!`,
+    expertGuidance: `Explain the exact credit costs clearly and highlight the multi-image discount rationale based on system architecture efficiency and sending question and answer photos together.`
   },
+  
   {
     id: "portal_bug_feedback",
     category: "portal_usage",
