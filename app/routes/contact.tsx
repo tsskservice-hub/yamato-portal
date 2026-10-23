@@ -111,7 +111,7 @@ export default function Contact() {
                 name="inquiryType"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 text-sm bg-white"
               >
-                {content.inquiryTypes.map((type, idx) => (
+                {content.inquiryTypes?.map((type, idx) => (
                   <option key={idx} value={type.toLowerCase().split(' ')[0]}>
                     {type}
                   </option>

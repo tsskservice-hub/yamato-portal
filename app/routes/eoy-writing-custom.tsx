@@ -8,7 +8,7 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom";
 
-import textTypesData from "../data/texttypes.json";
+import textTypesData from "../data/texttypes";
 
 const modalData: { [key: string]: any } = textTypesData;
 

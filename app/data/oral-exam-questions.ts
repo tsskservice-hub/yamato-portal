@@ -29,6 +29,38 @@ export interface OralExamQuestionsData {
 
 export type OralExamQuestionsDataPayload = OralExamQuestionsData;
 
+// --- Default Data for Default Export ---
+export const ORAL_EXAM_QUESTIONS_DATA: OralExamQuestionsData = {
+  beforeSec1: {
+    steady: [
+      { category: "Personal World", text: "自己紹介をしてください。", defaultAnswer: "はじめまして。私は..." }
+    ],
+    normal: [
+      { category: "Personal World", text: "あなたの趣味は何ですか。", defaultAnswer: "私の趣味は..." }
+    ],
+    accelerated: [
+      { category: "Personal World", text: "将来の夢について教えてください。", defaultAnswer: "将来は..." }
+    ]
+  },
+  sec1: {
+    steady: [],
+    normal: [],
+    accelerated: []
+  },
+  sec2: {
+    steady: [],
+    normal: [],
+    accelerated: []
+  },
+  afterSec2: {
+    steady: [],
+    normal: [],
+    accelerated: []
+  }
+};
+
+export default ORAL_EXAM_QUESTIONS_DATA;
+
 export interface AppKnowledgeRecord<T = any> {
   id?: string;
   key: string;

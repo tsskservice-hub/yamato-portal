@@ -34,6 +34,58 @@ export interface LegalContent {
   contact: LegalDocument;
 }
 
+// --- Legal Content Data (追加) ---
+export const LEGAL_CONTENT: LegalContent = {
+  terms: {
+    title: "Terms of Service",
+    lastUpdated: "October 2026",
+    summary: "Please read these terms carefully before using AI Yamato Portal services.",
+    sections: [
+      {
+        heading: "1. Acceptance of Terms",
+        content: "By accessing or using AI Yamato Portal, you agree to be bound by these Terms."
+      }
+    ]
+  },
+  disclaimer: {
+    title: "Disclaimer",
+    lastUpdated: "October 2026",
+    summary: "Educational and reference disclaimers for global and VCE learners.",
+    sections: [
+      {
+        heading: "General Disclaimer",
+        content: "The tools and resources provided are for educational and guidance purposes."
+      }
+    ]
+  },
+  privacy: {
+    title: "Privacy Policy",
+    lastUpdated: "October 2026",
+    summary: "How we collect, use, and protect your personal information.",
+    sections: [
+      {
+        heading: "Information Collection",
+        content: "We collect information necessary to provide personalized tutoring services."
+      }
+    ]
+  },
+  contact: {
+    title: "Contact Us",
+    lastUpdated: "October 2026",
+    summary: "Get in touch with us for inquiries, support, or feedback.",
+    sections: [
+      {
+        heading: "Get in Touch",
+        content: "You can reach out to our team for any assistance."
+      }
+    ],
+    directEmail: "support@jptutoraiyamato.com",
+    inquiryTypes: ["General Inquiry", "Technical Support", "Billing"]
+  }
+};
+
+export default LEGAL_CONTENT;
+
 /**
  * Retrieves a specific legal document (e.g., terms, disclaimer, privacy, contact) from Supabase-fetched legal content.
  * @param content The full LegalContent object retrieved from Supabase

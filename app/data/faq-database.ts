@@ -6,12 +6,36 @@
 export interface FaqItem {
   id: string;
   category: "general" | "vce_written" | "vce_oral" | "genkoyoshi" | "portal_usage";
-  tags: string[];          // Tags for search and filtering
+  tags: string[];         // Tags for search and filtering
   questionEn: string;      // English question text
   questionJp: string;      // Japanese question text (kept identical to English for uniformity)
   answerHtml: string;      // Detailed explanation displayed on the site's FAQ page (supports HTML and ruby tags)
   expertGuidance: string;  // Scoring criteria and guidance policy referenced by AI Yamato in its prompt (Backend/AI use only; hidden on frontend FAQ view)
 }
+
+// --- FAQ List Data (追加) ---
+export const faqList: FaqItem[] = [
+  {
+    id: "faq-1",
+    category: "general",
+    tags: ["portal", "yamato"],
+    questionEn: "What is AI Yamato Portal?",
+    questionJp: "What is AI Yamato Portal?",
+    answerHtml: "AI Yamato Portal is an advanced educational platform designed to support Japanese language learners globally.",
+    expertGuidance: "Provide general portal overview focusing on global and VCE support."
+  },
+  {
+    id: "faq-2",
+    category: "vce_written",
+    tags: ["vce", "writing", "kanji", "grammar"],
+    questionEn: "How does the Kanji & Grammar Checker work?",
+    questionJp: "How does the Kanji & Grammar Checker work?",
+    answerHtml: "It scans your Japanese input text and highlights unique VCE kanji and grammar patterns without duplication.",
+    expertGuidance: "Explain exact match criteria and remind users to use counts for reference only."
+  }
+];
+
+export default faqList;
 
 /**
  * Retrieves a specific FAQ item by its ID from Supabase fetched data.

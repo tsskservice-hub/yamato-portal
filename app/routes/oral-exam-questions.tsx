@@ -4,7 +4,7 @@ import { useNavigate } from "@remix-run/react";
 import { createClient } from "@supabase/supabase-js";
 
 // 🚀 モノレポ依存を排除し、app内のローカルデータファイルへ直接インポートする形に変更
-import questionDataRaw from "../data/oral-exam-questions.json";
+import questionDataRaw from "../data/oral-exam-questions";
 import PageLayout from "../components/PageLayout";
 
 export const meta: MetaFunction = () => {

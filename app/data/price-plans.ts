@@ -35,7 +35,8 @@ export const PRICE_PLANS = {
     description: "Basic access with daily free credits.",
     badge: "Free",
     features: ["10 Free Welcome Credits", "Daily Quiz (+2 Credits)", "Community Access"],
-    ctaText: "Get Started Free"
+    ctaText: "Get Started Free",
+    ctaLink: "/my-account"
   },
   starter: {
     id: "price_starter",
@@ -48,7 +49,8 @@ export const PRICE_PLANS = {
     description: "Great for casual practice.",
     badge: "Starter",
     features: ["50 Credits", "Standard Support"],
-    ctaText: "Buy Starter"
+    ctaText: "Buy Starter",
+    ctaLink: "https://gumroad.com/l/sample-starter"
   },
   standard: {
     id: "price_standard",
@@ -61,7 +63,8 @@ export const PRICE_PLANS = {
     description: "Most popular for exam preparation.",
     badge: "Most Popular",
     features: ["120 Credits", "Priority Support", "All Tools Access"],
-    ctaText: "Buy Standard"
+    ctaText: "Buy Standard",
+    ctaLink: "https://gumroad.com/l/sample-standard"
   },
   pro: {
     id: "price_pro",
@@ -74,7 +77,8 @@ export const PRICE_PLANS = {
     description: "For intensive full-scale study.",
     badge: "Pro",
     features: ["300 Credits", "VIP Support", "Unlimited Advanced AI Access"],
-    ctaText: "Buy Pro"
+    ctaText: "Buy Pro",
+    ctaLink: "https://gumroad.com/l/sample-pro"
   }
 };
 

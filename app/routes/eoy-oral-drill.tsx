@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
-import oralExamQuestionsData from "../data/oral-exam-questions.json";
+import oralExamQuestionsData from "../data/oral-exam-questions";
 import PageLayout from "../components/PageLayout";
 import { supabase } from "../lib/supabaseClient";
 

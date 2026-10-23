@@ -41,7 +41,7 @@ export default function Disclaimer() {
             
             {content.sections.map((section, idx) => {
               // セクション2（試験結果の保証について）の場合はタブ切り替えUIを挿入
-              const isExamSection = section.heading.includes("No Guarantee of Exam Results");
+              const isExamSection = section.heading?.includes("No Guarantee of Exam Results");
 
               return (
                 <section key={idx}>
