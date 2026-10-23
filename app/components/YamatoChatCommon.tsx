@@ -25,12 +25,12 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.6.0",
+  version: "3.7.0",
   role: "ポータル共通AIチャットウィジェット（完全連動上戻りボタン・左上リサイズ・root自動解決・写真切替対応版）",
   features: [
     {
       featureName: "Synchronized Scroll Top Button",
-      description: "チャットボタンと枠線・背景・文字色（三角）を完全に共有する上に戻るボタンを内包"
+      description: "チャットボタンと枠線,背景,文字色（三角）を完全に共有する上に戻るボタンを内包"
     },
     {
       featureName: "Top-Left Resizing Handle",
@@ -89,7 +89,7 @@ export type YamatoChatCommonProps = {
   userNickname?: string;
   credits?: number;
   onOpenAuth?: (mode?: 'signin' | 'signup') => void;
-  enableImageUpload?: boolean; // 💡 2: ノートのコード（写真ボタンON/OFFスイッチ）
+  enableImageUpload?: boolean;
 };
 
 // 新9色テーマごとのスタイル定義
@@ -238,7 +238,6 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-// 💡 4: さきほど表示したコード（チャットボタンと枠線・背景・文字色を完全に共有する上に戻るボタン）
 function ScrollTopButton({
   floatingClass,
   inlineStyle
@@ -293,9 +292,8 @@ export function YamatoChatCommon({
   userNickname: propNickname,
   credits: propCredits,
   onOpenAuth,
-  enableImageUpload = true, // 💡 2: ノートのコード（デフォルトは true）
+  enableImageUpload = true,
 }: YamatoChatCommonProps) {
-  // 💡 1: ノートのコード（root loader からのセッション・クレジット自動解決）
   const rootData = useRouteLoaderData("root") as RootLoaderData | undefined;
 
   const effectiveUserId = propUserId ?? rootData?.user?.id;
@@ -308,7 +306,6 @@ export function YamatoChatCommon({
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 3: さきほど表示したコード（左上ドラッグリサイズのステート管理）
   const [chatSize, setChatSize] = useState<{ width: number; height: number }>({ width: 384, height: 540 });
   const resizingRef = useRef<boolean>(false);
   const startPosRef = useRef<{ x: number; y: number; w: number; h: number }>({ x: 0, y: 0, w: 384, h: 540 });
@@ -659,7 +656,6 @@ export function YamatoChatCommon({
     <>
       <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
         
-        {/* 💡 4: ヤマトチャットボタンと完全に同じ背景・枠線・文字色（三角）を共有する上に戻るボタン */}
         <ScrollTopButton floatingClass={finalFloatingButtonClass} inlineStyle={floatingInlineStyle} />
 
         {!isAiTutorOpen ? (
@@ -683,7 +679,6 @@ export function YamatoChatCommon({
         ) : (
           <div
             ref={aiChatRef}
-            // 💡 3: 左上リサイズ用インラインスタイル（通常時は chatSize の幅・高さを反映）
             style={isAiFullscreen ? undefined : { width: `${chatSize.width}px`, height: `${chatSize.height}px` }}
             className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
@@ -700,7 +695,6 @@ export function YamatoChatCommon({
                     {characterName}
                   </h3>
                   
-                  {/* 💡 3: 左上ドラッグリサイズ用グリップボタン */}
                   {!isAiFullscreen && (
                     <button
                       type="button"
@@ -711,16 +705,6 @@ export function YamatoChatCommon({
                       <span>↖</span>
                       <span className="text-[10px]">サイズ変更</span>
                     </button>
-                  )}
-
-                  {activeUserId ? (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                      🪙 {currentCredits} credits
-                    </span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                      🔒 Guest
-                    </span>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -747,6 +731,20 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
+              {/* クレジット表示エリア（Learning Pace の上に移動） */}
+              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
+                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Account Status</span>
+                {activeUserId ? (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    🪙 {currentCredits} credits
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    🔒 Guest
+                  </span>
+                )}
+              </div>
+
               {/* 学習ペース選択UI */}
               <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
                 <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
@@ -766,7 +764,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI */}
+              {/* フォントサイズ変更UI（テーマカラー連動版） */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -784,8 +782,8 @@ export function YamatoChatCommon({
                       onClick={() => setChatFontSize(size.key)}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
                         chatFontSize === size.key
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-600 hover:text-blue-700"
+                          ? currentTheme.buttonActive
+                          : currentTheme.buttonInactive
                       }`}
                     >
                       {size.label}
@@ -888,7 +886,6 @@ export function YamatoChatCommon({
                   {/* 入力フォーム */}
                   <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                     <div className="flex items-center justify-between">
-                      {/* 💡 2: enableImageUpload が true の時だけ写真アップロードボタンを表示 */}
                       {enableImageUpload ? (
                         <>
                           <input
