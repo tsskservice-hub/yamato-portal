@@ -227,6 +227,43 @@ export default function TestYamatoNotePage() {
           </div>
         </div>
 
+        {/* 追加セクション：YamatoChatCommon から各ヤマトを作る方法 */}
+        <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
+            <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#0d9488", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+              <span>🧩</span> YamatoChatCommon から各ヤマトを作る方法（設定とロジックの分離設計）
+            </h2>
+            <span style={{ fontSize: "11px", backgroundColor: "#f0fdfa", color: "#0f766e", padding: "4px 8px", borderRadius: "6px", border: "1px solid #ccfbf1", fontWeight: "600" }}>
+              Component Architecture
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px", fontSize: "13px", color: "#334155", lineHeight: "1.6" }}>
+            <p>
+              AIヤマト・エコシステムでは、UIや通信、認証などの共通ロジックをすべて <code>YamatoChatCommon.tsx</code> に集約し、各部屋（アプリ）用のヤマトはそのラッパーとして薄いコンポーネント（例: <code>ChatYamatoConcierge.tsx</code> や <code>ChatYamatoKanjiGrammarCheckerVce.tsx</code>）を作成してページにインポートする設計をとっています。
+            </p>
+
+            <div style={{ backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>✨</span> 1. ラッパーコンポーネントの作成と配置
+              </h3>
+              <p style={{ fontSize: "12px", color: "#475569", margin: 0 }}>
+                <code>YamatoChatCommon</code> をベースにして、<code>appType</code>、<code>characterName</code>、<code>initialGreeting</code>、<code>themeColor</code> などの固有のパラメータを渡すだけのシンプルなラッパーを作成し、それを各ページのファイルでそのまま配置します。
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <h3 style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>🔧</span> 2. 機能を削除（非表示）または追加する場合の手順
+              </h3>
+              <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "12px", color: "#334155", display: "flex", flexDirection: "column", gap: "6px" }}>
+                <li><strong>機能を削除・非表示にする場合:</strong> <code>YamatoChatCommon.tsx</code> 側で切り替え用の Props（例: <code>enableImageUpload?: boolean</code> など）を用意し、各ヤマトのラッパー側から <code>enableImageUpload={false}</code> と1行指定するだけで非表示にします。</li>
+                <li><strong>固有の機能を追加する場合:</strong> <code>YamatoChatCommon.tsx</code> 側にパーツの差し込み口（スロット、例: <code>customAction?: React.ReactNode</code>）を用意しておき、各ヤマトのラッパーからそのスロットに独自のボタンやJSXを渡して拡張します。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {/* セクション4：デバッグ手法まとめ（Workers リアルタイムログ） */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", color: "#1e293b", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>

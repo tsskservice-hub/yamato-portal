@@ -16,8 +16,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import PageLayout, { PageLayoutRef } from '../components/PageLayout';
-// ※ヤマトチャットの実際のパスに合わせて適宜変更してください
-import YamatoChat from '../components/ChatYamatoKanjiGrammarCheckerVce'; 
+// 💡 YamatoChatKanjiGrammarCheckerVce をインポート
+import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGrammarCheckerVce'; 
 
 // 外部データファイルからのインポート
 import { VCE_KANJI_LIST } from '../data/kanji-list';
@@ -399,11 +399,10 @@ export default function KanjiGrammarCheckerPage() {
           </div>
         </main>
 
-        {/* 右下のフローティングエリア（上戻りボタン ＆ ヤマトチャットの配置） */}
+        {/* 右下のフローティングエリア（上戻りボタン ＆ インポートしたラッパー版ヤマトチャットの配置） */}
         <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-          <YamatoChat
+          <YamatoChatKanjiGrammarCheckerVce
             userId={activeUserId || undefined}
-            userNickname={nickname || (activeUserId ? "Student" : "Student")}
             credits={currentCredits}
           />
           
