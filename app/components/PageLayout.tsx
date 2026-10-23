@@ -460,5 +460,4 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
 PageLayout.displayName = "PageLayout";
 
-exports = PageLayout;
 export default PageLayout;
