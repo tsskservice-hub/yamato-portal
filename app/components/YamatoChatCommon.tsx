@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（虹色テーマ対応・未ログインガード・クレジット残高・スマートクレジット制御・左上リサイズ・テーマ連動上に戻るボタン内蔵版）
+ * @description ヤマトAIチャットウィジェット（虹色テーマ対応・未ログインガード・クレジット残高・スマートクレジット制御・左上リサイズ・チャットボタン完全連動上に戻るボタン内蔵版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,12 +25,12 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.9.1",
-  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応・左上リサイズ・テーマ連動上に戻るボタン内蔵）",
+  version: "3.9.3",
+  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応・左上リサイズ・完全連動上に戻るボタン内蔵）",
   features: [
     {
-      featureName: "Theme-Synchronized Scroll Top Button",
-      description: "ヤマトチャットより少し上に配置され、テーマカラーに同期する枠線を持つページトップへ戻るボタンを統合"
+      featureName: "Fully Synchronized Scroll Top Button",
+      description: "チャットボタンと背景・枠線・文字（三角）の色が完全に一致・連動するページトップへ戻るボタンを統合"
     },
     {
       featureName: "Top-Left Resize Support",
@@ -122,8 +122,6 @@ const themeStyles = {
     userBubble: "bg-red-600 text-white rounded-br-xs",
     inputRing: "focus:ring-red-500",
     submitBtn: "bg-red-600 hover:bg-red-700 text-white",
-    scrollBorder: "2px solid #dc2626", // 赤
-    scrollText: "text-red-700",
   },
   blue: {
     floatingBg: "bg-blue-600 hover:bg-blue-700",
@@ -139,8 +137,6 @@ const themeStyles = {
     userBubble: "bg-blue-600 text-white rounded-br-xs",
     inputRing: "focus:ring-blue-500",
     submitBtn: "bg-blue-600 hover:bg-blue-700 text-white",
-    scrollBorder: "2px solid #2563eb", // 青
-    scrollText: "text-blue-700",
   },
   black: {
     floatingBg: "bg-slate-900 hover:bg-black",
@@ -156,8 +152,6 @@ const themeStyles = {
     userBubble: "bg-slate-900 text-white rounded-br-xs",
     inputRing: "focus:ring-slate-900",
     submitBtn: "bg-slate-900 hover:bg-black text-white",
-    scrollBorder: "2px solid #0f172a", // 黒/スレート
-    scrollText: "text-slate-900",
   },
   green: {
     floatingBg: "bg-green-600 hover:bg-green-700",
@@ -173,8 +167,6 @@ const themeStyles = {
     userBubble: "bg-green-600 text-white rounded-br-xs",
     inputRing: "focus:ring-green-500",
     submitBtn: "bg-green-600 hover:bg-green-700 text-white",
-    scrollBorder: "2px solid #16a34a", // 緑
-    scrollText: "text-green-700",
   },
   yellow: {
     floatingBg: "bg-yellow-500 hover:bg-yellow-600",
@@ -190,8 +182,6 @@ const themeStyles = {
     userBubble: "bg-yellow-500 text-slate-900 rounded-br-xs",
     inputRing: "focus:ring-yellow-500",
     submitBtn: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
-    scrollBorder: "2px solid #ca8a04", // 黄
-    scrollText: "text-yellow-800",
   },
   orange: {
     floatingBg: "bg-orange-500 hover:bg-orange-600",
@@ -207,8 +197,6 @@ const themeStyles = {
     userBubble: "bg-orange-500 text-white rounded-br-xs",
     inputRing: "focus:ring-orange-500",
     submitBtn: "bg-orange-500 hover:bg-orange-600 text-white",
-    scrollBorder: "2px solid #ea580c", // オレンジ
-    scrollText: "text-orange-700",
   },
   purple: {
     floatingBg: "bg-purple-600 hover:bg-purple-700",
@@ -224,8 +212,6 @@ const themeStyles = {
     userBubble: "bg-purple-600 text-white rounded-br-xs",
     inputRing: "focus:ring-purple-500",
     submitBtn: "bg-purple-600 hover:bg-purple-700 text-white",
-    scrollBorder: "2px solid #9333ea", // 紫
-    scrollText: "text-purple-700",
   },
   cyan: {
     floatingBg: "bg-cyan-600 hover:bg-cyan-700",
@@ -241,8 +227,6 @@ const themeStyles = {
     userBubble: "bg-cyan-600 text-white rounded-br-xs",
     inputRing: "focus:ring-cyan-500",
     submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
-    scrollBorder: "2px solid #0891b2", // シアン
-    scrollText: "text-cyan-700",
   },
   pink: {
     floatingBg: "bg-pink-600 hover:bg-pink-700",
@@ -258,8 +242,6 @@ const themeStyles = {
     userBubble: "bg-pink-600 text-white rounded-br-xs",
     inputRing: "focus:ring-pink-500",
     submitBtn: "bg-pink-600 hover:bg-pink-700 text-white",
-    scrollBorder: "2px solid #db2777", // ピンク
-    scrollText: "text-pink-700",
   },
   rainbow: {
     floatingBg: "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 hover:opacity-90",
@@ -275,8 +257,6 @@ const themeStyles = {
     userBubble: "bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-br-xs",
     inputRing: "focus:ring-purple-500",
     submitBtn: "bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white",
-    scrollBorder: "2px solid #ec4899", // 虹色テーマはピンク系枠
-    scrollText: "text-purple-900",
   },
 };
 
@@ -287,8 +267,14 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
-// 💡 ページトップへ戻るボタン（テーマカラー連動枠線版）
-function ScrollTopButton({ scrollBorder, scrollText }: { scrollBorder: string; scrollText: string }) {
+// 💡 ページトップへ戻るボタン（チャットボタンと完全に同じ枠線・背景・文字色を共有）
+function ScrollTopButton({ 
+  floatingClass, 
+  inlineStyle 
+}: { 
+  floatingClass: string; 
+  inlineStyle?: { border?: string; background?: string; color?: string } 
+}) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -313,8 +299,8 @@ function ScrollTopButton({ scrollBorder, scrollText }: { scrollBorder: string; s
     <button
       type="button"
       onClick={scrollToTop}
-      style={{ border: scrollBorder }}
-      className={`bg-white hover:bg-slate-50 ${scrollText} w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center`}
+      style={inlineStyle}
+      className={`${floatingClass} w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center`}
       title="ページトップへ戻る"
     >
       ▲
@@ -724,8 +710,8 @@ export function YamatoChatCommon({
   return (
     <>
       <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
-        {/* 💡 ヤマトチャット（ボタンまたはウィンドウ）より少し上に配置され、テーマカラーに同期する上に戻るボタン */}
-        <ScrollTopButton scrollBorder={currentTheme.scrollBorder} scrollText={currentTheme.scrollText} />
+        {/* 💡 ヤマトチャットボタンと完全に同じ背景・枠線・文字色（三角）を共有する上に戻るボタン */}
+        <ScrollTopButton floatingClass={finalFloatingButtonClass} inlineStyle={floatingInlineStyle} />
 
         {!isAiTutorOpen ? (
           <button
@@ -1033,7 +1019,7 @@ export function YamatoChatCommon({
           </div>
         </div>
       )}
-  </>
+    </>
   );
 }
 
