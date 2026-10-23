@@ -17,6 +17,7 @@ export type AppType =
   | "eoy-oral-mock" 
   | "eoy-writing" 
   | "oral-exam-questions"
+  | "kanji-grammar-checker"
   | "image-explanation";
 
 export type BotConfig = {
