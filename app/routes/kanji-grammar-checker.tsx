@@ -1,9 +1,9 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（AI Vision自動文字起こし・クレジット表示対応版）
+ * @description VCE Kanji & Grammar Checker 独立ページ（AI Vision自動文字起こし・クレジット表示・確実なセッション取得対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useRouteLoaderData } from '@remix-run/react';
+import { Link, useRouteLoaderData, useRevalidator } from '@remix-run/react';
 import { 
   Sparkles, 
   Coins, 
@@ -22,6 +22,7 @@ import YamatoChat from '../components/ChatYamatoKanjiGrammarCheckerVce';
 // 外部データファイルからのインポート
 import { VCE_KANJI_LIST } from '../data/kanji-list';
 import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
+import { supabase } from '../lib/supabaseClient';
 
 // ページトップへ戻るボタン（カスタムスタイル: 枠線は紺、背景は白、三角は紺）
 function ScrollTopButton() {
@@ -60,6 +61,7 @@ function ScrollTopButton() {
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const revalidator = useRevalidator(); // 💡 クレジット減算後にヘッダー等を再検証するためのフック
 
   // 画像アップロードおよび文字起こし用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -73,9 +75,61 @@ export default function KanjiGrammarCheckerPage() {
     nickname?: string;
   } | undefined;
 
-  const user = rootData?.user ?? null;
-  const credits = rootData?.credits ?? 10;
-  const nickname = rootData?.nickname ?? "";
+  // 💡 YamatoChatCommon と同様に、Supabaseセッションから直接ユーザーIDを確実に取得するステート
+  const [activeUserId, setActiveUserId] = useState<string | null>(rootData?.user?.id ?? null);
+  const [currentCredits, setCurrentCredits] = useState<number>(rootData?.credits ?? 10);
+  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
+
+  // 💡 コンポーネントマウント時および認証状態の変化時にユーザーIDとクレジットを確実に同期
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncUserSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id && isMounted) {
+          setActiveUserId(session.user.id);
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('credits, nickname')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile && isMounted) {
+            if (typeof profile.credits === 'number') setCurrentCredits(profile.credits);
+            if (profile.nickname) setNickname(profile.nickname);
+          }
+        }
+      } catch (err) {
+        console.error("Session sync error in KanjiGrammarCheckerPage:", err);
+      }
+    }
+
+    syncUserSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (isMounted) {
+        const newUid = session?.user?.id || null;
+        setActiveUserId(newUid);
+        if (newUid) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('credits, nickname')
+            .eq('id', newUid)
+            .single();
+          if (profile && isMounted) {
+            if (typeof profile.credits === 'number') setCurrentCredits(profile.credits);
+            if (profile.nickname) setNickname(profile.nickname);
+          }
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const [text, setText] = useState(
     "私は日本へ行って、日本語の勉強をたくさんしなければなりません。"
@@ -98,7 +152,7 @@ export default function KanjiGrammarCheckerPage() {
         body: JSON.stringify({
           message: "Please transcribe the handwritten Japanese text in this photo accurately and output ONLY the transcribed Japanese text without any extra explanations or conversational filler.",
           imageBase64: imageBase64,
-          userId: user?.id,
+          userId: activeUserId, // 💡 確実に取得した activeUserId を送信
           appType: "kanji-grammar-checker-ocr"
         }),
       });
@@ -109,8 +163,11 @@ export default function KanjiGrammarCheckerPage() {
         // AIの返答から余分な引用符などを除去してテキストエリアにセット
         const cleanedText = data.reply.trim().replace(/^["「]|["」]$/g, "");
         setText(cleanedText);
+
+        // 💡 4クレジット消費が成功したため、画面全体およびヘッダーの残高を即座に再検証・更新
+        revalidator.revalidate();
       } else {
-        alert("Failed to transcribe image automatically. Please try typing or use the chat widget.");
+        alert(data.error || "Failed to transcribe image automatically. Please try typing or use the chat widget.");
       }
     } catch (err) {
       console.error("Transcription error:", err);
@@ -345,10 +402,11 @@ export default function KanjiGrammarCheckerPage() {
         {/* 右下のフローティングエリア（上戻りボタン ＆ ヤマトチャットの配置） */}
         <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
           <YamatoChat
-            userId={user?.id}
-            userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
-            credits={credits}
+            userId={activeUserId || undefined}
+            userNickname={nickname || (activeUserId ? "Student" : "Student")}
+            credits={currentCredits}
           />
+          
           <ScrollTopButton />
         </aside>
       </div>
