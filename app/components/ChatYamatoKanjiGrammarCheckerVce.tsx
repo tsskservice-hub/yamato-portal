@@ -25,8 +25,8 @@ export interface ChatYamatoKanjiGrammarCheckerVceMetaType {
  */
 export const CHAT_YAMATO_KANJI_GRAMMAR_CHECKER_VCE_META: ChatYamatoKanjiGrammarCheckerVceMetaType = {
   componentName: "ChatYamatoKanjiGrammarCheckerVce",
-  version: "3.8.0",
-  role: "VCE漢字文法チェッカー専用AIチャットウィジェット（カスタムテーマ・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
+  version: "3.9.0",
+  role: "VCE漢字文法チェッカー専用AIチャットウィジェット（カスタムテーマ・ログインガード・クレジット管理・セッション自動検知対応版）",
   features: [
     {
       featureName: "Login Guard & Auth Modal Trigger",
@@ -45,16 +45,12 @@ export const CHAT_YAMATO_KANJI_GRAMMAR_CHECKER_VCE_META: ChatYamatoKanjiGrammarC
       description: "バックエンドからの ZERO_CREDITS および PARTIAL_SHORTAGE エラーをスマートにハンドリング"
     },
     {
-      featureName: "External Image & Vision Support",
-      description: "ページ側で選択された答案画像をプレビュー付きで受け取り、AI家庭教師に画像付きで質問送信可能"
-    },
-    {
       featureName: "Learning Pace Synchronization",
       description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
     },
     {
       featureName: "Credit Cost & Feature Footer",
-      description: "チャット下部にクレジット消費案内（Text / Photo / Visual Aid）を配置"
+      description: "チャット下部にクレジット消費案内を配置"
     }
   ],
   supportedThemes: ["custom-vce-kanji"],
@@ -70,8 +66,7 @@ type ChatMessage = {
 // 💡 機能ごとの消費クレジット定義
 const FEATURE_COSTS = {
   textAi: 2,           // 通常のテキストチャット
-  imageAi: 4,          // 画像付きチャット（1枚）または画像生成AI
-  multiImageAi: 6,     // 画像付きチャット（2枚）
+  imageAi: 4,          // 画像生成AIなどの費用
 };
 
 // 外部から受け取るプロパティ（Props）の型定義
@@ -83,9 +78,6 @@ export type ChatYamatoKanjiGrammarCheckerVceProps = {
   userNickname?: string;
   credits?: number; // クレジット残高初期値
   onOpenAuth?: () => void; // 未ログイン時に認証モーダルを開くコールバック
-  externalImageFile?: File | null;
-  externalImagePreview?: string | null;
-  onClearExternalImage?: () => void;
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -103,8 +95,6 @@ export function ChatYamatoKanjiGrammarCheckerVce({
   userNickname = "My friend",
   credits: initialCredits = 10,
   onOpenAuth,
-  externalImagePreview,
-  onClearExternalImage,
 }: ChatYamatoKanjiGrammarCheckerVceProps) {
   const characterName = "漢字文法チェッカー for VCE";
   const initialGreeting = "Are you studying hard today? This is a handy tool that lets you see at a glance how many essential kanji and grammar points required for the VCE are included in your writing!";
@@ -178,8 +168,6 @@ export function ChatYamatoKanjiGrammarCheckerVce({
   }, [activeUserId]);
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
-
-  const activeImagePreview = externalImagePreview || null;
 
   // ご要望のカスタムボタンスタイル（枠線：紺、背景：薄めの桃色、文字：黒）
   const customButtonStyle = {
@@ -286,7 +274,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
+    if (!tutorInput.trim() || isTutorLoading) return;
 
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
@@ -299,7 +287,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() || "Please check this photo." },
+        { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
           content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
@@ -309,14 +297,13 @@ export function ChatYamatoKanjiGrammarCheckerVce({
       return;
     }
 
-    const hasImage = Boolean(activeImagePreview);
     const needsVisual = requestVisualAid;
-    const requiredCost = (hasImage || needsVisual) ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
+    const requiredCost = needsVisual ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
 
     if (currentCredits < requiredCost) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() || "Please check this photo.", imageUrl: activeImagePreview || undefined },
+        { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
           content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCost} credits). 🪙`
@@ -326,18 +313,14 @@ export function ChatYamatoKanjiGrammarCheckerVce({
       return;
     }
 
-    const userMsg = tutorInput.trim() || (hasImage ? "Please transcribe my answer in the photo." : "");
-    const imageBase64 = activeImagePreview;
+    const userMsg = tutorInput.trim();
 
     setTutorInput("");
     setRequestVisualAid(false);
-    if (onClearExternalImage) {
-      onClearExternalImage();
-    }
 
     const newMessages: ChatMessage[] = [
       ...tutorMessages,
-      { role: "user", content: userMsg, imageUrl: imageBase64 || undefined },
+      { role: "user", content: userMsg },
     ];
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
@@ -362,7 +345,6 @@ export function ChatYamatoKanjiGrammarCheckerVce({
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
-          imageBase64: imageBase64,
           userId: activeUserId,
         }),
       });
@@ -432,9 +414,6 @@ export function ChatYamatoKanjiGrammarCheckerVce({
           >
             <span>🤖</span>
             <span>{characterName}</span>
-            {activeImagePreview && (
-              <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
-            )}
             {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white">
                 !
@@ -576,19 +555,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
                           }`}
                         >
                           {msg.role === "user" ? (
-                            <div>
-                              {msg.content}
-                              {msg.imageUrl && (
-                                <div className="mt-2">
-                                  <img
-                                    src={msg.imageUrl}
-                                    alt="User Upload"
-                                    className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
-                                    onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                  />
-                                </div>
-                              )}
-                            </div>
+                            <div>{msg.content}</div>
                           ) : (
                             <div className="space-y-2">
                               <div dangerouslySetInnerHTML={{ __html: msg.content }} />
@@ -615,24 +582,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
                     )}
                   </div>
 
-                  {/* 添付画像のプレビューバー */}
-                  {activeImagePreview && (
-                    <div className="flex items-center gap-2 bg-pink-50 border border-pink-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                      <img src={activeImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
-                      <span className="truncate flex-grow text-pink-900 font-medium">Answer photo attached</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (onClearExternalImage) onClearExternalImage();
-                        }}
-                        className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 入力フォーム（Upload Photo ボタンを削除） */}
+                  {/* 入力フォーム */}
                   <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                     <div className="flex items-center justify-end">
                       <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
@@ -651,13 +601,13 @@ export function ChatYamatoKanjiGrammarCheckerVce({
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={activeImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        placeholder="Ask Yamato anything..."
                         disabled={isTutorLoading}
                         className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 bg-slate-50/50"
                       />
                       <button
                         type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !activeImagePreview)}
+                        disabled={isTutorLoading || !tutorInput.trim()}
                         className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
                       >
                         Send
@@ -666,7 +616,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
 
                     {/* 消費クレジット案内 */}
                     <div className="text-[10px] text-slate-400 px-1 text-left">
-                      💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / Visual Aid: {FEATURE_COSTS.imageAi} cr
+                      💡 Text: {FEATURE_COSTS.textAi} cr / Visual Aid: {FEATURE_COSTS.imageAi} cr
                     </div>
                   </form>
                 </>
