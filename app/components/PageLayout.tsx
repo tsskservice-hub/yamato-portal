@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応版・共通パンくずリスト自動生成・カスタマイズ可能スクロールトップボタン内蔵版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・子コンポーネントへのセッション/クレジット自動注入対応版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -256,7 +256,18 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       )}
 
       <main className="flex-grow">
-        {children}
+        {/* 💡 PageLayout が保持する最新のセッション（user, credits, nickname）を子要素（各ページ）へ自動注入 */}
+        {React.Children.map(children, (child) => {
+          if (React.isValidElement(child)) {
+            return React.cloneElement(child as React.ReactElement<any>, {
+              user: user !== undefined ? user : (child.props as any).user,
+              credits: credits !== undefined ? credits : (child.props as any).credits,
+              nickname: nickname !== undefined ? nickname : (child.props as any).nickname,
+              learningPace: learningPace !== undefined ? learningPace : (child.props as any).learningPace,
+            });
+          }
+          return child;
+        })}
       </main>
       
       <Footer onOpenAuth={handleOpenAuthModal} />
@@ -449,4 +460,5 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
 PageLayout.displayName = "PageLayout";
 
+exports = PageLayout;
 export default PageLayout;

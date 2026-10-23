@@ -220,7 +220,7 @@ export default function KanjiGrammarCheckerPage() {
           {/* Header Card */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <p className="text-base text-slate-600 leading-relaxed">
-              If you have a typed writing response, please paste it into the checker below. If you have a handwritten response, upload a photo below to automatically transcribe it into the checker using AI Vision. You can see at a glance how many unique VCE Kanji (highlighted in <span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 yellow</span>) and VCE Grammar points (highlighted in <span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 green</span>) you have used without any duplication!
+              If you have a typed writing response, please paste it into the checker below. If you have a handwritten response, upload a photo below to automatically transcribe it into the checker using AI Vision. You can see at a glance how many unique VCE Kanji (highlighted in <span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 yellow</span> and VCE Grammar points highlighted in <span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 green</span> you have used without any duplication!
             </p>
           </div>
 
