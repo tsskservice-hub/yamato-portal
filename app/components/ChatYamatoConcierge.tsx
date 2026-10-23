@@ -19,7 +19,7 @@ export const ChatYamatoConcierge: React.FC<ChatYamatoConciergeProps> = ({
       appType="concierge"
       characterName="コンシェルジュヤマト"
       initialGreeting="Hello, my friend! How are you doing? I am Concierge Yamato, your general guide for the Yamato Portal. It is my true mission to help and support you on your learning journey. Please feel free to ask me anything anytime!"
-      themeColor="teal"
+      themeColor="red"
       defaultOpen={defaultOpen}
       {...restProps}
     />
