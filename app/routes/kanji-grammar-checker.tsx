@@ -1,6 +1,6 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（バックエンドAI Visionによる自動文字起こし・型エラー修正版）
+ * @description VCE Kanji & Grammar Checker 独立ページ（AI Vision自動文字起こし・クレジット表示対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -235,7 +235,7 @@ export default function KanjiGrammarCheckerPage() {
                   Upload a photo of your handwritten response to automatically transcribe it via AI Vision.
                 </p>
               </div>
-              <div>
+              <div className="flex flex-col items-end gap-1">
                 <input
                   type="file"
                   accept="image/*"
@@ -257,10 +257,11 @@ export default function KanjiGrammarCheckerPage() {
                   ) : (
                     <>
                       <span>📷</span>
-                      <span>{selectedImagePreview ? "Change Answer Photo" : "Upload & Transcribe Photo"}</span>
+                      <span>Transcribe my answer</span>
                     </>
                   )}
                 </button>
+                <span className="text-[11px] text-slate-500 font-medium">💡 4 credits needed</span>
               </div>
             </div>
 
