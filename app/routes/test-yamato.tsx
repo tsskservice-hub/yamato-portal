@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得対応版・デフォルトフォールバックなし）
+ * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・appType一覧表示対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { Link, useSearchParams } from "@remix-run/react";
@@ -315,13 +315,43 @@ export default function TestYamatoPage() {
             </div>
           </div>
 
-          {/* 💡 選択中であることがひと目でわかるステータスインジケーター */}
-          <div style={{ marginTop: "20px", fontSize: "12px", color: "#1e293b", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ color: "#16a34a", fontWeight: "bold" }}>✓ 現在選択中のヤマト:</span> 
-              <strong style={{ color: "#0f172a" }}>{currentConfig?.name || activeAppType}</strong>
-            </span>
-            <span style={{ fontFamily: "monospace", backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#334155" }}>{activeAppType}</span>
+          {/* 💡 選択中であることがひと目でわかるステータスインジケーター & 登録 appType 一覧表示 */}
+          <div style={{ marginTop: "20px", fontSize: "12px", color: "#1e293b", backgroundColor: "#f8fafc", padding: "14px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ color: "#16a34a", fontWeight: "bold" }}>✓ 現在選択中のヤマト:</span> 
+                <strong style={{ color: "#0f172a" }}>{currentConfig?.name || activeAppType}</strong>
+              </span>
+              <span style={{ fontFamily: "monospace", backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#334155" }}>{activeAppType}</span>
+            </div>
+
+            {/* 💡 Supabase から取得したすべての appType キー一覧を可視化 */}
+            <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
+              <span style={{ fontSize: "11px", fontWeight: "bold", color: "#64748b" }}>📦 Supabase (YAMATO_CONFIGS) に登録されている appType 一覧:</span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                {yamatoConfigs ? (
+                  Object.keys(yamatoConfigs).map((key) => (
+                    <span
+                      key={key}
+                      style={{
+                        fontFamily: "monospace",
+                        fontSize: "11px",
+                        backgroundColor: activeAppType === key ? "#dbeafe" : "#e2e8f0",
+                        color: activeAppType === key ? "#1e40af" : "#334155",
+                        border: activeAppType === key ? "1px solid #93c5fd" : "1px solid transparent",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        fontWeight: activeAppType === key ? "bold" : "normal"
+                      }}
+                    >
+                      {key}
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ fontSize: "11px", color: "#94a3b8" }}>読み込み中...</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
