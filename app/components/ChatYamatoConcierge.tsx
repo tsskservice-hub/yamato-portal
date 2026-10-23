@@ -1,5 +1,11 @@
-import React from "react";
+/**
+ * @file ChatYamatoConcierge.tsx
+ * @description Supabase YAMATO_CONFIGS から設定を動的取得するコンシェルジュチャットコンポーネント
+ */
+import React, { useState, useEffect } from "react";
 import YamatoChatCommon from "../components/YamatoChatCommon";
+import { fetchYamatoConfigsData, BotConfig } from "../data/yamato-configs";
+import { supabase } from "../lib/supabaseClient";
 
 export interface ChatYamatoConciergeProps {
   defaultOpen?: boolean;
@@ -14,12 +20,30 @@ export const ChatYamatoConcierge: React.FC<ChatYamatoConciergeProps> = ({
   defaultOpen = false,
   ...restProps
 }) => {
+  // 💡 Supabase から動的に取得するコンシェルジュ設定
+  const [config, setConfig] = useState<BotConfig | null>(null);
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const configsData = await fetchYamatoConfigsData(supabase);
+        if (configsData && configsData.concierge) {
+          setConfig(configsData.concierge);
+        }
+      } catch (err) {
+        console.error("Failed to load concierge config from Supabase:", err);
+      }
+    }
+    loadConfig();
+  }, []);
+
   return (
     <YamatoChatCommon
       appType="concierge"
-      characterName="コンシェルジュヤマト"
-      initialGreeting="Hello, my friend! How are you doing? I am Concierge Yamato, your general guide for the Yamato Portal. It is my true mission to help and support you on your learning journey. Please feel free to ask me anything anytime!"
-      themeColor="red"
+      characterName={config?.name || "コンシェルジュヤマト"}
+      initialGreeting={config?.greeting || "Hello, my friend! How are you doing? I am Concierge Yamato, your general guide for the Yamato Portal. It is my true mission to help and support you on your learning journey. Please feel free to ask me anything anytime!"}
+      themeColor={(config?.themeColor as any) || "red"}
+      buttonStyle={config?.floatingButtonStyle}
       defaultOpen={defaultOpen}
       {...restProps}
     />

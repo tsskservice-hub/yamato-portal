@@ -1,47 +1,19 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（絵で説明ヤマト・虹色テーマ・テーマ連動上に戻るボタン対応版）
+ * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得対応版・デフォルトフォールバックなし）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { Link, useSearchParams } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { YamatoChatCommon } from "../components/YamatoChatCommon";
+import { fetchYamatoConfigsData, YamatoConfigsData, AppType } from "../data/yamato-configs";
+import { supabase } from "../lib/supabaseClient";
 
 export const meta: MetaFunction = () => {
   return [
     { title: "AI Yamato 独立APIテスト画面" },
     { name: "description", content: "独立APIサーバーと連携するヤマトのテストページです。" },
   ];
-};
-
-type AppType = 
-  | "concierge" 
-  | "game-igo" 
-  | "genkoyoshi-editor-general" 
-  | "genkoyoshi-editor-vce" 
-  | "eoy-oral-drill" 
-  | "eoy-oral-elaborate" 
-  | "eoy-oral-mock" 
-  | "eoy-writing" 
-  | "oral-exam-questions"
-  | "image-explanation"; // 💡 絵で説明ヤマト追加
-
-type AppConfig = {
-  name: string;
-  greeting: string;
-  themeColor: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | "rainbow"; // 💡 rainbow対応
-  apiSourceFile: string;
-  targetAudience: string;
-  buttonStyle: {
-    border: string;
-    background: string;
-    color: string;
-  };
-  floatingButtonStyle: {
-    border: string;
-    background: string;
-    color: string;
-  };
 };
 
 export default function TestYamatoPage() {
@@ -55,18 +27,26 @@ export default function TestYamatoPage() {
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
-  // 💡 バックエンドから非同期で取得するエコシステムのメタデータ
-  const [ecosystemMeta, setEcosystemMeta] = useState<any>(null);
+  // 💡 Supabase から動的に取得するボット設定データ（ハードコードされたフォールバックは持たない）
+  const [yamatoConfigs, setYamatoConfigs] = useState<YamatoConfigsData | null>(null);
+  const [isConfigLoading, setIsConfigLoading] = useState<boolean>(true);
 
   // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
   useEffect(() => {
     async function fetchData() {
       setIsLoadingSchema(true);
+      setIsConfigLoading(true);
       try {
         const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
         const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
 
-        // 1. スキーマ情報の取得
+        // 1. Supabase の app_knowledge テーブルから YAMATO_CONFIGS を非同期取得
+        const remoteConfigs = await fetchYamatoConfigsData(supabase);
+        if (remoteConfigs) {
+          setYamatoConfigs(remoteConfigs);
+        }
+
+        // 2. スキーマ情報の取得
         const schemaRes = await fetch(`${apiBaseUrl}/api/schema/${activeAppType}`);
         if (schemaRes.ok) {
           const data = (await schemaRes.json()) as { appType: string; fields: string[] };
@@ -74,18 +54,12 @@ export default function TestYamatoPage() {
         } else {
           setApiFields([]);
         }
-
-        // 2. バックエンドのエコシステムメタデータの取得
-        const metaRes = await fetch(`${apiBaseUrl}/api/ecosystem-metadata`);
-        if (metaRes.ok) {
-          const metaJson = (await metaRes.json()) as { metadata: any };
-          setEcosystemMeta(metaJson.metadata);
-        }
       } catch (err) {
-        console.error("Failed to fetch data from API:", err);
+        console.error("Failed to fetch data from API or Supabase:", err);
         setApiFields([]);
       } finally {
         setIsLoadingSchema(false);
+        setIsConfigLoading(false);
       }
     }
 
@@ -106,100 +80,7 @@ export default function TestYamatoPage() {
     );
   }
 
-  const appConfig: Record<AppType, AppConfig> = {
-    concierge: {
-      name: "やまと先生",
-      greeting: "Hello, my friend! 🌟 Welcome to Yamato Portal. I'm Yamato, your portal guide. Whether you're a student, parent, or educator, how can I assist you today?",
-      themeColor: "red",
-      apiSourceFile: "concierge.ts (経由: chat.ts / index.ts)",
-      targetAudience: "ポータル全体の訪問者（生徒・保護者・教員）",
-      buttonStyle: { border: "2px solid #ef4444", background: "#ffffff", color: "#000000" },
-      floatingButtonStyle: { border: "2px solid #ef4444", background: "#ffffff", color: "#000000" },
-    },
-    "game-igo": {
-      name: "囲碁ヤマト",
-      greeting: "こんにちは！囲碁AIヤマトです。一局打ってみましょうか？それともルールや定石について質問しますか？",
-      themeColor: "black",
-      apiSourceFile: "game-igo.ts (経由: FoundationLayout.ts)",
-      targetAudience: "囲碁に興味のある日本語学習者",
-      buttonStyle: { border: "2px solid #ffffff", background: "#000000", color: "#ffffff" },
-      floatingButtonStyle: { border: "2px solid #ffffff", background: "#000000", color: "#ffffff" },
-    },
-    "genkoyoshi-editor-general": {
-      name: "原稿用紙エディター (一般)",
-      greeting: "こんにちは！一般向け原稿用紙エディターです。日本語の文章構成や推敲をサポートします。",
-      themeColor: "blue",
-      apiSourceFile: "genkoyoshi-editor-general.ts (経由: FoundationLayout.ts)",
-      targetAudience: "一般的な日本語の文章作成・作文を行う学習者",
-      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
-      floatingButtonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
-    },
-    "genkoyoshi-editor-vce": {
-      name: "原稿用紙エディター (VCE)",
-      greeting: "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards.",
-      themeColor: "blue",
-      apiSourceFile: "genkoyoshi-editor-vce.ts (経由: FoundationLayout.ts)",
-      targetAudience: "オーストラリア・ビクトリア州 VCE日本語学習者 (Years 11–12)",
-      buttonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
-      floatingButtonStyle: { border: "2px solid #38bdf8", background: "#3b82f6", color: "#ffffff" },
-    },
-    "eoy-oral-drill": {
-      name: "EOY Oral Drill",
-      greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Drill practice session! Let's sharpen your speaking skills.",
-      themeColor: "green",
-      apiSourceFile: "eoy-oral-drill.ts (経由: FoundationLayout.ts)",
-      targetAudience: "VCE期末口頭試験（Oral Exam）を控える生徒",
-      buttonStyle: { border: "2px solid #eab308", background: "#dcfce7", color: "#000000" },
-      floatingButtonStyle: { border: "2px solid #eab308", background: "#dcfce7", color: "#000000" },
-    },
-    "eoy-oral-elaborate": {
-      name: "EOY Oral Elaborate",
-      greeting: "Hello, my friend! 🌟 Welcome to the EOY Oral Elaborate session. Let's dive deeper into your detailed study and responses.",
-      themeColor: "purple",
-      apiSourceFile: "eoy-oral-elaborate.ts (経由: FoundationLayout.ts)",
-      targetAudience: "VCE口頭試験の詳細研究セクション対策の生徒",
-      buttonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "#000000" },
-      floatingButtonStyle: { border: "2px solid #a855f7", background: "#f3e8ff", color: "#000000" },
-    },
-    "eoy-oral-mock": {
-      name: "EOY Oral Mock Exam",
-      greeting: "Hello, my friend! 🌟 Welcome to your EOY Oral Mock Exam. Ready to simulate the real exam experience?",
-      themeColor: "pink",
-      apiSourceFile: "eoy-oral-mock.ts (経由: FoundationLayout.ts)",
-      targetAudience: "本番さながらの模擬試験を体験したいVCE受験生",
-      buttonStyle: { border: "2px solid #ef4444", background: "#3b82f6", color: "#ffffff" },
-      floatingButtonStyle: { border: "2px solid #ef4444", background: "#3b82f6", color: "#ffffff" },
-    },
-    "eoy-writing": {
-      name: "VCE Writing Practice",
-      greeting: "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills.",
-      themeColor: "cyan",
-      apiSourceFile: "eoy-writing.ts (経由: FoundationLayout.ts)",
-      targetAudience: "VCE期末ライティング試験対策を行う生徒",
-      buttonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "#000000" },
-      floatingButtonStyle: { border: "2px solid #3b82f6", background: "#e0f2fe", color: "#000000" },
-    },
-    "oral-exam-questions": {
-      name: "語彙文法チェッカー",
-      greeting: "Hello, my friend! 🌟 Welcome to the Vocabulary & Grammar Checker. What expressions or sentences would you like to check today?",
-      themeColor: "orange",
-      apiSourceFile: "oral-exam-questions.ts (経由: FoundationLayout.ts)",
-      targetAudience: "VCE日本語の語彙や文法を確認したい生徒・教員",
-      buttonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "#000000" },
-      floatingButtonStyle: { border: "2px solid #22c55e", background: "#fde047", color: "#000000" },
-    },
-    "image-explanation": {
-      name: "絵で説明ヤマト",
-      greeting: "Hello, my friend! 🎨 Welcome to Image Explanation Yamato. Ask me anything about Japanese culture, customs, or vocabulary, and I will generate vivid visual illustrations to explain it!",
-      themeColor: "rainbow",
-      apiSourceFile: "image-explanation.ts (経由: FoundationLayout.ts & imagen-service.ts)",
-      targetAudience: "日本語や日本文化を視覚的な図解・イラストで学びたい全学習者",
-      buttonStyle: { border: "2px solid #ec4899", background: "linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6)", color: "#ffffff" },
-      floatingButtonStyle: { border: "3px solid #ec4899", background: "linear-gradient(135deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6)", color: "#ffffff" },
-    },
-  };
-
-  const currentConfig = appConfig[activeAppType];
+  const currentConfig = yamatoConfigs ? yamatoConfigs[activeAppType] : null;
 
   return (
     <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
@@ -322,7 +203,7 @@ export default function TestYamatoPage() {
         {/* セクション1：ヤマトAI 独立APIテスト画面 */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h1 style={{ fontSize: "20px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span>🇯🇵</span> ヤマト AI 独立APIテスト
+            <span>🇯🇵</span> ヤマト AI 独立APIテスト {isConfigLoading && <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "normal" }}>(Supabaseから設定読込中...)</span>}
           </h1>
           <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "12px" }}>
             新規ページに対するヤマトチャットを作るとき、YamatoChatCommon.tsx で必ず色などを登録する。でないと、その後PageLayoutで全てを流し込んでもらえない。
@@ -343,9 +224,9 @@ export default function TestYamatoPage() {
                     fontSize: "12px",
                     fontWeight: "600",
                     cursor: "pointer",
-                    border: appConfig.concierge.buttonStyle.border,
-                    backgroundColor: appConfig.concierge.buttonStyle.background,
-                    color: appConfig.concierge.buttonStyle.color
+                    border: yamatoConfigs?.concierge?.buttonStyle.border || "2px solid #ef4444",
+                    backgroundColor: yamatoConfigs?.concierge?.buttonStyle.background || "#ffffff",
+                    color: yamatoConfigs?.concierge?.buttonStyle.color || "#000000"
                   }}
                 >
                   👋 LP Concierge (コンシェルジュ) {activeAppType === "concierge" && " ✓"}
@@ -360,7 +241,7 @@ export default function TestYamatoPage() {
               </h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {(["genkoyoshi-editor-general", "game-igo", "image-explanation"] as const).map((type) => {
-                  const cfg = appConfig[type];
+                  const cfg = yamatoConfigs?.[type];
                   const isSelected = activeAppType === type;
                   return (
                     <button
@@ -373,9 +254,9 @@ export default function TestYamatoPage() {
                         fontSize: "12px",
                         fontWeight: "bold",
                         cursor: "pointer",
-                        border: cfg.buttonStyle.border,
-                        background: cfg.buttonStyle.background,
-                        color: cfg.buttonStyle.color
+                        border: cfg?.buttonStyle.border || "1px solid #cbd5e1",
+                        background: cfg?.buttonStyle.background || "#ffffff",
+                        color: cfg?.buttonStyle.color || "#000000"
                       }}
                     >
                       {type === "genkoyoshi-editor-general" && (<span>📄 原稿用紙 (一般) {isSelected && " ✓"}</span>)}
@@ -403,7 +284,7 @@ export default function TestYamatoPage() {
                     "oral-exam-questions",
                   ] as const
                 ).map((type) => {
-                  const cfg = appConfig[type];
+                  const cfg = yamatoConfigs?.[type];
                   const isSelected = activeAppType === type;
                   return (
                     <button
@@ -416,9 +297,9 @@ export default function TestYamatoPage() {
                         fontSize: "12px",
                         fontWeight: "600",
                         cursor: "pointer",
-                        border: cfg.buttonStyle.border,
-                        backgroundColor: cfg.buttonStyle.background,
-                        color: cfg.buttonStyle.color
+                        border: cfg?.buttonStyle.border || "1px solid #cbd5e1",
+                        backgroundColor: cfg?.buttonStyle.background || "#ffffff",
+                        color: cfg?.buttonStyle.color || "#000000"
                       }}
                     >
                       {type === "genkoyoshi-editor-vce" && (<span>📄 原稿用紙 (VCE) {isSelected && " ✓"}</span>)}
@@ -438,7 +319,7 @@ export default function TestYamatoPage() {
           <div style={{ marginTop: "20px", fontSize: "12px", color: "#1e293b", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ color: "#16a34a", fontWeight: "bold" }}>✓ 現在選択中のヤマト:</span> 
-              <strong style={{ color: "#0f172a" }}>{currentConfig.name}</strong>
+              <strong style={{ color: "#0f172a" }}>{currentConfig?.name || activeAppType}</strong>
             </span>
             <span style={{ fontFamily: "monospace", backgroundColor: "#e2e8f0", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", color: "#334155" }}>{activeAppType}</span>
           </div>
@@ -449,16 +330,16 @@ export default function TestYamatoPage() {
       {/* 💡 YamatoChatCommon 呼び出し（虹色テーマ & 画像生成対応） */}
       <YamatoChatCommon 
         appType={activeAppType}
-        characterName={currentConfig.name}
-        initialGreeting={currentConfig.greeting}
-        themeColor={currentConfig.themeColor as any}
-        buttonStyle={currentConfig.floatingButtonStyle}
+        characterName={currentConfig?.name || "やまと先生"}
+        initialGreeting={currentConfig?.greeting || ""}
+        themeColor={(currentConfig?.themeColor as any) || "red"}
+        buttonStyle={currentConfig?.floatingButtonStyle || { border: "2px solid #ef4444", background: "#ffffff", color: "#000000" }}
         defaultOpen={false}
       />
 
       <footer style={{ textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }}>
         <p>&copy; 2026 JPTutor AI Yamato.</p>
       </footer>
-  </div>
+    </div>
   );
 }
