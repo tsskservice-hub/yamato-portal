@@ -1,8 +1,9 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（虹色テーマ対応・未ログインガード・クレジット残高・スマートクレジット制御・左上リサイズ・チャットボタン完全連動上に戻るボタン内蔵版）
+ * @description ポータル共通AIチャットウィジェット（root loader 自動データ解決・未ログインガード・クレジット残高表示・スマートクレジットエラー分岐・新9色テーマ・Vision画像対応版）
  */
 import { useState, useEffect, useRef } from "react";
+import { useRouteLoaderData } from "@remix-run/react";
 import { supabase } from "../lib/supabaseClient";
 
 /**
@@ -25,47 +26,43 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.9.3",
-  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応・左上リサイズ・完全連動上に戻るボタン内蔵）",
+  version: "3.3.0",
+  role: "ポータル共通AIチャットウィジェット（root loader 自動データ解決・クレジット管理・セッション自動検知・9色テーマ完全統合版）",
   features: [
     {
-      featureName: "Fully Synchronized Scroll Top Button",
-      description: "チャットボタンと背景・枠線・文字（三角）の色が完全に一致・連動するページトップへ戻るボタンを統合"
-    },
-    {
-      featureName: "Top-Left Resize Support",
-      description: "チャットウィンドウのサイズ変更を右下から左上基点（ドラッグ操作）に変更し、画面端での操作性を大幅改善"
+      featureName: "Automatic Root Loader Data Resolution",
+      description: "useRouteLoaderData('root') を用いて userId, credits, nickname, learningPace を全自動取得。Props バケツリレーが不要に。"
     },
     {
       featureName: "Login Guard & Auth Modal Trigger",
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
     },
     {
-      featureName: "Theme-Aware Font Size Selector (Full Chat)",
-      description: "フォントサイズ選択ボタンをチャット履歴だけでなく入力スペースにも完全連動"
-    },
-    {
-      featureName: "Credits Moved Above Learning Pace",
-      description: "クレジット残高表示ブロックをLearning Paceの上の位置に移動"
+      featureName: "Live Credit Display & Warning Badge",
+      description: "ヘッダーに現在のクレジット残高をリアルタイム表示し、不足時に警告バッジを点灯"
     },
     {
       featureName: "Smart 402 Credit Error Handling",
       description: "バックエンドからの ZERO_CREDITS および PARTIAL_SHORTAGE エラーをスマートにハンドリング"
     },
     {
-      featureName: "New Theme Support (including Rainbow)",
-      description: "虹色テーマを含む多彩なカラーテーマに対応"
+      featureName: "New 9 Color Themes",
+      description: "赤、青、黒、緑、黄色、オレンジ、紫、水色、ピンクの新しい9色テーマに対応"
     },
     {
       featureName: "Image Upload & Vision Support",
       description: "手書き答案などの画像を選択・プレビュー付きでアップロードし、AI家庭教師に画像付きで質問送信可能"
     },
     {
+      featureName: "Font Size Customization",
+      description: "チャット内の文字サイズを「小・中・大・特大」の4段階に動的切替可能"
+    },
+    {
       featureName: "Learning Pace Synchronization",
       description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
     }
   ],
-  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "rainbow"],
+  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink"],
   learningPaces: ["steady", "normal", "accelerated"]
 };
 
@@ -75,21 +72,28 @@ type ChatMessage = {
   imageUrl?: string;
 };
 
-// 💡 機能ごとの消費クレジット定義
+// 機能ごとの消費クレジット定義
 const FEATURE_COSTS = {
   textAi: 2,         // 通常のテキストチャット
-  imageAi: 4,        // 画像付きチャット（1枚）または画像生成AI
-  multiImageAi: 6,   // 画像付きチャット（2枚）
+  imageAi: 4,        // 画像付きチャット・ビジュアル解説
 };
 
-// 外部から受け取るプロパティ（Props）の型定義
+// root.tsx の loader が返すデータ構造
+interface RootLoaderData {
+  user?: any;
+  credits?: number;
+  nickname?: string;
+  learningPace?: "steady" | "normal" | "accelerated";
+}
+
+// 外部から受け取るプロパティ（Props）の型定義（すべてオプショナル）
 export type YamatoChatCommonProps = {
   characterName?: string;
   initialGreeting?: string;
   systemPrompt?: string;
   appType?: "concierge" | "writing" | "oral" | "general" | string;
   defaultOpen?: boolean;
-  themeColor?: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | "rainbow" | string;
+  themeColor?: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | string;
   floatingButtonClassName?: string;
   buttonStyle?: {
     border?: string;
@@ -99,14 +103,11 @@ export type YamatoChatCommonProps = {
   initialLearningPace?: "steady" | "normal" | "accelerated";
   userId?: string;
   userNickname?: string;
-  credits?: number; // クレジット残高初期値
-  onOpenAuth?: () => void; // 未ログイン時に認証モーダルを開くコールバック
-  externalImageFile?: File | null;
-  externalImagePreview?: string | null;
-  onClearExternalImage?: () => void;
+  credits?: number;                  // 親から明示的に渡したい場合（省略時は root から自動取得）
+  onOpenAuth?: (mode?: 'signin' | 'signup') => void; // 認証モーダルを開くコールバック
 };
 
-// テーマカラーごとのスタイル定義
+// 新9色のテーマカラーごとのスタイル定義
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -243,21 +244,6 @@ const themeStyles = {
     inputRing: "focus:ring-pink-500",
     submitBtn: "bg-pink-600 hover:bg-pink-700 text-white",
   },
-  rainbow: {
-    floatingBg: "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 hover:opacity-90",
-    floatingText: "text-white",
-    floatingBorder: "border-2 border-pink-400",
-    button: "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 text-white",
-    border: "border-pink-300",
-    headerText: "text-purple-900 font-extrabold",
-    badgeBg: "bg-purple-50 border-purple-200",
-    badgeText: "text-purple-900",
-    buttonActive: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-purple-700",
-    userBubble: "bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-purple-500",
-    submitBtn: "bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white",
-  },
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -265,47 +251,6 @@ function sanitizeAiOutput(text: string): string {
   return text
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\*\*/g, '');
-}
-
-// 💡 ページトップへ戻るボタン（チャットボタンと完全に同じ枠線・背景・文字色を共有）
-function ScrollTopButton({ 
-  floatingClass, 
-  inlineStyle 
-}: { 
-  floatingClass: string; 
-  inlineStyle?: { border?: string; background?: string; color?: string } 
-}) {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const toggleVisible = () => {
-      if (window.scrollY > 300) {
-        setVisible(true);
-      } else {
-        setVisible(false);
-      }
-    };
-    window.addEventListener("scroll", toggleVisible);
-    return () => window.removeEventListener("scroll", toggleVisible);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  if (!visible) return null;
-
-  return (
-    <button
-      type="button"
-      onClick={scrollToTop}
-      style={inlineStyle}
-      className={`${floatingClass} w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center`}
-      title="ページトップへ戻る"
-    >
-      ▲
-    </button>
-  );
 }
 
 export function YamatoChatCommon({
@@ -317,66 +262,40 @@ export function YamatoChatCommon({
   themeColor = "blue",
   floatingButtonClassName,
   buttonStyle,
-  initialLearningPace = "normal",
+  initialLearningPace: propLearningPace,
   userId: propUserId,
-  userNickname = "My friend",
-  credits: initialCredits = 10,
+  userNickname: propNickname,
+  credits: propCredits,
   onOpenAuth,
-  externalImagePreview,
-  onClearExternalImage,
 }: YamatoChatCommonProps) {
+  // 💡 1. root loader から全ページ共通データを自動取得
+  const rootData = useRouteLoaderData("root") as RootLoaderData | undefined;
+
+  // 親から渡された値を優先し、無ければ rootData から自動補完
+  const effectiveUserId = propUserId ?? rootData?.user?.id;
+  const effectiveCreditsFromRoot = propCredits ?? rootData?.credits ?? 0;
+  const effectiveNickname = propNickname ?? rootData?.nickname ?? "My friend";
+  const effectiveLearningPace = propLearningPace ?? rootData?.learningPace ?? "normal";
+
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 チャットウィンドウのサイズ管理（左上リサイズ用）
-  const [chatSize, setChatSize] = useState<{ width: number; height: number }>({ width: 384, height: 540 });
-  const resizingRef = useRef<boolean>(false);
-  const startPosRef = useRef<{ x: number; y: number; w: number; h: number }>({ x: 0, y: 0, w: 384, h: 540 });
+  // 内部状態（セッションとクレジット）
+  const [activeUserId, setActiveUserId] = useState<string | undefined>(effectiveUserId);
+  const [currentCredits, setCurrentCredits] = useState<number>(effectiveCreditsFromRoot);
 
-  const startTopLeftResize = (e: React.MouseEvent) => {
-    e.preventDefault();
-    resizingRef.current = true;
-    startPosRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      w: chatSize.width,
-      h: chatSize.height,
-    };
-
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      if (!resizingRef.current) return;
-      const deltaX = startPosRef.current.x - moveEvent.clientX;
-      const deltaY = startPosRef.current.y - moveEvent.clientY;
-      const newWidth = Math.max(280, Math.min(window.innerWidth * 0.95, startPosRef.current.w + deltaX));
-      const newHeight = Math.max(380, Math.min(window.innerHeight * 0.9, startPosRef.current.h + deltaY));
-      setChatSize({ width: newWidth, height: newHeight });
-    };
-
-    const onMouseUp = () => {
-      resizingRef.current = false;
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-  };
-
-  const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
-  const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
+  // prop または rootData の変更に追従
+  useEffect(() => {
+    setActiveUserId(effectiveUserId);
+  }, [effectiveUserId]);
 
   useEffect(() => {
-    if (propUserId) {
-      setActiveUserId(propUserId);
-    }
-  }, [propUserId]);
+    setCurrentCredits(effectiveCreditsFromRoot);
+  }, [effectiveCreditsFromRoot]);
 
-  useEffect(() => {
-    setCurrentCredits(initialCredits);
-  }, [initialCredits]);
-
+  // 💡 2. 安全策：Supabase の Auth State Change を監視し、ログイン/ログアウトを即時反映
   useEffect(() => {
     let isMounted = true;
 
@@ -426,20 +345,26 @@ export function YamatoChatCommon({
     };
   }, [activeUserId]);
 
+  // 💡 3. 認証モーダル呼び出しの安全なハンドラ
+  const handleTriggerAuth = (mode: 'signin' | 'signup' = 'signup') => {
+    if (onOpenAuth) {
+      onOpenAuth(mode);
+    } else {
+      // 共通カスタムイベントを発行（PageLayout 側でモーダルを開くトリガーとして利用可能）
+      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode } }));
+    }
+  };
+
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
-
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [internalImagePreview, setInternalImagePreview] = useState<string | null>(null);
-
-  const activeImagePreview = externalImagePreview || internalImagePreview;
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
   const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.blue;
-
   const finalFloatingButtonClass = floatingButtonClassName || `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
   
   const floatingInlineStyle = buttonStyle ? {
     border: buttonStyle.border,
-    background: buttonStyle.background,
+    backgroundColor: buttonStyle.background,
     color: buttonStyle.color,
   } : undefined;
 
@@ -451,23 +376,15 @@ export function YamatoChatCommon({
   ]);
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
-  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
-  
-  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(appType === "image-explanation");
-
-  useEffect(() => {
-    if (appType === "image-explanation") {
-      setRequestVisualAid(true);
-    }
-  }, [appType]);
-
+  const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(effectiveLearningPace);
+  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialLearningPace) {
-      setTutorLevel(initialLearningPace);
+    if (effectiveLearningPace) {
+      setTutorLevel(effectiveLearningPace);
     }
-  }, [initialLearningPace]);
+  }, [effectiveLearningPace]);
 
   const getFontSizeClass = () => {
     switch (chatFontSize) {
@@ -479,19 +396,9 @@ export function YamatoChatCommon({
     }
   };
 
-  const getInputFontSizeClass = () => {
-    switch (chatFontSize) {
-      case 'sm': return 'text-[11px]';
-      case 'base': return 'text-xs';
-      case 'lg': return 'text-sm';
-      case 'xl': return 'text-base';
-      default: return 'text-xs';
-    }
-  };
-
+  // 学習ペース即時同期
   const handlePaceChange = async (newLevel: "steady" | "normal" | "accelerated") => {
     setTutorLevel(newLevel);
-
     if (!activeUserId) return;
 
     try {
@@ -537,6 +444,7 @@ export function YamatoChatCommon({
     };
   }, []);
 
+  // Supabaseから最新のクレジット残高を再取得
   const refreshUserCredits = async () => {
     if (!activeUserId) return;
     try {
@@ -560,7 +468,7 @@ export function YamatoChatCommon({
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setInternalImagePreview(reader.result as string);
+        setSelectedImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -568,20 +476,20 @@ export function YamatoChatCommon({
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
+    if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
 
+    // ガード1: 未ログインの場合
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
-      if (onOpenAuth) {
-        onOpenAuth();
-      }
+      handleTriggerAuth('signup');
       return;
     }
 
+    // ガード2: クレジット残高がゼロの場合
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() || "Please check this photo." },
+        { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
           content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
@@ -591,36 +499,29 @@ export function YamatoChatCommon({
       return;
     }
 
-    const hasImage = Boolean(activeImagePreview);
-    const needsVisual = requestVisualAid || appType === "image-explanation";
-    const requiredCost = (hasImage || needsVisual) ? FEATURE_COSTS.imageAi : FEATURE_COSTS.textAi;
-
-    if (currentCredits < requiredCost) {
+    // ガード3: 最低クレジット不足
+    if (currentCredits < FEATURE_COSTS.textAi) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() || "Please check this photo.", imageUrl: activeImagePreview || undefined },
+        { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCost} credits). 🪙`
+          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request. Please top up your account! 🪙`
         }
       ]);
       setTutorInput("");
       return;
     }
 
-    const userMsg = tutorInput.trim() || (hasImage ? "Please check this attached photo." : "");
-    const imageBase64 = activeImagePreview;
+    const userMsg = tutorInput.trim() || "Please check this answer image.";
+    const needsVisual = requestVisualAid;
+    const imageBase64 = selectedImagePreview;
 
     setTutorInput("");
     setSelectedImage(null);
-    setInternalImagePreview(null);
-    if (appType !== "image-explanation") {
-      setRequestVisualAid(false);
-    }
+    setSelectedImagePreview(null);
+    setRequestVisualAid(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    if (onClearExternalImage) {
-      onClearExternalImage();
-    }
 
     const newMessages: ChatMessage[] = [
       ...tutorMessages,
@@ -631,20 +532,17 @@ export function YamatoChatCommon({
 
     try {
       const visualPrompt = needsVisual
-        ? `Educational instructional diagram and visual aid for Japanese language learners explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
+        ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
-      const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
-
-      const response = await fetch(`${apiBaseUrl}/chat`, {
+      const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
-          userNickname: userNickname,
+          userNickname: effectiveNickname,
           appType: appType,
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt,
@@ -710,9 +608,6 @@ export function YamatoChatCommon({
   return (
     <>
       <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
-        {/* 💡 ヤマトチャットボタンと完全に同じ背景・枠線・文字色（三角）を共有する上に戻るボタン */}
-        <ScrollTopButton floatingClass={finalFloatingButtonClass} inlineStyle={floatingInlineStyle} />
-
         {!isAiTutorOpen ? (
           <button
             type="button"
@@ -722,7 +617,7 @@ export function YamatoChatCommon({
           >
             <span>🤖</span>
             <span>{characterName}</span>
-            {activeImagePreview && (
+            {selectedImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
             {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
@@ -734,31 +629,27 @@ export function YamatoChatCommon({
         ) : (
           <div
             ref={aiChatRef}
-            style={isAiFullscreen ? undefined : { width: `${chatSize.width}px`, height: `${chatSize.height}px` }}
             className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                : "min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] overflow-auto"
+                : "w-80 sm:w-96 h-[540px] min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
             }`}
           >
             <div className="w-full h-full flex flex-col">
-              {/* ヘッダー */}
+              {/* ヘッダー（クレジット残高表示対応） */}
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
                   </h3>
-                  {/* 💡 左上リサイズ用グリップボタン */}
-                  {!isAiFullscreen && (
-                    <button
-                      type="button"
-                      onMouseDown={startTopLeftResize}
-                      title="ドラッグして左上方向にサイズ変更"
-                      className="cursor-nw-resize text-slate-400 hover:text-slate-700 text-[11px] px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 transition flex items-center gap-0.5 select-none"
-                    >
-                      <span>↖</span>
-                      <span className="text-[10px]">サイズ変更</span>
-                    </button>
+                  {activeUserId ? (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                      🪙 {currentCredits} credits
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                      🔒 Guest (Login Required)
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -783,20 +674,6 @@ export function YamatoChatCommon({
                     ✕ Close
                   </button>
                 </div>
-              </div>
-
-              {/* クレジット残高表示セクション（学習ペースの上） */}
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-amber-800">Credits Balance</span>
-                {activeUserId ? (
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
-                    🪙 {currentCredits} credits
-                  </span>
-                ) : (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                    🔒 Guest
-                  </span>
-                )}
               </div>
 
               {/* 学習ペース選択UI */}
@@ -836,8 +713,8 @@ export function YamatoChatCommon({
                       onClick={() => setChatFontSize(size.key)}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
                         chatFontSize === size.key
-                          ? currentTheme.buttonActive
-                          : currentTheme.buttonInactive
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-blue-700"
                       }`}
                     >
                       {size.label}
@@ -858,7 +735,7 @@ export function YamatoChatCommon({
                     type="button"
                     onClick={() => {
                       setIsAiTutorOpen(false);
-                      if (onOpenAuth) onOpenAuth();
+                      handleTriggerAuth('signup');
                     }}
                     className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
                   >
@@ -913,23 +790,22 @@ export function YamatoChatCommon({
                     {isTutorLoading && (
                       <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
                         <span className="inline-block animate-spin text-sm">🤖</span>
-                        <span>かんがえちゅう...</span>
+                        <span>Yamato is thinking & reading...</span>
                       </div>
                     )}
                   </div>
 
                   {/* 添付画像のプレビューバー */}
-                  {activeImagePreview && (
+                  {selectedImagePreview && (
                     <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                      <img src={activeImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                      <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
                       <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedImage(null);
-                          setInternalImagePreview(null);
+                          setSelectedImagePreview(null);
                           if (fileInputRef.current) fileInputRef.current.value = '';
-                          if (onClearExternalImage) onClearExternalImage();
                         }}
                         className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
                       >
@@ -951,13 +827,13 @@ export function YamatoChatCommon({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className={`px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300 ${getInputFontSizeClass()}`}
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
                       >
                         <span>📷</span>
-                        <span>{activeImagePreview ? "Change Photo" : "Upload Photo"}</span>
+                        <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
                       </button>
 
-                      <label className={`flex items-center gap-1 text-slate-600 cursor-pointer select-none ${getInputFontSizeClass()}`}>
+                      <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
                         <input
                           type="checkbox"
                           checked={requestVisualAid}
@@ -973,22 +849,17 @@ export function YamatoChatCommon({
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={activeImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
-                        className={`flex-grow p-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50 ${getInputFontSizeClass()}`}
+                        className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                       />
                       <button
                         type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !activeImagePreview)}
-                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0 ${getInputFontSizeClass()}`}
+                        disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
+                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                       >
                         Send
                       </button>
-                    </div>
-
-                    {/* 消費クレジット案内 */}
-                    <div className="text-[10px] text-slate-400 px-1 text-left">
-                      💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / Visual Aid: {FEATURE_COSTS.imageAi} cr
                     </div>
                   </form>
                 </>
@@ -1001,7 +872,7 @@ export function YamatoChatCommon({
       {/* 画像拡大表示モーダル */}
       {modalImageSrc && (
         <div
-          className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z- bg-black/80 flex items-center justify-center p-4"
           onClick={() => setModalImageSrc(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh]">
