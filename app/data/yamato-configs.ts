@@ -42,9 +42,9 @@ export type YamatoConfigsData = Record<AppType, BotConfig>;
 export interface AppKnowledgeRecord<T = any> {
   id?: string;
   key: string;
-  title: string;
-  category: string;
-  content_json: T;
+  title?: string;
+  category?: string;
+  data: T;
   created_at?: string;
   updated_at?: string;
 }
@@ -57,7 +57,7 @@ const KNOWLEDGE_KEY = 'YAMATO_CONFIGS';
 export async function fetchYamatoConfigsData(supabaseClient: SupabaseClient): Promise<YamatoConfigsData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('data')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 
@@ -66,7 +66,7 @@ export async function fetchYamatoConfigsData(supabaseClient: SupabaseClient): Pr
     return null;
   }
 
-  return data?.content_json as YamatoConfigsData;
+  return data?.data as YamatoConfigsData;
 }
 
 /**
@@ -83,7 +83,7 @@ export async function upsertYamatoConfigsData(
       key: KNOWLEDGE_KEY,
       title: 'Yamato Bot Configs',
       category,
-      content_json: content,
+      data: content,
       updated_at: new Date().toISOString()
     }, { onConflict: 'key' });
 
