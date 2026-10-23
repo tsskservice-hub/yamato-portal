@@ -24,40 +24,6 @@ import { VCE_KANJI_LIST } from '../data/kanji-list';
 import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
 import { supabase } from '../lib/supabaseClient';
 
-// ページトップへ戻るボタン（カスタムスタイル: 枠線は紺、背景は白、三角は紺）
-function ScrollTopButton() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const toggleVisible = () => {
-      if (window.scrollY > 300) {
-        setVisible(true);
-      } else {
-        setVisible(false);
-      }
-    };
-    window.addEventListener("scroll", toggleVisible);
-    return () => window.removeEventListener("scroll", toggleVisible);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  if (!visible) return null;
-
-  return (
-    <button
-      onClick={scrollToTop}
-      style={{ border: "2px solid #1e3a8a" }}
-      className="bg-white hover:bg-slate-50 text-indigo-900 w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center"
-      title="ページトップへ戻る"
-    >
-      ▲
-    </button>
-  );
-}
-
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -399,14 +365,12 @@ export default function KanjiGrammarCheckerPage() {
           </div>
         </main>
 
-        {/* 右下のフローティングエリア（上戻りボタン ＆ インポートしたラッパー版ヤマトチャットの配置） */}
+        {/* 右下のフローティングエリア（インポートしたラッパー版ヤマトチャットの配置） */}
         <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
           <YamatoChatKanjiGrammarCheckerVce
             userId={activeUserId || undefined}
             credits={currentCredits}
           />
-          
-          <ScrollTopButton />
         </aside>
       </div>
     </PageLayout>
