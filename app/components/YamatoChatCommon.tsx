@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ヤマトAIチャットウィジェット（虹色テーマ対応・未ログインガード・クレジット残高・スマートクレジット制御版）
+ * @description ヤマトAIチャットウィジェット（虹色テーマ対応・未ログインガード・クレジット残高・スマートクレジット制御・左上リサイズ・テーマ連動上に戻るボタン内蔵版）
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -25,9 +25,17 @@ export interface YamatoChatCommonMetaType {
  */
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.7.1",
-  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応・入力欄フォント連動版）",
+  version: "3.9.1",
+  role: "ポータル共通AIチャットウィジェット（虹色テーマ対応・ログインガード・クレジット管理・セッション自動検知・画像生成対応・左上リサイズ・テーマ連動上に戻るボタン内蔵）",
   features: [
+    {
+      featureName: "Theme-Synchronized Scroll Top Button",
+      description: "ヤマトチャットより少し上に配置され、テーマカラーに同期する枠線を持つページトップへ戻るボタンを統合"
+    },
+    {
+      featureName: "Top-Left Resize Support",
+      description: "チャットウィンドウのサイズ変更を右下から左上基点（ドラッグ操作）に変更し、画面端での操作性を大幅改善"
+    },
     {
       featureName: "Login Guard & Auth Modal Trigger",
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
@@ -55,10 +63,6 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Learning Pace Synchronization",
       description: "steady, normal, accelerated の学習ペース切替時に Supabase の profiles テーブルを即時更新"
-    },
-    {
-      featureName: "Credit Cost & Feature Footer",
-      description: "チャット下部にクレジット消費案内（Text / Photo / Visual Aid）を配置"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "rainbow"],
@@ -102,7 +106,7 @@ export type YamatoChatCommonProps = {
   onClearExternalImage?: () => void;
 };
 
-// テーマカラーごとのスタイル定義（rainbow を追加）
+// テーマカラーごとのスタイル定義
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -118,6 +122,8 @@ const themeStyles = {
     userBubble: "bg-red-600 text-white rounded-br-xs",
     inputRing: "focus:ring-red-500",
     submitBtn: "bg-red-600 hover:bg-red-700 text-white",
+    scrollBorder: "2px solid #dc2626", // 赤
+    scrollText: "text-red-700",
   },
   blue: {
     floatingBg: "bg-blue-600 hover:bg-blue-700",
@@ -133,6 +139,8 @@ const themeStyles = {
     userBubble: "bg-blue-600 text-white rounded-br-xs",
     inputRing: "focus:ring-blue-500",
     submitBtn: "bg-blue-600 hover:bg-blue-700 text-white",
+    scrollBorder: "2px solid #2563eb", // 青
+    scrollText: "text-blue-700",
   },
   black: {
     floatingBg: "bg-slate-900 hover:bg-black",
@@ -148,6 +156,8 @@ const themeStyles = {
     userBubble: "bg-slate-900 text-white rounded-br-xs",
     inputRing: "focus:ring-slate-900",
     submitBtn: "bg-slate-900 hover:bg-black text-white",
+    scrollBorder: "2px solid #0f172a", // 黒/スレート
+    scrollText: "text-slate-900",
   },
   green: {
     floatingBg: "bg-green-600 hover:bg-green-700",
@@ -163,6 +173,8 @@ const themeStyles = {
     userBubble: "bg-green-600 text-white rounded-br-xs",
     inputRing: "focus:ring-green-500",
     submitBtn: "bg-green-600 hover:bg-green-700 text-white",
+    scrollBorder: "2px solid #16a34a", // 緑
+    scrollText: "text-green-700",
   },
   yellow: {
     floatingBg: "bg-yellow-500 hover:bg-yellow-600",
@@ -178,6 +190,8 @@ const themeStyles = {
     userBubble: "bg-yellow-500 text-slate-900 rounded-br-xs",
     inputRing: "focus:ring-yellow-500",
     submitBtn: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
+    scrollBorder: "2px solid #ca8a04", // 黄
+    scrollText: "text-yellow-800",
   },
   orange: {
     floatingBg: "bg-orange-500 hover:bg-orange-600",
@@ -193,6 +207,8 @@ const themeStyles = {
     userBubble: "bg-orange-500 text-white rounded-br-xs",
     inputRing: "focus:ring-orange-500",
     submitBtn: "bg-orange-500 hover:bg-orange-600 text-white",
+    scrollBorder: "2px solid #ea580c", // オレンジ
+    scrollText: "text-orange-700",
   },
   purple: {
     floatingBg: "bg-purple-600 hover:bg-purple-700",
@@ -208,6 +224,8 @@ const themeStyles = {
     userBubble: "bg-purple-600 text-white rounded-br-xs",
     inputRing: "focus:ring-purple-500",
     submitBtn: "bg-purple-600 hover:bg-purple-700 text-white",
+    scrollBorder: "2px solid #9333ea", // 紫
+    scrollText: "text-purple-700",
   },
   cyan: {
     floatingBg: "bg-cyan-600 hover:bg-cyan-700",
@@ -223,6 +241,8 @@ const themeStyles = {
     userBubble: "bg-cyan-600 text-white rounded-br-xs",
     inputRing: "focus:ring-cyan-500",
     submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
+    scrollBorder: "2px solid #0891b2", // シアン
+    scrollText: "text-cyan-700",
   },
   pink: {
     floatingBg: "bg-pink-600 hover:bg-pink-700",
@@ -238,6 +258,8 @@ const themeStyles = {
     userBubble: "bg-pink-600 text-white rounded-br-xs",
     inputRing: "focus:ring-pink-500",
     submitBtn: "bg-pink-600 hover:bg-pink-700 text-white",
+    scrollBorder: "2px solid #db2777", // ピンク
+    scrollText: "text-pink-700",
   },
   rainbow: {
     floatingBg: "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 hover:opacity-90",
@@ -253,6 +275,8 @@ const themeStyles = {
     userBubble: "bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-br-xs",
     inputRing: "focus:ring-purple-500",
     submitBtn: "bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white",
+    scrollBorder: "2px solid #ec4899", // 虹色テーマはピンク系枠
+    scrollText: "text-purple-900",
   },
 };
 
@@ -261,6 +285,41 @@ function sanitizeAiOutput(text: string): string {
   return text
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\*\*/g, '');
+}
+
+// 💡 ページトップへ戻るボタン（テーマカラー連動枠線版）
+function ScrollTopButton({ scrollBorder, scrollText }: { scrollBorder: string; scrollText: string }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisible = () => {
+      if (window.scrollY > 300) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    };
+    window.addEventListener("scroll", toggleVisible);
+    return () => window.removeEventListener("scroll", toggleVisible);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={scrollToTop}
+      style={{ border: scrollBorder }}
+      className={`bg-white hover:bg-slate-50 ${scrollText} w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center`}
+      title="ページトップへ戻る"
+    >
+      ▲
+    </button>
+  );
 }
 
 export function YamatoChatCommon({
@@ -284,6 +343,40 @@ export function YamatoChatCommon({
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 💡 チャットウィンドウのサイズ管理（左上リサイズ用）
+  const [chatSize, setChatSize] = useState<{ width: number; height: number }>({ width: 384, height: 540 });
+  const resizingRef = useRef<boolean>(false);
+  const startPosRef = useRef<{ x: number; y: number; w: number; h: number }>({ x: 0, y: 0, w: 384, h: 540 });
+
+  const startTopLeftResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    resizingRef.current = true;
+    startPosRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      w: chatSize.width,
+      h: chatSize.height,
+    };
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!resizingRef.current) return;
+      const deltaX = startPosRef.current.x - moveEvent.clientX;
+      const deltaY = startPosRef.current.y - moveEvent.clientY;
+      const newWidth = Math.max(280, Math.min(window.innerWidth * 0.95, startPosRef.current.w + deltaX));
+      const newHeight = Math.max(380, Math.min(window.innerHeight * 0.9, startPosRef.current.h + deltaY));
+      setChatSize({ width: newWidth, height: newHeight });
+    };
+
+    const onMouseUp = () => {
+      resizingRef.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
 
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
@@ -374,7 +467,6 @@ export function YamatoChatCommon({
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(initialLearningPace);
   
-  // 💡 絵で説明ヤマト（image-explanation）の場合はデフォルトで Visual Aid チェックをONにする
   const [requestVisualAid, setRequestVisualAid] = useState<boolean>(appType === "image-explanation");
 
   useEffect(() => {
@@ -401,7 +493,6 @@ export function YamatoChatCommon({
     }
   };
 
-  // 💡 入力欄やボタン用にバランスの取れたフォントサイズクラスを返す関数
   const getInputFontSizeClass = () => {
     switch (chatFontSize) {
       case 'sm': return 'text-[11px]';
@@ -633,6 +724,9 @@ export function YamatoChatCommon({
   return (
     <>
       <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
+        {/* 💡 ヤマトチャット（ボタンまたはウィンドウ）より少し上に配置され、テーマカラーに同期する上に戻るボタン */}
+        <ScrollTopButton scrollBorder={currentTheme.scrollBorder} scrollText={currentTheme.scrollText} />
+
         {!isAiTutorOpen ? (
           <button
             type="button"
@@ -654,10 +748,11 @@ export function YamatoChatCommon({
         ) : (
           <div
             ref={aiChatRef}
+            style={isAiFullscreen ? undefined : { width: `${chatSize.width}px`, height: `${chatSize.height}px` }}
             className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                : "w-80 sm:w-96 h-[540px] min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
+                : "min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] overflow-auto"
             }`}
           >
             <div className="w-full h-full flex flex-col">
@@ -667,6 +762,18 @@ export function YamatoChatCommon({
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
                   </h3>
+                  {/* 💡 左上リサイズ用グリップボタン */}
+                  {!isAiFullscreen && (
+                    <button
+                      type="button"
+                      onMouseDown={startTopLeftResize}
+                      title="ドラッグして左上方向にサイズ変更"
+                      className="cursor-nw-resize text-slate-400 hover:text-slate-700 text-[11px] px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 transition flex items-center gap-0.5 select-none"
+                    >
+                      <span>↖</span>
+                      <span className="text-[10px]">サイズ変更</span>
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -725,7 +832,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI（テーマカラー連動） */}
+              {/* フォントサイズ変更UI */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -795,8 +902,8 @@ export function YamatoChatCommon({
                                     alt="User Upload"
                                     className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
                                     onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                />
-                              </div>
+                                  />
+                                </div>
                               )}
                             </div>
                           ) : (
@@ -812,7 +919,7 @@ export function YamatoChatCommon({
                                   />
                                 </div>
                               )}
-                          </div>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -914,16 +1021,16 @@ export function YamatoChatCommon({
           <div className="relative max-w-4xl max-h-[90vh]">
             <button
               onClick={() => setModalImageSrc(null)}
-            className="absolute -top-10 right-0 text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition cursor-pointer"
-          >
-            ✕ Close
-          </button>
-          <img
-            src={modalImageSrc}
-            alt="Enlarged View"
-            className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white"
-          />
-        </div>
+              className="absolute -top-10 right-0 text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition cursor-pointer"
+            >
+              ✕ Close
+            </button>
+            <img
+              src={modalImageSrc}
+              alt="Enlarged View"
+              className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white"
+            />
+          </div>
         </div>
       )}
   </>

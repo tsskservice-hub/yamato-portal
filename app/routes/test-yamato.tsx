@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（絵で説明ヤマト・虹色テーマ対応版）
+ * @description ヤマトAI 独立APIテスト画面（絵で説明ヤマト・虹色テーマ・テーマ連動上に戻るボタン対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { Link, useSearchParams } from "@remix-run/react";
@@ -268,6 +268,12 @@ export default function TestYamatoPage() {
                     ウィジェットのヘッダー色、バッジ、入力欄のフォーカスリング、ユーザーの吹き出し背景、およびボタンの枠線・背景・文字色（赤、黒、水色、緑、紫、虹色など）が各ペルソナの設定に合わせて変化します。
                   </div>
                 </li>
+                <li>
+                  <strong>上に戻るボタンの枠線と文字の色:</strong>
+                  <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
+                    ヤマトチャットのテーマカラーに連動して、ページトップへ戻るボタンの枠線やアイコンの色（赤、青、緑、紫、虹色対応など）が自動的に同期して変化します。
+                  </div>
+                </li>
               </ul>
             </div>
 
@@ -453,6 +459,6 @@ export default function TestYamatoPage() {
       <footer style={{ textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }}>
         <p>&copy; 2026 JPTutor AI Yamato.</p>
       </footer>
-    </div>
+  </div>
   );
 }
