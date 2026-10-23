@@ -326,7 +326,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
       return;
     }
 
-    const userMsg = tutorInput.trim() || (hasImage ? "Please check this attached photo." : "");
+    const userMsg = tutorInput.trim() || (hasImage ? "Please transcribe my answer in the photo." : "");
     const imageBase64 = activeImagePreview;
 
     setTutorInput("");

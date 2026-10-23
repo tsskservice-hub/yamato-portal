@@ -1,6 +1,6 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（手書き解答の画像アップロード＆チャット連携対応版）
+ * @description VCE Kanji & Grammar Checker 独立ページ（バックエンドAI Visionによる自動文字起こし・型エラー修正版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
@@ -61,9 +61,10 @@ export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 画像アップロード用ステート
+  // 画像アップロードおよび文字起こし用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
 
   // rootData からグローバルデータを安全に取得
   const rootData = useRouteLoaderData("root") as {
@@ -84,6 +85,41 @@ export default function KanjiGrammarCheckerPage() {
     document.title = "VCE Kanji & Grammar Checker | AI Yamato Portal";
   }, []);
 
+  // 💡 バックエンドのAI (Vision API) を利用して手書き画像を自動文字起こしする関数
+  const handleAutoTranscribe = async (imageBase64: string) => {
+    setIsTranscribing(true);
+    try {
+      const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+      const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
+
+      const response = await fetch(`${apiBaseUrl}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "Please transcribe the handwritten Japanese text in this photo accurately and output ONLY the transcribed Japanese text without any extra explanations or conversational filler.",
+          imageBase64: imageBase64,
+          userId: user?.id,
+          appType: "kanji-grammar-checker-ocr"
+        }),
+      });
+
+      // 💡 型エラー解消のため data に any 型を明示
+      const data: any = await response.json();
+      if (response.ok && data.reply) {
+        // AIの返答から余分な引用符などを除去してテキストエリアにセット
+        const cleanedText = data.reply.trim().replace(/^["「]|["」]$/g, "");
+        setText(cleanedText);
+      } else {
+        alert("Failed to transcribe image automatically. Please try typing or use the chat widget.");
+      }
+    } catch (err) {
+      console.error("Transcription error:", err);
+      alert("An error occurred during transcription communication.");
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
   // 画像選択時の処理
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,7 +127,10 @@ export default function KanjiGrammarCheckerPage() {
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSelectedImagePreview(reader.result as string);
+        const base64Result = reader.result as string;
+        setSelectedImagePreview(base64Result);
+        // 画像読み込み完了と同時に自動でバックエンドAI文字起こしを実行
+        handleAutoTranscribe(base64Result);
       };
       reader.readAsDataURL(file);
     }
@@ -181,19 +220,19 @@ export default function KanjiGrammarCheckerPage() {
           {/* Header Card */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <p className="text-base text-slate-600 leading-relaxed">
-              If you have a typed writing response, please paste it into the checker below. If you have a handwritten response, transcribe it below first, and then paste it into the checker. You can see at a glance how many unique VCE Kanji (highlighted in <span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 yellow</span>) and VCE Grammar points (highlighted in <span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 green</span>) you have used without any duplication!
+              If you have a typed writing response, please paste it into the checker below. If you have a handwritten response, upload a photo below to automatically transcribe it into the checker using AI Vision. You can see at a glance how many unique VCE Kanji (highlighted in <span className="text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded">🟡 yellow</span>) and VCE Grammar points (highlighted in <span className="text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded">🟢 green</span>) you have used without any duplication!
             </p>
           </div>
 
-          {/* 手書き答案のアップロードセクション */}
+          {/* 手書き答案のアップロード ＆ 自動文字起こしセクション */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                  <span>📷</span> Handwriting Transcription & AI Assist
+                  <span>📷</span> AI Handwriting Auto-Transcription
                 </h3>
                 <p className="text-sm text-slate-600">
-                  Upload a photo of your handwritten response to transcribe it with AI Yamato.
+                  Upload a photo of your handwritten response to automatically transcribe it via AI Vision.
                 </p>
               </div>
               <div>
@@ -206,11 +245,21 @@ export default function KanjiGrammarCheckerPage() {
                 />
                 <button
                   type="button"
+                  disabled={isTranscribing}
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
                 >
-                  <span>📷</span>
-                  <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
+                  {isTranscribing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Transcribing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📷</span>
+                      <span>{selectedImagePreview ? "Change Answer Photo" : "Upload & Transcribe Photo"}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -219,8 +268,10 @@ export default function KanjiGrammarCheckerPage() {
               <div className="flex items-center gap-4 bg-slate-50 border border-indigo-200 p-3 rounded-2xl">
                 <img src={selectedImagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-xl border shadow-xs" />
                 <div className="flex-grow">
-                  <div className="font-bold text-indigo-900 text-sm">Handwritten Answer Ready for AI Tutor</div>
-                  <div className="text-slate-600 text-xs">Open the chat widget below and send it to transcribe!</div>
+                  <div className="font-bold text-indigo-900 text-sm">
+                    {isTranscribing ? "AI Vision is transcribing your handwriting..." : "Transcription complete! Check the text box below."}
+                  </div>
+                  <div className="text-slate-600 text-xs">You can freely edit the transcribed text in the input area.</div>
                 </div>
                 <button
                   type="button"
@@ -231,7 +282,7 @@ export default function KanjiGrammarCheckerPage() {
                   }}
                   className="text-red-600 hover:text-red-800 text-xs font-bold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition"
                 >
-                  Remove ✕
+                  Clear ✕
                 </button>
               </div>
             )}
@@ -240,13 +291,18 @@ export default function KanjiGrammarCheckerPage() {
           {/* Checker Workspace */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-700">
-                Japanese Text Input
+              <label className="block text-sm font-bold text-slate-700 flex items-center justify-between">
+                <span>Japanese Text Input (Transcribed or Typed)</span>
+                {isTranscribing && (
+                  <span className="text-xs text-indigo-600 font-bold flex items-center gap-1 animate-pulse">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Processing image...
+                  </span>
+                )}
               </label>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Type or paste Japanese text here..."
+                placeholder="Type, paste, or upload a photo to transcribe Japanese text here..."
                 className="w-full h-40 p-4 rounded-2xl border border-slate-300 text-lg sm:text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y box-border bg-slate-50/50 text-slate-800 leading-relaxed"
               />
             </div>
@@ -291,13 +347,6 @@ export default function KanjiGrammarCheckerPage() {
             userId={user?.id}
             userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
             credits={credits}
-            externalImageFile={selectedImage}
-            externalImagePreview={selectedImagePreview}
-            onClearExternalImage={() => {
-              setSelectedImage(null);
-              setSelectedImagePreview(null);
-              if (fileInputRef.current) fileInputRef.current.value = '';
-            }}
           />
           <ScrollTopButton />
         </aside>
