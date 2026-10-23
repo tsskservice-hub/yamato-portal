@@ -16,6 +16,7 @@ export type AppType =
   | "eoy-oral-elaborate" 
   | "eoy-oral-mock" 
   | "eoy-writing" 
+  | "eoy-writing-custom"
   | "oral-exam-questions"
   | "kanji-grammar-checker"
   | "image-explanation";

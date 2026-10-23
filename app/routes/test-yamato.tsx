@@ -145,7 +145,7 @@ export default function TestYamatoPage() {
               </div>
             </div>
 
-            {/* 🌍 Section 1: 全世界対応（ここに「絵で説明ヤマト」を配置） */}
+            {/* 🌍 Section 1: 全世界対応 */}
             <div style={{ backgroundColor: "#eff6ff", padding: "12px", borderRadius: "12px", border: "1px solid #bfdbfe" }}>
               <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#1d4ed8", textTransform: "uppercase", marginBottom: "8px" }}>
                 🌍 Section 1: 全世界対応
@@ -192,8 +192,9 @@ export default function TestYamatoPage() {
                     "eoy-oral-elaborate",
                     "eoy-oral-mock",
                     "eoy-writing",
+                    "eoy-writing-custom",
                     "oral-exam-questions",
-                    "kanji-grammar-checker", // 💡 新しく追加した漢字文型チェッカーのappType
+                    "kanji-grammar-checker",
                   ] as const
                 ).map((type) => {
                   const cfg = yamatoConfigs?.[type];
@@ -219,6 +220,7 @@ export default function TestYamatoPage() {
                       {type === "eoy-oral-elaborate" && (<span>💭 Oral Elaborate {isSelected && " ✓"}</span>)}
                       {type === "eoy-oral-mock" && (<span>📝 Oral Mock {isSelected && " ✓"}</span>)}
                       {type === "eoy-writing" && (<span>✍️ Writing {isSelected && " ✓"}</span>)}
+                      {type === "eoy-writing-custom" && (<span>✍️ Writing (Custom) {isSelected && " ✓"}</span>)}
                       {type === "oral-exam-questions" && (<span>✨ 口頭試験質問集 {isSelected && " ✓"}</span>)}
                       {type === "kanji-grammar-checker" && (<span>📚 漢字文法チェッカー {isSelected && " ✓"}</span>)}
                     </button>
