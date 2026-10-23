@@ -1,6 +1,11 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（root loader 自動データ解決・未ログインガード・クレジット残高表示・9色テーマ・Vision画像アップロードON/OFF切替対応版）
+ * @description ポータル共通AIチャットウィジェット
+ * 💡 特徴：
+ * 1. root loader 自動データ解決（userId, credits, nickname, learningPace）
+ * 2. 写真アップロード（enableImageUpload）のON/OFF切り替え
+ * 3. 左上ドラッグによるウィンドウリサイズ機能
+ * 4. チャットボタンと枠線・文字色（三角）・背景色が完全連動する上に戻るボタン（ScrollTopButton）内包
  */
 import { useState, useEffect, useRef } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -20,9 +25,17 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.4.0",
-  role: "ポータル共通AIチャットウィジェット（root loader 自動データ解決・クレジット管理・セッション自動検知・9色テーマ・画像アップロード切替対応版）",
+  version: "3.6.0",
+  role: "ポータル共通AIチャットウィジェット（完全連動上戻りボタン・左上リサイズ・root自動解決・写真切替対応版）",
   features: [
+    {
+      featureName: "Synchronized Scroll Top Button",
+      description: "チャットボタンと枠線・背景・文字色（三角）を完全に共有する上に戻るボタンを内包"
+    },
+    {
+      featureName: "Top-Left Resizing Handle",
+      description: "画面内に収まったまま左上方向にスムーズにチャット窓をドラッグリサイズ可能"
+    },
     {
       featureName: "Automatic Root Loader Data Resolution",
       description: "useRouteLoaderData('root') を用いて userId, credits, nickname, learningPace を自動取得"
@@ -30,14 +43,6 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Configurable Image Upload Button",
       description: "enableImageUpload props により、部屋ごとに写真アップロードボタンの表示/非表示を自在に切り替え可能"
-    },
-    {
-      featureName: "Login Guard & Auth Modal Trigger",
-      description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
-    },
-    {
-      featureName: "Live Credit Display & Warning Badge",
-      description: "ヘッダーに現在のクレジット残高をリアルタイム表示し、不足時に警告バッジを点灯"
     },
     {
       featureName: "New 9 Color Themes",
@@ -84,9 +89,10 @@ export type YamatoChatCommonProps = {
   userNickname?: string;
   credits?: number;
   onOpenAuth?: (mode?: 'signin' | 'signup') => void;
-  enableImageUpload?: boolean; // 💡 写真アップロード機能のON/OFF（デフォルト: true）
+  enableImageUpload?: boolean; // 💡 2: ノートのコード（写真ボタンON/OFFスイッチ）
 };
 
+// 新9色テーマごとのスタイル定義
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -232,6 +238,47 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
+// 💡 4: さきほど表示したコード（チャットボタンと枠線・背景・文字色を完全に共有する上に戻るボタン）
+function ScrollTopButton({
+  floatingClass,
+  inlineStyle
+}: {
+  floatingClass: string;
+  inlineStyle?: { border?: string; background?: string; color?: string }
+}) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisible = () => {
+      if (window.scrollY > 300) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    };
+    window.addEventListener("scroll", toggleVisible);
+    return () => window.removeEventListener("scroll", toggleVisible);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={scrollToTop}
+      style={inlineStyle}
+      className={`${floatingClass} w-10 h-10 rounded-full shadow-lg transition cursor-pointer text-xs font-bold flex items-center justify-center`}
+      title="ページトップへ戻る"
+    >
+      ▲
+    </button>
+  );
+}
+
 export function YamatoChatCommon({
   characterName = "ヤマト AI",
   initialGreeting = "Hello, my friend! 🌟 Welcome to Yamato AI Tutor. How can I assist your Japanese learning today?",
@@ -246,8 +293,9 @@ export function YamatoChatCommon({
   userNickname: propNickname,
   credits: propCredits,
   onOpenAuth,
-  enableImageUpload = true, // 💡 デフォルトは有効（表示）
+  enableImageUpload = true, // 💡 2: ノートのコード（デフォルトは true）
 }: YamatoChatCommonProps) {
+  // 💡 1: ノートのコード（root loader からのセッション・クレジット自動解決）
   const rootData = useRouteLoaderData("root") as RootLoaderData | undefined;
 
   const effectiveUserId = propUserId ?? rootData?.user?.id;
@@ -259,6 +307,40 @@ export function YamatoChatCommon({
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 💡 3: さきほど表示したコード（左上ドラッグリサイズのステート管理）
+  const [chatSize, setChatSize] = useState<{ width: number; height: number }>({ width: 384, height: 540 });
+  const resizingRef = useRef<boolean>(false);
+  const startPosRef = useRef<{ x: number; y: number; w: number; h: number }>({ x: 0, y: 0, w: 384, h: 540 });
+
+  const startTopLeftResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    resizingRef.current = true;
+    startPosRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      w: chatSize.width,
+      h: chatSize.height,
+    };
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!resizingRef.current) return;
+      const deltaX = startPosRef.current.x - moveEvent.clientX;
+      const deltaY = startPosRef.current.y - moveEvent.clientY;
+      const newWidth = Math.max(280, Math.min(window.innerWidth * 0.95, startPosRef.current.w + deltaX));
+      const newHeight = Math.max(380, Math.min(window.innerHeight * 0.9, startPosRef.current.h + deltaY));
+      setChatSize({ width: newWidth, height: newHeight });
+    };
+
+    const onMouseUp = () => {
+      resizingRef.current = false;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
 
   const [activeUserId, setActiveUserId] = useState<string | undefined>(effectiveUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(effectiveCreditsFromRoot);
@@ -576,6 +658,10 @@ export function YamatoChatCommon({
   return (
     <>
       <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
+        
+        {/* 💡 4: ヤマトチャットボタンと完全に同じ背景・枠線・文字色（三角）を共有する上に戻るボタン */}
+        <ScrollTopButton floatingClass={finalFloatingButtonClass} inlineStyle={floatingInlineStyle} />
+
         {!isAiTutorOpen ? (
           <button
             type="button"
@@ -597,10 +683,12 @@ export function YamatoChatCommon({
         ) : (
           <div
             ref={aiChatRef}
+            // 💡 3: 左上リサイズ用インラインスタイル（通常時は chatSize の幅・高さを反映）
+            style={isAiFullscreen ? undefined : { width: `${chatSize.width}px`, height: `${chatSize.height}px` }}
             className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                : "w-80 sm:w-96 h-[540px] min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
+                : "min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] overflow-auto"
             }`}
           >
             <div className="w-full h-full flex flex-col">
@@ -608,15 +696,30 @@ export function YamatoChatCommon({
               <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
-                    <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
+                    <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span>
+                    {characterName}
                   </h3>
+                  
+                  {/* 💡 3: 左上ドラッグリサイズ用グリップボタン */}
+                  {!isAiFullscreen && (
+                    <button
+                      type="button"
+                      onMouseDown={startTopLeftResize}
+                      title="ドラッグして左上方向にサイズ変更"
+                      className="cursor-nw-resize text-slate-400 hover:text-slate-700 text-[11px] px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 transition flex items-center gap-0.5 select-none"
+                    >
+                      <span>↖</span>
+                      <span className="text-[10px]">サイズ変更</span>
+                    </button>
+                  )}
+
                   {activeUserId ? (
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                       🪙 {currentCredits} credits
                     </span>
                   ) : (
                     <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                      🔒 Guest (Login Required)
+                      🔒 Guest
                     </span>
                   )}
                 </div>
@@ -785,7 +888,7 @@ export function YamatoChatCommon({
                   {/* 入力フォーム */}
                   <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
                     <div className="flex items-center justify-between">
-                      {/* 💡 enableImageUpload が true の時だけ写真アップロードボタンを表示 */}
+                      {/* 💡 2: enableImageUpload が true の時だけ写真アップロードボタンを表示 */}
                       {enableImageUpload ? (
                         <>
                           <input
@@ -805,7 +908,7 @@ export function YamatoChatCommon({
                           </button>
                         </>
                       ) : (
-                        <div /> /* ボタンがない場合のレイアウト崩れを防ぐスペーサー */
+                        <div />
                       )}
 
                       <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
