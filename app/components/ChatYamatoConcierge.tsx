@@ -1,5 +1,5 @@
 import React from "react";
-import YamatoChatCommon from "~/components/YamatoChatCommon";
+import YamatoChatCommon from "../components/YamatoChatCommon";
 
 export interface ChatYamatoConciergeProps {
   defaultOpen?: boolean;

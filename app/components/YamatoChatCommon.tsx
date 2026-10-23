@@ -629,241 +629,250 @@ export function YamatoChatCommon({
         ) : (
           <div
             ref={aiChatRef}
+            style={{ transform: 'scale(-1, -1)', transformOrigin: 'bottom right' }}
             className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                 : "w-80 sm:w-96 h-[540px] min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] resize overflow-auto"
             }`}
           >
-            <div className="w-full h-full flex flex-col">
-              {/* ヘッダー（クレジット残高表示対応） */}
-              <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-                <div className="flex items-center gap-2">
-                  <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
-                    <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
-                  </h3>
-                  {activeUserId ? (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                      🪙 {currentCredits} credits
-                    </span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                      🔒 Guest (Login Required)
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={toggleAiFullscreen}
-                    className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
-                  >
-                    {isAiFullscreen ? "🗗 縮小" : "🗖 最大化"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (document.fullscreenElement) {
-                        document.exitFullscreen().catch(() => {});
-                      }
-                      setIsAiTutorOpen(false);
-                      setIsAiFullscreen(false);
-                    }}
-                    className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
-                  >
-                    ✕ Close
-                  </button>
-                </div>
-              </div>
-
-              {/* 学習ペース選択UI */}
-              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
-                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
-                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
-                  {(["steady", "normal", "accelerated"] as const).map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => handlePaceChange(level)}
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize transition ${
-                        tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* フォントサイズ変更UI */}
-              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-slate-700">Font Size</span>
-                <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
-                  {(
-                    [
-                      { key: 'sm', label: '小' },
-                      { key: 'base', label: '中' },
-                      { key: 'lg', label: '大' },
-                      { key: 'xl', label: '特大' },
-                    ] as const
-                  ).map((size) => (
-                    <button
-                      key={size.key}
-                      type="button"
-                      onClick={() => setChatFontSize(size.key)}
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
-                        chatFontSize === size.key
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-600 hover:text-blue-700"
-                      }`}
-                    >
-                      {size.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 未ログイン時の新規登録・ログインガード画面 */}
-              {!activeUserId ? (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="text-3xl">🔒</div>
-                  <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Please sign up or log in to chat with {characterName} and receive welcome credits!
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAiTutorOpen(false);
-                      handleTriggerAuth('signup');
-                    }}
-                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
-                  >
-                    Sign In / Sign Up Now
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {/* チャット履歴エリア */}
-                  <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
-                    {tutorMessages.map((msg, idx) => (
-                      <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                        <div
-                          className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
-                            msg.role === "user"
-                              ? currentTheme.userBubble
-                              : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
-                          }`}
-                        >
-                          {msg.role === "user" ? (
-                            <div>
-                              {msg.content}
-                              {msg.imageUrl && (
-                                <div className="mt-2">
-                                  <img
-                                    src={msg.imageUrl}
-                                    alt="User Upload"
-                                    className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
-                                    onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                              {msg.imageUrl && (
-                                <div className="mt-2">
-                                  <img
-                                    src={msg.imageUrl}
-                                    alt="AI Generated Visual Aid"
-                                    className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
-                                    onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {isTutorLoading && (
-                      <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
-                        <span className="inline-block animate-spin text-sm">🤖</span>
-                        <span>Yamato is thinking & reading...</span>
-                      </div>
+            {/* 💡 内部のコンテンツを正しい向き（正立）に戻すためのラッパー */}
+            <div style={{ transform: 'scale(-1, -1)' }} className="w-full h-full flex flex-col">
+              <div className="w-full h-full flex flex-col">
+                {/* ヘッダー（クレジット残高表示対応） */}
+                <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
+                      <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
+                    </h3>
+                    {activeUserId ? (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                        🪙 {currentCredits} credits
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                        🔒 Guest (Login Required)
+                      </span>
                     )}
                   </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={toggleAiFullscreen}
+                      className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
+                    >
+                      {isAiFullscreen ? "🗗 縮小" : "🗖 最大化"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (document.fullscreenElement) {
+                          document.exitFullscreen().catch(() => {});
+                        }
+                        setIsAiTutorOpen(false);
+                        setIsAiFullscreen(false);
+                      }}
+                      className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
+                    >
+                      ✕ Close
+                    </button>
+                  </div>
+                </div>
 
-                  {/* 添付画像のプレビューバー */}
-                  {selectedImagePreview && (
-                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                      <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
-                      <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
+                {/* 学習ペース選択UI */}
+                <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
+                  <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
+                  <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
+                    {(["steady", "normal", "accelerated"] as const).map((level) => (
                       <button
+                        key={level}
                         type="button"
-                        onClick={() => {
-                          setSelectedImage(null);
-                          setSelectedImagePreview(null);
-                          if (fileInputRef.current) fileInputRef.current.value = '';
-                        }}
-                        className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
+                        onClick={() => handlePaceChange(level)}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize transition ${
+                          tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
+                        }`}
                       >
-                        ✕
+                        {level}
                       </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* フォントサイズ変更UI */}
+                <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
+                  <span className="text-xs font-bold text-slate-700">Font Size</span>
+                  <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
+                    {(
+                      [
+                        { key: 'sm', label: '小' },
+                        { key: 'base', label: '中' },
+                        { key: 'lg', label: '大' },
+                        { key: 'xl', label: '特大' },
+                      ] as const
+                    ).map((size) => (
+                      <button
+                        key={size.key}
+                        type="button"
+                        onClick={() => setChatFontSize(size.key)}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
+                          chatFontSize === size.key
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "text-slate-600 hover:text-blue-700"
+                        }`}
+                      >
+                        {size.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 未ログイン時の新規登録・ログインガード画面 */}
+                {!activeUserId ? (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="text-3xl">🔒</div>
+                    <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Please sign up or log in to chat with {characterName} and receive welcome credits!
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAiTutorOpen(false);
+                        handleTriggerAuth('signup');
+                      }}
+                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
+                    >
+                      Sign In / Sign Up Now
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* チャット履歴エリア */}
+                    <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
+                      {tutorMessages.map((msg, idx) => (
+                        <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                          <div
+                            className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
+                              msg.role === "user"
+                                ? currentTheme.userBubble
+                                : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
+                            }`}
+                          >
+                            {msg.role === "user" ? (
+                              <div>
+                                {msg.content}
+                                {msg.imageUrl && (
+                                  <div className="mt-2">
+                                    <img
+                                      src={msg.imageUrl}
+                                      alt="User Upload"
+                                      className="rounded-lg max-h-36 object-cover cursor-pointer hover:opacity-90"
+                                      onClick={() => setModalImageSrc(msg.imageUrl || null)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                {msg.imageUrl && (
+                                  <div className="mt-2">
+                                    <img
+                                      src={msg.imageUrl}
+                                      alt="AI Generated Visual Aid"
+                                      className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
+                                      onClick={() => setModalImageSrc(msg.imageUrl || null)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {isTutorLoading && (
+                        <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
+                          <span className="inline-block animate-spin text-sm">🤖</span>
+                          <span>Yamato is thinking & reading...</span>
+                        </div>
+                      )}
                     </div>
-                  )}
 
-                  {/* 入力フォーム */}
-                  <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                    <div className="flex items-center justify-between">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
-                      >
-                        <span>📷</span>
-                        <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
-                      </button>
+                    {/* 添付画像のプレビューバー */}
+                    {selectedImagePreview && (
+                      <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
+                        <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                        <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedImage(null);
+                            setSelectedImagePreview(null);
+                            if (fileInputRef.current) fileInputRef.current.value = '';
+                          }}
+                          className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
 
-                      <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
+                    {/* 入力フォーム */}
+                    <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
+                      <div className="flex items-center justify-between">
                         <input
-                          type="checkbox"
-                          checked={requestVisualAid}
-                          onChange={(e) => setRequestVisualAid(e.target.checked)}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+                          type="file"
+                          accept="image/*"
+                          ref={fileInputRef}
+                          onChange={handleImageChange}
+                          className="hidden"
                         />
-                        <span>Visual Aid</span>
-                      </label>
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
+                        >
+                          <span>📷</span>
+                          <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
+                        </button>
 
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={tutorInput}
-                        onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
-                        disabled={isTutorLoading}
-                        className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
-                      />
-                      <button
-                        type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
-                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
-                      >
-                        Send
-                      </button>
-                    </div>
-                  </form>
-                </>
-              )}
+                        <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={requestVisualAid}
+                            onChange={(e) => setRequestVisualAid(e.target.checked)}
+                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+                          />
+                          <span>Visual Aid</span>
+                        </label>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={tutorInput}
+                          onChange={(e) => setTutorInput(e.target.value)}
+                          placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                          disabled={isTutorLoading}
+                          className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
+                          className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
+                        >
+                          Send
+                        </button>
+                      </div>
+
+                      {/* 消費クレジット案内 */}
+                      <div className="text-[10px] text-slate-400 px-1 text-left">
+                        💡 Text: {FEATURE_COSTS.textAi} cr / Photo & Visual Aid: {FEATURE_COSTS.imageAi} cr
+                      </div>
+                    </form>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -872,7 +881,7 @@ export function YamatoChatCommon({
       {/* 画像拡大表示モーダル */}
       {modalImageSrc && (
         <div
-          className="fixed inset-0 z- bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4"
           onClick={() => setModalImageSrc(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh]">
