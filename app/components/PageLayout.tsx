@@ -1,10 +1,25 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・子コンポーネントへのセッション/クレジット自動注入対応版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応・共通パンくずリスト自動生成版）
+ * 💡 上戻りボタンは YamatoChatCommon 側へ集約・カラー完全連動されたため、PageLayout からは削除してクリーン化しています。
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
-import { KeyRound, ShieldCheck, X, ArrowRight, Fingerprint, Mail, CheckCircle2, ChevronDown, ChevronUp, Lock, Sparkles, Home, ChevronRight } from "lucide-react";
+import { 
+  KeyRound, 
+  ShieldCheck, 
+  X, 
+  ArrowRight, 
+  Fingerprint, 
+  Mail, 
+  CheckCircle2, 
+  ChevronDown, 
+  ChevronUp, 
+  Lock, 
+  Sparkles, 
+  Home, 
+  ChevronRight 
+} from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
 import { supabase } from "../lib/supabaseClient";
@@ -22,8 +37,7 @@ type PageLayoutProps = {
   learningPace?: "steady" | "normal" | "accelerated"; 
   isDarkMode?: boolean;
   breadcrumbTitle?: string; // 💡 個別ページでカスタム名称を指定したい場合のオプション
-  scrollTopClassName?: string; // 💡 個別ページからスクロールトップボタンのスタイル/色を上書きするためのオプション
-  onSignOut?: () => void | Promise<void>; // 💡 各ルートファイルからの渡されるサインアウト処理に対応
+  onSignOut?: () => void | Promise<void>;
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -34,7 +48,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   learningPace: propLearningPace, 
   isDarkMode = false,
   breadcrumbTitle,
-  scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50", // 💡 デフォルト：枠青線、三角青、背景白
   onSignOut: propOnSignOut
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {  
@@ -45,25 +58,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   } | undefined;
 
   const location = useLocation();
-
-  // 💡 Scroll to top states & listener
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   // 💡 パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
@@ -158,6 +152,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setNickname("");
   };
 
+  // 💡 認証モーダル・パスキーのステート管理
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGuideStep, setIsGuideStep] = useState(false);
@@ -256,35 +251,10 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       )}
 
       <main className="flex-grow">
-        {/* 💡 PageLayout が保持する最新のセッション（user, credits, nickname）を子要素（各ページ）へ自動注入 */}
-        {React.Children.map(children, (child) => {
-          if (React.isValidElement(child)) {
-            return React.cloneElement(child as React.ReactElement<any>, {
-              user: user !== undefined ? user : (child.props as any).user,
-              credits: credits !== undefined ? credits : (child.props as any).credits,
-              nickname: nickname !== undefined ? nickname : (child.props as any).nickname,
-              learningPace: learningPace !== undefined ? learningPace : (child.props as any).learningPace,
-            });
-          }
-          return child;
-        })}
+        {children}
       </main>
       
       <Footer onOpenAuth={handleOpenAuthModal} />
-
-      {/* ⬆️ ページトップへ戻るボタン（デフォルト：枠青線、三角青、背景白） */}
-      {showScrollTop && (
-        <div className="fixed bottom-24 right-6 z-40">
-          <button
-            type="button"
-            onClick={scrollToTop}
-            className={`w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center ${scrollTopClassName}`}
-            title="ページトップへ戻る"
-          >
-            ▲
-          </button>
-        </div>
-      )}
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (
