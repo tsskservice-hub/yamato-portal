@@ -25,7 +25,7 @@ export interface ChatYamatoKanjiGrammarCheckerVceMetaType {
  */
 export const CHAT_YAMATO_KANJI_GRAMMAR_CHECKER_VCE_META: ChatYamatoKanjiGrammarCheckerVceMetaType = {
   componentName: "ChatYamatoKanjiGrammarCheckerVce",
-  version: "3.7.0",
+  version: "3.8.0",
   role: "VCE漢字文法チェッカー専用AIチャットウィジェット（カスタムテーマ・ログインガード・クレジット管理・セッション自動検知・画像生成対応版）",
   features: [
     {
@@ -45,8 +45,8 @@ export const CHAT_YAMATO_KANJI_GRAMMAR_CHECKER_VCE_META: ChatYamatoKanjiGrammarC
       description: "バックエンドからの ZERO_CREDITS および PARTIAL_SHORTAGE エラーをスマートにハンドリング"
     },
     {
-      featureName: "Image Upload & Vision Support",
-      description: "手書き答案などの画像を選択・プレビュー付きでアップロードし、AI家庭教師に画像付きで質問送信可能"
+      featureName: "External Image & Vision Support",
+      description: "ページ側で選択された答案画像をプレビュー付きで受け取り、AI家庭教師に画像付きで質問送信可能"
     },
     {
       featureName: "Learning Pace Synchronization",
@@ -69,9 +69,9 @@ type ChatMessage = {
 
 // 💡 機能ごとの消費クレジット定義
 const FEATURE_COSTS = {
-  textAi: 2,         // 通常のテキストチャット
-  imageAi: 4,        // 画像付きチャット（1枚）または画像生成AI
-  multiImageAi: 6,   // 画像付きチャット（2枚）
+  textAi: 2,           // 通常のテキストチャット
+  imageAi: 4,          // 画像付きチャット（1枚）または画像生成AI
+  multiImageAi: 6,     // 画像付きチャット（2枚）
 };
 
 // 外部から受け取るプロパティ（Props）の型定義
@@ -114,7 +114,6 @@ export function ChatYamatoKanjiGrammarCheckerVce({
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeUserId, setActiveUserId] = useState<string | undefined>(propUserId);
   const [currentCredits, setCurrentCredits] = useState<number>(initialCredits);
@@ -180,10 +179,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
 
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [internalImagePreview, setInternalImagePreview] = useState<string | null>(null);
-
-  const activeImagePreview = externalImagePreview || internalImagePreview;
+  const activeImagePreview = externalImagePreview || null;
 
   // ご要望のカスタムボタンスタイル（枠線：紺、背景：薄めの桃色、文字：黒）
   const customButtonStyle = {
@@ -288,18 +284,6 @@ export function ChatYamatoKanjiGrammarCheckerVce({
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setInternalImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
@@ -346,10 +330,7 @@ export function ChatYamatoKanjiGrammarCheckerVce({
     const imageBase64 = activeImagePreview;
 
     setTutorInput("");
-    setSelectedImage(null);
-    setInternalImagePreview(null);
     setRequestVisualAid(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
     if (onClearExternalImage) {
       onClearExternalImage();
     }
@@ -534,9 +515,9 @@ export function ChatYamatoKanjiGrammarCheckerVce({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI */}
-              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-slate-700">Font Size</span>
+              {/* フォントサイズ変更UI（Learning Paceと同じ桃色系に変更） */}
+              <div className="bg-pink-50 border border-pink-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-pink-900">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(
                     [
@@ -552,8 +533,8 @@ export function ChatYamatoKanjiGrammarCheckerVce({
                       onClick={() => setChatFontSize(size.key)}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
                         chatFontSize === size.key
-                          ? "bg-indigo-900 text-white shadow-xs"
-                          : "text-slate-600 hover:text-indigo-900"
+                          ? "bg-pink-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-pink-700"
                       }`}
                     >
                       {size.label}
@@ -642,9 +623,6 @@ export function ChatYamatoKanjiGrammarCheckerVce({
                       <button
                         type="button"
                         onClick={() => {
-                          setSelectedImage(null);
-                          setInternalImagePreview(null);
-                          if (fileInputRef.current) fileInputRef.current.value = '';
                           if (onClearExternalImage) onClearExternalImage();
                         }}
                         className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
@@ -654,25 +632,9 @@ export function ChatYamatoKanjiGrammarCheckerVce({
                     </div>
                   )}
 
-                  {/* 入力フォーム */}
+                  {/* 入力フォーム（Upload Photo ボタンを削除） */}
                   <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                    <div className="flex items-center justify-between">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
-                      >
-                        <span>📷</span>
-                        <span>{activeImagePreview ? "Change Photo" : "Upload Photo"}</span>
-                      </button>
-
+                    <div className="flex items-center justify-end">
                       <label className="flex items-center gap-1 text-[11px] text-slate-600 cursor-pointer select-none">
                         <input
                           type="checkbox"
