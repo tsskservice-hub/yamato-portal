@@ -1,16 +1,13 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（全機能完全版・ヘッダークレジット即時連動・Supabase Realtime同期対応）
- * 💡 実装機能：
- * 1. root loader 自動データ解決（userId, credits, nickname, learningPace）
- * 2. 写真アップロード（enableImageUpload）のON/OFF切り替え
- * 3. 左上ドラッグによるウィンドウリサイズ機能
- * 4. チャットボタンと枠線・背景色が完全連動する上に戻るボタン（ScrollTopButton）
- * 5. 未ログインガード画面（Sign Up Required）
- * 6. フォントサイズ4段階切替（小・中・大・特大）
- * 7. 新9色テーマ＆カラーコード（#hex）直接指定対応
- * 8. 画像拡大表示モーダル
- * 9. ヘッダー（PageLayout）へのクレジット即時連動通知（0秒同期）
+ * @description ポータル共通AIチャットウィジェット（ニックネーム動的反映・ヘッダークレジット即時連動・左上リサイズ・完全連動上戻りボタン内包版）
+ * 💡 特徴：
+ * 1. root loader & Supabase profiles からのニックネーム・クレジット自動解決
+ * 2. 初期挨拶（my friend）の登録ニックネームへの自動置換
+ * 3. AIバックエンドへの最新ニックネーム送信（パーソナライズ呼びかけ）
+ * 4. F5なしのヘッダークレジット即時連動（yamato:credits-updated イベント発行）
+ * 5. 左上ドラッグリサイズ＆テーマ完全連動上戻りボタン
+ * 6. 写真アップロード（enableImageUpload）のON/OFF切り替え
  */
 import { useState, useEffect, useRef } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -30,9 +27,13 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.0.0",
-  role: "ポータル共通AIチャットウィジェット（フル機能・ヘッダー即時連動版）",
+  version: "4.1.0",
+  role: "ポータル共通AIチャットウィジェット（ニックネーム反映・ヘッダー即時連動版）",
   features: [
+    {
+      featureName: "Dynamic Nickname Resolution & Greeting",
+      description: "Supabase profiles または root からニックネームを取得し、初期挨拶およびAIプロンプトへ反映"
+    },
     {
       featureName: "Synchronized Scroll Top Button",
       description: "チャットボタンと枠線,背景,文字色（三角）を完全に共有する上に戻るボタンを内包"
@@ -40,10 +41,6 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Top-Left Resizing Handle",
       description: "画面内に収まったまま左上方向にスムーズにチャット窓をドラッグリサイズ可能"
-    },
-    {
-      featureName: "Automatic Root Loader Data Resolution",
-      description: "useRouteLoaderData('root') を用いて userId, credits, nickname, learningPace を自動取得"
     },
     {
       featureName: "Configurable Image Upload Button",
@@ -101,7 +98,6 @@ export type YamatoChatCommonProps = {
   enableImageUpload?: boolean;
 };
 
-// 9色テーマ用スタイル定義
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -298,15 +294,23 @@ export function YamatoChatCommon({
 
   const effectiveUserId = propUserId ?? rootData?.user?.id;
   const effectiveCreditsFromRoot = propCredits ?? rootData?.credits ?? 0;
-  const effectiveNickname = propNickname ?? rootData?.nickname ?? "My friend";
   const effectiveLearningPace = propLearningPace ?? rootData?.learningPace ?? "normal";
+
+  // 💡 ニックネームの優先解決ステート（prop -> rootData -> 空文字）
+  const [currentNickname, setCurrentNickname] = useState<string>(
+    (propNickname && propNickname.trim() !== "")
+      ? propNickname.trim()
+      : (rootData?.nickname && rootData.nickname.trim() !== "")
+        ? rootData.nickname.trim()
+        : ""
+  );
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // リサイズ用ステート
+  // 左上リサイズ用ステート
   const [chatSize, setChatSize] = useState<{ width: number; height: number }>({ width: 384, height: 540 });
   const resizingRef = useRef<boolean>(false);
   const startPosRef = useRef<{ x: number; y: number; w: number; h: number }>({ x: 0, y: 0, w: 384, h: 540 });
@@ -351,7 +355,15 @@ export function YamatoChatCommon({
     setCurrentCredits(effectiveCreditsFromRoot);
   }, [effectiveCreditsFromRoot]);
 
-  // 💡 全体イベントを受信した際のローカル同期
+  useEffect(() => {
+    if (propNickname && propNickname.trim() !== "") {
+      setCurrentNickname(propNickname.trim());
+    } else if (rootData?.nickname && rootData.nickname.trim() !== "") {
+      setCurrentNickname(rootData.nickname.trim());
+    }
+  }, [propNickname, rootData?.nickname]);
+
+  // 💡 全体クレジット更新イベントの受信
   useEffect(() => {
     const handleGlobalCreditUpdate = (e: any) => {
       if (typeof e.detail?.credits === "number") {
@@ -362,22 +374,28 @@ export function YamatoChatCommon({
     return () => window.removeEventListener("yamato:credits-updated", handleGlobalCreditUpdate);
   }, []);
 
-  // セッション監視と Supabase Realtime
+  // 💡 Supabase から credits と nickname を同時に取得・セッション監視
   useEffect(() => {
     let isMounted = true;
 
     async function checkAuthSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.id && isMounted && !activeUserId) {
+        if (session?.user?.id && isMounted) {
           setActiveUserId(session.user.id);
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('credits')
+            .select('credits, nickname')
             .eq('id', session.user.id)
             .single();
-          if (profileData && typeof profileData.credits === 'number') {
-            setCurrentCredits(profileData.credits);
+
+          if (profileData) {
+            if (typeof profileData.credits === 'number') {
+              setCurrentCredits(profileData.credits);
+            }
+            if (profileData.nickname && profileData.nickname.trim() !== "") {
+              setCurrentNickname(profileData.nickname.trim());
+            }
           }
         }
       } catch (err) {
@@ -396,11 +414,17 @@ export function YamatoChatCommon({
         if (newUid) {
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('credits')
+            .select('credits, nickname')
             .eq('id', newUid)
             .single();
-          if (profileData && typeof profileData.credits === 'number') {
-            setCurrentCredits(profileData.credits);
+
+          if (profileData) {
+            if (typeof profileData.credits === 'number') {
+              setCurrentCredits(profileData.credits);
+            }
+            if (profileData.nickname && profileData.nickname.trim() !== "") {
+              setCurrentNickname(profileData.nickname.trim());
+            }
           }
         }
       }
@@ -412,7 +436,7 @@ export function YamatoChatCommon({
     };
   }, [activeUserId]);
 
-  // 💡 Supabase Realtime 監視（profiles の credits 更新を検知）
+  // 💡 Supabase Realtime 監視（profiles の credits と nickname の更新）
   useEffect(() => {
     if (!activeUserId) return;
 
@@ -427,8 +451,13 @@ export function YamatoChatCommon({
           filter: `id=eq.${activeUserId}`,
         },
         (payload: any) => {
-          if (payload.new && typeof payload.new.credits === "number") {
-            setCurrentCredits(payload.new.credits);
+          if (payload.new) {
+            if (typeof payload.new.credits === "number") {
+              setCurrentCredits(payload.new.credits);
+            }
+            if (payload.new.nickname && payload.new.nickname.trim() !== "") {
+              setCurrentNickname(payload.new.nickname.trim());
+            }
           }
         }
       )
@@ -464,12 +493,30 @@ export function YamatoChatCommon({
 
   const boxBorderInlineStyle = isHexColor ? { borderColor: themeColor } : undefined;
 
+  // 初期メッセージ設定
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
       content: initialGreeting,
     },
   ]);
+
+  // 💡 ニックネームが確定した際、初期挨拶の中の "my friend" を動的に置換
+  useEffect(() => {
+    if (currentNickname && currentNickname.trim() !== "") {
+      setTutorMessages((prev) => {
+        if (prev.length > 0 && prev[0].role === "assistant") {
+          const updatedFirstMsg: ChatMessage = {
+            ...prev[0],
+            content: initialGreeting.replace(/my friend/gi, currentNickname),
+          };
+          return [updatedFirstMsg, ...prev.slice(1)];
+        }
+        return prev;
+      });
+    }
+  }, [currentNickname, initialGreeting]);
+
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">(effectiveLearningPace);
@@ -544,15 +591,20 @@ export function YamatoChatCommon({
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, nickname')
         .eq('id', activeUserId)
         .single();
       
-      if (data && !error && typeof data.credits === 'number') {
-        setCurrentCredits(data.credits);
+      if (data && !error) {
+        if (typeof data.credits === 'number') {
+          setCurrentCredits(data.credits);
+        }
+        if (data.nickname && data.nickname.trim() !== "") {
+          setCurrentNickname(data.nickname.trim());
+        }
       }
     } catch (err) {
-      console.error("Failed to refresh credits:", err);
+      console.error("Failed to refresh user data:", err);
     }
   };
 
@@ -579,28 +631,29 @@ export function YamatoChatCommon({
     }
 
     if (currentCredits <= 0) {
+      const callName = currentNickname || "my friend";
       setTutorMessages((prev) => [
         ...prev,
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
+          content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`
         }
       ]);
       setTutorInput("");
       return;
     }
 
-    // 消費クレジット判定
     const requiredCredits = (requestVisualAid || Boolean(selectedImage) || appType === "kanji-grammar-checker-ocr") ? 4 : 2;
 
     if (currentCredits < requiredCredits) {
+      const callName = currentNickname || "my friend";
       setTutorMessages((prev) => [
         ...prev,
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCredits} credits). Please top up your account! 🪙`
+          content: `⚠️ **[Insufficient Credits]**\n\n${callName}, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCredits} credits). Please top up your account! 🪙`
         }
       ]);
       setTutorInput("");
@@ -629,6 +682,9 @@ export function YamatoChatCommon({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
+      // 💡 決定されたニックネーム（未設定時のみ My friend）をAPIへ送信
+      const sendingNickname = currentNickname && currentNickname.trim() !== "" ? currentNickname.trim() : "My friend";
+
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -636,7 +692,7 @@ export function YamatoChatCommon({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
-          userNickname: effectiveNickname,
+          userNickname: sendingNickname, // 🌟 ニックネーム送信
           appType: appType,
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt,
@@ -658,17 +714,18 @@ export function YamatoChatCommon({
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
+          const callName = currentNickname || "my friend";
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
-              { role: "assistant", content: `🌟 **[Zero Credits Remaining]**\n\nHello, my friend! Please top up your credits to continue!` }
+              { role: "assistant", content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! Please top up your credits to continue!` }
             ]);
             await refreshUserCredits();
             return;
           } else if (errorCode === "PARTIAL_SHORTAGE") {
             setTutorMessages([
               ...newMessages,
-              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\nMy friend, standard text chat (2 credits) is available, but this action requires more credits.` }
+              { role: "assistant", content: `⚠️ **[Insufficient Credits]**\n\n${callName}, standard text chat (2 credits) is available, but this action requires more credits.` }
             ]);
             await refreshUserCredits();
             return;
@@ -687,7 +744,7 @@ export function YamatoChatCommon({
         { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
       ]);
 
-      // 🌟【ここが最重要！】チャット内残高を減算し、全ヘッダーへ 0 秒通知を発行！
+      // 🌟 ヘッダーのクレジット表記を即座（F5なし）に連動更新
       const nextCredits = Math.max(0, currentCredits - requiredCredits);
       setCurrentCredits(nextCredits);
 
@@ -699,7 +756,6 @@ export function YamatoChatCommon({
         );
       }
 
-      // DB残高の再同期
       await refreshUserCredits();
 
     } catch (err: any) {
@@ -800,9 +856,16 @@ export function YamatoChatCommon({
               <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
                 <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Account Status</span>
                 {activeUserId ? (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    🪙 {currentCredits} credits
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {currentNickname && (
+                      <span className="text-[10px] text-slate-600 font-medium">
+                        👤 {currentNickname}
+                      </span>
+                    )}
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                      🪙 {currentCredits} credits
+                    </span>
+                  </div>
                 ) : (
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
                     🔒 Guest
