@@ -9,7 +9,7 @@ let cachedSupabase: SupabaseClient | null = null;
 
 // 💡 確実に接続できるよう、実際のプロジェクト情報をフォールバックとして定義
 const FALLBACK_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
-const FALLBACK_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicXV3em9yZWVjeHhiZXdqcGRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2OTA5NDksImV4cCI6MjEwMjI2Njk0OX0.OHz5CEV9CLO02vzP4FOBCwPSs-aHuDOZtgobfiO5VM0";
+const FALLBACK_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
 
 export const getSupabase = (): SupabaseClient => {
   if (cachedSupabase) {
