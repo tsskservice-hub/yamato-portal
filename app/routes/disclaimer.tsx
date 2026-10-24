@@ -1,6 +1,6 @@
 /**
  * @file disclaimer.tsx
- * @description 免責事項ページ（Supabase LEGAL_CONTENTS 連動・DataErrorState フォールバック版）
+ * @description 免責事項ページ（Supabase LEGAL_CONTENTS 100%動的連動・DataErrorState版）
  */
 import { useState, useEffect, useCallback } from "react";
 import type { MetaFunction } from "@remix-run/cloudflare";
@@ -13,7 +13,10 @@ import { supabase } from "../lib/supabaseClient";
 export const meta: MetaFunction = () => {
   return [
     { title: "Disclaimer | AI Yamato Japanese Tutoring" },
-    { name: "description", content: "Disclaimer for AI Yamato Japanese Tutoring Platform." },
+    {
+      name: "description",
+      content: "Educational use limitations, AI output disclaimers, custom practice prompts, and service availability for AI Yamato.",
+    },
   ];
 };
 
@@ -78,7 +81,7 @@ export default function Disclaimer() {
           ) : error || !doc ? (
             <DataErrorState
               title="Disclaimer Unavailable"
-              message="Failed to load Disclaimer from Supabase. Please check your network connection and try again."
+              message="Failed to load Disclaimer from the database. Please check your network connection and try again."
               onRetry={loadData}
             />
           ) : (

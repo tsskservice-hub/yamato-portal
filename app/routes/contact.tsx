@@ -1,6 +1,6 @@
 /**
  * @file contact.tsx
- * @description お問い合わせページ（Supabase LEGAL_CONTENTS 連動・DataErrorState フォールバック版）
+ * @description お問い合わせページ（Supabase LEGAL_CONTENTS 100%動的連動・DataErrorState版）
  */
 import { useState, useEffect, useCallback } from "react";
 import type { MetaFunction, ActionFunctionArgs } from "@remix-run/cloudflare";
@@ -8,13 +8,16 @@ import { json } from "@remix-run/cloudflare";
 import { Link, useActionData, useNavigation, useRouteLoaderData } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import DataErrorState from "../components/DataErrorState";
-import { LEGAL_CONTENT, fetchLegalContentData, LegalDocument } from "../data/legal-content";
+import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
 import { supabase } from "../lib/supabaseClient";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: `${LEGAL_CONTENT.contact.title} | AI Yamato Japanese Tutoring` },
-    { name: "description", content: LEGAL_CONTENT.contact.summary },
+    { title: "Contact Us | AI Yamato Japanese Tutoring" },
+    {
+      name: "description",
+      content: "Contact the AI Yamato team for support, technical help, feedback, and school classroom licensing.",
+    },
   ];
 };
 
@@ -54,7 +57,7 @@ export default function Contact() {
     nickname?: string;
   } | undefined;
 
-  const [doc, setDoc] = useState<LegalDocument>(LEGAL_CONTENT.contact);
+  const [doc, setDoc] = useState<LegalDocument | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
 
@@ -85,7 +88,7 @@ export default function Contact() {
       user={rootData?.user}
       credits={rootData?.credits}
       nickname={rootData?.nickname}
-      breadcrumbTitle={doc.title}
+      breadcrumbTitle={doc?.title || "Contact Us"}
     >
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">
@@ -104,10 +107,10 @@ export default function Contact() {
               <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
               <p className="text-slate-500 font-medium text-sm">Loading Contact Page...</p>
             </div>
-          ) : error && !doc ? (
+          ) : error || !doc ? (
             <DataErrorState
               title="Contact Page Unavailable"
-              message="Failed to load contact information from Supabase. Please check your network connection and try again."
+              message="Failed to load contact information from the database. Please check your network connection and try again."
               onRetry={loadData}
             />
           ) : (
