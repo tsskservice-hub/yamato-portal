@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（設問情報連携版）
+ * @description EOY Writing Practice モジュール（設問情報連携版・Supabase動的取得対応）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -8,10 +8,11 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-import questionsData from "../data/writing-exam-questions";
+// 💡 変更: フォールバックデータと取得関数をインポート
+import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
 import textTypesData from "../data/texttypes";
+import { supabase } from "../lib/supabaseClient";
 
-const questions = questionsData as any[];
 const modalData: { [key: string]: any } = textTypesData;
 
 export default function Dashboard() {
@@ -20,6 +21,9 @@ export default function Dashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   
+  // 💡 1. 設問データをステートとして管理（初期値はフォールバックデータ）
+  const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
+
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -39,6 +43,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
+  }, []);
+
+  // 💡 2. ページ表示時に Supabase から動的に最新データを取得してステートを更新
+  useEffect(() => {
+    let isMounted = true;
+    async function loadQuestions() {
+      try {
+        const data = await fetchWritingExamQuestionsData(supabase);
+        if (isMounted && data && Array.isArray(data) && data.length > 0) {
+          setQuestions(data); // Supabase のデータで更新
+        }
+      } catch (err) {
+        console.error("Failed to load writing exam questions from Supabase:", err);
+      }
+    }
+    loadQuestions();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +88,6 @@ export default function Dashboard() {
     ? `[Selected VCE EOY Writing Question Q${selectedQuestion.id}]\nCategory: ${selectedQuestion.category}\nText Type: ${selectedQuestion.textType}\nPrompt (English): ${selectedQuestion.english}\nPrompt (Japanese): ${selectedQuestion.japanese}`
     : "";
 
-  // 💡 選択中の設問情報をバックエンドおよびチャットウィジェットへ渡す文字列を定義
   const assignedQuestionText = selectedQuestion
     ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
     : "";
@@ -281,7 +303,6 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* 💡 修正点: assignedQuestion={assignedQuestionText} を追加 */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
