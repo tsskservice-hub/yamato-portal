@@ -1,24 +1,23 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応・共通パンくずリスト自動生成版）
- * 💡 上戻りボタンは YamatoChatCommon 側へ集約・カラー完全連動されたため、PageLayout からは削除してクリーン化しています。
+ * @description ポータル共通レイアウト（Supabase Realtime クレジット・プロフィール自動同期、認証モーダル、パンくずリスト、スクロールトップ対応完全版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
-import { 
-  KeyRound, 
-  ShieldCheck, 
-  X, 
-  ArrowRight, 
-  Fingerprint, 
-  Mail, 
-  CheckCircle2, 
-  ChevronDown, 
-  ChevronUp, 
-  Lock, 
-  Sparkles, 
-  Home, 
-  ChevronRight 
+import {
+  KeyRound,
+  ShieldCheck,
+  X,
+  ArrowRight,
+  Fingerprint,
+  Mail,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  Sparkles,
+  Home,
+  ChevronRight
 } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
@@ -34,43 +33,64 @@ type PageLayoutProps = {
   user?: any;
   credits?: number;
   nickname?: string;
-  learningPace?: "steady" | "normal" | "accelerated"; 
+  learningPace?: "steady" | "normal" | "accelerated";
   isDarkMode?: boolean;
-  breadcrumbTitle?: string; // 💡 個別ページでカスタム名称を指定したい場合のオプション
+  breadcrumbTitle?: string; // 個別ページでカスタムパンくず名称を指定したい場合のオプション
+  scrollTopClassName?: string; // スクロールトップボタンのスタイル上書き用オプション
   onSignOut?: () => void | Promise<void>;
 };
 
-const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
-  children,  
-  user: propUser,  
-  credits: propCredits,  
+const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
+  children,
+  user: propUser,
+  credits: propCredits,
   nickname: propNickname,
-  learningPace: propLearningPace, 
+  learningPace: propLearningPace,
   isDarkMode = false,
   breadcrumbTitle,
+  scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50",
   onSignOut: propOnSignOut
 }, ref) => {
-  const rootData = useRouteLoaderData("root") as {  
-    user?: any;  
-    credits?: number;  
-    nickname?: string;  
-    learningPace?: "steady" | "normal" | "accelerated"; 
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+    learningPace?: "steady" | "normal" | "accelerated";
   } | undefined;
 
   const location = useLocation();
+
+  // 💡 Scroll to top states & listener
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // 💡 パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
     const paths = location.pathname.split("/").filter(Boolean);
     const crumbs: { label: string; path: string }[] = [];
-    
+
     let currentPath = "";
     paths.forEach((segment, index) => {
       currentPath += `/${segment}`;
-      
+
       let label = segment.replace(/-/g, " ");
       label = label.charAt(0).toUpperCase() + label.slice(1);
-      
+
       if (segment === "eoy-writing") label = "EOY Writing Practice";
       if (segment === "kanji-grammar-checker") label = "Kanji & Grammar Checker";
       if (segment === "dashboard") label = "Dashboard";
@@ -87,16 +107,18 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const breadcrumbs = generateBreadcrumbs();
 
+  // 💡 ユーザー情報・クレジット・ニックネーム・学習ペースの状態管理
   const [user, setUser] = useState<any>(propUser !== undefined ? propUser : (rootData?.user ?? null));
   const [credits, setCredits] = useState<number>(propCredits !== undefined ? propCredits : (rootData?.credits ?? 10));
   const [nickname, setNickname] = useState<string>(propNickname !== undefined ? propNickname : (rootData?.nickname ?? ""));
 
   const rawLearningPace = propLearningPace !== undefined ? propLearningPace : rootData?.learningPace;
-  const learningPace: "steady" | "normal" | "accelerated" = 
+  const learningPace: "steady" | "normal" | "accelerated" =
     (rawLearningPace === "steady" || rawLearningPace === "normal" || rawLearningPace === "accelerated")
       ? rawLearningPace
       : "normal";
 
+  // 💡 Supabase から最新のプロフィール情報を取得
   const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -104,7 +126,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         .select('credits, nickname')
         .eq('id', userId)
         .single();
-      
+
       if (data && !error) {
         setCredits((data as any).credits ?? 10);
         if ((data as any).nickname) {
@@ -122,6 +144,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     if (propNickname !== undefined) setNickname(propNickname);
   }, [propUser, propCredits, propNickname]);
 
+  // 💡 ログインセッションの監視
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       if (propUser === undefined) {
@@ -141,6 +164,40 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // 🌟【方法2：Supabase Realtime】profiles テーブルの更新（credits / nickname）をリアルタイム監視
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`realtime-profile-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload: any) => {
+          if (payload.new) {
+            // クレジットが加算・減算されたらF5なしで即時反映
+            if (typeof payload.new.credits === 'number') {
+              setCredits(payload.new.credits);
+            }
+            // ニックネームが更新された場合も同期
+            if (payload.new.nickname !== undefined && payload.new.nickname !== null) {
+              setNickname(payload.new.nickname);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const handleSignOut = async () => {
     if (propOnSignOut) {
@@ -174,6 +231,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setIsAuthModalOpen(true);
   };
 
+  // 💡 外部（各ページ）の ref から呼び出し可能にする公開メソッド
   useImperativeHandle(ref, () => ({
     openAuthModal: (mode: 'signin' | 'signup' | string) => {
       handleOpenAuthModal(mode);
@@ -213,12 +271,12 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   return (
     <div className={`flex flex-col min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
-      <Header 
-        user={user} 
-        credits={credits} 
-        nickname={resolvedNickname} 
-        onOpenAuth={handleOpenAuthModal} 
-        onSignOut={handleSignOut} 
+      <Header
+        user={user}
+        credits={credits}
+        nickname={resolvedNickname}
+        onOpenAuth={handleOpenAuthModal}
+        onSignOut={handleSignOut}
       />
 
       {/* 🍞 共通パンくずリスト（トップページ '/' 以外の階層でのみ表示） */}
@@ -253,14 +311,28 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       <main className="flex-grow">
         {children}
       </main>
-      
+
       <Footer onOpenAuth={handleOpenAuthModal} />
+
+      {/* ⬆️ ページトップへ戻るボタン */}
+      {showScrollTop && (
+        <div className="fixed bottom-24 right-6 z-40">
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className={`w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center ${scrollTopClassName}`}
+            title="ページトップへ戻る"
+          >
+            ▲
+          </button>
+        </div>
+      )}
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
-            <button 
+            <button
               onClick={() => {
                 setIsAuthModalOpen(false);
                 setIsGuideStep(false);
@@ -285,7 +357,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                 </div>
 
                 <div>
-                  <button 
+                  <button
                     onClick={() => setIsGuideStep(false)}
                     className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
@@ -365,8 +437,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                     {authMode === 'signup' ? 'Create Account with Passkey' : 'Sign In with Passkey'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {authMode === 'signup' 
-                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.' 
+                    {authMode === 'signup'
+                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.'
                       : 'Authenticate instantly with your registered biometric passkey.'}
                   </p>
                 </div>
@@ -381,7 +453,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   {authMode === 'signup' && (
                     <div className="space-y-1.5 text-left">
                       <label className="text-xs font-semibold text-slate-500">Email Address</label>
-                      <input 
+                      <input
                         type="email"
                         required
                         placeholder="your.email@school.vic.edu.au"
@@ -392,7 +464,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                     </div>
                   )}
 
-                  <button 
+                  <button
                     type="submit"
                     disabled={authLoading}
                     className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"

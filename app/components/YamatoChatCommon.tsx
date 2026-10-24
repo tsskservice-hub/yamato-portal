@@ -1,6 +1,16 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（外部画像・設問連携対応版）
+ * @description ポータル共通AIチャットウィジェット（全機能完全版・ヘッダークレジット即時連動・Supabase Realtime同期対応）
+ * 💡 実装機能：
+ * 1. root loader 自動データ解決（userId, credits, nickname, learningPace）
+ * 2. 写真アップロード（enableImageUpload）のON/OFF切り替え
+ * 3. 左上ドラッグによるウィンドウリサイズ機能
+ * 4. チャットボタンと枠線・背景色が完全連動する上に戻るボタン（ScrollTopButton）
+ * 5. 未ログインガード画面（Sign Up Required）
+ * 6. フォントサイズ4段階切替（小・中・大・特大）
+ * 7. 新9色テーマ＆カラーコード（#hex）直接指定対応
+ * 8. 画像拡大表示モーダル
+ * 9. ヘッダー（PageLayout）へのクレジット即時連動通知（0秒同期）
  */
 import { useState, useEffect, useRef } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -20,8 +30,8 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.9.0",
-  role: "ポータル共通AIチャットウィジェット（外部画像・設問連携対応版）",
+  version: "4.0.0",
+  role: "ポータル共通AIチャットウィジェット（フル機能・ヘッダー即時連動版）",
   features: [
     {
       featureName: "Synchronized Scroll Top Button",
@@ -32,8 +42,20 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "画面内に収まったまま左上方向にスムーズにチャット窓をドラッグリサイズ可能"
     },
     {
-      featureName: "External Image & Question Integration",
-      description: "親コンポーネントから渡された外部画像（手書き解答）や選択中設問情報をバックエンドへ自動連携"
+      featureName: "Automatic Root Loader Data Resolution",
+      description: "useRouteLoaderData('root') を用いて userId, credits, nickname, learningPace を自動取得"
+    },
+    {
+      featureName: "Configurable Image Upload Button",
+      description: "enableImageUpload props により、部屋ごとに写真アップロードボタンの表示/非表示を自在に切り替え可能"
+    },
+    {
+      featureName: "Direct Color Code Theme Support",
+      description: "themeColor に直接カラーコード（例: #1e3a8a）を指定可能"
+    },
+    {
+      featureName: "Instant Credit Header Sync",
+      description: "AI返答受信時に yamato:credits-updated イベントを発行し、F5なしで即時ヘッダーを同期"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "custom"],
@@ -64,7 +86,7 @@ export type YamatoChatCommonProps = {
   systemPrompt?: string;
   appType?: "concierge" | "writing" | "oral" | "general" | string;
   defaultOpen?: boolean;
-  themeColor?: string;
+  themeColor?: string; // キーワードまたはカラーコード（例: "#1e3a8a"）
   floatingButtonClassName?: string;
   buttonStyle?: {
     border?: string;
@@ -77,15 +99,9 @@ export type YamatoChatCommonProps = {
   credits?: number;
   onOpenAuth?: (mode?: 'signin' | 'signup') => void;
   enableImageUpload?: boolean;
-  // 💡 外部画像および設問情報の受け取り用プロパティを追加
-  externalImageFile?: File | null;
-  externalImageFile2?: File | null;
-  externalImagePreview?: string | null;
-  externalImagePreview2?: string | null;
-  onClearExternalImage?: () => void;
-  assignedQuestion?: string;
 };
 
+// 9色テーマ用スタイル定義
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -277,10 +293,6 @@ export function YamatoChatCommon({
   credits: propCredits,
   onOpenAuth,
   enableImageUpload = true,
-  externalImageFile,
-  externalImagePreview: propExternalImagePreview,
-  onClearExternalImage,
-  assignedQuestion,
 }: YamatoChatCommonProps) {
   const rootData = useRouteLoaderData("root") as RootLoaderData | undefined;
 
@@ -294,6 +306,7 @@ export function YamatoChatCommon({
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // リサイズ用ステート
   const [chatSize, setChatSize] = useState<{ width: number; height: number }>({ width: 384, height: 540 });
   const resizingRef = useRef<boolean>(false);
   const startPosRef = useRef<{ x: number; y: number; w: number; h: number }>({ x: 0, y: 0, w: 384, h: 540 });
@@ -338,6 +351,18 @@ export function YamatoChatCommon({
     setCurrentCredits(effectiveCreditsFromRoot);
   }, [effectiveCreditsFromRoot]);
 
+  // 💡 全体イベントを受信した際のローカル同期
+  useEffect(() => {
+    const handleGlobalCreditUpdate = (e: any) => {
+      if (typeof e.detail?.credits === "number") {
+        setCurrentCredits(e.detail.credits);
+      }
+    };
+    window.addEventListener("yamato:credits-updated", handleGlobalCreditUpdate);
+    return () => window.removeEventListener("yamato:credits-updated", handleGlobalCreditUpdate);
+  }, []);
+
+  // セッション監視と Supabase Realtime
   useEffect(() => {
     let isMounted = true;
 
@@ -387,6 +412,33 @@ export function YamatoChatCommon({
     };
   }, [activeUserId]);
 
+  // 💡 Supabase Realtime 監視（profiles の credits 更新を検知）
+  useEffect(() => {
+    if (!activeUserId) return;
+
+    const channel = supabase
+      .channel(`chat-profile-${activeUserId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${activeUserId}`,
+        },
+        (payload: any) => {
+          if (payload.new && typeof payload.new.credits === "number") {
+            setCurrentCredits(payload.new.credits);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeUserId]);
+
   const handleTriggerAuth = (mode: 'signin' | 'signup' = 'signup') => {
     if (onOpenAuth) {
       onOpenAuth(mode);
@@ -396,11 +448,8 @@ export function YamatoChatCommon({
   };
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
-  const [internalSelectedImage, setInternalSelectedImage] = useState<File | null>(null);
-  const [internalSelectedImagePreview, setInternalSelectedImagePreview] = useState<string | null>(null);
-
-  // 💡 外部から渡されたプレビュー（propExternalImagePreview）を優先し、なければ内部の画像を使う
-  const activeImagePreview = propExternalImagePreview !== undefined ? propExternalImagePreview : internalSelectedImagePreview;
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
   const isHexColor = themeColor.startsWith('#');
   const currentTheme = !isHexColor && themeStyles[themeColor as keyof typeof themeStyles] ? themeStyles[themeColor as keyof typeof themeStyles] : themeStyles.blue;
@@ -510,10 +559,10 @@ export function YamatoChatCommon({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setInternalSelectedImage(file);
+      setSelectedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setInternalSelectedImagePreview(reader.result as string);
+        setSelectedImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -521,7 +570,7 @@ export function YamatoChatCommon({
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
+    if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
 
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
@@ -542,34 +591,29 @@ export function YamatoChatCommon({
       return;
     }
 
-    if (currentCredits < FEATURE_COSTS.textAi) {
+    // 消費クレジット判定
+    const requiredCredits = (requestVisualAid || Boolean(selectedImage) || appType === "kanji-grammar-checker-ocr") ? 4 : 2;
+
+    if (currentCredits < requiredCredits) {
       setTutorMessages((prev) => [
         ...prev,
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request. Please top up your account! 🪙`
+          content: `⚠️ **[Insufficient Credits]**\n\nMy friend, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCredits} credits). Please top up your account! 🪙`
         }
       ]);
       setTutorInput("");
       return;
     }
 
-    const userMsg = tutorInput.trim() || (activeImagePreview ? "Please check this answer photo." : "");
+    const userMsg = tutorInput.trim() || "Please check this answer image.";
     const needsVisual = requestVisualAid;
-    const imageBase64 = activeImagePreview;
-
-    // 💡 選択中の設問情報（assignedQuestion）があればメッセージに自動付加する
-    const finalMessageText = assignedQuestion 
-      ? `[Assigned Question: ${assignedQuestion}]\n${userMsg}` 
-      : userMsg;
+    const imageBase64 = selectedImagePreview;
 
     setTutorInput("");
-    if (onClearExternalImage) {
-      onClearExternalImage();
-    }
-    setInternalSelectedImage(null);
-    setInternalSelectedImagePreview(null);
+    setSelectedImage(null);
+    setSelectedImagePreview(null);
     setRequestVisualAid(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
 
@@ -589,7 +633,7 @@ export function YamatoChatCommon({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: finalMessageText,
+          message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
           userNickname: effectiveNickname,
@@ -597,7 +641,7 @@ export function YamatoChatCommon({
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
-          imageBase64: imageBase64, // 💡 ここに確実にBase64画像データが送信されます
+          imageBase64: imageBase64,
           userId: activeUserId,
         }),
       });
@@ -643,6 +687,19 @@ export function YamatoChatCommon({
         { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
       ]);
 
+      // 🌟【ここが最重要！】チャット内残高を減算し、全ヘッダーへ 0 秒通知を発行！
+      const nextCredits = Math.max(0, currentCredits - requiredCredits);
+      setCurrentCredits(nextCredits);
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("yamato:credits-updated", {
+            detail: { credits: nextCredits },
+          })
+        );
+      }
+
+      // DB残高の再同期
       await refreshUserCredits();
 
     } catch (err: any) {
@@ -659,6 +716,7 @@ export function YamatoChatCommon({
     <>
       <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
         
+        {/* 上に戻るボタン */}
         <ScrollTopButton floatingClass={finalFloatingButtonClass} inlineStyle={floatingInlineStyle} />
 
         {!isAiTutorOpen ? (
@@ -670,7 +728,7 @@ export function YamatoChatCommon({
           >
             <span>🤖</span>
             <span>{characterName}</span>
-            {activeImagePreview && (
+            {selectedImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
             {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
@@ -875,16 +933,15 @@ export function YamatoChatCommon({
                   </div>
 
                   {/* 添付画像のプレビューバー */}
-                  {activeImagePreview && (
+                  {selectedImagePreview && (
                     <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                      <img src={activeImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                      <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
                       <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
                       <button
                         type="button"
                         onClick={() => {
-                          if (onClearExternalImage) onClearExternalImage();
-                          setInternalSelectedImage(null);
-                          setInternalSelectedImagePreview(null);
+                          setSelectedImage(null);
+                          setSelectedImagePreview(null);
                           if (fileInputRef.current) fileInputRef.current.value = '';
                         }}
                         className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
@@ -912,7 +969,7 @@ export function YamatoChatCommon({
                             className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
                           >
                             <span>📷</span>
-                            <span>{activeImagePreview ? "Change Photo" : "Upload Photo"}</span>
+                            <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
                           </button>
                         </>
                       ) : (
@@ -935,13 +992,13 @@ export function YamatoChatCommon({
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={activeImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
                         className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                       />
                       <button
                         type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !activeImagePreview)}
+                        disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
                         style={isHexColor ? { backgroundColor: themeColor, color: '#ffffff' } : undefined}
                         className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                       >
