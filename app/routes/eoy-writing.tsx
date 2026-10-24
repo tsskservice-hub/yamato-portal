@@ -2,31 +2,53 @@
  * @file eoy-writing.tsx
  * @description EOY Writing Practice モジュール
  * 💡 特徴：
- * 1. Supabase 'app_knowledge' からの動的設問データ取得（fetchWritingExamQuestionsData）
- * 2. Supabase 'TEXTTYPES' からの動的モーダルデータ取得（fetchTextTypesData）
- * 3. 「How to use Genkoyoshi」および各 text type のモーダル表示対応
- * 4. 写真解答アップロード & AIヤマトチャット連携
+ * 1. Text Type（緑バッジ）をクリック ➔ TextTypeModal（Supabase: TEXTTYPES）を表示
+ * 2. Writing Style（青バッジ）をクリック ➔ WritingStyleModal（Supabase: WRITING_STYLES）を表示
+ * 3. 「How to use Genkoyoshi」ボタン ➔ 原稿用紙使い方モーダルを表示
+ * 4. 設問・写真解答アップロード & AIヤマトチャット連携
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
+import { DataErrorState } from "../components/DataErrorState";
 
 // 💡 外部データ・APIフェッチ関数のインポート
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
 import TEXT_TYPES_DATA, { fetchTextTypesData, TextTypesData } from "../data/texttypes";
+import { fetchWritingStylesData, WritingStylesData } from "../data/writing-styles";
 import { supabase } from "../lib/supabaseClient";
+
+// 💡 原稿用紙ガイドのフォールバックデータ
+const DEFAULT_GENKOYOSHI_DATA = {
+  title: "Genkoyoshi Usage Guide (原稿用紙の使い方)",
+  purpose: "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi. Refer to each text type for details.",
+  structure: [
+    "Title (Line 1): Leave 3 spaces at the beginning, then write the title",
+    "Name (Line 2): Write at the end, leaving the last square blank",
+    "Main Text: Indent 1 space at the beginning of each paragraph",
+    "Square Usage: Place punctuation marks (、。) in their own square. Never start a line with punctuation."
+  ],
+  sampleImage: "/genkoyoshi.pdf"
+};
 
 export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeTextType, setActiveTextType] = useState<string>("all");
-  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<string | null>(null); // Text Type / Genkoyoshi 用モーダルキー
+  const [activeStyleModal, setActiveStyleModal] = useState<string | null>(null); // 💡 Writing Style 用モーダルキー
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
 
-  // 💡 設問データおよび TextTypes モーダルデータをステートで管理
+  // 💡 設問、TextTypes、WritingStyles データをステートで管理（WritingStylesの初期値は空）
   const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
-  const [modalData, setModalData] = useState<TextTypesData>(TEXT_TYPES_DATA);
+  const [modalData, setModalData] = useState<TextTypesData>({
+    ...TEXT_TYPES_DATA,
+    Genkoyoshi: DEFAULT_GENKOYOSHI_DATA,
+    Genkooyooshi: DEFAULT_GENKOYOSHI_DATA,
+  });
+  const [stylesData, setStylesData] = useState<WritingStylesData>({});
+  const [isStylesLoading, setIsStylesLoading] = useState<boolean>(true);
 
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -50,25 +72,40 @@ export default function Dashboard() {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // 💡 ページ表示時に Supabase から設問データと TEXTTYPES データを両方非同期フェッチ
+  // 💡 ページ表示時に Supabase から設問、TEXTTYPES、WRITING_STYLES を非同期フェッチ
   useEffect(() => {
     let isMounted = true;
 
     async function loadDataFromSupabase() {
       try {
-        // 1. 設問データの取得
+        // 1. 設問一覧の取得
         const fetchedQuestions = await fetchWritingExamQuestionsData(supabase);
         if (isMounted && fetchedQuestions && Array.isArray(fetchedQuestions) && fetchedQuestions.length > 0) {
           setQuestions(fetchedQuestions);
         }
 
-        // 2. TEXTTYPES（Genkoyoshi を含む）詳細データの取得
+        // 2. TEXTTYPES データの取得
         const fetchedTextTypes = await fetchTextTypesData(supabase);
         if (isMounted && fetchedTextTypes && typeof fetchedTextTypes === "object" && Object.keys(fetchedTextTypes).length > 0) {
-          setModalData(fetchedTextTypes);
+          setModalData((prev) => ({
+            ...prev,
+            ...fetchedTextTypes,
+            Genkoyoshi: fetchedTextTypes["Genkoyoshi"] || fetchedTextTypes["Genkooyooshi"] || prev["Genkoyoshi"] || DEFAULT_GENKOYOSHI_DATA,
+            Genkooyooshi: fetchedTextTypes["Genkoyoshi"] || fetchedTextTypes["Genkooyooshi"] || prev["Genkooyooshi"] || DEFAULT_GENKOYOSHI_DATA,
+          }));
+        }
+
+        // 3. 💡 WRITING_STYLES データの取得（Supabase の key: 'WRITING_STYLES'）
+        const fetchedStyles = await fetchWritingStylesData(supabase);
+        if (isMounted && fetchedStyles && typeof fetchedStyles === "object") {
+          setStylesData(fetchedStyles);
         }
       } catch (err) {
         console.error("Failed to load data from Supabase:", err);
+      } finally {
+        if (isMounted) {
+          setIsStylesLoading(false);
+        }
       }
     }
 
@@ -107,10 +144,37 @@ export default function Dashboard() {
     ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
     : "";
 
-  // 💡 Genkoyoshi / Genkoyoshi の表記ゆれに対応してモーダル用データを解決
+  // TextType モーダル用データの解決
   const activeModalData = activeModal
-    ? modalData[activeModal] || (activeModal === "Genkoyoshi" ? modalData["Genkoyoshi"] : modalData["Genkoyoshi"])
+    ? modalData[activeModal] ||
+      (activeModal === "Genkoyoshi" ? modalData["Genkooyooshi"] || DEFAULT_GENKOYOSHI_DATA : null) ||
+      (activeModal === "Genkooyooshi" ? modalData["Genkoyoshi"] || DEFAULT_GENKOYOSHI_DATA : null)
     : null;
+
+  // 💡 Writing Style モーダル用データの解決
+  const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
+
+  // 💡 データ読み込み中の表示
+  if (isStylesLoading) {
+    return (
+      <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
+        <div className="min-h-screen bg-white text-slate-800 font-sans flex items-center justify-center p-8">
+          <div className="text-slate-600 font-bold text-lg animate-pulse">Loading Writing Styles...</div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // 💡 Supabase から Writing Styles が取得できなかった（空だった）場合は DataErrorState を表示
+  if (!stylesData || Object.keys(stylesData).length === 0) {
+    return (
+      <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
+        <div className="min-h-screen bg-white text-slate-800 font-sans px-4 py-8 max-w-4xl mx-auto">
+          <DataErrorState errorMessage="Failed to fetch WRITING_STYLES from app_knowledge table in Supabase." />
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
@@ -119,7 +183,6 @@ export default function Dashboard() {
           
           {/* 上部ショートカットボタン */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            {/* 💡 How to use Genkoyoshi ボタン */}
             <button
               type="button"
               onClick={() => setActiveModal("Genkoyoshi")}
@@ -246,6 +309,14 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* ガイド案内バナー */}
+          <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 mb-6 text-sm sm:text-base text-sky-900 flex items-center gap-3 shadow-xs">
+            <span className="text-xl">💡</span>
+            <span>
+              Click on the <strong>blue Writing Style tag</strong> or <strong>green Text Type tag</strong> on each question to view requirements, purpose, and key features.
+            </span>
+          </div>
+
           {/* タスクリストヘッダー */}
           <div className="flex justify-between items-end border-b-2 border-slate-200 pb-2 mb-6">
             <h1 className="text-slate-800 text-2xl sm:text-3xl font-bold m-0">
@@ -270,21 +341,21 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div id="filter-by-text-type" className="scroll-mt-10 mb-6">  
-            <div className="mb-2 text-lg font-bold text-slate-600">Filter by Text Type</div>
-            <div className="flex gap-2.5 flex-wrap">
-              {["all", "Speech", "Email", "Letter", "Article", "Journal", "Essay", "Story", "Report", "Account", "Message", "Review", "Summary", "Official Report"].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setActiveTextType(type)}
-                  className={`px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${
-                    activeTextType === type ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
-                  }`}
-                >
-                  {type === "all" ? "All" : type}
-                </button>
-              ))}
-            </div>
+            <div id="filter-by-text-type" className="scroll-mt-10">
+              <div className="mb-2 text-lg font-bold text-slate-600">Filter by Text Type</div>
+              <div className="flex gap-2.5 flex-wrap">
+                {["all", "Speech", "Email", "Letter", "Article", "Journal", "Essay", "Story", "Report", "Account", "Message", "Review", "Summary", "Official Report"].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setActiveTextType(type)}
+                    className={`px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${
+                      activeTextType === type ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                    }`}
+                  >
+                    {type === "all" ? "All" : type}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -300,15 +371,23 @@ export default function Dashboard() {
                   }`}
                 >
                   <div className="flex justify-between items-center mb-3">
-                    <div className="flex gap-2 flex-wrap">
-                      <span className="text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold">{q.category}</span>
-                      
+                    <div className="flex gap-2 flex-wrap items-center">
+                      {/* 💡 青色の Writing Style バッジ：クリックで activeStyleModal にセット */}
+                      <span
+                        onClick={() => setActiveStyleModal(q.category)}
+                        className="text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-sky-200 hover:scale-105 transition-all shadow-2xs"
+                        title="Click to view Writing Style specifications"
+                      >
+                        {q.category} ↗
+                      </span>
+
                       {/* 💡 緑色の text type バッジ：クリックで activeModal にセット */}
                       <span
                         onClick={() => setActiveModal(q.textType)}
-                        className="text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 transition-colors"
+                        className="text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 hover:scale-105 transition-all shadow-2xs"
+                        title="Click to view Text Type format and conventions"
                       >
-                        {q.textType}
+                        {q.textType} ↗
                       </span>
                     </div>
                     <span className="text-lg text-slate-600 font-bold">Q{q.id}</span>
@@ -371,6 +450,118 @@ export default function Dashboard() {
               {...activeModalData}
             />
           )}
+
+          {/* 💡 Writing Style 専用モーダル（青バッジクリックでポップアップ表示） */}
+          {activeStyleModal && activeWritingStyleData && (
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4"
+              onClick={() => setActiveStyleModal(null)}
+            >
+              <div
+                className="bg-white p-6 sm:p-7 w-full max-w-2xl rounded-2xl shadow-2xl relative max-h-[85vh] overflow-y-auto box-border border border-slate-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 border-none w-8 h-8 rounded-full flex items-center justify-center text-lg cursor-pointer text-slate-500 hover:text-slate-800 transition"
+                  onClick={() => setActiveStyleModal(null)}
+                >
+                  ✕
+                </button>
+
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold uppercase tracking-wider bg-sky-100 text-sky-800 px-2.5 py-1 rounded-md">
+                    Writing Style (Kind of Writing)
+                  </span>
+                </div>
+
+                <h3 className="mt-2 text-slate-800 text-2xl font-bold">
+                  {activeWritingStyleData.styleName} ({activeWritingStyleData.japaneseName})
+                </h3>
+
+                {/* 目的 (Purpose) */}
+                <div className="mt-4 bg-sky-50/70 p-4 rounded-xl border border-sky-100">
+                  <h4 className="m-0 mb-1.5 font-bold text-sky-900 text-base flex items-center gap-2">
+                    <span>🎯</span> Purpose & Stance
+                  </h4>
+                  <p className="m-0 text-slate-700 text-base leading-relaxed">
+                    {activeWritingStyleData.purpose}
+                  </p>
+                </div>
+
+                {/* 主な特徴 (Key Features) */}
+                {activeWritingStyleData.keyFeatures && activeWritingStyleData.keyFeatures.length > 0 && (
+                  <div className="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h4 className="m-0 mb-2 font-bold text-slate-800 text-base flex items-center gap-2">
+                      <span>📌</span> Key Features in VCE
+                    </h4>
+                    <ul className="m-0 pl-5 text-slate-700 space-y-1.5 text-base list-disc">
+                      {activeWritingStyleData.keyFeatures.map((feature, idx) => (
+                        <li key={idx} className="leading-relaxed">{feature}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 効果的な語彙 & 文法 */}
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {activeWritingStyleData.effectiveVocabulary && activeWritingStyleData.effectiveVocabulary.length > 0 && (
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                      <h4 className="m-0 mb-2 font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                        <span>✨</span> Effective Expressions
+                      </h4>
+                      <div className="space-y-2 text-sm text-slate-700">
+                        {activeWritingStyleData.effectiveVocabulary.map((vocabCat, idx) => (
+                          <div key={idx}>
+                            <span className="font-bold text-slate-900 text-xs block mb-0.5">{vocabCat.categories}:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {vocabCat.examples.map((ex, eIdx) => (
+                                <span key={eIdx} className="bg-white border border-slate-200 px-2 py-0.5 rounded text-xs">
+                                  {ex}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeWritingStyleData.compatibleTextTypes && activeWritingStyleData.compatibleTextTypes.length > 0 && (
+                    <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-100 flex flex-col justify-between">
+                      <div>
+                        <h4 className="m-0 mb-2 font-bold text-emerald-900 text-sm flex items-center gap-1.5">
+                          <span>📝</span> Compatible Text Types
+                        </h4>
+                        <p className="text-xs text-emerald-800 mb-2">Common formats used for this style in exams:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {activeWritingStyleData.compatibleTextTypes.map((type, idx) => (
+                            <span key={idx} className="bg-white text-emerald-900 font-bold border border-emerald-200 px-2 py-1 rounded-md text-xs shadow-2xs">
+                              {type}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveStyleModal(null);
+                            const target = document.getElementById("filter-by-text-type");
+                            if (target) target.scrollIntoView({ behavior: "smooth" });
+                          }}
+                          className="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
+                        >
+                          Filter by text type →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
         </main>
       </div>
     </PageLayout>
