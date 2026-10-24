@@ -75,7 +75,7 @@ export default function TestYamatoPage() {
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
 
-  // 💡 Supabase から動的に取得するボット設定データ（ハードコードされたフォールバックは持たない）
+  // 💡 Supabase から動的に取得するボット設定データ
   const [yamatoConfigs, setYamatoConfigs] = useState<YamatoConfigsData | null>(null);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(true);
 
@@ -263,41 +263,6 @@ export default function TestYamatoPage() {
               </div>
             </div>
 
-            {/* ⚽ 50通りのスポーツチーム配色テンプレートセクション */}
-            <div style={{ backgroundColor: "#f0fdf4", padding: "16px", borderRadius: "12px", border: "1px solid #bbf7d0" }}>
-              <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#166534", textTransform: "uppercase", marginBottom: "8px" }}>
-                ⚽ スポーツチーム配色テンプレート (全50選)
-              </h2>
-              <p style={{ fontSize: "12px", color: "#15803d", marginBottom: "12px" }}>
-                ヤマトチャットボタンの色使いの参考にするためのスポーツチームユニフォーム配色案です。
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {sportsColorTemplates.map((template, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      border: template.border,
-                      backgroundColor: template.background,
-                      color: template.color,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      gap: "2px",
-                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                      minWidth: "180px"
-                    }}
-                  >
-                    <span>{template.name}</span>
-                    <span style={{ fontSize: "10px", opacity: 0.85, fontWeight: "normal" }}>{template.sport}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
           </div>
 
           {/* 💡 選択中であることがひと目でわかるステータスインジケーター & 登録 appType 一覧表示 */}
@@ -337,6 +302,63 @@ export default function TestYamatoPage() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* ⚽ セクション2：スポーツチーム配色テンプレート (全50選・独立セクション) */}
+        <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <span>⚽</span> スポーツチーム配色テンプレート (全50選 - ヤマトチャットサイズプレビュー)
+          </h2>
+          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "20px" }}>
+            右下常駐ヤマトチャットのボタンカラーおよび配色バランスの参考にするための50通りのスポーツチームモチーフ配色です。
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "20px" }}>
+            {sportsColorTemplates.map((template, idx) => (
+              <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                
+                {/* 💬 ヤマトチャットの大きさ・雰囲気のプレビューボックス */}
+                <div
+                  style={{
+                    width: "100%",
+                    height: "130px",
+                    border: template.border,
+                    backgroundColor: template.background,
+                    color: template.color,
+                    borderRadius: "14px",
+                    padding: "14px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04)",
+                    boxSizing: "border-box"
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", fontWeight: "bold" }}>
+                    <span>大和ヤマト</span>
+                    <span style={{ fontSize: "11px", opacity: 0.85 }}>💬</span>
+                  </div>
+                  <div style={{ fontSize: "11px", opacity: 0.9, lineHeight: "1.3" }}>
+                    こんにちは！日本語学習をサポートします。
+                  </div>
+                  <div style={{ fontSize: "9px", textAlign: "right", opacity: 0.75, fontFamily: "monospace" }}>
+                    {template.border}
+                  </div>
+                </div>
+
+                {/* 元のチーム名 */}
+                <div style={{ textAlign: "center", width: "100%" }}>
+                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "#0f172a" }}>
+                    {template.name}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#64748b" }}>
+                    {template.sport}
+                  </div>
+                </div>
+
+              </div>
+            ))}
           </div>
         </div>
 

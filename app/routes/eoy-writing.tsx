@@ -270,6 +270,7 @@ export default function Dashboard() {
               ))}
             </div>
 
+            <div id="filter-by-text-type" className="scroll-mt-10 mb-6">  
             <div className="mb-2 text-lg font-bold text-slate-600">Filter by Text Type</div>
             <div className="flex gap-2.5 flex-wrap">
               {["all", "Speech", "Email", "Letter", "Article", "Journal", "Essay", "Story", "Report", "Account", "Message", "Review", "Summary", "Official Report"].map((type) => (
@@ -283,6 +284,7 @@ export default function Dashboard() {
                   {type === "all" ? "All" : type}
                 </button>
               ))}
+            </div>
             </div>
           </div>
 
