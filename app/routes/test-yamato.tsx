@@ -1,13 +1,7 @@
 /**
  * @file test-yamato.tsx
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加版）
-
-色
-マンチェスターシティ：背景　水色、文字　黒、枠線　白
-マンチェスターユナイテッド：背景　赤、文字　白、枠線　黄色
-セルティック：背景　緑、文字　白、枠線　黒
-
-*/
+ */
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
@@ -22,14 +16,14 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// 💡 スポーツチームのユニフォーム配色テンプレート（全50選）
+// 💡 スポーツチームのユニフォーム配色テンプレート
 const sportsColorTemplates = [
-  { name: "セルティックFC", sport: "サッカー / スコットランド", border: "2px solid #018749", background: "#FFFFFF", color: "#000000" },
-  { name: "FCバルセロナ", sport: "サッカー / スペイン", border: "2px solid #A50044", background: "#004D98", color: "#FFED02" },
+  { name: "セルティック", sport: "サッカー / スコットランド", border: "2px solid #000000", background: "#018749", color: "#FFFFFF" },
+  { name: "マンチェスター・シティ", sport: "サッカー / イングランド", border: "2px solid #FFFFFF", background: "#6CABDD", color: "#000000" },
+  { name: "マンチェスター・ユナイテッド", sport: "サッカー / イングランド", border: "2px solid #FBE122", background: "#DA291C", color: "#FFFFFF" },
+  { name: "Aston Villa", sport: "サッカー / イングランド", border: "2px solid #F1BE48", background: "#670E36", color: "#95BFE5" },
   { name: "レアル・マドリード", sport: "サッカー / スペイン", border: "2px solid #FEBE10", background: "#FFFFFF", color: "#00529F" },
-  { name: "マンチェスター・ユナイテッド", sport: "サッカー / イングランド", border: "2px solid #DA291C", background: "#000000", color: "#FBE122" },
   { name: "リヴァプールFC", sport: "サッカー / イングランド", border: "2px solid #F6EB61", background: "#C8102E", color: "#FFFFFF" },
-  { name: "マンチェスター・シティ", sport: "サッカー / イングランド", border: "2px solid #6CABDD", background: "#FFFFFF", color: "#1C2C5B" },
   { name: "アーセナルFC", sport: "サッカー / イングランド", border: "2px solid #9C824A", background: "#FFFFFF", color: "#EF0107" },
   { name: "チェルシーFC", sport: "サッカー / イングランド", border: "2px solid #034694", background: "#1A1A1A", color: "#FFFFFF" },
   { name: "トッテナム・ホットスパー", sport: "サッカー / イングランド", border: "2px solid #132257", background: "#FFFFFF", color: "#132257" },
@@ -311,13 +305,13 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* ⚽ セクション2：スポーツチーム配色テンプレート (全50選・独立チャットボタンサイズプレビュー) */}
+        {/* ⚽ セクション2：スポーツチーム配色テンプレート (独立チャットボタンサイズプレビュー) */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h2 style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span>⚽</span> スポーツチーム配色テンプレート (全50選 - チャットボタンサイズプレビュー)
+            <span>⚽</span> スポーツチーム配色テンプレート (チャットボタンサイズプレビュー)
           </h2>
           <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "24px" }}>
-            実際の常駐チャットボタンサイズ（<code>px-4 py-3 rounded-full text-sm</code>）で「大和ヤマト」の表示雰囲気を比較できる50通りの配色案です。
+            実際の常駐チャットボタンサイズ（<code>px-4 py-3 rounded-full text-sm</code>）で「大和ヤマト」の表示雰囲気を比較できる配色案です。
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
