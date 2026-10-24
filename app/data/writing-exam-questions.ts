@@ -56,7 +56,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'writing-exam-questions';
+const KNOWLEDGE_KEY = 'WRITING_EXAM_QUESTIONS';
 
 /**
  * Fetch Writing Exam Questions Database data from Supabase 'app_knowledge' table.
