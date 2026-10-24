@@ -207,9 +207,6 @@ export default function Dashboard() {
             </Link>
           </div>
 
-// 一時的なテスト用コード
-<DataErrorState errorMessage="インポートテスト用のメッセージです" />
-
           {/* AIヤマトガイドエリア */}
           <div>
             <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
