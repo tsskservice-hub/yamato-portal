@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（設問情報連携版・Supabase動的取得対応）
+ * @description EOY Writing Practice モジュール（Supabase動的取得 ＆ 画像バックエンド連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -8,7 +8,7 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-// 💡 変更: フォールバックデータと取得関数をインポート
+// 💡 フォールバックデータと取得関数、Supabaseクライアントのインポート
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
 import textTypesData from "../data/texttypes";
 import { supabase } from "../lib/supabaseClient";
@@ -37,6 +37,7 @@ export default function Dashboard() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 💡 2. 手書き解答画像の状態管理
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
@@ -45,14 +46,14 @@ export default function Dashboard() {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // 💡 2. ページ表示時に Supabase から動的に最新データを取得してステートを更新
+  // 💡 3. ページ表示時に Supabase から動的に最新データを取得してステートを更新
   useEffect(() => {
     let isMounted = true;
     async function loadQuestions() {
       try {
         const data = await fetchWritingExamQuestionsData(supabase);
         if (isMounted && data && Array.isArray(data) && data.length > 0) {
-          setQuestions(data); // Supabase のデータで更新
+          setQuestions(data); // Supabase のデータで画面を更新
         }
       } catch (err) {
         console.error("Failed to load writing exam questions from Supabase:", err);
@@ -64,6 +65,7 @@ export default function Dashboard() {
     };
   }, []);
 
+  // 💡 4. アップロードされた手書き画像の処理（プレビュー生成およびバックエンド送信用の準備）
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -303,6 +305,7 @@ export default function Dashboard() {
             })}
           </div>
 
+          {/* 💡 手書き解答画像（externalImageFile / externalImagePreview）をチャットウィジェット経由でバックエンドへ送信 */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
