@@ -7,7 +7,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // シングルトンとして保持するクライアントインスタンス
 let cachedSupabase: SupabaseClient | null = null;
 
-// 💡 確実に接続できるよう、実際のプロジェクト情報をフォールバックとして定義
+// 💡 正しいプロジェクトURLと、公式から取得した最新の Publishable Key を設定
 const FALLBACK_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
 const FALLBACK_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
 
