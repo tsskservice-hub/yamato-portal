@@ -4,7 +4,7 @@
  * 💡 特徴：
  * 1. Supabase 'app_knowledge' からの動的設問データ取得（fetchWritingExamQuestionsData）
  * 2. Supabase 'TEXTTYPES' からの動的モーダルデータ取得（fetchTextTypesData）
- * 3. 「How to use Genkooyooshi」および各 text type のモーダル表示対応
+ * 3. 「How to use Genkoyoshi」および各 text type のモーダル表示対応
  * 4. 写真解答アップロード & AIヤマトチャット連携
  */
 import { useState, useEffect, useRef } from "react";
@@ -62,7 +62,7 @@ export default function Dashboard() {
           setQuestions(fetchedQuestions);
         }
 
-        // 2. TEXTTYPES（Genkooyooshi を含む）詳細データの取得
+        // 2. TEXTTYPES（Genkoyoshi を含む）詳細データの取得
         const fetchedTextTypes = await fetchTextTypesData(supabase);
         if (isMounted && fetchedTextTypes && typeof fetchedTextTypes === "object" && Object.keys(fetchedTextTypes).length > 0) {
           setModalData(fetchedTextTypes);
@@ -107,9 +107,9 @@ export default function Dashboard() {
     ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
     : "";
 
-  // 💡 Genkooyooshi / Genkoyoshi の表記ゆれに対応してモーダル用データを解決
+  // 💡 Genkoyoshi / Genkoyoshi の表記ゆれに対応してモーダル用データを解決
   const activeModalData = activeModal
-    ? modalData[activeModal] || (activeModal === "Genkooyooshi" ? modalData["Genkoyoshi"] : modalData["Genkooyooshi"])
+    ? modalData[activeModal] || (activeModal === "Genkoyoshi" ? modalData["Genkoyoshi"] : modalData["Genkoyoshi"])
     : null;
 
   return (
@@ -119,15 +119,15 @@ export default function Dashboard() {
           
           {/* 上部ショートカットボタン */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            {/* 💡 How to use Genkooyooshi ボタン */}
+            {/* 💡 How to use Genkoyoshi ボタン */}
             <button
               type="button"
-              onClick={() => setActiveModal("Genkooyooshi")}
+              onClick={() => setActiveModal("Genkoyoshi")}
               className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
             >
               <div className="flex items-center space-x-2 truncate">
                 <span className="text-base">📝</span>
-                <span className="truncate">How to use Genkooyooshi</span>
+                <span className="truncate">How to use Genkoyoshi</span>
               </div>
               <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2">View →</span>
             </button>
@@ -360,7 +360,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* 💡 TextTypeModal: Genkooyooshi または各テキストタイプのモーダルを描画 */}
+          {/* 💡 TextTypeModal: Genkoyoshi または各テキストタイプのモーダルを描画 */}
           {activeModal && activeModalData && (
             <TextTypeModal
               isOpen={true}

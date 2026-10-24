@@ -118,12 +118,12 @@ export default function CustomDashboard() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <button
-              onClick={() => setActiveModal("Genkooyooshi")}
+              onClick={() => setActiveModal("Genkoyoshi")}
               className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
             >
               <div className="flex items-center space-x-2 truncate">
                 <span className="text-base">📝</span>
-                <span className="truncate">How to use Genkooyooshi</span>
+                <span className="truncate">How to use Genkoyoshi</span>
               </div>
               <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2">View →</span>
             </button>
