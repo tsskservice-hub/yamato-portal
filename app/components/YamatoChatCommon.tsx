@@ -25,8 +25,8 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.7.0",
-  role: "ポータル共通AIチャットウィジェット（完全連動上戻りボタン・左上リサイズ・root自動解決・写真切替対応版）",
+  version: "3.8.0",
+  role: "ポータル共通AIチャットウィジェット（カラーコード直接指定・完全連動上戻りボタン・左上リサイズ対応版）",
   features: [
     {
       featureName: "Synchronized Scroll Top Button",
@@ -45,11 +45,11 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "enableImageUpload props により、部屋ごとに写真アップロードボタンの表示/非表示を自在に切り替え可能"
     },
     {
-      featureName: "New 9 Color Themes",
-      description: "赤、青、黒、緑、黄色、オレンジ、紫、水色、ピンクの新しい9色テーマに対応"
+      featureName: "Direct Color Code Theme Support",
+      description: "themeColor に直接カラーコード（例: #1e3a8a）を指定可能"
     }
   ],
-  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink"],
+  supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "custom"],
   learningPaces: ["steady", "normal", "accelerated"]
 };
 
@@ -77,7 +77,7 @@ export type YamatoChatCommonProps = {
   systemPrompt?: string;
   appType?: "concierge" | "writing" | "oral" | "general" | string;
   defaultOpen?: boolean;
-  themeColor?: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | string;
+  themeColor?: string; // 💡 キーワードまたはカラーコード（例: "#1e3a8a"）を受付
   floatingButtonClassName?: string;
   buttonStyle?: {
     border?: string;
@@ -92,13 +92,12 @@ export type YamatoChatCommonProps = {
   enableImageUpload?: boolean;
 };
 
-// 新9色テーマごとのスタイル定義
+// 従来のキーワードテーマ用スタイル定義（フォールバック用）
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
     floatingText: "text-white",
     floatingBorder: "border border-red-400",
-    button: "bg-red-600 hover:bg-red-700 text-white",
     border: "border-red-300",
     headerText: "text-red-900",
     badgeBg: "bg-red-50 border-red-200",
@@ -113,7 +112,6 @@ const themeStyles = {
     floatingBg: "bg-blue-600 hover:bg-blue-700",
     floatingText: "text-white",
     floatingBorder: "border border-blue-400",
-    button: "bg-blue-600 hover:bg-blue-700 text-white",
     border: "border-blue-300",
     headerText: "text-blue-900",
     badgeBg: "bg-blue-50 border-blue-200",
@@ -128,7 +126,6 @@ const themeStyles = {
     floatingBg: "bg-slate-900 hover:bg-black",
     floatingText: "text-white",
     floatingBorder: "border border-slate-700",
-    button: "bg-slate-900 hover:bg-black text-white",
     border: "border-slate-700",
     headerText: "text-slate-900",
     badgeBg: "bg-slate-100 border-slate-300",
@@ -143,7 +140,6 @@ const themeStyles = {
     floatingBg: "bg-green-600 hover:bg-green-700",
     floatingText: "text-white",
     floatingBorder: "border border-green-400",
-    button: "bg-green-600 hover:bg-green-700 text-white",
     border: "border-green-300",
     headerText: "text-green-900",
     badgeBg: "bg-green-50 border-green-200",
@@ -158,7 +154,6 @@ const themeStyles = {
     floatingBg: "bg-yellow-500 hover:bg-yellow-600",
     floatingText: "text-slate-900",
     floatingBorder: "border border-yellow-300",
-    button: "bg-yellow-500 hover:bg-yellow-600 text-slate-900",
     border: "border-yellow-300",
     headerText: "text-yellow-900",
     badgeBg: "bg-yellow-50 border-yellow-200",
@@ -173,7 +168,6 @@ const themeStyles = {
     floatingBg: "bg-orange-500 hover:bg-orange-600",
     floatingText: "text-white",
     floatingBorder: "border border-orange-300",
-    button: "bg-orange-500 hover:bg-orange-600 text-white",
     border: "border-orange-300",
     headerText: "text-orange-900",
     badgeBg: "bg-orange-50 border-orange-200",
@@ -188,7 +182,6 @@ const themeStyles = {
     floatingBg: "bg-purple-600 hover:bg-purple-700",
     floatingText: "text-white",
     floatingBorder: "border border-purple-400",
-    button: "bg-purple-600 hover:bg-purple-700 text-white",
     border: "border-purple-300",
     headerText: "text-purple-900",
     badgeBg: "bg-purple-50 border-purple-200",
@@ -203,7 +196,6 @@ const themeStyles = {
     floatingBg: "bg-cyan-600 hover:bg-cyan-700",
     floatingText: "text-white",
     floatingBorder: "border border-cyan-400",
-    button: "bg-cyan-600 hover:bg-cyan-700 text-white",
     border: "border-cyan-300",
     headerText: "text-cyan-900",
     badgeBg: "bg-cyan-50 border-cyan-200",
@@ -218,7 +210,6 @@ const themeStyles = {
     floatingBg: "bg-pink-600 hover:bg-pink-700",
     floatingText: "text-white",
     floatingBorder: "border border-pink-400",
-    button: "bg-pink-600 hover:bg-pink-700 text-white",
     border: "border-pink-300",
     headerText: "text-pink-900",
     badgeBg: "bg-pink-50 border-pink-200",
@@ -284,7 +275,7 @@ export function YamatoChatCommon({
   systemPrompt = "",
   appType = "general",
   defaultOpen = false,
-  themeColor = "blue",
+  themeColor = "#3b82f6",
   floatingButtonClassName,
   buttonStyle,
   initialLearningPace: propLearningPace,
@@ -411,14 +402,21 @@ export function YamatoChatCommon({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
-  const currentTheme = themeStyles[themeColor as keyof typeof themeStyles] || themeStyles.blue;
-  const finalFloatingButtonClass = floatingButtonClassName || `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
+  // 💡 themeColor がカラーコード（例: "#1e3a8a"）またはキーワードかを判定し、安全にスタイルを構築
+  const isHexColor = themeColor.startsWith('#');
+  const currentTheme = !isHexColor && themeStyles[themeColor as keyof typeof themeStyles] ? themeStyles[themeColor as keyof typeof themeStyles] : themeStyles.blue;
   
-  const floatingInlineStyle = buttonStyle ? {
-    border: buttonStyle.border,
-    backgroundColor: buttonStyle.background,
-    color: buttonStyle.color,
-  } : undefined;
+  const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
+  
+  // 💡 カラーコードが直接渡された場合、あるいは buttonStyle が指定された場合にインラインスタイルを優先適用
+  const floatingInlineStyle = {
+    ...(buttonStyle?.border ? { border: buttonStyle.border } : isHexColor ? { border: `2px solid ${themeColor}` } : {}),
+    ...(buttonStyle?.background ? { backgroundColor: buttonStyle.background } : isHexColor ? { backgroundColor: themeColor } : {}),
+    ...(buttonStyle?.color ? { color: buttonStyle.color } : {}),
+  };
+
+  // チャットボックスの枠線用インラインスタイル（themeColor のカラーコードを直接適用）
+  const boxBorderInlineStyle = isHexColor ? { borderColor: themeColor } : undefined;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     {
@@ -679,8 +677,12 @@ export function YamatoChatCommon({
         ) : (
           <div
             ref={aiChatRef}
-            style={isAiFullscreen ? undefined : { width: `${chatSize.width}px`, height: `${chatSize.height}px` }}
-            className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+            style={
+              isAiFullscreen 
+                ? undefined 
+                : { width: `${chatSize.width}px`, height: `${chatSize.height}px`, ...boxBorderInlineStyle }
+            }
+            className={`bg-white border-2 ${!isHexColor ? currentTheme.border : ''} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                 : "min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] overflow-auto"
@@ -731,7 +733,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* クレジット表示エリア（Learning Pace の上に移動） */}
+              {/* クレジット表示エリア */}
               <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
                 <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Account Status</span>
                 {activeUserId ? (
@@ -754,6 +756,7 @@ export function YamatoChatCommon({
                       key={level}
                       type="button"
                       onClick={() => handlePaceChange(level)}
+                      style={tutorLevel === level && isHexColor ? { backgroundColor: themeColor, color: '#ffffff' } : undefined}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize transition ${
                         tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
                       }`}
@@ -764,7 +767,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI（テーマカラー連動版） */}
+              {/* フォントサイズ変更UI */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -780,6 +783,7 @@ export function YamatoChatCommon({
                       key={size.key}
                       type="button"
                       onClick={() => setChatFontSize(size.key)}
+                      style={chatFontSize === size.key && isHexColor ? { backgroundColor: themeColor, color: '#ffffff' } : undefined}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
                         chatFontSize === size.key
                           ? currentTheme.buttonActive
@@ -792,7 +796,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* 未ログイン時の新規登録・ログインガード画面 */}
+              {/* 未ログイン時のガード画面 */}
               {!activeUserId ? (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex-grow mb-3 flex flex-col items-center justify-center text-center space-y-3">
                   <div className="text-3xl">🔒</div>
@@ -818,6 +822,7 @@ export function YamatoChatCommon({
                     {tutorMessages.map((msg, idx) => (
                       <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                         <div
+                          style={msg.role === "user" && isHexColor ? { backgroundColor: themeColor, color: '#ffffff' } : undefined}
                           className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
                             msg.role === "user"
                               ? currentTheme.userBubble
@@ -931,6 +936,7 @@ export function YamatoChatCommon({
                       <button
                         type="submit"
                         disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
+                        style={isHexColor ? { backgroundColor: themeColor, color: '#ffffff' } : undefined}
                         className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                       >
                         Send
