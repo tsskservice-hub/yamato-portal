@@ -1,7 +1,12 @@
 /**
  * @file test-yamato.tsx
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加版）
- */
+ 
+背景、文字、枠線
+湘南ベルマーレ：黄緑、黒、青
+
+
+*/
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
