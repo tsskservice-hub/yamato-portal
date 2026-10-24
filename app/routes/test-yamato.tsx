@@ -1,7 +1,13 @@
 /**
  * @file test-yamato.tsx
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加版）
- */
+
+色
+マンチェスターシティ：背景　水色、文字　黒、枠線　白
+マンチェスターユナイテッド：背景　赤、文字　白、枠線　黄色
+セルティック：背景　緑、文字　白、枠線　黒
+
+*/
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
