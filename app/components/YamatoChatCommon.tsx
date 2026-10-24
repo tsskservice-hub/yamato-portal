@@ -1,11 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット
- * 💡 特徴：
- * 1. root loader 自動データ解決（userId, credits, nickname, learningPace）
- * 2. 写真アップロード（enableImageUpload）のON/OFF切り替え
- * 3. 左上ドラッグによるウィンドウリサイズ機能
- * 4. チャットボタンと枠線・文字色（三角）・背景色が完全連動する上に戻るボタン（ScrollTopButton）内包
+ * @description ポータル共通AIチャットウィジェット（外部画像・設問連携対応版）
  */
 import { useState, useEffect, useRef } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -25,8 +20,8 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "3.8.0",
-  role: "ポータル共通AIチャットウィジェット（カラーコード直接指定・完全連動上戻りボタン・左上リサイズ対応版）",
+  version: "3.9.0",
+  role: "ポータル共通AIチャットウィジェット（外部画像・設問連携対応版）",
   features: [
     {
       featureName: "Synchronized Scroll Top Button",
@@ -37,16 +32,8 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
       description: "画面内に収まったまま左上方向にスムーズにチャット窓をドラッグリサイズ可能"
     },
     {
-      featureName: "Automatic Root Loader Data Resolution",
-      description: "useRouteLoaderData('root') を用いて userId, credits, nickname, learningPace を自動取得"
-    },
-    {
-      featureName: "Configurable Image Upload Button",
-      description: "enableImageUpload props により、部屋ごとに写真アップロードボタンの表示/非表示を自在に切り替え可能"
-    },
-    {
-      featureName: "Direct Color Code Theme Support",
-      description: "themeColor に直接カラーコード（例: #1e3a8a）を指定可能"
+      featureName: "External Image & Question Integration",
+      description: "親コンポーネントから渡された外部画像（手書き解答）や選択中設問情報をバックエンドへ自動連携"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "custom"],
@@ -77,7 +64,7 @@ export type YamatoChatCommonProps = {
   systemPrompt?: string;
   appType?: "concierge" | "writing" | "oral" | "general" | string;
   defaultOpen?: boolean;
-  themeColor?: string; // 💡 キーワードまたはカラーコード（例: "#1e3a8a"）を受付
+  themeColor?: string;
   floatingButtonClassName?: string;
   buttonStyle?: {
     border?: string;
@@ -90,9 +77,15 @@ export type YamatoChatCommonProps = {
   credits?: number;
   onOpenAuth?: (mode?: 'signin' | 'signup') => void;
   enableImageUpload?: boolean;
+  // 💡 外部画像および設問情報の受け取り用プロパティを追加
+  externalImageFile?: File | null;
+  externalImageFile2?: File | null;
+  externalImagePreview?: string | null;
+  externalImagePreview2?: string | null;
+  onClearExternalImage?: () => void;
+  assignedQuestion?: string;
 };
 
-// 従来のキーワードテーマ用スタイル定義（フォールバック用）
 const themeStyles = {
   red: {
     floatingBg: "bg-red-600 hover:bg-red-700",
@@ -284,6 +277,10 @@ export function YamatoChatCommon({
   credits: propCredits,
   onOpenAuth,
   enableImageUpload = true,
+  externalImageFile,
+  externalImagePreview: propExternalImagePreview,
+  onClearExternalImage,
+  assignedQuestion,
 }: YamatoChatCommonProps) {
   const rootData = useRouteLoaderData("root") as RootLoaderData | undefined;
 
@@ -399,23 +396,23 @@ export function YamatoChatCommon({
   };
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [internalSelectedImage, setInternalSelectedImage] = useState<File | null>(null);
+  const [internalSelectedImagePreview, setInternalSelectedImagePreview] = useState<string | null>(null);
 
-  // 💡 themeColor がカラーコード（例: "#1e3a8a"）またはキーワードかを判定し、安全にスタイルを構築
+  // 💡 外部から渡されたプレビュー（propExternalImagePreview）を優先し、なければ内部の画像を使う
+  const activeImagePreview = propExternalImagePreview !== undefined ? propExternalImagePreview : internalSelectedImagePreview;
+
   const isHexColor = themeColor.startsWith('#');
   const currentTheme = !isHexColor && themeStyles[themeColor as keyof typeof themeStyles] ? themeStyles[themeColor as keyof typeof themeStyles] : themeStyles.blue;
   
   const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
   
-  // 💡 カラーコードが直接渡された場合、あるいは buttonStyle が指定された場合にインラインスタイルを優先適用
   const floatingInlineStyle = {
     ...(buttonStyle?.border ? { border: buttonStyle.border } : isHexColor ? { border: `2px solid ${themeColor}` } : {}),
     ...(buttonStyle?.background ? { backgroundColor: buttonStyle.background } : isHexColor ? { backgroundColor: themeColor } : {}),
     ...(buttonStyle?.color ? { color: buttonStyle.color } : {}),
   };
 
-  // チャットボックスの枠線用インラインスタイル（themeColor のカラーコードを直接適用）
   const boxBorderInlineStyle = isHexColor ? { borderColor: themeColor } : undefined;
 
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
@@ -513,10 +510,10 @@ export function YamatoChatCommon({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedImage(file);
+      setInternalSelectedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSelectedImagePreview(reader.result as string);
+        setInternalSelectedImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -524,7 +521,7 @@ export function YamatoChatCommon({
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!tutorInput.trim() && !selectedImage) || isTutorLoading) return;
+    if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
 
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
@@ -558,13 +555,21 @@ export function YamatoChatCommon({
       return;
     }
 
-    const userMsg = tutorInput.trim() || "Please check this answer image.";
+    const userMsg = tutorInput.trim() || (activeImagePreview ? "Please check this answer photo." : "");
     const needsVisual = requestVisualAid;
-    const imageBase64 = selectedImagePreview;
+    const imageBase64 = activeImagePreview;
+
+    // 💡 選択中の設問情報（assignedQuestion）があればメッセージに自動付加する
+    const finalMessageText = assignedQuestion 
+      ? `[Assigned Question: ${assignedQuestion}]\n${userMsg}` 
+      : userMsg;
 
     setTutorInput("");
-    setSelectedImage(null);
-    setSelectedImagePreview(null);
+    if (onClearExternalImage) {
+      onClearExternalImage();
+    }
+    setInternalSelectedImage(null);
+    setInternalSelectedImagePreview(null);
     setRequestVisualAid(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
 
@@ -584,7 +589,7 @@ export function YamatoChatCommon({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMsg,
+          message: finalMessageText,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
           userNickname: effectiveNickname,
@@ -592,7 +597,7 @@ export function YamatoChatCommon({
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt,
           requestVisualAid: needsVisual,
-          imageBase64: imageBase64,
+          imageBase64: imageBase64, // 💡 ここに確実にBase64画像データが送信されます
           userId: activeUserId,
         }),
       });
@@ -665,7 +670,7 @@ export function YamatoChatCommon({
           >
             <span>🤖</span>
             <span>{characterName}</span>
-            {selectedImagePreview && (
+            {activeImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
             {activeUserId && currentCredits < FEATURE_COSTS.textAi && (
@@ -870,15 +875,16 @@ export function YamatoChatCommon({
                   </div>
 
                   {/* 添付画像のプレビューバー */}
-                  {selectedImagePreview && (
+                  {activeImagePreview && (
                     <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-2.5 py-1.5 rounded-lg text-xs mb-2 shrink-0">
-                      <img src={selectedImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
+                      <img src={activeImagePreview} alt="Preview" className="w-8 h-8 object-cover rounded border" />
                       <span className="truncate flex-grow text-blue-900 font-medium">Answer photo attached</span>
                       <button
                         type="button"
                         onClick={() => {
-                          setSelectedImage(null);
-                          setSelectedImagePreview(null);
+                          if (onClearExternalImage) onClearExternalImage();
+                          setInternalSelectedImage(null);
+                          setInternalSelectedImagePreview(null);
                           if (fileInputRef.current) fileInputRef.current.value = '';
                         }}
                         className="text-red-600 hover:text-red-800 font-bold px-1 cursor-pointer"
@@ -906,7 +912,7 @@ export function YamatoChatCommon({
                             className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer border border-slate-300"
                           >
                             <span>📷</span>
-                            <span>{selectedImagePreview ? "Change Photo" : "Upload Photo"}</span>
+                            <span>{activeImagePreview ? "Change Photo" : "Upload Photo"}</span>
                           </button>
                         </>
                       ) : (
@@ -929,13 +935,13 @@ export function YamatoChatCommon({
                         type="text"
                         value={tutorInput}
                         onChange={(e) => setTutorInput(e.target.value)}
-                        placeholder={selectedImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
+                        placeholder={activeImagePreview ? "Ask feedback for photo..." : "Ask Yamato anything..."}
                         disabled={isTutorLoading}
                         className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
                       />
                       <button
                         type="submit"
-                        disabled={isTutorLoading || (!tutorInput.trim() && !selectedImage)}
+                        disabled={isTutorLoading || (!tutorInput.trim() && !activeImagePreview)}
                         style={isHexColor ? { backgroundColor: themeColor, color: '#ffffff' } : undefined}
                         className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
                       >
