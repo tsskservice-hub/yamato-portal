@@ -1,10 +1,10 @@
 /**
  * @file writing-exam-questions.ts
  * @description Decoupled TypeScript logic & Supabase client integration for Writing Exam Questions Database.
- * Stores data in Supabase 'app_knowledge' table under key: 'writing-exam-questions'.
+ * Stores data in Supabase 'app_knowledge' table under key: 'writing-exam-questions' (or 'WRITING_EXAM_QUESTIONS').
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 // --- Type Definitions ---
 export interface WritingExamQuestion {
@@ -16,64 +16,66 @@ export interface WritingExamQuestion {
 }
 
 export type WritingExamQuestionsData = WritingExamQuestion[];
-
 export type WritingExamQuestionsDataPayload = WritingExamQuestionsData;
 
-// --- Default Questions Data (デフォルトエクスポート用) ---
-export const WRITING_EXAM_QUESTIONS: WritingExamQuestion[] = [
+// --- Fallback & Default Data (取得失敗時の案内メッセージ) ---
+export const WRITING_EXAM_QUESTIONS_FALLBACK: WritingExamQuestion[] = [
   {
-    id: 1,
-    category: "Persuasive",
-    textType: "Speech",
-    english: "Write a speech persuading your peers to adopt sustainable living practices.",
-    japanese: "持続可能な生活習慣を取り入れるよう仲間に説得するスピーチを書く。"
-  },
-  {
-    id: 2,
-    category: "Personal",
-    textType: "Journal",
-    english: "Write a journal entry reflecting on an unforgettable experience during a trip to Japan.",
-    japanese: "日本旅行中の忘れられない経験を振り返る日記を書く。"
-  },
-  {
-    id: 3,
+    id: 0,
     category: "Informative",
-    textType: "Article",
-    english: "Write an article introducing Japanese traditional culture to Australian high school students.",
-    japanese: "オーストラリアの高校生に日本の伝統文化を紹介する記事を書く。"
+    textType: "Notice",
+    english: "Currently, exam questions are temporarily unavailable. We apologize for the inconvenience. Please contact support@jptutoraiyamato.com for assistance.",
+    japanese: "ただいま問題を表示できません。恐れ入りますが、support@jptutoraiyamato.com までご連絡ください。"
   }
 ];
 
-export default WRITING_EXAM_QUESTIONS;
+// デフォルトエクスポートにもフォールバックを設定
+export default WRITING_EXAM_QUESTIONS_FALLBACK;
 
 export interface AppKnowledgeRecord<T = any> {
   id?: string;
   key: string;
   title: string;
   category: string;
-  content_json: T;
+  data: T;
   created_at?: string;
   updated_at?: string;
 }
 
+// 💡 Supabase の key カラムに登録されている文字列に合わせて設定してください
+// （Supabase側が小文字ハイフンの場合は 'writing-exam-questions' にしてください）
 const KNOWLEDGE_KEY = 'WRITING_EXAM_QUESTIONS';
 
 /**
  * Fetch Writing Exam Questions Database data from Supabase 'app_knowledge' table.
+ * 取得に失敗した場合は、案内メッセージが入ったフォールバック配列を安全に返します。
  */
-export async function fetchWritingExamQuestionsData(supabaseClient: SupabaseClient): Promise<WritingExamQuestionsData | null> {
-  const { data, error } = await supabaseClient
-    .from('app_knowledge')
-    .select('content_json')
-    .eq('key', KNOWLEDGE_KEY)
-    .single();
+export async function fetchWritingExamQuestionsData(
+  supabaseClient: SupabaseClient
+): Promise<WritingExamQuestionsData> {
+  try {
+    const { data: row, error } = await supabaseClient
+      .from('app_knowledge')
+      .select('*')
+      .eq('key', KNOWLEDGE_KEY)
+      .single();
 
-  if (error) {
-    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, error);
-    return null;
+    if (error || !row) {
+      console.warn(`[${KNOWLEDGE_KEY}] Supabaseからの取得失敗またはデータ未登録のため、フォールバック案内を返します:`, error?.message);
+      return WRITING_EXAM_QUESTIONS_FALLBACK;
+    }
+
+    // 💡 カラム名が 'data' の場合と 'content_json' の場合の双方に対応
+    const questions = (row.data || row.content_json) as WritingExamQuestionsData;
+    if (Array.isArray(questions) && questions.length > 0) {
+      return questions;
+    }
+
+    return WRITING_EXAM_QUESTIONS_FALLBACK;
+  } catch (err) {
+    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, err);
+    return WRITING_EXAM_QUESTIONS_FALLBACK;
   }
-
-  return data?.content_json as WritingExamQuestionsData;
 }
 
 /**
@@ -90,7 +92,7 @@ export async function upsertWritingExamQuestionsData(
       key: KNOWLEDGE_KEY,
       title: 'Writing Exam Questions Database',
       category,
-      content_json: content,
+      data: content, // 💡 Supabaseの標準カラム名 'data' に格納
       updated_at: new Date().toISOString()
     }, { onConflict: 'key' });
 
@@ -106,6 +108,7 @@ export async function upsertWritingExamQuestionsData(
  * Filter writing exam questions by category.
  */
 export function getWritingQuestionsByCategory(questions: WritingExamQuestionsData, category: string): WritingExamQuestion[] {
+  if (!Array.isArray(questions)) return [];
   return questions.filter(q => q.category.toLowerCase() === category.toLowerCase());
 }
 
@@ -113,5 +116,6 @@ export function getWritingQuestionsByCategory(questions: WritingExamQuestionsDat
  * Filter writing exam questions by text type (e.g. Speech, Essay, Letter, Report).
  */
 export function getWritingQuestionsByTextType(questions: WritingExamQuestionsData, textType: string): WritingExamQuestion[] {
+  if (!Array.isArray(questions)) return [];
   return questions.filter(q => q.textType.toLowerCase() === textType.toLowerCase());
 }

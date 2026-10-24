@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（Supabase動的データ取得・設問情報連携版）
+ * @description EOY Writing Practice モジュール（設問情報連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -8,10 +8,10 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-import { WRITING_EXAM_QUESTIONS, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
+import questionsData from "../data/writing-exam-questions";
 import textTypesData from "../data/texttypes";
-import { supabase } from "../lib/supabaseClient";
 
+const questions = questionsData as any[];
 const modalData: { [key: string]: any } = textTypesData;
 
 export default function Dashboard() {
@@ -19,23 +19,6 @@ export default function Dashboard() {
   const [activeTextType, setActiveTextType] = useState<string>("all");
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
-
-  // 💡 Supabase から動的に問題データを取得するステート（初期値はデフォルトデータ）
-  const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS);
-
-  useEffect(() => {
-    async function loadQuestions() {
-      try {
-        const data = await fetchWritingExamQuestionsData(supabase);
-        if (data && Array.isArray(data) && data.length > 0) {
-          setQuestions(data);
-        }
-      } catch (err) {
-        console.error("Failed to load writing exam questions from Supabase:", err);
-      }
-    }
-    loadQuestions();
-  }, []);
   
   const rootData = useRouteLoaderData("root") as {
     user?: any;
