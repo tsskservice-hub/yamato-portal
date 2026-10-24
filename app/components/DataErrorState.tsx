@@ -5,16 +5,18 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-interface DataErrorStateProps {
+export interface DataErrorStateProps {
   title?: string;
   message?: string;
-  errorMessage: string;
+  errorMessage?: string;
+  onRetry?: () => void;
 }
 
 export function DataErrorState({
   title = 'Unable to Load Data',
   message = 'An unexpected error has occurred while loading the page. You can automatically notify our support team by clicking the button below.',
-  errorMessage,
+  errorMessage = 'No additional error details provided.',
+  onRetry,
 }: DataErrorStateProps) {
   const [isSending, setIsSending] = useState(false);
   const [sentSuccess, setSentSuccess] = useState(false);
@@ -53,28 +55,45 @@ export function DataErrorState({
     }
   };
 
+  const handleRetry = () => {
+    if (onRetry) {
+      onRetry();
+    } else if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center bg-white rounded-lg shadow-sm border border-slate-200 my-8">
-      <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
-      <p className="text-slate-600 max-w-md mb-6 text-sm leading-relaxed">{message}</p>
+    <div className="p-8 text-center bg-white border border-slate-200 rounded-2xl shadow-sm max-w-lg mx-auto my-12">
+      <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+        ⚠️
+      </div>
+      <h3 className="text-xl font-bold text-slate-800 mb-2">
+        {title}
+      </h3>
+      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+        {message}
+      </p>
 
       {sentSuccess ? (
-        <div className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md text-sm font-bold mb-4">
+        <div className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-bold mb-4">
           ✓ Error report sent successfully to support. Thank you!
         </div>
       ) : (
         <div className="flex flex-wrap gap-3 justify-center">
           <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-md transition-colors text-sm cursor-pointer"
+            type="button"
+            onClick={handleRetry}
+            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm cursor-pointer shadow-xs"
           >
-            Reload Page
+            Retry / Reload
           </button>
 
           <button
+            type="button"
             onClick={handleAutoReport}
             disabled={isSending}
-            className="px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:bg-sky-300 text-white font-medium rounded-md transition-colors text-sm inline-flex items-center cursor-pointer"
+            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold rounded-xl transition-colors text-sm inline-flex items-center cursor-pointer shadow-xs"
           >
             {isSending ? 'Sending Report...' : 'Report Error to Support'}
           </button>
@@ -82,10 +101,13 @@ export function DataErrorState({
       )}
 
       {sendError && (
-        <p className="text-xs text-red-600 mt-3">
+        <p className="text-xs text-rose-600 mt-3 font-medium">
           Failed to send automatically. Please contact support@jptutoraiyamato.com directly.
         </p>
       )}
     </div>
   );
 }
+
+// 💡 デフォルトエクスポートを追加（contact.tsx 等の default import に対応）
+export default DataErrorState;

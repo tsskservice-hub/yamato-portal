@@ -1,8 +1,12 @@
 /**
  * @file legal-content.ts
- * @description Type definitions and helper functions for AI Yamato Portal legal documents, terms, privacy, and contact information.
+ * @description Decoupled TypeScript logic & Supabase client integration for AI Yamato Portal legal documents.
+ * Stores data in Supabase 'app_knowledge' table under key: 'LEGAL_CONTENTS'.
  */
 
+import { SupabaseClient } from '@supabase/supabase-js';
+
+// --- Type Definitions ---
 export interface LegalListItem {
   strong?: string;
   text?: string;
@@ -34,104 +38,59 @@ export interface LegalContent {
   contact: LegalDocument;
 }
 
-// --- Legal Content Data (追加) ---
-export const LEGAL_CONTENT: LegalContent = {
-  terms: {
-    title: "Terms of Service",
-    lastUpdated: "October 2026",
-    summary: "Please read these terms carefully before using AI Yamato Portal services.",
-    sections: [
-      {
-        heading: "1. Acceptance of Terms",
-        content: "By accessing or using AI Yamato Portal, you agree to be bound by these Terms."
-      }
-    ]
-  },
-  disclaimer: {
-    title: "Disclaimer",
-    lastUpdated: "October 2026",
-    summary: "Educational and reference disclaimers for global and VCE learners.",
-    sections: [
-      {
-        heading: "General Disclaimer",
-        content: "The tools and resources provided are for educational and guidance purposes."
-      }
-    ]
-  },
-  privacy: {
-    title: "Privacy Policy",
-    lastUpdated: "October 2026",
-    summary: "How we collect, use, and protect your personal information.",
-    sections: [
-      {
-        heading: "Information Collection",
-        content: "We collect information necessary to provide personalized tutoring services."
-      }
-    ]
-  },
-  contact: {
-    title: "Contact Us",
-    lastUpdated: "October 2026",
-    summary: "Get in touch with us for inquiries, support, or feedback.",
-    sections: [
-      {
-        heading: "Get in Touch",
-        content: "You can reach out to our team for any assistance."
-      }
-    ],
-    directEmail: "support@jptutoraiyamato.com",
-    inquiryTypes: ["General Inquiry", "Technical Support", "Billing"]
-  }
-};
-
-export default LEGAL_CONTENT;
+// 💡 Supabase app_knowledge の key
+const KNOWLEDGE_KEY = 'LEGAL_CONTENTS';
 
 /**
- * Retrieves a specific legal document (e.g., terms, disclaimer, privacy, contact) from Supabase-fetched legal content.
- * @param content The full LegalContent object retrieved from Supabase
- * @param docKey The document key
+ * Fetch Legal Content data from Supabase 'app_knowledge' table.
+ * 失敗時は null を返し、UI側で DataErrorState を表示させます。
  */
-export function getLegalDocument(
-  content: LegalContent,
-  docKey: keyof LegalContent
-): LegalDocument {
-  return content[docKey];
+export async function fetchLegalContentData(supabaseClient: SupabaseClient): Promise<LegalContent | null> {
+  try {
+    const { data: row, error } = await supabaseClient
+      .from('app_knowledge')
+      .select('*')
+      .eq('key', KNOWLEDGE_KEY)
+      .single();
+
+    if (error || !row) {
+      console.error(`[${KNOWLEDGE_KEY}] Supabase fetch error:`, error?.message);
+      return null;
+    }
+
+    const result = (row.data || row.content_json) as LegalContent;
+    if (result && typeof result === 'object' && Object.keys(result).length > 0) {
+      return result;
+    }
+
+    return null;
+  } catch (err) {
+    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, err);
+    return null;
+  }
 }
 
 /**
- * Searches across all legal sections for a given keyword.
- * @param content The full LegalContent object retrieved from Supabase
- * @param keyword Search keyword
+ * Upsert Legal Content data to Supabase 'app_knowledge' table.
  */
-export function searchLegalContent(
+export async function upsertLegalContentData(
+  supabaseClient: SupabaseClient,
   content: LegalContent,
-  keyword: string
-): { docKey: keyof LegalContent; section: LegalSection }[] {
-  const query = keyword.toLowerCase().trim();
-  if (!query) return [];
+  category = 'Legal & Compliance'
+): Promise<boolean> {
+  const { error } = await supabaseClient
+    .from('app_knowledge')
+    .upsert({
+      key: KNOWLEDGE_KEY,
+      title: 'AI Yamato Legal Documents',
+      category,
+      data: content,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'key' });
 
-  const results: { docKey: keyof LegalContent; section: LegalSection }[] = [];
-  const docKeys: (keyof LegalContent)[] = ["terms", "disclaimer", "privacy", "contact"];
-
-  for (const docKey of docKeys) {
-    const doc = content[docKey];
-    for (const section of doc.sections) {
-      const matchHeading = section.heading?.toLowerCase().includes(query) ?? false;
-      const matchContent = section.content?.toLowerCase().includes(query) ?? false;
-      const matchGlobal = section.globalContent?.toLowerCase().includes(query) ?? false;
-      const matchVce = section.vceContent?.toLowerCase().includes(query) ?? false;
-      
-      const matchLists = section.listItems?.some(
-        (item) =>
-          (item.strong?.toLowerCase().includes(query) ?? false) ||
-          (item.text?.toLowerCase().includes(query) ?? false)
-      ) ?? false;
-
-      if (matchHeading || matchContent || matchGlobal || matchVce || matchLists) {
-        results.push({ docKey, section });
-      }
-    }
+  if (error) {
+    console.error(`Error upserting ${KNOWLEDGE_KEY} to Supabase:`, error);
+    return false;
   }
-
-  return results;
+  return true;
 }
