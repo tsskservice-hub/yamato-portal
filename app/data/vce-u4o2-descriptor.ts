@@ -41,7 +41,7 @@ const KNOWLEDGE_KEY = 'VCE_U4O2_DESCRIPTOR';
 export async function fetchUnitOutcomeDescriptor(supabaseClient: SupabaseClient): Promise<UnitOutcomeDescriptor | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

@@ -46,7 +46,7 @@ const KNOWLEDGE_KEY = 'VCE_GRAMMAR_LIST';
 export async function fetchGrammarCategoriesData(supabaseClient: SupabaseClient): Promise<GrammarCategoriesData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

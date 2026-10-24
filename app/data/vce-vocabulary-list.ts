@@ -38,7 +38,7 @@ const KNOWLEDGE_KEY = 'VCE_VOCABULARY_LIST';
 export async function fetchVocabularyListData(supabaseClient: SupabaseClient): Promise<VocabularyListData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

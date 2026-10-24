@@ -58,7 +58,7 @@ const KNOWLEDGE_KEY = 'PORTAL_CONTENT';
 export async function fetchPortalContentData(supabaseClient: SupabaseClient): Promise<PortalContentData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

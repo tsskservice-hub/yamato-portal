@@ -47,7 +47,7 @@ const KNOWLEDGE_KEY = 'KANJI_LIST';
 export async function fetchKanjiListData(supabaseClient: SupabaseClient): Promise<KanjiListData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

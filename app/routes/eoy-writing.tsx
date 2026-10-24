@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（設問・TextTypes Supabase動的取得 ＆ 画像バックエンド連携版）
+ * @description EOY Writing Practice モジュール（Supabase動的設問取得・TEXTTYPES動的モーダル連携・手書き画像連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -8,7 +8,7 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-// 💡 フォールバックデータと取得関数のインポート
+// 💡 外部データと取得関数のインポート
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
 import TEXT_TYPES_DATA, { fetchTextTypesData, TextTypesData } from "../data/texttypes";
 import { supabase } from "../lib/supabaseClient";
@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   
-  // 💡 1. 設問データおよび TextTypes データをステートとして管理（初期値はフォールバックデータ）
+  // 💡 1. 設問データおよび TextTypes モーダルデータをステートとして管理
   const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
   const [modalData, setModalData] = useState<TextTypesData>(TEXT_TYPES_DATA);
 
@@ -36,7 +36,7 @@ export default function Dashboard() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 2. 手書き解答画像の状態管理
+  // 画像アップロード用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
@@ -45,21 +45,21 @@ export default function Dashboard() {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // 💡 3. ページ表示時に Supabase から設問データと TextTypes データを動的に取得してステートを更新
+  // 💡 2. ページ読み込み時に Supabase から設問と TEXTTYPES を両方動的に取得
   useEffect(() => {
     let isMounted = true;
     async function loadInitialData() {
       try {
-        // 設問データの取得
-        const questionsData = await fetchWritingExamQuestionsData(supabase);
-        if (isMounted && questionsData && Array.isArray(questionsData) && questionsData.length > 0) {
-          setQuestions(questionsData);
+        // 設問一覧の取得
+        const qData = await fetchWritingExamQuestionsData(supabase);
+        if (isMounted && qData && Array.isArray(qData) && qData.length > 0) {
+          setQuestions(qData);
         }
 
-        // TextTypes データの取得（Supabase の app_knowledge テーブルから）
-        const textTypesResult = await fetchTextTypesData(supabase);
-        if (isMounted && textTypesResult && typeof textTypesResult === 'object' && Object.keys(textTypesResult).length > 0) {
-          setModalData(textTypesResult);
+        // TEXTTYPES 詳細データの取得
+        const tTypesData = await fetchTextTypesData(supabase);
+        if (isMounted && tTypesData && typeof tTypesData === 'object' && Object.keys(tTypesData).length > 0) {
+          setModalData(tTypesData); // 🌟 これにより全テキストタイプの詳細モーダルが有効化されます
         }
       } catch (err) {
         console.error("Failed to load initial data from Supabase:", err);
@@ -71,7 +71,6 @@ export default function Dashboard() {
     };
   }, []);
 
-  // 💡 4. アップロードされた手書き画像の処理
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -93,7 +92,7 @@ export default function Dashboard() {
   });
 
   const currentSystemPrompt = selectedQuestion
-    ? `[Selected VCE EOY Writing Question Q${selectedQuestion.id}]\nCategory: ${selectedQuestion.category}\nText Type: ${selectedQuestion.textType}\nPrompt (English): ${selectedQuestion.english}\nPrompt (Japanese): ${selectedQuestion.japanese}`
+    ? `[Selected VCE EOY Writing Question Q$ [cite: 36]{selectedQuestion.id}]\nCategory: ${selectedQuestion.category}\nText Type: ${selectedQuestion.textType}\nPrompt (English): ${selectedQuestion.english}\nPrompt (Japanese): ${selectedQuestion.japanese}`
     : "";
 
   const assignedQuestionText = selectedQuestion
@@ -131,13 +130,12 @@ export default function Dashboard() {
 
           <div>
             <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
-              
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
                   <span>🤖</span> AI Yamato is ready for you
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
                   <input
                     type="file"
                     accept="image/*"
@@ -153,11 +151,6 @@ export default function Dashboard() {
                     <span>📷</span>
                     <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
                   </button>
-
-                  <span className="text-xs font-medium text-indigo-700 bg-white/80 border border-indigo-200 px-2 py-1 rounded-md shadow-2xs">
-                    (Requires login & 4 credits for image feedback)
-                  </span>
-
                   {selectedImagePreview && (
                     <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
                       ✓ Attached
@@ -286,6 +279,8 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex gap-2 flex-wrap">
                       <span className="text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold">{q.category}</span>
+                      
+                      {/* 💡 緑色の text type バッジ：クリックで activeModal をセット */}
                       <span
                         onClick={() => setActiveModal(q.textType)}
                         className="text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 transition-colors"
@@ -316,10 +311,11 @@ export default function Dashboard() {
             })}
           </div>
 
+          {/* チャットウィジェット */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
-            userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
+            userNickname={nickname || (user?.email ? user.email.split('@') : "Student")}
             credits={credits}
             externalImageFile={selectedImage}
             externalImagePreview={selectedImagePreview}
@@ -331,8 +327,9 @@ export default function Dashboard() {
             }}
           />
 
+          {/* 画像拡大モーダル */}
           {modalImageSrc && (
-            <div className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
+            <div className="fixed inset-0 z- bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
               <div className="relative max-w-4xl max-h-[90vh]">
                 <button onClick={() => setModalImageSrc(null)} className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition">
                   ✕ Close
@@ -342,6 +339,7 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* 💡 TextTypeModal: Supabaseから取得した modalData[activeModal] が渡される */}
           {activeModal && modalData[activeModal] && (
             <TextTypeModal
               isOpen={true}

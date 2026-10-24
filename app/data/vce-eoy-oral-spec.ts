@@ -58,7 +58,7 @@ const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_SPEC';
 export async function fetchOralSpecification(supabaseClient: SupabaseClient): Promise<OralSpecification | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

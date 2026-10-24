@@ -47,7 +47,7 @@ const KNOWLEDGE_KEY = 'VCE_ORAL_CRITERIA';
 export async function fetchOralCriteriaMap(supabaseClient: SupabaseClient): Promise<OralCriteriaMap | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

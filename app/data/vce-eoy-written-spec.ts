@@ -68,7 +68,7 @@ const KNOWLEDGE_KEY = 'VCE_EOY_WRITTEN_SPEC';
 export async function fetchWrittenSpecification(supabaseClient: SupabaseClient): Promise<WrittenSpecification | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

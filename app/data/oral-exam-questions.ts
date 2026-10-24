@@ -79,7 +79,7 @@ const KNOWLEDGE_KEY = 'ORAL_EXAM_QUESTIONS';
 export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient): Promise<OralExamQuestionsData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

@@ -48,7 +48,7 @@ const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_ADVICE2026';
 export async function fetchOralExamAdvice2026(supabaseClient: SupabaseClient): Promise<OralExamAdvice2026 | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

@@ -44,7 +44,7 @@ const KNOWLEDGE_KEY = 'WRITING_STYLES';
 export async function fetchWritingStylesData(supabaseClient: SupabaseClient): Promise<WritingStylesData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

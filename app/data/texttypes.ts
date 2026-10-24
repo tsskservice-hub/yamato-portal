@@ -73,7 +73,7 @@ const KNOWLEDGE_KEY = 'TEXTTYPES';
 export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 
