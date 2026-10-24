@@ -1,6 +1,6 @@
 /**
  * @file terms.tsx
- * @description 利用規約ページ（Supabase LEGAL_CONTENTS 連動・DataErrorState フォールバック版）
+ * @description 利用規約ページ（Supabase LEGAL_CONTENTS 100%動的連動・DataErrorState版）
  */
 import { useState, useEffect, useCallback } from "react";
 import type { MetaFunction } from "@remix-run/cloudflare";
@@ -13,7 +13,10 @@ import { supabase } from "../lib/supabaseClient";
 export const meta: MetaFunction = () => {
   return [
     { title: "Terms of Service | AI Yamato Japanese Tutoring" },
-    { name: "description", content: "Terms of Service for AI Yamato Japanese Tutoring Platform." },
+    {
+      name: "description",
+      content: "Terms of Service governing educational use of AI Yamato Japanese tutoring platform, passkey authentication, and user responsibilities.",
+    },
   ];
 };
 
@@ -60,15 +63,6 @@ export default function TermsOfService() {
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">
           
-          <div className="mb-8">
-            <Link
-              to="/"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
-            >
-              &larr; Back to Home
-            </Link>
-          </div>
-
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center space-y-4">
               <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
@@ -77,7 +71,7 @@ export default function TermsOfService() {
           ) : error || !doc ? (
             <DataErrorState
               title="Terms of Service Unavailable"
-              message="Failed to load Terms of Service from Supabase. Please check your network connection and try again."
+              message="Failed to load Terms of Service from the database. Please check your network connection and try again."
               onRetry={loadData}
             />
           ) : (

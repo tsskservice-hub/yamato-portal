@@ -64,15 +64,6 @@ export default function Disclaimer() {
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">
           
-          <div className="mb-8">
-            <Link
-              to="/"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
-            >
-              &larr; Back to Home
-            </Link>
-          </div>
-
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center space-y-4">
               <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
