@@ -21,7 +21,7 @@ const sportsColorTemplates = [
   { name: "セルティック", sport: "サッカー / スコットランド", border: "2px solid #000000", background: "#018749", color: "#FFFFFF" },
   { name: "マンチェスター・シティ", sport: "サッカー / イングランド", border: "2px solid #FFFFFF", background: "#6CABDD", color: "#000000" },
   { name: "マンチェスター・ユナイテッド", sport: "サッカー / イングランド", border: "2px solid #FBE122", background: "#DA291C", color: "#FFFFFF" },
-  { name: "Aston Villa", sport: "サッカー / イングランド", border: "2px solid #F1BE48", background: "#670E36", color: "#95BFE5" },
+  { name: "Aston Villa", sport: "サッカー / イングランド", border: "2px solid #F1BE48", background: "#b22222", color: "#95BFE5" },
   { name: "レアル・マドリード", sport: "サッカー / スペイン", border: "2px solid #FEBE10", background: "#FFFFFF", color: "#00529F" },
   { name: "リヴァプールFC", sport: "サッカー / イングランド", border: "2px solid #F6EB61", background: "#C8102E", color: "#FFFFFF" },
   { name: "アーセナルFC", sport: "サッカー / イングランド", border: "2px solid #9C824A", background: "#FFFFFF", color: "#EF0107" },
