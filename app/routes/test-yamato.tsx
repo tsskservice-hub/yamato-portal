@@ -305,55 +305,50 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* ⚽ セクション2：スポーツチーム配色テンプレート (全50選・独立セクション) */}
+        {/* ⚽ セクション2：スポーツチーム配色テンプレート (全50選・独立チャットボタンサイズプレビュー) */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h2 style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span>⚽</span> スポーツチーム配色テンプレート (全50選 - ヤマトチャットサイズプレビュー)
+            <span>⚽</span> スポーツチーム配色テンプレート (全50選 - チャットボタンサイズプレビュー)
           </h2>
-          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "20px" }}>
-            右下常駐ヤマトチャットのボタンカラーおよび配色バランスの参考にするための50通りのスポーツチームモチーフ配色です。
+          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "24px" }}>
+            実際の常駐チャットボタンサイズ（<code>px-4 py-3 rounded-full text-sm</code>）で「大和ヤマト」の表示雰囲気を比較できる50通りの配色案です。
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
             {sportsColorTemplates.map((template, idx) => (
-              <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+              <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "6px", backgroundColor: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                 
-                {/* 💬 ヤマトチャットの大きさ・雰囲気のプレビューボックス */}
+                {/* 💬 実際のチャットボタンと同じカプセル型サイズ・デザインのプレビュー */}
                 <div
                   style={{
-                    width: "100%",
-                    height: "130px",
                     border: template.border,
                     backgroundColor: template.background,
                     color: template.color,
-                    borderRadius: "14px",
-                    padding: "14px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04)",
-                    boxSizing: "border-box"
+                    padding: "12px 16px",
+                    borderRadius: "9999px",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)",
+                    cursor: "default"
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", fontWeight: "bold" }}>
-                    <span>大和ヤマト</span>
-                    <span style={{ fontSize: "11px", opacity: 0.85 }}>💬</span>
-                  </div>
-                  <div style={{ fontSize: "11px", opacity: 0.9, lineHeight: "1.3" }}>
-                    こんにちは！日本語学習をサポートします。
-                  </div>
-                  <div style={{ fontSize: "9px", textAlign: "right", opacity: 0.75, fontFamily: "monospace" }}>
-                    {template.border}
-                  </div>
+                  <span>🤖</span>
+                  <span>大和ヤマト</span>
                 </div>
 
-                {/* 元のチーム名 */}
-                <div style={{ textAlign: "center", width: "100%" }}>
-                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "#0f172a" }}>
+                {/* 元のチーム名 & スポーツ種目 */}
+                <div style={{ marginTop: "4px", width: "100%" }}>
+                  <div style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a" }}>
                     {template.name}
                   </div>
                   <div style={{ fontSize: "11px", color: "#64748b" }}>
                     {template.sport}
+                  </div>
+                  <div style={{ fontSize: "10px", color: "#94a3b8", fontFamily: "monospace", marginTop: "2px" }}>
+                    枠: {template.border} / 背景: {template.background} / 文字: {template.color}
                   </div>
                 </div>
 
