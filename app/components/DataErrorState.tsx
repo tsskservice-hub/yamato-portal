@@ -1,5 +1,9 @@
-// components/DataErrorState.tsx
-import React from 'react';
+/**
+ * @file DataErrorState.tsx
+ * @description データ取得失敗時のエラー表示および、Supabase Edge Function経由での自動メール送信コンポーネント
+ */
+import React, { useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 interface DataErrorStateProps {
   title?: string;
@@ -8,47 +12,80 @@ interface DataErrorStateProps {
 }
 
 export function DataErrorState({
-  title = 'データを正しく読み込めませんでした',
-  message = '一時的な読み込みエラーが発生している可能性があります。お手数ですが、以下のボタンから管理者へエラーをご報告いただけますと幸いです。',
+  title = 'Unable to Load Data',
+  message = 'An unexpected error has occurred while loading the page. You can automatically notify our support team by clicking the button below.',
   errorMessage,
-} : DataErrorStateProps) {
-  // 現在のページURLと日時からメールリンクを動的生成
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const timestamp = new Date().toLocaleString('ja-JP', { timeZone: 'Australia/Melbourne' });
+}: DataErrorStateProps) {
+  const [isSending, setIsSending] = useState(false);
+  const [sentSuccess, setSentSuccess] = useState(false);
+  const [sendError, setSendError] = useState(false);
 
-  const subject = encodeURIComponent('[システムエラー報告] JP Tutor AI Yamato');
-  const body = encodeURIComponent(
-    `サポートチーム様\n\n` +
-    `以下のページでデータの読み込みエラーが発生しました。\n\n` +
-    `---\n` +
-    `■ 発生URL: ${currentUrl}\n` +
-    `■ 発生日時: ${timestamp}\n` +
-    `■ エラー内容: ${errorMessage}\n` +
-    `---\n\n` +
-    `（もしよろしければ、エラー発生時の状況をご記入ください）\n`
-  );
+  // ボタンを押したときにEdge Function経由でメールを自動送信する関数
+  const handleAutoReport = async () => {
+    setIsSending(true);
+    setSendError(false);
 
-  const mailtoLink = `mailto:support@jptutoraiyamato.com?subject=${subject}&body=${body}`;
+    try {
+      const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+      const timestamp = new Date().toISOString();
+
+      // Supabase Edge Function 'send-error-report' を呼び出し
+      const { error } = await supabase.functions.invoke('send-error-report', {
+        body: {
+          recipient: 'support@jptutoraiyamato.com',
+          subject: '[System Error Report] JP Tutor AI Yamato',
+          pageUrl: currentUrl,
+          timestamp: timestamp,
+          errorMessage: errorMessage,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setSentSuccess(true);
+    } catch (err) {
+      console.error('Failed to send error report:', err);
+      setSendError(true);
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center bg-white rounded-lg shadow-sm border border-slate-200 my-8">
       <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
       <p className="text-slate-600 max-w-md mb-6 text-sm leading-relaxed">{message}</p>
-      
-      <div className="flex flex-wrap gap-3 justify-center">
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-md transition-colors text-sm"
-        >
-          ページを再読み込み
-        </button>
-        <a
-          href={mailtoLink}
-          className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-md transition-colors text-sm inline-flex items-center"
-        >
-          サポートへエラーを報告する
-        </a>
-      </div>
+
+      {sentSuccess ? (
+        <div className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md text-sm font-bold mb-4">
+          ✓ Error report sent successfully to support. Thank you!
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-3 justify-center">
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-md transition-colors text-sm cursor-pointer"
+          >
+            Reload Page
+          </button>
+
+          <button
+            onClick={handleAutoReport}
+            disabled={isSending}
+            className="px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:bg-sky-300 text-white font-medium rounded-md transition-colors text-sm inline-flex items-center cursor-pointer"
+          >
+            {isSending ? 'Sending Report...' : 'Report Error to Support'}
+          </button>
+        </div>
+      )}
+
+      {sendError && (
+        <p className="text-xs text-red-600 mt-3">
+          Failed to send automatically. Please contact support@jptutoraiyamato.com directly.
+        </p>
+      )}
     </div>
   );
 }
