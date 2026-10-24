@@ -56,6 +56,7 @@ export const ChatYamatoEoyWriting: React.FC<ChatYamatoEoyWritingProps> = ({
       themeColor={config?.themeColor || "#06b6d4"}
       buttonStyle={config?.floatingButtonStyle}
       defaultOpen={defaultOpen}
+      enableImageUpload={false} // 💡 チャット内の「Upload Photo」ボタンを非表示に設定
       {...restProps}
     />
   );

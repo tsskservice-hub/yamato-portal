@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（設問情報連携版）
+ * @description EOY Writing Practice モジュール（Supabase動的データ取得・設問情報連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -8,10 +8,10 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-import questionsData from "../data/writing-exam-questions";
+import { WRITING_EXAM_QUESTIONS, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
 import textTypesData from "../data/texttypes";
+import { supabase } from "../lib/supabaseClient";
 
-const questions = questionsData as any[];
 const modalData: { [key: string]: any } = textTypesData;
 
 export default function Dashboard() {
@@ -19,7 +19,23 @@ export default function Dashboard() {
   const [activeTextType, setActiveTextType] = useState<string>("all");
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+
+  // 💡 Supabase から動的に問題データを取得するステート（初期値はデフォルトデータ）
+  const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS);
+
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        const data = await fetchWritingExamQuestionsData(supabase);
+        if (data && Array.isArray(data) && data.length > 0) {
+          setQuestions(data);
+        }
+      } catch (err) {
+        console.error("Failed to load writing exam questions from Supabase:", err);
+      }
+    }
+    loadQuestions();
+  }, []);
   
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -40,21 +56,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -312,20 +313,6 @@ export default function Dashboard() {
               if (fileInputRef.current) fileInputRef.current.value = '';
             }}
           />
-
-          {showScrollTop && (
-            <aside aria-label="Scroll controls" className="fixed bottom-24 right-6 z-40 flex flex-col items-end gap-3">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="p-3.5 bg-white hover:bg-slate-50 rounded-full shadow-xl cursor-pointer transition-all flex items-center justify-center w-12 h-12 border-2 border-red-500"
-                aria-label="Scroll to top"
-              >
-                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4l-8 8h5v8h6v-8h5z" />
-                </svg>
-              </button>
-            </aside>
-          )}
 
           {modalImageSrc && (
             <div className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
