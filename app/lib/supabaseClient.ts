@@ -1,3 +1,7 @@
+/**
+ * @file supabaseClient.ts
+ * @description Supabase client initialization for Remix / Vite / Cloudflare Pages
+ */
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // シングルトンとして保持するクライアントインスタンス
@@ -8,37 +12,20 @@ export const getSupabase = (): SupabaseClient => {
     return cachedSupabase;
   }
 
-  const getEnvVar = (key: string): string => {
-    try {
-      if (typeof import.meta !== 'undefined' && (import.meta as any).env?.[key]) {
-        return (import.meta as any).env[key];
-      }
-    } catch {}
-
-    try {
-      if (typeof process !== 'undefined' && process.env?.[key]) {
-        return process.env[key] as string;
-      }
-    } catch {}
-
-    try {
-      if (typeof window !== 'undefined' && (window as any)[key]) {
-        return (window as any)[key];
-      }
-    } catch {}
-
-    return '';
-  };
-
+  // 💡 Viteの静的置換を確実に効かせるため、直接 `import.meta.env` のプロパティを指定して参照する
   const url = 
-    getEnvVar('SUPABASE_URL') || 
-    getEnvVar('VITE_SUPABASE_URL') || 
-    getEnvVar('PUBLIC_SUPABASE_URL');
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) || 
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.SUPABASE_URL) || 
+    (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) || 
+    (typeof process !== 'undefined' && process.env?.SUPABASE_URL) || 
+    '';
 
   const key = 
-    getEnvVar('SUPABASE_ANON_KEY') || 
-    getEnvVar('VITE_SUPABASE_ANON_KEY') || 
-    getEnvVar('PUBLIC_SUPABASE_ANON_KEY');
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) || 
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.SUPABASE_ANON_KEY) || 
+    (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) || 
+    (typeof process !== 'undefined' && process.env?.SUPABASE_ANON_KEY) || 
+    '';
 
   if (!url || !key || url.includes('placeholder')) {
     console.error('❌ CRITICAL: Supabase URL or Anon Key is missing during client initialization.');
