@@ -1,6 +1,6 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール（Supabase動的取得 ＆ 画像バックエンド連携版）
+ * @description EOY Writing Practice モジュール（設問・TextTypes Supabase動的取得 ＆ 画像バックエンド連携版）
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -8,12 +8,10 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-// 💡 フォールバックデータと取得関数、Supabaseクライアントのインポート
+// 💡 フォールバックデータと取得関数のインポート
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
-import textTypesData from "../data/texttypes";
+import TEXT_TYPES_DATA, { fetchTextTypesData, TextTypesData } from "../data/texttypes";
 import { supabase } from "../lib/supabaseClient";
-
-const modalData: { [key: string]: any } = textTypesData;
 
 export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -21,8 +19,9 @@ export default function Dashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   
-  // 💡 1. 設問データをステートとして管理（初期値はフォールバックデータ）
+  // 💡 1. 設問データおよび TextTypes データをステートとして管理（初期値はフォールバックデータ）
   const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
+  const [modalData, setModalData] = useState<TextTypesData>(TEXT_TYPES_DATA);
 
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -46,26 +45,33 @@ export default function Dashboard() {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // 💡 3. ページ表示時に Supabase から動的に最新データを取得してステートを更新
+  // 💡 3. ページ表示時に Supabase から設問データと TextTypes データを動的に取得してステートを更新
   useEffect(() => {
     let isMounted = true;
-    async function loadQuestions() {
+    async function loadInitialData() {
       try {
-        const data = await fetchWritingExamQuestionsData(supabase);
-        if (isMounted && data && Array.isArray(data) && data.length > 0) {
-          setQuestions(data); // Supabase のデータで画面を更新
+        // 設問データの取得
+        const questionsData = await fetchWritingExamQuestionsData(supabase);
+        if (isMounted && questionsData && Array.isArray(questionsData) && questionsData.length > 0) {
+          setQuestions(questionsData);
+        }
+
+        // TextTypes データの取得（Supabase の app_knowledge テーブルから）
+        const textTypesResult = await fetchTextTypesData(supabase);
+        if (isMounted && textTypesResult && typeof textTypesResult === 'object' && Object.keys(textTypesResult).length > 0) {
+          setModalData(textTypesResult);
         }
       } catch (err) {
-        console.error("Failed to load writing exam questions from Supabase:", err);
+        console.error("Failed to load initial data from Supabase:", err);
       }
     }
-    loadQuestions();
+    loadInitialData();
     return () => {
       isMounted = false;
     };
   }, []);
 
-  // 💡 4. アップロードされた手書き画像の処理（プレビュー生成およびバックエンド送信用の準備）
+  // 💡 4. アップロードされた手書き画像の処理
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -131,7 +137,7 @@ export default function Dashboard() {
                   <span>🤖</span> AI Yamato is ready for you
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <input
                     type="file"
                     accept="image/*"
@@ -147,6 +153,11 @@ export default function Dashboard() {
                     <span>📷</span>
                     <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
                   </button>
+
+                  <span className="text-xs font-medium text-indigo-700 bg-white/80 border border-indigo-200 px-2 py-1 rounded-md shadow-2xs">
+                    (Requires login & 4 credits for image feedback)
+                  </span>
+
                   {selectedImagePreview && (
                     <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
                       ✓ Attached
@@ -305,7 +316,6 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* 💡 手書き解答画像（externalImageFile / externalImagePreview）をチャットウィジェット経由でバックエンドへ送信 */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
