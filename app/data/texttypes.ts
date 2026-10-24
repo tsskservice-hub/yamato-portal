@@ -4,7 +4,7 @@
  * Stores data in Supabase 'app_knowledge' table under key: 'TEXTTYPES'.
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 // --- Type Definitions ---
 export interface TextTypeDetail {
@@ -12,13 +12,13 @@ export interface TextTypeDetail {
   purpose: string;
   structure: string[];
   sampleImage?: string;
+  sample?: string;
 }
 
 export type TextTypesData = Record<string, TextTypeDetail>;
-
 export type TextTypesDataPayload = TextTypesData;
 
-// --- Default Text Types Data (デフォルトエクスポート用) ---
+// --- Default Fallback Data (取得前の初期値・オフライン保険) ---
 export const TEXT_TYPES_DATA: TextTypesData = {
   "Speech": {
     "title": "Speech",
@@ -59,30 +59,41 @@ export interface AppKnowledgeRecord<T = any> {
   key: string;
   title: string;
   category: string;
-  content_json: T;
+  data: T;
   created_at?: string;
   updated_at?: string;
 }
 
-// 💡 Supabase のキー設定に合わせて大文字の 'TEXTTYPES' に修正
+// 💡 Supabase の key（大文字の 'TEXTTYPES'）
 const KNOWLEDGE_KEY = 'TEXTTYPES';
 
 /**
  * Fetch VCE Japanese Text Types Specification data from Supabase 'app_knowledge' table.
  */
-export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData | null> {
-  const { data, error } = await supabaseClient
-    .from('app_knowledge')
-    .select('*')
-    .eq('key', KNOWLEDGE_KEY)
-    .single();
+export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData> {
+  try {
+    // 💡 Supabase の標準カラム名 'data'（または content_json）を安全に取得
+    const { data: row, error } = await supabaseClient
+      .from('app_knowledge')
+      .select('*')
+      .eq('key', KNOWLEDGE_KEY)
+      .single();
 
-  if (error) {
-    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, error);
-    return null;
+    if (error || !row) {
+      console.warn(`[${KNOWLEDGE_KEY}] Supabaseからの取得失敗のためデフォルトを返します:`, error?.message);
+      return TEXT_TYPES_DATA;
+    }
+
+    const result = (row.data || row.content_json) as TextTypesData;
+    if (result && typeof result === 'object' && Object.keys(result).length > 0) {
+      return result;
+    }
+
+    return TEXT_TYPES_DATA;
+  } catch (err) {
+    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, err);
+    return TEXT_TYPES_DATA;
   }
-
-  return data?.content_json as TextTypesData;
 }
 
 /**
@@ -99,7 +110,7 @@ export async function upsertTextTypesData(
       key: KNOWLEDGE_KEY,
       title: 'VCE Japanese Text Types Specification',
       category,
-      content_json: content,
+      data: content, // 💡 data カラムに保存
       updated_at: new Date().toISOString()
     }, { onConflict: 'key' });
 
@@ -110,17 +121,10 @@ export async function upsertTextTypesData(
   return true;
 }
 
-// --- Helper & Utility Logic ---
-/**
- * Get text type details by name.
- */
 export function getTextTypeByName(textTypesData: TextTypesData, name: string): TextTypeDetail | null {
   return textTypesData[name] || null;
 }
 
-/**
- * List all supported text type titles.
- */
 export function listAllTextTypeNames(textTypesData: TextTypesData): string[] {
   return Object.keys(textTypesData);
 }
