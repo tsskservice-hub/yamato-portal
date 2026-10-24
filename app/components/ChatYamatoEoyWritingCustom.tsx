@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { fetchYamatoConfigsData, BotConfig } from "../data/yamato-configs";
 
 export interface ChatYamatoEoyWritingCustomMetaType {
   componentName: string;
@@ -63,8 +64,8 @@ export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMeta
       description: "未ログインユーザーがチャットを利用しようとした際にガード画面を表示し、認証モーダルを開く"
     },
     {
-      featureName: "Cyan Color Theme Fixed",
-      description: "VCE Writing専用の水色（cyan）テーマをデフォルト固定"
+      featureName: "Dynamic Color Theme Support",
+      description: "Supabaseから動的にカラーコード（例: #06b6d4）を取得して反映"
     },
     {
       featureName: "Font Size Customization",
@@ -101,24 +102,6 @@ export type ChatYamatoEoyWritingCustomProps = {
   assignedQuestion?: string;
 };
 
-const themeStyles = {
-  cyan: {
-    floatingBg: "bg-cyan-600 hover:bg-cyan-700",
-    floatingText: "text-white",
-    floatingBorder: "border border-cyan-400",
-    button: "bg-cyan-600 hover:bg-cyan-700 text-white",
-    border: "border-cyan-300",
-    headerText: "text-cyan-900",
-    badgeBg: "bg-cyan-50 border-cyan-200",
-    badgeText: "text-cyan-900",
-    buttonActive: "bg-cyan-600 text-white shadow-xs",
-    buttonInactive: "text-slate-600 hover:text-cyan-700",
-    userBubble: "bg-cyan-600 text-white rounded-br-xs",
-    inputRing: "focus:ring-cyan-500",
-    submitBtn: "bg-cyan-600 hover:bg-cyan-700 text-white",
-  },
-};
-
 function sanitizeAiOutput(text: string): string {
   if (!text) return "";
   return text
@@ -148,9 +131,28 @@ export function ChatYamatoEoyWritingCustom({
   onClearExternalImage,
   assignedQuestion = "",
 }: ChatYamatoEoyWritingCustomProps) {
-  const characterName = "VCE Writing Tutor (Yamato)";
   const appType = "eoy-writing-custom";
-  const initialGreeting = "Hello, my friend! 🌟 Please select your writing section (Section 2 Part B, Section 3, or Other) and share your brought question and answer (via text or image). I am ready to give you detailed VCE feedback!";
+  
+  // 💡 Supabase から動的に取得する設定ステート
+  const [config, setConfig] = useState<BotConfig | null>(null);
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const configsData = await fetchYamatoConfigsData(supabase);
+        if (configsData && configsData[appType]) {
+          setConfig(configsData[appType]);
+        }
+      } catch (err) {
+        console.error("Failed to load eoy-writing-custom config from Supabase:", err);
+      }
+    }
+    loadConfig();
+  }, [appType]);
+
+  const characterName = config?.name || "VCE Writing Tutor (Yamato)";
+  const initialGreeting = config?.greeting || "Hello, my friend! 🌟 Please select your writing section (Section 2 Part B, Section 3, or Other) and share your brought question and answer (via text or image). I am ready to give you detailed VCE feedback!";
+  const themeColor = config?.themeColor || "#06b6d4";
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
   const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
@@ -227,12 +229,17 @@ export function ChatYamatoEoyWritingCustom({
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
-  const currentTheme = themeStyles.cyan;
-  const finalFloatingButtonClass = `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`;
-
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: initialGreeting },
   ]);
+
+  // initialGreeting がロード後に変わった場合の初回メッセージ更新
+  useEffect(() => {
+    if (config?.greeting && tutorMessages.length === 1 && tutorMessages[0].role === "assistant") {
+      setTutorMessages([{ role: "assistant", content: config.greeting }]);
+    }
+  }, [config?.greeting]);
+
   const [tutorInput, setTutorInput] = useState<string>("");
   const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("normal");
@@ -271,21 +278,21 @@ export function ChatYamatoEoyWritingCustom({
           <title>VCE Japanese Writing Feedback Report</title>
           <style>
             body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.8; }
-            .header { border-bottom: 3px solid #0891b2; padding-bottom: 15px; margin-bottom: 25px; }
-            h1 { color: #0891b2; font-size: 22px; margin: 0 0 5px 0; }
+            .header { border-bottom: 3px solid ${themeColor}; padding-bottom: 15px; margin-bottom: 25px; }
+            h1 { color: ${themeColor}; font-size: 22px; margin: 0 0 5px 0; }
             .meta { font-size: 13px; color: #64748b; }
             .content { font-size: 14px; white-space: pre-wrap; word-break: break-word; }
             
             .teacher-notes-box {
               margin-top: 40px;
-              border: 2px dashed #0891b2;
+              border: 2px dashed ${themeColor};
               background-color: #ecfeff;
               padding: 20px;
               border-radius: 8px;
               break-inside: avoid;
               page-break-inside: avoid;
             }
-            .teacher-notes-title { font-weight: bold; color: #0e7490; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+            .teacher-notes-title { font-weight: bold; color: ${themeColor}; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
             .teacher-notes-text { font-size: 14px; color: #164e63; white-space: pre-wrap; }
             
             @media print {
@@ -446,12 +453,11 @@ export function ChatYamatoEoyWritingCustom({
       console.error("Failed to convert question files to base64:", err);
     }
 
-    // 💡 問題文がpropsや画像から取得できない場合のフォールバック（直書きテキストなど）
     const effectiveAssignedQuestion = assignedQuestion && assignedQuestion.trim()
       ? assignedQuestion
       : questionImagesBase64.length > 0
       ? `[External Question Images Attached for AI OCR (${questionImagesBase64.length} page(s))]`
-      : userMsg; // 直書きされたテキストを問題/答案として柔軟に扱う
+      : userMsg;
 
     setTutorInput("");
     setRequestVisualAid(false);
@@ -476,9 +482,9 @@ export function ChatYamatoEoyWritingCustom({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMsg,
-          writingSection: writingSection, // 💡 選択されたセクション情報をバックエンドへ送信
-          assignedQuestion: effectiveAssignedQuestion, // 💡 直書き・画像両対応のassignedQuestion
-          studentEssay: userMsg, // 💡 直書きテキストを答案（studentEssay）としても確実に渡す
+          writingSection: writingSection,
+          assignedQuestion: effectiveAssignedQuestion,
+          studentEssay: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
           userNickname: userNickname,
@@ -552,7 +558,8 @@ export function ChatYamatoEoyWritingCustom({
           <button
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
-            className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
+            style={config?.floatingButtonStyle || { backgroundColor: themeColor, color: '#ffffff' }}
+            className="font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative hover:opacity-90"
           >
             <span>🤖</span>
             <span>{characterName}</span>
@@ -568,17 +575,18 @@ export function ChatYamatoEoyWritingCustom({
         ) : (
           <div
             ref={aiChatRef}
-            className={`bg-white border-2 ${currentTheme.border} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+            className={`bg-white border-2 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                 : "w-80 sm:w-96 h-[580px] min-w-[280px] min-h-[400px] max-w-[90vw] max-h-[88vh] resize overflow-auto"
             }`}
+            style={{ borderColor: themeColor }}
           >
             <div className="w-full h-full flex flex-col">
               {/* ヘッダー */}
               <div className="flex items-center justify-between border-b pb-2 mb-2.5 shrink-0">
                 <div className="flex items-center gap-2">
-                  <h3 className={`text-sm font-bold ${currentTheme.headerText} flex items-center gap-1.5 m-0`}>
+                  <h3 className="text-sm font-bold flex items-center gap-1.5 m-0" style={{ color: themeColor }}>
                     <span className={isTutorLoading ? "inline-block animate-spin" : "inline-block"}>🤖</span> {characterName}
                   </h3>
                 </div>
@@ -621,8 +629,8 @@ export function ChatYamatoEoyWritingCustom({
               </div>
 
               {/* 💡 VCE Writing セクション選択UI */}
-              <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-2 mb-2 flex flex-col gap-1.5 shrink-0">
-                <span className="text-[11px] font-bold text-cyan-900">Select Writing Section</span>
+              <div className="border rounded-xl p-2 mb-2 flex flex-col gap-1.5 shrink-0" style={{ backgroundColor: `${themeColor}0d`, borderColor: `${themeColor}40` }}>
+                <span className="text-[11px] font-bold" style={{ color: themeColor }}>Select Writing Section</span>
                 <div className="grid grid-cols-3 gap-1">
                   {(
                     [
@@ -635,10 +643,11 @@ export function ChatYamatoEoyWritingCustom({
                       key={sec.key}
                       type="button"
                       onClick={() => setWritingSection(sec.key)}
+                      style={writingSection === sec.key ? { backgroundColor: themeColor, color: '#ffffff' } : {}}
                       className={`py-1 px-1 rounded-md text-[10px] font-bold transition text-center truncate ${
                         writingSection === sec.key
-                          ? "bg-cyan-600 text-white shadow-xs"
-                          : "bg-white text-slate-700 hover:bg-cyan-100 border border-cyan-200"
+                          ? "shadow-xs"
+                          : "bg-white text-slate-700 hover:opacity-80 border border-slate-200"
                       }`}
                     >
                       {sec.label}
@@ -648,16 +657,17 @@ export function ChatYamatoEoyWritingCustom({
               </div>
 
               {/* 学習ペース選択UI */}
-              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
-                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
+              <div className="border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0" style={{ backgroundColor: `${themeColor}0d`, borderColor: `${themeColor}40` }}>
+                <span className="text-xs font-bold" style={{ color: themeColor }}>Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
                       key={level}
                       type="button"
                       onClick={() => handlePaceChange(level)}
+                      style={tutorLevel === level ? { backgroundColor: themeColor, color: '#ffffff' } : {}}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize transition ${
-                        tutorLevel === level ? currentTheme.buttonActive : currentTheme.buttonInactive
+                        tutorLevel === level ? "shadow-xs" : "text-slate-600 hover:opacity-80"
                       }`}
                     >
                       {level}
@@ -682,10 +692,11 @@ export function ChatYamatoEoyWritingCustom({
                       key={size.key}
                       type="button"
                       onClick={() => setChatFontSize(size.key)}
+                      style={chatFontSize === size.key ? { backgroundColor: themeColor, color: '#ffffff' } : {}}
                       className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
                         chatFontSize === size.key
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-slate-600 hover:text-blue-700"
+                          ? "shadow-xs"
+                          : "text-slate-600 hover:opacity-80"
                       }`}
                     >
                       {size.label}
@@ -708,7 +719,8 @@ export function ChatYamatoEoyWritingCustom({
                       setIsAiTutorOpen(false);
                       if (onOpenAuth) onOpenAuth();
                     }}
-                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
+                    style={{ backgroundColor: themeColor }}
+                    className="w-full py-2.5 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer hover:opacity-90"
                   >
                     Sign In / Sign Up Now
                   </button>
@@ -720,9 +732,10 @@ export function ChatYamatoEoyWritingCustom({
                     {tutorMessages.map((msg, idx) => (
                       <div key={idx} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                         <div
+                          style={msg.role === "user" ? { backgroundColor: themeColor, color: '#ffffff' } : {}}
                           className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
                             msg.role === "user"
-                              ? currentTheme.userBubble
+                              ? "rounded-br-xs"
                               : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
                           }`}
                         >
@@ -758,7 +771,8 @@ export function ChatYamatoEoyWritingCustom({
                                 <button
                                   type="button"
                                   onClick={() => handleOpenPdfModal(msg.content)}
-                                  className="text-[11px] font-bold text-cyan-700 hover:text-cyan-900 bg-cyan-50 hover:bg-cyan-100 px-2.5 py-1 rounded-md transition flex items-center gap-1 cursor-pointer"
+                                  className="text-[11px] font-bold px-2.5 py-1 rounded-md transition flex items-center gap-1 cursor-pointer hover:opacity-80"
+                                  style={{ color: themeColor, backgroundColor: `${themeColor}15` }}
                                   title="Export this feedback as PDF with customizable P.S. Notes"
                                 >
                                   <span>📄</span>
@@ -803,7 +817,8 @@ export function ChatYamatoEoyWritingCustom({
                           type="checkbox"
                           checked={requestVisualAid}
                           onChange={(e) => setRequestVisualAid(e.target.checked)}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+                          className="rounded border-slate-300 w-3.5 h-3.5"
+                          style={{ accentColor: themeColor }}
                         />
                         <span>Visual Aid</span>
                       </label>
@@ -816,12 +831,15 @@ export function ChatYamatoEoyWritingCustom({
                         onChange={(e) => setTutorInput(e.target.value)}
                         placeholder={externalImagePreview || externalQuestionFiles.length > 0 ? "Ask feedback for photos..." : "Enter question & your writing text..."}
                         disabled={isTutorLoading}
-                        className={`flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 ${currentTheme.inputRing} bg-slate-50/50`}
+                        className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 bg-slate-50/50"
+                        style={{ focusRingColor: themeColor } as any}
                       />
                       <button
-                        type="submit"
+                        type="button"
+                        onClick={handleSendTutorMessage}
                         disabled={isTutorLoading || (!tutorInput.trim() && !externalImagePreview && externalQuestionFiles.length === 0)}
-                        className={`px-4 py-2 ${currentTheme.submitBtn} font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0`}
+                        style={{ backgroundColor: themeColor }}
+                        className="px-4 py-2 font-bold text-xs text-white rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0 hover:opacity-90"
                       >
                         Send
                       </button>
@@ -884,7 +902,7 @@ export function ChatYamatoEoyWritingCustom({
               <textarea
                 value={editablePdfContent}
                 onChange={(e) => setEditablePdfContent(e.target.value)}
-                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-50 resize-none font-mono leading-relaxed flex-grow h-full"
+                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 bg-slate-50 resize-none font-mono leading-relaxed flex-grow h-full"
               />
             </div>
 
@@ -895,7 +913,7 @@ export function ChatYamatoEoyWritingCustom({
                 value={teacherNotesTitleInput}
                 onChange={(e) => setTeacherNotesTitleInput(e.target.value)}
                 placeholder="例: P.S. / 先生からのメッセージ / Note from Mr. Tanaka"
-                className="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-50"
+                className="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 bg-slate-50"
               />
             </div>
 
@@ -906,7 +924,7 @@ export function ChatYamatoEoyWritingCustom({
                 onChange={(e) => setTeacherNotesInput(e.target.value)}
                 placeholder="例: よく頑張りました！次回は文末の表現（〜と思います）に気をつけましょう。"
                 rows={3}
-                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-50 resize-none"
+                className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 bg-slate-50 resize-none"
               />
             </div>
 
@@ -924,7 +942,8 @@ export function ChatYamatoEoyWritingCustom({
               <button
                 type="button"
                 onClick={handleExecutePdfExport}
-                className="px-4 py-2 text-xs font-bold text-white bg-cyan-600 hover:bg-cyan-700 rounded-xl transition shadow-md shadow-cyan-600/20 cursor-pointer"
+                style={{ backgroundColor: themeColor }}
+                className="px-4 py-2 text-xs font-bold text-white rounded-xl transition shadow-md cursor-pointer hover:opacity-90"
               >
                 Generate PDF / Print
               </button>

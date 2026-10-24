@@ -57,7 +57,7 @@ export const ChatYamatoGenkoyoshiEditorVce: React.FC<ChatYamatoGenkoyoshiEditorV
         config?.greeting ||
         "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards."
       }
-      themeColor={propThemeColor || (config?.themeColor as any) || "blue"}
+      themeColor={propThemeColor || config?.themeColor || "#2563eb"}
       buttonStyle={propButtonStyle || config?.buttonStyle || config?.floatingButtonStyle}
       defaultOpen={defaultOpen}
       {...restProps}
