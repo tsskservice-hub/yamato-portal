@@ -1,175 +1,376 @@
 /**
- * @file texttypes.ts
- * @description Decoupled TypeScript logic & Supabase client integration for VCE Japanese Text Types Specification.
- * Stores data in Supabase 'app_knowledge' table under key: 'TEXTTYPES'.
+ * @file eoy-writing.tsx
+ * @description EOY Writing Practice モジュール
+ * 💡 特徴：
+ * 1. Supabase 'app_knowledge' からの動的設問データ取得（fetchWritingExamQuestionsData）
+ * 2. Supabase 'TEXTTYPES' からの動的モーダルデータ取得（fetchTextTypesData）
+ * 3. 「How to use Genkooyooshi」および各 text type のモーダル表示対応
+ * 4. 写真解答アップロード & AIヤマトチャット連携
  */
+import { useState, useEffect, useRef } from "react";
+import { Link, useRouteLoaderData } from "@remix-run/react";
+import TextTypeModal from "../components/TextTypeModal";
+import PageLayout, { PageLayoutRef } from "../components/PageLayout";
+import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 
-import { SupabaseClient } from '@supabase/supabase-js';
+// 💡 外部データ・APIフェッチ関数のインポート
+import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
+import TEXT_TYPES_DATA, { fetchTextTypesData, TextTypesData } from "../data/texttypes";
+import { supabase } from "../lib/supabaseClient";
 
-// --- Type Definitions ---
-export interface TextTypeDetail {
-  title: string;
-  purpose: string;
-  structure: string[];
-  sampleImage?: string;
-  sample?: string;
-}
+export default function Dashboard() {
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeTextType, setActiveTextType] = useState<string>("all");
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
 
-export type TextTypesData = Record<string, TextTypeDetail>;
-export type TextTypesDataPayload = TextTypesData;
+  // 💡 設問データおよび TextTypes モーダルデータをステートで管理
+  const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
+  const [modalData, setModalData] = useState<TextTypesData>(TEXT_TYPES_DATA);
 
-// --- Default Fallback Data (Genkooyooshi を含むデフォルトデータ) ---
-export const TEXT_TYPES_DATA: TextTypesData = {
-  "Speech": {
-    "title": "Speech (スピーチ原稿)",
-    "purpose": "To persuade, inform, or entertain an audience through spoken delivery.",
-    "structure": [
-      "Catchy opening / Greeting (e.g. みなさん、こんにちは)",
-      "Clear thesis statement & self-introduction",
-      "Body paragraphs with supporting arguments & rhetorical questions",
-      "Strong concluding call to action & polite closing (e.g. ご清聴ありがとうございました)"
-    ]
-  },
-  "Journal": {
-    "title": "Journal, Diary Entry (日記)",
-    "purpose": "To record personal thoughts, feelings, and reflections on daily experiences.",
-    "structure": [
-      "Date / Day of week / Weather header at the top",
-      "Personal tone and emotional expression (Plain style / だ・である調)",
-      "Chronological or thematic reflection on unforgettable moments",
-      "Closing personal resolution or future thought"
-    ]
-  },
-  "Article": {
-    "title": "Article (記事)",
-    "purpose": "To inform, persuade, or entertain readers through a structured publication format.",
-    "structure": [
-      "Catchy headline / Title",
-      "Author's name (fictional) under the title",
-      "Introduction outlining the main theme & engaging hook",
-      "Informative body sections with clear logical flow",
-      "Conclusion summarizing key takeaways (Plain or Polite style)"
-    ]
-  },
-  "Email": {
-    "title": "Email (Eメール)",
-    "purpose": "To convey a clear message, consultation, or advice to a specific recipient.",
-    "structure": [
-      "Recipient name at the top",
-      "Subject line clearly indicating the topic",
-      "Polite opening & main text",
-      "Sign-off & Sender name at the end"
-    ]
-  },
-  "Letter": {
-    "title": "Personal Letter (手紙)",
-    "purpose": "To correspond warmly with friends, host families, or teachers.",
-    "structure": [
-      "Greeting to recipient (e.g. 〇〇さんへ)",
-      "Seasonal greeting or opening inquiry",
-      "Body paragraphs with personal recount and questions",
-      "Closing remarks & sender sign-off with date"
-    ]
-  },
-  // 💡 原稿用紙の使い方ガイド（How to use Genkooyooshi）
-  "Genkooyooshi": {
-    "title": "Genkooyooshi Usage Guide (原稿用紙の使い方)",
-    "purpose": "This guide outlines the standard VCE rules for formatting titles, names, indentations, and punctuation marks on Japanese manuscript paper.",
-    "structure": [
-      "Title (Line 1): Leave 3 blank squares at the beginning, then write your title.",
-      "Name (Line 2): Align your name towards the bottom, leaving the very last square blank.",
-      "Paragraph Indentation: Always leave 1 blank square at the start of every new paragraph.",
-      "Punctuation (、 and 。): Each punctuation mark occupies its own square. Never start a new line with a comma or full stop (place it inside the last square of the previous line instead).",
-      "Numbers & Alphabet: Two half-width digits or letters occupy one single square (e.g. '20', 'in')."
-    ],
-    "sampleImage": "/genkoyoshi.pdf"
-  }
-};
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+  } | undefined;
 
-// 表記ゆれ（Genkoyoshi）対策のエイリアス
-TEXT_TYPES_DATA["Genkoyoshi"] = TEXT_TYPES_DATA["Genkooyooshi"];
+  const user = rootData?.user ?? null;
+  const credits = rootData?.credits ?? 10;
+  const nickname = rootData?.nickname ?? "";
 
-export default TEXT_TYPES_DATA;
+  const layoutRef = useRef<PageLayoutRef>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-export interface AppKnowledgeRecord<T = any> {
-  id?: string;
-  key: string;
-  title: string;
-  category: string;
-  data: T;
-  created_at?: string;
-  updated_at?: string;
-}
+  // 画像アップロード用ステート
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
-const KNOWLEDGE_KEY = 'TEXTTYPES';
+  useEffect(() => {
+    document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
+  }, []);
 
-/**
- * Fetch VCE Japanese Text Types Specification data from Supabase 'app_knowledge' table.
- */
-export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData> {
-  try {
-    const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
-      .select('*')
-      .eq('key', KNOWLEDGE_KEY)
-      .single();
+  // 💡 ページ表示時に Supabase から設問データと TEXTTYPES データを両方非同期フェッチ
+  useEffect(() => {
+    let isMounted = true;
 
-    if (error || !row) {
-      console.warn(`[${KNOWLEDGE_KEY}] Supabaseからの取得失敗のためデフォルトを返します:`, error?.message);
-      return TEXT_TYPES_DATA;
+    async function loadDataFromSupabase() {
+      try {
+        // 1. 設問データの取得
+        const fetchedQuestions = await fetchWritingExamQuestionsData(supabase);
+        if (isMounted && fetchedQuestions && Array.isArray(fetchedQuestions) && fetchedQuestions.length > 0) {
+          setQuestions(fetchedQuestions);
+        }
+
+        // 2. TEXTTYPES（Genkooyooshi を含む）詳細データの取得
+        const fetchedTextTypes = await fetchTextTypesData(supabase);
+        if (isMounted && fetchedTextTypes && typeof fetchedTextTypes === "object" && Object.keys(fetchedTextTypes).length > 0) {
+          setModalData(fetchedTextTypes);
+        }
+      } catch (err) {
+        console.error("Failed to load data from Supabase:", err);
+      }
     }
 
-    const fetchedData = (row.data || row.content_json) as TextTypesData;
-    if (fetchedData && typeof fetchedData === 'object' && Object.keys(fetchedData).length > 0) {
-      // 💡 もし Supabase 側のデータに Genkooyooshi が欠けている場合はデフォルトから補完
-      if (!fetchedData["Genkooyooshi"] && !fetchedData["Genkoyoshi"]) {
-        fetchedData["Genkooyooshi"] = TEXT_TYPES_DATA["Genkooyooshi"];
-      }
-      // 表記ゆれエイリアスの同期
-      if (fetchedData["Genkooyooshi"] && !fetchedData["Genkoyoshi"]) {
-        fetchedData["Genkoyoshi"] = fetchedData["Genkooyooshi"];
-      } else if (fetchedData["Genkoyoshi"] && !fetchedData["Genkooyooshi"]) {
-        fetchedData["Genkooyooshi"] = fetchedData["Genkoyoshi"];
-      }
-      return fetchedData;
+    loadDataFromSupabase();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
 
-    return TEXT_TYPES_DATA;
-  } catch (err) {
-    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, err);
-    return TEXT_TYPES_DATA;
-  }
-}
+  const filteredQuestions = questions.filter((q) => {
+    const matchesCategory =
+      activeCategory === "all" || q.category === activeCategory;
+    const matchesTextType =
+      activeTextType === "all" || q.textType === activeTextType;
+    return matchesCategory && matchesTextType;
+  });
 
-/**
- * Upsert VCE Japanese Text Types Specification data to Supabase 'app_knowledge' table.
- */
-export async function upsertTextTypesData(
-  supabaseClient: SupabaseClient,
-  content: TextTypesData,
-  category = 'VCE Japanese Data'
-): Promise<boolean> {
-  const { error } = await supabaseClient
-    .from('app_knowledge')
-    .upsert({
-      key: KNOWLEDGE_KEY,
-      title: 'VCE Japanese Text Types Specification',
-      category,
-      data: content,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'key' });
+  const currentSystemPrompt = selectedQuestion
+    ? `[Selected VCE EOY Writing Question Q${selectedQuestion.id}]\nCategory: ${selectedQuestion.category}\nText Type: ${selectedQuestion.textType}\nPrompt (English): ${selectedQuestion.english}\nPrompt (Japanese): ${selectedQuestion.japanese}`
+    : "";
 
-  if (error) {
-    console.error(`Error upserting ${KNOWLEDGE_KEY} to Supabase:`, error);
-    return false;
-  }
-  return true;
-}
+  const assignedQuestionText = selectedQuestion
+    ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
+    : "";
 
-export function getTextTypeByName(textTypesData: TextTypesData, name: string): TextTypeDetail | null {
-  return textTypesData[name] || textTypesData[name === "Genkooyooshi" ? "Genkoyoshi" : "Genkooyooshi"] || null;
-}
+  // 💡 Genkooyooshi / Genkoyoshi の表記ゆれに対応してモーダル用データを解決
+  const activeModalData = activeModal
+    ? modalData[activeModal] || (activeModal === "Genkooyooshi" ? modalData["Genkoyoshi"] : modalData["Genkooyooshi"])
+    : null;
 
-export function listAllTextTypeNames(textTypesData: TextTypesData): string[] {
-  return Object.keys(textTypesData);
+  return (
+    <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
+      <div className="min-h-screen bg-white text-slate-800 font-sans relative">
+        <main className="max-w-4xl mx-auto px-4 py-8 relative">
+          
+          {/* 上部ショートカットボタン */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            {/* 💡 How to use Genkooyooshi ボタン */}
+            <button
+              type="button"
+              onClick={() => setActiveModal("Genkooyooshi")}
+              className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
+            >
+              <div className="flex items-center space-x-2 truncate">
+                <span className="text-base">📝</span>
+                <span className="truncate">How to use Genkooyooshi</span>
+              </div>
+              <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2">View →</span>
+            </button>
+
+            <Link
+              to="/kanji-grammar-checker"
+              className="w-full text-left p-3.5 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border no-underline"
+            >
+              <div className="flex items-center space-x-2 truncate">
+                <span className="text-base">✨</span>
+                <span className="truncate">VCE Kanji & Grammar Checker</span>
+              </div>
+              <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-amber-200 shrink-0 ml-2">Open →</span>
+            </Link>
+          </div>
+
+          {/* AIヤマトガイドエリア */}
+          <div>
+            <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
+                  <span>🤖</span> AI Yamato is ready for you
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <span>📷</span>
+                    <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
+                  </button>
+                  {selectedImagePreview && (
+                    <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
+                      ✓ Attached
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 選択中の問題バナー */}
+              <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span>🎯 Active Question Q</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={questions.length}
+                    value={selectedQuestion ? selectedQuestion.id : ""}
+                    onChange={(e) => {
+                      const qId = parseInt(e.target.value, 10);
+                      const found = questions.find((q) => q.id === qId);
+                      if (found) {
+                        setSelectedQuestion(found);
+                      } else if (e.target.value === "") {
+                        setSelectedQuestion(null);
+                      }
+                    }}
+                    placeholder="No."
+                    className="w-16 px-2 py-1 bg-white border border-indigo-300 rounded text-center text-indigo-900 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  {selectedQuestion ? (
+                    <span className="text-sm font-normal text-indigo-700 truncate max-w-xs sm:max-w-sm">
+                      ({selectedQuestion.textType}) {selectedQuestion.english}
+                    </span>
+                  ) : (
+                    <span className="text-sm font-normal text-amber-700">⚠️ None selected</span>
+                  )}
+                </div>
+              </div>
+
+              {selectedImagePreview && (
+                <div className="flex items-center gap-3 bg-white border border-indigo-200 px-3 py-2 rounded-lg text-sm">
+                  <img src={selectedImagePreview} alt="Preview" className="w-10 h-10 object-cover rounded border" />
+                  <div className="flex-grow">
+                    <div className="font-bold text-indigo-900 text-xs">Handwritten Answer Ready for AI Tutor</div>
+                    <div className="text-slate-600 text-xs truncate">You can now open the chat and send it!</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedImage(null);
+                      setSelectedImagePreview(null);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                    className="text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 rounded"
+                  >
+                    Remove ✕
+                  </button>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-indigo-100 text-slate-700 text-base leading-relaxed">
+                <div className="mb-2 text-indigo-900 font-bold">
+                  To get started, please follow these two quick steps:
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold text-indigo-900 shrink-0">1️⃣</span>
+                    <div><strong>Select question & photo:</strong> Enter the question number and upload your handwritten answer photo using the button above. 📋📸</div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold text-indigo-900 shrink-0">2️⃣</span>
+                    <div><strong>Chat with AI Yamato:</strong> Open the chat bubble at the bottom-right and send it!</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* タスクリストヘッダー */}
+          <div className="flex justify-between items-end border-b-2 border-slate-200 pb-2 mb-6">
+            <h1 className="text-slate-800 text-2xl sm:text-3xl font-bold m-0">
+              📚 Task List ({filteredQuestions.length} questions)
+            </h1>
+          </div>
+
+          {/* フィルターボタン群 */}
+          <div className="mb-6">
+            <div className="mb-2 text-lg font-bold text-slate-600">Filter by Writing Style</div>
+            <div className="flex gap-2.5 flex-wrap mb-4">
+              {["all", "Informative", "Evaluative", "Persuasive", "Personal", "Imaginative"].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${
+                    activeCategory === cat ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  {cat === "all" ? "All" : cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="mb-2 text-lg font-bold text-slate-600">Filter by Text Type</div>
+            <div className="flex gap-2.5 flex-wrap">
+              {["all", "Speech", "Email", "Letter", "Article", "Journal", "Essay", "Story", "Report", "Account", "Message", "Review", "Summary", "Official Report"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setActiveTextType(type)}
+                  className={`px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${
+                    activeTextType === type ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  {type === "all" ? "All" : type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 設問カード一覧 */}
+          <div className="flex flex-col gap-6 mb-12">
+            {filteredQuestions.map((q) => {
+              const isSelected = selectedQuestion?.id === q.id;
+              return (
+                <div
+                  key={q.id}
+                  className={`p-6 border rounded-xl bg-white shadow-sm transition-all ${
+                    isSelected ? "border-indigo-500 ring-2 ring-indigo-200" : "border-slate-200"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex gap-2 flex-wrap">
+                      <span className="text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold">{q.category}</span>
+                      
+                      {/* 💡 緑色の text type バッジ：クリックで activeModal にセット */}
+                      <span
+                        onClick={() => setActiveModal(q.textType)}
+                        className="text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 transition-colors"
+                      >
+                        {q.textType}
+                      </span>
+                    </div>
+                    <span className="text-lg text-slate-600 font-bold">Q{q.id}</span>
+                  </div>
+
+                  <p className="text-[20px] text-slate-800 mb-3 leading-relaxed font-medium">{q.english}</p>
+                  <div className="text-lg sm:text-[20px] text-slate-700 mb-4 border-l-4 border-slate-200 pl-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: q.japanese }} />
+
+                  <button
+                    onClick={() => {
+                      setSelectedQuestion(q);
+                      const banner = document.getElementById("active-ai-tutor-banner");
+                      if (banner) banner.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className={`px-4 py-2 text-base rounded-lg cursor-pointer font-bold transition-colors shadow-sm ${
+                      isSelected ? "bg-indigo-600 text-white" : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-700"
+                    }`}
+                  >
+                    {isSelected ? "🤖 Currently Active in AI Tutor Bubble" : "🎯 Select for AI Tutor"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* チャットウィジェット */}
+          <ChatYamatoEoyWriting
+            systemPrompt={currentSystemPrompt}
+            userId={user?.id}
+            userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
+            credits={credits}
+            externalImageFile={selectedImage}
+            externalImagePreview={selectedImagePreview}
+            assignedQuestion={assignedQuestionText}
+            onClearExternalImage={() => {
+              setSelectedImage(null);
+              setSelectedImagePreview(null);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }}
+          />
+
+          {/* 画像拡大モーダル */}
+          {modalImageSrc && (
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
+              <div className="relative max-w-4xl max-h-[90vh]">
+                <button onClick={() => setModalImageSrc(null)} className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition">
+                  ✕ Close
+                </button>
+                <img src={modalImageSrc} alt="Enlarged View" className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" />
+              </div>
+            </div>
+          )}
+
+          {/* 💡 TextTypeModal: Genkooyooshi または各テキストタイプのモーダルを描画 */}
+          {activeModal && activeModalData && (
+            <TextTypeModal
+              isOpen={true}
+              onClose={() => setActiveModal(null)}
+              modalKey={activeModal}
+              {...activeModalData}
+            />
+          )}
+        </main>
+      </div>
+    </PageLayout>
+  );
 }
