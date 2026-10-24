@@ -16,6 +16,60 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+// 💡 スポーツチームのユニフォーム配色テンプレート（全50選）
+const sportsColorTemplates = [
+  { name: "セルティックFC", sport: "サッカー / スコットランド", border: "2px solid #018749", background: "#FFFFFF", color: "#000000" },
+  { name: "FCバルセロナ", sport: "サッカー / スペイン", border: "2px solid #A50044", background: "#004D98", color: "#FFED02" },
+  { name: "レアル・マドリード", sport: "サッカー / スペイン", border: "2px solid #FEBE10", background: "#FFFFFF", color: "#00529F" },
+  { name: "マンチェスター・ユナイテッド", sport: "サッカー / イングランド", border: "2px solid #DA291C", background: "#000000", color: "#FBE122" },
+  { name: "リヴァプールFC", sport: "サッカー / イングランド", border: "2px solid #F6EB61", background: "#C8102E", color: "#FFFFFF" },
+  { name: "マンチェスター・シティ", sport: "サッカー / イングランド", border: "2px solid #6CABDD", background: "#FFFFFF", color: "#1C2C5B" },
+  { name: "アーセナルFC", sport: "サッカー / イングランド", border: "2px solid #9C824A", background: "#FFFFFF", color: "#EF0107" },
+  { name: "チェルシーFC", sport: "サッカー / イングランド", border: "2px solid #034694", background: "#1A1A1A", color: "#FFFFFF" },
+  { name: "トッテナム・ホットスパー", sport: "サッカー / イングランド", border: "2px solid #132257", background: "#FFFFFF", color: "#132257" },
+  { name: "ユベントスFC", sport: "サッカー / イタリア", border: "2px solid #000000", background: "#FFFFFF", color: "#000000" },
+  { name: "ACミラン", sport: "サッカー / イタリア", border: "2px solid #FB090B", background: "#FFFFFF", color: "#000000" },
+  { name: "インテル・ミラノ", sport: "サッカー / イタリア", border: "2px solid #000000", background: "#111111", color: "#0099FF" },
+  { name: "ASローマ", sport: "サッカー / イタリア", border: "2px solid #8B0000", background: "#5B0E2D", color: "#F1BE48" },
+  { name: "バイエルン・ミュンヘン", sport: "サッカー / ドイツ", border: "2px solid #DC052D", background: "#0066B2", color: "#FFFFFF" },
+  { name: "ボルシア・ドルトムント", sport: "サッカー / ドイツ", border: "2px solid #000000", background: "#FDE100", color: "#000000" },
+  { name: "パリ・サンジェルマン", sport: "サッカー / フランス", border: "2px solid #004170", background: "#FFFFFF", color: "#DA291C" },
+  { name: "オリンピック・マルセイユ", sport: "サッカー / フランス", border: "2px solid #0096D6", background: "#FFFFFF", color: "#0096D6" },
+  { name: "アヤックス・アムステルダム", sport: "サッカー / オランダ", border: "2px solid #D2122E", background: "#FFFFFF", color: "#D2122E" },
+  { name: "FCポルト", sport: "サッカー / ポルトガル", border: "2px solid #003399", background: "#003399", color: "#FFFFFF" },
+  { name: "SLベンフィカ", sport: "サッカー / ポルトガル", border: "2px solid #ED1C24", background: "#000000", color: "#FFFFFF" },
+  { name: "ボカ・ジュニアーズ", sport: "サッカー / アルゼンチン", border: "2px solid #FCD116", background: "#003399", color: "#FCD116" },
+  { name: "リーベル・プレート", sport: "サッカー / アルゼンチン", border: "2px solid #ED1C24", background: "#FFFFFF", color: "#000000" },
+  { name: "フラメンゴ", sport: "サッカー / ブラジル", border: "2px solid #000000", background: "#C32021", color: "#FFFFFF" },
+  { name: "コリンチャンス", sport: "サッカー / ブラジル", border: "2px solid #000000", background: "#FFFFFF", color: "#000000" },
+  { name: "鹿島アントラーズ", sport: "Jリーグ / 日本", border: "2px solid #A80000", background: "#FFFFFF", color: "#000000" },
+  { name: "浦和レッドダイヤモンズ", sport: "Jリーグ / 日本", border: "2px solid #000000", background: "#E60012", color: "#FFFFFF" },
+  { name: "横浜F・マリノス", sport: "Jリーグ / 日本", border: "2px solid #002D62", background: "#FFFFFF", color: "#ED1C24" },
+  { name: "川崎フロンターレ", sport: "Jリーグ / 日本", border: "2px solid #1E90FF", background: "#FFFFFF", color: "#000000" },
+  { name: "FC東京", sport: "Jリーグ / 日本", border: "2px solid #002060", background: "#FFFFFF", color: "#CC0000" },
+  { name: "サンフレッチェ広島", sport: "Jリーグ / 日本", border: "2px solid #5C2D91", background: "#FFFFFF", color: "#E5A823" },
+  { name: "ヴィッセル神戸", sport: "Jリーグ / 日本", border: "2px solid #7A003C", background: "#000000", color: "#FFFFFF" },
+  { name: "名古屋グランパス", sport: "Jリーグ / 日本", border: "2px solid #FF6600", background: "#CC0000", color: "#FFFFFF" },
+  { name: "ガンバ大阪", sport: "Jリーグ / 日本", border: "2px solid #000080", background: "#000000", color: "#00FFFF" },
+  { name: "セレッソ大阪", sport: "Jリーグ / 日本", border: "2px solid #E4007F", background: "#FFFFFF", color: "#000000" },
+  { name: "シカゴ・ブルズ", sport: "NBA / アメリカ", border: "2px solid #CE1141", background: "#000000", color: "#FFFFFF" },
+  { name: "ロサンゼルス・レイカーズ", sport: "NBA / アメリカ", border: "2px solid #FDB927", background: "#FFFFFF", color: "#552583" },
+  { name: "ボストン・セルティックス", sport: "NBA / アメリカ", border: "2px solid #007A33", background: "#000000", color: "#FFFFFF" },
+  { name: "ゴールデンステート・ウォリアーズ", sport: "NBA / アメリカ", border: "2px solid #1D428A", background: "#FFFFFF", color: "#FFC72C" },
+  { name: "ニューヨーク・ヤンキース", sport: "MLB / アメリカ", border: "2px solid #0C2340", background: "#0C2340", color: "#FFFFFF" },
+  { name: "ロサンゼルス・ドジャース", sport: "MLB / アメリカ", border: "2px solid #005A9C", background: "#FFFFFF", color: "#005A9C" },
+  { name: "オールブラックキーズ / ニュージーランド代表", sport: "ラグビー / ニュージーランド", border: "2px solid #C0C0C0", background: "#000000", color: "#FFFFFF" },
+  { name: "スプリングボクス / 南アフリカ代表", sport: "ラグビー / 南アフリカ", border: "2px solid #007A3D", background: "#FFFFFF", color: "#FFB81C" },
+  { name: "ワラビーズ / オーストラリア代表", sport: "ラグビー / オーストラリア", border: "2px solid #006600", background: "#FFCC00", color: "#006600" },
+  { name: "イングランド代表", sport: "ラグビー / イングランド", border: "2px solid #0B162A", background: "#FFFFFF", color: "#0B162A" },
+  { name: "ブラジル代表", sport: "サッカー / ブラジル", border: "2px solid #009B3A", background: "#FEDF00", color: "#002776" },
+  { name: "アルゼンチン代表", sport: "サッカー / アルゼンチン", border: "2px solid #75AADB", background: "#FFFFFF", color: "#000000" },
+  { name: "ドイツ代表", sport: "サッカー / ドイツ", border: "2px solid #000000", background: "#FFFFFF", color: "#000000" },
+  { name: "フランス代表", sport: "サッカー / フランス", border: "2px solid #002395", background: "#FFFFFF", color: "#ED2939" },
+  { name: "イタリア代表", sport: "サッカー / イタリア", border: "2px solid #FFFFFF", background: "#002F6C", color: "#FFFFFF" },
+  { name: "日本代表（サムライブルー）", sport: "サッカー / 日本", border: "2px solid #BC002D", background: "#002B49", color: "#FFFFFF" },
+];
+
 export default function TestYamatoPage() {
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
   const [apiFields, setApiFields] = useState<string[]>([]);
@@ -208,6 +262,42 @@ export default function TestYamatoPage() {
                 })}
               </div>
             </div>
+
+            {/* ⚽ 50通りのスポーツチーム配色テンプレートセクション */}
+            <div style={{ backgroundColor: "#f0fdf4", padding: "16px", borderRadius: "12px", border: "1px solid #bbf7d0" }}>
+              <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#166534", textTransform: "uppercase", marginBottom: "8px" }}>
+                ⚽ スポーツチーム配色テンプレート (全50選)
+              </h2>
+              <p style={{ fontSize: "12px", color: "#15803d", marginBottom: "12px" }}>
+                ヤマトチャットボタンの色使いの参考にするためのスポーツチームユニフォーム配色案です。
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {sportsColorTemplates.map((template, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      border: template.border,
+                      backgroundColor: template.background,
+                      color: template.color,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: "2px",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                      minWidth: "180px"
+                    }}
+                  >
+                    <span>{template.name}</span>
+                    <span style={{ fontSize: "10px", opacity: 0.85, fontWeight: "normal" }}>{template.sport}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
 
           {/* 💡 選択中であることがひと目でわかるステータスインジケーター & 登録 appType 一覧表示 */}
