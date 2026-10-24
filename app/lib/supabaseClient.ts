@@ -1,54 +1,46 @@
+/**
+ * @file supabaseClient.ts
+ * @description Supabase client initialization for Remix / Vite / Cloudflare Pages
+ */
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // シングルトンとして保持するクライアントインスタンス
 let cachedSupabase: SupabaseClient | null = null;
+
+// 💡 正しいプロジェクトURLと、公式から取得した最新の Publishable Key を設定
+const FALLBACK_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
+const FALLBACK_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
 
 export const getSupabase = (): SupabaseClient => {
   if (cachedSupabase) {
     return cachedSupabase;
   }
 
-  const getEnvVar = (key: string): string => {
-    try {
-      if (typeof import.meta !== 'undefined' && (import.meta as any).env?.[key]) {
-        return (import.meta as any).env[key];
-      }
-    } catch {}
-
-    try {
-      if (typeof process !== 'undefined' && process.env?.[key]) {
-        return process.env[key] as string;
-      }
-    } catch {}
-
-    try {
-      if (typeof window !== 'undefined' && (window as any)[key]) {
-        return (window as any)[key];
-      }
-    } catch {}
-
-    return '';
-  };
-
+  // 💡 Viteの静的置換を確実に効かせるため、直接 `import.meta.env` のプロパティを指定して参照する
   const url = 
-    getEnvVar('SUPABASE_URL') || 
-    getEnvVar('VITE_SUPABASE_URL') || 
-    getEnvVar('PUBLIC_SUPABASE_URL');
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) || 
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.SUPABASE_URL) || 
+    (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) || 
+    (typeof process !== 'undefined' && process.env?.SUPABASE_URL) || 
+    '';
 
   const key = 
-    getEnvVar('SUPABASE_ANON_KEY') || 
-    getEnvVar('VITE_SUPABASE_ANON_KEY') || 
-    getEnvVar('PUBLIC_SUPABASE_ANON_KEY');
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) || 
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.SUPABASE_ANON_KEY) || 
+    (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) || 
+    (typeof process !== 'undefined' && process.env?.SUPABASE_ANON_KEY) || 
+    '';
 
-  if (!url || !key || url.includes('placeholder')) {
+  // 有効な値がない、またはプレースホルダーが含まれている場合はフォールバックを使用する
+  const finalUrl = (url && !url.includes('placeholder')) ? url : FALLBACK_URL;
+  const finalKey = (key && !key.includes('placeholder')) ? key : FALLBACK_ANON_KEY;
+
+  if (!finalUrl || !finalKey) {
     console.error('❌ CRITICAL: Supabase URL or Anon Key is missing during client initialization.');
   }
 
   // 実行時に有効な値でインスタンスを生成
-  cachedSupabase = createClient(
-    url || 'https://placeholder.supabase.co', 
-    key || 'placeholder-key'
-  );
+  cachedSupabase = createClient(finalUrl, finalKey);
 
   return cachedSupabase;
 };

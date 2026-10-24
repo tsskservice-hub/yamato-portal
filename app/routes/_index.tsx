@@ -178,7 +178,7 @@ export default function Home() {
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
 
-  // 💡 PageLayout の認証モーダルを外部から操作するための ref
+  // 💡 PageLayout の認証モーダルを外部から操作するために ref
   const layoutRef = useRef<PageLayoutRef>(null);
 
   // 💡 2. ステート定義：Daily Quiz States

@@ -3,7 +3,7 @@
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加版）
  */
 import type { MetaFunction } from "@remix-run/react";
-import { Link, useSearchParams } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { YamatoChatCommon } from "../components/YamatoChatCommon";
 import { fetchYamatoConfigsData, YamatoConfigsData, AppType } from "../data/yamato-configs";
@@ -17,12 +17,6 @@ export const meta: MetaFunction = () => {
 };
 
 export default function TestYamatoPage() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-  const tokenQuery = token ? `?token=${token}` : "";
-
-  const SECRET_TOKEN = "tssk224";
-
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
@@ -66,20 +60,6 @@ export default function TestYamatoPage() {
     fetchData();
   }, [activeAppType]);
 
-  if (token !== SECRET_TOKEN) {
-    return (
-      <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px", fontFamily: "sans-serif" }}>
-        <div style={{ maxWidth: "400px", width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "32px", textAlign: "center" }}>
-          <div style={{ fontSize: "36px", marginBottom: "16px" }}>🔒</div>
-          <h1 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "8px" }}>アクセス権がありません</h1>
-          <p style={{ fontSize: "14px", color: "#475569", lineHeight: "1.5" }}>
-            このページを表示するための有効なトークンが指定されていません。正しいURLからアクセスしてください。
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const currentConfig = yamatoConfigs ? yamatoConfigs[activeAppType] : null;
 
   return (
@@ -94,7 +74,7 @@ export default function TestYamatoPage() {
             <span>💡</span> AIヤマト・エコシステムの仕組みやアーキテクチャ詳細を確認したいですか？
           </div>
           <Link
-            to={`/test-yamato-note${tokenQuery}`}
+            to="/test-yamato-note"
             style={{
               padding: "8px 16px",
               backgroundColor: "#2563eb",
@@ -145,7 +125,7 @@ export default function TestYamatoPage() {
               </div>
             </div>
 
-            {/* 🌍 Section 1: 全世界対応（ここに「絵で説明ヤマト」を配置） */}
+            {/* 🌍 Section 1: 全世界対応 */}
             <div style={{ backgroundColor: "#eff6ff", padding: "12px", borderRadius: "12px", border: "1px solid #bfdbfe" }}>
               <h2 style={{ fontSize: "11px", fontWeight: "bold", color: "#1d4ed8", textTransform: "uppercase", marginBottom: "8px" }}>
                 🌍 Section 1: 全世界対応
@@ -192,8 +172,9 @@ export default function TestYamatoPage() {
                     "eoy-oral-elaborate",
                     "eoy-oral-mock",
                     "eoy-writing",
+                    "eoy-writing-custom",
                     "oral-exam-questions",
-                    "kanji-grammar-checker", // 💡 新しく追加した漢字文型チェッカーのappType
+                    "kanji-grammar-checker",
                   ] as const
                 ).map((type) => {
                   const cfg = yamatoConfigs?.[type];
@@ -219,6 +200,7 @@ export default function TestYamatoPage() {
                       {type === "eoy-oral-elaborate" && (<span>💭 Oral Elaborate {isSelected && " ✓"}</span>)}
                       {type === "eoy-oral-mock" && (<span>📝 Oral Mock {isSelected && " ✓"}</span>)}
                       {type === "eoy-writing" && (<span>✍️ Writing {isSelected && " ✓"}</span>)}
+                      {type === "eoy-writing-custom" && (<span>✍️ Writing (Custom) {isSelected && " ✓"}</span>)}
                       {type === "oral-exam-questions" && (<span>✨ 口頭試験質問集 {isSelected && " ✓"}</span>)}
                       {type === "kanji-grammar-checker" && (<span>📚 漢字文法チェッカー {isSelected && " ✓"}</span>)}
                     </button>
@@ -270,7 +252,7 @@ export default function TestYamatoPage() {
 
       </main>
 
-      {/* 💡 YamatoChatCommon 呼び出し（虹色テーマ & 画像生成対応） */}
+      {/* 💡 YamatoChatCommon 呼び出し */}
       <YamatoChatCommon 
         appType={activeAppType}
         characterName={currentConfig?.name || "やまと先生"}

@@ -16,6 +16,7 @@ export type AppType =
   | "eoy-oral-elaborate" 
   | "eoy-oral-mock" 
   | "eoy-writing" 
+  | "eoy-writing-custom"
   | "oral-exam-questions"
   | "kanji-grammar-checker"
   | "image-explanation";
@@ -23,7 +24,7 @@ export type AppType =
 export type BotConfig = {
   name: string;
   greeting: string;
-  themeColor: "red" | "blue" | "black" | "green" | "yellow" | "orange" | "purple" | "cyan" | "pink" | "rainbow";
+  themeColor: string; // 💡 "yellow"などのキーワードではなく、カラーコード（例: "#1e3a8a"）を直接指定できるように string 型に変更
   apiSourceFile: string;
   targetAudience: string;
   buttonStyle: {
