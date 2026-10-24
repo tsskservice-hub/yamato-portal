@@ -33,7 +33,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-u3o2-descriptor';
+const KNOWLEDGE_KEY = 'VCE_U3O2_DESCRIPTOR';
 
 /**
  * Fetch VCE Unit 3 Outcome 2 Performance Descriptor data from Supabase 'app_knowledge' table.

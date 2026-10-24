@@ -40,7 +40,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-oral-advice2026';
+const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_ADVICE2026';
 
 /**
  * Fetch 2026 VCE Languages Oral Examination Advice data from Supabase 'app_knowledge' table.

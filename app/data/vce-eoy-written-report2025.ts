@@ -46,7 +46,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-written-report2025';
+const KNOWLEDGE_KEY = 'VCE_EOY_WRITTEN_REPORT2025';
 
 /**
  * Fetch 2025 VCE Japanese Written External Assessment Report data from Supabase 'app_knowledge' table.

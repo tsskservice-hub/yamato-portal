@@ -36,7 +36,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'writing-styles';
+const KNOWLEDGE_KEY = 'WRITING_STYLES';
 
 /**
  * Fetch VCE Writing Styles Guide data from Supabase 'app_knowledge' table.

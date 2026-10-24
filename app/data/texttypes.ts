@@ -1,7 +1,7 @@
 /**
  * @file texttypes.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Japanese Text Types Specification.
- * Stores data in Supabase 'app_knowledge' table under key: 'texttypes'.
+ * Stores data in Supabase 'app_knowledge' table under key: 'TEXTTYPES'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -64,7 +64,8 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'texttypes';
+// 💡 Supabase のキー設定に合わせて大文字の 'TEXTTYPES' に修正
+const KNOWLEDGE_KEY = 'TEXTTYPES';
 
 /**
  * Fetch VCE Japanese Text Types Specification data from Supabase 'app_knowledge' table.

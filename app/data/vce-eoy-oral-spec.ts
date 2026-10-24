@@ -50,7 +50,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-oral-spec';
+const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_SPEC';
 
 /**
  * Fetch VCE Oral Examination Specification data from Supabase 'app_knowledge' table.

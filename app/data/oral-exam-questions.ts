@@ -71,7 +71,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'oral-exam-questions';
+const KNOWLEDGE_KEY = 'ORAL_EXAM_QUESTIONS';
 
 /**
  * Fetch Oral Exam Questions Database data from Supabase 'app_knowledge' table.

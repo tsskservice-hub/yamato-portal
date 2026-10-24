@@ -39,7 +39,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'kanji-list';
+const KNOWLEDGE_KEY = 'KANJI_LIST';
 
 /**
  * Fetch VCE Kanji List data from Supabase 'app_knowledge' table.

@@ -39,7 +39,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-written-criteria';
+const KNOWLEDGE_KEY = 'VCE_EOY_WRITTEN_CRITERIA';
 
 /**
  * Fetch VCE Written Examination Assessment Criteria data from Supabase 'app_knowledge' table.

@@ -50,7 +50,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'portal-content';
+const KNOWLEDGE_KEY = 'PORTAL_CONTENT';
 
 /**
  * Fetch JP Tutor AI Yamato Portal Content data from Supabase 'app_knowledge' table.

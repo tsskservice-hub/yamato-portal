@@ -38,7 +38,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-grammar-list';
+const KNOWLEDGE_KEY = 'VCE_GRAMMAR_LIST';
 
 /**
  * Fetch VCE Grammar List Categories data from Supabase 'app_knowledge' table.

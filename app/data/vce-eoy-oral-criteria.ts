@@ -39,7 +39,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-oral-criteria';
+const KNOWLEDGE_KEY = 'VCE_ORAL_CRITERIA';
 
 /**
  * Fetch VCE Oral Assessment Criteria data from Supabase 'app_knowledge' table.

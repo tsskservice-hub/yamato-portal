@@ -34,7 +34,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-oral-report2025';
+const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_REPORT2025';
 
 /**
  * Fetch 2025 VCE Japanese Oral Assessment Report data from Supabase 'app_knowledge' table.
