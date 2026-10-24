@@ -329,7 +329,7 @@ export default function TestYamatoNotePage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "14px", fontSize: "13px", color: "#334155", lineHeight: "1.6" }}>
             <p>
-              AIヤマト・エコシステムでは、UIや通信、認証などの共通ロジックをすべて <code>YamatoChatCommon.tsx</code> に集約し、各部屋（アプリ）用のヤマトはそのラッパーとして薄いコンポーネント（例: <code>ChatYamatoConcierge.tsx</code> や <code>ChatYamatoKanjiGrammarCheckerVce.tsx</code>）を作成してページにインポートする設計をとっています。
+              AIヤマト・エコシステムでは、UIや通信や認証などの共通ロジックをすべて <code>YamatoChatCommon.tsx</code> に集約し、各部屋（アプリ）用のヤマトはそのラッパーとして薄いコンポーネント（例: <code>ChatYamatoConcierge.tsx</code> や <code>ChatYamatoKanjiGrammarCheckerVce.tsx</code>）を作成してページにインポートする設計をとっています。
             </p>
 
             <div style={{ backgroundColor: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
