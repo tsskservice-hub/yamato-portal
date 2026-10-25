@@ -1,6 +1,6 @@
 /**
  * @file game-igo.tsx
- * @description ミニ5路 囲碁対局ページ（横：西洋数字・縦：漢数字の座標、最終手マーカー・AI投了判定・指導碁/フリー対局完全対応版）
+ * @description ミニ5路 囲碁対局ページ（確実な石取り・クリーンアップ処理・AI投了判定対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import type { MetaFunction } from "@remix-run/react";
@@ -19,6 +19,111 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+/**
+ * 盤面上のすべての石のグループ（連）と、その呼吸点（リバティ）を計算する関数
+ */
+function findAllGroups(board: number[][], color: number) {
+  const SIZE = board.length;
+  const visited: boolean[][] = Array(SIZE).fill(false).map(() => Array(SIZE).fill(false));
+  const groups: { stones: [number, number][]; liberties: Set<string> }[] = [];
+  const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (board[r][c] === color && !visited[r][c]) {
+        const stones: [number, number][] = [];
+        const liberties = new Set<string>();
+        const queue: [number, number][] = [[r, c]];
+        visited[r][c] = true;
+
+        let head = 0;
+        while (head < queue.length) {
+          const [currR, currC] = queue[head++];
+          stones.push([currR, currC]);
+
+          for (const [dr, dc] of directions) {
+            const nR = currR + dr;
+            const nC = currC + dc;
+            if (nR >= 0 && nR < SIZE && nC >= 0 && nC < SIZE) {
+              if (board[nR][nR] === 0) { // 修正: board[nR][nC]
+                // 念のためインデックスの安全確認
+              }
+              if (board[nR][nC] === 0) {
+                liberties.add(`${nR},${nC}`);
+              } else if (board[nR][nC] === color && !visited[nR][nC]) {
+                visited[nR][nC] = true;
+                queue.push([nR, nC]);
+              }
+            }
+          }
+        }
+        groups.push({ stones, liberties });
+      }
+    }
+  }
+  return groups;
+}
+
+/**
+ * 盤面全体をスキャンし、呼吸点が0になった石グループをすべて自動回収するクリーンアップ関数
+ */
+function sweepCapturedStones(board: number[][], actionColor: number) {
+  let newBoard = board.map(r => [...r]);
+  let capturedByPlayer = 0;
+  let capturedByAi = 0;
+
+  const opponentColor = actionColor === 1 ? 2 : 1;
+  const colorsToCheck = [opponentColor, actionColor]; // 相手の石を先にチェックし、次に自分の石をチェック
+
+  for (const color of colorsToCheck) {
+    const groups = findAllGroups(newBoard, color);
+    for (const group of groups) {
+      if (group.liberties.size === 0) {
+        for (const [r, c] of group.stones) {
+          if (newBoard[r][c] !== 0) {
+            newBoard[r][c] = 0;
+            if (color === 2) {
+              capturedByPlayer++; // 黒（プレイヤー）が白を取った
+            } else {
+              capturedByAi++; // 白（AI）が黒を取った
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return { newBoard, capturedByPlayer, capturedByAi };
+}
+
+/**
+ * 石を置いた時の処理（自殺手チェックと石取りの適用）
+ */
+function processMove(board: number[][], row: number, col: number, color: number) {
+  const SIZE = board.length;
+  const testBoard = board.map(r => [...r]);
+  testBoard[row][col] = color;
+
+  // 盤面全体をスキャンして取れる石を回収
+  const { newBoard, capturedByPlayer, capturedByAi } = sweepCapturedStones(testBoard, color);
+
+  // 自殺手チェック：もし自分が置いた石が、自分の色としてのキャプチャによって消されてしまった場合
+  if (newBoard[row][col] === 0) {
+    // 相手の石を取れていれば合法（打ち上げ）、取れていなければ自殺手として無効
+    const capturedOpponent = color === 1 ? capturedByPlayer : capturedByAi;
+    if (capturedOpponent === 0) {
+      return { success: false, newBoard: board, playerCapInc: 0, aiCapInc: 0 };
+    }
+  }
+
+  return {
+    success: true,
+    newBoard,
+    playerCapInc: capturedByPlayer,
+    aiCapInc: capturedByAi
+  };
+}
+
 function IgoBoard({ userId, credits }: { userId: string | null; credits: number | null }) {
   const SIZE = 5;
   const [board, setBoard] = useState<number[][]>(
@@ -28,6 +133,10 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
   const [message, setMessage] = useState<string>('あなたの番です（黒・先手）。碁盤の交点をクリックしてください。');
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [lastMove, setLastMove] = useState<[number, number] | null>(null);
+  
+  const [playerCaptures, setPlayerCaptures] = useState<number>(0);
+  const [aiCaptures, setAiCaptures] = useState<number>(0);
+
   const [gameMode, setGameMode] = useState<'teaching' | 'free'>('teaching');
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
   const [chatLog, setChatLog] = useState<Array<{ sender: 'user' | 'yamato'; text: string }>>([
@@ -45,10 +154,16 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
   const handleIntersectionClick = async (row: number, col: number) => {
     if (turn !== 1 || board[row][col] !== 0 || isAiThinking || isGameOver) return;
 
-    // 1. ユーザーの石を配置
-    const newBoard = board.map((r, rIdx) =>
-      r.map((cell, cIdx) => (rIdx === row && cIdx === col ? 1 : cell))
-    );
+    // 1. ユーザーの石を配置 & アゲハマ処理
+    const moveResult = processMove(board, row, col, 1);
+    if (!moveResult.success) {
+      setMessage('そこには置けません（自殺手になります）。別の場所を選んでください。');
+      return;
+    }
+
+    const newBoard = moveResult.newBoard;
+    setPlayerCaptures(prev => prev + moveResult.playerCapInc);
+    setAiCaptures(prev => prev + moveResult.aiCapInc);
 
     setBoard(newBoard);
     setLastMove([row, col]);
@@ -57,7 +172,12 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
     setIsAiThinking(true);
 
     const moveStr = `(${row + 1}, ${col + 1})`;
-    const updatedChat = [...chatLog, { sender: 'user' as const, text: `(${row + 1}, ${col + 1}) に黒石を置きました。` }];
+    let chatText = `(${row + 1}, ${col + 1}) に黒石を置きました。`;
+    if (moveResult.playerCapInc > 0) {
+      chatText += ` 白石を ${moveResult.playerCapInc}子取りました！`;
+    }
+
+    const updatedChat = [...chatLog, { sender: 'user' as const, text: chatText }];
     setChatLog(updatedChat);
 
     try {
@@ -79,36 +199,46 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
 
       if (aiMove) {
         const [aiRow, aiCol] = aiMove;
-        newBoard[aiRow][aiCol] = 2; // 白石配置
-        setLastMove([aiRow, aiCol]);
+        const aiMoveResult = processMove(newBoard, aiRow, aiCol, 2);
 
-        if (gameMode === 'teaching') {
-          const response = await fetch('/api/igo-chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userMove: moveStr,
-              aiMove: `(${aiRow + 1}, ${aiCol + 1})`,
-              boardState: JSON.stringify(newBoard),
-              userId: userId
-            })
-          });
+        if (aiMoveResult.success) {
+          const finalBoard = aiMoveResult.newBoard;
+          setPlayerCaptures(prev => prev + aiMoveResult.playerCapInc);
+          setAiCaptures(prev => prev + aiMoveResult.aiCapInc);
 
-          if (response.ok) {
-            const data = await response.json() as any;
-            aiComment = data.commentary || "お見事な一手ですね。布石の形を意識していきましょう！";
+          setBoard(finalBoard);
+          setLastMove([aiRow, aiCol]);
+
+          if (gameMode === 'teaching') {
+            const response = await fetch('/api/igo-chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userMove: moveStr,
+                aiMove: `(${aiRow + 1}, ${aiCol + 1})`,
+                boardState: JSON.stringify(finalBoard),
+                userId: userId
+              })
+            });
+
+            if (response.ok) {
+              const data = await response.json() as any;
+              aiComment = data.commentary || "お見事な一手ですね。布石の形を意識していきましょう！";
+            } else {
+              aiComment = "良い着眼点ですね。周囲の石のつながりに注意してみましょう。";
+            }
           } else {
-            aiComment = "良い着眼点ですね。周囲の石のつながりに注意してみましょう。";
+            const commentObj = getRandomComment('afterMove');
+            aiComment = `[白: (${aiRow + 1}, ${aiCol + 1})] ${commentObj.jp} (${commentObj.en})`;
           }
-        } else {
-          const commentObj = getRandomComment('afterMove');
-          aiComment = `[白: (${aiRow + 1}, ${aiCol + 1})] ${commentObj.jp} (${commentObj.en})`;
-        }
 
-        setBoard([...newBoard]);
-        setChatLog([...updatedChat, { sender: 'yamato', text: aiComment }]);
-        setTurn(1);
-        setMessage('あなたの番です（黒）。');
+          setChatLog([...updatedChat, { sender: 'yamato', text: aiComment }]);
+          setTurn(1);
+          setMessage('あなたの番です（黒）。');
+        } else {
+          setTurn(1);
+          setMessage('あなたの番です（黒）。');
+        }
       } else {
         setIsGameOver(true);
         aiComment = "盤面が埋まりました！終局です。お疲れ様でした。";
@@ -134,6 +264,8 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
     setTurn(1);
     setLastMove(null);
     setIsGameOver(false);
+    setPlayerCaptures(0);
+    setAiCaptures(0);
     setMessage('ゲームがリセットされました。あなたの番です（黒）。');
     setChatLog([{ sender: 'yamato', text: `新しい対局（${gameMode === 'teaching' ? '指導碁モード' : 'フリー対局モード'}）を開始します！最初の1手をどうぞ。` }]);
   };
@@ -188,7 +320,12 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
               {gameMode === 'teaching' ? '🥋 指導対局' : '⚔️ 真剣勝負'}
             </span>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium text-center">{message}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 font-medium text-center">{message}</p>
+
+          <div className="flex space-x-6 text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 bg-amber-100/60 dark:bg-slate-800 px-4 py-1.5 rounded-xl border border-amber-300 dark:border-slate-700">
+            <span>あなたのアゲハマ: <strong className="text-blue-600">{playerCaptures} 子</strong></span>
+            <span>やまと先生のアゲハマ: <strong className="text-red-600">{aiCaptures} 子</strong></span>
+          </div>
 
           {/* 碁盤表示エリア（上部：西洋数字、左側：漢数字の座標ラベル付き） */}
           <div className="relative bg-[#e6c280] p-8 rounded-2xl shadow-xl w-80 h-80 flex items-center justify-center mb-6 border-4 border-amber-800/40">
