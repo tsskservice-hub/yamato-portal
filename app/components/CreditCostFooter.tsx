@@ -31,7 +31,7 @@ export function CreditCostFooter({
   );
 
   // 表示用テキストの整形（見つからない場合のフォールバック付き）
-  const textCostText = textChatRow?.cost || "2 credits / turn";
+  const textCostText = textChatRow?.cost || "2 credits per turn";
   const photoCostText = singleImageRow?.cost || "4 credits";
   const visualAidCostText = "4 credits";
 
