@@ -140,21 +140,21 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Section 4: A Tribute to Busy Teachers (Highlighted in Pink) */}
-          <div className="bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-pink-600 text-white flex items-center justify-center mx-auto shadow-md">
-              <Heart className="w-6 h-6 animate-pulse" />
+          {/* Section 4: A Tribute to Busy Teachers (Blue theme with Pink Heart accent) */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto shadow-sm">
+              <Heart className="w-6 h-6 fill-pink-500 text-pink-600 animate-pulse" />
             </div>
-            <h2 className="text-xl font-bold text-pink-900">
+            <h2 className="text-xl font-bold text-blue-900">
               A Message for Dedicated Teachers
             </h2>
-            <p className="text-sm sm:text-base text-pink-950/80 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-blue-800 max-w-2xl mx-auto leading-relaxed">
               Finally, to all teachers currently working under immense pressure and heavy workloads: I sincerely hope this platform serves as a helpful assistant in your teaching journey. May it ultimately afford you more precious moments to connect directly with your students inside the classroom.
             </p>
             <div className="pt-4">
               <Link 
                 to="/" 
-                className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold shadow-md transition-all space-x-2"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md transition-all space-x-2"
               >
                 <span>Explore Portal Dashboard</span>
               </Link>
