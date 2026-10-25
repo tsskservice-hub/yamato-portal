@@ -379,23 +379,45 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* VCE Writing Modules [小見出し] */}
-              <div className="space-y-6 pl-2 sm:pl-4 border-l-2 border-red-500/30 pt-4">
+              {/* VCE Writing Modules [小見出し階層：Interactive Tools と References & Guides に分離] */}
+              <div className="space-y-8 pl-2 sm:pl-4 border-l-2 border-red-500/30 pt-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">✍️</span>
                   <h4 className="text-lg font-bold tracking-tight text-red-600 dark:text-red-400">VCE Writing Modules</h4>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {PORTAL_MODULES
-                    .filter((m) => m.section === 'australia' && m.subSection === 'vce-writing')
-                    .map((module) => (
-                      <ModuleCard
-                        key={module.id}
-                        module={module}
-                        isDarkMode={isDarkMode}
-                        onActionClick={handleModuleAction}
-                      />
-                    ))}
+
+                {/* ① Interactive Tools */}
+                <div className="space-y-4">
+                  <h5 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Interactive Tools</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {PORTAL_MODULES
+                      .filter((m) => m.section === 'australia' && m.subSection === 'vce-writing')
+                      .map((module) => (
+                        <ModuleCard
+                          key={module.id}
+                          module={module}
+                          isDarkMode={isDarkMode}
+                          onActionClick={handleModuleAction}
+                        />
+                      ))}
+                  </div>
+                </div>
+
+                {/* ② References & Guides */}
+                <div className="space-y-4 pt-2">
+                  <h5 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">References & Guides</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {PORTAL_MODULES
+                      .filter((m) => m.section === 'australia' && m.subSection === 'vce-writing-reference')
+                      .map((module) => (
+                        <ModuleCard
+                          key={module.id}
+                          module={module}
+                          isDarkMode={isDarkMode}
+                          onActionClick={handleModuleAction}
+                        />
+                      ))}
+                  </div>
                 </div>
               </div>
             </div>
