@@ -1,12 +1,13 @@
 /**
  * @file lp-card-modules.ts
- * @description ポータルページのセクション別モジュールカードデータ定義
+ * @description ポータルページのセクション別モジュールカードデータ定義（将来の拡張を見据えた階層構造対応）
  */
 export interface ModuleItem {
   id: string;
   title: string;
   description: string;
-  category: 'global' | 'speaking' | 'writing';
+  section: 'global' | 'australia'; // 大枠の括り
+  subSection?: 'vce-speaking' | 'vce-writing'; // 詳細な見出し（将来のVCE以外の拡張にも対応）
   iconName: 'Gamepad2' | 'Grid' | 'Mic' | 'FileText' | 'Sparkles';
   badge?: string;
   badgeType?: 'default' | 'comingSoon';
@@ -27,7 +28,7 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'igo-game',
     title: 'Go (Igo) Mini Game',
     description: 'Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.',
-    category: 'global',
+    section: 'global',
     iconName: 'Gamepad2',
     badge: 'Mini Game',
     badgeType: 'default',
@@ -42,7 +43,7 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'genkoyoshi-editor-general',
     title: 'Genkoyoshi Editor (General)',
     description: 'Digital manuscript paper editor with image/text AI layout analysis (Req max 4 credits).',
-    category: 'global',
+    section: 'global',
     iconName: 'Grid',
     badge: 'Coming Soon',
     badgeType: 'comingSoon',
@@ -54,13 +55,15 @@ export const PORTAL_MODULES: ModuleItem[] = [
   },
 
   // ==========================================
-  // Section 2: VCE Speaking Modules
+  // Section 2: Victorian Curriculum & VCE Students (Australia)
+  // --- VCE Speaking Modules ---
   // ==========================================
   {
     id: 'eoy-oral-drill',
     title: 'EOY Oral Drill',
     description: 'Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.',
-    category: 'speaking',
+    section: 'australia',
+    subSection: 'vce-speaking',
     iconName: 'Mic',
     badge: 'Coming Soon',
     badgeType: 'comingSoon',
@@ -74,7 +77,8 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'eoy-oral-elaboration',
     title: 'EOY Oral Elaboration',
     description: 'Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.',
-    category: 'speaking',
+    section: 'australia',
+    subSection: 'vce-speaking',
     iconName: 'Mic',
     badge: 'Coming Soon',
     badgeType: 'comingSoon',
@@ -88,7 +92,8 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'eoy-oral-mock-exam',
     title: 'EOY Oral Mock Exam',
     description: 'Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.',
-    category: 'speaking',
+    section: 'australia',
+    subSection: 'vce-speaking',
     iconName: 'Mic',
     badge: 'Coming Soon',
     badgeType: 'comingSoon',
@@ -102,7 +107,8 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'oral-exam-questions',
     title: 'Oral Exam Questions',
     description: 'Curated database of official and practice VCE oral examination questions with audio samples.',
-    category: 'speaking',
+    section: 'australia',
+    subSection: 'vce-speaking',
     iconName: 'FileText',
     badge: 'Coming Soon',
     badgeType: 'comingSoon',
@@ -114,13 +120,15 @@ export const PORTAL_MODULES: ModuleItem[] = [
   },
 
   // ==========================================
-  // Section 2: VCE Writing Modules
+  // Section 2: Victorian Curriculum & VCE Students (Australia)
+  // --- VCE Writing Modules ---
   // ==========================================
   {
     id: 'genkoyoshi-editor-vce',
     title: 'Genkoyoshi Editor (VCE)',
     description: 'Specialized VCE manuscript editor with strict criteria check and image/text AI essay advisor (Req max 4 credits).',
-    category: 'writing',
+    section: 'australia',
+    subSection: 'vce-writing',
     iconName: 'Grid',
     badge: 'VCE AI Tool',
     badgeType: 'default',
@@ -135,7 +143,8 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'kanji-grammar-checker',
     title: 'VCE Kanji & Grammar Checker',
     description: 'Instantly verify unique VCE kanji and grammar patterns in your handwritten essay transcripts.',
-    category: 'writing',
+    section: 'australia',
+    subSection: 'vce-writing',
     iconName: 'Sparkles',
     badge: 'VCE Tool',
     badgeType: 'default',
@@ -150,7 +159,8 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'eoy-writing',
     title: 'EOY Writing Exam Tutor',
     description: 'Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback (Req max 2 credits).',
-    category: 'writing',
+    section: 'australia',
+    subSection: 'vce-writing',
     iconName: 'FileText',
     badge: 'VCE AI Tool',
     badgeType: 'default',
@@ -165,7 +175,8 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'eoy-writing-custom',
     title: 'Custom Writing Practice (External / Past Exams)',
     description: 'Upload any custom past exam paper, textbook prompt, or external questions along with your answer for instant AI feedback (Zero Data Stored).',
-    category: 'writing',
+    section: 'australia',
+    subSection: 'vce-writing',
     iconName: 'Sparkles',
     badge: 'Custom AI Tool',
     badgeType: 'default',
@@ -180,7 +191,8 @@ export const PORTAL_MODULES: ModuleItem[] = [
     id: 'section2b-writing',
     title: 'Section 2 Part B Writing (Reading-based)',
     description: 'Practice reading Japanese source texts and crafting precise 300-character responses with AI source-alignment checks.',
-    category: 'writing',
+    section: 'australia',
+    subSection: 'vce-writing',
     iconName: 'FileText',
     badge: 'Coming Soon',
     badgeType: 'comingSoon',
