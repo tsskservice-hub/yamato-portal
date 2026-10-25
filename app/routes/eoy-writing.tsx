@@ -9,10 +9,11 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
 import { DataErrorState } from "../components/DataErrorState";
+import GenkoyoshiModal from "../components/GenkoyoshiModal";
 
-// 💡 外部データ・APIフェッチ関数のインポート
+// 💡 外部データ・APIフェッチ関数のインポート（getGenkoyoshiData は削除）
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
-import { fetchTextTypesData, TextTypesData, getGenkoyoshiData } from "../data/texttypes";
+import { fetchTextTypesData, TextTypesData } from "../data/texttypes";
 import { fetchWritingStylesData, WritingStylesData } from "../data/writing-styles";
 import { supabase } from "../lib/supabaseClient";
 
@@ -58,7 +59,7 @@ export default function Dashboard() {
         setQuestions(fetchedQuestions);
       }
 
-      // 2. TEXTTYPES（原稿用紙データ含む）
+      // 2. TEXTTYPES
       const fetchedTextTypes = await fetchTextTypesData(supabase);
       setModalData(fetchedTextTypes);
 
@@ -106,8 +107,6 @@ export default function Dashboard() {
 
   // 💡 各テキストタイプ用モーダルのデータ解決
   const activeModalData = activeModal && modalData ? modalData[activeModal] || null : null;
-  const genkoyoshiModalData = modalData ? getGenkoyoshiData(modalData) : null;
-
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
 
   // 1. ローディング中の表示
@@ -390,15 +389,11 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* 💡 Genkoyoshi モダル（単一の boolean ステートでシンプルに描画） */}
-          {genkoyoshiModalData && (
-            <TextTypeModal
-              isOpen={isGenkoyoshiOpen}
-              onClose={() => setIsGenkoyoshiOpen(false)}
-              modalKey="Genkoyoshi"
-              {...genkoyoshiModalData}
-            />
-          )}
+          {/* 💡 独立した GenkoyoshiModal コンポーネントの配置 */}
+          <GenkoyoshiModal
+            isOpen={isGenkoyoshiOpen}
+            onClose={() => setIsGenkoyoshiOpen(false)}
+          />
 
           {/* 💡 各テキストタイプ用モーダル */}
           {activeModal && activeModalData && (
