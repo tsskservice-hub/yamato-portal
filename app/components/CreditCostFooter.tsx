@@ -4,7 +4,7 @@
  * 💡 特徴：
  * 1. app/data/price-plans.ts の CREDIT_CONSUMPTION_GUIDE を直接参照し完全同期
  * 2. 入力欄下部にはチャットで即座に必要な主要コスト（Text / Photo / Visual Aid）をコンパクトに表示
- * 3. ℹ️ アイコンホバーで、全6機能（エッセイ添削や音声ロールプレイ等）の消費ガイドをポップアップ確認可能
+ * 3. ℹ️ アイコンホバーまたはクリックで、全6機能の消費ガイドを一回り大きな文字（text-xs）でポップアップ確認可能
  */
 import React, { useState } from "react";
 // 🌟 Supabase の app_knowledge (PRICE_PLANS) から連携されている共通データを直接インポート
@@ -56,27 +56,34 @@ export function CreditCostFooter({
           <span>ℹ️</span>
         </button>
 
-        {/* 🌟 ポップアップ：CREDIT_CONSUMPTION_GUIDE の全項目リスト */}
+        {/* 🌟 ポップアップ：文字サイズを一回り拡大（text-xs）、幅拡張（w-72 sm:w-80） */}
         {showFullGuide && (
           <div
             role="tooltip"
-            className="absolute bottom-6 right-0 z-50 w-64 p-3 bg-slate-900/95 text-white rounded-xl shadow-2xl border border-slate-700 text-left backdrop-blur-xs animate-fadeIn"
+            className="absolute bottom-6 right-0 z-50 w-72 sm:w-80 p-3.5 bg-slate-900/95 text-white rounded-xl shadow-2xl border border-slate-700 text-left backdrop-blur-xs animate-fadeIn"
           >
-            <div className="font-bold text-[11px] text-amber-400 mb-2 border-b border-slate-700 pb-1 flex items-center gap-1">
+            <div className="font-bold text-xs text-amber-400 mb-2.5 border-b border-slate-700 pb-1.5 flex items-center gap-1.5">
               <span>🪙</span>
               <span>Official Credit Guide</span>
             </div>
-            <div className="space-y-1.5 text-[10px]">
+            <div className="space-y-2 text-xs">
               {CREDIT_CONSUMPTION_GUIDE.map((guide, idx) => (
-                <div key={idx} className="flex justify-between items-start gap-2 border-b border-slate-800/60 pb-1">
-                  <span className="text-slate-300 leading-tight">{guide.item}</span>
+                <div
+                  key={idx}
+                  className="flex justify-between items-start gap-3 border-b border-slate-800/60 pb-1.5"
+                >
+                  <span className="text-slate-200 leading-snug">{guide.item}</span>
                   <span className="font-bold text-amber-300 shrink-0">{guide.cost}</span>
                 </div>
               ))}
             </div>
+
+            {/* 💡 コメントアウト形式でコード内に保持 */}
+            {/*
             <div className="mt-2 text-[9px] text-slate-400 italic">
               ※ Synced directly from Database price plans.
             </div>
+            */}
           </div>
         )}
       </div>
