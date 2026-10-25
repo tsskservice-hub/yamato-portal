@@ -1,35 +1,12 @@
 /**
  * @file eoy-writing-custom.tsx
- * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（TSエラー完全解消・クレジット案内・Step 3完備 正式版）
- * 💡 特徴：
- * 1. texttypes の型インポート対応により TS2724 エラーを完全解消
- * 2. 1枚=4cr / 2枚以上=一律6cr（最大4枚）の明確なクレジット消費リマインダーバナー
- * 3. Step 1 (問題入力・OCR画像), Step 2 (答案写真アップロード), Step 3 (チャットから送信) の3ステップガイド
- * 4. Step 2 のアップロードボタンを見出し文言のすぐ下に配置
- * 5. TypeScript型安全対策（answerImages 指定）
- * 6. 原稿用紙モーダルの開閉を 1つの boolean ステート (isGenkoyoshiOpen) でシンプルに制御
+ * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
-import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom";
-
-// 💡 型のみをインポートして TS2724 エラーを完全解消
-import type { TextTypesData } from "../data/texttypes";
-
-// 💡 原稿用紙ガイドのデータ
-const DEFAULT_GENKOYOSHI_DATA = {
-  title: "Genkoyoshi Usage Guide (原稿用紙の使い方)",
-  purpose: "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi. Refer to each text type for details.",
-  structure: [
-    "Title (Line 1): Leave 3 spaces at the beginning, then write the title",
-    "Name (Line 2): Write at the end, leaving the last square blank",
-    "Main Text: Indent 1 space at the beginning of each paragraph",
-    "Square Usage: Place punctuation marks (、。) in their own square. Never start a line with punctuation."
-  ],
-  sampleImage: "/genkoyoshi.pdf"
-};
+import GenkoyoshiModal from "../components/GenkoyoshiModal";
 
 interface UploadedImage {
   id: string;
@@ -38,7 +15,7 @@ interface UploadedImage {
 }
 
 export default function CustomDashboard() {
-  // 💡 原稿用紙モーダルの開閉を管理する 1つの boolean ステート
+  // 💡 原稿用紙ガイドモーダルの開閉ステート
   const [isGenkoyoshiOpen, setIsGenkoyoshiOpen] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
@@ -153,7 +130,7 @@ export default function CustomDashboard() {
             >
               <div className="flex items-center space-x-2 truncate">
                 <span className="text-base">📝</span>
-                <span className="truncate">How to use Genkooyooshi</span>
+                <span className="truncate">How to use Genkoyoshi</span>
               </div>
               <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2">View →</span>
             </button>
@@ -392,12 +369,10 @@ export default function CustomDashboard() {
             </div>
           )}
 
-          {/* 💡 原稿用紙ガイドモーダル（1つの boolean ステートでシンプルに制御） */}
-          <TextTypeModal
+          {/* 💡 独立した GenkoyoshiModal コンポーネントの配置 */}
+          <GenkoyoshiModal
             isOpen={isGenkoyoshiOpen}
             onClose={() => setIsGenkoyoshiOpen(false)}
-            modalKey="Genkooyooshi"
-            {...DEFAULT_GENKOYOSHI_DATA}
           />
         </main>
       </div>
