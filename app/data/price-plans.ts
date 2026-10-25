@@ -95,12 +95,12 @@ export const CAMPAIGN_NOTICE = {
  * 💡 クレジット消費ガイドの定義
  */
 export const CREDIT_CONSUMPTION_GUIDE = [
-  { item: "Text Chat (Q&A / Vocabulary)", cost: "2 credits / turn" },
+  { item: "Text Chat (Q&A / Vocabulary)", cost: "2 credits per turn" },
   { item: "Image Attachment (1) / Image Gen", cost: "4 credits" },
   { item: "Image Attachments (2) [System multi-image discount]", cost: "6 credits" },
-  { item: "Essay / Genkoyoshi Correctors", cost: "20-30 credits / session" },
-  { item: "Oral Exam / Voice Roleplay", cost: "15-25 credits / min" },
-  { item: "Mini Games & Drills", cost: "Free / 0.5 credits" },
+  { item: "Essay / Genkoyoshi Correctors", cost: "20-30 credits per session" },
+  { item: "Oral Exam / Voice Roleplay", cost: "15-25 credits per minute" },
+  { item: "Mini Games & Drills", cost: "Free or 0.5 credits per game" },
 ];
 
 /**
