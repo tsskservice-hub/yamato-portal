@@ -100,7 +100,7 @@ export const CREDIT_CONSUMPTION_GUIDE = [
   { item: "Image Attachments (2) [System multi-image discount]", cost: "6 credits" },
   { item: "Essay / Genkoyoshi Correctors", cost: "20-30 credits per session" },
   { item: "Oral Exam / Voice Roleplay", cost: "15-25 credits per minute" },
-  { item: "Mini Games & Drills", cost: "Free or 0.5 credits per game" },
+  { item: "Mini Games & Drills", cost: "Free or 0.5 credits per play" },
 ];
 
 /**

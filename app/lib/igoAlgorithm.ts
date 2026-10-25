@@ -1,6 +1,6 @@
 /**
  * @file igoAlgorithm.ts
- * @description ミニ5路囲碁（5x5）のAI思考アルゴリズム（相手のアタリを確実に取る機能付き）
+ * @description ミニ5路囲碁（5x5）のAI思考アルゴリズム（アタリの回避・取得、端・角を避ける機能付き）
  */
 
 type BoardState = number[][]; // 0: 空, 1: 黒（プレイヤー）, 2: 白（AI）
@@ -49,19 +49,15 @@ function findGroupsAndLiberties(board: BoardState, color: number) {
 
 /**
  * AIの次の手（座標）を計算する関数
- * @param board 現在の盤面の2次元配列
- * @param aiColor AIの石の色（通常は 2: 白）
- * @returns [row, col] の座標、置ける場所がない場合は null
  */
 export function calculateAiMove(board: BoardState, aiColor: number = 2): [number, number] | null {
   const SIZE = board.length;
   const opponentColor = aiColor === 2 ? 1 : 2;
 
-  // 1. 【最優先】相手の石が「アタリ（リバティが残り1つ）」になっているか探索
+  // 1. 【最優先】相手の石が「アタリ（リバティ1つ）」なら、必ずそこを取る
   const opponentGroups = findGroupsAndLiberties(board, opponentColor);
   for (const group of opponentGroups) {
     if (group.liberties.size === 1) {
-      // 残り1つのリバティ（空きマス）の座標を取得してそこへ打ち、石を取る
       const libertyStr = Array.from(group.liberties)[0];
       const [r, c] = libertyStr.split(',').map(Number);
       if (board[r][c] === 0) {
@@ -70,7 +66,19 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
     }
   }
 
-  // 2. 空いているマス（合法手候補）を収集
+  // 2. 【優先】自分の石が「アタリ（リバティ1つ）」なら、逃げる
+  const aiGroups = findGroupsAndLiberties(board, aiColor);
+  for (const group of aiGroups) {
+    if (group.liberties.size === 1) {
+      const libertyStr = Array.from(group.liberties)[0];
+      const [r, c] = libertyStr.split(',').map(Number);
+      if (board[r][c] === 0) {
+        return [r, c];
+      }
+    }
+  }
+
+  // 3. 空いているマスをすべて収集
   const emptySpots: [number, number][] = [];
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
@@ -82,27 +90,19 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
 
   if (emptySpots.length === 0) return null;
 
-  // 3. 囲碁の戦術的優先順位（中央や星付近を好む）
-  const center: [number, number] = [2, 2];
-  if (board[center[0]][center[1]] === 0 && Math.random() < 0.75) {
-    return center;
+  // 4. 【通常時】角や端（行・列が 0 または 4）を避け、内側（行・列が 1, 2, 3）のマスを優先する
+  const innerSpots = emptySpots.filter(([r, c]) => r > 0 && r < SIZE - 1 && c > 0 && c < SIZE - 1);
+
+  if (innerSpots.length > 0) {
+    const center: [number, number] = [2, 2];
+    if (board[center[0]][center[1]] === 0 && Math.random() < 0.6) {
+      return center;
+    }
+    const randomIndex = Math.floor(Math.random() * innerSpots.length);
+    return innerSpots[randomIndex];
   }
 
-  const strategicSpots: [number, number][] = [
-    [1, 2], [2, 1], [2, 3], [3, 2],
-    [1, 1], [1, 3], [3, 1], [3, 3]
-  ];
-
-  const availableStrategicSpots = strategicSpots.filter(
-    ([r, c]) => r < SIZE && c < SIZE && board[r][c] === 0
-  );
-
-  if (availableStrategicSpots.length > 0 && Math.random() < 0.6) {
-    const randomIndex = Math.floor(Math.random() * availableStrategicSpots.length);
-    return availableStrategicSpots[randomIndex];
-  }
-
-  // 4. それ以外の場合は残りの空きマスからランダムに選択
+  // 5. 内側が埋まっている場合は、やむを得ず端や角から選ぶ
   const randomIndex = Math.floor(Math.random() * emptySpots.length);
   return emptySpots[randomIndex];
 }
