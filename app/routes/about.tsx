@@ -69,7 +69,7 @@ export default function AboutPage() {
                 <Users className="w-5 h-5" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white">
-                "Jūnin Toshiro" (十人十色): Ten People, Ten Colors
+                "Jūnin Toiro・じゅうにん　といろ" (十人十色): Ten People, Ten Colors
               </h2>
             </div>
 
