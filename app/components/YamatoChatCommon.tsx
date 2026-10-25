@@ -1,8 +1,8 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（枠線4px対応・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
+ * @description ポータル共通AIチャットウィジェット（閉じたボタン＆開いたウィンドウ両方の枠線4px完全統一・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
  * 💡 特徴：
- * 1. 枠線の太さを 2px から 4px (border-4 & 4px solid) に強化
+ * 1. 閉じたフローティングボタンおよび開いたチャットウィンドウの枠線を 4px (border-4 & 4px solid) で完全統一
  * 2. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
  * 3. chatThemes, ImageModal, ScrollTopButton, useChatResize, CreditCostFooter の分離による高い保守性
  * 4. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
@@ -32,12 +32,12 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.6.0",
-  role: "ポータル共通AIチャットウィジェット（枠線4px版）",
+  version: "4.7.0",
+  role: "ポータル共通AIチャットウィジェット（全枠線4px完全統一版）",
   features: [
     {
-      featureName: "Enhanced Border Width",
-      description: "チャットウィンドウおよびフローティングボタンの枠線を2pxから4pxに強化"
+      featureName: "Uniform 4px Border Width",
+      description: "閉じた起動ボタンおよび開いたチャット枠線の太さを4pxに完全統一"
     },
     {
       featureName: "Modular Architecture",
@@ -176,11 +176,15 @@ export function YamatoChatCommon({
     ? themeStyles[themeColor as ThemeColorKey]
     : themeStyles.blue;
   
-  const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
+  const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `$ [cite: 58, 127] [cite: 58, 127]{currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
   
-  // 💡 【変更点1】HEXカラー指定時の枠線を 2px から 4px solid に変更
+  // 💡 【修正点1】個別設定に 2px が入っていても 4px に置換し、カラーコード指定時も 4px solid を強制
   const floatingInlineStyle = {
-    ...(buttonStyle?.border ? { border: buttonStyle.border } : isHexColor ? { border: `4px solid ${themeColor}` } : {}),
+    ...(buttonStyle?.border
+      ? { border: buttonStyle.border.replace("2px", "4px").replace("1px", "4px") }
+      : isHexColor
+      ? { border: `4px solid ${themeColor}` }
+      : {}),
     ...(buttonStyle?.background ? { backgroundColor: buttonStyle.background } : isHexColor ? { backgroundColor: themeColor } : {}),
     ...(buttonStyle?.color ? { color: buttonStyle.color } : {}),
   };
@@ -422,7 +426,8 @@ export function YamatoChatCommon({
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
             style={floatingInlineStyle}
-            className={`${finalFloatingButtonClass} font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
+            // 💡 【修正点2】閉じたボタンのクラスに「border-4」を直接追加して4pxの太枠を確実化
+            className={`${finalFloatingButtonClass} border-4 font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
           >
             <span>🤖</span>
             <span>{characterName}</span>
@@ -443,7 +448,7 @@ export function YamatoChatCommon({
                 ? undefined 
                 : { width: `${chatSize.width}px`, height: `${chatSize.height}px`, ...boxBorderInlineStyle }
             }
-            // 💡 【変更点2】開いたチャットウィンドウの枠線を border-2 から border-4 に変更
+            // 💡 開いたチャットウィンドウの枠線も「border-4」
             className={`bg-white border-4 ${!isHexColor ? currentTheme.border : ''} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
