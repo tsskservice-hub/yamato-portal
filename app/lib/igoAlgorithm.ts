@@ -1,6 +1,6 @@
 /**
  * @file igoAlgorithm.ts
- * @description ミニ5路 囲碁対局ページ（AI思考アルゴリズム：無駄なアタリ逃げの回避・投了判定）
+ * @description ミニ5路 囲碁対局ページ（AI思考アルゴリズム：生きる可能性ゼロの自殺手・無駄な死にに行く手の完全回避・投了判定）
  */
 
 export type BoardState = number[][]; // 0: 空, 1: 黒（プレイヤー）, 2: 白（AI）
@@ -91,7 +91,7 @@ export function shouldAiResign(board: BoardState, aiColor: number = 2): boolean 
 }
 
 /**
- * AIの次の一手を算出する（助からないアタリの石をあえて逃げないロジックを追加）
+ * AIの次の一手を算出する（生きる道がゼロの無駄な場所・自殺手への飛び込みを完全に回避）
  */
 export function calculateAiMove(board: BoardState, aiColor: number = 2): [number, number] | null {
   const SIZE = board.length;
@@ -113,13 +113,11 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
     }
   }
 
-  // 2. 自分の石がアタリなら逃げる
-  // 💡 修正：石数が少なく（2子以下）、どうあがいても助からない絶望的な死に石の場合は、
-  // 無駄な延命を行わずに無視して他の良い場所（三四などの大場）を探させる
+  // 2. 自分の石がアタリなら逃げる（ただし、生きる可能性ゼロの無駄な延命は絶対にしない）
   const aiGroups = findGroupsAndLiberties(board, aiColor);
   for (const group of aiGroups) {
     if (group.liberties.size === 1) {
-      const isHopelessDeadStone = group.stones.length <= 2;
+      const isHopelessDeadStone = group.stones.length <= 3;
       
       if (!isHopelessDeadStone) {
         const [firstLiberty] = group.liberties;
@@ -135,30 +133,51 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
     }
   }
 
-  // 3. 空いているマスを収集
-  const emptySpots: [number, number][] = [];
+  // 3. 安全な空きマスを収集（💡 ここで「生きる道がゼロの場所・自ら死にに行く手」を厳しくフィルタリング）
+  const safeSpots: [number, number][] = [];
+  const allEmptySpots: [number, number][] = [];
+
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
       if (board[r][c] === 0) {
-        emptySpots.push([r, c]);
+        allEmptySpots.push([r, c]);
+
+        // シミュレーション：ここにAIが石を置いたと仮定する
+        const simBoard = board.map(row => [...row]);
+        simBoard[r][c] = aiColor;
+        
+        // 置いた後の自分のグループの状態をチェック
+        const simGroups = findGroupsAndLiberties(simBoard, aiColor);
+        const placedGroup = simGroups.find(g => g.stones.some(s => s.r === r && s.c === c));
+        
+        // 呼吸点が0（自殺手）はもちろん除外、
+        // さらに「呼吸点が1つしかなく、かつ石数が少ない（＝打った瞬間にアタリになり、周囲に脱出路がない死にに行く手）」も除外する
+        const isSuicide = placedGroup ? placedGroup.liberties.size === 0 : true;
+        const isHopelessPlacement = placedGroup ? placedGroup.liberties.size === 1 && placedGroup.stones.length <= 2 : false;
+
+        if (!isSuicide && !isHopelessPlacement) {
+          safeSpots.push([r, c]);
+        }
       }
     }
   }
 
-  if (emptySpots.length === 0) return null;
+  // もし安全な場所がすべて埋まってしまっている場合の保険
+  const candidateSpots = safeSpots.length > 0 ? safeSpots : allEmptySpots;
+  if (candidateSpots.length === 0) return null;
 
-  // 4. 端や角を避け、内側や中央（三四などを含む大場）を優先する
-  const innerSpots = emptySpots.filter(([r, c]) => r > 0 && r < SIZE - 1 && c > 0 && c < SIZE - 1);
+  // 4. 端や角を避け、安全な候補地の中から内側や中央（三四などを含む大場）を優先する
+  const innerSpots = candidateSpots.filter(([r, c]) => r > 0 && r < SIZE - 1 && c > 0 && c < SIZE - 1);
   if (innerSpots.length > 0) {
     const centerR = 2;
     const centerC = 2;
-    if (board[centerR][centerC] === 0 && Math.random() < 0.6) {
+    if (board[centerR][centerC] === 0 && innerSpots.some(([r, c]) => r === centerR && c === centerC) && Math.random() < 0.6) {
       return [centerR, centerC];
     }
     const randomIndex = Math.floor(Math.random() * innerSpots.length);
     return innerSpots[randomIndex];
   }
 
-  const randomIndex = Math.floor(Math.random() * emptySpots.length);
-  return emptySpots[randomIndex];
+  const randomIndex = Math.floor(Math.random() * candidateSpots.length);
+  return candidateSpots[randomIndex];
 }
