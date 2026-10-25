@@ -1,13 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（ニックネーム動的反映・ヘッダークレジット即時連動・左上リサイズ・完全連動上戻りボタン内包版）
- * 💡 特徴：
- * 1. root loader & Supabase profiles からのニックネーム・クレジット自動解決
- * 2. 初期挨拶（my friend）の登録ニックネームへの自動置換
- * 3. AIバックエンドへの最新ニックネーム送信（パーソナライズ呼びかけ）
- * 4. F5なしのヘッダークレジット即時連動（yamato:credits-updated イベント発行）
- * 5. 左上ドラッグリサイズ＆テーマ完全連動上戻りボタン
- * 6. 写真アップロード（enableImageUpload）のON/OFF切り替え
+ * @description ポータル共通AIチャットウィジェット（型安全ニックネーム解決・ヘッダークレジット即時連動完全版）
  */
 import { useState, useEffect, useRef } from "react";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -27,12 +20,12 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.1.0",
-  role: "ポータル共通AIチャットウィジェット（ニックネーム反映・ヘッダー即時連動版）",
+  version: "4.1.1",
+  role: "ポータル共通AIチャットウィジェット（型安全ニックネーム反映・ヘッダー即時連動版）",
   features: [
     {
-      featureName: "Dynamic Nickname Resolution & Greeting",
-      description: "Supabase profiles または root からニックネームを取得し、初期挨拶およびAIプロンプトへ反映"
+      featureName: "Type-Safe Dynamic Nickname Resolution",
+      description: "getSafeString により null や非文字列の入力でも例外を完全に防止し安全にニックネームを反映"
     },
     {
       featureName: "Synchronized Scroll Top Button",
@@ -83,7 +76,7 @@ export type YamatoChatCommonProps = {
   systemPrompt?: string;
   appType?: "concierge" | "writing" | "oral" | "general" | string;
   defaultOpen?: boolean;
-  themeColor?: string; // キーワードまたはカラーコード（例: "#1e3a8a"）
+  themeColor?: string;
   floatingButtonClassName?: string;
   buttonStyle?: {
     border?: string;
@@ -234,6 +227,11 @@ function sanitizeAiOutput(text: string): string {
     .replace(/\*\*/g, '');
 }
 
+// 💡 どんな型が渡されても安全に文字列トリムを返す防御関数
+function getSafeString(val: any): string {
+  return typeof val === "string" ? val.trim() : "";
+}
+
 function ScrollTopButton({
   floatingClass,
   inlineStyle
@@ -296,13 +294,9 @@ export function YamatoChatCommon({
   const effectiveCreditsFromRoot = propCredits ?? rootData?.credits ?? 0;
   const effectiveLearningPace = propLearningPace ?? rootData?.learningPace ?? "normal";
 
-  // 💡 ニックネームの優先解決ステート（prop -> rootData -> 空文字）
+  // 💡 安全にニックネームを初期化（nullや非文字列による例外を完全ガード）
   const [currentNickname, setCurrentNickname] = useState<string>(
-    (propNickname && propNickname.trim() !== "")
-      ? propNickname.trim()
-      : (rootData?.nickname && rootData.nickname.trim() !== "")
-        ? rootData.nickname.trim()
-        : ""
+    getSafeString(propNickname) || getSafeString(rootData?.nickname) || ""
   );
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
@@ -355,15 +349,18 @@ export function YamatoChatCommon({
     setCurrentCredits(effectiveCreditsFromRoot);
   }, [effectiveCreditsFromRoot]);
 
+  // 💡 安全なニックネーム同期
   useEffect(() => {
-    if (propNickname && propNickname.trim() !== "") {
-      setCurrentNickname(propNickname.trim());
-    } else if (rootData?.nickname && rootData.nickname.trim() !== "") {
-      setCurrentNickname(rootData.nickname.trim());
+    const validProp = getSafeString(propNickname);
+    const validRoot = getSafeString(rootData?.nickname);
+    if (validProp) {
+      setCurrentNickname(validProp);
+    } else if (validRoot) {
+      setCurrentNickname(validRoot);
     }
   }, [propNickname, rootData?.nickname]);
 
-  // 💡 全体クレジット更新イベントの受信
+  // 全体クレジット更新イベントの受信
   useEffect(() => {
     const handleGlobalCreditUpdate = (e: any) => {
       if (typeof e.detail?.credits === "number") {
@@ -374,7 +371,7 @@ export function YamatoChatCommon({
     return () => window.removeEventListener("yamato:credits-updated", handleGlobalCreditUpdate);
   }, []);
 
-  // 💡 Supabase から credits と nickname を同時に取得・セッション監視
+  // Supabase から credits と nickname を安全に取得
   useEffect(() => {
     let isMounted = true;
 
@@ -393,8 +390,9 @@ export function YamatoChatCommon({
             if (typeof profileData.credits === 'number') {
               setCurrentCredits(profileData.credits);
             }
-            if (profileData.nickname && profileData.nickname.trim() !== "") {
-              setCurrentNickname(profileData.nickname.trim());
+            const validNick = getSafeString(profileData.nickname);
+            if (validNick) {
+              setCurrentNickname(validNick);
             }
           }
         }
@@ -422,8 +420,9 @@ export function YamatoChatCommon({
             if (typeof profileData.credits === 'number') {
               setCurrentCredits(profileData.credits);
             }
-            if (profileData.nickname && profileData.nickname.trim() !== "") {
-              setCurrentNickname(profileData.nickname.trim());
+            const validNick = getSafeString(profileData.nickname);
+            if (validNick) {
+              setCurrentNickname(validNick);
             }
           }
         }
@@ -436,7 +435,7 @@ export function YamatoChatCommon({
     };
   }, [activeUserId]);
 
-  // 💡 Supabase Realtime 監視（profiles の credits と nickname の更新）
+  // Supabase Realtime 監視（credits & nickname）
   useEffect(() => {
     if (!activeUserId) return;
 
@@ -455,8 +454,9 @@ export function YamatoChatCommon({
             if (typeof payload.new.credits === "number") {
               setCurrentCredits(payload.new.credits);
             }
-            if (payload.new.nickname && payload.new.nickname.trim() !== "") {
-              setCurrentNickname(payload.new.nickname.trim());
+            const validNick = getSafeString(payload.new.nickname);
+            if (validNick) {
+              setCurrentNickname(validNick);
             }
           }
         }
@@ -501,14 +501,15 @@ export function YamatoChatCommon({
     },
   ]);
 
-  // 💡 ニックネームが確定した際、初期挨拶の中の "my friend" を動的に置換
+  // 💡 安全な初期挨拶の置換
   useEffect(() => {
-    if (currentNickname && currentNickname.trim() !== "") {
+    const validNick = getSafeString(currentNickname);
+    if (validNick && typeof initialGreeting === "string") {
       setTutorMessages((prev) => {
-        if (prev.length > 0 && prev[0].role === "assistant") {
+        if (prev.length > 0 && prev[0]?.role === "assistant") {
           const updatedFirstMsg: ChatMessage = {
             ...prev[0],
-            content: initialGreeting.replace(/my friend/gi, currentNickname),
+            content: initialGreeting.replace(/my friend/gi, validNick),
           };
           return [updatedFirstMsg, ...prev.slice(1)];
         }
@@ -599,8 +600,9 @@ export function YamatoChatCommon({
         if (typeof data.credits === 'number') {
           setCurrentCredits(data.credits);
         }
-        if (data.nickname && data.nickname.trim() !== "") {
-          setCurrentNickname(data.nickname.trim());
+        const validNick = getSafeString(data.nickname);
+        if (validNick) {
+          setCurrentNickname(validNick);
         }
       }
     } catch (err) {
@@ -630,8 +632,9 @@ export function YamatoChatCommon({
       return;
     }
 
+    const callName = getSafeString(currentNickname) || "my friend";
+
     if (currentCredits <= 0) {
-      const callName = currentNickname || "my friend";
       setTutorMessages((prev) => [
         ...prev,
         { role: "user", content: tutorInput.trim() },
@@ -647,7 +650,6 @@ export function YamatoChatCommon({
     const requiredCredits = (requestVisualAid || Boolean(selectedImage) || appType === "kanji-grammar-checker-ocr") ? 4 : 2;
 
     if (currentCredits < requiredCredits) {
-      const callName = currentNickname || "my friend";
       setTutorMessages((prev) => [
         ...prev,
         { role: "user", content: tutorInput.trim() },
@@ -682,8 +684,8 @@ export function YamatoChatCommon({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      // 💡 決定されたニックネーム（未設定時のみ My friend）をAPIへ送信
-      const sendingNickname = currentNickname && currentNickname.trim() !== "" ? currentNickname.trim() : "My friend";
+      // 💡 100%安全なニックネーム文字列を構築
+      const sendingNickname = getSafeString(currentNickname) || "My friend";
 
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
@@ -692,7 +694,7 @@ export function YamatoChatCommon({
           message: userMsg,
           history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
           learningPace: tutorLevel,
-          userNickname: sendingNickname, // 🌟 ニックネーム送信
+          userNickname: sendingNickname,
           appType: appType,
           systemPrompt: systemPrompt,
           visualPrompt: visualPrompt,
@@ -714,7 +716,6 @@ export function YamatoChatCommon({
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
-          const callName = currentNickname || "my friend";
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
@@ -857,9 +858,9 @@ export function YamatoChatCommon({
                 <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Account Status</span>
                 {activeUserId ? (
                   <div className="flex items-center gap-2">
-                    {currentNickname && (
+                    {getSafeString(currentNickname) && (
                       <span className="text-[10px] text-slate-600 font-medium">
-                        👤 {currentNickname}
+                        👤 {getSafeString(currentNickname)}
                       </span>
                     )}
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
