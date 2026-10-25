@@ -13,8 +13,7 @@ import {
   FileText, 
   Mic, 
   PenTool, 
-  LayoutDashboard,
-  ArrowLeft
+  LayoutDashboard 
 } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import { faqList, FaqItem } from '../data/faq-database';
@@ -66,8 +65,31 @@ export default function FaqPage() {
     });
   }, [searchQuery, selectedCategory]);
 
+  // Generate JSON-LD Structured Data for FAQ SEO (Rich Results)
+  const faqJsonLd = useMemo(() => {
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqList.map(item => ({
+        "@type": "Question",
+        "name": item.questionEn,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          // Strip HTML tags for clean schema text representation
+          "text": item.answerHtml.replace(/<[^>]*>?/gm, '').trim()
+        }
+      }))
+    };
+  }, []);
+
   return (
     <PageLayout>
+      {/* JSON-LD Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+
       <div className="min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-800 pb-16">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-md">
