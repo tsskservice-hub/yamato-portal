@@ -1,6 +1,6 @@
 /**
  * @file game-igo.tsx
- * @description ミニ5路 囲碁対局ページ（漢数字座標・格子線修正・最終手マーカー・AI投了判定・指導碁/フリー対局完全対応版）
+ * @description ミニ5路 囲碁対局ページ（横：西洋数字・縦：漢数字の座標、最終手マーカー・AI投了判定・指導碁/フリー対局完全対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import type { MetaFunction } from "@remix-run/react";
@@ -190,10 +190,10 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium text-center">{message}</p>
 
-          {/* 碁盤表示エリア（漢数字の座標ラベル付き） */}
+          {/* 碁盤表示エリア（上部：西洋数字、左側：漢数字の座標ラベル付き） */}
           <div className="relative bg-[#e6c280] p-8 rounded-2xl shadow-xl w-80 h-80 flex items-center justify-center mb-6 border-4 border-amber-800/40">
             <svg viewBox="-16 -16 132 132" className="w-full h-full cursor-pointer overflow-visible">
-              {/* 碁盤の罫線（修正済み） */}
+              {/* 碁盤の罫線 */}
               {[0, 25, 50, 75, 100].map((pos) => (
                 <React.Fragment key={pos}>
                   <line x1={pos} y1="0" x2={pos} y2="100" stroke="#78350f" strokeWidth="1.5" />
@@ -204,20 +204,23 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
               {/* 星（天元） */}
               <circle cx="50" cy="50" r="2.5" fill="#78350f" />
 
-              {/* 漢数字座標ラベル（一、二、三、四、五） */}
+              {/* 上部：西洋数字座標ラベル（1, 2, 3, 4, 5） */}
+              {['1', '2', '3', '4', '5'].map((num, idx) => {
+                const pos = idx * 25;
+                return (
+                  <text key={`top-${num}`} x={pos} y="-8" textAnchor="middle" dominantBaseline="central" fontSize="7" fontWeight="bold" fill="#78350f">
+                    {num}
+                  </text>
+                );
+              })}
+
+              {/* 左側：漢数字座標ラベル（一、二、三、四、五） */}
               {['一', '二', '三', '四', '五'].map((kanji, idx) => {
                 const pos = idx * 25;
                 return (
-                  <React.Fragment key={kanji}>
-                    {/* 上部ラベル */}
-                    <text x={pos} y="-8" textAnchor="middle" dominantBaseline="central" fontSize="7" fontWeight="bold" fill="#78350f">
-                      {kanji}
-                    </text>
-                    {/* 左側ラベル */}
-                    <text x="-8" y={pos} textAnchor="middle" dominantBaseline="central" fontSize="7" fontWeight="bold" fill="#78350f">
-                      {kanji}
-                    </text>
-                  </React.Fragment>
+                  <text key={`left-${kanji}`} x="-8" y={pos} textAnchor="middle" dominantBaseline="central" fontSize="7" fontWeight="bold" fill="#78350f">
+                    {kanji}
+                  </text>
                 );
               })}
 

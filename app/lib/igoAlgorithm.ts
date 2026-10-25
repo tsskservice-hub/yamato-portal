@@ -1,6 +1,6 @@
 /**
  * @file igoAlgorithm.ts
- * @description ミニ5路囲碁（5x5）のAI思考アルゴリズムおよび投了（二眼喪失）判定
+ * @description ミニ5路 囲碁対局ページ（AI思考アルゴリズム：無駄なアタリ逃げの回避・投了判定）
  */
 
 export type BoardState = number[][]; // 0: 空, 1: 黒（プレイヤー）, 2: 白（AI）
@@ -13,7 +13,6 @@ function findGroupsAndLiberties(board: BoardState, color: number) {
   const visited: boolean[][] = Array(SIZE).fill(false).map(() => Array(SIZE).fill(false));
   const groups: { stones: { r: number; c: number }[]; liberties: Set<string> }[] = [];
   
-  // 上下左右の移動量（配列の角括弧事故を防ぐためオブジェクト形式で定義）
   const directions = [
     { dr: -1, dc: 0 },
     { dr: 1, dc: 0 },
@@ -55,9 +54,6 @@ function findGroupsAndLiberties(board: BoardState, color: number) {
 
 /**
  * 現在の盤面を見て、AIが二眼を作れず詰み（投了すべき状態）かどうかを判定する
- * @param board 碁盤の状態
- * @param aiColor AIの石の色（デフォルト: 2 / 白）
- * @returns 投了すべき状態なら true
  */
 export function shouldAiResign(board: BoardState, aiColor: number = 2): boolean {
   const opponentColor = aiColor === 2 ? 1 : 2;
@@ -66,7 +62,6 @@ export function shouldAiResign(board: BoardState, aiColor: number = 2): boolean 
   const opponentStonesCount = board.flat().filter(cell => cell === opponentColor).length;
   const emptySpotsCount = board.flat().filter(cell => cell === 0).length;
 
-  // 序盤（相手の石がまだ少ない段階）は投了しない
   if (opponentStonesCount < 5) {
     return false;
   }
@@ -77,21 +72,17 @@ export function shouldAiResign(board: BoardState, aiColor: number = 2): boolean 
     const totalLiberties = new Set<string>();
     aiGroups.forEach(g => g.liberties.forEach(lib => totalLiberties.add(lib)));
 
-    // すべてのグループがアタリ（ダメ1以下）で追い詰められているか
     const isUnderHeavyAttack = aiGroups.every(g => g.liberties.size <= 1);
 
-    // プレイヤーが6石以上展開し、AI石が少数（2石以下）で呼吸点も1つ以下
     if (opponentStonesCount >= 6 && aiStonesCount <= 2 && totalLiberties.size <= 1) {
       return true;
     }
 
-    // 空きマスが少なくなり、二眼を作るスペースがなくAIの石がほぼ包囲されている
     if (emptySpotsCount <= 4 && totalLiberties.size <= 2 && isUnderHeavyAttack) {
       return true;
     }
   }
 
-  // AIの石が壊滅し、相手の石が盤面の大部分を支配している場合
   if (opponentStonesCount >= 7 && aiStonesCount <= 1 && emptySpotsCount <= 6) {
     return true;
   }
@@ -100,17 +91,16 @@ export function shouldAiResign(board: BoardState, aiColor: number = 2): boolean 
 }
 
 /**
- * AIの次の一手を算出する
+ * AIの次の一手を算出する（助からないアタリの石をあえて逃げないロジックを追加）
  */
 export function calculateAiMove(board: BoardState, aiColor: number = 2): [number, number] | null {
   const SIZE = board.length;
   const opponentColor = aiColor === 2 ? 1 : 2;
 
-  // 1. 相手の石がアタリなら取る
+  // 1. 相手の石がアタリなら取る（最優先：確実に石を取る）
   const opponentGroups = findGroupsAndLiberties(board, opponentColor);
   for (const group of opponentGroups) {
     if (group.liberties.size === 1) {
-      // Set から最初に取り出す（ という添字を使わない安全な取得方法）
       const [firstLiberty] = group.liberties;
       if (firstLiberty) {
         const coords = firstLiberty.split(',').map(Number);
@@ -124,16 +114,22 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
   }
 
   // 2. 自分の石がアタリなら逃げる
+  // 💡 修正：石数が少なく（2子以下）、どうあがいても助からない絶望的な死に石の場合は、
+  // 無駄な延命を行わずに無視して他の良い場所（三四などの大場）を探させる
   const aiGroups = findGroupsAndLiberties(board, aiColor);
   for (const group of aiGroups) {
     if (group.liberties.size === 1) {
-      const [firstLiberty] = group.liberties;
-      if (firstLiberty) {
-        const coords = firstLiberty.split(',').map(Number);
-        const r = coords.at(0)!;
-        const c = coords.at(1)!;
-        if (board[r][c] === 0) {
-          return [r, c];
+      const isHopelessDeadStone = group.stones.length <= 2;
+      
+      if (!isHopelessDeadStone) {
+        const [firstLiberty] = group.liberties;
+        if (firstLiberty) {
+          const coords = firstLiberty.split(',').map(Number);
+          const r = coords.at(0)!;
+          const c = coords.at(1)!;
+          if (board[r][c] === 0) {
+            return [r, c];
+          }
         }
       }
     }
@@ -151,7 +147,7 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
 
   if (emptySpots.length === 0) return null;
 
-  // 4. 端や角を避け、内側を優先する
+  // 4. 端や角を避け、内側や中央（三四などを含む大場）を優先する
   const innerSpots = emptySpots.filter(([r, c]) => r > 0 && r < SIZE - 1 && c > 0 && c < SIZE - 1);
   if (innerSpots.length > 0) {
     const centerR = 2;
