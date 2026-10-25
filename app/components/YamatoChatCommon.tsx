@@ -1,13 +1,14 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（Credit Balance表記・アンバー調背景・全枠線4px完全統一・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
+ * @description ポータル共通AIチャットウィジェット（Learning Pace薄灰色統一・Credit Balance表記・全枠線4px完全統一・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
  * 💡 特徴：
- * 1. クレジット表示欄を「Credit Balance」表記に変更し、ChatYamatoEoyWritingCustomと同じ黄色調（bg-amber-50）に統一
- * 2. 閉じたフローティングボタンおよび開いたチャットウィンドウの枠線を 4px (border-4 & 4px solid) で完全統一
- * 3. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
- * 4. chatThemes, ImageModal, ScrollTopButton, useChatResize, CreditCostFooter の分離による高い保守性
- * 5. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
- * 6. 入力フォーム下部にクレジット消費案内（Text: 2 cr / 1 Photo: 4 cr / Visual Aid: 4 cr）を再表示
+ * 1. Learning Pace の背景を Font Size と同じ薄い灰色（bg-slate-100）に統一
+ * 2. クレジット表示欄を「Credit Balance」表記に変更し、ChatYamatoEoyWritingCustomと同じ黄色調（bg-amber-50）に統一
+ * 3. 閉じたフローティングボタンおよび開いたチャットウィンドウの枠線を 4px (border-4 & 4px solid) で完全統一
+ * 4. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
+ * 5. chatThemes, ImageModal, ScrollTopButton, useChatResize, CreditCostFooter の分離による高い保守性
+ * 6. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
+ * 7. 入力フォーム下部にクレジット消費案内（Text: 2 cr / 1 Photo: 4 cr / Visual Aid: 4 cr）を再表示
  */
 import React, { useState, useEffect, useRef } from "react";
 
@@ -33,9 +34,13 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.8.0",
-  role: "ポータル共通AIチャットウィジェット（Credit Balance＆アンバー背景統一版）",
+  version: "4.9.0",
+  role: "ポータル共通AIチャットウィジェット（UI配色完全統一版）",
   features: [
+    {
+      featureName: "Unified Slate Learning Pace Style",
+      description: "Learning Paceの背景をFont Sizeと同じ薄い灰色に統一"
+    },
     {
       featureName: "Credit Balance Header with Amber Theme",
       description: "アカウント表示をCredit Balanceに変更しChatYamatoEoyWritingCustomと共通の黄色い背景色を適用"
@@ -181,7 +186,7 @@ export function YamatoChatCommon({
     ? themeStyles[themeColor as ThemeColorKey]
     : themeStyles.blue;
   
-  const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `$ [cite: 8, 15]{currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
+  const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
   
   const floatingInlineStyle = {
     ...(buttonStyle?.border
@@ -502,7 +507,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* 💡 【修正点】Credit Balance 表記 ＆ ChatYamatoEoyWritingCustom と同じ黄色（bg-amber-50）に統一 */}
+              {/* Credit Balance 表示エリア（ChatYamatoEoyWritingCustom と同じ黄色 bg-amber-50） */}
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-amber-800">Credit Balance</span>
                 {activeUserId ? (
@@ -523,9 +528,9 @@ export function YamatoChatCommon({
                 )}
               </div>
 
-              {/* 学習ペース選択UI */}
-              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
-                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
+              {/* 💡 【修正点】学習ペース選択UI（Font Size と同じ薄い灰色 bg-slate-100 に統一） */}
+              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-slate-700">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
@@ -543,7 +548,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI */}
+              {/* フォントサイズ変更UI（薄い灰色 bg-slate-100） */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
