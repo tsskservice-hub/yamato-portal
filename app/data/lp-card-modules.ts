@@ -7,7 +7,7 @@ export interface ModuleItem {
   title: string;
   description: string;
   section: 'global' | 'australia'; // 大枠の括り
-  subSection?: 'vce-speaking' | 'vce-writing'; // 詳細な見出し（将来のVCE以外の拡張にも対応）
+  subSection?: 'vce-speaking' | 'vce-writing' | 'vce-writing-reference'; // 詳細な見出し（リファレンス階層を追加）
   iconName: 'Gamepad2' | 'Grid' | 'Mic' | 'FileText' | 'Sparkles';
   badge?: string;
   badgeType?: 'default' | 'comingSoon';
@@ -120,7 +120,7 @@ export const PORTAL_MODULES: ModuleItem[] = [
 
   // ==========================================
   // Section 2: Victorian Curriculum & VCE Students (Australia)
-  // --- VCE Writing Modules ---
+  // --- VCE Writing Modules (Interactive Tools) ---
   // ==========================================
   {
     id: 'genkoyoshi-editor-vce',
@@ -200,5 +200,42 @@ export const PORTAL_MODULES: ModuleItem[] = [
     iconBgColor: 'bg-blue-500/10',
     iconTextColor: 'text-blue-600',
     actionText: 'Coming Soon',
+  },
+
+  // ==========================================
+  // Section 2: Victorian Curriculum & VCE Students (Australia)
+  // --- VCE Writing Modules (References & Guides) ---
+  // ==========================================
+  {
+    id: 'text-types',
+    title: 'Text Types',
+    description: 'Comprehensive reference guide covering various Japanese text types required for VCE writing tasks (e.g., evaluative, personal, persuasive, informative).',
+    section: 'australia',
+    subSection: 'vce-writing-reference',
+    iconName: 'FileText',
+    badge: 'Reference Guide',
+    badgeType: 'default',
+    path: '/reference/text-types',
+    isComingSoon: false,
+    borderHoverColor: 'hover:border-emerald-500/50',
+    iconBgColor: 'bg-emerald-500/10',
+    iconTextColor: 'text-emerald-600',
+    actionText: 'Read Guide',
+  },
+  {
+    id: 'writing-styles',
+    title: 'Writing Styles',
+    description: 'Detailed instructions on appropriate writing styles, register conventions, and tone (Desu/Masu vs. Da/Dearu) for VCE assessments.',
+    section: 'australia',
+    subSection: 'vce-writing-reference',
+    iconName: 'FileText',
+    badge: 'Reference Guide',
+    badgeType: 'default',
+    path: '/reference/writing-styles',
+    isComingSoon: false,
+    borderHoverColor: 'hover:border-emerald-500/50',
+    iconBgColor: 'bg-emerald-500/10',
+    iconTextColor: 'text-emerald-600',
+    actionText: 'Read Guide',
   },
 ];
