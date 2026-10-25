@@ -5,9 +5,6 @@
 
 type BoardState = number[][]; // 0: 空, 1: 黒（プレイヤー）, 2: 白（AI）
 
-/**
- * 指定した色の石のグループ（連）と、その呼吸点（リバティ）を計算する関数
- */
 function findGroupsAndLiberties(board: BoardState, color: number) {
   const SIZE = board.length;
   const visited: boolean[][] = Array(SIZE).fill(false).map(() => Array(SIZE).fill(false));
@@ -47,14 +44,11 @@ function findGroupsAndLiberties(board: BoardState, color: number) {
   return groups;
 }
 
-/**
- * AIの次の手（座標）を計算する関数
- */
 export function calculateAiMove(board: BoardState, aiColor: number = 2): [number, number] | null {
   const SIZE = board.length;
   const opponentColor = aiColor === 2 ? 1 : 2;
 
-  // 1. 【最優先】相手の石が「アタリ（リバティ1つ）」なら、必ずそこを取る
+  // 1. 相手の石がアタリなら取る
   const opponentGroups = findGroupsAndLiberties(board, opponentColor);
   for (const group of opponentGroups) {
     if (group.liberties.size === 1) {
@@ -66,7 +60,7 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
     }
   }
 
-  // 2. 【優先】自分の石が「アタリ（リバティ1つ）」なら、逃げる
+  // 2. 自分の石がアタリなら逃げる
   const aiGroups = findGroupsAndLiberties(board, aiColor);
   for (const group of aiGroups) {
     if (group.liberties.size === 1) {
@@ -78,7 +72,7 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
     }
   }
 
-  // 3. 空いているマスをすべて収集
+  // 3. 空いているマスを収集
   const emptySpots: [number, number][] = [];
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
@@ -90,7 +84,7 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
 
   if (emptySpots.length === 0) return null;
 
-  // 4. 【通常時】角や端（行・列が 0 または 4）を避け、内側（行・列が 1, 2, 3）のマスを優先する
+  // 4. 端や角を避け、内側を優先する
   const innerSpots = emptySpots.filter(([r, c]) => r > 0 && r < SIZE - 1 && c > 0 && c < SIZE - 1);
 
   if (innerSpots.length > 0) {
@@ -102,7 +96,6 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
     return innerSpots[randomIndex];
   }
 
-  // 5. 内側が埋まっている場合は、やむを得ず端や角から選ぶ
   const randomIndex = Math.floor(Math.random() * emptySpots.length);
   return emptySpots[randomIndex];
 }

@@ -1,6 +1,6 @@
 /**
  * @file game-igo.tsx
- * @description ミニ5路 囲碁対局ページ（最終手マーカー・AI投了判定・指導碁/フリー対局完全対応版）
+ * @description ミニ5路 囲碁対局ページ（漢数字座標・最終手マーカー・AI投了判定・指導碁/フリー対局完全対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import type { MetaFunction } from "@remix-run/react";
@@ -67,11 +67,9 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
       let aiComment = "";
       
       // 2. AIの投了判定チェック（もしAI側の石が追い詰められ、二眼を作るスペースが無く負けが確定している場合）
-      // 簡易的な判定：AIの石の数が極端に少なく、かつ周囲が囲まれている、あるいは有効な手が打てない状態
       const aiStonesCount = newBoard.flat().filter(cell => cell === 2).length;
       const userStonesCount = newBoard.flat().filter(cell => cell === 1).length;
       
-      // 5路盤でAIの石が2個以下かつ、相手の石が優勢な終盤局面において二眼形成が不可能な場合の投了シミュレーション
       const isAiDefeated = aiStonesCount <= 2 && userStonesCount >= 6 && Math.random() < 0.4;
 
       if (isAiDefeated) {
@@ -191,9 +189,10 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium text-center">{message}</p>
           
-          {/* 碁盤表示エリア */}
-          <div className="relative bg-[#e6c280] p-6 rounded-2xl shadow-xl w-72 h-72 flex items-center justify-center mb-6 border-4 border-amber-800/40">
-            <svg viewBox="-12 -12 124 124" className="w-full h-full cursor-pointer overflow-visible">
+          {/* 碁盤表示エリア（漢数字の座標ラベル付き） */}
+          <div className="relative bg-[#e6c280] p-8 rounded-2xl shadow-xl w-80 h-80 flex items-center justify-center mb-6 border-4 border-amber-800/40">
+            <svg viewBox="-16 -16 132 132" className="w-full h-full cursor-pointer overflow-visible">
+              {/* 碁盤の罫線 */}
               {[0, 25, 50, 75, 100].map((pos) => (
                 <React.Fragment key={pos}>
                   <line x1={pos} y1="0" x2={pos} y2="100" stroke="#78350f" strokeWidth="1.5" />
@@ -201,7 +200,25 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
                 </React.Fragment>
               ))}
 
+              {/* 星（天元） */}
               <circle cx="50" cy="50" r="2.5" fill="#78350f" />
+
+              {/* 漢数字座標ラベル（一、二、三、四、五） */}
+              {['一', '二', '三', '四', '五'].map((kanji, idx) => {
+                const pos = idx * 25;
+                return (
+                  <React.Fragment key={kanji}>
+                    {/* 上部ラベル */}
+                    <text x={pos} y="-8" textAnchor="middle" dominantBaseline="central" fontSize="7" fontWeight="bold" fill="#78350f">
+                      {kanji}
+                    </text>
+                    {/* 左側ラベル */}
+                    <text x="-8" y={pos} textAnchor="middle" dominantBaseline="central" fontSize="7" fontWeight="bold" fill="#78350f">
+                      {kanji}
+                    </text>
+                  </React.Fragment>
+                );
+              })}
 
               {board.map((row, rIdx) =>
                 row.map((cell, cIdx) => {
@@ -220,7 +237,6 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
                       {cell === 1 && (
                         <g>
                           <circle cx={cx} cy={cy} r="10" fill="#000000" className="shadow-md" />
-                          {/* 最後に置いた石の中央に黄色い丸印を表示 */}
                           {isLast && <circle cx={cx} cy={cy} r="3.5" fill="#eab308" />}
                         </g>
                       )}
@@ -228,7 +244,6 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
                       {cell === 2 && (
                         <g>
                           <circle cx={cx} cy={cy} r="10" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" className="shadow-md" />
-                          {/* 最後に置いた石の中央に黄色い丸印を表示 */}
                           {isLast && <circle cx={cx} cy={cy} r="3.5" fill="#eab308" />}
                         </g>
                       )}
