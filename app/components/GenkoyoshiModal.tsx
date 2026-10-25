@@ -146,11 +146,12 @@ export function GenkoyoshiModal({
             {/* Inline PDF Preview Frame */}
             <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-inner h-[380px] sm:h-[460px]">
               <iframe
-                src={`${samplePdfUrl}#toolbar=0&navpanes=0`}
+                src={samplePdfUrl} // 💡 #toolbar=0 などのハッシュを削除し、純粋なURLのみにする
                 title="Genkoyoshi PDF Preview"
                 className="w-full h-full border-none"
               />
             </div>
+
           </div>
         </div>
 
