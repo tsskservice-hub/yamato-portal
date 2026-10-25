@@ -7,7 +7,7 @@
  * 3. Step 1 (問題入力・OCR画像), Step 2 (答案写真アップロード), Step 3 (チャットから送信) の3ステップガイド
  * 4. Step 2 のアップロードボタンを見出し文言のすぐ下に配置
  * 5. TypeScript型安全対策（answerImages 指定）
- * 6. (Volatile Session) 表記を排除した洗練されたUI
+ * 6. 原稿用紙モーダルの開閉を 1つの boolean ステート (isGenkoyoshiOpen) でシンプルに制御
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -15,10 +15,10 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom";
 
-// 💡 【修正点】型のみをインポートして TS2724 エラーを完全解消
+// 💡 型のみをインポートして TS2724 エラーを完全解消
 import type { TextTypesData } from "../data/texttypes";
 
-// 💡 原稿用紙ガイドのデータ（このページで唯一開かれるモーダル）
+// 💡 原稿用紙ガイドのデータ
 const DEFAULT_GENKOYOSHI_DATA = {
   title: "Genkoyoshi Usage Guide (原稿用紙の使い方)",
   purpose: "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi. Refer to each text type for details.",
@@ -31,12 +31,6 @@ const DEFAULT_GENKOYOSHI_DATA = {
   sampleImage: "/genkoyoshi.pdf"
 };
 
-// 💡 外部ファイルに依存せず安全にモーダルデータを解決
-const modalData: { [key: string]: any } = {
-  Genkoyoshi: DEFAULT_GENKOYOSHI_DATA,
-  Genkooyooshi: DEFAULT_GENKOYOSHI_DATA,
-};
-
 interface UploadedImage {
   id: string;
   file: File;
@@ -44,7 +38,8 @@ interface UploadedImage {
 }
 
 export default function CustomDashboard() {
-  const [activeModal, setActiveModal] = useState<string | null>(null);
+  // 💡 原稿用紙モーダルの開閉を管理する 1つの boolean ステート
+  const [isGenkoyoshiOpen, setIsGenkoyoshiOpen] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
   const rootData = useRouteLoaderData("root") as {
@@ -153,7 +148,7 @@ export default function CustomDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <button
               type="button"
-              onClick={() => setActiveModal("Genkooyooshi")}
+              onClick={() => setIsGenkoyoshiOpen(true)}
               className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
             >
               <div className="flex items-center space-x-2 truncate">
@@ -397,15 +392,13 @@ export default function CustomDashboard() {
             </div>
           )}
 
-          {/* 原稿用紙の使い方モーダル */}
-          {activeModal && modalData[activeModal] && (
-            <TextTypeModal
-              isOpen={true}
-              onClose={() => setActiveModal(null)}
-              modalKey={activeModal}
-              {...modalData[activeModal]}
-            />
-          )}
+          {/* 💡 原稿用紙ガイドモーダル（1つの boolean ステートでシンプルに制御） */}
+          <TextTypeModal
+            isOpen={isGenkoyoshiOpen}
+            onClose={() => setIsGenkoyoshiOpen(false)}
+            modalKey="Genkooyooshi"
+            {...DEFAULT_GENKOYOSHI_DATA}
+          />
         </main>
       </div>
     </PageLayout>

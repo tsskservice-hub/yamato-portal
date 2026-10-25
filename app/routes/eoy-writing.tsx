@@ -1,5 +1,5 @@
 /**
- * @file eoy-writing.tsx (または eoy-writing-custom.tsx)
+ * @file eoy-writing.tsx
  * @description EOY Writing Practice モジュール
  */
 
@@ -22,6 +22,9 @@ export default function Dashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeStyleModal, setActiveStyleModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
+
+  // 💡 Genkoyoshi モダル専用の 1つの boolean ステート
+  const [isGenkoyoshiOpen, setIsGenkoyoshiOpen] = useState<boolean>(false);
 
   // 💡 ステート管理（非同期取得前は null または初期配列）
   const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
@@ -101,12 +104,9 @@ export default function Dashboard() {
     ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
     : "";
 
-  // 💡 原稿用紙データおよびテキストタイプデータの安全な解決
-  const activeModalData = activeModal && modalData
-    ? activeModal.toLowerCase() === "genkoyoshi" || activeModal.toLowerCase() === "genkooyooshi"
-      ? getGenkoyoshiData(modalData)
-      : modalData[activeModal] || null
-    : null;
+  // 💡 各テキストタイプ用モーダルのデータ解決
+  const activeModalData = activeModal && modalData ? modalData[activeModal] || null : null;
+  const genkoyoshiModalData = modalData ? getGenkoyoshiData(modalData) : null;
 
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
 
@@ -158,11 +158,11 @@ export default function Dashboard() {
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
 
-          {/* 上部原稿用紙ガイドボタン */}
+          {/* 上部原稿用紙ガイドボタン（1つの boolean ステートで極めてシンプルに呼び出し） */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <button
               type="button"
-              onClick={() => setActiveModal("Genkoyoshi")}
+              onClick={() => setIsGenkoyoshiOpen(true)}
               className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
             >
               <div className="flex items-center space-x-2 truncate">
@@ -390,7 +390,17 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* 💡 TextTypeModal: Genkoyoshi または各テキストタイプのモーダルを描画 */}
+          {/* 💡 Genkoyoshi モダル（単一の boolean ステートでシンプルに描画） */}
+          {genkoyoshiModalData && (
+            <TextTypeModal
+              isOpen={isGenkoyoshiOpen}
+              onClose={() => setIsGenkoyoshiOpen(false)}
+              modalKey="Genkoyoshi"
+              {...genkoyoshiModalData}
+            />
+          )}
+
+          {/* 💡 各テキストタイプ用モーダル */}
           {activeModal && activeModalData && (
             <TextTypeModal
               isOpen={true}
