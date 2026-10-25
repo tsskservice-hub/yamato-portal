@@ -445,7 +445,7 @@ export function ChatYamatoEoyWritingCustom({
 
               {/* クレジット表示エリア */}
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-amber-800">Account Status</span>
+                <span className="text-xs font-bold text-amber-800">Credit Balance</span>
                 {activeUserId ? (
                   <div className="flex items-center gap-2">
                     {getSafeString(currentNickname) && (
