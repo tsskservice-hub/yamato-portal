@@ -1,12 +1,8 @@
 /**
- * @file eoy-writing.tsx
+ * @file eoy-writing.tsx (または eoy-writing-custom.tsx)
  * @description EOY Writing Practice モジュール
- * 💡 特徴：
- * 1. Text Type（緑バッジ）をクリック ➔ TextTypeModal（Supabase: TEXTTYPES）を表示
- * 2. Writing Style（青バッジ）をクリック ➔ WritingStyleModal（Supabase: WRITING_STYLES）を表示
- * 3. 「How to use Genkoyoshi」ボタン ➔ 原稿用紙使い方モーダルを表示
- * 4. 設問・写真解答アップロード & AIヤマトチャット連携
  */
+
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
@@ -16,46 +12,24 @@ import { DataErrorState } from "../components/DataErrorState";
 
 // 💡 外部データ・APIフェッチ関数のインポート
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
-import TEXT_TYPES_DATA, { fetchTextTypesData, TextTypesData } from "../data/texttypes";
+import { fetchTextTypesData, TextTypesData, getGenkoyoshiData } from "../data/texttypes";
 import { fetchWritingStylesData, WritingStylesData } from "../data/writing-styles";
 import { supabase } from "../lib/supabaseClient";
-
-// 💡 原稿用紙ガイドのフォールバックデータ
-const DEFAULT_GENKOYOSHI_DATA = {
-  title: "Genkoyoshi Usage Guide (原稿用紙の使い方)",
-  purpose: "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi. Refer to each text type for details.",
-  structure: [
-    "Title (Line 1): Leave 3 spaces at the beginning, then write the title",
-    "Name (Line 2): Write at the end, leaving the last square blank",
-    "Main Text: Indent 1 space at the beginning of each paragraph",
-    "Square Usage: Place punctuation marks (、。) in their own square. Never start a line with punctuation."
-  ],
-  sampleImage: "/genkoyoshi.pdf"
-};
 
 export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeTextType, setActiveTextType] = useState<string>("all");
-  const [activeModal, setActiveModal] = useState<string | null>(null); // Text Type / Genkoyoshi 用モーダルキー
-  const [activeStyleModal, setActiveStyleModal] = useState<string | null>(null); // 💡 Writing Style 用モーダルキー
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [activeStyleModal, setActiveStyleModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
 
-  // 💡 設問、TextTypes、WritingStyles データをステートで管理（WritingStylesの初期値は空）
+  // 💡 ステート管理（非同期取得前は null または初期配列）
   const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
-  const [modalData, setModalData] = useState<TextTypesData>({
-    ...TEXT_TYPES_DATA,
-    Genkoyoshi: DEFAULT_GENKOYOSHI_DATA,
-    Genkooyooshi: DEFAULT_GENKOYOSHI_DATA,
-  });
+  const [modalData, setModalData] = useState<TextTypesData | null>(null);
   const [stylesData, setStylesData] = useState<WritingStylesData>({});
-  const [isStylesLoading, setIsStylesLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const rootData = useRouteLoaderData("root") as {
-    user?: any;
-    credits?: number;
-    nickname?: string;
-  } | undefined;
-
+  const rootData = useRouteLoaderData("root") as { user?: any; credits?: number; nickname?: string; } | undefined;
   const user = rootData?.user ?? null;
   const credits = rootData?.credits ?? 10;
   const nickname = rootData?.nickname ?? "";
@@ -63,7 +37,6 @@ export default function Dashboard() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 画像アップロード用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
   const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
@@ -72,48 +45,34 @@ export default function Dashboard() {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // 💡 ページ表示時に Supabase から設問、TEXTTYPES、WRITING_STYLES を非同期フェッチ
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadDataFromSupabase() {
-      try {
-        // 1. 設問一覧の取得
-        const fetchedQuestions = await fetchWritingExamQuestionsData(supabase);
-        if (isMounted && fetchedQuestions && Array.isArray(fetchedQuestions) && fetchedQuestions.length > 0) {
-          setQuestions(fetchedQuestions);
-        }
-
-        // 2. TEXTTYPES データの取得
-        const fetchedTextTypes = await fetchTextTypesData(supabase);
-        if (isMounted && fetchedTextTypes && typeof fetchedTextTypes === "object" && Object.keys(fetchedTextTypes).length > 0) {
-          setModalData((prev) => ({
-            ...prev,
-            ...fetchedTextTypes,
-            Genkoyoshi: fetchedTextTypes["Genkoyoshi"] || fetchedTextTypes["Genkooyooshi"] || prev["Genkoyoshi"] || DEFAULT_GENKOYOSHI_DATA,
-            Genkooyooshi: fetchedTextTypes["Genkoyoshi"] || fetchedTextTypes["Genkooyooshi"] || prev["Genkooyooshi"] || DEFAULT_GENKOYOSHI_DATA,
-          }));
-        }
-
-        // 3. 💡 WRITING_STYLES データの取得（Supabase の key: 'WRITING_STYLES'）
-        const fetchedStyles = await fetchWritingStylesData(supabase);
-        if (isMounted && fetchedStyles && typeof fetchedStyles === "object") {
-          setStylesData(fetchedStyles);
-        }
-      } catch (err) {
-        console.error("Failed to load data from Supabase:", err);
-      } finally {
-        if (isMounted) {
-          setIsStylesLoading(false);
-        }
+  // 💡 Supabase からデータを非同期取得
+  const loadDataFromSupabase = async () => {
+    setIsLoading(true);
+    try {
+      // 1. 設問一覧
+      const fetchedQuestions = await fetchWritingExamQuestionsData(supabase);
+      if (fetchedQuestions && Array.isArray(fetchedQuestions) && fetchedQuestions.length > 0) {
+        setQuestions(fetchedQuestions);
       }
+
+      // 2. TEXTTYPES（原稿用紙データ含む）
+      const fetchedTextTypes = await fetchTextTypesData(supabase);
+      setModalData(fetchedTextTypes);
+
+      // 3. WRITING_STYLES
+      const fetchedStyles = await fetchWritingStylesData(supabase);
+      if (fetchedStyles && typeof fetchedStyles === "object") {
+        setStylesData(fetchedStyles);
+      }
+    } catch (err) {
+      console.error("Failed to load data from Supabase:", err);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadDataFromSupabase();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,10 +88,8 @@ export default function Dashboard() {
   };
 
   const filteredQuestions = questions.filter((q) => {
-    const matchesCategory =
-      activeCategory === "all" || q.category === activeCategory;
-    const matchesTextType =
-      activeTextType === "all" || q.textType === activeTextType;
+    const matchesCategory = activeCategory === "all" || q.category === activeCategory;
+    const matchesTextType = activeTextType === "all" || q.textType === activeTextType;
     return matchesCategory && matchesTextType;
   });
 
@@ -144,33 +101,53 @@ export default function Dashboard() {
     ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
     : "";
 
-  // TextType モーダル用データの解決
-  const activeModalData = activeModal
-    ? modalData[activeModal] ||
-      (activeModal === "Genkoyoshi" ? modalData["Genkooyooshi"] || DEFAULT_GENKOYOSHI_DATA : null) ||
-      (activeModal === "Genkooyooshi" ? modalData["Genkoyoshi"] || DEFAULT_GENKOYOSHI_DATA : null)
+  // 💡 原稿用紙データおよびテキストタイプデータの安全な解決
+  const activeModalData = activeModal && modalData
+    ? activeModal.toLowerCase() === "genkoyoshi" || activeModal.toLowerCase() === "genkooyooshi"
+      ? getGenkoyoshiData(modalData)
+      : modalData[activeModal] || null
     : null;
 
-  // 💡 Writing Style モーダル用データの解決
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
 
-  // 💡 データ読み込み中の表示
-  if (isStylesLoading) {
+  // 1. ローディング中の表示
+  if (isLoading) {
     return (
       <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
         <div className="min-h-screen bg-white text-slate-800 font-sans flex items-center justify-center p-8">
-          <div className="text-slate-600 font-bold text-lg animate-pulse">Loading Writing Styles...</div>
+          <div className="text-slate-600 font-bold text-lg animate-pulse">Loading Writing Resources...</div>
         </div>
       </PageLayout>
     );
   }
 
-  // 💡 Supabase から Writing Styles が取得できなかった（空だった）場合は DataErrorState を表示
+  // 2. TEXTTYPES の取得失敗時は DataErrorState を表示
+  if (!modalData || Object.keys(modalData).length === 0) {
+    return (
+      <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
+        <div className="min-h-screen bg-white text-slate-800 font-sans px-4 py-8 max-w-4xl mx-auto">
+          <DataErrorState
+            title="Text Types Specification Unavailable"
+            message="Unable to load Text Types and Genkoyoshi guides from the database. Please reload or report this error."
+            errorMessage="Failed to fetch key 'TEXTTYPES' from app_knowledge table in Supabase."
+            onRetry={loadDataFromSupabase}
+          />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // 3. WRITING_STYLES の取得失敗時も DataErrorState を表示
   if (!stylesData || Object.keys(stylesData).length === 0) {
     return (
       <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
         <div className="min-h-screen bg-white text-slate-800 font-sans px-4 py-8 max-w-4xl mx-auto">
-          <DataErrorState errorMessage="Failed to fetch WRITING_STYLES from app_knowledge table in Supabase." />
+          <DataErrorState
+            title="Writing Styles Unavailable"
+            message="Unable to load Writing Styles information from the database."
+            errorMessage="Failed to fetch key 'WRITING_STYLES' from app_knowledge table in Supabase."
+            onRetry={loadDataFromSupabase}
+          />
         </div>
       </PageLayout>
     );
@@ -180,8 +157,8 @@ export default function Dashboard() {
     <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
-          
-          {/* 上部ショートカットボタン */}
+
+          {/* 上部原稿用紙ガイドボタン */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <button
               type="button"
@@ -207,117 +184,91 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          {/* AIヤマトガイドエリア */}
-          <div>
-            <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
-              <div className="flex items-center gap-4 flex-wrap">
-                <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
-                  <span>🤖</span> AI Yamato is ready for you
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>📷</span>
-                    <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
-                  </button>
-                  {selectedImagePreview && (
-                    <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
-                      ✓ Attached
-                    </span>
-                  )}
-                </div>
+          {/* AIヤマト案内エリア */}
+          <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
+                <span>🤖</span> AI Yamato is ready for you
               </div>
 
-              {/* 選択中の問題バナー */}
-              <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span>🎯 Active Question Q</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max={questions.length}
-                    value={selectedQuestion ? selectedQuestion.id : ""}
-                    onChange={(e) => {
-                      const qId = parseInt(e.target.value, 10);
-                      const found = questions.find((q) => q.id === qId);
-                      if (found) {
-                        setSelectedQuestion(found);
-                      } else if (e.target.value === "") {
-                        setSelectedQuestion(null);
-                      }
-                    }}
-                    placeholder="No."
-                    className="w-16 px-2 py-1 bg-white border border-indigo-300 rounded text-center text-indigo-900 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  {selectedQuestion ? (
-                    <span className="text-sm font-normal text-indigo-700 truncate max-w-xs sm:max-w-sm">
-                      ({selectedQuestion.textType}) {selectedQuestion.english}
-                    </span>
-                  ) : (
-                    <span className="text-sm font-normal text-amber-700">⚠️ None selected</span>
-                  )}
-                </div>
-              </div>
-
-              {selectedImagePreview && (
-                <div className="flex items-center gap-3 bg-white border border-indigo-200 px-3 py-2 rounded-lg text-sm">
-                  <img src={selectedImagePreview} alt="Preview" className="w-10 h-10 object-cover rounded border" />
-                  <div className="flex-grow">
-                    <div className="font-bold text-indigo-900 text-xs">Handwritten Answer Ready for AI Tutor</div>
-                    <div className="text-slate-600 text-xs truncate">You can now open the chat and send it!</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedImage(null);
-                      setSelectedImagePreview(null);
-                      if (fileInputRef.current) fileInputRef.current.value = '';
-                    }}
-                    className="text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 rounded"
-                  >
-                    Remove ✕
-                  </button>
-                </div>
-              )}
-
-              <div className="pt-2 border-t border-indigo-100 text-slate-700 text-base leading-relaxed">
-                <div className="mb-2 text-indigo-900 font-bold">
-                  To get started, please follow these two quick steps:
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="font-bold text-indigo-900 shrink-0">1️⃣</span>
-                    <div><strong>Select question & photo:</strong> Enter the question number and upload your handwritten answer photo using the button above. 📋📸</div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-bold text-indigo-900 shrink-0">2️⃣</span>
-                    <div><strong>Chat with AI Yamato:</strong> Open the chat bubble at the bottom-right and send it!</div>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <span>📷</span>
+                  <span>{selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo"}</span>
+                </button>
+                {selectedImagePreview && (
+                  <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded">
+                    ✓ Attached
+                  </span>
+                )}
               </div>
             </div>
+
+            {/* 選択中の問題 */}
+            <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>🎯 Active Question Q</span>
+                <input
+                  type="number"
+                  min="1"
+                  max={questions.length}
+                  value={selectedQuestion ? selectedQuestion.id : ""}
+                  onChange={(e) => {
+                    const qId = parseInt(e.target.value, 10);
+                    const found = questions.find((q) => q.id === qId);
+                    if (found) {
+                      setSelectedQuestion(found);
+                    } else if (e.target.value === "") {
+                      setSelectedQuestion(null);
+                    }
+                  }}
+                  placeholder="No."
+                  className="w-16 px-2 py-1 bg-white border border-indigo-300 rounded text-center text-indigo-900 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {selectedQuestion ? (
+                  <span className="text-sm font-normal text-indigo-700 truncate max-w-xs sm:max-w-sm">
+                    ({selectedQuestion.textType}) {selectedQuestion.english}
+                  </span>
+                ) : (
+                  <span className="text-sm font-normal text-amber-700">⚠️ None selected</span>
+                )}
+              </div>
+            </div>
+
+            {selectedImagePreview && (
+              <div className="flex items-center gap-3 bg-white border border-indigo-200 px-3 py-2 rounded-lg text-sm">
+                <img src={selectedImagePreview} alt="Preview" className="w-10 h-10 object-cover rounded border" />
+                <div className="flex-grow">
+                  <div className="font-bold text-indigo-900 text-xs">Handwritten Answer Ready for AI Tutor</div>
+                  <div className="text-slate-600 text-xs truncate">You can now open the chat and send it!</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedImage(null);
+                    setSelectedImagePreview(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className="text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 rounded"
+                >
+                  Remove ✕
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* ガイド案内バナー */}
-          <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 mb-6 text-sm sm:text-base text-sky-900 flex items-center gap-3 shadow-xs">
-            <span className="text-xl">💡</span>
-            <span>
-              Click on the <strong>blue Writing Style tag</strong> or <strong>green Text Type tag</strong> on each question to view requirements, purpose, and key features.
-            </span>
-          </div>
-
-          {/* タスクリストヘッダー */}
+          {/* 設問一覧ヘッダー */}
           <div className="flex justify-between items-end border-b-2 border-slate-200 pb-2 mb-6">
             <h1 className="text-slate-800 text-2xl sm:text-3xl font-bold m-0">
               📚 Task List ({filteredQuestions.length} questions)
@@ -372,7 +323,6 @@ export default function Dashboard() {
                 >
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex gap-2 flex-wrap items-center">
-                      {/* 💡 青色の Writing Style バッジ：クリックで activeStyleModal にセット */}
                       <span
                         onClick={() => setActiveStyleModal(q.category)}
                         className="text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-sky-200 hover:scale-105 transition-all shadow-2xs"
@@ -381,7 +331,6 @@ export default function Dashboard() {
                         {q.category} ↗
                       </span>
 
-                      {/* 💡 緑色の text type バッジ：クリックで activeModal にセット */}
                       <span
                         onClick={() => setActiveModal(q.textType)}
                         className="text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 hover:scale-105 transition-all shadow-2xs"
@@ -417,7 +366,7 @@ export default function Dashboard() {
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
-            userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
+            userNickname={nickname || (user?.email ? user.email.split('@') : "Student")}
             credits={credits}
             externalImageFile={selectedImage}
             externalImagePreview={selectedImagePreview}
@@ -451,7 +400,7 @@ export default function Dashboard() {
             />
           )}
 
-          {/* 💡 Writing Style 専用モーダル（青バッジクリックでポップアップ表示） */}
+          {/* Writing Style 専用モーダル */}
           {activeStyleModal && activeWritingStyleData && (
             <div
               className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4"
@@ -479,7 +428,6 @@ export default function Dashboard() {
                   {activeWritingStyleData.styleName} ({activeWritingStyleData.japaneseName})
                 </h3>
 
-                {/* 目的 (Purpose) */}
                 <div className="mt-4 bg-sky-50/70 p-4 rounded-xl border border-sky-100">
                   <h4 className="m-0 mb-1.5 font-bold text-sky-900 text-base flex items-center gap-2">
                     <span>🎯</span> Purpose & Stance
@@ -489,7 +437,6 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                {/* 主な特徴 (Key Features) */}
                 {activeWritingStyleData.keyFeatures && activeWritingStyleData.keyFeatures.length > 0 && (
                   <div className="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h4 className="m-0 mb-2 font-bold text-slate-800 text-base flex items-center gap-2">
@@ -502,62 +449,6 @@ export default function Dashboard() {
                     </ul>
                   </div>
                 )}
-
-                {/* 効果的な語彙 & 文法 */}
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {activeWritingStyleData.effectiveVocabulary && activeWritingStyleData.effectiveVocabulary.length > 0 && (
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                      <h4 className="m-0 mb-2 font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                        <span>✨</span> Effective Expressions
-                      </h4>
-                      <div className="space-y-2 text-sm text-slate-700">
-                        {activeWritingStyleData.effectiveVocabulary.map((vocabCat, idx) => (
-                          <div key={idx}>
-                            <span className="font-bold text-slate-900 text-xs block mb-0.5">{vocabCat.categories}:</span>
-                            <div className="flex flex-wrap gap-1">
-                              {vocabCat.examples.map((ex, eIdx) => (
-                                <span key={eIdx} className="bg-white border border-slate-200 px-2 py-0.5 rounded text-xs">
-                                  {ex}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {activeWritingStyleData.compatibleTextTypes && activeWritingStyleData.compatibleTextTypes.length > 0 && (
-                    <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-100 flex flex-col justify-between">
-                      <div>
-                        <h4 className="m-0 mb-2 font-bold text-emerald-900 text-sm flex items-center gap-1.5">
-                          <span>📝</span> Compatible Text Types
-                        </h4>
-                        <p className="text-xs text-emerald-800 mb-2">Common formats used for this style in exams:</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {activeWritingStyleData.compatibleTextTypes.map((type, idx) => (
-                            <span key={idx} className="bg-white text-emerald-900 font-bold border border-emerald-200 px-2 py-1 rounded-md text-xs shadow-2xs">
-                              {type}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="mt-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveStyleModal(null);
-                            const target = document.getElementById("filter-by-text-type");
-                            if (target) target.scrollIntoView({ behavior: "smooth" });
-                          }}
-                          className="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
-                        >
-                          Filter by text type →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           )}

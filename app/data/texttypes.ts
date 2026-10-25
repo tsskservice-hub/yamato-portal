@@ -13,46 +13,12 @@ export interface TextTypeDetail {
   structure: string[];
   sampleImage?: string;
   sample?: string;
+  title_original?: string;
+  purpose_original?: string;
+  structure_original?: string[];
 }
 
 export type TextTypesData = Record<string, TextTypeDetail>;
-export type TextTypesDataPayload = TextTypesData;
-
-// --- Default Fallback Data (取得前の初期値・オフライン保険) ---
-export const TEXT_TYPES_DATA: TextTypesData = {
-  "Speech": {
-    "title": "Speech",
-    "purpose": "To persuade, inform, or entertain an audience through spoken delivery.",
-    "structure": [
-      "Catchy opening / Greeting",
-      "Clear thesis statement",
-      "Body paragraphs with supporting arguments",
-      "Strong concluding call to action"
-    ]
-  },
-  "Journal": {
-    "title": "Journal",
-    "purpose": "To record personal thoughts, feelings, and reflections on daily experiences.",
-    "structure": [
-      "Date / Salutation",
-      "Personal tone and emotional expression",
-      "Chronological or thematic reflection",
-      "Closing personal thought"
-    ]
-  },
-  "Article": {
-    "title": "Article",
-    "purpose": "To inform and engage readers in magazines or newspapers on specific topics.",
-    "structure": [
-      "Catchy headline",
-      "Introduction outlining the main theme",
-      "Informative body sections with subheadings",
-      "Conclusion summarizing key takeaways"
-    ]
-  }
-};
-
-export default TEXT_TYPES_DATA;
 
 export interface AppKnowledgeRecord<T = any> {
   id?: string;
@@ -64,67 +30,67 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-// 💡 Supabase の key（大文字の 'TEXTTYPES'）
+// Supabase の key（大文字の 'TEXTTYPES'）
 const KNOWLEDGE_KEY = 'TEXTTYPES';
 
 /**
- * Fetch VCE Japanese Text Types Specification data from Supabase 'app_knowledge' table.
+ * 原稿用紙データを安全に取り出すヘルパー関数（表記揺れ Genkoyoshi / genkoyoshi / Genkooyooshi を吸収）
  */
-export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData> {
+export function getGenkoyoshiData(textTypesData?: TextTypesData | null): TextTypeDetail | null {
+  if (!textTypesData) return null;
+  return (
+    textTypesData["Genkoyoshi"] ||
+    textTypesData["genkoyoshi"] ||
+    textTypesData["Genkooyooshi"] ||
+    null
+  );
+}
+
+/**
+ * Supabase 'app_knowledge' テーブルから TEXTTYPES データを取得
+ * 取得失敗・レコード不在時は null を返し、UI側で DataErrorState を表示させます
+ */
+export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData | null> {
   try {
-    // 💡 Supabase の標準カラム名 'data'（または content_json）を安全に取得
     const { data: row, error } = await supabaseClient
       .from('app_knowledge')
-      .select('*')
+      .select('data')
       .eq('key', KNOWLEDGE_KEY)
       .single();
 
     if (error || !row) {
-      console.warn(`[${KNOWLEDGE_KEY}] Supabaseからの取得失敗のためデフォルトを返します:`, error?.message);
-      return TEXT_TYPES_DATA;
+      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase app_knowledge:`, error?.message);
+      return null;
     }
 
-    const result = (row.data || row.content_json) as TextTypesData;
+    const result = row.data as TextTypesData;
     if (result && typeof result === 'object' && Object.keys(result).length > 0) {
+      const resolvedGenkoyoshi = getGenkoyoshiData(result);
+      if (resolvedGenkoyoshi) {
+        return {
+          ...result,
+          Genkoyoshi: resolvedGenkoyoshi,
+          genkoyoshi: resolvedGenkoyoshi,
+          Genkooyooshi: resolvedGenkoyoshi
+        };
+      }
       return result;
     }
 
-    return TEXT_TYPES_DATA;
+    return null;
   } catch (err) {
     console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, err);
-    return TEXT_TYPES_DATA;
+    return null;
   }
 }
 
 /**
- * Upsert VCE Japanese Text Types Specification data to Supabase 'app_knowledge' table.
+ * テキストタイプ名から該当データを取得
  */
-export async function upsertTextTypesData(
-  supabaseClient: SupabaseClient,
-  content: TextTypesData,
-  category = 'VCE Japanese Data'
-): Promise<boolean> {
-  const { error } = await supabaseClient
-    .from('app_knowledge')
-    .upsert({
-      key: KNOWLEDGE_KEY,
-      title: 'VCE Japanese Text Types Specification',
-      category,
-      data: content, // 💡 data カラムに保存
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'key' });
-
-  if (error) {
-    console.error(`Error upserting ${KNOWLEDGE_KEY} to Supabase:`, error);
-    return false;
+export function getTextTypeByName(textTypesData: TextTypesData | null, name: string): TextTypeDetail | null {
+  if (!textTypesData) return null;
+  if (name.toLowerCase() === "genkoyoshi" || name.toLowerCase() === "genkooyooshi") {
+    return getGenkoyoshiData(textTypesData);
   }
-  return true;
-}
-
-export function getTextTypeByName(textTypesData: TextTypesData, name: string): TextTypeDetail | null {
   return textTypesData[name] || null;
-}
-
-export function listAllTextTypeNames(textTypesData: TextTypesData): string[] {
-  return Object.keys(textTypesData);
 }
