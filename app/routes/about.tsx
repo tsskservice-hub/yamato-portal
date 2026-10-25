@@ -62,20 +62,20 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Section 2: "Jūnin Toshiro" – Embracing Individuality */}
+          {/* Section 2: "Jūnin Toiro" – Embracing Individuality */}
           <div className="bg-gradient-to-br from-indigo-900 to-blue-900 text-white rounded-3xl p-8 sm:p-10 shadow-lg space-y-6">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-blue-300">
                 <Users className="w-5 h-5" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white">
-                "Jūnin Toiro・じゅうにん　といろ" (十人十色): Ten People, Ten Colors
+                "Jūnin Toiro" (十人十色): Ten People, Ten Colors
               </h2>
             </div>
 
             <div className="text-blue-100 space-y-4 text-sm sm:text-base leading-relaxed">
               <p>
-                In Japanese, there is a wonderful idiom: <em>"Jūnin toshiro"</em>—meaning everyone is unique, and no two individuals are alike. 
+                In Japanese, there is a wonderful idiom: <em>"Jūnin Toiro"</em>—meaning everyone is unique, and no two individuals are alike. 
               </p>
               <p>
                 Whether you missed school and fell behind in your Japanese progress, desperately want to study more advanced Japanese without the local environment to support it, or find the language challenging but are fascinated by Japanese culture as a gateway to learning—your journey is your own. 
@@ -93,7 +93,7 @@ export default function AboutPage() {
                 <Sparkles className="w-5 h-5" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                How AI Yamato Supports You 24/7
+                How AI Yamato Supports You
               </h2>
             </div>
 
@@ -104,7 +104,7 @@ export default function AboutPage() {
                   <span>Persistent AI Companion</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  AI Yamato stays resident at the bottom-right of every learning page, ready to answer your questions and guide your studies 24 hours a day, 365 days a year.
+                  AI Yamato stays resident at the bottom-right of every learning page, ready to support your studies around the clock (subject to regular scheduled maintenance).
                 </p>
               </div>
 
@@ -140,21 +140,21 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Section 4: A Tribute to Busy Teachers */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto shadow-sm">
-              <Heart className="w-6 h-6" />
+          {/* Section 4: A Tribute to Busy Teachers (Highlighted in Pink) */}
+          <div className="bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-pink-600 text-white flex items-center justify-center mx-auto shadow-md">
+              <Heart className="w-6 h-6 animate-pulse" />
             </div>
-            <h2 className="text-xl font-bold text-blue-900">
+            <h2 className="text-xl font-bold text-pink-900">
               A Message for Dedicated Teachers
             </h2>
-            <p className="text-sm sm:text-base text-blue-800 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-pink-950/80 max-w-2xl mx-auto leading-relaxed">
               Finally, to all teachers currently working under immense pressure and heavy workloads: I sincerely hope this platform serves as a helpful assistant in your teaching journey. May it ultimately afford you more precious moments to connect directly with your students inside the classroom.
             </p>
             <div className="pt-4">
               <Link 
                 to="/" 
-                className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md transition-all space-x-2"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold shadow-md transition-all space-x-2"
               >
                 <span>Explore Portal Dashboard</span>
               </Link>
