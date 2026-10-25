@@ -1,15 +1,15 @@
 /**
  * @file game-igo.tsx
- * @description ミニ5路 囲碁対局ページ（指導碁モード & AIフリー対局モード完全対応版）
+ * @description ミニ5路 囲碁対局ページ（SVG碁盤・指導碁/フリー対局完全対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import type { MetaFunction } from "@remix-run/react";
 import { useNavigate } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { supabase } from "../lib/supabaseClient";
-import { Send, Loader2, Sparkles, RotateCcw, Swords, GraduationCap } from "lucide-react";
+import { Loader2, RotateCcw, Swords, GraduationCap } from "lucide-react";
 
-// 💡 新規作成したAI頭脳とフリー対局用コメントのインポート
+// AI頭脳とフリー対局用コメントのインポート
 import { calculateAiMove } from "../lib/igoAlgorithm";
 import { getRandomComment } from "../data/igoFreeComments";
 
@@ -30,7 +30,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
   const [turn, setTurn] = useState<number>(1); // 1: ユーザーの番, 2: AIの番
   const [message, setMessage] = useState<string>('あなたの番です（黒・先手）。碁盤の交点をクリックしてください。');
   
-  // 💡 モード切替ステート: 'teaching'（指導碁） または 'free'（フリー対局）
+  // モード切替ステート: 'teaching'（指導碁） または 'free'（フリー対局）
   const [gameMode, setGameMode] = useState<'teaching' | 'free'>('teaching');
 
   // AI思考中・コメント表示用のステート
@@ -74,7 +74,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
         newBoard[aiRow][aiCol] = 2; // 白石配置
 
         if (gameMode === 'teaching') {
-          // 🥋 【指導碁モード】サーバーAPI（LLM）を呼び出して詳細なSocratic指導コメントを取得
+          // 🥋 【指導碁モード】サーバーAPI（LLM）を呼び出して詳細な指導コメントを取得
           const response = await fetch('/api/igo-chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -98,7 +98,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
           aiComment = `[白: (${aiRow + 1}, ${aiCol + 1})] ${commentObj.jp} (${commentObj.en})`;
         }
       } else {
-        aiComment = "盤面が埋まりました！終局です。お疲れ様でした（投了・中押し集計）。";
+        aiComment = "盤面が埋まりました！終局です。お疲れ様でした。";
       }
 
       setBoard([...newBoard]);
@@ -128,7 +128,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
       <div className="flex justify-center space-x-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl max-w-md mx-auto">
         <button
           onClick={() => { setGameMode('teaching'); resetGame(); }}
-          className={`flex-py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
             gameMode === 'teaching'
               ? 'bg-blue-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -139,7 +139,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
         </button>
         <button
           onClick={() => { setGameMode('free'); resetGame(); }}
-          className={`flex-py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
             gameMode === 'free'
               ? 'bg-red-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
@@ -151,7 +151,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        {/* 碁盤セクション */}
+        {/* SVG碁盤セクション */}
         <div className="flex flex-col items-center">
           <div className="flex items-center space-x-2 mb-2">
             <h2 className="text-xl font-bold">ミニ5路 囲碁（5x5 Go Board）</h2>
@@ -161,37 +161,49 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium text-center">{message}</p>
           
-          {/* 囲碁盤の描画 */}
+          {/* 絶対にズレないSVG碁盤 */}
           <div className="relative bg-[#e6c280] p-6 rounded-2xl shadow-xl w-72 h-72 flex items-center justify-center mb-6 border-4 border-amber-800/40">
-            {/* グリッド線 */}
-            <div className="absolute inset-6 grid grid-cols-4 grid-rows-4 pointer-events-none">
-              {Array(16).fill(0).map((_, i) => (
-                <div key={i} className="border border-amber-900/60"></div>
+            <svg viewBox="0 0 100 100" className="w-full h-full cursor-pointer">
+              {/* 碁盤の罫線（0, 25, 50, 75, 100 の正確な位置） */}
+              {[0, 25, 50, 75, 100].map((pos) => (
+                <React.Fragment key={pos}>
+                  <line x1={pos} y1="0" x2={pos} y2="100" stroke="#78350f" strokeWidth="1.5" />
+                  <line x1="0" y1={pos} x2="100" y2={pos} stroke="#78350f" strokeWidth="1.5" />
+                </React.Fragment>
               ))}
-            </div>
 
-            {/* 交点（クリック判定と石の表示） */}
-            <div className="absolute inset-4 grid grid-cols-5 grid-rows-5">
+              {/* 星（天元 [2,2] => 50, 50） */}
+              <circle cx="50" cy="50" r="2.5" fill="#78350f" />
+
+              {/* 交点ごとのクリック判定エリアと石の描画 */}
               {board.map((row, rIdx) =>
-                row.map((cell, cIdx) => (
-                  <div
-                    key={`${rIdx}-${cIdx}`}
-                    onClick={() => handleIntersectionClick(rIdx, cIdx)}
-                    className="relative flex items-center justify-center cursor-pointer group"
-                  >
-                    {cell === 0 && (
-                      <div className="w-3.5 h-3.5 rounded-full bg-transparent group-hover:bg-amber-950/40 transition-colors"></div>
-                    )}
-                    {cell === 1 && (
-                      <div className="w-7 h-7 rounded-full bg-black shadow-lg ring-2 ring-slate-900/20 animate-in zoom-in-50 duration-150" title="黒（プレイヤー）"></div>
-                    )}
-                    {cell === 2 && (
-                      <div className="w-7 h-7 rounded-full bg-white border-2 border-slate-300 shadow-lg ring-2 ring-slate-400/20 animate-in zoom-in-50 duration-150" title="白（やまと先生）"></div>
-                    )}
-                  </div>
-                ))
+                row.map((cell, cIdx) => {
+                  const cx = cIdx * 25;
+                  const cy = rIdx * 25;
+                  return (
+                    <g key={`${rIdx}-${cIdx}`} onClick={() => handleIntersectionClick(rIdx, cIdx)}>
+                      {/* クリックしやすい広めの透明ヒットエリア */}
+                      <circle cx={cx} cy={cy} r="10" fill="transparent" className="hover:fill-amber-950/20 transition-colors" />
+
+                      {/* 空きマスのホバーガイド */}
+                      {cell === 0 && (
+                        <circle cx={cx} cy={cy} r="3" fill="transparent" className="hover:fill-amber-950/40" />
+                      )}
+
+                      {/* 黒石（プレイヤー） */}
+                      {cell === 1 && (
+                        <circle cx={cx} cy={cy} r="10" fill="#000000" className="shadow-md" />
+                      )}
+
+                      {/* 白石（やまと先生） */}
+                      {cell === 2 && (
+                        <circle cx={cx} cy={cy} r="10" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" className="shadow-md" />
+                      )}
+                    </g>
+                  );
+                })
               )}
-            </div>
+            </svg>
           </div>
 
           <div className="flex items-center space-x-3">
@@ -205,7 +217,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
           </div>
         </div>
 
-        {/* やまと先生のコメント・チャットセクション */}
+        {/* チャットセクション */}
         <div className="flex flex-col h-[420px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center space-x-2 pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
             <span className="text-xl">🥋</span>
@@ -217,7 +229,6 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
             </div>
           </div>
 
-          {/* チャットログ */}
           <div ref={chatScrollRef} className="flex-grow overflow-y-auto space-y-3 pr-2 scroll-smooth">
             {chatLog.map((chat, idx) => (
               <div key={idx} className={`flex ${chat.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -252,7 +263,6 @@ export default function IgoRoute() {
   const [user, setUser] = useState<any>(null);
   const [userCredits, setUserCredits] = useState<number | null>(null);
 
-  // Supabase セッション監視とクレジット情報取得
   useEffect(() => {
     let isMounted = true;
 
@@ -274,11 +284,9 @@ export default function IgoRoute() {
     async function initSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          if (isMounted) {
-            setUser(session.user);
-            await fetchUserCredits(session.user.id);
-          }
+        if (session?.user && isMounted) {
+          setUser(session.user);
+          await fetchUserCredits(session.user.id);
         }
       } catch (err) {
         console.error("Session check error:", err);
