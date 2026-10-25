@@ -1,6 +1,6 @@
 /**
  * @file igoAlgorithm.ts
- * @description ミニ5路 囲碁対局ページ（AI思考アルゴリズム：生きる可能性ゼロの自殺手・無駄な死にに行く手の完全回避・投了判定）
+ * @description ミニ5路 囲碁対局ページ（AI思考アルゴリズム：自殺手・眼をつぶす悪手の完全回避、陣地拡大・制限の原則）
  */
 
 export type BoardState = number[][]; // 0: 空, 1: 黒（プレイヤー）, 2: 白（AI）
@@ -91,7 +91,7 @@ export function shouldAiResign(board: BoardState, aiColor: number = 2): boolean 
 }
 
 /**
- * AIの次の一手を算出する（生きる道がゼロの無駄な場所・自殺手への飛び込みを完全に回避）
+ * AIの次の一手を算出する（自分から眼をつぶす悪手の回避 ＆ 陣地拡大・制限の原則）
  */
 export function calculateAiMove(board: BoardState, aiColor: number = 2): [number, number] | null {
   const SIZE = board.length;
@@ -133,7 +133,8 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
     }
   }
 
-  // 3. 安全な空きマスを収集（💡 ここで「生きる道がゼロの場所・自ら死にに行く手」を厳しくフィルタリング）
+  // 3. 安全な空きマスを収集
+  // 💡 ルール：自分から自分の眼をふさぐ、あるいは打った瞬間に呼吸点が1つに落ちて自ら死にに行くような手（2三などの悪手）は絶対に排除する
   const safeSpots: [number, number][] = [];
   const allEmptySpots: [number, number][] = [];
 
@@ -142,42 +143,68 @@ export function calculateAiMove(board: BoardState, aiColor: number = 2): [number
       if (board[r][c] === 0) {
         allEmptySpots.push([r, c]);
 
-        // シミュレーション：ここにAIが石を置いたと仮定する
+        // シミュレーション：ここにAIが石を置いたと仮定
         const simBoard = board.map(row => [...row]);
         simBoard[r][c] = aiColor;
         
-        // 置いた後の自分のグループの状態をチェック
         const simGroups = findGroupsAndLiberties(simBoard, aiColor);
         const placedGroup = simGroups.find(g => g.stones.some(s => s.r === r && s.c === c));
         
-        // 呼吸点が0（自殺手）はもちろん除外、
-        // さらに「呼吸点が1つしかなく、かつ石数が少ない（＝打った瞬間にアタリになり、周囲に脱出路がない死にに行く手）」も除外する
+        // 自殺手（呼吸点0）は当然除外
         const isSuicide = placedGroup ? placedGroup.liberties.size === 0 : true;
-        const isHopelessPlacement = placedGroup ? placedGroup.liberties.size === 1 && placedGroup.stones.length <= 2 : false;
+        
+        // 打った瞬間に呼吸点が1つになってしまう（自ら眼をつぶす、死にに行く）手も除外
+        const isSelfAtariOrEyeClosure = placedGroup ? placedGroup.liberties.size <= 1 : true;
 
-        if (!isSuicide && !isHopelessPlacement) {
+        if (!isSuicide && !isSelfAtariOrEyeClosure) {
           safeSpots.push([r, c]);
         }
       }
     }
   }
 
-  // もし安全な場所がすべて埋まってしまっている場合の保険
   const candidateSpots = safeSpots.length > 0 ? safeSpots : allEmptySpots;
   if (candidateSpots.length === 0) return null;
 
-  // 4. 端や角を避け、安全な候補地の中から内側や中央（三四などを含む大場）を優先する
-  const innerSpots = candidateSpots.filter(([r, c]) => r > 0 && r < SIZE - 1 && c > 0 && c < SIZE - 1);
-  if (innerSpots.length > 0) {
-    const centerR = 2;
-    const centerC = 2;
-    if (board[centerR][centerC] === 0 && innerSpots.some(([r, c]) => r === centerR && c === centerC) && Math.random() < 0.6) {
-      return [centerR, centerC];
+  // 4. 「自分の陣地を広げる一方で相手の陣地を狭める」という基本原則に基づくスコアリング評価
+  let bestSpot = candidateSpots[0];
+  let maxScore = -999;
+
+  for (const [r, c] of candidateSpots) {
+    let score = 0;
+
+    // 原則A：自分の陣地を広げる（中央やバランスの良い空間を好む）
+    const distToCenter = Math.abs(r - 2) + Math.abs(c - 2);
+    score += (4 - distToCenter); // 中央に近いほど高い評価
+
+    // 原則B：相手の陣地を狭める（相手の石に適切なプレッシャーをかける位置を選ぶ）
+    let minOpponentDist = 999;
+    for (let pr = 0; pr < SIZE; pr++) {
+      for (let pc = 0; pc < SIZE; pc++) {
+        if (board[pr][pc] === opponentColor) {
+          const dist = Math.abs(r - pr) + Math.abs(c - pc);
+          if (dist < minOpponentDist) {
+            minOpponentDist = dist;
+          }
+        }
+      }
     }
-    const randomIndex = Math.floor(Math.random() * innerSpots.length);
-    return innerSpots[randomIndex];
+    
+    // 相手の石の周囲（距離1〜2のスペース）に陣取って相手の拡大を制限する手にボーナス
+    if (minOpponentDist === 1) {
+      score += 3; // 相手に迫り、陣地を狭める
+    } else if (minOpponentDist === 2) {
+      score += 2;
+    }
+
+    // 微小なランダム性を加えて単調な動きを防ぐ
+    score += Math.random() * 0.5;
+
+    if (score > maxScore) {
+      maxScore = score;
+      bestSpot = [r, c];
+    }
   }
 
-  const randomIndex = Math.floor(Math.random() * candidateSpots.length);
-  return candidateSpots[randomIndex];
+  return bestSpot;
 }
