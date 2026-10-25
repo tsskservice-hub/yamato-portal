@@ -1,6 +1,6 @@
 /**
  * @file game-igo.tsx
- * @description ミニ5路 囲碁対局ページ（漢数字座標・最終手マーカー・AI投了判定・指導碁/フリー対局完全対応版）
+ * @description ミニ5路 囲碁対局ページ（漢数字座標・格子線修正・最終手マーカー・AI投了判定・指導碁/フリー対局完全対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import type { MetaFunction } from "@remix-run/react";
@@ -8,6 +8,7 @@ import { useNavigate } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { supabase } from "../lib/supabaseClient";
 import { Loader2, RotateCcw, Swords, GraduationCap, Flag } from "lucide-react";
+
 import { calculateAiMove, shouldAiResign } from "../lib/igoAlgorithm";
 import { getRandomComment } from "../data/igoFreeComments";
 
@@ -62,7 +63,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
     try {
       let aiComment = "";
 
-      // 2. AIの投了判定チェック（igoAlgorithm.ts の shouldAiResign を呼び出し）
+      // 2. AIの投了判定チェック
       if (shouldAiResign(newBoard, 2)) {
         setIsGameOver(true);
         aiComment = "参りました。これ以上二眼を作ることができず、私の負けが確定しました。お見事です！（AI投了・Resign）";
@@ -144,7 +145,6 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
     setChatLog(prev => [...prev, { sender: 'yamato', text: "投了ですね。お疲れ様でした！次はもっと上手く打てるよう一緒に頑張りましょう。" }]);
   };
 
-  // 最終手の安全な座標展開（角括弧インデックス参照を排除）
   const [lastR, lastC] = lastMove || [-99, -99];
 
   return (
@@ -193,8 +193,8 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
           {/* 碁盤表示エリア（漢数字の座標ラベル付き） */}
           <div className="relative bg-[#e6c280] p-8 rounded-2xl shadow-xl w-80 h-80 flex items-center justify-center mb-6 border-4 border-amber-800/40">
             <svg viewBox="-16 -16 132 132" className="w-full h-full cursor-pointer overflow-visible">
-              {/* 碁盤の罫線 */}
-              {[4].map((pos) => (
+              {/* 碁盤の罫線（修正済み） */}
+              {[0, 25, 50, 75, 100].map((pos) => (
                 <React.Fragment key={pos}>
                   <line x1={pos} y1="0" x2={pos} y2="100" stroke="#78350f" strokeWidth="1.5" />
                   <line x1="0" y1={pos} x2="100" y2={pos} stroke="#78350f" strokeWidth="1.5" />
