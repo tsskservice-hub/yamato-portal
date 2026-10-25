@@ -1,6 +1,6 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（主要セクション・モーダル分離型）
+ * @description AI Yamato Portal のランディングページ（主要セクション・モーダル分離型 / Speaking & Writing個別見出し対応）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useRouteLoaderData } from '@remix-run/react';
@@ -352,15 +352,35 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Section 2: VCE / Australia */}
+            {/* Section 2A: VCE Speaking Modules */}
             <div className="space-y-6 pt-6">
               <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-                <span className="text-2xl">🇦🇺🐨🦘</span>
-                <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
+                <span className="text-2xl">🗣️</span>
+                <h3 className="text-xl font-extrabold tracking-tight">VCE Speaking Modules</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {PORTAL_MODULES
-                  .filter((m) => m.category === 'speaking' || m.category === 'writing')
+                  .filter((m) => m.category === 'speaking')
+                  .map((module) => (
+                    <ModuleCard
+                      key={module.id}
+                      module={module}
+                      isDarkMode={isDarkMode}
+                      onActionClick={handleModuleAction}
+                    />
+                  ))}
+              </div>
+            </div>
+
+            {/* Section 2B: VCE Writing Modules */}
+            <div className="space-y-6 pt-6">
+              <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <span className="text-2xl">✍️</span>
+                <h3 className="text-xl font-extrabold tracking-tight">VCE Writing Modules</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {PORTAL_MODULES
+                  .filter((m) => m.category === 'writing')
                   .map((module) => (
                     <ModuleCard
                       key={module.id}
@@ -380,7 +400,7 @@ export default function Home() {
           onOpenAuth={(mode) => handleOpenAuthModal(mode || 'signup')}
         />
          
-        {/* 💡 Daily Quiz Modal (切り出したコンポーネントを利用) */}
+        {/* 💡 Daily Quiz Modal */}
         <DailyQuizModal
           isOpen={isQuizModalOpen}
           onClose={() => setIsQuizModalOpen(false)}
