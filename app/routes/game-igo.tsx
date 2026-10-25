@@ -1,22 +1,26 @@
 /**
  * @file game-igo.tsx
- * @description ミニ5路 囲碁対局ページ（指導碁AI「やまと先生」完全連動版）
+ * @description ミニ5路 囲碁対局ページ（指導碁モード & AIフリー対局モード完全対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
 import type { MetaFunction } from "@remix-run/react";
 import { useNavigate } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { supabase } from "../lib/supabaseClient";
-import { Send, Loader2, Sparkles, RotateCcw } from "lucide-react";
+import { Send, Loader2, Sparkles, RotateCcw, Swords, GraduationCap } from "lucide-react";
+
+// 💡 新規作成したAI頭脳とフリー対局用コメントのインポート
+import { calculateAiMove } from "../lib/igoAlgorithm";
+import { getRandomComment } from "../data/igoFreeComments";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "ミニ5路 囲碁指導碁 | JPTutor AI Yamato" },
-    { name: "description", content: "Play a teaching game of 5x5 Go with AI Yamato-sensei." },
+    { title: "ミニ5路 囲碁 | JPTutor AI Yamato" },
+    { name: "description", content: "Enjoy 5x5 Go teaching games and free matches with AI Yamato-sensei." },
   ];
 };
 
-// ミニ5路囲碁のゲームコンポーネント（AI対局 & やまと先生のコメント連動）
+// ミニ5路囲碁のゲームコンポーネント
 function IgoBoard({ userId, credits }: { userId: string | null; credits: number | null }) {
   const SIZE = 5;
   // 0: 空, 1: 黒 (ユーザー), 2: 白 (AIやまと)
@@ -24,13 +28,15 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
     Array(SIZE).fill(null).map(() => Array(SIZE).fill(0))
   );
   const [turn, setTurn] = useState<number>(1); // 1: ユーザーの番, 2: AIの番
-  const [message, setMessage] = useState<string>('Your turn (Black). Place your stone on the board.');
+  const [message, setMessage] = useState<string>('あなたの番です（黒・先手）。碁盤の交点をクリックしてください。');
   
+  // 💡 モード切替ステート: 'teaching'（指導碁） または 'free'（フリー対局）
+  const [gameMode, setGameMode] = useState<'teaching' | 'free'>('teaching');
+
   // AI思考中・コメント表示用のステート
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
-  const [commentary, setCommentary] = useState<string>("Welcome to Igo Yamato! Let's play a friendly teaching game. Make your first move!");
   const [chatLog, setChatLog] = useState<Array<{ sender: 'user' | 'yamato'; text: string }>>([
-    { sender: 'yamato', text: "Hello! I am Igo Yamato. Enjoy our 5x5 teaching game. I will guide you step by step!" }
+    { sender: 'yamato', text: "こんにちは！やまと先生です。今日はどのモードで対局しますか？（指導碁でじっくり学ぶか、フリー対局で腕試しをしましょう！）" }
   ]);
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
@@ -40,27 +46,6 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
   }, [chatLog, isAiThinking]);
-
-  // 簡易的なAIの手を決めるロジック（空いているマスからランダム、または中央優先）
-  const calculateAiMove = (currentBoard: number[][]) => {
-    const emptySpots: [number, number][] = [];
-    currentBoard.forEach((row, rIdx) => {
-      row.forEach((cell, cIdx) => {
-        if (cell === 0) emptySpots.push([rIdx, cIdx]);
-      });
-    });
-
-    if (emptySpots.length === 0) return null;
-
-    // 中央 (2,2) が空いていれば優先、なければランダム
-    const centre: [number, number] = [2, 2];
-    if (currentBoard[centre[0]][centre[1]] === 0 && Math.random() < 0.7) {
-      return centre;
-    }
-
-    const randomIndex = Math.floor(Math.random() * emptySpots.length);
-    return emptySpots[randomIndex];
-  };
 
   const handleIntersectionClick = async (row: number, col: number) => {
     // ユーザーの番以外、すでに石がある場所、またはAI思考中なら何もしない
@@ -73,54 +58,58 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
 
     setBoard(newBoard);
     setTurn(2);
-    setMessage('かんがえちゅう...');
+    setMessage('やまと先生が考えています...');
     setIsAiThinking(true);
 
     const moveStr = `(${row + 1}, ${col + 1})`;
-    const updatedChat = [...chatLog, { sender: 'user' as const, text: `I played at ${moveStr}.` }];
+    const updatedChat = [...chatLog, { sender: 'user' as const, text: `(${row + 1}, ${col + 1}) に黒石を置きました。` }];
     setChatLog(updatedChat);
 
     try {
-      // 2. AIの次の手を計算
-      const aiMove = calculateAiMove(newBoard);
-      
-      let aiComment = "Good move! Let's keep building our shape.";
+      let aiComment = "";
+      const aiMove = calculateAiMove(newBoard, 2);
+
       if (aiMove) {
         const [aiRow, aiCol] = aiMove;
         newBoard[aiRow][aiCol] = 2; // 白石配置
-        
-        // 3. サーバー側（API）を呼び出して、やまと先生の指導コメントを生成
-        const response = await fetch('/api/igo-chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userMove: moveStr,
-            aiMove: `(${aiRow + 1}, ${aiCol + 1})`,
-            boardState: JSON.stringify(newBoard),
-            userId: userId
-          })
-        });
 
-        if (response.ok) {
-          const data = await response.json() as any;
-          if (data.commentary) {
-            aiComment = data.commentary;
+        if (gameMode === 'teaching') {
+          // 🥋 【指導碁モード】サーバーAPI（LLM）を呼び出して詳細なSocratic指導コメントを取得
+          const response = await fetch('/api/igo-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userMove: moveStr,
+              aiMove: `(${aiRow + 1}, ${aiCol + 1})`,
+              boardState: JSON.stringify(newBoard),
+              userId: userId
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json() as any;
+            aiComment = data.commentary || "お見事な一手ですね。布石の形を意識していきましょう！";
+          } else {
+            aiComment = "良い着眼点ですね。周囲の石のつながりに注意してみましょう。";
           }
+        } else {
+          // ⚔️ 【フリー対局モード】高速アルゴリズム ＋ igoFreeComments からランダムコメントを取得
+          const commentObj = getRandomComment('afterMove');
+          aiComment = `[白: (${aiRow + 1}, ${aiCol + 1})] ${commentObj.jp} (${commentObj.en})`;
         }
       } else {
-        aiComment = "The board is full! Excellent game.";
+        aiComment = "盤面が埋まりました！終局です。お疲れ様でした（投了・中押し集計）。";
       }
 
       setBoard([...newBoard]);
-      setCommentary(aiComment);
       setChatLog([...updatedChat, { sender: 'yamato', text: aiComment }]);
       setTurn(1);
-      setMessage('Your turn (Black).');
+      setMessage('あなたの番です（黒）。');
     } catch (err) {
       console.error("AI move error:", err);
-      setCommentary("Yamato-sensei says: Keep up the great concentration!");
+      setChatLog([...updatedChat, { sender: 'yamato', text: "やまと先生：集中力が素晴らしいですね。次の手をどうぞ！" }]);
       setTurn(1);
-      setMessage('Your turn (Black).');
+      setMessage('あなたの番です（黒）。');
     } finally {
       setIsAiThinking(false);
     }
@@ -129,94 +118,128 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
   const resetGame = () => {
     setBoard(Array(SIZE).fill(null).map(() => Array(SIZE).fill(0)));
     setTurn(1);
-    setMessage('Your turn (Black). Place your stone on the board.');
-    setCommentary("Game reset. Let's start a new teaching game!");
-    setChatLog([{ sender: 'yamato', text: "New game started! Where will you play your first stone?" }]);
+    setMessage('ゲームがリセットされました。あなたの番です（黒）。');
+    setChatLog([{ sender: 'yamato', text: `新しい対局（${gameMode === 'teaching' ? '指導碁モード' : 'フリー対局モード'}）を開始します！最初の1手をどうぞ。` }]);
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      {/* 碁盤セクション */}
-      <div className="flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-2 flex items-center space-x-2">
-          <span>ミニ5路 囲碁 (5x5 Go Teaching Board)</span>
-        </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium">{message}</p>
-        
-        {/* 囲碁盤の描画 */}
-        <div className="relative bg-[#e6c280] p-6 rounded-2xl shadow-xl w-72 h-72 flex items-center justify-center mb-6 border-4 border-amber-800/40">
-          {/* グリッド線 */}
-          <div className="absolute inset-6 grid grid-cols-4 grid-rows-4 pointer-events-none">
-            {Array(16).fill(0).map((_, i) => (
-              <div key={i} className="border border-amber-900/60"></div>
-            ))}
-          </div>
-
-          {/* 交点（クリック判定と石の表示） */}
-          <div className="absolute inset-4 grid grid-cols-5 grid-rows-5">
-            {board.map((row, rIdx) =>
-              row.map((cell, cIdx) => (
-                <div
-                  key={`${rIdx}-${cIdx}`}
-                  onClick={() => handleIntersectionClick(rIdx, cIdx)}
-                  className="relative flex items-center justify-center cursor-pointer group"
-                >
-                  {cell === 0 && (
-                    <div className="w-3.5 h-3.5 rounded-full bg-transparent group-hover:bg-amber-950/40 transition-colors"></div>
-                  )}
-                  {cell === 1 && (
-                    <div className="w-7 h-7 rounded-full bg-black shadow-lg ring-2 ring-slate-900/20 animate-in zoom-in-50 duration-150"></div>
-                  )}
-                  {cell === 2 && (
-                    <div className="w-7 h-7 rounded-full bg-white border-2 border-slate-300 shadow-lg ring-2 ring-slate-400/20 animate-in zoom-in-50 duration-150"></div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
+    <div className="space-y-6">
+      {/* モード切り替えタブ */}
+      <div className="flex justify-center space-x-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl max-w-md mx-auto">
         <button
-          onClick={resetGame}
-          className="px-5 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-bold transition-all shadow-sm flex items-center space-x-2 cursor-pointer"
+          onClick={() => { setGameMode('teaching'); resetGame(); }}
+          className={`flex-py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
+            gameMode === 'teaching'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+          }`}
         >
-          <RotateCcw className="w-4 h-4" />
-          <span>New Game (Reset)</span>
+          <GraduationCap className="w-4 h-4" />
+          <span>指導碁モード (Teaching)</span>
+        </button>
+        <button
+          onClick={() => { setGameMode('free'); resetGame(); }}
+          className={`flex-py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
+            gameMode === 'free'
+              ? 'bg-red-600 text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+          }`}
+        >
+          <Swords className="w-4 h-4" />
+          <span>AIフリー対局 (Free Match)</span>
         </button>
       </div>
 
-      {/* やまと先生の指導コメント・チャットセクション */}
-      <div className="flex flex-col h-[420px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center space-x-2 pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
-          <span className="text-xl">🥋</span>
-          <div>
-            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Igo Yamato-sensei (指導碁コーチ)</h3>
-            <p className="text-[11px] text-slate-500">Socratic Guidance & Strategic Advice</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* 碁盤セクション */}
+        <div className="flex flex-col items-center">
+          <div className="flex items-center space-x-2 mb-2">
+            <h2 className="text-xl font-bold">ミニ5路 囲碁（5x5 Go Board）</h2>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold">
+              {gameMode === 'teaching' ? '🥋 指導対局' : '⚔️ 真剣勝負'}
+            </span>
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium text-center">{message}</p>
+          
+          {/* 囲碁盤の描画 */}
+          <div className="relative bg-[#e6c280] p-6 rounded-2xl shadow-xl w-72 h-72 flex items-center justify-center mb-6 border-4 border-amber-800/40">
+            {/* グリッド線 */}
+            <div className="absolute inset-6 grid grid-cols-4 grid-rows-4 pointer-events-none">
+              {Array(16).fill(0).map((_, i) => (
+                <div key={i} className="border border-amber-900/60"></div>
+              ))}
+            </div>
+
+            {/* 交点（クリック判定と石の表示） */}
+            <div className="absolute inset-4 grid grid-cols-5 grid-rows-5">
+              {board.map((row, rIdx) =>
+                row.map((cell, cIdx) => (
+                  <div
+                    key={`${rIdx}-${cIdx}`}
+                    onClick={() => handleIntersectionClick(rIdx, cIdx)}
+                    className="relative flex items-center justify-center cursor-pointer group"
+                  >
+                    {cell === 0 && (
+                      <div className="w-3.5 h-3.5 rounded-full bg-transparent group-hover:bg-amber-950/40 transition-colors"></div>
+                    )}
+                    {cell === 1 && (
+                      <div className="w-7 h-7 rounded-full bg-black shadow-lg ring-2 ring-slate-900/20 animate-in zoom-in-50 duration-150" title="黒（プレイヤー）"></div>
+                    )}
+                    {cell === 2 && (
+                      <div className="w-7 h-7 rounded-full bg-white border-2 border-slate-300 shadow-lg ring-2 ring-slate-400/20 animate-in zoom-in-50 duration-150" title="白（やまと先生）"></div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={resetGame}
+              className="px-5 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-bold transition-all shadow-sm flex items-center space-x-2 cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>リセット (Reset)</span>
+            </button>
           </div>
         </div>
 
-        {/* チャットログ */}
-        <div ref={chatScrollRef} className="flex-grow overflow-y-auto space-y-3 pr-2 scroll-smooth">
-          {chatLog.map((chat, idx) => (
-            <div key={idx} className={`flex ${chat.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] p-3 rounded-2xl text-xs sm:text-sm font-medium leading-relaxed shadow-xs ${
-                chat.sender === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-xs'
-                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-xs'
-              }`}>
-                {chat.text}
-              </div>
+        {/* やまと先生のコメント・チャットセクション */}
+        <div className="flex flex-col h-[420px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center space-x-2 pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
+            <span className="text-xl">🥋</span>
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">やまと先生 (Igo Yamato-sensei)</h3>
+              <p className="text-[11px] text-slate-500">
+                {gameMode === 'teaching' ? 'ソクラテス式・指導碁コーチング中' : 'AIフリー対局・対局実況中'}
+              </p>
             </div>
-          ))}
+          </div>
 
-          {isAiThinking && (
-            <div className="flex justify-start">
-              <div className="p-3 rounded-2xl rounded-bl-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 flex items-center space-x-2 text-xs shadow-xs">
-                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                <span className="italic">Yamato-sensei is reviewing the board...</span>
+          {/* チャットログ */}
+          <div ref={chatScrollRef} className="flex-grow overflow-y-auto space-y-3 pr-2 scroll-smooth">
+            {chatLog.map((chat, idx) => (
+              <div key={idx} className={`flex ${chat.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] p-3 rounded-2xl text-xs sm:text-sm font-medium leading-relaxed shadow-xs ${
+                  chat.sender === 'user'
+                    ? 'bg-blue-600 text-white rounded-br-xs'
+                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-xs'
+                }`}>
+                  {chat.text}
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+
+            {isAiThinking && (
+              <div className="flex justify-start">
+                <div className="p-3 rounded-2xl rounded-bl-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 flex items-center space-x-2 text-xs shadow-xs">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  <span className="italic">やまと先生が検討しています...</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -287,7 +310,7 @@ export default function IgoRoute() {
     return (
       <div className="flex justify-center items-center h-screen bg-[#f4f1ea] font-sans">
         <h3 className="text-xl font-semibold text-slate-700 animate-pulse">
-          Loading 5x5 Go Go Coaching... ♟️
+          Loading 5x5 Go Board... ♟️
         </h3>
       </div>
     );
