@@ -8,8 +8,7 @@ import { useNavigate } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { supabase } from "../lib/supabaseClient";
 import { Loader2, RotateCcw, Swords, GraduationCap, Flag } from "lucide-react";
-
-import { calculateAiMove } from "../lib/igoAlgorithm";
+import { calculateAiMove, shouldAiResign } from "../lib/igoAlgorithm";
 import { getRandomComment } from "../data/igoFreeComments";
 
 export const meta: MetaFunction = () => {
@@ -27,10 +26,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
   const [turn, setTurn] = useState<number>(1);
   const [message, setMessage] = useState<string>('あなたの番です（黒・先手）。碁盤の交点をクリックしてください。');
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
-  
-  // 最後に置いた石の座標を保持するステート ([row, col] または null)
   const [lastMove, setLastMove] = useState<[number, number] | null>(null);
-
   const [gameMode, setGameMode] = useState<'teaching' | 'free'>('teaching');
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
   const [chatLog, setChatLog] = useState<Array<{ sender: 'user' | 'yamato'; text: string }>>([
@@ -54,7 +50,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
     );
 
     setBoard(newBoard);
-    setLastMove([row, col]); // 最後に置いた石を記録
+    setLastMove([row, col]);
     setTurn(2);
     setMessage('やまと先生が考えています...');
     setIsAiThinking(true);
@@ -65,14 +61,9 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
 
     try {
       let aiComment = "";
-      
-      // 2. AIの投了判定チェック（もしAI側の石が追い詰められ、二眼を作るスペースが無く負けが確定している場合）
-      const aiStonesCount = newBoard.flat().filter(cell => cell === 2).length;
-      const userStonesCount = newBoard.flat().filter(cell => cell === 1).length;
-      
-      const isAiDefeated = aiStonesCount <= 2 && userStonesCount >= 6 && Math.random() < 0.4;
 
-      if (isAiDefeated) {
+      // 2. AIの投了判定チェック（igoAlgorithm.ts の shouldAiResign を呼び出し）
+      if (shouldAiResign(newBoard, 2)) {
         setIsGameOver(true);
         aiComment = "参りました。これ以上二眼を作ることができず、私の負けが確定しました。お見事です！（AI投了・Resign）";
         setChatLog([...updatedChat, { sender: 'yamato', text: aiComment }]);
@@ -82,12 +73,13 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
         return;
       }
 
+      // 3. AIの手を計算
       const aiMove = calculateAiMove(newBoard, 2);
 
       if (aiMove) {
         const [aiRow, aiCol] = aiMove;
         newBoard[aiRow][aiCol] = 2; // 白石配置
-        setLastMove([aiRow, aiCol]); // AIが置いた石を最終手として記録
+        setLastMove([aiRow, aiCol]);
 
         if (gameMode === 'teaching') {
           const response = await fetch('/api/igo-chat', {
@@ -152,11 +144,17 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
     setChatLog(prev => [...prev, { sender: 'yamato', text: "投了ですね。お疲れ様でした！次はもっと上手く打てるよう一緒に頑張りましょう。" }]);
   };
 
+  // 最終手の安全な座標展開（角括弧インデックス参照を排除）
+  const [lastR, lastC] = lastMove || [-99, -99];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-center space-x-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl max-w-md mx-auto">
         <button
-          onClick={() => { setGameMode('teaching'); resetGame(); }}
+          onClick={() => {
+            setGameMode('teaching');
+            resetGame();
+          }}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
             gameMode === 'teaching'
               ? 'bg-blue-600 text-white shadow-md'
@@ -167,7 +165,10 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
           <span>指導碁モード (Teaching)</span>
         </button>
         <button
-          onClick={() => { setGameMode('free'); resetGame(); }}
+          onClick={() => {
+            setGameMode('free');
+            resetGame();
+          }}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
             gameMode === 'free'
               ? 'bg-red-600 text-white shadow-md'
@@ -188,12 +189,12 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
             </span>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium text-center">{message}</p>
-          
+
           {/* 碁盤表示エリア（漢数字の座標ラベル付き） */}
           <div className="relative bg-[#e6c280] p-8 rounded-2xl shadow-xl w-80 h-80 flex items-center justify-center mb-6 border-4 border-amber-800/40">
             <svg viewBox="-16 -16 132 132" className="w-full h-full cursor-pointer overflow-visible">
               {/* 碁盤の罫線 */}
-              {[0, 25, 50, 75, 100].map((pos) => (
+              {[4].map((pos) => (
                 <React.Fragment key={pos}>
                   <line x1={pos} y1="0" x2={pos} y2="100" stroke="#78350f" strokeWidth="1.5" />
                   <line x1="0" y1={pos} x2="100" y2={pos} stroke="#78350f" strokeWidth="1.5" />
@@ -224,7 +225,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
                 row.map((cell, cIdx) => {
                   const cx = cIdx * 25;
                   const cy = rIdx * 25;
-                  const isLast = lastMove && lastMove[0] === rIdx && lastMove[1] === cIdx;
+                  const isLast = lastR === rIdx && lastC === cIdx;
 
                   return (
                     <g key={`${rIdx}-${cIdx}`} onClick={() => handleIntersectionClick(rIdx, cIdx)}>
