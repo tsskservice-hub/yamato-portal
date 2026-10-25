@@ -26,7 +26,6 @@ interface UploadedImage {
 
 export default function CustomDashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -49,21 +48,6 @@ export default function CustomDashboard() {
 
   useEffect(() => {
     document.title = "Custom Practice | VCE EOY Exam Writing Tutor";
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
   }, []);
 
   // 問題画像のアップロードハンドラ
@@ -322,20 +306,6 @@ export default function CustomDashboard() {
                 </p>
               </div>
 
-              {/* アクティブな設問バナー */}
-              <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-sm font-bold flex justify-between items-center shadow-xs">
-                <div>
-                  🎯 <strong>Active Custom Question:</strong> {selectedQuestionText || questionImages.length > 0 ? (selectedQuestionText ? (selectedQuestionText.length > 60 ? selectedQuestionText.slice(0, 60) + "..." : selectedQuestionText) : <span className="text-emerald-700 font-bold">📋 {questionImages.length} Question Image(s) Attached for AI OCR</span>) : <span className="text-amber-700 font-normal">⚠️ Please enter a question or upload question images above</span>}
-                </div>
-              </div>
-
-              {/* 使い方案内 */}
-              <div className="pt-2 border-t border-indigo-100 text-slate-700 text-sm leading-relaxed">
-                <div className="text-indigo-900 font-bold mb-1">💡 How it works:</div>
-                <p className="text-xs text-slate-600">
-                  Multiple pages of questions and answers are processed securely in real-time and are <strong>never stored</strong> in our database.
-                </p>
-              </div>
             </div>
           </div>
 
@@ -352,22 +322,8 @@ export default function CustomDashboard() {
             onClearExternalImage={() => setAnswerImages([])}
           />
 
-          {showScrollTop && (
-            <aside aria-label="Scroll controls" className="fixed bottom-24 right-6 z-40 flex flex-col items-end gap-3">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="p-3.5 bg-white hover:bg-slate-50 rounded-full shadow-xl cursor-pointer transition-all flex items-center justify-center w-12 h-12 border-2 border-red-500"
-                aria-label="Scroll to top"
-              >
-                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4l-8 8h5v8h6v-8h5z" />
-                </svg>
-              </button>
-            </aside>
-          )}
-
           {modalImageSrc && (
-            <div className="fixed inset-0 z- bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
               <div className="relative max-w-4xl max-h-[90vh]">
                 <button onClick={() => setModalImageSrc(null)} className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition">
                   ✕ Close
