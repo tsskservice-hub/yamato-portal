@@ -1,6 +1,12 @@
 /**
  * @file eoy-writing-custom.tsx
- * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（複数画像・OCR完全連動版）
+ * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール（複数画像・OCR完全連動・クレジット案内＆Step 3追加版）
+ * 💡 特徴：
+ * 1. 2枚以上一律6クレジット（最大4枚まで）の明確な料金案内バナーを配置
+ * 2. (Volatile Session) 表記を削除しスッキリしたワークスペース名に改修
+ * 3. Step 2 の写真アップロードボタンを見出しのすぐ下に配置
+ * 4. Step 3（右下のヤマトチャットを開いて送信する手順）を英語で明記
+ * 5. 複数問題画像（OCR用）および複数答案画像の一括管理
  */
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -8,21 +14,9 @@ import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom";
 
-import TEXT_TYPES_DATA, { fetchTextTypesData, TextTypesData } from "../data/texttypes";
-import { supabase } from "../lib/supabaseClient";
+import textTypesData from "../data/texttypes";
 
-// 💡 原稿用紙ガイドのフォールバックデータ
-const DEFAULT_GENKOYOSHI_DATA = {
-  title: "Genkoyoshi Usage Guide (原稿用紙の使い方)",
-  purpose: "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi. Refer to each text type for details.",
-  structure: [
-    "Title (Line 1): Leave 3 spaces at the beginning, then write the title",
-    "Name (Line 2): Write at the end, leaving the last square blank",
-    "Main Text: Indent 1 space at the beginning of each paragraph",
-    "Square Usage: Place punctuation marks (、。) in their own square. Never start a line with punctuation."
-  ],
-  sampleImage: "/genkoyoshi.pdf"
-};
+const modalData: { [key: string]: any } = textTypesData;
 
 interface UploadedImage {
   id: string;
@@ -34,13 +28,6 @@ export default function CustomDashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   
-  // 💡 TEXTTYPES データをステートで管理（Supabaseからの動的取得に対応）
-  const [modalData, setModalData] = useState<TextTypesData>({
-    ...TEXT_TYPES_DATA,
-    Genkoyoshi: DEFAULT_GENKOYOSHI_DATA,
-    Genkooyooshi: DEFAULT_GENKOYOSHI_DATA,
-  });
-
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -64,33 +51,6 @@ export default function CustomDashboard() {
     document.title = "Custom Practice | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // 💡 ページ表示時に Supabase から TEXTTYPES データを非同期フェッチ
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadDataFromSupabase() {
-      try {
-        const fetchedTextTypes = await fetchTextTypesData(supabase);
-        if (isMounted && fetchedTextTypes && typeof fetchedTextTypes === "object" && Object.keys(fetchedTextTypes).length > 0) {
-          setModalData((prev) => ({
-            ...prev,
-            ...fetchedTextTypes,
-            Genkoyoshi: fetchedTextTypes["Genkoyoshi"] || fetchedTextTypes["Genkooyooshi"] || prev["Genkoyoshi"] || DEFAULT_GENKOYOSHI_DATA,
-            Genkooyooshi: fetchedTextTypes["Genkoyoshi"] || fetchedTextTypes["Genkooyooshi"] || prev["Genkooyooshi"] || DEFAULT_GENKOYOSHI_DATA,
-          }));
-        }
-      } catch (err) {
-        console.error("Failed to load text types from Supabase:", err);
-      }
-    }
-
-    loadDataFromSupabase();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
@@ -106,6 +66,7 @@ export default function CustomDashboard() {
     };
   }, []);
 
+  // 問題画像のアップロードハンドラ
   const handleQuestionImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -126,11 +87,19 @@ export default function CustomDashboard() {
     if (questionFileInputRef.current) questionFileInputRef.current.value = "";
   };
 
+  // 答案画像のアップロードハンドラ（最大4枚まで制限）
   const handleAnswerImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
+    if (answerImages.length + files.length > 4) {
+      alert("一度に送信できる答案写真は最大4枚までです。(Maximum 4 photos allowed per request)");
+    }
+
+    const availableSlots = Math.max(0, 4 - answerImages.length);
+    const filesToAdd = Array.from(files).slice(0, availableSlots);
+
+    filesToAdd.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const newObj: UploadedImage = {
@@ -146,7 +115,6 @@ export default function CustomDashboard() {
     if (answerFileInputRef.current) answerFileInputRef.current.value = "";
   };
 
-  // 💡 テキストまたは問題画像の状態に応じて確実な assignedQuestion 文字列を生成
   const assignedQuestionText = selectedQuestionText.trim()
     ? `Custom Prompt: ${selectedQuestionText}`
     : questionImages.length > 0
@@ -157,27 +125,20 @@ export default function CustomDashboard() {
     ? `[Custom External Exam / Textbook Writing Task]\nDetails: ${assignedQuestionText}`
     : "";
 
-  // 💡 TextType モーダル用データの堅牢な解決
-  const activeModalData = activeModal
-    ? modalData[activeModal] ||
-      (activeModal === "Genkoyoshi" ? modalData["Genkooyooshi"] || DEFAULT_GENKOYOSHI_DATA : null) ||
-      (activeModal === "Genkooyooshi" ? modalData["Genkoyoshi"] || DEFAULT_GENKOYOSHI_DATA : null)
-    : null;
-
   return (
     <PageLayout ref={layoutRef} breadcrumbTitle="Custom Practice (External / Past Exams)">
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           
+          {/* 原稿用紙の使い方 ＆ 漢字チェッカーのリンク */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <button
-              type="button"
-              onClick={() => setActiveModal("Genkoyoshi")}
+              onClick={() => setActiveModal("Genkooyooshi")}
               className="w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border"
             >
               <div className="flex items-center space-x-2 truncate">
                 <span className="text-base">📝</span>
-                <span className="truncate">How to use Genkoyoshi</span>
+                <span className="truncate">How to use Genkooyooshi</span>
               </div>
               <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2">View →</span>
             </button>
@@ -197,12 +158,27 @@ export default function CustomDashboard() {
           <div>
             <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
               
+              {/* ワークスペースヘッダー：(Volatile Session) を削除 */}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
-                  <span>🤖</span> Custom AI Yamato Workspace (Volatile Session)
+                  <span>🤖</span> Custom AI Yamato Workspace
                 </div>
                 <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">
                   🔒 No Data Stored (Zero Persistence)
+                </span>
+              </div>
+
+              {/* 💡 クレジット消費案内（2枚以上は一律6クレジット・最大4枚まで） */}
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between flex-wrap gap-2 text-xs">
+                <div className="flex items-center gap-2 text-amber-900 font-bold">
+                  <span>🪙</span>
+                  <span>Photo Evaluation Rates:</span>
+                  <span className="font-normal text-amber-800">
+                    1 Photo = 4 Credits | 2+ Photos = Flat 6 Credits (Max 4 photos per request)
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-300">
+                  ※ 2枚以上は一律6クレジット（最大4枚まで）
                 </span>
               </div>
 
@@ -254,29 +230,35 @@ export default function CustomDashboard() {
                           ✕
                         </button>
                       </div>
-                  ))}
-                  <div className="text-xs text-indigo-900 font-bold ml-2">
-                    {questionImages.length} question page(s) attached for AI OCR.
+                    ))}
+                    <div className="text-xs text-indigo-900 font-bold ml-2">
+                      {questionImages.length} question page(s) attached for AI OCR.
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <textarea
-                value={selectedQuestionText}
-                onChange={(e) => setSelectedQuestionText(e.target.value)}
-                placeholder="Type or paste the exam question / prompt here (or upload photos above)..."
-                className="w-full p-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                rows={3}
-              />
-            </div>
+                <textarea
+                  value={selectedQuestionText}
+                  onChange={(e) => setSelectedQuestionText(e.target.value)}
+                  placeholder="Type or paste the exam question / prompt here (or upload photos above)..."
+                  className="w-full p-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  rows={3}
+                />
+              </div>
 
-            {/* Step 2: 生徒の複数答案画像のアップロード */}
-            <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-3">
-              <div className="text-sm font-bold text-indigo-900 flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-1.5">
-                  <span>2️⃣</span> Step 2: Upload Your Answer Photos (Multiple Pages OK)
-                </div>
+              {/* Step 2: 生徒の複数答案画像のアップロード（見出しのすぐ下にボタンを配置） */}
+              <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-3">
                 <div>
+                  <div className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
+                    <span>2️⃣</span> Step 2: Upload Your Answer Photos (Multiple Pages OK)
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Upload photos of your handwritten essay or typed response (Up to 4 pages).
+                  </p>
+                </div>
+
+                {/* 💡 見出しのすぐ下にボタンを配置 */}
+                <div className="flex items-center gap-3 flex-wrap pt-1">
                   <input
                     type="file"
                     accept="image/*"
@@ -288,96 +270,123 @@ export default function CustomDashboard() {
                   <button
                     type="button"
                     onClick={() => answerFileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <span>📷</span>
-                    <span>Upload Answer Photos (Multiple OK)</span>
+                    <span>Upload Answer Photos (Max 4 Pages)</span>
                   </button>
+                  {answerImages.length > 0 && (
+                    <span className="text-xs text-emerald-700 font-bold bg-emerald-100 px-2.5 py-1 rounded">
+                      ✓ {answerImages.length} Page(s) Attached
+                    </span>
+                  )}
+                </div>
+
+                {answerImages.length > 0 && (
+                  <div className="flex items-center gap-3 flex-wrap bg-indigo-50 border border-indigo-200 p-3 rounded-lg mt-2">
+                    {answerImages.map((img, index) => (
+                      <div key={img.id} className="relative group flex items-center bg-white border border-indigo-200 rounded p-1 shadow-2xs">
+                        <img 
+                          src={img.preview} 
+                          alt={`Answer ${index + 1}`} 
+                          className="w-12 h-12 object-cover rounded cursor-pointer" 
+                          onClick={() => setModalImageSrc(img.preview)} 
+                        />
+                        <span className="absolute -top-2 -left-2 bg-emerald-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setAnswerImages(prev => prev.filter(item => item.id !== img.id))}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center hover:bg-red-800"
+                          title="Remove"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <div className="text-xs text-emerald-800 font-bold ml-2">
+                      ✓ {answerImages.length} answer page(s) attached for evaluation.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 💡 Step 3: 右下のヤマトチャットで送信を押す（英語） */}
+              <div className="bg-white/90 border border-indigo-200 rounded-xl p-4 space-y-2">
+                <div className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
+                  <span>3️⃣</span> Step 3: Open Yamato Chat & Press "Send"
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Click on the <strong>Yamato AI Tutor</strong> floating button at the bottom right to open the chat window, then press <strong>Send</strong> to receive your structured VCE feedback and evaluation report! 🚀
+                </p>
+              </div>
+
+              {/* アクティブな設問バナー */}
+              <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-sm font-bold flex justify-between items-center shadow-xs">
+                <div>
+                  🎯 <strong>Active Custom Question:</strong> {selectedQuestionText || questionImages.length > 0 ? (selectedQuestionText ? (selectedQuestionText.length > 60 ? selectedQuestionText.slice(0, 60) + "..." : selectedQuestionText) : <span className="text-emerald-700 font-bold">📋 {questionImages.length} Question Image(s) Attached for AI OCR</span>) : <span className="text-amber-700 font-normal">⚠️ Please enter a question or upload question images above</span>}
                 </div>
               </div>
 
-              {answerImages.length > 0 && (
-                <div className="flex items-center gap-3 flex-wrap bg-indigo-50 border border-indigo-200 p-3 rounded-lg">
-                  {answerImages.map((img, index) => (
-                    <div key={img.id} className="relative group flex items-center bg-white border border-indigo-200 rounded p-1 shadow-2xs">
-                      <img 
-                        src={img.preview} 
-                        alt={`Answer ${index + 1}`} 
-                        className="w-12 h-12 object-cover rounded cursor-pointer" 
-                        onClick={() => setModalImageSrc(img.preview)} 
-                      />
-                      <span className="absolute -top-2 -left-2 bg-emerald-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                        {index + 1}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setAnswerImages(prev => prev.filter(item => item.id !== img.id))}
-                        className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center hover:bg-red-800"
-                        title="Remove"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  <div className="text-xs text-emerald-800 font-bold ml-2">
-                    ✓ {answerImages.length} answer page(s) attached for evaluation.
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </div>
-
-        {/* チャットウィジェットへの連携 */}
-        <ChatYamatoEoyWritingCustom
-          systemPrompt={currentSystemPrompt}
-          userId={user?.id}
-          userNickname={nickname || (user?.email ? user.email.split('@')[0] : "Student")}
-          credits={credits}
-          externalQuestionFiles={questionImages.map(i => i.file)}
-          externalImageFile={answerImages.length > 0 ? answerImages[0].file : null}
-          externalImagePreview={answerImages.length > 0 ? answerImages[0].preview : null}
-          assignedQuestion={assignedQuestionText}
-          onClearExternalImage={() => setAnswerImages([])}
-        />
-
-        {showScrollTop && (
-          <aside aria-label="Scroll controls" className="fixed bottom-24 right-6 z-40 flex flex-col items-end gap-3">
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="p-3.5 bg-white hover:bg-slate-50 rounded-full shadow-xl cursor-pointer transition-all flex items-center justify-center w-12 h-12 border-2 border-red-500"
-              aria-label="Scroll to top"
-            >
-              <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 4l-8 8h5v8h6v-8h5z" />
-              </svg>
-            </button>
-          </aside>
-        )}
-
-        {modalImageSrc && (
-          <div className="fixed inset-0 z-[2147483648] bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
-            <div className="relative max-w-4xl max-h-[90vh]">
-              <button onClick={() => setModalImageSrc(null)} className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition">
-                ✕ Close
-              </button>
-              <img src={modalImageSrc} alt="Enlarged View" className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" />
+              {/* 使い方案内 */}
+              <div className="pt-2 border-t border-indigo-100 text-slate-700 text-sm leading-relaxed">
+                <div className="text-indigo-900 font-bold mb-1">💡 How it works:</div>
+                <p className="text-xs text-slate-600">
+                  Multiple pages of questions and answers are processed securely in real-time and are <strong>never stored</strong> in our database.
+                </p>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* 💡 TextTypeModal: Genkoyoshi モーダルを描画 */}
-        {activeModal && activeModalData && (
-          <TextTypeModal
-            isOpen={true}
-            onClose={() => setActiveModal(null)}
-            modalKey={activeModal}
-            {...activeModalData}
+          {/* チャットウィジェットへの連携 */}
+          <ChatYamatoEoyWritingCustom
+            systemPrompt={currentSystemPrompt}
+            userId={user?.id}
+            userNickname={nickname || (user?.email ? user.email.split('@') : "Student")}
+            credits={credits}
+            externalQuestionFiles={questionImages.map(i => i.file)}
+            externalImageFile={answerImages.length > 0 ? answerImages[0].file : null}
+            externalImagePreview={answerImages.length > 0 ? answerImages[0].preview : null}
+            assignedQuestion={assignedQuestionText}
+            onClearExternalImage={() => setAnswerImages([])}
           />
-        )}
-      </main>
-    </div>
-  </PageLayout>
-);
+
+          {showScrollTop && (
+            <aside aria-label="Scroll controls" className="fixed bottom-24 right-6 z-40 flex flex-col items-end gap-3">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="p-3.5 bg-white hover:bg-slate-50 rounded-full shadow-xl cursor-pointer transition-all flex items-center justify-center w-12 h-12 border-2 border-red-500"
+                aria-label="Scroll to top"
+              >
+                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4l-8 8h5v8h6v-8h5z" />
+                </svg>
+              </button>
+            </aside>
+          )}
+
+          {modalImageSrc && (
+            <div className="fixed inset-0 z- bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
+              <div className="relative max-w-4xl max-h-[90vh]">
+                <button onClick={() => setModalImageSrc(null)} className="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition">
+                  ✕ Close
+                </button>
+                <img src={modalImageSrc} alt="Enlarged View" className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" />
+              </div>
+            </div>
+          )}
+
+          {activeModal && modalData[activeModal] && (
+            <TextTypeModal
+              isOpen={true}
+              onClose={() => setActiveModal(null)}
+              modalKey={activeModal}
+              {...modalData[activeModal]}
+            />
+          )}
+        </main>
+      </div>
+    </PageLayout>
+  );
 }
