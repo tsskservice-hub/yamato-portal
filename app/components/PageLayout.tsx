@@ -1,6 +1,7 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（Supabase Realtime クレジット・プロフィール自動同期、認証モーダル、パンくずリスト、スクロールトップ対応完全版）
+ * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応・共通パンくずリスト自動生成・ヘッダークレジット即時同期版）
+ * 💡 上戻りボタンは YamatoChatCommon 側へ集約・カラー完全連動されたため、PageLayout からは削除してクリーン化しています。
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -35,8 +36,7 @@ type PageLayoutProps = {
   nickname?: string;
   learningPace?: "steady" | "normal" | "accelerated";
   isDarkMode?: boolean;
-  breadcrumbTitle?: string; // 個別ページでカスタムパンくず名称を指定したい場合のオプション
-  scrollTopClassName?: string; // スクロールトップボタンのスタイル上書き用オプション
+  breadcrumbTitle?: string;
   onSignOut?: () => void | Promise<void>;
 };
 
@@ -48,7 +48,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   learningPace: propLearningPace,
   isDarkMode = false,
   breadcrumbTitle,
-  scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50",
   onSignOut: propOnSignOut
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {
@@ -60,26 +59,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const location = useLocation();
 
-  // 💡 Scroll to top states & listener
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // 💡 パス名から自動でパンくずの項目を生成するロジック
+  // 💡 パンくずリスト自動生成ロジック
   const generateBreadcrumbs = () => {
     const paths = location.pathname.split("/").filter(Boolean);
     const crumbs: { label: string; path: string }[] = [];
@@ -107,7 +87,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const breadcrumbs = generateBreadcrumbs();
 
-  // 💡 ユーザー情報・クレジット・ニックネーム・学習ペースの状態管理
+  // 💡 ユーザー情報・クレジット・ニックネームの状態管理
   const [user, setUser] = useState<any>(propUser !== undefined ? propUser : (rootData?.user ?? null));
   const [credits, setCredits] = useState<number>(propCredits !== undefined ? propCredits : (rootData?.credits ?? 10));
   const [nickname, setNickname] = useState<string>(propNickname !== undefined ? propNickname : (rootData?.nickname ?? ""));
@@ -118,7 +98,14 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       ? rawLearningPace
       : "normal";
 
-  // 💡 Supabase から最新のプロフィール情報を取得
+  // props からの更新を受け取る
+  useEffect(() => {
+    if (propUser !== undefined) setUser(propUser);
+    if (propCredits !== undefined) setCredits(propCredits);
+    if (propNickname !== undefined) setNickname(propNickname);
+  }, [propUser, propCredits, propNickname]);
+
+  // Supabase からユーザーデータを取得
   const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -128,7 +115,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         .single();
 
       if (data && !error) {
-        setCredits((data as any).credits ?? 10);
+        if (typeof (data as any).credits === 'number') {
+          setCredits((data as any).credits);
+        }
         if ((data as any).nickname) {
           setNickname((data as any).nickname);
         }
@@ -138,13 +127,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     }
   };
 
-  useEffect(() => {
-    if (propUser !== undefined) setUser(propUser);
-    if (propCredits !== undefined) setCredits(propCredits);
-    if (propNickname !== undefined) setNickname(propNickname);
-  }, [propUser, propCredits, propNickname]);
-
-  // 💡 ログインセッションの監視
+  // ログインセッションの監視
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       if (propUser === undefined) {
@@ -165,7 +148,21 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     return () => subscription.unsubscribe();
   }, []);
 
-  // 🌟【方法2：Supabase Realtime】profiles テーブルの更新（credits / nickname）をリアルタイム監視
+  // 🌟【クレジット即時同期】ブラウザ内即時イベント受信（F5なし即時連動）
+  useEffect(() => {
+    const handleCreditUpdate = (e: any) => {
+      if (typeof e.detail?.credits === 'number') {
+        setCredits(e.detail.credits);
+      }
+    };
+
+    window.addEventListener("yamato:credits-updated", handleCreditUpdate);
+    return () => {
+      window.removeEventListener("yamato:credits-updated", handleCreditUpdate);
+    };
+  }, []);
+
+  // 🌟【クレジット即時同期】Supabase Realtime 監視（他端末・Webhook等）
   useEffect(() => {
     if (!user?.id) return;
 
@@ -181,11 +178,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         },
         (payload: any) => {
           if (payload.new) {
-            // クレジットが加算・減算されたらF5なしで即時反映
             if (typeof payload.new.credits === 'number') {
               setCredits(payload.new.credits);
             }
-            // ニックネームが更新された場合も同期
             if (payload.new.nickname !== undefined && payload.new.nickname !== null) {
               setNickname(payload.new.nickname);
             }
@@ -209,7 +204,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setNickname("");
   };
 
-  // 💡 認証モーダル・パスキーのステート管理
+  // 認証モーダル管理
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGuideStep, setIsGuideStep] = useState(false);
@@ -231,7 +226,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setIsAuthModalOpen(true);
   };
 
-  // 💡 外部（各ページ）の ref から呼び出し可能にする公開メソッド
   useImperativeHandle(ref, () => ({
     openAuthModal: (mode: 'signin' | 'signup' | string) => {
       handleOpenAuthModal(mode);
@@ -313,20 +307,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       </main>
 
       <Footer onOpenAuth={handleOpenAuthModal} />
-
-      {/* ⬆️ ページトップへ戻るボタン */}
-      {showScrollTop && (
-        <div className="fixed bottom-24 right-6 z-40">
-          <button
-            type="button"
-            onClick={scrollToTop}
-            className={`w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center ${scrollTopClassName}`}
-            title="ページトップへ戻る"
-          >
-            ▲
-          </button>
-        </div>
-      )}
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (
