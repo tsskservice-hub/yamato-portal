@@ -5,6 +5,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { fetchYamatoConfigsData, BotConfig } from "../data/yamato-configs";
+import { CreditCostFooter } from "./CreditCostFooter";
 
 export interface ChatYamatoEoyWritingCustomMetaType {
   componentName: string;
@@ -778,11 +779,11 @@ export function ChatYamatoEoyWritingCustom({
                                   <span>📄</span>
                                   <span>Export PDF</span>
                                 </button>
-                              </div>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
+                    </div>
                     ))}
                     {isTutorLoading && (
                       <div className="flex items-center gap-2 text-xs text-slate-600 italic bg-white/80 border border-slate-200 p-2 rounded-xl w-fit shadow-xs">
@@ -845,9 +846,9 @@ export function ChatYamatoEoyWritingCustom({
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-                      <span>💡 Text: {FEATURE_COSTS.textAi} cr / 1 Photo: {FEATURE_COSTS.imageAi} cr / 2 Photos: {FEATURE_COSTS.multiImageAi} cr</span>
-                    </div>
+                    {/* 🌟 クレジットコストフッター */}
+                    <CreditCostFooter />
+
                   </form>
                 </>
               )}
