@@ -2,9 +2,9 @@
  * @file GenkoyoshiModal.tsx
  * @description VCE Japanese Genkoyoshi Usage Guide Modal Component
  * 💡 Features:
- * 1. Fully independent design without relying on texttypes or external DB (prevents import errors permanently)
- * 2. Systematically covers rules for titles, names, paragraphs, and square usage (punctuation rules, numbers, etc.) in English
- * 3. Inline iframe embedding for sample PDF (/genkoyoshi.pdf) with a "View in New Tab" button
+ * 1. Fully independent design utilizing structured data (title, purpose, structure, sampleImage)
+ * 2. Automatically handles sub-lists for Main Text and Square Usage
+ * 3. Safe PDF preview path handling to prevent 404 errors
  * 4. Smooth closing via Escape key and backdrop click
  */
 import React, { useEffect } from "react";
@@ -12,43 +12,31 @@ import React, { useEffect } from "react";
 export interface GenkoyoshiModalProps {
   isOpen: boolean;
   onClose: () => void;
-  samplePdfUrl?: string;
+  title?: string;
+  purpose?: string;
+  structure?: string[];
+  sampleImage?: string;
 }
 
-export const GENKOYOSHI_RULES = [
-  {
-    title: "Title & Author Name",
-    icon: "🏷️",
-    items: [
-      "Title (Line 1): Leave 3 blank squares at the beginning, then write your title.",
-      "Author Name (Line 2): Write towards the end, leaving the very last 1 square blank.",
-    ],
-  },
-  {
-    title: "Paragraphs & Main Text",
-    icon: "✍️",
-    items: [
-      "New Paragraph: Indent 1 square at the beginning of each paragraph.",
-      "No Blank Lines: Do not leave blank lines between paragraphs.",
-      "Dialogue (Conversations): Start a conversation on a new line, placing the opening quotation mark 「 in the first square.",
-    ],
-  },
-  {
-    title: "Square Usage & Punctuation Rules",
-    icon: "📐",
-    items: [
-      "1 Character per Square: As a general rule, write one letter or symbol in each square.",
-      "Punctuation Marks (、/ 。): Never start a new line with punctuation. Place it in the bottom-right of the previous square or in the margin.",
-      "Brackets (「 」): Opening brackets cannot be placed at the end of a line, and closing brackets cannot be placed at the beginning of a line.",
-      "Numbers & Alphabet: In vertical writing, use Kanji numerals (一, 二, 三) or fit two half-width Arabic digits (e.g. 25) horizontally into a single square.",
-    ],
-  },
-];
+const DEFAULT_GENKOYOSHI_DATA = {
+  title: "Genkoyoshi Usage Guide",
+  purpose: "This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi. Refer to each text type for details.",
+  structure: [
+    "Title (Line 1): Leave 3 spaces at the beginning, then write the title",
+    "Name (Line 2): Write at the end, leaving the last square blank",
+    "Main Text:",
+    "Square Usage:"
+  ],
+  sampleImage: "text_type_samples/genkoyoshi.pdf",
+};
 
 export function GenkoyoshiModal({
   isOpen,
   onClose,
-  samplePdfUrl = "/genkoyoshi.pdf",
+  title = DEFAULT_GENKOYOSHI_DATA.title,
+  purpose = DEFAULT_GENKOYOSHI_DATA.purpose,
+  structure = DEFAULT_GENKOYOSHI_DATA.structure,
+  sampleImage = DEFAULT_GENKOYOSHI_DATA.sampleImage,
 }: GenkoyoshiModalProps) {
   // Close modal on Escape key
   useEffect(() => {
@@ -62,6 +50,13 @@ export function GenkoyoshiModal({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  // Ensure sampleImage path starts with a slash to prevent 404 errors in nested routing
+  const resolvedPdfUrl = sampleImage
+    ? sampleImage.startsWith("/")
+      ? sampleImage
+      : `/${sampleImage}`
+    : "/genkoyoshi.pdf";
 
   return (
     <div
@@ -83,11 +78,10 @@ export function GenkoyoshiModal({
               <h3
                 id="genkoyoshi-modal-title"
                 className="text-lg sm:text-xl font-bold text-rose-900 m-0"
-              >
-                Genkoyoshi Usage Guide
-              </h3>
+                dangerouslySetInnerHTML={{ __html: title }}
+              />
               <p className="text-xs text-rose-700 m-0 mt-0.5">
-                This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi.
+                Standard formatting rules & conventions for VCE Japanese Writing
               </p>
             </div>
           </div>
@@ -104,24 +98,68 @@ export function GenkoyoshiModal({
         {/* Scrollable Main Content */}
         <div className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-grow text-slate-800">
           
-          {/* Rules Section */}
-          <div className="space-y-4">
-            {GENKOYOSHI_RULES.map((section, idx) => (
-              <div
-                key={idx}
-                className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-2xs"
-              >
-                <h4 className="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2 m-0 mb-2.5 pb-1.5 border-b border-slate-200">
-                  <span>{section.icon}</span>
-                  <span>{section.title}</span>
-                </h4>
-                <ul className="space-y-2 pl-5 list-disc text-xs sm:text-sm text-slate-700 leading-relaxed m-0">
-                  {section.items.map((item, itemIdx) => (
-                    <li key={itemIdx}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          {/* Key Points & Purpose Section */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
+            <h4 className="m-0 font-bold text-slate-800 text-base flex items-center gap-2 pb-2 border-b border-slate-200">
+              <span>📌</span>
+              <span>Key points</span>
+            </h4>
+            
+            <p className="m-0 text-base text-slate-700 leading-relaxed">
+              <strong>✨</strong> {purpose}
+            </p>
+
+            <ul className="m-0 pl-5 text-slate-700 space-y-3 text-base">
+              {structure.map((point, index) => {
+                // Main Text sub-items
+                if (point.startsWith("Main Text:")) {
+                  const mainTextSubItems = [
+                    "Start from the 3rd line, leaving the 1st square blank",
+                    "Indent 1 space for a new paragraph",
+                    "Do not leave a blank line between paragraphs",
+                  ];
+                  return (
+                    <li key={index} className="mb-2">
+                      <strong>Main Text:</strong>
+                      <ul className="mt-1 pl-5 list-disc space-y-1">
+                        {mainTextSubItems.map((sub, subIndex) => (
+                          <li key={subIndex} className="text-sm text-slate-600">
+                            {sub}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  );
+                }
+
+                // Square Usage sub-items
+                if (point.startsWith("Square Usage:")) {
+                  const squareUsageSubItems = [
+                    "1 character per square",
+                    "Use Arabic numerals (2 digits per square) for horizontal numbers",
+                    "Punctuation marks (、/。) never start a new line; place them in the bottom-right of the previous square or along with the last character",
+                  ];
+                  return (
+                    <li key={index} className="mb-2">
+                      <strong>Square Usage:</strong>
+                      <ul className="mt-1 pl-5 list-disc space-y-1">
+                        {squareUsageSubItems.map((sub, subIndex) => (
+                          <li key={subIndex} className="text-sm text-slate-600">
+                            {sub}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li key={index} className="mb-1 leading-relaxed">
+                    {point}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
           {/* Sample PDF Preview Section */}
@@ -134,7 +172,7 @@ export function GenkoyoshiModal({
                 </span>
               </div>
               <a
-                href={samplePdfUrl}
+                href={resolvedPdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-2xs flex items-center gap-1 no-underline"
@@ -146,12 +184,11 @@ export function GenkoyoshiModal({
             {/* Inline PDF Preview Frame */}
             <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-inner h-[380px] sm:h-[460px]">
               <iframe
-                src={samplePdfUrl} // 💡 #toolbar=0 などのハッシュを削除し、純粋なURLのみにする
+                src={resolvedPdfUrl}
                 title="Genkoyoshi PDF Preview"
                 className="w-full h-full border-none"
               />
             </div>
-
           </div>
         </div>
 
