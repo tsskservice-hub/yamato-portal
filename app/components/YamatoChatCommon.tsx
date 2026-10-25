@@ -1,12 +1,13 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（閉じたボタン＆開いたウィンドウ両方の枠線4px完全統一・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
+ * @description ポータル共通AIチャットウィジェット（Credit Balance表記・アンバー調背景・全枠線4px完全統一・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
  * 💡 特徴：
- * 1. 閉じたフローティングボタンおよび開いたチャットウィンドウの枠線を 4px (border-4 & 4px solid) で完全統一
- * 2. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
- * 3. chatThemes, ImageModal, ScrollTopButton, useChatResize, CreditCostFooter の分離による高い保守性
- * 4. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
- * 5. 入力フォーム下部にクレジット消費案内（Text: 2 cr / 1 Photo: 4 cr / Visual Aid: 4 cr）を再表示
+ * 1. クレジット表示欄を「Credit Balance」表記に変更し、ChatYamatoEoyWritingCustomと同じ黄色調（bg-amber-50）に統一
+ * 2. 閉じたフローティングボタンおよび開いたチャットウィンドウの枠線を 4px (border-4 & 4px solid) で完全統一
+ * 3. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
+ * 4. chatThemes, ImageModal, ScrollTopButton, useChatResize, CreditCostFooter の分離による高い保守性
+ * 5. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
+ * 6. 入力フォーム下部にクレジット消費案内（Text: 2 cr / 1 Photo: 4 cr / Visual Aid: 4 cr）を再表示
  */
 import React, { useState, useEffect, useRef } from "react";
 
@@ -32,9 +33,13 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.7.0",
-  role: "ポータル共通AIチャットウィジェット（全枠線4px完全統一版）",
+  version: "4.8.0",
+  role: "ポータル共通AIチャットウィジェット（Credit Balance＆アンバー背景統一版）",
   features: [
+    {
+      featureName: "Credit Balance Header with Amber Theme",
+      description: "アカウント表示をCredit Balanceに変更しChatYamatoEoyWritingCustomと共通の黄色い背景色を適用"
+    },
     {
       featureName: "Uniform 4px Border Width",
       description: "閉じた起動ボタンおよび開いたチャット枠線の太さを4pxに完全統一"
@@ -176,9 +181,8 @@ export function YamatoChatCommon({
     ? themeStyles[themeColor as ThemeColorKey]
     : themeStyles.blue;
   
-  const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `$ [cite: 58, 127] [cite: 58, 127]{currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
+  const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `$ [cite: 8, 15]{currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
   
-  // 💡 【修正点1】個別設定に 2px が入っていても 4px に置換し、カラーコード指定時も 4px solid を強制
   const floatingInlineStyle = {
     ...(buttonStyle?.border
       ? { border: buttonStyle.border.replace("2px", "4px").replace("1px", "4px") }
@@ -426,7 +430,6 @@ export function YamatoChatCommon({
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
             style={floatingInlineStyle}
-            // 💡 【修正点2】閉じたボタンのクラスに「border-4」を直接追加して4pxの太枠を確実化
             className={`${finalFloatingButtonClass} border-4 font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
           >
             <span>🤖</span>
@@ -448,7 +451,6 @@ export function YamatoChatCommon({
                 ? undefined 
                 : { width: `${chatSize.width}px`, height: `${chatSize.height}px`, ...boxBorderInlineStyle }
             }
-            // 💡 開いたチャットウィンドウの枠線も「border-4」
             className={`bg-white border-4 ${!isHexColor ? currentTheme.border : ''} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
@@ -500,9 +502,9 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* クレジット表示エリア */}
-              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
-                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Account Status</span>
+              {/* 💡 【修正点】Credit Balance 表記 ＆ ChatYamatoEoyWritingCustom と同じ黄色（bg-amber-50）に統一 */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-amber-800">Credit Balance</span>
                 {activeUserId ? (
                   <div className="flex items-center gap-2">
                     {getSafeString(currentNickname) && (
@@ -510,7 +512,7 @@ export function YamatoChatCommon({
                         👤 {getSafeString(currentNickname)}
                       </span>
                     )}
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
                       🪙 {currentCredits} credits
                     </span>
                   </div>

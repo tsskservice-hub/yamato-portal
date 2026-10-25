@@ -1,12 +1,12 @@
 /**
  * @file ChatYamatoEoyWritingCustom.tsx
- * @description 生徒持参問題＆答案対応 VCE Writing 3セクション添削専用AIチャット（FeedbackPdfModal 統合・スリム版）
+ * @description 生徒持参問題＆答案対応 VCE Writing 3セクション添削専用AIチャット
  * 💡 特徴：
- * 1. useYamatoAccount による Supabase認証・Realtime・クレジット残高・ヘッダー連動の完全カプセル化
- * 2. CreditCostFooter, ImageModal, ScrollTopButton, useChatResize による共通UI・操作の外部化
- * 3. FeedbackPdfModal の導入により、約100行におよぶPDF編集＆印刷用ロジックを完全外部委託
- * 4. Section 2 Part B（300字厳守）/ Section 3（400〜500字目安）/ Other の3セクション切り替えUI
- * 5. 複数問題画像・答案画像のBase64自動変換とAPI連携
+ * 1. Escキーでのフルスクリーン解除時に元のウィンドウサイズへ確実に復帰
+ * 2. Select Writing Section & Learning Pace の背景を Font Size と同じ薄い灰色（bg-slate-100）に統一
+ * 3. useYamatoAccount による Supabase認証・Realtime・クレジット残高・ヘッダー連動の完全カプセル化
+ * 4. FeedbackPdfModal による先生用添削編集・備考（P.S.）追加＆高品質PDF印刷機能
+ * 5. CreditCostFooter, ImageModal, ScrollTopButton, useChatResize による共通UI・操作の外部化
  */
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -17,7 +17,7 @@ import { themeStyles } from "../styles/chatThemes";
 import { ScrollTopButton } from "./ScrollTopButton";
 import { ImageModal } from "./ImageModal";
 import { CreditCostFooter } from "./CreditCostFooter";
-import { FeedbackPdfModal } from "./FeedbackPdfModal"; // 💡 切り出したPDFモーダル
+import { FeedbackPdfModal } from "./FeedbackPdfModal";
 import { useChatResize } from "../hooks/useChatResize";
 import { useYamatoAccount, getSafeString } from "../hooks/useYamatoAccount";
 
@@ -35,24 +35,24 @@ export interface ChatYamatoEoyWritingCustomMetaType {
 
 export const CHAT_YAMATO_EOY_WRITING_CUSTOM_META: ChatYamatoEoyWritingCustomMetaType = {
   componentName: "ChatYamatoEoyWritingCustom",
-  version: "6.1.0",
-  role: "生徒持参問題・直書き＆画像両対応 VCE Writing 3セクション対応 添削・フィードバック専用AIチャット（FeedbackPdfModal 統合版）",
+  version: "6.2.0",
+  role: "生徒持参問題・直書き＆画像両対応 VCE Writing 3セクション対応 添削・フィードバック専用AIチャット（フルスクリーン復帰＆UI統一版）",
   features: [
     {
-      featureName: "Modular Architecture",
-      description: "アカウント同期、リサイズ、クレジット案内、画像モーダル、PDF編集印刷モーダル等を外部委託し高い保守性を実現"
+      featureName: "Fullscreen Escape Restoration",
+      description: "Escキーやブラウザ側の全画面解除時に元の通常サイズへ正確に復帰"
     },
     {
-      featureName: "3 VCE Writing Sections Selection",
-      description: "Section 2 Part B (300字)、Section 3 (400-500字)、その他の3セクションから最適な指導基準を自動適用"
+      featureName: "Unified Slate UI Style",
+      description: "Writing Section と Learning Pace の背景を Font Size と同じ薄い灰色に統一"
     },
     {
       featureName: "External Editable Feedback for PDF Export",
       description: "FeedbackPdfModal により先生が添削本文を推敲し、備考（P.S.）を添えて高品質なPDFレポートとして印刷・保存可能"
     },
     {
-      featureName: "Multiple Question & Answer Image Handling",
-      description: "持参された複数の問題画像および答案画像を自動でBase64変換し、AI OCRに連携"
+      featureName: "Modular Architecture",
+      description: "アカウント同期、リサイズ、クレジット案内、画像モーダル等を外部委託し高い保守性を実現"
     }
   ],
   supportedThemes: ["cyan"],
@@ -155,7 +155,7 @@ export function ChatYamatoEoyWritingCustom({
   // 💡 VCE Writing セクション選択 ("section2b" | "section3" | "other")
   const [writingSection, setWritingSection] = useState<"section2b" | "section3" | "other">("section2b");
 
-  // 💡 PDFモーダル用：編集対象とするAI返答テキスト（null のときはモーダル非表示）
+  // 💡 PDFモーダル用：編集対象とするAI返答テキスト
   const [pdfTargetContent, setPdfTargetContent] = useState<string | null>(null);
 
   const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
@@ -203,6 +203,7 @@ export function ChatYamatoEoyWritingCustom({
     }
   };
 
+  // 💡 フルスクリーン切り替え
   const toggleAiFullscreen = async () => {
     if (!aiChatRef.current) return;
     try {
@@ -217,6 +218,27 @@ export function ChatYamatoEoyWritingCustom({
       console.error("Fullscreen toggle failed:", err);
     }
   };
+
+  // 💡 【修正点1】Escキーおよびブラウザ全画面解除イベントで元のサイズに復帰
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsAiFullscreen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+        setIsAiFullscreen(false);
+      }
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,7 +348,7 @@ export function ChatYamatoEoyWritingCustom({
         { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
       ]);
 
-      // 🌟 クレジット減算とヘッダー即時連動
+      // クレジット減算とヘッダー即時同期
       deductCredits(requiredCost);
       await refreshUserCredits();
 
@@ -344,7 +366,7 @@ export function ChatYamatoEoyWritingCustom({
     <>
       <aside aria-label="AI Yamato Custom" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
         
-        {/* 🌟 共通・上に戻るボタン */}
+        {/* 上に戻るボタン */}
         <ScrollTopButton floatingClass="text-white" inlineStyle={{ backgroundColor: themeColor }} />
 
         {!isAiTutorOpen ? (
@@ -352,7 +374,7 @@ export function ChatYamatoEoyWritingCustom({
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
             style={{ backgroundColor: themeColor }}
-            className="text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative hover:opacity-90"
+            className="text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative hover:opacity-90 border-4 border-cyan-400"
           >
             <span>🤖</span>
             <span>{characterName}</span>
@@ -373,7 +395,7 @@ export function ChatYamatoEoyWritingCustom({
                 ? undefined 
                 : { width: `${chatSize.width}px`, height: `${chatSize.height}px`, borderColor: themeColor }
             }
-            className={`bg-white border-2 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+            className={`bg-white border-4 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                 : "min-w-[280px] min-h-[400px] max-w-[90vw] max-h-[88vh] overflow-auto"
@@ -442,9 +464,9 @@ export function ChatYamatoEoyWritingCustom({
                 )}
               </div>
 
-              {/* VCE Writing セクション選択UI */}
-              <div className="border rounded-xl p-2 mb-2 flex flex-col gap-1.5 shrink-0" style={{ backgroundColor: `${themeColor}0d`, borderColor: `${themeColor}40` }}>
-                <span className="text-[11px] font-bold" style={{ color: themeColor }}>Select Writing Section</span>
+              {/* 💡 【修正点2】VCE Writing セクション選択UI（Font Sizeと同じ薄い灰色 bg-slate-100 に統一） */}
+              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-2 flex flex-col gap-1.5 shrink-0">
+                <span className="text-xs font-bold text-slate-700">Select Writing Section</span>
                 <div className="grid grid-cols-3 gap-1">
                   {(
                     [
@@ -461,7 +483,7 @@ export function ChatYamatoEoyWritingCustom({
                       className={`py-1 px-1 rounded-md text-[10px] font-bold transition text-center truncate ${
                         writingSection === sec.key
                           ? "shadow-xs"
-                          : "bg-white text-slate-700 hover:opacity-80 border border-slate-200"
+                          : "bg-white text-slate-600 hover:opacity-80 border border-slate-200"
                       }`}
                     >
                       {sec.label}
@@ -470,9 +492,9 @@ export function ChatYamatoEoyWritingCustom({
                 </div>
               </div>
 
-              {/* 学習ペース選択UI */}
-              <div className="border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0" style={{ backgroundColor: `${themeColor}0d`, borderColor: `${themeColor}40` }}>
-                <span className="text-xs font-bold" style={{ color: themeColor }}>Learning Pace</span>
+              {/* 💡 【修正点2】学習ペース選択UI（Font Sizeと同じ薄い灰色 bg-slate-100 に統一） */}
+              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-slate-700">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
@@ -578,7 +600,7 @@ export function ChatYamatoEoyWritingCustom({
                                   />
                                 </div>
                               )}
-                              {/* 💡 Export PDF ボタン：クリックで対象テキストをセットしてモーダル起動 */}
+                              {/* Export PDF ボタン */}
                               <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-end">
                                 <button
                                   type="button"
@@ -655,7 +677,7 @@ export function ChatYamatoEoyWritingCustom({
                       </button>
                     </div>
 
-                    {/* 🌟 共通クレジット消費案内（1行） */}
+                    {/* クレジット消費案内 */}
                     <CreditCostFooter />
                   </form>
                 </>
@@ -665,7 +687,7 @@ export function ChatYamatoEoyWritingCustom({
         )}
       </aside>
 
-      {/* 🌟 先生用PDF編集・備考追加モーダル（FeedbackPdfModal をたった1行で呼び出し） */}
+      {/* 先生用PDF編集・備考追加モーダル */}
       {pdfTargetContent && (
         <FeedbackPdfModal
           initialContent={pdfTargetContent}
@@ -676,7 +698,7 @@ export function ChatYamatoEoyWritingCustom({
         />
       )}
 
-      {/* 🌟 共通画像拡大モーダル（1行） */}
+      {/* 画像拡大表示モーダル */}
       {modalImageSrc && (
         <ImageModal src={modalImageSrc} onClose={() => setModalImageSrc(null)} />
       )}
