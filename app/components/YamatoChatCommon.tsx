@@ -31,7 +31,7 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.4.0",
+  version: "4.4.1",
   role: "ポータル共通AIチャットウィジェット（完全モジュール分離アーキテクチャ版）",
   features: [
     {
@@ -490,20 +490,13 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* クレジット表示エリア */}
-              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
-                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Account Status</span>
+              {/* クレジット残高表示セクション */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-amber-800">Credits Balance</span>
                 {activeUserId ? (
-                  <div className="flex items-center gap-2">
-                    {getSafeString(currentNickname) && (
-                      <span className="text-[10px] text-slate-600 font-medium">
-                        👤 {getSafeString(currentNickname)}
-                      </span>
-                    )}
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                      🪙 {currentCredits} credits
-                    </span>
-                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
+                    🪙 {currentCredits} credits
+                  </span>
                 ) : (
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
                     🔒 Guest
