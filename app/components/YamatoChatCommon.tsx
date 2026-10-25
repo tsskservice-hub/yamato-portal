@@ -31,7 +31,7 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.4.1",
+  version: "4.4.2",
   role: "ポータル共通AIチャットウィジェット（完全モジュール分離アーキテクチャ版）",
   features: [
     {
@@ -505,8 +505,8 @@ export function YamatoChatCommon({
               </div>
 
               {/* 学習ペース選択UI */}
-              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
-                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
+              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
+                <span className="text-xs font-bold text-slate-700">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
