@@ -1,11 +1,12 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（完全モジュール分離・外部答案画像連携・ヘッダー即時連動版）
+ * @description ポータル共通AIチャットウィジェット（枠線4px対応・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
  * 💡 特徴：
- * 1. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
- * 2. chatThemes, ImageModal, ScrollTopButton, useChatResize の完全分離による保守性向上
- * 3. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
- * 4. クレジット消費時に deductCredits を通じて F5 なしでヘッダー残高を即時連動更新
+ * 1. 枠線の太さを 2px から 4px (border-4 & 4px solid) に強化
+ * 2. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
+ * 3. chatThemes, ImageModal, ScrollTopButton, useChatResize, CreditCostFooter の分離による高い保守性
+ * 4. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
+ * 5. 入力フォーム下部にクレジット消費案内（Text: 2 cr / 1 Photo: 4 cr / Visual Aid: 4 cr）を再表示
  */
 import React, { useState, useEffect, useRef } from "react";
 
@@ -31,12 +32,20 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.4.2",
-  role: "ポータル共通AIチャットウィジェット（完全モジュール分離アーキテクチャ版）",
+  version: "4.6.0",
+  role: "ポータル共通AIチャットウィジェット（枠線4px版）",
   features: [
     {
+      featureName: "Enhanced Border Width",
+      description: "チャットウィンドウおよびフローティングボタンの枠線を2pxから4pxに強化"
+    },
+    {
       featureName: "Modular Architecture",
-      description: "テーマ・モーダル・リサイズ・上戻りボタン・アカウント同期を完全分離し最高の保守性を実現"
+      description: "テーマ・モーダル・リサイズ・上戻りボタン・アカウント同期・フッター案内を完全分離"
+    },
+    {
+      featureName: "Credit Cost Guide Footer",
+      description: "入力欄下部にテキスト2cr / 写真4cr / Visual Aid 4cr の消費目安を明示"
     },
     {
       featureName: "Dashboard External Image & Question Integration",
@@ -85,7 +94,6 @@ export type YamatoChatCommonProps = {
   credits?: number;
   onOpenAuth?: (mode?: 'signin' | 'signup') => void;
   enableImageUpload?: boolean;
-  // 🌟 ダッシュボード（eoy-writing等）から渡される答案画像と設問
   externalImageFile?: File | null;
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
@@ -119,7 +127,7 @@ export function YamatoChatCommon({
   onClearExternalImage,
   assignedQuestion = "",
 }: YamatoChatCommonProps) {
-  // 🌟【アカウント・クレジット・ニックネーム同期フック】（約90行のロジックを1行で集約）
+  // アカウント同期フック
   const {
     activeUserId,
     currentCredits,
@@ -135,7 +143,7 @@ export function YamatoChatCommon({
     propLearningPace,
   });
 
-  // 🌟【リサイズカスタムフック】（約40行のロジックを1行で集約）
+  // リサイズフック
   const { chatSize, startTopLeftResize } = useChatResize();
 
   const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(defaultOpen);
@@ -143,7 +151,6 @@ export function YamatoChatCommon({
   const aiChatRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 💡 ダッシュボードから画像が渡されたら自動的にチャットを開く
   useEffect(() => {
     if (externalImagePreview) {
       setIsAiTutorOpen(true);
@@ -162,7 +169,6 @@ export function YamatoChatCommon({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
 
-  // 💡 チャットローカルまたはダッシュボード連携画像の有効判定
   const activeImagePreview = selectedImagePreview || externalImagePreview || null;
 
   const isHexColor = themeColor.startsWith('#');
@@ -172,8 +178,9 @@ export function YamatoChatCommon({
   
   const finalFloatingButtonClass = floatingButtonClassName || (isHexColor ? "text-white" : `${currentTheme.floatingBg} ${currentTheme.floatingText} ${currentTheme.floatingBorder}`);
   
+  // 💡 【変更点1】HEXカラー指定時の枠線を 2px から 4px solid に変更
   const floatingInlineStyle = {
-    ...(buttonStyle?.border ? { border: buttonStyle.border } : isHexColor ? { border: `2px solid ${themeColor}` } : {}),
+    ...(buttonStyle?.border ? { border: buttonStyle.border } : isHexColor ? { border: `4px solid ${themeColor}` } : {}),
     ...(buttonStyle?.background ? { backgroundColor: buttonStyle.background } : isHexColor ? { backgroundColor: themeColor } : {}),
     ...(buttonStyle?.color ? { color: buttonStyle.color } : {}),
   };
@@ -187,7 +194,6 @@ export function YamatoChatCommon({
     },
   ]);
 
-  // ニックネームに応じた初期挨拶の置換
   useEffect(() => {
     const validNick = getSafeString(currentNickname);
     if (validNick && typeof initialGreeting === "string") {
@@ -314,7 +320,6 @@ export function YamatoChatCommon({
     setRequestVisualAid(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
 
-    // 送信時にダッシュボード側の画像もクリア
     if (onClearExternalImage) {
       onClearExternalImage();
     }
@@ -392,7 +397,6 @@ export function YamatoChatCommon({
         { role: "assistant", content: sanitizedReply, imageUrl: imageUrl }
       ]);
 
-      // 🌟【ヘッダー即時同期】フック経由で減算＆イベント自動送出
       deductCredits(requiredCredits);
       await refreshUserCredits();
 
@@ -410,7 +414,7 @@ export function YamatoChatCommon({
     <>
       <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
         
-        {/* 🌟 切り出した上に戻るボタンコンポーネント（1行） */}
+        {/* 上に戻るボタン */}
         <ScrollTopButton floatingClass={finalFloatingButtonClass} inlineStyle={floatingInlineStyle} />
 
         {!isAiTutorOpen ? (
@@ -439,7 +443,8 @@ export function YamatoChatCommon({
                 ? undefined 
                 : { width: `${chatSize.width}px`, height: `${chatSize.height}px`, ...boxBorderInlineStyle }
             }
-            className={`bg-white border-2 ${!isHexColor ? currentTheme.border : ''} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
+            // 💡 【変更点2】開いたチャットウィンドウの枠線を border-2 から border-4 に変更
+            className={`bg-white border-4 ${!isHexColor ? currentTheme.border : ''} rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
               isAiFullscreen
                 ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
                 : "min-w-[280px] min-h-[380px] max-w-[90vw] max-h-[85vh] overflow-auto"
@@ -490,13 +495,20 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* クレジット残高表示セクション */}
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-amber-800">Credits Balance</span>
+              {/* クレジット表示エリア */}
+              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
+                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Account Status</span>
                 {activeUserId ? (
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
-                    🪙 {currentCredits} credits
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {getSafeString(currentNickname) && (
+                      <span className="text-[10px] text-slate-600 font-medium">
+                        👤 {getSafeString(currentNickname)}
+                      </span>
+                    )}
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${currentCredits >= FEATURE_COSTS.textAi ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                      🪙 {currentCredits} credits
+                    </span>
+                  </div>
                 ) : (
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200">
                     🔒 Guest
@@ -505,8 +517,8 @@ export function YamatoChatCommon({
               </div>
 
               {/* 学習ペース選択UI */}
-              <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold text-slate-700">Learning Pace</span>
+              <div className={`${currentTheme.badgeBg} border rounded-xl p-2 mb-2 flex items-center justify-between shrink-0`}>
+                <span className={`text-xs font-bold ${currentTheme.badgeText}`}>Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
                   {(["steady", "normal", "accelerated"] as const).map((level) => (
                     <button
@@ -553,7 +565,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* 設問バッジ（assignedQuestion） */}
+              {/* 設問バッジ */}
               {assignedQuestion && (
                 <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                   <span className="text-xs font-bold text-indigo-900">Target Question</span>
@@ -714,9 +726,8 @@ export function YamatoChatCommon({
                       </button>
                     </div>
 
-                    {/* 🌟 一元化データを自動参照するフッター */}
+                    {/* クレジット消費案内 */}
                     <CreditCostFooter />
-
                   </form>
                 </>
               )}
@@ -725,7 +736,7 @@ export function YamatoChatCommon({
         )}
       </aside>
 
-      {/* 🌟 切り出した画像拡大表示モーダル（1行） */}
+      {/* 画像拡大表示モーダル */}
       {modalImageSrc && (
         <ImageModal src={modalImageSrc} onClose={() => setModalImageSrc(null)} />
       )}
