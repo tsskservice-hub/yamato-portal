@@ -1,11 +1,11 @@
 /**
  * @file GenkoyoshiModal.tsx
- * @description VCE日本語 原稿用紙の使い方専用モーダルコンポーネント
- * 💡 特徴:
- * 1. texttypes や外部DBに依存しない完全独立設計（インポートエラーの恒久防止）
- * 2. タイトル・氏名・段落・マス目ルール（句読点の禁則処理・数字アルファベット等）を体系的に網羅
- * 3. PDF見本（/genkoyoshi.pdf）のインライン iframe 埋め込み ＆ 別タブ閲覧ボタン完備
- * 4. Escキーおよび背景クリックでのスムーズなクローズ対応
+ * @description VCE Japanese Genkoyoshi Usage Guide Modal Component
+ * 💡 Features:
+ * 1. Fully independent design without relying on texttypes or external DB (prevents import errors permanently)
+ * 2. Systematically covers rules for titles, names, paragraphs, and square usage (punctuation rules, numbers, etc.) in English
+ * 3. Inline iframe embedding for sample PDF (/genkoyoshi.pdf) with a "View in New Tab" button
+ * 4. Smooth closing via Escape key and backdrop click
  */
 import React, { useEffect } from "react";
 
@@ -17,30 +17,30 @@ export interface GenkoyoshiModalProps {
 
 export const GENKOYOSHI_RULES = [
   {
-    title: "Title & Author Name (タイトルと氏名)",
+    title: "Title & Author Name",
     icon: "🏷️",
     items: [
-      "Title (1st Line): Leave 3 blank squares at the top, then write your title. (タイトルは1行目、上を3マス空けて書き始める)",
-      "Author Name (2nd Line): Align towards the bottom, leaving the very last 1 square blank. (名前は2行目、一番下の1マスを空けて末尾に揃える)",
+      "Title (Line 1): Leave 3 blank squares at the beginning, then write your title.",
+      "Author Name (Line 2): Write towards the end, leaving the very last 1 square blank.",
     ],
   },
   {
-    title: "Paragraphs & Main Text (段落と本文)",
+    title: "Paragraphs & Main Text",
     icon: "✍️",
     items: [
-      "New Paragraph: Indent 1 square at the beginning of each paragraph. (新しい段落の書き出しは、必ず1マス空ける)",
-      "No Blank Lines: Do not leave blank lines between paragraphs. (段落と段落の間に空行を作らない)",
-      "Dialogue (Conversations): Start conversation with a new line, placing the opening bracket 「 in the first square. (会話文は行を変え、1マス目に「 を書く)",
+      "New Paragraph: Indent 1 square at the beginning of each paragraph.",
+      "No Blank Lines: Do not leave blank lines between paragraphs.",
+      "Dialogue (Conversations): Start a conversation on a new line, placing the opening quotation mark 「 in the first square.",
     ],
   },
   {
-    title: "Square Usage & Punctuation (マス目の使い方と禁則処理)",
+    title: "Square Usage & Punctuation Rules",
     icon: "📐",
     items: [
-      "1 Character per Square: As a general rule, write one letter in each square. (基本的に1マスに1文字)",
-      "Punctuation Marks (、/ 。): Never start a new line with punctuation! Place it in the bottom-right of the previous line's last square, or write it in the margin outside. (句読点を行頭に書いてはいけない。前の行の最後のマスに文字と一緒に書くか、欄外に置く)",
-      "Brackets (「 」): Opening brackets cannot be at the end of a line; closing brackets cannot be at the beginning of a line. (開き括弧を行末に、閉じ括弧を行頭に置かない)",
-      "Numbers & Alphabet: In vertical writing, write Kanji numbers (一, 二, 三) or fit 2 half-width Arabic numbers (e.g. 25) into one square horizontally. (縦書きでは漢数字が基本。算用数字や英字は1マスに2文字収める)",
+      "1 Character per Square: As a general rule, write one letter or symbol in each square.",
+      "Punctuation Marks (、/ 。): Never start a new line with punctuation. Place it in the bottom-right of the previous square or in the margin.",
+      "Brackets (「 」): Opening brackets cannot be placed at the end of a line, and closing brackets cannot be placed at the beginning of a line.",
+      "Numbers & Alphabet: In vertical writing, use Kanji numerals (一, 二, 三) or fit two half-width Arabic digits (e.g. 25) horizontally into a single square.",
     ],
   },
 ];
@@ -50,7 +50,7 @@ export function GenkoyoshiModal({
   onClose,
   samplePdfUrl = "/genkoyoshi.pdf",
 }: GenkoyoshiModalProps) {
-  // Escキーでモーダルを閉じる
+  // Close modal on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -75,7 +75,7 @@ export function GenkoyoshiModal({
         className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl max-h-[90vh] flex flex-col relative my-auto animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ヘッダー */}
+        {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-rose-50 to-pink-50 rounded-t-2xl shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-2xl">📝</span>
@@ -84,10 +84,10 @@ export function GenkoyoshiModal({
                 id="genkoyoshi-modal-title"
                 className="text-lg sm:text-xl font-bold text-rose-900 m-0"
               >
-                Genkoyoshi Usage Guide (原稿用紙の使い方)
+                Genkoyoshi Usage Guide
               </h3>
               <p className="text-xs text-rose-700 m-0 mt-0.5">
-                Standard formatting rules & conventions for VCE Japanese Writing
+                This guide outlines the general rules for formatting titles, names, main text, and square usage on genkoyoshi.
               </p>
             </div>
           </div>
@@ -101,10 +101,10 @@ export function GenkoyoshiModal({
           </button>
         </div>
 
-        {/* スクロール可能メインコンテンツ */}
+        {/* Scrollable Main Content */}
         <div className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-grow text-slate-800">
           
-          {/* ルール解説セクション */}
+          {/* Rules Section */}
           <div className="space-y-4">
             {GENKOYOSHI_RULES.map((section, idx) => (
               <div
@@ -124,7 +124,7 @@ export function GenkoyoshiModal({
             ))}
           </div>
 
-          {/* 実物サンプル・PDFプレビューセクション */}
+          {/* Sample PDF Preview Section */}
           <div className="bg-rose-50/60 border border-rose-200 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export function GenkoyoshiModal({
               </a>
             </div>
 
-            {/* インライン PDF / 見本枠 */}
+            {/* Inline PDF Preview Frame */}
             <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-inner h-[380px] sm:h-[460px]">
               <iframe
                 src={`${samplePdfUrl}#toolbar=0&navpanes=0`}
@@ -154,14 +154,14 @@ export function GenkoyoshiModal({
           </div>
         </div>
 
-        {/* フッター */}
+        {/* Footer */}
         <div className="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end shrink-0">
           <button
             type="button"
             onClick={onClose}
             className="px-5 py-2 text-xs font-bold text-white bg-slate-700 hover:bg-slate-800 rounded-xl transition shadow-xs cursor-pointer"
           >
-            Close Guide (閉じる)
+            Close Guide
           </button>
         </div>
       </div>
