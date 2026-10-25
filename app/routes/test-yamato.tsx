@@ -1,12 +1,7 @@
 /**
  * @file test-yamato.tsx
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加版）
- 
-背景、文字、枠線
-湘南ベルマーレ：黄緑、黒、青
-
-
-*/
+ */
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
@@ -26,7 +21,7 @@ const sportsColorTemplates = [
   { name: "セルティック", sport: "サッカー / スコットランド", border: "2px solid #000000", background: "#018749", color: "#FFFFFF" },
   { name: "マンチェスター・シティ", sport: "サッカー / イングランド", border: "2px solid #FFFFFF", background: "#6CABDD", color: "#000000" },
   { name: "マンチェスター・ユナイテッド", sport: "サッカー / イングランド", border: "2px solid #FBE122", background: "#DA291C", color: "#FFFFFF" },
-  { name: "Aston Villa", sport: "サッカー / イングランド", border: "2px solid #F1BE48", background: "#b22222", color: "#95BFE5" },
+  { name: "Aston Villa", sport: "サッカー / イングランド", border: "2px solid #F1BE48", background: "#670E36", color: "#95BFE5" },
   { name: "レアル・マドリード", sport: "サッカー / スペイン", border: "2px solid #FEBE10", background: "#FFFFFF", color: "#00529F" },
   { name: "リヴァプールFC", sport: "サッカー / イングランド", border: "2px solid #F6EB61", background: "#C8102E", color: "#FFFFFF" },
   { name: "アーセナルFC", sport: "サッカー / イングランド", border: "2px solid #9C824A", background: "#FFFFFF", color: "#EF0107" },
@@ -310,28 +305,28 @@ export default function TestYamatoPage() {
           </div>
         </div>
 
-        {/* ⚽ セクション2：スポーツチーム配色テンプレート (独立チャットボタンサイズプレビュー) */}
+        {/* ⚽ セクション2：スポーツチーム配色テンプレート (チャットボタンサイズプレビュー) */}
         <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
           <h2 style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
             <span>⚽</span> スポーツチーム配色テンプレート (チャットボタンサイズプレビュー)
           </h2>
           <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "24px" }}>
-            実際の常駐チャットボタンサイズ（<code>px-4 py-3 rounded-full text-sm</code>）で「大和ヤマト」の表示雰囲気を比較できる配色案です。
+            実際の常駐チャットボタンサイズで「大和ヤマト」の文字を少し大きく（<code>fontSize: 16px</code>）して表示雰囲気を比較できる配色案です。
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
             {sportsColorTemplates.map((template, idx) => (
               <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "6px", backgroundColor: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                 
-                {/* 💬 実際のチャットボタンと同じカプセル型サイズ・デザインのプレビュー */}
+                {/* 💬 チャットボタンプレビュー（文字サイズを 16px に拡大） */}
                 <div
                   style={{
                     border: template.border,
                     backgroundColor: template.background,
                     color: template.color,
-                    padding: "12px 16px",
+                    padding: "12px 18px",
                     borderRadius: "9999px",
-                    fontSize: "14px",
+                    fontSize: "16px",
                     fontWeight: "bold",
                     display: "inline-flex",
                     alignItems: "center",
@@ -340,7 +335,7 @@ export default function TestYamatoPage() {
                     cursor: "default"
                   }}
                 >
-                  <span>🤖</span>
+                  <span style={{ fontSize: "18px" }}>🤖</span>
                   <span>大和ヤマト</span>
                 </div>
 
