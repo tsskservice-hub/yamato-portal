@@ -55,7 +55,7 @@ export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient)
   try {
     const { data: row, error } = await supabaseClient
       .from('app_knowledge')
-      .select('data, content_json')
+      .select('data')
       .eq('key', KNOWLEDGE_KEY)
       .single();
 
