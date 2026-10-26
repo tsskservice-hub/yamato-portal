@@ -30,9 +30,8 @@ export default function FaqPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
 
-  // 検索・フィルタリング用ステート
+  // 検索用ステート（カテゴリ絞り込みバーは撤去）
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
 
   // 💡 再試行（Retry）時にも再利用できるフェッチコールバック
@@ -63,33 +62,34 @@ export default function FaqPage() {
     setOpenIds(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // 💡 全21件のデータからユニークなカテゴリ一覧を自動抽出してタブ化
-  const categories = useMemo(() => {
-    if (!faqs) return [];
-    const uniqueCategories = Array.from(new Set(faqs.map(item => item.category)));
-    return [
-      { id: "all", label: "All Questions" },
-      ...uniqueCategories.map(cat => ({ id: cat, label: cat }))
-    ];
-  }, [faqs]);
-
-  // 💡 検索 & カテゴリ絞り込み（全21件を即座にフィルタリング）
+  // 💡 検索キーワードに基づく絞り込み
   const filteredFaqs = useMemo(() => {
     if (!faqs) return [];
     const query = searchQuery.toLowerCase().trim();
+    if (!query) return faqs;
 
     return faqs.filter(item => {
-      const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
-      if (!query) return matchesCategory;
-
-      const matchesSearch =
+      return (
         item.question.toLowerCase().includes(query) ||
         item.answer.toLowerCase().includes(query) ||
-        item.category.toLowerCase().includes(query);
-
-      return matchesCategory && matchesSearch;
+        item.category.toLowerCase().includes(query)
+      );
     });
-  }, [faqs, searchQuery, selectedCategory]);
+  }, [faqs, searchQuery]);
+
+  // 💡 カテゴリごとにグループ化してすべてのカテゴリーを一度に表示
+  const groupedFaqs = useMemo(() => {
+    const groups: { category: string; items: FaqItem[] }[] = [];
+    filteredFaqs.forEach(item => {
+      let group = groups.find(g => g.category === item.category);
+      if (!group) {
+        group = { category: item.category, items: [] };
+        groups.push(group);
+      }
+      group.items.push(item);
+    });
+    return groups;
+  }, [filteredFaqs]);
 
   // SEO 用 JSON-LD 構造化データの動的生成
   const faqJsonLd = useMemo(() => {
@@ -138,7 +138,7 @@ export default function FaqPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search across all 21 questions (e.g., kanji, credits, punctuation)..."
+                placeholder="Search across all questions (e.g., kanji, credits, punctuation)..."
                 disabled={loading || error || !faqs}
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all disabled:opacity-60"
               />
@@ -166,78 +166,68 @@ export default function FaqPage() {
               />
             </div>
           ) : (
-            /* 3. 正常取得時のコンテンツ描画 */
+            /* 3. 正常取得時のコンテンツ描画（横スクロールバーを廃止し、すべてのカテゴリをグループごとに一覧表示） */
             <>
-              {/* 💡 カテゴリタブ一覧 */}
-              <div className="flex items-center space-x-2 overflow-x-auto pb-4 no-scrollbar">
-                {categories.map(cat => {
-                  const isSelected = selectedCategory === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat.id)}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shadow-xs ${
-                        isSelected
-                          ? "bg-blue-600 text-white shadow-md"
-                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
-                      <span>{cat.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* FAQ リスト（全21件対応） */}
-              <div className="mt-6 space-y-4">
-                {filteredFaqs.length > 0 ? (
-                  filteredFaqs.map((faq: FaqItem) => {
-                    const isOpen = !!openIds[faq.id];
-                    return (
-                      <div
-                        key={faq.id}
-                        className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all hover:border-blue-200"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => toggleAccordion(faq.id)}
-                          className="w-full text-left px-6 py-5 flex items-start justify-between space-x-4 cursor-pointer focus:outline-hidden"
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-700">
-                                {faq.category}
-                              </span>
-                            </div>
-                            <h2 className="text-base font-bold text-slate-900">
-                              {faq.question}
-                            </h2>
-                          </div>
-                          <div className="shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
-                            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </div>
-                        </button>
-
-                        {/* アコーディオン本文 */}
-                        {isOpen && (
-                          <div className="px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4">
-                            <div
-                              className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ __html: faq.answer }}
-                            />
-                          </div>
-                        )}
+              <div className="space-y-10">
+                {groupedFaqs.length > 0 ? (
+                  groupedFaqs.map(group => (
+                    <div key={group.category} className="space-y-4">
+                      {/* カテゴリ見出し */}
+                      <div className="flex items-center space-x-3 border-b border-slate-200 pb-2">
+                        <h2 className="text-lg font-extrabold text-slate-900 capitalize">
+                          {group.category}
+                        </h2>
+                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                          {group.items.length} {group.items.length === 1 ? 'question' : 'questions'}
+                        </span>
                       </div>
-                    );
-                  })
+
+                      {/* 該当カテゴリのFAQリスト */}
+                      <div className="space-y-4">
+                        {group.items.map((faq: FaqItem) => {
+                          const isOpen = !!openIds[faq.id];
+                          return (
+                            <div
+                              key={faq.id}
+                              className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all hover:border-blue-200"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => toggleAccordion(faq.id)}
+                                className="w-full text-left px-6 py-5 flex items-start justify-between space-x-4 cursor-pointer focus:outline-hidden"
+                              >
+                                <div className="space-y-1">
+                                  <h3 className="text-base font-bold text-slate-900">
+                                    {faq.question}
+                                  </h3>
+                                </div>
+                                <div className="shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
+                                  {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </div>
+                              </button>
+
+                              {/* アコーディオン本文 */}
+                              {isOpen && (
+                                <div className="px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4">
+                                  <div
+                                    className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
+                                    dangerouslySetInnerHTML={{ __html: faq.answer }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))
                 ) : (
                   <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
-                    <HelpCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <h3 className="text-base font-bold text-slate-700">No matching questions found</h3>
-                    <p className="text-xs text-slate-500 mt-1">Try searching with a different keyword or switching categories.</p>
-                  </div>
-                )}
+                  <HelpCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h3 className="text-base font-bold text-slate-700">No matching questions found</h3>
+                  <p className="text-xs text-slate-500 mt-1">Try searching with a different keyword.</p>
+                </div>
+              )}
               </div>
 
               {/* お問い合わせ誘導セクション */}
@@ -256,10 +246,10 @@ export default function FaqPage() {
                 </div>
               </div>
             </>
-          )}
+        )}
 
-        </div>
       </div>
+    </div>
     </PageLayout>
   );
 }
