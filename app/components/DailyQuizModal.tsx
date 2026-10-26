@@ -1,12 +1,14 @@
 /**
  * @file DailyQuizModal.tsx
  * @description デイリークイズモーダルコンポーネント（クイズの出題、解答選択、正誤判定、解説表示を担当）
+ * 💡 固定文言をすべて PORTAL_CONTENT.dailyQuizModal から受け取るデータ駆動型設計
  */
 import React from 'react';
 import { X, Check } from 'lucide-react';
 import { QuizItem } from '../data/quizzes';
+import { PORTAL_CONTENT as DEFAULT_PORTAL_CONTENT } from '../data/portal-content';
 
-interface DailyQuizModalProps {
+export interface DailyQuizModalProps {
   isOpen: boolean;
   onClose: () => void;
   isDarkMode: boolean;
@@ -16,6 +18,7 @@ interface DailyQuizModalProps {
   hasCompletedTodayQuiz: boolean;
   isQuizCorrect: boolean;
   onAnswer: (selectedIndex: number) => void;
+  portalContent?: any; // Supabase または親から渡される動的マスターデータ
 }
 
 export function DailyQuizModal({
@@ -28,8 +31,13 @@ export function DailyQuizModal({
   hasCompletedTodayQuiz,
   isQuizCorrect,
   onAnswer,
+  portalContent,
 }: DailyQuizModalProps) {
   if (!isOpen) return null;
+
+  // 💡 文言マスターデータの解決（props優先、フォールバックとしてデフォルト定数を使用）
+  const content = portalContent || DEFAULT_PORTAL_CONTENT;
+  const modalText = content?.dailyQuizModal || DEFAULT_PORTAL_CONTENT.dailyQuizModal;
 
   return (
     <div 
@@ -43,25 +51,33 @@ export function DailyQuizModal({
         <button 
           onClick={onClose}
           className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
+          aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-6">
+          {/* ヘッダー */}
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">
               🧠
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge (+2 Credits)</span>
-              <h3 className="text-lg font-extrabold tracking-tight">Today's Japanese & Culture Quiz</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">
+                {modalText.badge}
+              </span>
+              <h3 className="text-lg font-extrabold tracking-tight">
+                {modalText.title}
+              </h3>
             </div>
           </div>
 
+          {/* クイズ問題文エリア */}
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-left">
             <p className="text-sm font-semibold leading-relaxed">{currentQuiz?.question}</p>
           </div>
 
+          {/* 選択肢ボタン一覧 */}
           <div className="space-y-2.5">
             {currentQuiz?.options?.map((option, idx) => {
               let btnStyle = "border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/20";
@@ -83,12 +99,15 @@ export function DailyQuizModal({
                   className={`w-full p-3.5 rounded-xl border text-xs sm:text-sm text-left transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
                 >
                   <span>{option}</span>
-                  {(isAnswerSubmitted || hasCompletedTodayQuiz) && idx === currentQuiz.answer && <Check className="w-4 h-4 text-blue-600" />}
+                  {(isAnswerSubmitted || hasCompletedTodayQuiz) && idx === currentQuiz.answer && (
+                    <Check className="w-4 h-4 text-blue-600 shrink-0 ml-2" />
+                  )}
                 </button>
               );
             })}
           </div>
 
+          {/* 解答後・解説表示エリア */}
           {(isAnswerSubmitted || hasCompletedTodayQuiz) && (
             <div className="space-y-3 text-left">
               {currentQuiz.images && currentQuiz.images.length > 0 && (
@@ -107,22 +126,25 @@ export function DailyQuizModal({
               <div className={`p-4 rounded-2xl border text-xs space-y-2 ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : 'bg-red-500/10 border-red-500/30 text-red-800 dark:text-red-200'}`}>
                 <p className="font-bold">
                   {hasCompletedTodayQuiz && !isAnswerSubmitted 
-                    ? "✨ You have already completed today's quiz! (Credits earned: +2)" 
+                    ? modalText.completedMessage 
                     : isQuizCorrect 
-                    ? "🎉 Correct! You earned 2 credits!" 
-                    : "💪 Incorrect! Try again tomorrow!"}
+                    ? modalText.correctMessage 
+                    : modalText.incorrectMessage}
                 </p>
-                <p className="leading-relaxed text-slate-600 dark:text-slate-300">{currentQuiz.explanation}</p>
+                <p className="leading-relaxed text-slate-600 dark:text-slate-300">
+                  {currentQuiz.explanation}
+                </p>
               </div>
             </div>
           )}
 
+          {/* フッター（閉じるボタン） */}
           <div className="flex justify-end pt-2">
             <button
               onClick={onClose}
               className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-bold transition cursor-pointer"
             >
-              Close
+              {modalText.closeBtnText}
             </button>
           </div>
         </div>
@@ -130,3 +152,5 @@ export function DailyQuizModal({
     </div>
   );
 }
+
+export default DailyQuizModal;

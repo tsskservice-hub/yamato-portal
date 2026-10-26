@@ -2,12 +2,17 @@
  * @file texttypes.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Japanese Text Types Specification.
  * Stores data in Supabase 'app_knowledge' table under key: 'TEXTTYPES'.
+ * 
+ * 💡 設計方針 (legal-content.ts 準拠):
+ * 1. 静的オブジェクトではなく、非同期取得関数 (fetchTextTypesData) を提供。
+ * 2. 取得失敗時は null を返し、UI側で DataErrorState にフォールバックさせる。
+ * 3. 原稿用紙キー (Genkoyoshi / genkoyoshi / Genkooyooshi) の表記揺れを吸収。
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
 // --- Type Definitions ---
-export interface TextTypeDetail {
+export interface TextTypeInfo {
   title: string;
   purpose: string;
   structure: string[];
@@ -18,7 +23,7 @@ export interface TextTypeDetail {
   structure_original?: string[];
 }
 
-export type TextTypesData = Record<string, TextTypeDetail>;
+export type TextTypesData = Record<string, TextTypeInfo>;
 
 export interface AppKnowledgeRecord<T = any> {
   id?: string;
@@ -30,13 +35,13 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-// Supabase の key（大文字の 'TEXTTYPES'）
+// 💡 Supabase app_knowledge の key（大文字の 'TEXTTYPES'）
 const KNOWLEDGE_KEY = 'TEXTTYPES';
 
 /**
- * 原稿用紙データを安全に取り出すヘルパー関数（表記揺れ Genkoyoshi / genkoyoshi / Genkooyooshi を吸収）
+ * 原稿用紙データを安全に取り出すヘルパー関数（表記揺れを吸収）
  */
-export function getGenkoyoshiData(textTypesData?: TextTypesData | null): TextTypeDetail | null {
+export function getGenkoyoshiData(textTypesData?: TextTypesData | null): TextTypeInfo | null {
   if (!textTypesData) return null;
   return (
     textTypesData["Genkoyoshi"] ||
@@ -48,7 +53,7 @@ export function getGenkoyoshiData(textTypesData?: TextTypesData | null): TextTyp
 
 /**
  * Supabase 'app_knowledge' テーブルから TEXTTYPES データを取得
- * 取得失敗・レコード不在時は null を返し、UI側で DataErrorState を表示させます
+ * 失敗時やレコード不在時は null を返し、画面側で DataErrorState を表示させます
  */
 export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData | null> {
   try {
@@ -65,13 +70,14 @@ export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promis
 
     const result = row.data as TextTypesData;
     if (result && typeof result === 'object' && Object.keys(result).length > 0) {
+      // Genkoyoshi 表記の正規化
       const resolvedGenkoyoshi = getGenkoyoshiData(result);
       if (resolvedGenkoyoshi) {
         return {
           ...result,
           Genkoyoshi: resolvedGenkoyoshi,
           genkoyoshi: resolvedGenkoyoshi,
-          Genkooyooshi: resolvedGenkoyoshi
+          Genkooyooshi: resolvedGenkoyoshi,
         };
       }
       return result;
@@ -85,12 +91,21 @@ export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promis
 }
 
 /**
- * テキストタイプ名から該当データを取得
+ * テキストタイプ名から該当データを取得するヘルパー
  */
-export function getTextTypeByName(textTypesData: TextTypesData | null, name: string): TextTypeDetail | null {
+export function getTextTypeByName(textTypesData: TextTypesData | null, name: string): TextTypeInfo | null {
   if (!textTypesData) return null;
   if (name.toLowerCase() === "genkoyoshi" || name.toLowerCase() === "genkooyooshi") {
     return getGenkoyoshiData(textTypesData);
   }
   return textTypesData[name] || null;
 }
+
+/**
+ * 登録されているすべてのテキストタイプ名を取得
+ */
+export function listAllTextTypeNames(textTypesData: TextTypesData | null): string[] {
+  return textTypesData ? Object.keys(textTypesData) : [];
+}
+
+export default fetchTextTypesData;

@@ -1,32 +1,20 @@
 /**
  * @file HeroDemoChat.tsx
  * @description ヒーローセクションおよび自動デモチャット・デイリークイズバナーコンポーネント
+ * 💡 文言をすべて PORTAL_CONTENT に委譲し、ロジックとUI構造のみに特化した理想的設計
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowRight, ArrowDown, Send } from 'lucide-react';
+import { PORTAL_CONTENT as DEFAULT_PORTAL_CONTENT } from '../data/portal-content';
 
-const DEMO_CONVERSATIONS = [
-  {
-    user: "How do I practice Japanese writing?",
-    yamato: "Hello!🌸 You can use our EOY Writing Exam Tutor with 110 original prompts, Genkoyoshi layout tools, and instant AI feedback."
-  },
-  {
-    user: "Can I practice oral conversations here?",
-    yamato: "Yes! Our EOY Oral Mock Exam module provides realistic voice interaction and real-time AI examiner scoring."
-  },
-  {
-    user: "How do credits work?",
-    yamato: "Chats and vocabulary Q&A cost 1-2 credits. You also get daily free credits upon login, or you can top up anytime!"
-  }
-];
-
-interface HeroDemoChatProps {
+export interface HeroDemoChatProps {
   isDarkMode: boolean;
   user: any;
   hasCompletedTodayQuiz: boolean;
   onOpenAuthModal: (mode: 'signin' | 'signup') => void;
   onOpenQuizModal: () => void;
   validateFeatureCredits: (featureType: 'textAi' | 'imageAi') => Promise<boolean>;
+  portalContent?: any; // Supabase から渡された動的データ（渡されなければデフォルトを使用）
 }
 
 export function HeroDemoChat({
@@ -36,7 +24,15 @@ export function HeroDemoChat({
   onOpenAuthModal,
   onOpenQuizModal,
   validateFeatureCredits,
+  portalContent,
 }: HeroDemoChatProps) {
+  // 💡 文言マスターデータの解決（props優先、フォールバックとして定数を使用）
+  const content = portalContent || DEFAULT_PORTAL_CONTENT;
+  const hero = content.hero;
+  const quizBanner = content.dailyChallengeBanner;
+  const demoWidget = content.aiDemoWidget;
+  const demoConversations = demoWidget?.demoConversations || [];
+
   const [currentStep, setCurrentStep] = useState(0);
   const [chatHistory, setChatHistory] = useState<Array<{ user: string; yamato?: string }>>([]);
   const [typedInputText, setTypedInputText] = useState('');        
@@ -51,9 +47,12 @@ export function HeroDemoChat({
     }
   }, [chatHistory, isThinking, typedInputText]);
 
+  // デモ会話のアニメーション進行
   useEffect(() => {
+    if (!demoConversations || demoConversations.length === 0) return;
+
     let isMounted = true;
-    const currentConv = DEMO_CONVERSATIONS[currentStep];
+    const currentConv = demoConversations[currentStep % demoConversations.length];
 
     const runDemoSequence = async () => {
       if (!isMounted) return;
@@ -98,7 +97,7 @@ export function HeroDemoChat({
         return updated;
       });
 
-      if (currentStep === DEMO_CONVERSATIONS.length - 1) {
+      if (currentStep === demoConversations.length - 1) {
         await new Promise((r) => setTimeout(r, 4000));
         if (!isMounted) return;
         setChatHistory([]);
@@ -115,26 +114,29 @@ export function HeroDemoChat({
     return () => {
       isMounted = false;
     };
-  }, [currentStep]);
+  }, [currentStep, demoConversations]);
 
   return (
     <section className="text-center space-y-6 max-w-4xl mx-auto">
+      {/* バッジ */}
       <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
         <Flame className="w-3.5 h-3.5 text-red-600 animate-pulse" />
-        <span>Decades of Expertise in Japanese Language Education</span>
+        <span>{hero?.badge}</span>
       </div>
 
+      {/* メインタイトル */}
       <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
         <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-red-600 bg-clip-text text-transparent">
-          Japanese Tutor AI Yamato
+          {hero?.title}
         </span>
         <span className="block text-2xl sm:text-3xl font-bold mt-3 text-slate-700 dark:text-slate-300">
-          Your Gateway to Japanese Mastery
+          {hero?.subtitle}
         </span>
       </h1>
 
+      {/* 説明文 */}
       <p className={`text-base sm:text-lg max-w-2xl mx-auto ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-        Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
+        {hero?.description}
       </p>
 
       {/* Daily Quiz Banner */}
@@ -145,16 +147,22 @@ export function HeroDemoChat({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge</span>
-              <span className="text-xs font-bold text-blue-700 dark:text-blue-300">+2 Credits</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">
+                {quizBanner?.badge}
+              </span>
+              <span className="text-xs font-bold text-blue-700 dark:text-blue-300">
+                {quizBanner?.reward}
+              </span>
             </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Today's Japanese & Culture Quiz</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {quizBanner?.title}
+            </h3>
             <p className="text-xs text-slate-500">
               {!user 
-                ? "Sign in to take today's quiz and earn 2 free credits! ✨" 
+                ? quizBanner?.unauthenticatedText 
                 : hasCompletedTodayQuiz 
-                ? "You've already completed today's quiz! Come back tomorrow for more ✨" 
-                : "Answer correctly to earn 2 credits! (Available once per day)"}
+                ? quizBanner?.completedText 
+                : quizBanner?.defaultText}
             </p>
           </div>
         </div>
@@ -172,7 +180,13 @@ export function HeroDemoChat({
               : "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20"
           }`}
         >
-          <span>{!user ? "Sign In to Play Quiz" : hasCompletedTodayQuiz ? "View Quiz Results & Explanation" : "Take Today's Quiz"}</span>
+          <span>
+            {!user 
+              ? quizBanner?.unauthenticatedBtnText 
+              : hasCompletedTodayQuiz 
+              ? quizBanner?.completedBtnText 
+              : quizBanner?.defaultBtnText}
+          </span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -182,18 +196,26 @@ export function HeroDemoChat({
         <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center space-x-2">
             <span className="text-base">🤖</span>
-            <span className="font-bold text-sm text-blue-900 dark:text-blue-200">Japanese Tutor AI Yamato (Auto Demo)</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 font-bold animate-pulse">● Live Demo</span>
+            <span className="font-bold text-sm text-blue-900 dark:text-blue-200">
+              {demoWidget?.title}
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 font-bold animate-pulse">
+              {demoWidget?.badge}
+            </span>
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-medium">
-            Step {currentStep + 1} / {DEMO_CONVERSATIONS.length}
+            Step {demoConversations.length > 0 ? (currentStep % demoConversations.length) + 1 : 1} / {demoConversations.length || 1}
           </div>
         </div>
 
         <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-xl p-2.5 mb-4 flex items-center justify-between">
-          <span className="text-xs font-bold text-blue-900 dark:text-blue-300">Learning Pace (Demo)</span>
+          <span className="text-xs font-bold text-blue-900 dark:text-blue-300">
+            {demoWidget?.learningPaceLabel}
+          </span>
           <div className="inline-flex rounded-lg bg-white dark:bg-slate-900 p-0.5 shadow-xs border border-blue-200 dark:border-blue-800">
-            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold capitalize bg-blue-600 text-white shadow-xs">normal</span>
+            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold capitalize bg-blue-600 text-white shadow-xs">
+              {demoWidget?.defaultPace}
+            </span>
           </div>
         </div>
 
@@ -204,7 +226,7 @@ export function HeroDemoChat({
         >
           {chatHistory.length === 0 && !isThinking && (
             <div className="my-auto text-center text-xs text-slate-400 dark:text-slate-500 italic">
-              AI Yamato demo is starting...
+              {demoWidget?.startingNotice}
             </div>
           )}
 
@@ -225,7 +247,9 @@ export function HeroDemoChat({
                   isThinking && idx === chatHistory.length - 1 && (
                     <div className="p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex items-center space-x-2 shadow-xs">
                       <span className="inline-block animate-spin text-sm">🤖</span>
-                      <span className="italic font-medium animate-pulse">かんがえちゅう...</span>
+                      <span className="italic font-medium animate-pulse">
+                        {demoWidget?.thinkingNotice}
+                      </span>
                     </div>
                   )
                 )}
@@ -239,7 +263,9 @@ export function HeroDemoChat({
             {typedInputText ? (
               <span>{typedInputText}</span>
             ) : (
-              <span className="text-slate-400 dark:text-slate-500">Ask Yamato a question...</span>
+              <span className="text-slate-400 dark:text-slate-500">
+                {demoWidget?.inputPlaceholder}
+              </span>
             )}
             {!isSending && <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-600 animate-pulse"></span>}
           </div>
@@ -254,7 +280,7 @@ export function HeroDemoChat({
           <div className="flex flex-col space-y-1.5 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
             <div className="flex items-center space-x-2">
               <span>✨</span>
-              <span>Want to chat with Yamato-sensei? (Requires login & 2 credits for text chat)</span>
+              <span>{demoWidget?.chatNotice}</span>
               <a 
                 href="#pricing-credits-guide" 
                 onClick={(e) => {
@@ -264,12 +290,12 @@ export function HeroDemoChat({
                 className="inline-flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:underline font-bold ml-1 cursor-pointer bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded-md"
                 title="View Credit Consumption Guide"
               >
-                <span>Guide</span>
+                <span>{demoWidget?.guideLinkText}</span>
                 <ArrowDown className="w-3 h-3 animate-bounce" />
               </a>
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400 pl-5">
-              Answer today's Daily Quiz to earn 2 credits, or sign up now to receive 10 welcome credits!
+              {demoWidget?.subNotice}
             </div>
           </div>
           <button 
@@ -277,12 +303,12 @@ export function HeroDemoChat({
               if (!user) {
                 onOpenAuthModal('signup');
               } else if (await validateFeatureCredits('textAi')) {
-                alert("You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!");
+                alert(demoWidget?.chatWidgetAlert);
               }
             }}
             className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
           >
-            <span>{user ? "Chat with Yamato" : "Free Sign Up"}</span>
+            <span>{user ? demoWidget?.chatWithYamatoBtn : demoWidget?.freeSignUpBtn}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
