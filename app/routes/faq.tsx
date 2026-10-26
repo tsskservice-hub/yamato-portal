@@ -30,7 +30,7 @@ export default function FaqPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
 
-  // 検索用ステート（カテゴリ絞り込みバーは撤去）
+  // 検索用ステート
   const [searchQuery, setSearchQuery] = useState("");
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
 
@@ -91,6 +91,14 @@ export default function FaqPage() {
     return groups;
   }, [filteredFaqs]);
 
+  // 💡 該当カテゴリーの位置へスムーズスクロールする関数
+  const scrollToCategory = (categoryName: string) => {
+    const element = document.getElementById(`category-${categoryName}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // SEO 用 JSON-LD 構造化データの動的生成
   const faqJsonLd = useMemo(() => {
     if (!faqs || faqs.length === 0) return null;
@@ -143,6 +151,23 @@ export default function FaqPage() {
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all disabled:opacity-60"
               />
             </div>
+
+            {/* 💡 サーチボックスの下にすべてのカテゴリーを配置（クイックジャンプボタン） */}
+            {groupedFaqs.length > 0 && (
+              <div className="mt-6 flex flex-wrap items-center gap-2">
+                <span className="text-xs text-blue-200 font-medium mr-1">Categories:</span>
+                {groupedFaqs.map(group => (
+                  <button
+                    key={group.category}
+                    type="button"
+                    onClick={() => scrollToCategory(group.category)}
+                    className="px-3 py-1 rounded-full bg-blue-700/60 hover:bg-blue-600 text-white text-xs font-semibold border border-blue-400/30 transition-all cursor-pointer shadow-xs capitalize"
+                  >
+                    {group.category} ({group.items.length})
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -166,12 +191,12 @@ export default function FaqPage() {
               />
             </div>
           ) : (
-            /* 3. 正常取得時のコンテンツ描画（横スクロールバーを廃止し、すべてのカテゴリをグループごとに一覧表示） */
+            /* 3. 正常取得時のコンテンツ描画（各カテゴリに id を付与してスクロール遷移に対応） */
             <>
               <div className="space-y-10">
                 {groupedFaqs.length > 0 ? (
                   groupedFaqs.map(group => (
-                    <div key={group.category} className="space-y-4">
+                    <div key={group.category} id={`category-${group.category}`} className="space-y-4 scroll-mt-6">
                       {/* カテゴリ見出し */}
                       <div className="flex items-center space-x-3 border-b border-slate-200 pb-2">
                         <h2 className="text-lg font-extrabold text-slate-900 capitalize">
@@ -203,7 +228,7 @@ export default function FaqPage() {
                                 </div>
                                 <div className="shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
                                   {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                </div>
+                              </div>
                               </button>
 
                               {/* アコーディオン本文 */}
@@ -212,44 +237,44 @@ export default function FaqPage() {
                                   <div
                                     className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
                                     dangerouslySetInnerHTML={{ __html: faq.answer }}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
                   <HelpCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                   <h3 className="text-base font-bold text-slate-700">No matching questions found</h3>
                   <p className="text-xs text-slate-500 mt-1">Try searching with a different keyword.</p>
                 </div>
-              )}
-              </div>
+            )}
+            </div>
 
-              {/* お問い合わせ誘導セクション */}
-              <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center space-y-3">
-                <h3 className="text-lg font-bold text-blue-900">Still have questions?</h3>
-                <p className="text-xs sm:text-sm text-blue-700 max-w-xl mx-auto">
-                  Feel free to reach out anytime via the feedback feature or bug report cards on your dashboard. AI Yamato is also here to support you!
-                </p>
-                <div className="pt-2">
-                  <Link
-                    to="/"
-                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
-                  >
-                    Go to Dashboard
-                  </Link>
-                </div>
+            {/* お問い合わせ誘導セクション */}
+            <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center space-y-3">
+              <h3 className="text-lg font-bold text-blue-900">Still have questions?</h3>
+              <p className="text-xs sm:text-sm text-blue-700 max-w-xl mx-auto">
+                Feel free to reach out anytime via the feedback feature or bug report cards on your dashboard. AI Yamato is also here to support you!
+              </p>
+              <div className="pt-2">
+                <Link
+                  to="/"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+                >
+                  Go to Dashboard
+                </Link>
               </div>
-            </>
-        )}
+          </div>
+        </>
+      )}
 
-      </div>
     </div>
+  </div>
     </PageLayout>
   );
 }
