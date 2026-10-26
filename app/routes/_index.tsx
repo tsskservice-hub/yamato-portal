@@ -312,25 +312,7 @@ export default function Home() {
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
             
-          {/* 💡 セクションクイックジャンプボタン（毎日クイズ / Hero のすぐ上） */}
-          <div className="flex justify-center items-center space-x-3">
-            <a 
-              href="#section-general" 
-              className="px-4 py-2 rounded-xl bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 shadow-sm"
-            >
-              <span>🌐</span>
-              <span>Jump to General Learners</span>
-            </a>
-            <a 
-              href="#section-vce" 
-              className="px-4 py-2 rounded-xl bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 shadow-sm"
-            >
-              <span>🇦🇺</span>
-              <span>Jump to VCE Students</span>
-            </a>
-          </div>
-
-          {/* 1. Hero Section ＆ Auto Demo Chat (毎日クイズを含む) */}
+          {/* 1. Hero Section ＆ Auto Demo Chat */}
           <HeroDemoChat
             isDarkMode={isDarkMode}
             user={user}
