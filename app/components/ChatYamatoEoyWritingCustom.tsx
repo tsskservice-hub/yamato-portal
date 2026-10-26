@@ -88,22 +88,6 @@ export function ChatYamatoEoyWritingCustom({
         <span className="text-[11px] font-bold" style={{ color: themeColor }}>
           Select Writing Section
         </span>
-        {/* PDF出力ツールを直接開くためのクイックボタン */}
-        <button
-          type="button"
-          onClick={() => {
-            const initialText = assignedQuestion 
-              ? `【Assigned Prompt / Question】\n${assignedQuestion}\n\n【Feedback & Notes】\n`
-              : `【Feedback Report】\n`;
-            setPdfTargetContent(initialText);
-          }}
-          className="text-[10px] font-bold px-2 py-0.5 rounded transition flex items-center gap-1 cursor-pointer hover:opacity-80"
-          style={{ color: themeColor, backgroundColor: `${themeColor}20` }}
-          title="Open PDF Export Tool"
-        >
-          <span>📄</span>
-          <span>PDF Tool</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-3 gap-1">
