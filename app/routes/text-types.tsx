@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from '@remix-run/react';
 import type { MetaFunction } from '@remix-run/cloudflare';
 import PageLayout from '../components/PageLayout';
 import DataErrorState from '../components/DataErrorState';
@@ -78,13 +79,22 @@ export const TextTypesComponent: React.FC = () => {
           ) : (
             /* 3. 正常取得時のコンテンツ描画 */
             <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-                  Text Types / 文章の種類
-                </h1>
-                <p className="text-sm text-slate-600">
-                  VCE Japanese Second Language text types, structures, and conventions ({textTypeEntries.length} types).
-                </p>
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
+                    Text Types / 文章の種類
+                  </h1>
+                  <p className="text-sm text-slate-600 max-w-2xl">
+                    While there are various text types in VCE Japanese, these 8 essential formats frequently appear in external exams. Master these core structures first!
+                  </p>
+                </div>
+                <Link
+                  to="/faq"
+                  className="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition-colors self-start sm:self-auto shadow-xs whitespace-nowrap gap-1.5"
+                >
+                  <span>View FAQ: Text Types & Styles</span>
+                  <span>↗</span>
+                </Link>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -122,20 +132,20 @@ export const TextTypesComponent: React.FC = () => {
                           </ul>
                         </div>
                       )}
-                  </div>
-
-                  {item.sampleImage && (
-                    <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end items-center text-xs">
-                      <a
-                        href={item.sampleImage.startsWith('/') ? item.sampleImage : `/${item.sampleImage}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors inline-flex items-center gap-1"
-                      >
-                        View Sample PDF ↗
-                      </a>
                     </div>
-                  )}
+
+                    {item.sampleImage && (
+                      <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end items-center text-xs">
+                        <a
+                          href={item.sampleImage.startsWith('/') ? item.sampleImage : `/${item.sampleImage}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors inline-flex items-center gap-1"
+                        >
+                          View Sample PDF ↗
+                        </a>
+                      </div>
+                    )}
                 </div>
               ))}
             </div>
