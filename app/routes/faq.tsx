@@ -1,14 +1,14 @@
 /**
  * @file faq.tsx
- * @description VCE Japanese Portal (Yamato Portal) Comprehensive FAQ Page
- * （Supabase app_knowledge key: 'FAQ' 100%動的連動・DataErrorState版）
+ * @description VCE Japanese Portal FAQ ページ
+ * （Supabase app_knowledge key: 'FAQ' 全21件フラット動的連動・DataErrorState版）
  * 模範: terms.tsx
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from '@remix-run/react';
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { Search, HelpCircle, ChevronDown, ChevronUp, FileText, Mic, PenTool, LayoutDashboard } from 'lucide-react';
+import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import DataErrorState from '../components/DataErrorState';
 import { fetchFaqData, FaqItem } from '../data/faq-database';
@@ -19,7 +19,7 @@ export const meta: MetaFunction = () => {
     { title: "FAQ & AI Guide | AI Yamato Japanese Tutoring" },
     {
       name: "description",
-      content: "Frequently Asked Questions and AI Yamato expert guidance for VCE Japanese students.",
+      content: "Frequently Asked Questions and guidance for VCE Japanese external exams, text types, genkoyoshi, and portal usage.",
     },
   ];
 };
@@ -63,29 +63,29 @@ export default function FaqPage() {
     setOpenIds(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // カテゴリタブの定義
-  const categories = [
-    { id: "all", label: "All Questions", icon: HelpCircle },
-    { id: "portal_usage", label: "Portal & Credits", icon: LayoutDashboard },
-    { id: "genkoyoshi", label: "Genkoyoshi", icon: FileText },
-    { id: "vce_written", label: "VCE Written Exam", icon: PenTool },
-    { id: "vce_oral", label: "VCE Oral Exam", icon: Mic },
-  ];
+  // 💡 全21件のデータからユニークなカテゴリ一覧を自動抽出してタブ化
+  const categories = useMemo(() => {
+    if (!faqs) return [];
+    const uniqueCategories = Array.from(new Set(faqs.map(item => item.category)));
+    return [
+      { id: "all", label: "All Questions" },
+      ...uniqueCategories.map(cat => ({ id: cat, label: cat }))
+    ];
+  }, [faqs]);
 
-  // 💡 Supabase から取得した faqs を対象に検索とカテゴリフィルターを実行
+  // 💡 検索 & カテゴリ絞り込み（全21件を即座にフィルタリング）
   const filteredFaqs = useMemo(() => {
     if (!faqs) return [];
+    const query = searchQuery.toLowerCase().trim();
+
     return faqs.filter(item => {
       const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
-      const query = searchQuery.toLowerCase().trim();
-
       if (!query) return matchesCategory;
 
-      const matchesSearch = 
-        item.questionEn.toLowerCase().includes(query) ||
-        item.questionJp.toLowerCase().includes(query) ||
-        item.answerHtml.toLowerCase().includes(query) ||
-        item.tags.some(tag => tag.toLowerCase().includes(query));
+      const matchesSearch =
+        item.question.toLowerCase().includes(query) ||
+        item.answer.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query);
 
       return matchesCategory && matchesSearch;
     });
@@ -99,10 +99,10 @@ export default function FaqPage() {
       "@type": "FAQPage",
       "mainEntity": faqs.map(item => ({
         "@type": "Question",
-        "name": item.questionEn,
+        "name": item.question,
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": item.answerHtml.replace(/<[^>]*>?/gm, '').trim()
+          "text": item.answer.replace(/<[^>]*>?/gm, '').trim()
         }
       }))
     };
@@ -138,7 +138,7 @@ export default function FaqPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by keyword (e.g., kanji, punctuation, credits, speech)..."
+                placeholder="Search across all 21 questions (e.g., kanji, credits, punctuation)..."
                 disabled={loading || error || !faqs}
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all disabled:opacity-60"
               />
@@ -148,7 +148,7 @@ export default function FaqPage() {
 
         {/* メインコンテンツ */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-          
+
           {/* 1. ローディング状態 */}
           {loading ? (
             <div className="py-24 flex flex-col items-center justify-center space-y-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
@@ -168,10 +168,9 @@ export default function FaqPage() {
           ) : (
             /* 3. 正常取得時のコンテンツ描画 */
             <>
-              {/* カテゴリフィルタータブ */}
+              {/* 💡 カテゴリタブ一覧 */}
               <div className="flex items-center space-x-2 overflow-x-auto pb-4 no-scrollbar">
                 {categories.map(cat => {
-                  const IconComponent = cat.icon;
                   const isSelected = selectedCategory === cat.id;
                   return (
                     <button
@@ -179,25 +178,24 @@ export default function FaqPage() {
                       type="button"
                       onClick={() => setSelectedCategory(cat.id)}
                       className={`flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shadow-xs ${
-                        isSelected 
-                          ? "bg-blue-600 text-white shadow-md" 
+                        isSelected
+                          ? "bg-blue-600 text-white shadow-md"
                           : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
                       }`}
                     >
-                      <IconComponent className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-slate-500"}`} />
                       <span>{cat.label}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* FAQ リスト */}
+              {/* FAQ リスト（全21件対応） */}
               <div className="mt-6 space-y-4">
                 {filteredFaqs.length > 0 ? (
                   filteredFaqs.map((faq: FaqItem) => {
                     const isOpen = !!openIds[faq.id];
                     return (
-                      <div 
+                      <div
                         key={faq.id}
                         className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all hover:border-blue-200"
                       >
@@ -208,17 +206,12 @@ export default function FaqPage() {
                         >
                           <div className="space-y-1">
                             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600">
-                                {faq.category.replace('_', ' ')}
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-700">
+                                {faq.category}
                               </span>
-                              {faq.tags.slice(0, 3).map((tag, idx) => (
-                                <span key={idx} className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">
-                                  #{tag}
-                                </span>
-                              ))}
                             </div>
                             <h2 className="text-base font-bold text-slate-900">
-                              {faq.questionEn}
+                              {faq.question}
                             </h2>
                           </div>
                           <div className="shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
@@ -229,9 +222,9 @@ export default function FaqPage() {
                         {/* アコーディオン本文 */}
                         {isOpen && (
                           <div className="px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4">
-                            <div 
+                            <div
                               className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ __html: faq.answerHtml }}
+                              dangerouslySetInnerHTML={{ __html: faq.answer }}
                             />
                           </div>
                         )}
@@ -254,8 +247,8 @@ export default function FaqPage() {
                   Feel free to reach out anytime via the feedback feature or bug report cards on your dashboard. AI Yamato is also here to support you!
                 </p>
                 <div className="pt-2">
-                  <Link 
-                    to="/" 
+                  <Link
+                    to="/"
                     className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
                   >
                     Go to Dashboard

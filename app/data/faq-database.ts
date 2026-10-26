@@ -1,24 +1,20 @@
 /**
  * @file faq-database.ts
- * @description Type definitions and Supabase client integration for FAQ and AI Yamato Expert Guidance Data Bank.
- * Stores data in Supabase 'app_knowledge' table under key: 'FAQ'.
+ * @description Supabase 'app_knowledge' (key: 'FAQ') とフロントエンドを繋ぐアダプター
  * 
- * 💡 設計方針 (legal-content.ts 準拠):
- * 1. 静的配列の直参照ではなく、非同期取得関数 (fetchFaqData) を提供。
- * 2. 取得失敗時は null を返し、UI側で DataErrorState にフォールバックさせる。
+ * 💡 設計方針 (terms.tsx 模範準拠):
+ * 1. 質問1件を最小単位とする「フラットな配列形式（FaqItem[]）」を採用。
+ * 2. 取得失敗時・レコード不在時は null を返し、UI側で DataErrorState にフォールバックさせる。
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-// --- Type Definitions ---
+// --- 単一質問エンティティの型定義 ---
 export interface FaqItem {
   id: string;
-  category: "general" | "vce_written" | "vce_oral" | "genkoyoshi" | "portal_usage";
-  tags: string[];         // Tags for search and filtering
-  questionEn: string;      // English question text
-  questionJp: string;      // Japanese question text
-  answerHtml: string;      // Detailed explanation displayed on the site's FAQ page (supports HTML)
-  expertGuidance: string;  // Scoring criteria and guidance policy referenced by AI Yamato in its prompt
+  category: string;
+  question: string;
+  answer: string;
 }
 
 export type FaqDataPayload = FaqItem[];
@@ -58,11 +54,6 @@ export async function fetchFaqData(supabaseClient: SupabaseClient): Promise<FaqI
       return result;
     }
 
-    // 万が一 { faqList: [...] } の形式で保存されている場合の互換ハンドリング
-    if (result && typeof result === 'object' && Array.isArray((result as any).faqList)) {
-      return (result as any).faqList;
-    }
-
     return null;
   } catch (err) {
     console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, err);
@@ -71,7 +62,7 @@ export async function fetchFaqData(supabaseClient: SupabaseClient): Promise<FaqI
 }
 
 /**
- * Upsert FAQ data to Supabase 'app_knowledge' table.
+ * FAQ データを Supabase に Upsert 保存
  */
 export async function upsertFaqData(
   supabaseClient: SupabaseClient,
@@ -95,43 +86,25 @@ export async function upsertFaqData(
   return true;
 }
 
-// --- Helper & Utility Logic ---
+// --- 検索・抽出ヘルパー ---
 
-/**
- * Retrieves a specific FAQ item by its ID from Supabase fetched data.
- */
-export function getFaqById(faqs: FaqItem[] | null, id: string): FaqItem | undefined {
-  if (!faqs) return undefined;
-  return faqs.find((faq) => faq.id === id);
-}
-
-/**
- * Filters FAQ items by category from Supabase fetched data.
- */
-export function getFaqsByCategory(
-  faqs: FaqItem[] | null,
-  category: FaqItem["category"] | "all"
-): FaqItem[] {
-  if (!faqs) return [];
-  if (category === "all") return faqs;
-  return faqs.filter((faq) => faq.category === category);
-}
-
-/**
- * Searches FAQ items by keyword matching against question text, tags, or answer content.
- */
-export function searchFaqs(faqs: FaqItem[] | null, keyword: string): FaqItem[] {
-  if (!faqs) return [];
+export function searchFaqs(items: FaqItem[] | null, keyword: string): FaqItem[] {
+  if (!items) return [];
   const query = keyword.toLowerCase().trim();
-  if (!query) return faqs;
+  if (!query) return items;
 
-  return faqs.filter(
-    (faq) =>
-      faq.questionEn.toLowerCase().includes(query) ||
-      faq.questionJp.toLowerCase().includes(query) ||
-      faq.answerHtml.toLowerCase().includes(query) ||
-      faq.tags.some((tag) => tag.toLowerCase().includes(query))
+  return items.filter(
+    (item) =>
+      item.question.toLowerCase().includes(query) ||
+      item.answer.toLowerCase().includes(query) ||
+      item.category.toLowerCase().includes(query)
   );
+}
+
+export function getFaqsByCategory(items: FaqItem[] | null, category: string): FaqItem[] {
+  if (!items) return [];
+  if (category === "all") return items;
+  return items.filter((item) => item.category === category);
 }
 
 export default fetchFaqData;

@@ -1,6 +1,6 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタンを追加版）
+ * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタンを追加版・Yamatoの枠を削除）
  */
 import React from 'react';
 import { Link } from '@remix-run/react';
@@ -43,7 +43,7 @@ export default function Header({
               />
             </div>
             <span className="font-extrabold tracking-tight text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hidden sm:inline">
-              JP Tutor AI <span className="text-xs uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold ml-1">Yamato</span>
+              JP Tutor AI Yamato
             </span>
           </Link>
 
