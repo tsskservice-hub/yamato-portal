@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import { useNavigate } from "@remix-run/react";
-import { createClient } from "@supabase/supabase-js";
 
 // 🚀 モノレポ依存を排除し、app内のローカルデータファイルへ直接インポートする形に変更
 import questionDataRaw from "../data/oral-exam-questions";
@@ -15,8 +14,6 @@ export const meta: MetaFunction = () => {
 };
 
 // Supabase クライアント初期化用
-const SUPABASE_URL = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_URL || "" : "";
-const SUPABASE_ANON_KEY = typeof window !== "undefined" ? (window as any).ENV?.SUPABASE_ANON_KEY || "" : "";
 import { supabase } from "../lib/supabaseClient";
 
 type QuestionItem = {
@@ -72,7 +69,6 @@ export default function OralExamQuestions() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<any>(null);
-  const [userCredits, setUserCredits] = useState<number | null>(null);
 
   const [currentSection, setCurrentSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2">("sec1");
   const [currentPace, setCurrentPace] = useState<"steady" | "normal" | "accelerated">("steady");
@@ -106,24 +102,9 @@ export default function OralExamQuestions() {
   // 💡 AIチューター専用の学習レベル選択ステート（steady / normal / accelerated）
   const [tutorLevel, setTutorLevel] = useState<"steady" | "normal" | "accelerated">("steady");
 
-  // Supabase セッション監視とクレジット情報取得
+  // Supabase セッション監視
   useEffect(() => {
     let isMounted = true;
-
-    async function fetchUserCredits(userId: string) {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("credits")
-          .eq("id", userId)
-          .single();
-        if (!error && data && isMounted) {
-          setUserCredits(data.credits);
-        }
-      } catch (err) {
-        console.error("Error fetching user credits:", err);
-      }
-    }
 
     async function initSession() {
       try {
@@ -131,7 +112,6 @@ export default function OralExamQuestions() {
         if (session?.user) {
           if (isMounted) {
             setUser(session.user);
-            await fetchUserCredits(session.user.id);
           }
         }
       } catch (err) {
@@ -146,10 +126,8 @@ export default function OralExamQuestions() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        await fetchUserCredits(session.user.id);
       } else {
         setUser(null);
-        setUserCredits(null);
       }
       setLoading(false);
     });
@@ -253,17 +231,16 @@ export default function OralExamQuestions() {
     if (!tutorInput.trim() || isTutorLoading) return;
 
     const userMsg = tutorInput.trim();
-    const needsVisual = requestVisualAid; // 🎨 チェック状態を保持
+    const needsVisual = requestVisualAid;
 
     setTutorInput("");
-    setRequestVisualAid(false); // 送信後にチェックを自動リセット
+    setRequestVisualAid(false);
 
     const newMessages: ChatMessage[] = [...tutorMessages, { role: "user", content: userMsg }];
     setTutorMessages(newMessages);
     setIsTutorLoading(true);
 
     try {
-      // 🎨 チェックが入っている場合のみ、確実に対象メッセージに基づえた visualPrompt を構築
       const visualPrompt = needsVisual
         ? `Educational instructional diagram and visual aid for VCE Japanese high school students explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
@@ -275,7 +252,7 @@ export default function OralExamQuestions() {
           message: userMsg,
           chatHistory: tutorMessages,
           learningPace: tutorLevel,
-          visualPrompt: visualPrompt, // 🎨 バックエンドへ visualPrompt を送信
+          visualPrompt: visualPrompt,
           userNickname: user?.email ? user.email.split('@')[0] : "Student",
         }),
       });
@@ -286,7 +263,7 @@ export default function OralExamQuestions() {
 
       const data = (await response.json()) as any;
       const replyText = data.reply || "I'm here to help you with your Japanese studies!";
-      const imageUrl = data.imageUrl; // 💡 生成画像URL
+      const imageUrl = data.imageUrl;
       
       const sanitizedReply = sanitizeAiOutput(replyText);
 
@@ -326,32 +303,15 @@ export default function OralExamQuestions() {
       <div className="bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative">
         {/* Main Content */}
         <main className="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">
-          {/* User Credits Banner if available */}
-          {userCredits !== null && (
-            <div className="mb-6 flex justify-end">
-              <span className="text-sm bg-amber-200 text-amber-900 px-4 py-1.5 rounded-full font-bold shadow-xs">
-                💎 Credits: {userCredits}
-              </span>
-            </div>
-          )}
-
           {/* Hero Section */}
           <div className="bg-white border-2 border-amber-300 rounded-2xl p-6 sm:p-8 shadow-xl mb-10 text-center relative overflow-hidden">
             <div className="absolute -right-1 -bottom-1 text-amber-100 text-9xl select-none pointer-events-none">🎙️</div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3">
               VCE Oral Exam: Frequently Used Examiner Questions Audio Library
             </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed mb-6">
+            <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
               Listen to authentic examiner questions with exam-style speed and pronunciation. Switch between learning paces and sections to start improving your listening skills!
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <a
-                href="/#vce-app"
-                className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-3 rounded-xl shadow-xs transition text-sm flex items-center gap-2"
-              >
-                <span>✨ Try AI Tutor</span>
-              </a>
-            </div>
           </div>
 
           {/* Controls / Filter Section */}
@@ -459,20 +419,6 @@ export default function OralExamQuestions() {
                 </button>
               </div>
             ))}
-          </div>
-
-          {/* Bottom CTA Card */}
-          <div className="mt-12 bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-8 text-white shadow-xl text-center">
-            <h3 className="text-xl sm:text-2xl font-bold mb-3">Why not take your practice a step beyond just listening to audio and actually have a conversation with an AI?</h3>
-            <p className="text-amber-100 text-sm sm:text-base max-w-xl mx-auto mb-6">
-              With the EOY Oral Exam AI Tutor app, you can experience a realistic mock oral exam tailored to your level and pace.
-            </p>
-            <a
-              href="/#vce-app"
-              className="inline-block bg-white text-amber-800 hover:bg-amber-50 font-extrabold px-8 py-3.5 rounded-full shadow-lg transition transform hover:-translate-y-0.5"
-            >
-              Check out the app today! 🚀 
-            </a>
           </div>
         </main>
 
@@ -611,7 +557,6 @@ export default function OralExamQuestions() {
 
                 {/* 入力フォーム & 図解生成チェックボックス */}
                 <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                  {/* 🎨 ユーザーが明示的に図解を要求するためのチェックボックス */}
                   <div className="flex items-center gap-2 px-1">
                     <label className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 cursor-pointer select-none">
                       <input

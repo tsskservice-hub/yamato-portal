@@ -1,7 +1,12 @@
+/**
+ * @file eoy-oral-mock.tsx
+ * @description VCE Japanese - Mock Oral Mode (ChatYamatoEoyOralMock 連携版)
+ */
 import { useState, useEffect, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { supabase } from "../lib/supabaseClient";
+import ChatYamatoEoyOralMock from "../components/ChatYamatoEoyOralMock";
 
 export const meta: MetaFunction = () => {
   return [
@@ -122,6 +127,7 @@ const questionDataRaw = oralExamQuestionsData;
 export default function MockOralMode() {
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(10);
+  const [nickname, setNickname] = useState<string>("My friend");
 
   const [examPhase, setExamPhase] = useState<"config" | "examining" | "result">("config");
   const [selectedLevel, setSelectedLevel] = useState<string>("normal");
@@ -204,34 +210,39 @@ export default function MockOralMode() {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserCredits = async (userId: string) => {
+  const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, nickname, full_name')
         .eq('id', userId)
         .single();
       
       if (data && !error) {
-        const typedData = data as { credits?: number };
+        const typedData = data as { credits?: number; nickname?: string; full_name?: string };
         setCredits(typedData.credits ?? 10);
+        if (typedData.nickname) {
+          setNickname(typedData.nickname);
+        } else if (typedData.full_name) {
+          setNickname(typedData.full_name);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch user credits:', err);
+      console.error('Failed to fetch user profile:', err);
     }
   };
 
@@ -1618,6 +1629,15 @@ export default function MockOralMode() {
             );
           })()}
         </main>
+
+        {/* 💡 Floating Controls (ChatYamatoEoyOralMock 連携) */}
+        <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+          <ChatYamatoEoyOralMock
+            userId={user?.id}
+            userNickname={nickname}
+            credits={credits}
+          />
+        </aside>
 
         {modalContent && (
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
