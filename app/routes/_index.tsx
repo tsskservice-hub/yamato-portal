@@ -1,27 +1,12 @@
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
- * 💡 PORTAL_CONTENT 完全統合 ＆ エラー完全解消版
- * - lp-card-modules.ts を廃止し、PORTAL_CONTENT からモジュール一覧を動的ループ描画
- * - DataErrorState の Props 型定義（title, message, errorMessage）に完全準拠
- * - split('T')[0] および DAILY_QUIZZES の型不一致を修正
- * - HeroDemoChat / DailyQuizModal への portalContent 完全連動
- * - ネットワーク復旧時のオンライン自動再接続リスナー完備
+ * 💡 PORTAL_CONTENT & PRICE_PLANS 完全動的連動・DataErrorState版
  */
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { 
-  Sparkles, 
-  Coins, 
-  FileText, 
-  Grid, 
-  Mic, 
-  Gamepad2, 
-  Check, 
-  ArrowRight, 
-  Loader2, 
-  Flame 
-} from 'lucide-react';
+import { Sparkles, Coins, FileText, Grid, Mic, Gamepad2, Check, ArrowRight, Loader2, Flame } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import PageLayout, { PageLayoutRef } from '../components/PageLayout';
 import { HeroDemoChat } from '../components/HeroDemoChat';
@@ -32,8 +17,8 @@ import { DataErrorState } from '../components/DataErrorState';
 // 💡 Supabase 同期フック ＆ モジュール型定義
 import { usePortalContent, PortalModule } from '../data/portal-content';
 
-// 💡 料金プラン・キャンペーンマスター（PRICE_PLANS 側で一元管理）
-import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/price-plans';
+// 💡 料金プラン非同期取得関数 ＆ 型定義
+import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
 
 // 💡 クイズデータおよび取得ヘルパー
 import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
@@ -47,7 +32,7 @@ const MAX_ESTIMATED_CREDITS = {
 export default function Home() {
   const navigate = useNavigate();
 
-  // 💡 root.tsx の loader からユーザー情報・ニックネーム・クレジット・学習ペースを安全に取得
+  // root.tsx の loader からユーザー情報を取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     nickname?: string;
@@ -62,20 +47,18 @@ export default function Home() {
   const nickname = rootData?.nickname ?? "";
   const learningPace = rootData?.learningPace ?? "normal";
 
-  // 💡 PORTAL_CONTENT の動的取得 ＆ 自動再接続フック
-  const { 
-    portalContent, 
-    isLoading: isPortalLoading, 
-    isError: isPortalError, 
-    errorMessage: portalErrorMessage 
-  } = usePortalContent(supabase);
+  // 💡 PORTAL_CONTENT の動的取得
+  const { portalContent, isLoading: isPortalLoading, isError: isPortalError, errorMessage: portalErrorMessage } = usePortalContent(supabase);
+
+  // 💡 PRICE_PLANS の動的取得ステート
+  const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
+  const [isPriceLoading, setIsPriceLoading] = useState<boolean>(true);
+  const [isPriceError, setIsPriceError] = useState<boolean>(false);
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
-
-  // 💡 PageLayout の認証モーダルを外部から操作するための ref
   const layoutRef = useRef<PageLayoutRef>(null);
 
-  // 💡 Daily Quiz States（DAILY_QUIZZES 配列から安全に初期化）
+  // 💡 Daily Quiz States（DAILY_QUIZZES[0] をフォールバックにして型不一致を解消）
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -91,6 +74,29 @@ export default function Home() {
     }
   }, []);
 
+  // 💡 料金プランを Supabase からフェッチ
+  const loadPricePlans = useCallback(async () => {
+    setIsPriceLoading(true);
+    setIsPriceError(false);
+    try {
+      const data = await fetchPricePlansData(supabase);
+      if (data && data.pricePlans) {
+        setPriceData(data);
+      } else {
+        setIsPriceError(true);
+      }
+    } catch (err) {
+      console.error("Failed to load price plans on home page:", err);
+      setIsPriceError(true);
+    } finally {
+      setIsPriceLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPricePlans();
+  }, [loadPricePlans]);
+
   // ユーザーのクレジット残高およびクイズ完了履歴を取得
   const fetchUserCredits = async (userId: string) => {
     try {
@@ -99,12 +105,12 @@ export default function Home() {
         .select('credits, last_quiz_date')
         .eq('id', userId)
         .single();
-      
+
       if (data && !error) {
         const typedData = data as { credits?: number; last_quiz_date?: string };
         setCredits(typedData.credits ?? 10);
 
-        // 💡 .split('T')[0] で日付文字列を安全に取得
+        // 💡 .split('T')[0] で文字列として日付を取得して比較
         const todayStr = new Date().toISOString().split('T')[0];
         if (typedData.last_quiz_date === todayStr) {
           setHasCompletedTodayQuiz(true);
@@ -146,20 +152,17 @@ export default function Home() {
     }
   }, [user]);
 
-  // 認証モーダル開閉ハンドラー
   const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
     if (layoutRef.current?.openAuthModal) {
       layoutRef.current.openAuthModal(mode);
     }
   };
 
-  // サインアウト
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
   };
 
-  // クレジット消費ガード
   const validateFeatureCredits = async (featureType: 'textAi' | 'imageAi'): Promise<boolean> => {
     if (!user) {
       handleOpenAuthModal('signup');
@@ -179,7 +182,6 @@ export default function Home() {
     return true;
   };
 
-  // デイリークイズ解答処理
   const handleAnswerQuiz = async (selectedIndex: number) => {
     if (isAnswerSubmitted || !user) return;
     setSelectedOption(selectedIndex);
@@ -189,7 +191,7 @@ export default function Home() {
     setIsQuizCorrect(correct);
 
     if (correct) {
-      // 💡 .split('T')[0] で日付文字列を安全に取得
+      // 💡 .split('T')[0] で文字列として日付を取得
       const todayStr = new Date().toISOString().split('T')[0];
       const newCredits = credits + 2;
 
@@ -208,7 +210,6 @@ export default function Home() {
     }
   };
 
-  // Stripe 購入ボタン押下処理
   const handleCheckout = async (priceId: string) => {
     if (!user) {
       alert("ログインが必要です");
@@ -244,7 +245,6 @@ export default function Home() {
     }
   };
 
-  // 💡 アイコン名に応じた Lucide アイコンの動的レンダリングヘルパー
   const renderModuleIcon = (iconName: string, className: string) => {
     switch (iconName) {
       case "Grid": return <Grid className={className} />;
@@ -256,18 +256,18 @@ export default function Home() {
     }
   };
 
-  // 💡 1. データ取得失敗時は、静的データで隠蔽せず直ちに DataErrorState を表示！
+  // 1. PORTAL_CONTENT 取得失敗時は DataErrorState
   if (isPortalError) {
     return (
-      <DataErrorState 
+      <DataErrorState
         title="Unable to Load Portal Configuration"
         message="A database connection error occurred while loading PORTAL_CONTENT. You can reload the page or report this error directly to our support team."
-        errorMessage={portalErrorMessage || 'Database connection error: Unable to load PORTAL_CONTENT.'} 
+        errorMessage={portalErrorMessage || 'Database connection error: Unable to load PORTAL_CONTENT.'}
       />
     );
   }
 
-  // 💡 2. 初回ローディング中
+  // 2. 初回ローディング中
   if (isPortalLoading || !portalContent) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 space-y-4">
@@ -277,7 +277,7 @@ export default function Home() {
     );
   }
 
-  // 💡 Section 2 のモジュールを種別（Speaking / Writing）に自動分類・フィルタリングするヘルパー
+  // Section 2 のモジュール自動分類
   const vceSpeakingModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => {
     const lowerName = mod.name.toLowerCase();
     const lowerDesc = mod.description.toLowerCase();
@@ -286,7 +286,6 @@ export default function Home() {
   });
 
   const vceWritingModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => {
-    // 💡 text-types と writing-styles は VCE Writing から除外（Reference 側へ移行）
     if (mod.id === 'text-types' || mod.id === 'writing-styles') return false;
     const lowerName = mod.name.toLowerCase();
     const lowerDesc = mod.description.toLowerCase();
@@ -300,18 +299,17 @@ export default function Home() {
     vceWritingModules.push(...unassignedModules);
   }
 
-  // 💡 3. 正常表示
   return (
-    <PageLayout 
+    <PageLayout
       ref={layoutRef}
-      user={user} 
-      credits={credits} 
+      user={user}
+      credits={credits}
       onSignOut={handleSignOut}
       isDarkMode={isDarkMode}
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-            
+
           {/* 1. Hero Section ＆ Auto Demo Chat */}
           <HeroDemoChat
             isDarkMode={isDarkMode}
@@ -330,178 +328,220 @@ export default function Home() {
             portalContent={portalContent}
           />
 
-          {/* 2. Pricing & Credit Packs */}
+          {/* 2. Pricing & Credit Packs（Supabase 動的連動） */}
           <section id="pricing" className="space-y-12 text-center">
             <div className="space-y-4 max-w-3xl mx-auto">
               <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
               <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 Start for free with daily credits, or top up with prepaid charge packs for intensive study.
               </p>
-                
+
               {/* キャンペーンバナー */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
-                <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
-                <span>{CAMPAIGN_NOTICE.rawText}</span>
-              </div>
+              {priceData?.campaignNotice && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
+                  <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
+                  <span>{priceData.campaignNotice.rawText}</span>
+                </div>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-              {/* Free Plan */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICE_PLANS.free.name}</span>
-                  <div>
-                    <span className="text-4xl font-black">{PRICE_PLANS.free.price}</span>
-                    <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.free.period}</span>
-                  </div>
-                  <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                    {PRICE_PLANS.free.badge}
-                  </div>
-                  <p className="text-xs text-slate-500">{PRICE_PLANS.free.description}</p>
-                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                    {PRICE_PLANS.free.features.map((feat: string, idx: number) => (
-                      <li key={idx} className="flex items-center space-x-2">
-                        <Check className="w-3.5 h-3.5 text-blue-600" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <button 
-                  onClick={() => handleOpenAuthModal('signup')}
-                  className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                >
-                  {PRICE_PLANS.free.ctaText}
-                </button>
+            {isPriceLoading ? (
+              <div className="py-16 flex flex-col items-center justify-center space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                <p className="text-xs text-slate-400">Loading pricing plans...</p>
               </div>
+            ) : isPriceError || !priceData ? (
+              <div className="py-6 max-w-xl mx-auto">
+                <DataErrorState
+                  title="Pricing Data Unavailable"
+                  message="Failed to load pricing packages from Supabase."
+                  errorMessage="Failed to fetch key 'PRICE_PLANS' from app_knowledge table in Supabase."
+                  onRetry={loadPricePlans}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+                  {/* Free Plan */}
+                  {priceData.pricePlans.free && (
+                    <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{priceData.pricePlans.free.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.free.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.free.period}</span>
+                        </div>
+                        {priceData.pricePlans.free.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+                            {priceData.pricePlans.free.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.free.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.free.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => handleOpenAuthModal('signup')}
+                        className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                      >
+                        {priceData.pricePlans.free.ctaText || "Get Started Free"}
+                      </button>
+                    </div>
+                  )}
 
-              {/* Starter Pack */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.starter.name}</span>
-                  <div>
-                    <span className="text-4xl font-black">{PRICE_PLANS.starter.price}</span>
-                    <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.starter.period}</span>
-                  </div>
-                  <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                    {PRICE_PLANS.starter.badge}
-                  </div>
-                  <p className="text-xs text-slate-500">{PRICE_PLANS.starter.description}</p>
-                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                    {PRICE_PLANS.starter.features.map((feat: string, idx: number) => (
-                      <li key={idx} className="flex items-center space-x-2">
-                        <Check className="w-3.5 h-3.5 text-blue-600" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-6 space-y-3">
-                  <button 
-                    onClick={() => handleCheckout(PRICE_PLANS.starter.id)} 
-                    disabled={checkoutLoadingPriceId === PRICE_PLANS.starter.id}
-                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    {checkoutLoadingPriceId === PRICE_PLANS.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    <span>Buy Starter Pack</span>
-                  </button>
-                  <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                    By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                  </p>
-                </div>
-              </div>
+                  {/* Starter Pack */}
+                  {priceData.pricePlans.starter && (
+                    <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData.pricePlans.starter.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.starter.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.starter.period}</span>
+                        </div>
+                        {priceData.pricePlans.starter.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                            {priceData.pricePlans.starter.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.starter.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.starter.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-6 space-y-3">
+                        <button 
+                          type="button"
+                          onClick={() => handleCheckout(priceData.pricePlans.starter.id)} 
+                          disabled={checkoutLoadingPriceId === priceData.pricePlans.starter.id}
+                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          {checkoutLoadingPriceId === priceData.pricePlans.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          <span>{priceData.pricePlans.starter.ctaText || "Buy Starter Pack"}</span>
+                        </button>
+                        <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-              {/* Standard Pack */}
-              <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-                  Most Popular
-                </div>
-                <div className="space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.standard.name}</span>
-                  <div>
-                    <span className="text-4xl font-black">{PRICE_PLANS.standard.price}</span>
-                    <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.standard.period}</span>
-                  </div>
-                  <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                    {PRICE_PLANS.standard.badge}
-                  </div>
-                  <p className="text-xs text-slate-500">{PRICE_PLANS.standard.description}</p>
-                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                    {PRICE_PLANS.standard.features.map((feat: string, idx: number) => (
-                      <li key={idx} className="flex items-center space-x-2">
-                        <Check className="w-3.5 h-3.5 text-blue-600" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-6 space-y-3">
-                  <button 
-                    onClick={() => handleCheckout(PRICE_PLANS.standard.id)} 
-                    disabled={checkoutLoadingPriceId === PRICE_PLANS.standard.id}
-                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    {checkoutLoadingPriceId === PRICE_PLANS.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    <span>Buy Standard Pack</span>
-                  </button>
-                  <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                    By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                  </p>
-                </div>
-              </div>
+                  {/* Standard Pack */}
+                  {priceData.pricePlans.standard && (
+                    <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
+                        Most Popular
+                      </div>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData.pricePlans.standard.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.standard.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.standard.period}</span>
+                        </div>
+                        {priceData.pricePlans.standard.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                            {priceData.pricePlans.standard.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.standard.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.standard.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-6 space-y-3">
+                        <button 
+                          type="button"
+                          onClick={() => handleCheckout(priceData.pricePlans.standard.id)} 
+                          disabled={checkoutLoadingPriceId === priceData.pricePlans.standard.id}
+                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          {checkoutLoadingPriceId === priceData.pricePlans.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          <span>{priceData.pricePlans.standard.ctaText || "Buy Standard Pack"}</span>
+                        </button>
+                        <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-              {/* Pro Intensivist */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                <div className="space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICE_PLANS.pro.name}</span>
-                  <div>
-                    <span className="text-4xl font-black">{PRICE_PLANS.pro.price}</span>
-                    <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.pro.period}</span>
-                  </div>
-                  <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                    {PRICE_PLANS.pro.badge}
-                  </div>
-                  <p className="text-xs text-slate-500">{PRICE_PLANS.pro.description}</p>
-                  <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                    {PRICE_PLANS.pro.features.map((feat: string, idx: number) => (
-                      <li key={idx} className="flex items-center space-x-2">
-                        <Check className="w-3.5 h-3.5 text-purple-600" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Pro Intensivist */}
+                  {priceData.pricePlans.pro && (
+                    <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{priceData.pricePlans.pro.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.pro.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.pro.period}</span>
+                        </div>
+                        {priceData.pricePlans.pro.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
+                            {priceData.pricePlans.pro.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.pro.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.pro.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-6 space-y-3">
+                        <button 
+                          type="button"
+                          onClick={() => handleCheckout(priceData.pricePlans.pro.id)} 
+                          disabled={checkoutLoadingPriceId === priceData.pricePlans.pro.id}
+                          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          {checkoutLoadingPriceId === priceData.pricePlans.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          <span>{priceData.pricePlans.pro.ctaText || "Buy Pro Pack"}</span>
+                        </button>
+                        <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-6 space-y-3">
-                  <button 
-                    onClick={() => handleCheckout(PRICE_PLANS.pro.id)} 
-                    disabled={checkoutLoadingPriceId === PRICE_PLANS.pro.id}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    {checkoutLoadingPriceId === PRICE_PLANS.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    <span>Buy Pro Pack</span>
-                  </button>
-                  <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                    By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* クレジット消費ガイド */}
-            <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="flex items-center justify-center space-x-2 font-bold mb-3">
-                <Coins className="w-4 h-4 text-amber-500" />
-                <span>Credit Consumption Guide</span>
-              </div>
-              <div className="space-y-2 text-slate-500">
-                {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
-                  <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5">
-                    <span>{row.item}</span>
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                {/* クレジット消費ガイド */}
+                {priceData.creditConsumptionGuide && (
+                  <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm mt-8`}>
+                    <div className="flex items-center justify-center space-x-2 font-bold mb-3">
+                      <Coins className="w-4 h-4 text-amber-500" />
+                      <span>Credit Consumption Guide</span>
+                    </div>
+                    <div className="space-y-2 text-slate-500">
+                      {priceData.creditConsumptionGuide.map((row, idx) => (
+                        <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
+                          <span>{row.item}</span>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                )}
+              </>
+            )}
           </section>
 
           {/* 3. Portal Pages & Modules */}
@@ -639,7 +679,7 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Sub-section 2: VCE Writing (text-types & writing-styles は除外済み) */}
+              {/* Sub-section 2: VCE Writing */}
               <div className="space-y-4 pt-4">
                 <div className="flex items-center space-x-2 text-sm font-bold text-red-600 dark:text-red-400">
                   <span>✍️</span>
@@ -699,7 +739,6 @@ export default function Home() {
 
               {/* Sub-section 3: VCE Writing References & Guides */}
               {(() => {
-                // 💡 PORTAL_CONTENT から category === 'Reference Guide' または該当IDのカードを抽出
                 const referenceModules = portalContent.modulesSection.section2.modules.filter(
                   (m: PortalModule) => m.id === 'text-types' || m.id === 'writing-styles' || m.category === 'Reference Guide'
                 );
@@ -753,7 +792,6 @@ export default function Home() {
                   </div>
                 );
               })()}
-
             </div>
           </section>
 
