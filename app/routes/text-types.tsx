@@ -122,32 +122,29 @@ export const TextTypesComponent: React.FC = () => {
                           </ul>
                         </div>
                       )}
-                    </div>
-
-                    {item.sampleImage && (
-                      <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-xs">
-                        <span className="text-slate-500 font-mono truncate max-w-[200px]">
-                          {item.sampleImage}
-                        </span>
-                        <a
-                          href={item.sampleImage.startsWith('/') ? item.sampleImage : `/${item.sampleImage}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors inline-flex items-center gap-1"
-                        >
-                          View Sample PDF ↗
-                        </a>
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
-            </>
-          )}
 
-        </div>
+                  {item.sampleImage && (
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end items-center text-xs">
+                      <a
+                        href={item.sampleImage.startsWith('/') ? item.sampleImage : `/${item.sampleImage}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors inline-flex items-center gap-1"
+                      >
+                        View Sample PDF ↗
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
       </div>
-    </PageLayout>
+    </div>
+  </PageLayout>
   );
 };
 

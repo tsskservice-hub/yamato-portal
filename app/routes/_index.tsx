@@ -286,6 +286,8 @@ export default function Home() {
   });
 
   const vceWritingModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => {
+    // 💡 text-types と writing-styles は VCE Writing から除外（Reference 側へ移行）
+    if (mod.id === 'text-types' || mod.id === 'writing-styles') return false;
     const lowerName = mod.name.toLowerCase();
     const lowerDesc = mod.description.toLowerCase();
     const lowerId = mod.id.toLowerCase();
@@ -293,7 +295,7 @@ export default function Home() {
   });
 
   const categorizedIds = new Set([...vceSpeakingModules, ...vceWritingModules].map(m => m.id));
-  const unassignedModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => !categorizedIds.has(mod.id));
+  const unassignedModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => mod.id !== 'text-types' && mod.id !== 'writing-styles' && !categorizedIds.has(mod.id));
   if (unassignedModules.length > 0) {
     vceWritingModules.push(...unassignedModules);
   }
@@ -511,10 +513,28 @@ export default function Home() {
               <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {portalContent.modulesSection.header.subtitle}
               </p>
+
+              {/* 💡 セクションクイックジャンプボタン */}
+              <div className="flex justify-center items-center space-x-3 pt-4">
+                <a 
+                  href="#section-general" 
+                  className="px-4 py-2 rounded-xl bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+                >
+                  <span>🌐</span>
+                  <span>Jump to General Learners</span>
+                </a>
+                <a 
+                  href="#section-vce" 
+                  className="px-4 py-2 rounded-xl bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+                >
+                  <span>🇦🇺</span>
+                  <span>Jump to VCE Students</span>
+                </a>
+              </div>
             </div>
 
             {/* Section 1: Global & General Japanese Learners */}
-            <div className="space-y-4">
+            <div id="section-general" className="space-y-4 pt-4">
               <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
                 <span className="text-xl">{portalContent.modulesSection.section1.emoji}</span>
                 <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
@@ -571,7 +591,7 @@ export default function Home() {
             </div>
 
             {/* Section 2: Victorian Curriculum & VCE Students (Australia) */}
-            <div className="space-y-8 pt-6">
+            <div id="section-vce" className="space-y-8 pt-6">
               <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
                 <span className="text-xl">{portalContent.modulesSection.section2.emoji}</span>
                 <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
@@ -637,7 +657,7 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Sub-section 2: VCE Writing */}
+              {/* Sub-section 2: VCE Writing (text-types & writing-styles は除外済み) */}
               <div className="space-y-4 pt-4">
                 <div className="flex items-center space-x-2 text-sm font-bold text-red-600 dark:text-red-400">
                   <span>✍️</span>
