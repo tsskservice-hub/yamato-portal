@@ -277,6 +277,27 @@ export default function Home() {
     );
   }
 
+  // 💡 Section 2 のモジュールを種別（Speaking / Writing）に自動分類・フィルタリングするヘルパー
+  const vceSpeakingModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => {
+    const lowerName = mod.name.toLowerCase();
+    const lowerDesc = mod.description.toLowerCase();
+    const lowerId = mod.id.toLowerCase();
+    return lowerName.includes('speaking') || lowerName.includes('oral') || lowerDesc.includes('oral') || lowerDesc.includes('conversation') || lowerId.includes('oral') || lowerId.includes('speaking') || mod.iconName === 'Mic';
+  });
+
+  const vceWritingModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => {
+    const lowerName = mod.name.toLowerCase();
+    const lowerDesc = mod.description.toLowerCase();
+    const lowerId = mod.id.toLowerCase();
+    return !vceSpeakingModules.includes(mod) && (lowerName.includes('writing') || lowerName.includes('essay') || lowerDesc.includes('writing') || lowerDesc.includes('kanji') || lowerDesc.includes('vocabulary') || lowerId.includes('writing') || lowerId.includes('genkoyoshi') || mod.iconName === 'FileText');
+  });
+
+  const categorizedIds = new Set([...vceSpeakingModules, ...vceWritingModules].map(m => m.id));
+  const unassignedModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => !categorizedIds.has(mod.id));
+  if (unassignedModules.length > 0) {
+    vceWritingModules.push(...unassignedModules);
+  }
+
   // 💡 3. 正常表示
   return (
     <PageLayout 
@@ -550,60 +571,187 @@ export default function Home() {
             </div>
 
             {/* Section 2: Victorian Curriculum & VCE Students (Australia) */}
-            <div className="space-y-4 pt-6">
+            <div className="space-y-8 pt-6">
               <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
                 <span className="text-xl">{portalContent.modulesSection.section2.emoji}</span>
                 <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
                   {portalContent.modulesSection.section2.title}
                 </h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {portalContent.modulesSection.section2.modules.map((mod: PortalModule) => (
-                  <div 
-                    key={mod.id} 
-                    className={`p-6 rounded-3xl border flex flex-col justify-between ${
-                      mod.isComingSoon 
-                        ? 'opacity-75' 
-                        : 'hover:border-red-500/50'
-                    } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
-                          {renderModuleIcon(mod.iconName, "w-5 h-5")}
+
+              {/* Sub-section 1: VCE Speaking */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2 text-sm font-bold text-red-600 dark:text-red-400">
+                  <span>🗣️</span>
+                  <h4>VCE Speaking</h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {vceSpeakingModules.map((mod: PortalModule) => (
+                    <div 
+                      key={mod.id} 
+                      className={`p-6 rounded-3xl border flex flex-col justify-between ${
+                        mod.isComingSoon 
+                          ? 'opacity-75' 
+                          : 'hover:border-red-500/50'
+                      } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                            {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                          </div>
+                          {mod.isComingSoon && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
+                              Coming Soon
+                            </span>
+                          )}
                         </div>
-                        {mod.isComingSoon && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
-                            Coming Soon
-                          </span>
+                        <h4 className="font-bold text-base">{mod.name}</h4>
+                        <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                        <span className="text-slate-400 font-medium">{mod.category}</span>
+                        {!mod.isComingSoon ? (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                                navigate(mod.path);
+                              }
+                            }}
+                            className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                          >
+                            <span>{mod.actionLabel}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
                         )}
                       </div>
-                      <h4 className="font-bold text-base">{mod.name}</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                    </div>
+                  ))}
+                </div>
+                {vceSpeakingModules.length === 0 && (
+                  <p className="text-xs text-slate-400 italic">No modules currently assigned to VCE Speaking.</p>
+                )}
+              </div>
+
+              {/* Sub-section 2: VCE Writing */}
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center space-x-2 text-sm font-bold text-red-600 dark:text-red-400">
+                  <span>✍️</span>
+                  <h4>VCE Writing</h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {vceWritingModules.map((mod: PortalModule) => (
+                    <div 
+                      key={mod.id} 
+                      className={`p-6 rounded-3xl border flex flex-col justify-between ${
+                        mod.isComingSoon 
+                          ? 'opacity-75' 
+                          : 'hover:border-red-500/50'
+                      } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                            {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                          </div>
+                          {mod.isComingSoon && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
+                              Coming Soon
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-base">{mod.name}</h4>
+                        <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                        <span className="text-slate-400 font-medium">{mod.category}</span>
+                        {!mod.isComingSoon ? (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                                navigate(mod.path);
+                              }
+                            }}
+                            className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                          >
+                            <span>{mod.actionLabel}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {vceWritingModules.length === 0 && (
+                  <p className="text-xs text-slate-400 italic">No modules currently assigned to VCE Writing.</p>
+                )}
+              </div>
+
+              {/* Sub-section 3: VCE Writing References & Guides */}
+              {(() => {
+                // 💡 PORTAL_CONTENT から category === 'Reference Guide' または該当IDのカードを抽出
+                const referenceModules = portalContent.modulesSection.section2.modules.filter(
+                  (m: PortalModule) => m.id === 'text-types' || m.id === 'writing-styles' || m.category === 'Reference Guide'
+                );
+
+                if (referenceModules.length === 0) return null;
+
+                return (
+                  <div className="space-y-4 pt-4">
+                    <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                      <span className="text-lg">📚</span>
+                      <h4 className="font-bold text-base text-slate-700 dark:text-slate-300">
+                        VCE Writing References & Guides
+                      </h4>
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium">{mod.category}</span>
-                      {!mod.isComingSoon ? (
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
-                              navigate(mod.path);
-                            }
-                          }}
-                          className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {referenceModules.map((mod: PortalModule) => (
+                        <div
+                          key={mod.id}
+                          className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-emerald-500/50 ${
+                            isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                          } shadow-sm transition-colors`}
                         >
-                          <span>{mod.actionLabel}</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      ) : (
-                        <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-                      )}
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                                {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                              </div>
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600">
+                                Reference
+                              </span>
+                            </div>
+                            <h5 className="font-bold text-base">{mod.name}</h5>
+                            <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                          </div>
+
+                          <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                            <span className="text-emerald-600 font-medium">{mod.category}</span>
+                            <button
+                              type="button"
+                              onClick={() => navigate(mod.path)}
+                              className="text-emerald-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                            >
+                              <span>{mod.actionLabel}</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })()}
+
             </div>
           </section>
 
