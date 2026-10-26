@@ -1,14 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（Learning Pace薄灰色統一・Credit Balance表記・全枠線4px完全統一・完全モジュール分離・外部答案画像連携・ヘッダー即時連動・クレジット消費案内復元版）
- * 💡 特徴：
- * 1. Learning Pace の背景を Font Size と同じ薄い灰色（bg-slate-100）に統一
- * 2. クレジット表示欄を「Credit Balance」表記に変更し、ChatYamatoEoyWritingCustomと同じ黄色調（bg-amber-50）に統一
- * 3. 閉じたフローティングボタンおよび開いたチャットウィンドウの枠線を 4px (border-4 & 4px solid) で完全統一
- * 4. useYamatoAccount による Supabase 通信・Realtime・クレジット同期の完全カプセル化
- * 5. chatThemes, ImageModal, ScrollTopButton, useChatResize, CreditCostFooter の分離による高い保守性
- * 6. eoy-writing 等のダッシュボードからの答案画像（externalImagePreview）および設問（assignedQuestion）自動連携
- * 7. 入力フォーム下部にクレジット消費案内（Text: 2 cr / 1 Photo: 4 cr / Visual Aid: 4 cr）を再表示
+ * @description ポータル共通AIチャットウィジェット（customWidget・onExportPdf 対応版）
  */
 import React, { useState, useEffect, useRef } from "react";
 
@@ -34,40 +26,28 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.9.0",
-  role: "ポータル共通AIチャットウィジェット（UI配色完全統一版）",
+  version: "4.10.0",
+  role: "ポータル共通AIチャットウィジェット（カスタムウィジェット・PDF出力連携版）",
   features: [
+    {
+      featureName: "Custom Widget Support",
+      description: "customWidget プロパティにより外部から任意のUIパーツを柔軟に挿入可能"
+    },
+    {
+      featureName: "PDF Export Integration",
+      description: "onExportPdf プロパティによりAI返答から先生用PDF編集モーダルへシームレスに連携"
+    },
     {
       featureName: "Unified Slate Learning Pace Style",
       description: "Learning Paceの背景をFont Sizeと同じ薄い灰色に統一"
     },
     {
       featureName: "Credit Balance Header with Amber Theme",
-      description: "アカウント表示をCredit Balanceに変更しChatYamatoEoyWritingCustomと共通の黄色い背景色を適用"
+      description: "アカウント表示をCredit Balanceに変更し共通の黄色い背景色を適用"
     },
     {
       featureName: "Uniform 4px Border Width",
       description: "閉じた起動ボタンおよび開いたチャット枠線の太さを4pxに完全統一"
-    },
-    {
-      featureName: "Modular Architecture",
-      description: "テーマ・モーダル・リサイズ・上戻りボタン・アカウント同期・フッター案内を完全分離"
-    },
-    {
-      featureName: "Credit Cost Guide Footer",
-      description: "入力欄下部にテキスト2cr / 写真4cr / Visual Aid 4cr の消費目安を明示"
-    },
-    {
-      featureName: "Dashboard External Image & Question Integration",
-      description: "eoy-writing等のダッシュボードから答案画像や選択設問を受け取りプレビュー・送信"
-    },
-    {
-      featureName: "Type-Safe Dynamic Nickname Resolution",
-      description: "getSafeString により null や非文字列の入力でも例外を完全に防止し安全にニックネームを反映"
-    },
-    {
-      featureName: "Instant Credit Header Sync",
-      description: "AI返答受信時に deductCredits を通じて yamato:credits-updated イベントを発行し即時ヘッダー同期"
     }
   ],
   supportedThemes: ["red", "blue", "black", "green", "yellow", "orange", "purple", "cyan", "pink", "custom"],
@@ -108,6 +88,9 @@ export type YamatoChatCommonProps = {
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
   assignedQuestion?: string;
+  // 💡 追加された拡張プロパティの型定義
+  customWidget?: React.ReactNode;
+  onExportPdf?: (content: string) => void;
 };
 
 function sanitizeAiOutput(text: string): string {
@@ -136,6 +119,8 @@ export function YamatoChatCommon({
   externalImagePreview,
   onClearExternalImage,
   assignedQuestion = "",
+  customWidget,
+  onExportPdf,
 }: YamatoChatCommonProps) {
   // アカウント同期フック
   const {
@@ -507,7 +492,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* Credit Balance 表示エリア（ChatYamatoEoyWritingCustom と同じ黄色 bg-amber-50） */}
+              {/* Credit Balance 表示エリア */}
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-amber-800">Credit Balance</span>
                 {activeUserId ? (
@@ -528,7 +513,14 @@ export function YamatoChatCommon({
                 )}
               </div>
 
-              {/* 💡 【修正点】学習ペース選択UI（Font Size と同じ薄い灰色 bg-slate-100 に統一） */}
+              {/* 💡 カスタムウィジェット (customWidget) の挿入エリア */}
+              {customWidget && (
+                <div className="mb-2 shrink-0">
+                  {customWidget}
+                </div>
+              )}
+
+              {/* 学習ペース選択UI */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-2 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Learning Pace</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -548,7 +540,7 @@ export function YamatoChatCommon({
                 </div>
               </div>
 
-              {/* フォントサイズ変更UI（薄い灰色 bg-slate-100） */}
+              {/* フォントサイズ変更UI */}
               <div className="bg-slate-100 border border-slate-200 rounded-xl p-2 mb-3 flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold text-slate-700">Font Size</span>
                 <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
@@ -645,6 +637,22 @@ export function YamatoChatCommon({
                                     className="rounded-lg border border-slate-200 max-h-48 object-contain w-full bg-white cursor-pointer hover:opacity-90"
                                     onClick={() => setModalImageSrc(msg.imageUrl || null)}
                                   />
+                                </div>
+                              )}
+
+                              {/* 💡 onExportPdf が指定されている場合に Export PDF ボタンを表示 */}
+                              {onExportPdf && (
+                                <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => onExportPdf(msg.content)}
+                                    className="text-[11px] font-bold px-2.5 py-1 rounded-md transition flex items-center gap-1 cursor-pointer hover:opacity-80"
+                                    style={{ color: themeColor, backgroundColor: `${themeColor}15` }}
+                                    title="Export this feedback as PDF with customizable P.S. Notes"
+                                  >
+                                    <span>📄</span>
+                                    <span>Export PDF</span>
+                                  </button>
                                 </div>
                               )}
                             </div>
