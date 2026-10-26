@@ -89,7 +89,7 @@ export const TextTypesComponent: React.FC = () => {
                   </p>
                 </div>
                 <Link
-                  to="/faq"
+                  to="/faq#category-Text%20Types%20and%20Styles"
                   className="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition-colors self-start sm:self-auto shadow-xs whitespace-nowrap gap-1.5"
                 >
                   <span>View FAQ: Text Types & Styles</span>
@@ -146,15 +146,15 @@ export const TextTypesComponent: React.FC = () => {
                         </a>
                       </div>
                     )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
+        </div>
       </div>
-    </div>
-  </PageLayout>
+    </PageLayout>
   );
 };
 

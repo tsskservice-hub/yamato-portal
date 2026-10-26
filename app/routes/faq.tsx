@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Link } from '@remix-run/react';
+import { Link, useLocation } from '@remix-run/react';
 import type { MetaFunction } from "@remix-run/cloudflare";
 import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
@@ -25,6 +25,8 @@ export const meta: MetaFunction = () => {
 };
 
 export default function FaqPage() {
+  const location = useLocation();
+
   // 💡 terms.tsx 模範の独立ステート管理 (データ・ローディング・エラー)
   const [faqs, setFaqs] = useState<FaqItem[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,6 +58,22 @@ export default function FaqPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // 💡 URLハッシュ（#category-...）やクエリパラメータを検知して自動スクロール
+  useEffect(() => {
+    if (!loading && faqs && faqs.length > 0) {
+      const hash = location.hash;
+      if (hash) {
+        const elementId = hash.replace('#', '');
+        const element = document.getElementById(elementId);
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
+      }
+    }
+  }, [loading, faqs, location]);
 
   // アコーディオンの開閉切り替え
   const toggleAccordion = (id: string) => {
@@ -228,7 +246,7 @@ export default function FaqPage() {
                                 </div>
                                 <div className="shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
                                   {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                              </div>
+                                </div>
                               </button>
 
                               {/* アコーディオン本文 */}
@@ -237,44 +255,44 @@ export default function FaqPage() {
                                   <div
                                     className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
                                     dangerouslySetInnerHTML={{ __html: faq.answer }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
+                    <HelpCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <h3 className="text-base font-bold text-slate-700">No matching questions found</h3>
+                    <p className="text-xs text-slate-500 mt-1">Try searching with a different keyword.</p>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
-                  <HelpCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <h3 className="text-base font-bold text-slate-700">No matching questions found</h3>
-                  <p className="text-xs text-slate-500 mt-1">Try searching with a different keyword.</p>
-                </div>
-            )}
-            </div>
-
-            {/* お問い合わせ誘導セクション */}
-            <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center space-y-3">
-              <h3 className="text-lg font-bold text-blue-900">Still have questions?</h3>
-              <p className="text-xs sm:text-sm text-blue-700 max-w-xl mx-auto">
-                Feel free to reach out anytime via the feedback feature or bug report cards on your dashboard. AI Yamato is also here to support you!
-              </p>
-              <div className="pt-2">
-                <Link
-                  to="/"
-                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
-                >
-                  Go to Dashboard
-                </Link>
+                )}
               </div>
-          </div>
-        </>
-      )}
 
-    </div>
-  </div>
+              {/* お問い合わせ誘導セクション */}
+              <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center space-y-3">
+                <h3 className="text-lg font-bold text-blue-900">Still have questions?</h3>
+                <p className="text-xs sm:text-sm text-blue-700 max-w-xl mx-auto">
+                  Feel free to reach out anytime via the feedback feature or bug report cards on your dashboard. AI Yamato is also here to support you!
+                </p>
+                <div className="pt-2">
+                  <Link
+                    to="/"
+                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+                  >
+                    Go to Dashboard
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
+
+        </div>
+      </div>
     </PageLayout>
   );
 }
