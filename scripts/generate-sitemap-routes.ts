@@ -20,8 +20,15 @@ function getRoutes(dir: string, base = ""): string[] {
     } else if (entry.isFile()) {
       let name = entry.name.replace(/\.(tsx|ts|jsx|js)$/, "");
 
-      // プレフィックスやサイトマップ自体、ルートファイルは除外
-      if (name.startsWith("_") || name.includes("sitemap") || name === "root") {
+      // プレフィックスやサイトマップ自体、ルートファイル、および指定した除外ページをスキップ
+      if (
+        name.startsWith("_") ||
+        name.includes("sitemap") ||
+        name === "root" ||
+        name === "test-yamato" ||
+        name === "test-yamato-note" ||
+        name === "image-test"
+      ) {
         continue;
       }
 
