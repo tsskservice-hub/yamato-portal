@@ -1,136 +1,363 @@
 /**
- * @file oral-exam-questions.ts
- * @description Decoupled TypeScript logic & Supabase client integration for Oral Exam Questions Database.
- * Stores data in Supabase 'app_knowledge' table under key: 'ORAL_EXAM_QUESTIONS'.
+ * @file eoy-oral-drill.tsx
+ * @description VCE Japanese - Section 1 General Conversation Oral Drill & Custom QA Bank (Modular Refactored Edition)
  */
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import type { MetaFunction } from "@remix-run/react";
+import PageLayout from "../components/PageLayout";
+import { DataErrorState } from "../components/DataErrorState";
+import OralExaminerAvatar from "../components/OralExaminerAvatar";
+import ChatYamatoEoyOralDrill from "../components/ChatYamatoEoyOralDrill";
+import { supabase } from "../lib/supabaseClient";
 
-import { SupabaseClient } from '@supabase/supabase-js';
+// 💡 分割・モジュール化した Oral コンポーネント ＆ フック
+import OralCenterChatPractice from "../components/OralCenterChatPractice";
+import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
+import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
+import { useOralPracticeEngine } from "../hooks/OralPracticeHooks";
+import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
-// --- Type Definitions ---
-export interface OralExamQuestionItem {
-  id?: string;
-  category: string;
-  text: string;
-  audio?: string;
-  text_original?: string;
-  defaultAnswer?: string;
-  default_answer_original?: string;
-  keyInfoHint?: string;
-}
+import {
+  fetchOralExamQuestionsData,
+  OralExamQuestionsData,
+} from "../data/oral-exam-questions";
 
-export interface OralExamModeGroup {
-  steady?: OralExamQuestionItem[];
-  normal?: OralExamQuestionItem[];
-  accelerated?: OralExamQuestionItem[];
-}
-
-export interface OralExamQuestionsData {
-  beforeSec1?: OralExamModeGroup;
-  sec1?: OralExamModeGroup;
-  sec2?: OralExamModeGroup;
-  afterSec2?: OralExamModeGroup;
-}
-
-export type OralExamQuestionsDataPayload = OralExamQuestionsData;
-
-// --- Pure Empty Reference Structure (サンプルデータ排除・空配列化) ---
-export const ORAL_EXAM_QUESTIONS_DATA: OralExamQuestionsData = {
-  beforeSec1: { steady: [], normal: [], accelerated: [] },
-  sec1: { steady: [], normal: [], accelerated: [] },
-  sec2: { steady: [], normal: [], accelerated: [] },
-  afterSec2: { steady: [], normal: [], accelerated: [] }
+export const meta: MetaFunction = () => {
+  return [
+    { title: "VCE Japanese - EOY Oral Drill & Custom QA Bank | JPTutor AI Yamato" },
+    { name: "description", content: "Interactive Section 1 oral practice with custom Q&A bank, auto-saved answers to Supabase, and central AI Yamato dialogue." },
+  ];
 };
 
-export default ORAL_EXAM_QUESTIONS_DATA;
+export default function EoyOralDrillPage() {
+  const themeColor = "#eab308";
 
-const KNOWLEDGE_KEY = 'ORAL_EXAM_QUESTIONS';
+  const [user, setUser] = useState<any>(null);
+  const [credits, setCredits] = useState<number>(10);
+  const [nickname, setNickname] = useState<string>("VCE Student");
 
-/**
- * Fetch Oral Exam Questions Database data from Supabase 'app_knowledge' table.
- * Returns null when fetch fails or data is empty, triggering DataErrorState.tsx in UI.
- */
-export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient): Promise<OralExamQuestionsData | null> {
-  try {
-    // 💡 存在しない 'content_json' を削除し、'key, data' のみに修正
-    const { data: rows, error } = await supabaseClient
-      .from('app_knowledge')
-      .select('key, data')
-      .eq('key', KNOWLEDGE_KEY);
+  const [questionsData, setQuestionsData] = useState<OralExamQuestionsData | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
 
-    if (error) {
-      console.warn(`[${KNOWLEDGE_KEY}] Supabase fetch error:`, error.message);
-      return null;
-    }
+  const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom">("sec1");
+  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
+  const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
+  const [speechSpeed, setSpeechSpeed] = useState<number>(1.0);
+  const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
 
-    if (!rows || rows.length === 0) {
-      console.warn(`[${KNOWLEDGE_KEY}] No rows found in Supabase.`);
-      return null;
-    }
+  const [newQuestionText, setNewQuestionText] = useState("");
+  const [newAnswerText, setNewAnswerText] = useState("");
+  const [newCategory, setNewCategory] = useState("");
 
-    const row = rows[0];
-    const rawData = row.data; // 💡 row.content_json への参照を削除
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
-    if (rawData) {
-      const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
-      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-        console.log(`[${KNOWLEDGE_KEY}] Successfully imported data from Supabase!`);
-        return parsed as OralExamQuestionsData;
+  const {
+    answers,
+    customQuestionsRaw,
+    fetchCustomQuestions,
+    loadSavedAnswers,
+    handleAnswerChange,
+    handleAnswerBlur,
+    addCustomQuestion,
+    deleteCustomQuestion,
+  } = useSupabaseUserAnswers(supabase, user?.id);
+
+  const engine = useOralPracticeEngine(selectedLevel, speechSpeed);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+    });
+
+    async function loadQuestions() {
+      setIsLoadingData(true);
+      try {
+        const fetched = await fetchOralExamQuestionsData(supabase);
+        setQuestionsData(fetched);
+      } catch (err) {
+        setQuestionsData(null);
+      } finally {
+        setIsLoadingData(false);
       }
     }
+    loadQuestions();
 
-    return null;
-  } catch (err) {
-    console.error(`Error fetching ${KNOWLEDGE_KEY} from Supabase:`, err);
-    return null;
-  }
-}
+    return () => subscription.unsubscribe();
+  }, []);
 
-/**
- * Upsert Oral Exam Questions Database data to Supabase 'app_knowledge' table.
- */
-export async function upsertOralExamQuestionsData(
-  supabaseClient: SupabaseClient,
-  content: OralExamQuestionsData
-): Promise<boolean> {
-  const { error } = await supabaseClient
-    .from('app_knowledge')
-    .upsert({
-      key: KNOWLEDGE_KEY,
-      data: content,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'key' });
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("credits, nickname")
+        .eq("id", userId)
+        .single();
 
-  if (error) {
-    console.error(`Error upserting ${KNOWLEDGE_KEY} to Supabase:`, error);
-    return false;
-  }
-  return true;
-}
+      if (data && !error) {
+        if (typeof data.credits === "number") setCredits(data.credits);
+        if (data.nickname) setNickname(data.nickname);
+      }
+    } catch (err) {
+      console.error("Fetch profile error:", err);
+    }
+  };
 
-// --- Helper & Utility Logic ---
-export function getOralQuestionsBySectionAndMode(
-  data: OralExamQuestionsData,
-  section: keyof OralExamQuestionsData,
-  mode: 'steady' | 'normal' | 'accelerated'
-): OralExamQuestionItem[] {
-  return data[section]?.[mode] || [];
-}
+  useEffect(() => {
+    if (selectedSection === "custom") fetchCustomQuestions();
+  }, [selectedSection, user?.id]);
 
-export function searchOralQuestionsByCategory(data: OralExamQuestionsData, category: string): OralExamQuestionItem[] {
-  const results: OralExamQuestionItem[] = [];
-  const catLower = category.toLowerCase();
-  
-  for (const section of Object.values(data)) {
-    if (!section) continue;
-    for (const questions of Object.values(section)) {
-      if (Array.isArray(questions)) {
-        questions.forEach(q => {
-          if (q.category && q.category.toLowerCase().includes(catLower)) {
-            results.push(q);
+  const availableTopics = useMemo(() => {
+    const set = new Set<string>();
+    if (selectedSection === "custom") {
+      customQuestionsRaw.forEach((q) => q.category && set.add(q.category));
+    } else if (questionsData) {
+      const secData = questionsData[selectedSection];
+      if (secData) {
+        const list = secData[selectedLevel] || secData["normal"] || secData["steady"] || [];
+        list.forEach((q) => q.category && set.add(q.category));
+      }
+    }
+    return Array.from(set);
+  }, [selectedSection, selectedLevel, questionsData, customQuestionsRaw]);
+
+  useEffect(() => {
+    setSelectedTopic(availableTopics);
+  }, [selectedLevel, selectedSection, availableTopics.length]);
+
+  const currentQuestions: QuestionItem[] = useMemo(() => {
+    const list: QuestionItem[] = [];
+    const initialMap: { [key: string]: string } = {};
+
+    if (selectedSection === "custom") {
+      customQuestionsRaw.forEach((q) => {
+        if (selectedTopic.length > 0 && q.category && !selectedTopic.includes(q.category)) return;
+        const qId = String(q.id);
+        list.push({ id: qId, question: q.question_text, category: q.category || "General", isCustom: true });
+        initialMap[qId] = q.answer_text || "";
+      });
+    } else if (questionsData) {
+      const secData = questionsData[selectedSection];
+      if (secData) {
+        const rawList = secData[selectedLevel] || secData["normal"] || secData["steady"] || [];
+        let counter = 1;
+        rawList.forEach((q) => {
+          if (q && (q.text || q.text_original)) {
+            if (selectedTopic.length > 0 && q.category && !selectedTopic.includes(q.category)) return;
+            const qId = q.audio ? q.audio.replace("/audio/", "").replace(".mp3", "") : `q-${counter++}`;
+            const plainAnswer = q.default_answer_original || q.defaultAnswer || "";
+            list.push({ id: String(qId), question: q.text || q.text_original || "", category: q.category, isCustom: false });
+            initialMap[String(qId)] = plainAnswer;
           }
         });
       }
     }
+
+    loadSavedAnswers(initialMap);
+    return list;
+  }, [selectedSection, selectedLevel, selectedTopic, questionsData, customQuestionsRaw]);
+
+  const handleStartPractice = () => {
+    const targetQList = currentQuestions.map((q) => {
+      let qOrig = q.question;
+      if (selectedSection !== "custom" && questionsData) {
+        const secData = questionsData[selectedSection];
+        const rawList = secData?.[selectedLevel] || secData?.["normal"] || secData?.["steady"] || [];
+        const found = rawList.find((item) => (item.text || item.text_original) === q.question);
+        if (found) qOrig = found.text_original || found.text || q.question;
+      }
+      return { id: q.id, question: q.question, questionOriginal: qOrig, category: q.category };
+    });
+
+    engine.startPractice(targetQList, answers, orderMode);
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleAddCustom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newQuestionText.trim() || !newAnswerText.trim()) {
+      alert("設問と解答の両方を入力してください。");
+      return;
+    }
+    const success = await addCustomQuestion(newQuestionText, newAnswerText, newCategory);
+    if (success) {
+      setNewQuestionText("");
+      setNewAnswerText("");
+      setNewCategory("");
+    }
+  };
+
+  if (isLoadingData) {
+    return (
+      <PageLayout user={user} credits={credits}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
+          <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
+            Loading Oral Exam Database from Supabase...
+          </div>
+        </div>
+      </PageLayout>
+    );
   }
-  return results;
+
+  if (!questionsData || Object.keys(questionsData).length === 0) {
+    return (
+      <PageLayout user={user} credits={credits}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 max-w-4xl mx-auto">
+          <DataErrorState
+            title="Oral Exam Database Unavailable"
+            message="Unable to load Oral Exam Questions from Supabase. Please reload or report this error."
+            errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+          />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  return (
+    <PageLayout user={user} credits={credits}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
+        <main className="max-w-4xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
+                  Section 1 General Conversation
+                </span>
+                <span className="text-xs text-slate-500">VCE Oral Exam Practice</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
+                EOY Oral Drill & Custom QA Bank
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                作成したマイ解答は Supabase に自動保存されます。画面中央のヤマトと対話して即答力を鍛えましょう！
+              </p>
+            </div>
+            <OralExaminerAvatar statusText="Ready for Conversation" themeColor={themeColor} />
+          </div>
+
+          {/* Section & Filter Controls */}
+          <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 rounded-3xl p-6 shadow-sm space-y-6">
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">📂 Select Section / Source</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {[
+                  { id: "beforeSec1", label: "Before Sec 1" },
+                  { id: "sec1", label: "Section 1" },
+                  { id: "sec2", label: "Section 2" },
+                  { id: "afterSec2", label: "After Sec 2" },
+                  { id: "custom", label: "⭐ My Custom Bank" },
+                ].map((sec) => (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSection(sec.id as any);
+                      setSelectedTopic([]);
+                    }}
+                    className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                      selectedSection === sec.id
+                        ? "bg-amber-500 text-white border-amber-600 shadow-sm"
+                        : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"
+                    }`}
+                  >
+                    {sec.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {selectedSection !== "custom" && (
+              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🌱 Select Learning Pace</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: "steady", label: "Steady (Foundation)" },
+                    { id: "normal", label: "Normal (Standard)" },
+                    { id: "accelerated", label: "Accelerated (Advanced)" },
+                  ].map((lvl) => (
+                    <button
+                      key={lvl.id}
+                      type="button"
+                      onClick={() => setSelectedLevel(lvl.id as any)}
+                      className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                        selectedLevel === lvl.id
+                          ? "bg-amber-500 text-white border-amber-600 shadow-sm"
+                          : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"
+                      }`}
+                    >
+                      {lvl.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Add Custom Question Form */}
+          {selectedSection === "custom" && (
+            <OralCustomQuestionForm
+              newQuestionText={newQuestionText}
+              setNewQuestionText={setNewQuestionText}
+              newAnswerText={newAnswerText}
+              setNewAnswerText={setNewAnswerText}
+              newCategory={newCategory}
+              setNewCategory={setNewCategory}
+              onSubmit={handleAddCustom}
+              themeColor={themeColor}
+            />
+          )}
+
+          {/* 1. Review & Customize Answers List */}
+          <OralUserAnswerList
+            questions={currentQuestions}
+            answers={answers}
+            onAnswerChange={handleAnswerChange}
+            onAnswerBlur={handleAnswerBlur}
+            onDeleteCustom={deleteCustomQuestion}
+            onStartPractice={handleStartPractice}
+            orderMode={orderMode}
+            setOrderMode={setOrderMode}
+            themeColor={themeColor}
+          />
+
+          {/* 2. Central Interactive Practice Screen */}
+          <div ref={chatContainerRef}>
+            <OralCenterChatPractice
+              chatMessages={engine.chatMessages}
+              isPracticing={engine.isPracticing}
+              currentQuestionIndex={engine.currentQuestionIndex}
+              totalQuestions={engine.activeQuestions.length}
+              isAnalyzing={engine.isAnalyzing}
+              isRecording={engine.isRecording}
+              isWaitingForNext={engine.isWaitingForNext}
+              inputMessage={engine.inputMessage}
+              setInputMessage={engine.setInputMessage}
+              onStartRecording={engine.startRecording}
+              onStopRecording={engine.stopRecording}
+              onRepeatQuestion={() => {
+                const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
+                if (currentQ) engine.playTTS(currentQ.questionOriginal);
+              }}
+              onProceedNext={() => engine.proceedToNextQuestion(answers)}
+              onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill", selectedSection)}
+              themeColor={themeColor}
+            />
+          </div>
+
+          {/* Floating Chat */}
+          <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+            <ChatYamatoEoyOralDrill userId={user?.id} userNickname={nickname} credits={credits} />
+          </aside>
+        </main>
+      </div>
+    </PageLayout>
+  );
 }
