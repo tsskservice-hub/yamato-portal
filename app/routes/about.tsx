@@ -63,25 +63,25 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Section 2: "Jūnin Toiro" – Embracing Individuality */}
-          <div className="bg-gradient-to-br from-indigo-900 to-blue-900 text-white rounded-3xl p-8 sm:p-10 shadow-lg space-y-6">
+          {/* Section 2: "Jūnin Toiro" – Embracing Individuality (薄い桃色の背景) */}
+          <div className="bg-gradient-to-br from-pink-50 to-rose-100 border border-pink-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-blue-300">
+              <div className="w-10 h-10 rounded-2xl bg-pink-500/10 flex items-center justify-center text-pink-600">
                 <Users className="w-5 h-5" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 "Jūnin Toiro" (十人十色): Ten People, Ten Colors
               </h2>
             </div>
 
-            <div className="text-blue-100 space-y-4 text-sm sm:text-base leading-relaxed">
+            <div className="text-slate-700 space-y-4 text-sm sm:text-base leading-relaxed">
               <p>
                 In Japanese, there is a wonderful idiom: <em>"Jūnin Toiro"</em>—meaning everyone is unique, and no two individuals are alike. 
               </p>
               <p>
                 Whether you missed school and fell behind in your Japanese progress, desperately want to study more advanced Japanese without the local environment to support it, or find the language challenging but are fascinated by Japanese culture as a gateway to learning—your journey is your own. 
               </p>
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-slate-900">
                 Our mission is to provide every single learner with personalised, differentiated support tailored precisely to your own learning pace and personal interests.
               </p>
             </div>
