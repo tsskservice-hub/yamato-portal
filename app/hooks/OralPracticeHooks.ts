@@ -8,12 +8,20 @@ export type ChatMessage = {
 
 export interface QuestionData {
   id: string;
-  question: string;         // 画面表示用 (ルビ付き HTML)
+  question: string;          // 画面表示用 (ルビ付き HTML)
   questionOriginal: string; // TTS音声再生用 (Supabase の text_original プレーンテキスト)
-  defaultAnswer?: string;   // 画面表示用モデル解答
+  defaultAnswer?: string;    // 画面表示用モデル解答
   defaultAnswerOriginal?: string; // プレーンテキストモデル解答 (default_answer_original)
   category?: string;
 }
+
+// 💡 バックエンドAPIのエンドポイントを環境に応じて自動切り替え
+const getApiUrl = () => {
+  if (typeof window !== "undefined" && window.location.hostname.includes("staging")) {
+    return "https://api.staging.jptutoraiyamato.com/chat";
+  }
+  return "https://api.jptutoraiyamato.com/chat";
+};
 
 export function formatOralFeedbackToHtml(rawText: string): string {
   if (!rawText) return "";
@@ -71,7 +79,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         .replace(/※.*$/gm, "")
         .trim();
 
-      const response = await fetch("/api/chat", {
+      const response = await fetch(getApiUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -153,7 +161,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     formData.append("level", selectedLevel);
 
     try {
-      const res = await fetch("/api/chat", { method: "POST", body: formData });
+      const res = await fetch(getApiUrl(), { method: "POST", body: formData });
       if (!res.ok) throw new Error();
       const data = (await res.json()) as any;
       setInputMessage(data.userText || "");
@@ -243,7 +251,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     const registeredAnswer = answersMap[currentQ.id] || "";
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch(getApiUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
