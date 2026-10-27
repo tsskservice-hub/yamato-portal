@@ -413,10 +413,10 @@ export default function Home() {
                         <p className="text-xs text-slate-500">{priceData.pricePlans.starter.description}</p>
                         <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                           {priceData.pricePlans.starter.features.map((feat: string, idx: number) => (
-                            <li key={idx} className="flex items-center space-x-2">
-                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                              <span>{feat}</span>
-                            </li>
+                              <li key={idx} className="flex items-center space-x-2">
+                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                                <span>{feat}</span>
+                              </li>
                           ))}
                         </ul>
                       </div>
@@ -431,7 +431,7 @@ export default function Home() {
                           <span>{priceData.pricePlans.starter.ctaText || "Buy Starter Pack"}</span>
                         </button>
                         <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                         </p>
                       </div>
                     </div>
@@ -441,7 +441,7 @@ export default function Home() {
                   {priceData.pricePlans.standard && (
                     <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-                        Most Popular
+                          Most Popular
                       </div>
                       <div className="space-y-4">
                         <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData.pricePlans.standard.name}</span>
@@ -450,32 +450,32 @@ export default function Home() {
                           <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.standard.period}</span>
                         </div>
                         {priceData.pricePlans.standard.badge && (
-                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                            {priceData.pricePlans.standard.badge}
-                          </div>
+                            <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                              {priceData.pricePlans.standard.badge}
+                            </div>
                         )}
                         <p className="text-xs text-slate-500">{priceData.pricePlans.standard.description}</p>
                         <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                           {priceData.pricePlans.standard.features.map((feat: string, idx: number) => (
-                            <li key={idx} className="flex items-center space-x-2">
-                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                              <span>{feat}</span>
-                            </li>
+                              <li key={idx} className="flex items-center space-x-2">
+                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                                <span>{feat}</span>
+                              </li>
                           ))}
                         </ul>
                       </div>
                       <div className="mt-6 space-y-3">
                         <button 
-                          type="button"
-                          onClick={() => handleCheckout(priceData.pricePlans.standard.id)} 
-                          disabled={checkoutLoadingPriceId === priceData.pricePlans.standard.id}
-                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                            type="button"
+                            onClick={() => handleCheckout(priceData.pricePlans.standard.id)} 
+                            disabled={checkoutLoadingPriceId === priceData.pricePlans.standard.id}
+                            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                         >
-                          {checkoutLoadingPriceId === priceData.pricePlans.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                          <span>{priceData.pricePlans.standard.ctaText || "Buy Standard Pack"}</span>
+                            {checkoutLoadingPriceId === priceData.pricePlans.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            <span>{priceData.pricePlans.standard.ctaText || "Buy Standard Pack"}</span>
                         </button>
                         <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                         </p>
                       </div>
                     </div>
@@ -491,32 +491,32 @@ export default function Home() {
                           <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.pro.period}</span>
                         </div>
                         {priceData.pricePlans.pro.badge && (
-                          <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                            {priceData.pricePlans.pro.badge}
-                          </div>
+                            <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
+                              {priceData.pricePlans.pro.badge}
+                            </div>
                         )}
                         <p className="text-xs text-slate-500">{priceData.pricePlans.pro.description}</p>
                         <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                           {priceData.pricePlans.pro.features.map((feat: string, idx: number) => (
-                            <li key={idx} className="flex items-center space-x-2">
-                              <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                              <span>{feat}</span>
-                            </li>
+                              <li key={idx} className="flex items-center space-x-2">
+                                <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                <span>{feat}</span>
+                              </li>
                           ))}
                         </ul>
                       </div>
                       <div className="mt-6 space-y-3">
                         <button 
-                          type="button"
-                          onClick={() => handleCheckout(priceData.pricePlans.pro.id)} 
-                          disabled={checkoutLoadingPriceId === priceData.pricePlans.pro.id}
-                          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                            type="button"
+                            onClick={() => handleCheckout(priceData.pricePlans.pro.id)} 
+                            disabled={checkoutLoadingPriceId === priceData.pricePlans.pro.id}
+                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                         >
-                          {checkoutLoadingPriceId === priceData.pricePlans.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                          <span>{priceData.pricePlans.pro.ctaText || "Buy Pro Pack"}</span>
+                            {checkoutLoadingPriceId === priceData.pricePlans.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            <span>{priceData.pricePlans.pro.ctaText || "Buy Pro Pack"}</span>
                         </button>
                         <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                         </p>
                       </div>
                     </div>
@@ -537,12 +537,12 @@ export default function Home() {
                           <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
                         </div>
                       ))}
-                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </section>
+                </div>
+              )}
+            </>
+          )}
+        </section>
 
           {/* 3. Portal Pages & Modules */}
           <section className="space-y-12">
@@ -792,8 +792,8 @@ export default function Home() {
                   </div>
                 );
               })()}
-            </div>
-          </section>
+          </div>
+        </section>
 
         </main>
 
