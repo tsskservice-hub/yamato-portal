@@ -15,15 +15,7 @@ export interface QuestionData {
 }
 
 export function getApiEndpoint(): string {
-  if (typeof window !== "undefined") {
-    if ((window as any).ENV?.API_URL) return (window as any).ENV.API_URL;
-    if (import.meta.env?.VITE_API_URL) return import.meta.env.VITE_API_URL;
-
-    const host = window.location.hostname;
-    if (host.includes("jptutoraiyamato.com") || host.includes("pages.dev")) {
-      return "https://api.jptutoraiyamato.com/chat";
-    }
-  }
+  // バックエンド（apiプロジェクト）の /chat エンドポイントへ直接リクエストを送るよう固定
   return "https://api.jptutoraiyamato.com/chat";
 }
 
@@ -73,8 +65,7 @@ export function formatOralFeedbackToHtml(rawText: string): string {
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #d1fae5; color: #065f46; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #059669; border-radius: 0.375rem;">✨ Refined Expression & Polish</div>'
   );
 
-  cleaned = cleaned.replace(/
-/g, "<br>");
+  cleaned = cleaned.replace(/\n/g, "<br>");
   return cleaned;
 }
 
