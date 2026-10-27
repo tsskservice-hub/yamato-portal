@@ -1,6 +1,6 @@
 /**
  * @file eoy-oral-elaborate.tsx
- * @description VCE Japanese - Section 2 Detailed Study Elaboration Practice (Modular Refactored Edition)
+ * @description VCE Japanese - Section 2 Detailed Study Elaboration Practice (Supabase プレーンテキスト分離連携版)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -13,7 +13,7 @@ import { supabase } from "../lib/supabaseClient";
 // 💡 分割・モジュール化した Oral コンポーネント ＆ フック
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
-import { useOralPracticeEngine } from "../hooks/OralPracticeHooks";
+import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
 import {
@@ -106,21 +106,27 @@ export default function EoyOralElaboratePage() {
     return Array.from(new Set(rawQuestions.map((q) => q.category).filter(Boolean)));
   }, [rawQuestions]);
 
-  const currentQuestions: QuestionItem[] = useMemo(() => {
-    const list: QuestionItem[] = [];
+  // 💡 画面表示用ルビ付き (question: text) と TTS用フリガナなし (questionOriginal: text_original) を分離
+  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = useMemo(() => {
+    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     rawQuestions.forEach((q, idx) => {
       if (selectedCategory !== "all" && q.category && q.category !== selectedCategory) return;
-      const qText = q.text || q.text_original || "";
+      const displayQuestion = q.text || q.text_original || "";
+      const plainQuestion = q.text_original || q.text || "";
       const qId = q.audio ? q.audio.replace("/audio/", "").replace(".mp3", "") : `sec2-q-${idx + 1}`;
+      
+      // 💡 default_answer_original (フリガナなし) を優先取得、なければ defaultAnswer
       const plainAnswer = q.default_answer_original || q.defaultAnswer || "";
 
       list.push({
         id: String(qId),
         category: q.category || "Detailed Study",
-        question: qText,
+        question: displayQuestion,          // 画面表示用ルビ付き
+        questionOriginal: plainQuestion,  // TTS用フリガナなし
         isCustom: false,
+        defaultAnswerOriginal: plainAnswer,
       });
       initialMap[String(qId)] = plainAnswer;
     });
@@ -130,11 +136,13 @@ export default function EoyOralElaboratePage() {
   }, [rawQuestions, selectedCategory]);
 
   const handleStartElaboration = () => {
-    const targetQList = currentQuestions.map((q) => {
-      const found = rawQuestions.find((item) => (item.text || item.text_original) === q.question);
-      const qOrig = found ? found.text_original || found.text || q.question : q.question;
-      return { id: q.id, question: q.question, questionOriginal: qOrig, category: q.category };
-    });
+    const targetQList: QuestionData[] = currentQuestions.map((q) => ({
+      id: q.id,
+      question: q.question,                 // 画面表示用 (ルビ付き)
+      questionOriginal: q.questionOriginal, // TTS発話用 (フリガナなし text_original)
+      category: q.category,
+      defaultAnswerOriginal: q.defaultAnswerOriginal,
+    }));
 
     engine.startPractice(targetQList, answers, "sequential");
     if (chatContainerRef.current) {
@@ -278,7 +286,7 @@ export default function EoyOralElaboratePage() {
               onStopRecording={engine.stopRecording}
               onRepeatQuestion={() => {
                 const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                if (currentQ) engine.playTTS(currentQ.questionOriginal);
+                if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
               }}
               onProceedNext={() => engine.proceedToNextQuestion(answers)}
               onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill-elaborate", "sec2")}

@@ -81,9 +81,9 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             key={idx}
             className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
           >
-            {/* 💡 dangerouslySetInnerHTML によりメッセージ内の <ruby> などのルビタグを正しく HTML 表示 */}
+            {/* 💡 メッセージ（問題文や返答）のフォントサイズを text-sm sm:text-base へ拡大 */}
             <div
-              className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-wrap shadow-xs ${
+              className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl text-sm sm:text-base leading-relaxed whitespace-pre-wrap shadow-xs ${
                 msg.role === "user"
                   ? "text-white rounded-br-none"
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none"
@@ -95,7 +95,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
         ))}
         {isAnalyzing && (
           <div className="text-xs font-bold italic animate-pulse p-2" style={{ color: themeColor }}>
-            ⏳ AIヤマトがあなたの回答を分析・フィードバック作成中...
+            ⏳ AI Yamato is analyzing your response and creating feedback...
           </div>
         )}
       </div>
@@ -156,10 +156,10 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder={
               isWaitingForNext
-                ? "上の「Next Question」を押して次へ進んでください"
+                ? "Click 'Next Question' above to proceed..."
                 : isPracticing
-                ? "マイク録音、またはここにテキスト入力して送信..."
-                : "上の「Speak to AI Yamato」を押して開始..."
+                ? "Record audio or type your response here..."
+                : "Click 'Speak to AI Yamato' above to start..."
             }
             disabled={!isPracticing || isAnalyzing || isWaitingForNext}
             className="flex-grow p-3 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:outline-none disabled:opacity-50"

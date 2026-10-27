@@ -40,15 +40,15 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
             1. {title} ({questions.length} Questions)
           </h3>
           <p className="text-xs text-slate-500">
-            テキスト欄を編集してカーソルを外すと（onBlur）、解答が Supabase に自動保存されます。
+            Auto-saves your answers to Supabase when you click outside the text box (onBlur).
           </p>
         </div>
       </div>
 
-      <div className="space-y-4 max-h-[480px] overflow-y-auto pr-2">
+      <div className="space-y-4 max-h-[520px] overflow-y-auto pr-2">
         {questions.length === 0 ? (
           <div className="p-8 text-center text-xs text-slate-400">
-            該当する設問が見つかりませんでした。
+            No questions found for the selected filter.
           </div>
         ) : (
           questions.map((item, idx) => (
@@ -57,9 +57,9 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
               className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded border"
+                    className="text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider"
                     style={{
                       backgroundColor: `${themeColor}20`,
                       borderColor: `${themeColor}40`,
@@ -68,8 +68,8 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
                   >
                     {item.category || "General"}
                   </span>
-                  {/* 💡 dangerouslySetInnerHTML により <ruby>ふりがな</ruby> を正確に HTML ルビとして描画 */}
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-start gap-1">
+                  {/* 💡 問題文のフォントサイズを text-sm から text-base sm:text-lg へ拡大 */}
+                  <h4 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex items-start gap-1.5 leading-snug">
                     <span className="shrink-0">Q{idx + 1}. </span>
                     <span dangerouslySetInnerHTML={{ __html: item.question }} />
                   </h4>
@@ -78,7 +78,7 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
                   <button
                     type="button"
                     onClick={() => onDeleteCustom(item.id)}
-                    className="text-xs text-rose-500 hover:text-rose-700 font-bold cursor-pointer"
+                    className="text-xs text-rose-500 hover:text-rose-700 font-bold cursor-pointer shrink-0"
                   >
                     Delete
                   </button>
@@ -86,16 +86,17 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400">
                   ✍️ Your Answer (Auto-saves to Supabase on blur):
                 </label>
+                {/* 💡 解答欄・サンプル解答のテキストサイズを text-xs から text-sm sm:text-base へ拡大 */}
                 <textarea
                   rows={2}
                   value={answers[item.id] ?? ""}
                   onChange={(e) => onAnswerChange(item.id, e.target.value)}
                   onBlur={(e) => onAnswerBlur(item.id, e.target.value, item.isCustom)}
-                  placeholder="自分の言葉で回答を入力してください..."
-                  className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:outline-none"
+                  placeholder="Enter your response in Japanese..."
+                  className="w-full text-sm sm:text-base p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:outline-none leading-relaxed"
                 />
               </div>
             </div>
@@ -135,7 +136,7 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
           className="w-full sm:w-auto text-white font-black px-8 py-3.5 rounded-2xl shadow-lg transition cursor-pointer text-sm disabled:opacity-50 ml-auto"
           style={{ backgroundColor: themeColor }}
         >
-          🚀 Speak to AI Yamato (画面中央で対話開始)
+          🚀 Speak to AI Yamato (Start Practice)
         </button>
       </div>
     </div>
