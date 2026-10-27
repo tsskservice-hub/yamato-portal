@@ -1,6 +1,10 @@
 /**
  * @file eoy-oral-drill.tsx
- * @description VCE Japanese - Section 1 General Conversation Oral Drill & Custom QA Bank (Supabase プレーンテキスト分離連携版)
+ * @description VCE Japanese - Section 1 General Conversation Oral Drill & Custom QA Bank (トピック複数選択フィルター機能追加版)
+ * 💡 特徴：
+ * 1. Section 1 や各セクションのトピック（カテゴリ）を複数選択できるフィルター機能を搭載
+ * 2. 選択したトピックのみを対象にマイ解答の作成・確認および画面中央の AI ヤマト対話練習が可能
+ * 3. プレーンテキスト（text_original / default_answer_original）とルビ付き表示テキストを分離し、TTS音声の超高精度再生を実現
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -25,12 +29,12 @@ import {
 export const meta: MetaFunction = () => {
   return [
     { title: "VCE Japanese - EOY Oral Drill & Custom QA Bank | JPTutor AI Yamato" },
-    { name: "description", content: "Interactive Section 1 oral practice with custom Q&A bank, auto-saved answers to Supabase, and central AI Yamato dialogue." },
+    { name: "description", content: "Interactive Section 1 oral practice with multi-topic filtering, custom Q&A bank, auto-saved answers to Supabase, and central AI Yamato dialogue." },
   ];
 };
 
 export default function EoyOralDrillPage() {
-  const themeColor = "#eab308";
+  const themeColor = "#eab308"; // ゴールド/アンバー
 
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(10);
@@ -41,7 +45,7 @@ export default function EoyOralDrillPage() {
 
   const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom">("sec1");
   const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
-  const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [speechSpeed, setSpeechSpeed] = useState<number>(1.0);
   const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
 
@@ -112,6 +116,7 @@ export default function EoyOralDrillPage() {
     if (selectedSection === "custom") fetchCustomQuestions();
   }, [selectedSection, user?.id]);
 
+  // 💡 選択中セクション・難易度で利用可能な全トピック（カテゴリ）を取得
   const availableTopics = useMemo(() => {
     const set = new Set<string>();
     if (selectedSection === "custom") {
@@ -126,24 +131,40 @@ export default function EoyOralDrillPage() {
     return Array.from(set);
   }, [selectedSection, selectedLevel, questionsData, customQuestionsRaw]);
 
+  // 初期状態・セクション切替時に全トピックをデフォルト選択
   useEffect(() => {
-    setSelectedTopic(availableTopics);
+    setSelectedTopics(availableTopics);
   }, [selectedLevel, selectedSection, availableTopics.length]);
 
-  // 💡 画面表示用 (question: ルビ付き text) と TTS用 (questionOriginal: フリガナなし text_original) を分離
+  // 💡 トピックの複数選択/選択解除トグル処理
+  const toggleTopic = (topic: string) => {
+    if (selectedTopics.includes(topic)) {
+      setSelectedTopics(selectedTopics.filter((t) => t !== topic));
+    } else {
+      setSelectedTopics([...selectedTopics, topic]);
+    }
+  };
+
+  const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
+  const handleClearAllTopics = () => setSelectedTopics([]);
+
+  // 💡 複数選択されたトピックに基づく問題リストの抽出
   const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = useMemo(() => {
     const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     if (selectedSection === "custom") {
       customQuestionsRaw.forEach((q) => {
-        if (selectedTopic.length > 0 && q.category && !selectedTopic.includes(q.category)) return;
+        const categoryName = q.category || "General";
+        // 複数トピックフィルター判定
+        if (selectedTopics.length > 0 && !selectedTopics.includes(categoryName)) return;
+
         const qId = String(q.id);
         list.push({
           id: qId,
           question: q.question_text,
           questionOriginal: q.question_text,
-          category: q.category || "General",
+          category: categoryName,
           isCustom: true,
           defaultAnswerOriginal: q.answer_text || "",
         });
@@ -156,19 +177,20 @@ export default function EoyOralDrillPage() {
         let counter = 1;
         rawList.forEach((q) => {
           if (q && (q.text || q.text_original)) {
-            if (selectedTopic.length > 0 && q.category && !selectedTopic.includes(q.category)) return;
+            const categoryName = q.category || "General";
+            // 複数トピックフィルター判定
+            if (selectedTopics.length > 0 && !selectedTopics.includes(categoryName)) return;
+
             const qId = q.audio ? q.audio.replace("/audio/", "").replace(".mp3", "") : `q-${counter++}`;
-            
-            // 💡 default_answer_original (フリガナなし) を優先取得、なければ defaultAnswer
             const plainAnswer = q.default_answer_original || q.defaultAnswer || "";
             const displayQuestion = q.text || q.text_original || "";
             const plainQuestion = q.text_original || q.text || "";
 
             list.push({
               id: String(qId),
-              question: displayQuestion,          // 画面表示用ルビ付き
-              questionOriginal: plainQuestion,  // TTS用フリガナなし
-              category: q.category,
+              question: displayQuestion,          // 画面表示用 (ルビ付き)
+              questionOriginal: plainQuestion,  // TTS音声用 (フリガナなし)
+              category: categoryName,
               isCustom: false,
               defaultAnswerOriginal: plainAnswer,
             });
@@ -180,7 +202,7 @@ export default function EoyOralDrillPage() {
 
     loadSavedAnswers(initialMap);
     return list;
-  }, [selectedSection, selectedLevel, selectedTopic, questionsData, customQuestionsRaw]);
+  }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
   const handleStartPractice = () => {
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
@@ -254,7 +276,7 @@ export default function EoyOralDrillPage() {
                 EOY Oral Drill & Custom QA Bank
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                作成したマイ解答は Supabase に自動保存されます。画面中央のヤマトと対話して即答力を鍛えましょう！
+                学習したいトピックを自由に複数選択して練習できます。作成したマイ解答は Supabase に自動保存されます。
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Conversation" themeColor={themeColor} />
@@ -262,6 +284,7 @@ export default function EoyOralDrillPage() {
 
           {/* Section & Filter Controls */}
           <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 rounded-3xl p-6 shadow-sm space-y-6">
+            {/* 1. Section Selection */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">📂 Select Section / Source</h3>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -277,7 +300,7 @@ export default function EoyOralDrillPage() {
                     type="button"
                     onClick={() => {
                       setSelectedSection(sec.id as any);
-                      setSelectedTopic([]);
+                      setSelectedTopics([]);
                     }}
                     className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
                       selectedSection === sec.id
@@ -291,6 +314,7 @@ export default function EoyOralDrillPage() {
               </div>
             </div>
 
+            {/* 2. Pace Selection */}
             {selectedSection !== "custom" && (
               <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🌱 Select Learning Pace</h3>
@@ -313,6 +337,60 @@ export default function EoyOralDrillPage() {
                       {lvl.label}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* 3. 🌟 トピック複数選択フィルター (Multi-Topic Filter) 🌟 */}
+            {availableTopics.length > 0 && (
+              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      🏷 Select Topics (Multiple Selection Allowed)
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
+                      {selectedTopics.length} / {availableTopics.length} selected
+                    </span>
+                  </div>
+                  <div className="space-x-2">
+                    <button
+                      type="button"
+                      onClick={handleSelectAllTopics}
+                      className="text-xs text-amber-600 font-bold hover:underline cursor-pointer"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearAllTopics}
+                      className="text-xs text-slate-400 font-bold hover:underline cursor-pointer"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+
+                {/* トピック選択ボタン（ピル型デザイン） */}
+                <div className="flex flex-wrap gap-2">
+                  {availableTopics.map((topic) => {
+                    const isSelected = selectedTopics.includes(topic);
+                    return (
+                      <button
+                        key={topic}
+                        type="button"
+                        onClick={() => toggleTopic(topic)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border flex items-center gap-1.5 ${
+                          isSelected
+                            ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
+                        }`}
+                      >
+                        <span>{isSelected ? "☑" : "□"}</span>
+                        <span>{topic}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
