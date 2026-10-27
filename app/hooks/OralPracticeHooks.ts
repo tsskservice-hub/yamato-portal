@@ -103,7 +103,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // TTS Voice Playback with Fallback
+  // TTS Voice Playback with Fallback (drill.tsx parameters added: learningPace, pace)
   const playTTS = async (textToSpeak: string) => {
     try {
       if (!textToSpeak) return;
@@ -123,6 +123,8 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         body: JSON.stringify({
           speakText: cleanedText,
           level: selectedLevel,
+          learningPace: selectedLevel,
+          pace: selectedLevel,
           speed: speechSpeed,
         }),
       });
@@ -207,15 +209,20 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPracticing, isAnalyzing, isWaitingForNext, isRecording]);
 
-  // Speech Transcription via Backend API
-  const transcribeAudio = async (audioBlob: Blob) => {
+  // Speech Transcription via Backend API (drill.tsx mode fix: -transcribe suffix & pace fields)
+  const transcribeAudio = async (audioBlob: Blob, baseMode = "drill-elaborate") => {
     setIsAnalyzing(true);
     const currentQ = activeQuestions[currentQuestionIndex];
     const formData = new FormData();
     formData.append("audio", audioBlob, "user-audio.webm");
     formData.append("expectedQuestion", currentQ?.questionOriginal || currentQ?.question || "");
-    formData.append("mode", "drill-practice");
+    
+    // 💡 drill.tsx で正常動作していた文字起こし用モード名 (-transcribe)
+    const transcribeMode = baseMode.endsWith("-transcribe") ? baseMode : `${baseMode}-transcribe`;
+    formData.append("mode", transcribeMode);
     formData.append("level", selectedLevel);
+    formData.append("learningPace", selectedLevel);
+    formData.append("pace", selectedLevel);
 
     try {
       const endpoint = getApiEndpoint();
@@ -321,6 +328,8 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
           registeredAnswer: registeredAnswer,
           mode,
           level: selectedLevel,
+          learningPace: selectedLevel,
+          pace: selectedLevel,
           section,
         }),
       });
