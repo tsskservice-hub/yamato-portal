@@ -19,7 +19,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
   onSelectQuestion,
   selectedLevel = "normal",
   themeColor = "#a855f7",
-  apiEndpoint = "/api/chat",
+  apiEndpoint = "https://" + "api." + "jptutor" + "aiyamato" + ".com/chat",
   modeLabel = "Practice",
 }) => {
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
@@ -28,11 +28,13 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
   const { isRecording, startRecording, stopRecording, audioBlob } = useOralAudioRecorder();
 
+  // 設問が変更されたらフィードバックとテキストをリセット
   useEffect(() => {
     setFeedback(null);
     setUserSpeechText("");
   }, [selectedQuestion?.text]);
 
+  // 音声データ生成時の自動AI送信
   useEffect(() => {
     if (audioBlob && selectedQuestion) {
       processAudioSubmission(audioBlob);
@@ -54,7 +56,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
       if (!response.ok) throw new Error("API response error");
 
-      const data = (await response.json()) as any;
+      const data = await response.json();
 
       setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
 
@@ -86,6 +88,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
   return (
     <div className="space-y-8">
+      {/* 設問選択グリッド */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
           <span className="flex items-center gap-2">
@@ -124,7 +127,9 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
                   }
                 >
                   <div className="space-y-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                    >
                       {q.category || "General"}
                     </span>
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug">
@@ -147,6 +152,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
         )}
       </div>
 
+      {/* 選択中設問の練習 ＆ 録音エリア */}
       {selectedQuestion && (
         <div
           className="bg-white dark:bg-slate-900 border-2 rounded-3xl p-6 shadow-md space-y-6"
@@ -166,6 +172,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
             </h2>
           </div>
 
+          {/* マイク録音コントロール */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
             <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
               <p className="font-bold text-slate-800 dark:text-slate-200">
@@ -197,6 +204,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
             )}
           </div>
 
+          {/* 解析・書き起こし状況 */}
           {isAnalyzing && (
             <div className="p-4 bg-purple-50/50 dark:bg-purple-950/20 rounded-xl border border-purple-200 dark:border-purple-900 text-center text-xs font-bold text-purple-700 dark:text-purple-300 animate-pulse">
               ⏳ AI面接官が音声を聞き取って評価中...
@@ -212,6 +220,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
             </div>
           )}
 
+          {/* AI 即時フィードバックカード */}
           {feedback && (
             <OralDrillFeedbackCard
               feedback={feedback}
