@@ -275,7 +275,7 @@ export default function EoyOralDrillPage() {
                 EOY Oral Exam Practice & Custom QA Bank
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice every stage of the VCE Japanese Oral Exam — from entrance greetings and Section 1 General Conversation to Section 2 Detailed Study and exit. Your custom answers are automatically saved to Supabase.
+                Practice every stage of the VCE Japanese Oral Exam — from entrance greetings and Section 1 General Conversation to Section 2 Detailed Study and exit. Your custom answers are automatically saved so you can practice and edit them anytime, anywhere.
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />

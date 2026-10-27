@@ -5,7 +5,7 @@
 import React from 'react';
 import { Link } from '@remix-run/react';
 import type { MetaFunction } from "@remix-run/cloudflare";
-import { Sparkles, BookOpen, Users, Heart } from 'lucide-react';
+import { Sparkles, BookOpen, Users, Heart, Cpu } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 
 export const meta: MetaFunction = () => {
@@ -140,7 +140,31 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Section 4: A Tribute to Busy Teachers (Blue theme with Pink Heart accent) */}
+          {/* Section 4: Robust Technology & Secure Infrastructure */}
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 shadow-sm space-y-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600">
+                <Cpu className="w-5 h-5" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                Robust Technology & Secure Infrastructure
+              </h2>
+            </div>
+            
+            <div className="prose prose-slate max-w-none text-slate-700 space-y-4 text-sm sm:text-base leading-relaxed">
+              <p>
+                To provide a seamless, secure, and high-performance learning environment, AI Yamato is built on a modern and trusted technology stack:
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-slate-600">
+                <li><strong>Supabase:</strong> Powers our secure database and passwordless passkey authentication.</li>
+                <li><strong>Cloudflare & GitHub:</strong> Ensure reliable global site deployment and high-speed delivery.</li>
+                <li><strong>Stripe:</strong> Delivers secure and seamless payment processing for credit packs.</li>
+                <li><strong>Google Cloud, OpenAI & ElevenLabs:</strong> Provide state-of-the-art artificial intelligence models for intelligent tutoring, natural interactions, and voice synthesis.</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Section 5: A Tribute to Busy Teachers (Blue theme with Pink Heart accent) */}
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl p-8 sm:p-10 shadow-sm space-y-4 text-center">
             <div className="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto shadow-sm">
               <Heart className="w-6 h-6 fill-pink-500 text-pink-600 animate-pulse" />

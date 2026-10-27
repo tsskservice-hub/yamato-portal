@@ -1,6 +1,7 @@
 /**
  * @file eoy-oral-elaborate.tsx
- * @description VCE Japanese - Section 2 Detailed Study Elaboration Practice (Supabase プレーンテキスト分離連携版)
+ * @description VCE Japanese - Comprehensive EOY Oral Elaborate Practice & Custom QA Bank
+ * Covers all stages of the VCE Oral Exam: Before Section 1, Section 1, Section 2, and After Section 2 with multi-topic selection for Section 1 and all sections.
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -10,9 +11,10 @@ import OralExaminerAvatar from "../components/OralExaminerAvatar";
 import ChatYamatoEoyOralElaborate from "../components/ChatYamatoEoyOralElaborate";
 import { supabase } from "../lib/supabaseClient";
 
-// 💡 分割・モジュール化した Oral コンポーネント ＆ フック
+// Modular Oral components & hooks
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
+import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
@@ -24,12 +26,12 @@ import {
 export const meta: MetaFunction = () => {
   return [
     { title: "VCE Japanese - EOY Oral Elaborate Practice | JPTutor AI Yamato" },
-    { name: "description", content: "Section 2 Detailed Study elaboration practice with custom answers auto-saved to Supabase and central AI Yamato deep-dive dialogue." },
+    { name: "description", content: "Comprehensive VCE Japanese Oral Exam elaboration practice covering Before Section 1, Section 1, Section 2, and After Section 2 with multi-topic filtering and AI dialogue." },
   ];
 };
 
 export default function EoyOralElaboratePage() {
-  const themeColor = "#a855f7"; // パープル
+  const themeColor = "#a855f7"; // Purple theme for Elaboration Practice
 
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(10);
@@ -38,17 +40,27 @@ export default function EoyOralElaboratePage() {
   const [questionsData, setQuestionsData] = useState<OralExamQuestionsData | null>(null);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
 
+  const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom">("sec2");
   const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [speechSpeed, setSpeechSpeed] = useState<number>(1.0);
+  const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
+
+  const [newQuestionText, setNewQuestionText] = useState("");
+  const [newAnswerText, setNewAnswerText] = useState("");
+  const [newCategory, setNewCategory] = useState("");
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   const {
     answers,
+    customQuestionsRaw,
+    fetchCustomQuestions,
     loadSavedAnswers,
     handleAnswerChange,
     handleAnswerBlur,
+    addCustomQuestion,
+    deleteCustomQuestion,
   } = useSupabaseUserAnswers(supabase, user?.id);
 
   const engine = useOralPracticeEngine(selectedLevel, speechSpeed);
@@ -97,56 +109,122 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  const rawQuestions = useMemo(() => {
-    if (!questionsData?.sec2) return [];
-    return questionsData.sec2[selectedLevel] || questionsData.sec2["normal"] || questionsData.sec2["steady"] || [];
-  }, [questionsData, selectedLevel]);
+  useEffect(() => {
+    if (selectedSection === "custom") fetchCustomQuestions();
+  }, [selectedSection, user?.id]);
 
-  const categories = useMemo(() => {
-    return Array.from(new Set(rawQuestions.map((q) => q.category).filter(Boolean)));
-  }, [rawQuestions]);
+  // Extract all available topics for the current exam stage/section & pace
+  const availableTopics = useMemo(() => {
+    const set = new Set<string>();
+    if (selectedSection === "custom") {
+      customQuestionsRaw.forEach((q) => q.category && set.add(q.category));
+    } else if (questionsData) {
+      const secData = questionsData[selectedSection];
+      if (secData) {
+        const list = secData[selectedLevel] || secData["normal"] || secData["steady"] || [];
+        list.forEach((q) => q.category && set.add(q.category));
+      }
+    }
+    return Array.from(set);
+  }, [selectedSection, selectedLevel, questionsData, customQuestionsRaw]);
 
-  // 💡 画面表示用ルビ付き (question: text) と TTS用フリガナなし (questionOriginal: text_original) を分離
+  // Default to selecting all available topics on section or level change
+  useEffect(() => {
+    setSelectedTopics(availableTopics);
+  }, [selectedLevel, selectedSection, availableTopics.length]);
+
+  // Multi-topic selection toggle
+  const toggleTopic = (topic: string) => {
+    if (selectedTopics.includes(topic)) {
+      setSelectedTopics(selectedTopics.filter((t) => t !== topic));
+    } else {
+      setSelectedTopics([...selectedTopics, topic]);
+    }
+  };
+
+  const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
+  const handleClearAllTopics = () => setSelectedTopics([]);
+
+  // Extract current questions based on selected topics
   const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = useMemo(() => {
     const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = [];
     const initialMap: { [key: string]: string } = {};
 
-    rawQuestions.forEach((q, idx) => {
-      if (selectedCategory !== "all" && q.category && q.category !== selectedCategory) return;
-      const displayQuestion = q.text || q.text_original || "";
-      const plainQuestion = q.text_original || q.text || "";
-      const qId = q.audio ? q.audio.replace("/audio/", "").replace(".mp3", "") : `sec2-q-${idx + 1}`;
-      
-      // 💡 default_answer_original (フリガナなし) を優先取得、なければ defaultAnswer
-      const plainAnswer = q.default_answer_original || q.defaultAnswer || "";
+    if (selectedSection === "custom") {
+      customQuestionsRaw.forEach((q) => {
+        const categoryName = q.category || "General";
+        if (selectedTopics.length > 0 && !selectedTopics.includes(categoryName)) return;
 
-      list.push({
-        id: String(qId),
-        category: q.category || "Detailed Study",
-        question: displayQuestion,          // 画面表示用ルビ付き
-        questionOriginal: plainQuestion,  // TTS用フリガナなし
-        isCustom: false,
-        defaultAnswerOriginal: plainAnswer,
+        const qId = String(q.id);
+        list.push({
+          id: qId,
+          question: q.question_text,
+          questionOriginal: q.question_text,
+          category: categoryName,
+          isCustom: true,
+          defaultAnswerOriginal: q.answer_text || "",
+        });
+        initialMap[qId] = q.answer_text || "";
       });
-      initialMap[String(qId)] = plainAnswer;
-    });
+    } else if (questionsData) {
+      const secData = questionsData[selectedSection];
+      if (secData) {
+        const rawList = secData[selectedLevel] || secData["normal"] || secData["steady"] || [];
+        let counter = 1;
+        rawList.forEach((q) => {
+          if (q && (q.text || q.text_original)) {
+            const categoryName = q.category || "Detailed Study";
+            if (selectedTopics.length > 0 && !selectedTopics.includes(categoryName)) return;
+
+            const qId = q.audio ? q.audio.replace("/audio/", "").replace(".mp3", "") : `sec-q-${counter++}`;
+            const plainAnswer = q.default_answer_original || q.defaultAnswer || "";
+            const displayQuestion = q.text || q.text_original || "";
+            const plainQuestion = q.text_original || q.text || "";
+
+            list.push({
+              id: String(qId),
+              question: displayQuestion,          // Formatted HTML with furigana for UI
+              questionOriginal: plainQuestion,  // Clean text without furigana for TTS
+              category: categoryName,
+              isCustom: false,
+              defaultAnswerOriginal: plainAnswer,
+            });
+            initialMap[String(qId)] = plainAnswer;
+          }
+        });
+      }
+    }
 
     loadSavedAnswers(initialMap);
     return list;
-  }, [rawQuestions, selectedCategory]);
+  }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
   const handleStartElaboration = () => {
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
-      question: q.question,                 // 画面表示用 (ルビ付き)
-      questionOriginal: q.questionOriginal, // TTS発話用 (フリガナなし text_original)
+      question: q.question,                 // Ruby-formatted for UI display
+      questionOriginal: q.questionOriginal, // Clean text for TTS engine
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
     }));
 
-    engine.startPractice(targetQList, answers, "sequential");
+    engine.startPractice(targetQList, answers, orderMode);
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleAddCustom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newQuestionText.trim() || !newAnswerText.trim()) {
+      alert("Please enter both the question and sample answer.");
+      return;
+    }
+    const success = await addCustomQuestion(newQuestionText, newAnswerText, newCategory);
+    if (success) {
+      setNewQuestionText("");
+      setNewAnswerText("");
+      setNewCategory("");
     }
   };
 
@@ -155,7 +233,7 @@ export default function EoyOralElaboratePage() {
       <PageLayout user={user} credits={credits}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
-            Loading Section 2 Detailed Study Database...
+            Loading Oral Exam Database from Supabase...
           </div>
         </div>
       </PageLayout>
@@ -167,8 +245,8 @@ export default function EoyOralElaboratePage() {
       <PageLayout user={user} credits={credits}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 max-w-4xl mx-auto">
           <DataErrorState
-            title="Detailed Study Database Unavailable"
-            message="Unable to load Section 2 Detailed Study Questions from Supabase. Please reload or report this error."
+            title="Oral Exam Database Unavailable"
+            message="Unable to load Oral Exam Questions from Supabase. Please reload or report this error."
             errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
           />
         </div>
@@ -180,92 +258,163 @@ export default function EoyOralElaboratePage() {
     <PageLayout user={user} credits={credits}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-4xl mx-auto space-y-8">
-          {/* Header */}
+          {/* Header Card */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-300">
-                  Section 2 Detailed Study
+                  All VCE Oral Exam Stages
                 </span>
-                <span className="text-xs text-slate-500">VCE Oral Elaboration Drill</span>
+                <span className="text-xs text-slate-500">VCE Japanese Oral Elaboration</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
                 EOY Oral Elaboration Practice
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                作成した深掘り（Elaboration）解答は Supabase に自動保存されます。画面中央のヤマトと対話して、複数文で根拠を語る論理的スピーキング力を養いましょう！
+                Practice in-depth elaboration across all stages of the VCE Oral Exam (Before Sec 1, Sec 1, Sec 2, and After Sec 2). Filter by multiple topics, auto-save your responses to Supabase, and build logical speaking fluency with AI Yamato.
               </p>
             </div>
-            <OralExaminerAvatar statusText="Ready for Detailed Study" themeColor={themeColor} />
+            <OralExaminerAvatar statusText="Ready for Elaboration" themeColor={themeColor} />
           </div>
 
-          {/* Level & Subtopic Filters */}
+          {/* Section & Filter Controls */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-6 shadow-sm space-y-6">
+            {/* 1. Exam Stage / Section Selection */}
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🌱 Select Learning Pace</h3>
-              <div className="grid grid-cols-3 gap-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">📂 Select Exam Stage / Source</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {[
-                  { id: "steady", label: "Steady (Foundation)" },
-                  { id: "normal", label: "Normal (Standard)" },
-                  { id: "accelerated", label: "Accelerated (Advanced)" },
-                ].map((lvl) => (
+                  { id: "beforeSec1", label: "Before Sec 1 (Entrance)" },
+                  { id: "sec1", label: "Section 1 (General)" },
+                  { id: "sec2", label: "Section 2 (Detailed)" },
+                  { id: "afterSec2", label: "After Sec 2 (Exit)" },
+                  { id: "custom", label: "⭐ My Custom Bank" },
+                ].map((sec) => (
                   <button
-                    key={lvl.id}
+                    key={sec.id}
                     type="button"
-                    onClick={() => setSelectedLevel(lvl.id as any)}
+                    onClick={() => {
+                      setSelectedSection(sec.id as any);
+                      setSelectedTopics([]);
+                    }}
                     className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
-                      selectedLevel === lvl.id
+                      selectedSection === sec.id
                         ? "bg-purple-600 text-white border-purple-700 shadow-sm"
                         : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"
                     }`}
                   >
-                    {lvl.label}
+                    {sec.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {categories.length > 0 && (
-              <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">🏷 Subtopic Filter</span>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCategory("all")}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                      selectedCategory === "all"
-                        ? "bg-purple-600 text-white border-purple-700"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
-                    }`}
-                  >
-                    All Subtopics
-                  </button>
-                  {categories.map((cat) => (
+            {/* 2. Learning Pace Selection */}
+            {selectedSection !== "custom" && (
+              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🌱 Select Learning Pace</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: "steady", label: "Steady (Foundation)" },
+                    { id: "normal", label: "Normal (Standard)" },
+                    { id: "accelerated", label: "Accelerated (Advanced)" },
+                  ].map((lvl) => (
                     <button
-                      key={cat}
+                      key={lvl.id}
                       type="button"
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                        selectedCategory === cat
-                          ? "bg-purple-600 text-white border-purple-700"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                      onClick={() => setSelectedLevel(lvl.id as any)}
+                      className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                        selectedLevel === lvl.id
+                          ? "bg-purple-600 text-white border-purple-700 shadow-sm"
+                          : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"
                       }`}
                     >
-                      {cat}
+                      {lvl.label}
                     </button>
                   ))}
                 </div>
               </div>
             )}
+
+            {/* 3. Multi-Topic Selection Filter */}
+            {availableTopics.length > 0 && (
+              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      🏷 Select Topics (Multiple Selection Allowed)
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-300">
+                      {selectedTopics.length} / {availableTopics.length} selected
+                    </span>
+                  </div>
+                  <div className="space-x-2">
+                    <button
+                      type="button"
+                      onClick={handleSelectAllTopics}
+                      className="text-xs text-purple-600 font-bold hover:underline cursor-pointer"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearAllTopics}
+                      className="text-xs text-slate-400 font-bold hover:underline cursor-pointer"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+
+                {/* Topic Pill Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  {availableTopics.map((topic) => {
+                    const isSelected = selectedTopics.includes(topic);
+                    return (
+                      <button
+                        key={topic}
+                        type="button"
+                        onClick={() => toggleTopic(topic)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border flex items-center gap-1.5 ${
+                          isSelected
+                            ? "bg-purple-600 text-white border-purple-700 shadow-xs"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
+                        }`}
+                      >
+                        <span>{isSelected ? "☑" : "□"}</span>
+                        <span>{topic}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* 1. Review & Customize Answers List */}
+          {/* Add Custom Question Form */}
+          {selectedSection === "custom" && (
+            <OralCustomQuestionForm
+              newQuestionText={newQuestionText}
+              setNewQuestionText={setNewQuestionText}
+              newAnswerText={newAnswerText}
+              setNewAnswerText={setNewAnswerText}
+              newCategory={newCategory}
+              setNewCategory={setNewCategory}
+              onSubmit={handleAddCustom}
+              themeColor={themeColor}
+            />
+          )}
+
+          {/* 1. Review & Customize Elaboration Answers List */}
           <OralUserAnswerList
             questions={currentQuestions}
             answers={answers}
             onAnswerChange={handleAnswerChange}
             onAnswerBlur={handleAnswerBlur}
+            onDeleteCustom={deleteCustomQuestion}
             onStartPractice={handleStartElaboration}
+            orderMode={orderMode}
+            setOrderMode={setOrderMode}
             themeColor={themeColor}
             title="Review & Customize Your Elaboration Answers"
           />
@@ -289,9 +438,9 @@ export default function EoyOralElaboratePage() {
                 if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
               }}
               onProceedNext={() => engine.proceedToNextQuestion(answers)}
-              onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill-elaborate", "sec2")}
+              onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill-elaborate", selectedSection)}
               themeColor={themeColor}
-              titleLabel="Detailed Study Elaboration Practice with AI Yamato"
+              titleLabel="Detailed Elaboration Practice with AI Yamato"
             />
           </div>
 
