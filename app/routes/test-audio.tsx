@@ -47,7 +47,7 @@ export default function TestAudioPage() {
     appendLog("=== Audio Debug Environment Initialized ===");
     if (typeof window !== "undefined") {
       appendLog(`User Agent: ${navigator.userAgent}`);
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      if (Boolean(navigator.mediaDevices?.getUserMedia)) {
         appendLog("✅ Navigator MediaDevices API supported.");
       } else {
         appendLog("❌ Navigator MediaDevices API NOT supported!");
@@ -196,7 +196,7 @@ export default function TestAudioPage() {
       appendLog(`STT HTTP Response Status: ${response.status} ${response.statusText}`);
 
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as { userText?: string };
         appendLog(`✅ STT Response JSON: ${JSON.stringify(data)}`);
         setTranscribedText(data.userText || "（文字起こし結果が空でした）");
       } else {
@@ -251,10 +251,10 @@ export default function TestAudioPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setApiEndpoint("/api/chat")}
+                onClick={() => setApiEndpoint("/chat")}
                 className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0"
               >
-                Set Relative (/api/chat)
+                Set Relative (/chat)
               </button>
             </div>
           </div>
