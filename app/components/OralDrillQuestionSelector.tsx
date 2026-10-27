@@ -4,8 +4,10 @@ export interface OralDrillQuestionSelectorProps {
   categories: string[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
-  mode: "steady" | "normal" | "accelerated";
-  onSelectMode: (mode: "steady" | "normal" | "accelerated") => void;
+  selectedLevel?: "steady" | "normal" | "accelerated";
+  onSelectLevel?: (level: "steady" | "normal" | "accelerated") => void;
+  mode?: "steady" | "normal" | "accelerated";
+  onSelectMode?: (mode: "steady" | "normal" | "accelerated") => void;
   questionsCount?: number;
   themeColor?: string;
 }
@@ -14,14 +16,21 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
   categories,
   selectedCategory,
   onSelectCategory,
-  mode,
+  selectedLevel,
+  onSelectLevel,
+  mode = "normal",
   onSelectMode,
   questionsCount = 0,
   themeColor = "#eab308",
 }) => {
+  const currentLevel = selectedLevel || mode;
+  const handleLevelChange = (lvl: "steady" | "normal" | "accelerated") => {
+    if (onSelectLevel) onSelectLevel(lvl);
+    if (onSelectMode) onSelectMode(lvl);
+  };
+
   return (
     <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-      {/* Pace / Difficulty Selector */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
           Learning Pace & Speed
@@ -31,9 +40,9 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
             <button
               key={m}
               type="button"
-              onClick={() => onSelectMode(m)}
+              onClick={() => handleLevelChange(m)}
               className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition cursor-pointer ${
-                mode === m
+                currentLevel === m
                   ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
                   : "text-slate-500 hover:text-slate-800"
               }`}
@@ -44,7 +53,6 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
         </div>
       </div>
 
-      {/* Categories Tabs */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
