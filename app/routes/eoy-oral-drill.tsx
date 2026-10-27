@@ -51,9 +51,10 @@ const KNOWLEDGE_KEY = 'ORAL_EXAM_QUESTIONS';
  */
 export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient): Promise<OralExamQuestionsData | null> {
   try {
+    // 💡 存在しない 'content_json' を削除し、'key, data' のみに修正
     const { data: rows, error } = await supabaseClient
       .from('app_knowledge')
-      .select('key, data, content_json')
+      .select('key, data')
       .eq('key', KNOWLEDGE_KEY);
 
     if (error) {
@@ -67,7 +68,7 @@ export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient)
     }
 
     const row = rows[0];
-    const rawData = row.data || row.content_json;
+    const rawData = row.data; // 💡 row.content_json への参照を削除
 
     if (rawData) {
       const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
