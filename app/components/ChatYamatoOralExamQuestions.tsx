@@ -2,9 +2,9 @@
  * @file ChatYamatoOralExamQuestions.tsx
  * @description Supabase YAMATO_CONFIGS から設定を動的取得する Oral Exam Questions 専用AIチャットコンポーネント（ラッパー方式）
  * 💡 特徴：
- * 1. YamatoChatCommon をベースにした完全ラッパー方式
- * 2. Supabase の "oral-exam-questions" 設定（テーマカラー #22c55e、ボタンスタイル等）を動的反映
- * 3. リスニング・シャドーイング練習向けに写真アップロードボタン（Upload Photo）を非表示化（enableImageUpload={false}）
+ *   1. YamatoChatCommon をベースにした完全ラッパー方式
+ *   2. Supabase の "oral-exam-questions" 設定（テーマカラー #22c55e、ボタンスタイル等）を動的反映
+ *   3. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
  */
 import React, { useState, useEffect } from "react";
 import YamatoChatCommon from "./YamatoChatCommon";
@@ -17,8 +17,10 @@ export interface ChatYamatoOralExamQuestionsProps {
   userId?: string;
   userNickname?: string;
   credits?: number;
-  initialLearningPace?: "steady" | "normal" | "accelerated";
   onOpenAuth?: (mode?: 'signin' | 'signup') => void;
+  externalImageFile?: File | null;
+  externalImagePreview?: string | null;
+  onClearExternalImage?: () => void;
   assignedQuestion?: string;
 }
 
@@ -28,8 +30,6 @@ export const ChatYamatoOralExamQuestions: React.FC<ChatYamatoOralExamQuestionsPr
   ...restProps
 }) => {
   const appType = "oral-exam-questions";
-
-  // 💡 Supabase から動的に取得するボット設定
   const [config, setConfig] = useState<BotConfig | null>(null);
 
   useEffect(() => {
@@ -46,11 +46,10 @@ export const ChatYamatoOralExamQuestions: React.FC<ChatYamatoOralExamQuestionsPr
     loadConfig();
   }, [appType]);
 
-  // ご提示いただいたデフォルトのボタンスタイル（イエロー背景 ＆ グリーン枠線）
   const defaultButtonStyle = {
-    color: "#000000",
-    border: "2px solid #22c55e",
-    background: "#fde047",
+    background: "#22c55e",
+    border: "2px solid #86efac",
+    color: "#ffffff"
   };
 
   return (
@@ -65,7 +64,7 @@ export const ChatYamatoOralExamQuestions: React.FC<ChatYamatoOralExamQuestionsPr
       themeColor={config?.themeColor || "#22c55e"}
       buttonStyle={config?.floatingButtonStyle || config?.buttonStyle || defaultButtonStyle}
       defaultOpen={defaultOpen}
-      enableImageUpload={false} // 💡 質問リスニング・シャドーイング用のため、写真アップロードボタンは非表示
+      enableImageUpload={true} // 💡 写真アップロードボタン（Upload Photo）を表示
       {...restProps}
     />
   );

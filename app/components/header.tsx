@@ -1,9 +1,9 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタンを追加版・Yamatoの枠を削除）
+ * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタンを追加版・Yamatoの枠を削除・ホーム画面のみ表示）
  */
 import React from 'react';
-import { Link } from '@remix-run/react';
+import { Link, useLocation } from '@remix-run/react';
 import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle } from 'lucide-react';
 
 type HeaderProps = {
@@ -23,6 +23,9 @@ export default function Header({
   onOpenAuth, 
   onSignOut 
 }: HeaderProps) {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
   // 💡 ユーザーが入力中の文字（nickname）があればそれを最優先で表示し、
   // 完全な未入力・空白のときのみ "Set Nickname" を表示する
   const trimmedNickname = nickname ? nickname.trim() : "";
@@ -47,23 +50,25 @@ export default function Header({
             </span>
           </Link>
 
-          {/* 💡 クイックジャンプボタン（ロゴの右隣） */}
-          <div className="hidden md:flex items-center space-x-2">
-            <a 
-              href="/#section-general" 
-              className="px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
-            >
-              <span>🌐</span>
-              <span>General</span>
-            </a>
-            <a 
-              href="/#section-vce" 
-              className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
-            >
-              <span>🇦🇺</span>
-              <span>VCE</span>
-            </a>
-          </div>
+          {/* 💡 クイックジャンプボタン（ロゴの右隣：ホーム画面でのみ表示） */}
+          {isHome && (
+            <div className="hidden md:flex items-center space-x-2">
+              <a 
+                href="/#section-general" 
+                className="px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+              >
+                <span>🌐</span>
+                <span>General</span>
+              </a>
+              <a 
+                href="/#section-vce" 
+                className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+              >
+                <span>🇦🇺</span>
+                <span>VCE</span>
+              </a>
+            </div>
+          )}
         </div>
 
         {/* 右側グループ：ユーザー情報、プラン、FAQ、My Account、認証ボタン */}

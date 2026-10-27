@@ -2,9 +2,9 @@
  * @file ChatYamatoEoyOralDrill.tsx
  * @description Supabase YAMATO_CONFIGS から設定を動的取得する VCE EOY Oral Drill 専用AIチャットコンポーネント（ラッパー方式）
  * 💡 特徴：
- * 1. YamatoChatCommon をベースにした完全ラッパー方式
- * 2. Supabase の "eoy-oral-drill" 設定（テーマカラー #eab308、ボタンスタイル等）を動的反映
- * 3. 口頭練習向けに写真アップロードボタン（Upload Photo）を非表示化（enableImageUpload={false}）
+ *   1. YamatoChatCommon をベースにした完全ラッパー方式
+ *   2. Supabase の "eoy-oral-drill" 設定（テーマカラー #eab308、ボタンスタイル等）を動的反映
+ *   3. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
  */
 import React, { useState, useEffect } from "react";
 import YamatoChatCommon from "./YamatoChatCommon";
@@ -17,8 +17,10 @@ export interface ChatYamatoEoyOralDrillProps {
   userId?: string;
   userNickname?: string;
   credits?: number;
-  initialLearningPace?: "steady" | "normal" | "accelerated";
   onOpenAuth?: (mode?: 'signin' | 'signup') => void;
+  externalImageFile?: File | null;
+  externalImagePreview?: string | null;
+  onClearExternalImage?: () => void;
   assignedQuestion?: string;
 }
 
@@ -28,8 +30,6 @@ export const ChatYamatoEoyOralDrill: React.FC<ChatYamatoEoyOralDrillProps> = ({
   ...restProps
 }) => {
   const appType = "eoy-oral-drill";
-
-  // 💡 Supabase から動的に取得するボット設定
   const [config, setConfig] = useState<BotConfig | null>(null);
 
   useEffect(() => {
@@ -46,11 +46,10 @@ export const ChatYamatoEoyOralDrill: React.FC<ChatYamatoEoyOralDrillProps> = ({
     loadConfig();
   }, [appType]);
 
-  // ご提示いただいたデフォルトのボタンスタイル
   const defaultButtonStyle = {
-    color: "#000000",
-    border: "2px solid #eab308",
-    background: "#dcfce7",
+    background: "#eab308",
+    border: "2px solid #fef08a",
+    color: "#ffffff"
   };
 
   return (
@@ -65,7 +64,7 @@ export const ChatYamatoEoyOralDrill: React.FC<ChatYamatoEoyOralDrillProps> = ({
       themeColor={config?.themeColor || "#eab308"}
       buttonStyle={config?.floatingButtonStyle || config?.buttonStyle || defaultButtonStyle}
       defaultOpen={defaultOpen}
-      enableImageUpload={false} // 💡 口頭練習のため、チャット内の写真アップロードボタンは非表示
+      enableImageUpload={true} // 💡 写真アップロードボタン（Upload Photo）を表示
       {...restProps}
     />
   );

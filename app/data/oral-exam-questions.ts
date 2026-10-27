@@ -2,21 +2,20 @@
  * @file oral-exam-questions.ts
  * @description Decoupled TypeScript logic & Supabase client integration for Oral Exam Questions Database.
  * Stores data in Supabase 'app_knowledge' table under key: 'ORAL_EXAM_QUESTIONS'.
- * 
- * 💡 設計方針 (terms.tsx 模範準拠):
- * 1. 静的配列の直参照ではなく、非同期取得関数 (fetchOralExamQuestionsData) を提供。
- * 2. 取得失敗時は null を返し、UI側で DataErrorState にフォールバックさせる。
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
 // --- Type Definitions ---
 export interface OralExamQuestionItem {
+  id?: string;
   category: string;
   text: string;
-  audio?: string;        // 実際の音声ファイルパス
+  audio?: string;
   text_original?: string;
   defaultAnswer?: string;
+  default_answer_original?: string;
+  keyInfoHint?: string;
 }
 
 export interface OralExamModeGroup {
@@ -34,39 +33,48 @@ export interface OralExamQuestionsData {
 
 export type OralExamQuestionsDataPayload = OralExamQuestionsData;
 
-export interface AppKnowledgeRecord<T = any> {
-  id?: string;
-  key: string;
-  title: string;
-  category: string;
-  data: T;
-  created_at?: string;
-  updated_at?: string;
-}
+// --- Pure Empty Reference Structure (サンプルデータ排除・空配列化) ---
+export const ORAL_EXAM_QUESTIONS_DATA: OralExamQuestionsData = {
+  beforeSec1: { steady: [], normal: [], accelerated: [] },
+  sec1: { steady: [], normal: [], accelerated: [] },
+  sec2: { steady: [], normal: [], accelerated: [] },
+  afterSec2: { steady: [], normal: [], accelerated: [] }
+};
 
-// 💡 Supabase app_knowledge の key（大文字の 'ORAL_EXAM_QUESTIONS'）
+export default ORAL_EXAM_QUESTIONS_DATA;
+
 const KNOWLEDGE_KEY = 'ORAL_EXAM_QUESTIONS';
 
 /**
- * Supabase 'app_knowledge' テーブルから ORAL_EXAM_QUESTIONS データを取得
- * 取得失敗・レコード不在時は null を返し、UI側で DataErrorState を表示させます
+ * Fetch Oral Exam Questions Database data from Supabase 'app_knowledge' table.
+ * Returns null when fetch fails or data is empty, triggering DataErrorState.tsx in UI.
  */
 export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient): Promise<OralExamQuestionsData | null> {
   try {
-    const { data: row, error } = await supabaseClient
+    const { data: rows, error } = await supabaseClient
       .from('app_knowledge')
-      .select('data')
-      .eq('key', KNOWLEDGE_KEY)
-      .single();
+      .select('key, data')
+      .eq('key', KNOWLEDGE_KEY);
 
-    if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase app_knowledge:`, error?.message);
+    if (error) {
+      console.warn(`[${KNOWLEDGE_KEY}] Supabase fetch error:`, error.message);
       return null;
     }
 
-    const result = (row.data || (row as any).content_json) as OralExamQuestionsData;
-    if (result && typeof result === 'object' && Object.keys(result).length > 0) {
-      return result;
+    if (!rows || rows.length === 0) {
+      console.warn(`[${KNOWLEDGE_KEY}] No rows found in Supabase.`);
+      return null;
+    }
+
+    const row = rows[0];
+    const rawData = row.data;
+
+    if (rawData) {
+      const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+        console.log(`[${KNOWLEDGE_KEY}] Successfully imported data from Supabase!`);
+        return parsed as OralExamQuestionsData;
+      }
     }
 
     return null;
@@ -81,15 +89,12 @@ export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient)
  */
 export async function upsertOralExamQuestionsData(
   supabaseClient: SupabaseClient,
-  content: OralExamQuestionsData,
-  category = 'VCE Japanese Data'
+  content: OralExamQuestionsData
 ): Promise<boolean> {
   const { error } = await supabaseClient
     .from('app_knowledge')
     .upsert({
       key: KNOWLEDGE_KEY,
-      title: 'Oral Exam Questions Database',
-      category,
       data: content,
       updated_at: new Date().toISOString()
     }, { onConflict: 'key' });
@@ -102,35 +107,23 @@ export async function upsertOralExamQuestionsData(
 }
 
 // --- Helper & Utility Logic ---
-
-/**
- * セクションおよびペースに応じた設問リストを取得
- */
 export function getOralQuestionsBySectionAndMode(
-  data: OralExamQuestionsData | null,
+  data: OralExamQuestionsData,
   section: keyof OralExamQuestionsData,
   mode: 'steady' | 'normal' | 'accelerated'
 ): OralExamQuestionItem[] {
-  if (!data) return [];
   return data[section]?.[mode] || [];
 }
 
-/**
- * カテゴリ名で設問を横断検索
- */
-export function searchOralQuestionsByCategory(
-  data: OralExamQuestionsData | null,
-  category: string
-): OralExamQuestionItem[] {
-  if (!data) return [];
+export function searchOralQuestionsByCategory(data: OralExamQuestionsData, category: string): OralExamQuestionItem[] {
   const results: OralExamQuestionItem[] = [];
   const catLower = category.toLowerCase();
-
+  
   for (const section of Object.values(data)) {
     if (!section) continue;
     for (const questions of Object.values(section)) {
       if (Array.isArray(questions)) {
-        questions.forEach((q) => {
+        questions.forEach(q => {
           if (q.category && q.category.toLowerCase().includes(catLower)) {
             results.push(q);
           }
@@ -140,5 +133,3 @@ export function searchOralQuestionsByCategory(
   }
   return results;
 }
-
-export default fetchOralExamQuestionsData;

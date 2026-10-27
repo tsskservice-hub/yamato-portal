@@ -11,6 +11,7 @@ import type { MetaFunction } from "@remix-run/cloudflare";
 import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import DataErrorState from '../components/DataErrorState';
+import ScrollTopButton from '../components/ScrollTopButton';
 import { fetchFaqData, FaqItem } from '../data/faq-database';
 import { supabase } from '../lib/supabaseClient';
 
@@ -144,7 +145,7 @@ export default function FaqPage() {
         />
       )}
 
-      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-800 pb-16">
+      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-800 pb-16 relative">
         {/* ヘッダーエリア */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-md">
           <div className="max-w-4xl mx-auto">
@@ -277,7 +278,7 @@ export default function FaqPage() {
               <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center space-y-3">
                 <h3 className="text-lg font-bold text-blue-900">Still have questions?</h3>
                 <p className="text-xs sm:text-sm text-blue-700 max-w-xl mx-auto">
-                  Feel free to reach out anytime via the feedback feature or bug report cards on your dashboard. AI Yamato is also here to support you!
+                  Please let us know your question via Contact, Report Bug & Photo, or Quick Feedback in the footer.
                 </p>
                 <div className="pt-2">
                   <Link
@@ -292,6 +293,9 @@ export default function FaqPage() {
           )}
 
         </div>
+
+        {/* 💡 スクロールトップボタンの配置 */}
+        <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" />
       </div>
     </PageLayout>
   );

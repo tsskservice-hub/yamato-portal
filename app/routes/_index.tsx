@@ -413,10 +413,10 @@ export default function Home() {
                         <p className="text-xs text-slate-500">{priceData.pricePlans.starter.description}</p>
                         <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                           {priceData.pricePlans.starter.features.map((feat: string, idx: number) => (
-                            <li key={idx} className="flex items-center space-x-2">
-                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                              <span>{feat}</span>
-                            </li>
+                              <li key={idx} className="flex items-center space-x-2">
+                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                                <span>{feat}</span>
+                              </li>
                           ))}
                         </ul>
                       </div>
@@ -431,7 +431,7 @@ export default function Home() {
                           <span>{priceData.pricePlans.starter.ctaText || "Buy Starter Pack"}</span>
                         </button>
                         <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                         </p>
                       </div>
                     </div>
@@ -441,7 +441,7 @@ export default function Home() {
                   {priceData.pricePlans.standard && (
                     <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-                        Most Popular
+                          Most Popular
                       </div>
                       <div className="space-y-4">
                         <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData.pricePlans.standard.name}</span>
@@ -450,9 +450,9 @@ export default function Home() {
                           <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.standard.period}</span>
                         </div>
                         {priceData.pricePlans.standard.badge && (
-                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                            {priceData.pricePlans.standard.badge}
-                          </div>
+                              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                              {priceData.pricePlans.standard.badge}
+                            </div>
                         )}
                         <p className="text-xs text-slate-500">{priceData.pricePlans.standard.description}</p>
                         <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -466,83 +466,83 @@ export default function Home() {
                       </div>
                       <div className="mt-6 space-y-3">
                         <button 
-                          type="button"
-                          onClick={() => handleCheckout(priceData.pricePlans.standard.id)} 
-                          disabled={checkoutLoadingPriceId === priceData.pricePlans.standard.id}
-                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                            type="button"
+                            onClick={() => handleCheckout(priceData.pricePlans.standard.id)} 
+                            disabled={checkoutLoadingPriceId === priceData.pricePlans.standard.id}
+                            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                         >
-                          {checkoutLoadingPriceId === priceData.pricePlans.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                          <span>{priceData.pricePlans.standard.ctaText || "Buy Standard Pack"}</span>
+                            {checkoutLoadingPriceId === priceData.pricePlans.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            <span>{priceData.pricePlans.standard.ctaText || "Buy Standard Pack"}</span>
                         </button>
                         <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                         </p>
                       </div>
-                    </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* Pro Intensivist */}
-                  {priceData.pricePlans.pro && (
-                    <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                      <div className="space-y-4">
-                        <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{priceData.pricePlans.pro.name}</span>
-                        <div>
-                          <span className="text-4xl font-black">{priceData.pricePlans.pro.price}</span>
-                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.pro.period}</span>
-                        </div>
-                        {priceData.pricePlans.pro.badge && (
-                          <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                            {priceData.pricePlans.pro.badge}
-                          </div>
+                {/* Pro Intensivist */}
+                {priceData.pricePlans.pro && (
+                  <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                    <div className="space-y-4">
+                      <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{priceData.pricePlans.pro.name}</span>
+                      <div>
+                        <span className="text-4xl font-black">{priceData.pricePlans.pro.price}</span>
+                        <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.pro.period}</span>
+                      </div>
+                      {priceData.pricePlans.pro.badge && (
+                            <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
+                              {priceData.pricePlans.pro.badge}
+                            </div>
                         )}
-                        <p className="text-xs text-slate-500">{priceData.pricePlans.pro.description}</p>
-                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                          {priceData.pricePlans.pro.features.map((feat: string, idx: number) => (
+                      <p className="text-xs text-slate-500">{priceData.pricePlans.pro.description}</p>
+                      <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                        {priceData.pricePlans.pro.features.map((feat: string, idx: number) => (
                             <li key={idx} className="flex items-center space-x-2">
                               <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
                               <span>{feat}</span>
                             </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="mt-6 space-y-3">
-                        <button 
-                          type="button"
-                          onClick={() => handleCheckout(priceData.pricePlans.pro.id)} 
-                          disabled={checkoutLoadingPriceId === priceData.pricePlans.pro.id}
-                          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                        >
-                          {checkoutLoadingPriceId === priceData.pricePlans.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                          <span>{priceData.pricePlans.pro.ctaText || "Buy Pro Pack"}</span>
-                        </button>
-                        <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                        </p>
-                      </div>
+                        ))}
+                      </ul>
                     </div>
-                  )}
-                </div>
-
-                {/* クレジット消費ガイド */}
-                {priceData.creditConsumptionGuide && (
-                  <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm mt-8`}>
-                    <div className="flex items-center justify-center space-x-2 font-bold mb-3">
-                      <Coins className="w-4 h-4 text-amber-500" />
-                      <span>Credit Consumption Guide</span>
-                    </div>
-                    <div className="space-y-2 text-slate-500">
-                      {priceData.creditConsumptionGuide.map((row, idx) => (
-                        <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
-                          <span>{row.item}</span>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <div className="mt-6 space-y-3">
+                    <button 
+                        type="button"
+                        onClick={() => handleCheckout(priceData.pricePlans.pro.id)} 
+                        disabled={checkoutLoadingPriceId === priceData.pricePlans.pro.id}
+                        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                    >
+                        {checkoutLoadingPriceId === priceData.pricePlans.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                        <span>{priceData.pricePlans.pro.ctaText || "Buy Pro Pack"}</span>
+                    </button>
+                    <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                        By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                    </p>
                   </div>
-                )}
-              </>
+                </div>
+              )}
+            </div>
+
+            {/* クレジット消費ガイド */}
+            {priceData.creditConsumptionGuide && (
+              <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm mt-8`}>
+                <div className="flex items-center justify-center space-x-2 font-bold mb-3">
+                  <Coins className="w-4 h-4 text-amber-500" />
+                  <span>Credit Consumption Guide</span>
+                </div>
+                <div className="space-y-2 text-slate-500">
+                  {priceData.creditConsumptionGuide.map((row, idx) => (
+                    <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
+                      <span>{row.item}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
-          </section>
+          </>
+          )}
+        </section>
 
           {/* 3. Portal Pages & Modules */}
           <section className="space-y-12">
@@ -567,10 +567,16 @@ export default function Home() {
                 {portalContent.modulesSection.section1.modules.map((mod: PortalModule) => (
                   <div 
                     key={mod.id} 
+                    onClick={async () => {
+                      if (mod.isComingSoon) return;
+                      if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                        navigate(mod.path);
+                      }
+                    }}
                     className={`p-6 rounded-3xl border flex flex-col justify-between ${
                       mod.isComingSoon 
-                        ? 'opacity-75' 
-                        : 'hover:border-blue-500/50'
+                        ? 'opacity-75 cursor-not-allowed' 
+                        : 'hover:border-blue-500/50 cursor-pointer'
                     } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
                   >
                     <div className="space-y-4">
@@ -593,7 +599,8 @@ export default function Home() {
                       {!mod.isComingSoon ? (
                         <button
                           type="button"
-                          onClick={async () => {
+                          onClick={async (e) => {
+                            e.stopPropagation();
                             if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
                               navigate(mod.path);
                             }
@@ -631,10 +638,16 @@ export default function Home() {
                   {vceSpeakingModules.map((mod: PortalModule) => (
                     <div 
                       key={mod.id} 
+                      onClick={async () => {
+                        if (mod.isComingSoon) return;
+                        if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                          navigate(mod.path);
+                        }
+                      }}
                       className={`p-6 rounded-3xl border flex flex-col justify-between ${
                         mod.isComingSoon 
-                          ? 'opacity-75' 
-                          : 'hover:border-red-500/50'
+                          ? 'opacity-75 cursor-not-allowed' 
+                          : 'hover:border-red-500/50 cursor-pointer'
                       } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
                     >
                       <div className="space-y-4">
@@ -657,7 +670,8 @@ export default function Home() {
                         {!mod.isComingSoon ? (
                           <button
                             type="button"
-                            onClick={async () => {
+                            onClick={async (e) => {
+                              e.stopPropagation();
                               if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
                                 navigate(mod.path);
                               }
@@ -689,10 +703,16 @@ export default function Home() {
                   {vceWritingModules.map((mod: PortalModule) => (
                     <div 
                       key={mod.id} 
+                      onClick={async () => {
+                        if (mod.isComingSoon) return;
+                        if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                          navigate(mod.path);
+                        }
+                      }}
                       className={`p-6 rounded-3xl border flex flex-col justify-between ${
                         mod.isComingSoon 
-                          ? 'opacity-75' 
-                          : 'hover:border-red-500/50'
+                          ? 'opacity-75 cursor-not-allowed' 
+                          : 'hover:border-red-500/50 cursor-pointer'
                       } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
                     >
                       <div className="space-y-4">
@@ -715,7 +735,8 @@ export default function Home() {
                         {!mod.isComingSoon ? (
                           <button
                             type="button"
-                            onClick={async () => {
+                            onClick={async (e) => {
+                              e.stopPropagation();
                               if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
                                 navigate(mod.path);
                               }
@@ -758,7 +779,8 @@ export default function Home() {
                       {referenceModules.map((mod: PortalModule) => (
                         <div
                           key={mod.id}
-                          className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-emerald-500/50 ${
+                          onClick={() => navigate(mod.path)}
+                          className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-emerald-500/50 cursor-pointer ${
                             isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                           } shadow-sm transition-colors`}
                         >
@@ -779,7 +801,10 @@ export default function Home() {
                             <span className="text-emerald-600 font-medium">{mod.category}</span>
                             <button
                               type="button"
-                              onClick={() => navigate(mod.path)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(mod.path);
+                              }}
                               className="text-emerald-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
                             >
                               <span>{mod.actionLabel}</span>
@@ -792,8 +817,8 @@ export default function Home() {
                   </div>
                 );
               })()}
-            </div>
-          </section>
+          </div>
+        </section>
 
         </main>
 
@@ -819,6 +844,6 @@ export default function Home() {
           portalContent={portalContent}
         />
       </div>
-    </PageLayout>
+      </PageLayout>
   );
 }
