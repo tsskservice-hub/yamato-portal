@@ -87,7 +87,7 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
 
               <div className="space-y-1">
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-400">
-                  ✍️ Your Answer (Auto-saves to Supabase on blur):
+                  ✍️ Your Answer (Saves automatically when you click away):
                 </label>
                 {/* 💡 解答欄・サンプル解答のテキストサイズを text-xs から text-sm sm:text-base へ拡大 */}
                 <textarea
