@@ -1,26 +1,13 @@
 // app/routes/sitemap[.]xml.ts
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+// 自動生成されたルート一覧をインポート
+import { generatedRoutes } from "../routes.generated";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const baseUrl = "https://jptutoraiyamato.com";
 
-  // プロジェクトの app/routes/ に存在する実際のページ一覧
-  const routes = [
-    "",                // _index.tsx (トップページ)
-    "/contact",        // contact.tsx
-    "/disclaimer",     // disclaimer.tsx
-    "/eoy-oral-drill", // eoy-oral-drill.tsx
-    "/eoy-oral-elaborate", // eoy-oral-elaborate.tsx
-    "/eoy-oral-mock",  // eoy-oral-mock.tsx
-    "/eoy-writing",    // eoy-writing.tsx
-    "/game-igo",       // game-igo.tsx
-    "/genkoyoshi-editor", // genkoyoshi-editor.tsx
-    "/oral-exam-questions", // oral-exam-questions.tsx
-    "/prices",         // prices.tsx
-    "/privacy",        // privacy.tsx
-    "/my-account", // my-account.tsx
-    "/terms",          // terms.tsx
-  ];
+  // トップページ（""）が自動生成リストに含まれていない場合に備え、安全に結合・確保する処理
+  const routes = generatedRoutes.includes("") ? generatedRoutes : ["", ...generatedRoutes];
 
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
