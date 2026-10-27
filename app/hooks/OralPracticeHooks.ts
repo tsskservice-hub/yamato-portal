@@ -8,9 +8,10 @@ export type ChatMessage = {
 
 export interface QuestionData {
   id: string;
-  question: string;
-  questionOriginal: string;
-  defaultAnswer?: string;
+  question: string;         // 画面表示用 (ルビ付き HTML)
+  questionOriginal: string; // TTS音声再生用 (Supabase の text_original プレーンテキスト)
+  defaultAnswer?: string;   // 画面表示用モデル解答
+  defaultAnswerOriginal?: string; // プレーンテキストモデル解答 (default_answer_original)
   category?: string;
 }
 
@@ -61,8 +62,10 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
+  // 💡 TTS 発話関数 (Supabaseのフリガナ無しの純粋プレーンテキスト text_original を直接再生)
   const playTTS = async (textToSpeak: string) => {
     try {
+      if (!textToSpeak) return;
       const cleanedText = textToSpeak
         .replace(/【.*?】/g, "")
         .replace(/※.*$/gm, "")
@@ -145,7 +148,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     const currentQ = activeQuestions[currentQuestionIndex];
     const formData = new FormData();
     formData.append("audio", audioBlob, "user-audio.webm");
-    formData.append("expectedQuestion", currentQ?.questionOriginal || "");
+    formData.append("expectedQuestion", currentQ?.questionOriginal || currentQ?.question || "");
     formData.append("mode", "drill-practice");
     formData.append("level", selectedLevel);
 
@@ -188,12 +191,13 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     setChatMessages([
       {
         role: "assistant",
-        content: `【Practice Session Started】\n\nYamato: 「${firstQ.question}」\n\n(あなたの作成解答: 「${userTargetAns || "（未入力）"}」)\n\nマイクまたはテキストで回答してください！`,
+        content: `【Practice Session Started】<br><br>Yamato: 「${firstQ.question}」<br><br>(あなたの作成解答: 「${userTargetAns || "（未入力）"}」)<br><br>マイクまたはテキストで回答してください！`,
         isHtml: true,
       },
     ]);
 
-    playTTS(firstQ.questionOriginal);
+    // 💡 フリガナなしプレーンテキスト (questionOriginal) を TTS で再生
+    playTTS(firstQ.questionOriginal || firstQ.question);
   };
 
   const proceedToNextQuestion = (answersMap: { [key: string]: string }) => {
@@ -206,12 +210,13 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         ...prev,
         {
           role: "assistant",
-          content: `【Next Question】\nYamato: 「${nextQ.question}」\n(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)\n\nどうぞ！`,
+          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)<br><br>どうぞ！`,
           isHtml: true,
         },
       ]);
       setIsWaitingForNext(false);
-      playTTS(nextQ.questionOriginal);
+      // 💡 フリガナなしプレーンテキスト (questionOriginal) を TTS で再生
+      playTTS(nextQ.questionOriginal || nextQ.question);
     }
   };
 
@@ -243,7 +248,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
-          expectedQuestion: currentQ.questionOriginal,
+          expectedQuestion: currentQ.questionOriginal || currentQ.question,
           registeredAnswer: registeredAnswer,
           mode,
           level: selectedLevel,
@@ -268,12 +273,12 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
             { role: "assistant", content: formattedHtml, isHtml: true },
             {
               role: "assistant",
-              content: `【Next Question】\nYamato: 「${nextQ.question}」\n(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)\n\nどうぞ！`,
+              content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)<br><br>どうぞ！`,
               isHtml: true,
             },
           ]);
           setIsWaitingForNext(false);
-          playTTS(nextQ.questionOriginal);
+          playTTS(nextQ.questionOriginal || nextQ.question);
         }, 500);
       } else if (nextIndex < activeQuestions.length) {
         setIsWaitingForNext(true);

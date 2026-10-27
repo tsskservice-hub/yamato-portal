@@ -1,6 +1,6 @@
 /**
  * @file eoy-oral-drill.tsx
- * @description VCE Japanese - Section 1 General Conversation Oral Drill & Custom QA Bank (Modular Refactored Edition)
+ * @description VCE Japanese - Section 1 General Conversation Oral Drill & Custom QA Bank (Supabase プレーンテキスト分離連携版)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -14,7 +14,7 @@ import { supabase } from "../lib/supabaseClient";
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
-import { useOralPracticeEngine } from "../hooks/OralPracticeHooks";
+import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
 import {
@@ -130,15 +130,23 @@ export default function EoyOralDrillPage() {
     setSelectedTopic(availableTopics);
   }, [selectedLevel, selectedSection, availableTopics.length]);
 
-  const currentQuestions: QuestionItem[] = useMemo(() => {
-    const list: QuestionItem[] = [];
+  // 💡 画面表示用 (question: ルビ付き text) と TTS用 (questionOriginal: フリガナなし text_original) を分離
+  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = useMemo(() => {
+    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     if (selectedSection === "custom") {
       customQuestionsRaw.forEach((q) => {
         if (selectedTopic.length > 0 && q.category && !selectedTopic.includes(q.category)) return;
         const qId = String(q.id);
-        list.push({ id: qId, question: q.question_text, category: q.category || "General", isCustom: true });
+        list.push({
+          id: qId,
+          question: q.question_text,
+          questionOriginal: q.question_text,
+          category: q.category || "General",
+          isCustom: true,
+          defaultAnswerOriginal: q.answer_text || "",
+        });
         initialMap[qId] = q.answer_text || "";
       });
     } else if (questionsData) {
@@ -150,8 +158,20 @@ export default function EoyOralDrillPage() {
           if (q && (q.text || q.text_original)) {
             if (selectedTopic.length > 0 && q.category && !selectedTopic.includes(q.category)) return;
             const qId = q.audio ? q.audio.replace("/audio/", "").replace(".mp3", "") : `q-${counter++}`;
+            
+            // 💡 default_answer_original (フリガナなし) を優先取得、なければ defaultAnswer
             const plainAnswer = q.default_answer_original || q.defaultAnswer || "";
-            list.push({ id: String(qId), question: q.text || q.text_original || "", category: q.category, isCustom: false });
+            const displayQuestion = q.text || q.text_original || "";
+            const plainQuestion = q.text_original || q.text || "";
+
+            list.push({
+              id: String(qId),
+              question: displayQuestion,          // 画面表示用ルビ付き
+              questionOriginal: plainQuestion,  // TTS用フリガナなし
+              category: q.category,
+              isCustom: false,
+              defaultAnswerOriginal: plainAnswer,
+            });
             initialMap[String(qId)] = plainAnswer;
           }
         });
@@ -163,16 +183,13 @@ export default function EoyOralDrillPage() {
   }, [selectedSection, selectedLevel, selectedTopic, questionsData, customQuestionsRaw]);
 
   const handleStartPractice = () => {
-    const targetQList = currentQuestions.map((q) => {
-      let qOrig = q.question;
-      if (selectedSection !== "custom" && questionsData) {
-        const secData = questionsData[selectedSection];
-        const rawList = secData?.[selectedLevel] || secData?.["normal"] || secData?.["steady"] || [];
-        const found = rawList.find((item) => (item.text || item.text_original) === q.question);
-        if (found) qOrig = found.text_original || found.text || q.question;
-      }
-      return { id: q.id, question: q.question, questionOriginal: qOrig, category: q.category };
-    });
+    const targetQList: QuestionData[] = currentQuestions.map((q) => ({
+      id: q.id,
+      question: q.question,                 // ルビ付き画面表示用
+      questionOriginal: q.questionOriginal, // TTS発話用フリガナなし text_original
+      category: q.category,
+      defaultAnswerOriginal: q.defaultAnswerOriginal,
+    }));
 
     engine.startPractice(targetQList, answers, orderMode);
     if (chatContainerRef.current) {
@@ -344,7 +361,7 @@ export default function EoyOralDrillPage() {
               onStopRecording={engine.stopRecording}
               onRepeatQuestion={() => {
                 const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                if (currentQ) engine.playTTS(currentQ.questionOriginal);
+                if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
               }}
               onProceedNext={() => engine.proceedToNextQuestion(answers)}
               onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill", selectedSection)}

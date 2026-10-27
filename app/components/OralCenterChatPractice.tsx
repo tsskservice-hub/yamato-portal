@@ -81,6 +81,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             key={idx}
             className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
           >
+            {/* 💡 dangerouslySetInnerHTML によりメッセージ内の <ruby> などのルビタグを正しく HTML 表示 */}
             <div
               className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-wrap shadow-xs ${
                 msg.role === "user"
@@ -88,13 +89,8 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none"
               }`}
               style={msg.role === "user" ? { backgroundColor: themeColor } : {}}
-            >
-              {msg.isHtml ? (
-                <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-              ) : (
-                msg.content
-              )}
-            </div>
+              dangerouslySetInnerHTML={{ __html: msg.content }}
+            />
           </div>
         ))}
         {isAnalyzing && (

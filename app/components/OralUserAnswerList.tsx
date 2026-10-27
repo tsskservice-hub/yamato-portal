@@ -68,8 +68,10 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
                   >
                     {item.category || "General"}
                   </span>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                    Q{idx + 1}. {item.question}
+                  {/* 💡 dangerouslySetInnerHTML により <ruby>ふりがな</ruby> を正確に HTML ルビとして描画 */}
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-start gap-1">
+                    <span className="shrink-0">Q{idx + 1}. </span>
+                    <span dangerouslySetInnerHTML={{ __html: item.question }} />
                   </h4>
                 </div>
                 {item.isCustom && onDeleteCustom && (
