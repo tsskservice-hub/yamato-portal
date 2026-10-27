@@ -53,7 +53,7 @@ export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient)
   try {
     const { data: rows, error } = await supabaseClient
       .from('app_knowledge')
-      .select('key, data, content_json')
+      .select('key, data')
       .eq('key', KNOWLEDGE_KEY);
 
     if (error) {
@@ -67,7 +67,7 @@ export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient)
     }
 
     const row = rows[0];
-    const rawData = row.data || row.content_json;
+    const rawData = row.data;
 
     if (rawData) {
       const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
