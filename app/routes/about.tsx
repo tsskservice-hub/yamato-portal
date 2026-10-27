@@ -188,7 +188,7 @@ export default function AboutPage() {
 
         </div>
 
-        {/* 💡 スクロールトップボタンの配置 */}
+        {/* 💡 スクロールトップボタン配置 */}
         <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" />
       </div>
     </PageLayout>
