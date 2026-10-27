@@ -7,6 +7,7 @@ import { Link } from '@remix-run/react';
 import type { MetaFunction } from "@remix-run/cloudflare";
 import { Sparkles, BookOpen, Users, Heart, Cpu } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
+import ScrollTopButton from '../components/ScrollTopButton';
 
 export const meta: MetaFunction = () => {
   return [
@@ -21,7 +22,7 @@ export const meta: MetaFunction = () => {
 export default function AboutPage() {
   return (
     <PageLayout>
-      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-800 pb-16">
+      <div className="min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-800 pb-16 relative">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 px-4 sm:px-6 lg:px-8 shadow-md">
           <div className="max-w-4xl mx-auto text-center space-y-4">
@@ -186,6 +187,9 @@ export default function AboutPage() {
           </div>
 
         </div>
+
+        {/* 💡 スクロールトップボタンの配置 */}
+        <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" />
       </div>
     </PageLayout>
   );
