@@ -1,26 +1,20 @@
 /**
  * @file eoy-oral-elaborate.tsx
- * @description VCE Japanese - Section 2 Detailed Study Elaboration Practice (リファクタリング版)
- * 💡 特徴:
- * 1. OralDrillQuestionSelector & OralQuestionPracticeCard によるカプセル化
- * 2. OralExaminerAvatar によるアバター演出
- * 3. ChatYamatoEoyOralElaborate (ラッパー方式) による常駐AIアシスタント連携
+ * @description VCE Japanese - Section 2 Detailed Study Elaboration Practice (DataErrorState フォールバック対応版)
  */
 import React, { useState, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
+import { DataErrorState } from "../components/DataErrorState";
 import { supabase } from "../lib/supabaseClient";
 
-// 💡 共通化・分割した Oral 系コンポーネント群をインポート
 import OralExaminerAvatar from "../components/OralExaminerAvatar";
 import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector";
 import OralQuestionPracticeCard from "../components/OralQuestionPracticeCard";
 import ChatYamatoEoyOralElaborate from "../components/ChatYamatoEoyOralElaborate";
 
-// 💡 Supabase ナレッジデータ連携
 import {
   fetchOralExamQuestionsData,
-  ORAL_EXAM_QUESTIONS_DATA,
   OralExamQuestionsData,
   OralExamQuestionItem,
 } from "../data/oral-exam-questions";
@@ -33,20 +27,19 @@ export const meta: MetaFunction = () => {
 };
 
 export default function EoyOralElaboratePage() {
-  const themeColor = "#a855f7"; // パープル（Section 2 Detailed Study テーマカラー）
+  const themeColor = "#a855f7";
 
-  // 1. ユーザーセッション＆プロフィールステート
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
-  // 2. 口頭設問データ＆フィルターステート
-  const [questionsData, setQuestionsData] = useState<OralExamQuestionsData>(ORAL_EXAM_QUESTIONS_DATA);
+  const [questionsData, setQuestionsData] = useState<OralExamQuestionsData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedQuestion, setSelectedQuestion] = useState<OralExamQuestionItem | null>(null);
 
-  // Supabase セッション＆設問データの同期
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -58,11 +51,23 @@ export default function EoyOralElaboratePage() {
       if (session?.user) fetchProfile(session.user.id);
     });
 
-    // Supabase から ORAL_EXAM_QUESTIONS を取得
+    // 💡 Supabase から ORAL_EXAM_QUESTIONS データを非同期取得
     async function loadQuestions() {
-      const fetched = await fetchOralExamQuestionsData(supabase);
-      if (fetched) {
-        setQuestionsData(fetched);
+      setIsLoading(true);
+      try {
+        const fetched = await fetchOralExamQuestionsData(supabase);
+        if (fetched && typeof fetched === "object" && Object.keys(fetched).length > 0) {
+          console.log("✅ [eoy-oral-elaborate] Supabase 口頭問題データの読込成功:", fetched);
+          setQuestionsData(fetched);
+        } else {
+          console.warn("⚠️ [eoy-oral-elaborate] Supabase データ取得失敗または空です");
+          setQuestionsData(null);
+        }
+      } catch (err) {
+        console.error("Failed to load oral questions from Supabase:", err);
+        setQuestionsData(null);
+      } finally {
+        setIsLoading(false);
       }
     }
     loadQuestions();
@@ -87,14 +92,40 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  // Section 2 (sec2) 設問の抽出とカテゴリー生成
+  // 💡 データ読み込み中状態の描画
+  if (isLoading) {
+    return (
+      <PageLayout user={user} credits={credits}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
+          <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
+            Loading Detailed Study Questions from Supabase...
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // 💡 Supabase からデータが取得できなかった場合は DataErrorState を表示
+  if (!questionsData || Object.keys(questionsData).length === 0) {
+    return (
+      <PageLayout user={user} credits={credits}>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 max-w-4xl mx-auto">
+          <DataErrorState
+            title="Section 2 Detailed Study Questions Unavailable"
+            message="Unable to load Detailed Study Questions from the database. Please reload or report this error."
+            errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+          />
+        </div>
+      </PageLayout>
+    );
+  }
+
   const rawQuestions = questionsData.sec2?.[selectedLevel] || [];
   const categories = Array.from(new Set(rawQuestions.map((q) => q.category).filter(Boolean)));
   const filteredQuestions = rawQuestions.filter(
     (q) => selectedCategory === "all" || q.category === selectedCategory
   );
 
-  // 常駐AIチャットへの選択中プロンプト連携
   const currentSystemPrompt = selectedQuestion
     ? `[Selected Section 2 Detailed Study Question]\nCategory: ${selectedQuestion.category}\nQuestion: ${selectedQuestion.text}\nSample Answer: ${selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original}`
     : "";
@@ -104,7 +135,6 @@ export default function EoyOralElaboratePage() {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-4xl mx-auto space-y-8">
           
-          {/* ヘッダーカード ＆ AI 面接官アバター */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -127,7 +157,6 @@ export default function EoyOralElaboratePage() {
             />
           </div>
 
-          {/* Pace（難易度）＆ Category フィルター */}
           <OralDrillQuestionSelector
             categories={categories}
             selectedCategory={selectedCategory}
@@ -138,9 +167,9 @@ export default function EoyOralElaboratePage() {
               setSelectedQuestion(null);
             }}
             themeColor={themeColor}
+            questionsCount={filteredQuestions.length}
           />
 
-          {/* 設問グリッド選択 ＆ 録音・AI即時フィードバックカード */}
           <OralQuestionPracticeCard
             questions={filteredQuestions}
             selectedQuestion={selectedQuestion}
@@ -150,7 +179,6 @@ export default function EoyOralElaboratePage() {
             modeLabel="Detailed Study"
           />
 
-          {/* 右下固定配置の AI 常駐チャット（ラッパー方式） */}
           <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
             <ChatYamatoEoyOralElaborate
               systemPrompt={currentSystemPrompt}

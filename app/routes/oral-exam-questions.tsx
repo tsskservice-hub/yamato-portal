@@ -281,8 +281,9 @@ export default function OralExamQuestions() {
                         <span className="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
                           {item.category}
                         </span>
+                        {/* 💡 フォントサイズを一回り大きく修正 (text-base sm:text-lg) */}
                         <div 
-                          className="question-text font-medium text-slate-900 pt-1 leading-relaxed"
+                          className="question-text text-base sm:text-lg font-medium text-slate-900 pt-1 leading-relaxed"
                           dangerouslySetInnerHTML={{ __html: item.text }}
                         />
                       </div>
