@@ -38,7 +38,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-grammar-list';
+const KNOWLEDGE_KEY = 'VCE_GRAMMAR_LIST';
 
 /**
  * Fetch VCE Grammar List Categories data from Supabase 'app_knowledge' table.
@@ -46,7 +46,7 @@ const KNOWLEDGE_KEY = 'vce-grammar-list';
 export async function fetchGrammarCategoriesData(supabaseClient: SupabaseClient): Promise<GrammarCategoriesData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

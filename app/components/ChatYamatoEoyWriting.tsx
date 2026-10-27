@@ -53,9 +53,10 @@ export const ChatYamatoEoyWriting: React.FC<ChatYamatoEoyWritingProps> = ({
         config?.greeting ||
         "Hello, my friend! 🌟 Welcome to your EOY Writing practice session! Let's polish your Japanese writing skills."
       }
-      themeColor={(config?.themeColor as any) || "cyan"}
+      themeColor={config?.themeColor || "#06b6d4"}
       buttonStyle={config?.floatingButtonStyle}
       defaultOpen={defaultOpen}
+      enableImageUpload={false} // 💡 チャット内の「Upload Photo」ボタンを非表示に設定
       {...restProps}
     />
   );

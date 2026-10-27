@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect } from "react";
 import YamatoChatCommon from "./YamatoChatCommon";
-import { fetchYamatoConfigsData, BotConfig } from "../data/yamato-configs";
+import { fetchYamatoConfigsData, BotConfig, YAMATO_BOT_CONFIGS } from "../data/yamato-configs";
 import { supabase } from "../lib/supabaseClient";
 
 export interface ChatYamatoGenkoyoshiEditorVceProps {
@@ -32,14 +32,17 @@ export const ChatYamatoGenkoyoshiEditorVce: React.FC<ChatYamatoGenkoyoshiEditorV
   buttonStyle: propButtonStyle,
   ...restProps
 }) => {
-  // 💡 Supabase から動的に設定を取得するステート
-  const [config, setConfig] = useState<BotConfig | null>(null);
+  // 💡 初期値として YAMATO_BOT_CONFIGS の設定を持たせ、チラつきやデフォルト青へのフォールバックを防止
+  const [config, setConfig] = useState<BotConfig | null>(
+    YAMATO_BOT_CONFIGS["genkoyoshi-editor-vce"] || null
+  );
 
   useEffect(() => {
+    let isMounted = true;
     async function loadConfig() {
       try {
         const configsData = await fetchYamatoConfigsData(supabase);
-        if (configsData && configsData["genkoyoshi-editor-vce"]) {
+        if (isMounted && configsData && configsData["genkoyoshi-editor-vce"]) {
           setConfig(configsData["genkoyoshi-editor-vce"]);
         }
       } catch (err) {
@@ -47,19 +50,29 @@ export const ChatYamatoGenkoyoshiEditorVce: React.FC<ChatYamatoGenkoyoshiEditorV
       }
     }
     loadConfig();
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  // 💡 指定されたボタン配色（floatingButtonStyle / buttonStyle）を確実に解決
+  const effectiveButtonStyle =
+    propButtonStyle ||
+    config?.floatingButtonStyle ||
+    config?.buttonStyle;
 
   return (
     <YamatoChatCommon
       appType="genkoyoshi-editor-vce"
-      characterName={config?.name || "原稿用紙エディター (VCE)"}
+      characterName={config?.name || "原稿用紙エディタ for VCE"}
       initialGreeting={
         config?.greeting ||
-        "Hello, my friend! 🌟 Welcome to the VCE Genkoyoshi Editor. Let's polish your Japanese essay to meet strict VCE standards."
+        "Hello, my friend! 🌟 Are you studying hard today? Let's master correct Genkoyoshi usage and stay well prepared for your SACs and End of Year Exam! 📝✨"
       }
-      themeColor={propThemeColor || (config?.themeColor as any) || "blue"}
-      buttonStyle={propButtonStyle || config?.buttonStyle || config?.floatingButtonStyle}
+      themeColor={propThemeColor || config?.themeColor || "blue"}
+      buttonStyle={effectiveButtonStyle}
       defaultOpen={defaultOpen}
+      enableImageUpload={true}
       {...restProps}
     />
   );

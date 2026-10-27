@@ -34,7 +34,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-oral-report2025';
+const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_REPORT2025';
 
 /**
  * Fetch 2025 VCE Japanese Oral Assessment Report data from Supabase 'app_knowledge' table.
@@ -42,7 +42,7 @@ const KNOWLEDGE_KEY = 'vce-eoy-oral-report2025';
 export async function fetchOralAssessmentReport2025(supabaseClient: SupabaseClient): Promise<OralAssessmentReport2025 | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "remix vite:dev",
-    "build": "remix vite:build && npx esbuild server.ts --bundle --format=esm --platform=browser --external:@cloudflare/* --external:@remix-run/* --external:react --external:react-dom --outfile=functions/[[path]].js",
+    "dev": "npx tsx scripts/generate-sitemap-routes.ts && remix vite:dev",
+    "build": "npx tsx scripts/generate-sitemap-routes.ts && remix vite:build && npx esbuild server.ts --bundle --format=esm --platform=browser --external:@cloudflare/* --external:@remix-run/* --external:react --external:react-dom --outfile=functions/[[path]].js",
     "sync:knowledge": "npx tsx scripts/portal-sync-knowledge.ts",
     "deploy:full": "npm run build && npm run sync:knowledge",
     "start": "npm run build && wrangler pages dev build/client"
@@ -32,6 +32,7 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.18",
+    "supabase": "^2.122.0",
     "tsx": "^4.23.15",
     "wrangler": "^3.114.1"
   }

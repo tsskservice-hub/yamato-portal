@@ -50,7 +50,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-oral-spec';
+const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_SPEC';
 
 /**
  * Fetch VCE Oral Examination Specification data from Supabase 'app_knowledge' table.
@@ -58,7 +58,7 @@ const KNOWLEDGE_KEY = 'vce-eoy-oral-spec';
 export async function fetchOralSpecification(supabaseClient: SupabaseClient): Promise<OralSpecification | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

@@ -1,3 +1,7 @@
+/**
+ * @file footer.tsx
+ * @description Application Footer with navigation links, bug reporting, and feedback buttons.
+ */
 import { Link } from "@remix-run/react";
 
 // 1. 不具合報告ボタン用コンポーネント（1つ目のリンクを使用）
@@ -61,8 +65,14 @@ export default function Footer({}: FooterProps) {
               <QuickFeedbackButton />
             </div>
 
-            {/* Quick Feedback のすぐ隣に4つの法律関係のリンクを配置 */}
+            {/* 法律関係のリンクおよび About ページへのリンクを配置 */}
             <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-slate-600">
+              <Link
+                to="/about"
+                className="hover:text-indigo-600 transition-colors font-medium text-indigo-700"
+              >
+                About Us
+              </Link>
               <Link
                 to="/terms"
                 className="hover:text-indigo-600 transition-colors"

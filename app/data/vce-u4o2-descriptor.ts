@@ -33,7 +33,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-u4o2-descriptor';
+const KNOWLEDGE_KEY = 'VCE_U4O2_DESCRIPTOR';
 
 /**
  * Fetch VCE Unit 4 Outcome 2 Performance Descriptor data from Supabase 'app_knowledge' table.
@@ -41,7 +41,7 @@ const KNOWLEDGE_KEY = 'vce-u4o2-descriptor';
 export async function fetchUnitOutcomeDescriptor(supabaseClient: SupabaseClient): Promise<UnitOutcomeDescriptor | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

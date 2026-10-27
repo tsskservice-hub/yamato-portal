@@ -39,7 +39,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'kanji-list';
+const KNOWLEDGE_KEY = 'KANJI_LIST';
 
 /**
  * Fetch VCE Kanji List data from Supabase 'app_knowledge' table.
@@ -47,7 +47,7 @@ const KNOWLEDGE_KEY = 'kanji-list';
 export async function fetchKanjiListData(supabaseClient: SupabaseClient): Promise<KanjiListData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

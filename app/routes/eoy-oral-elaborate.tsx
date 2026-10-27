@@ -1,8 +1,13 @@
+/**
+ * @file eoy-oral-elaborate.tsx
+ * @description VCE Japanese - Elaborate Drill (ChatYamatoEoyOralElaborate 連携版)
+ */
 import { useState, useRef, useMemo, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import oralExamQuestionsData from "../data/oral-exam-questions";
 import PageLayout from "../components/PageLayout";
 import { supabase } from "../lib/supabaseClient";
+import ChatYamatoEoyOralElaborate from "../components/ChatYamatoEoyOralElaborate";
 
 export const meta: MetaFunction = () => {
   return [
@@ -20,12 +25,6 @@ interface QuestionItem {
   default_answer_original?: string;
   keyInfoHint: string;
 }
-
-type ChatMessage = {
-  role: 'assistant' | 'user';
-  content: string;
-  imageUrl?: string;
-};
 
 const questionsData = oralExamQuestionsData;
 
@@ -72,213 +71,59 @@ function formatDrillFeedbackToHtml(rawText: string): string {
   return cleaned;
 }
 
-/**
- * 2. 右下の汎用ヤマトチャット専用の構造化HTML変換パーサー関数
- */
-function formatAiTutorFeedbackToHtml(rawText: string): string {
-  if (!rawText) return "";
-
-  let cleaned = rawText.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "");
-
-  cleaned = cleaned.replace(
-    /Explanation\s*(&|and)\s*Overview:/gi,
-    '<div style="margin-top: 1.25rem; margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 0.95rem; border-left: 4px solid #0284c7; border-radius: 0.375rem;">💡 Explanation & Overview</div>'
-  );
-
-  cleaned = cleaned.replace(
-    /Usage\s*(&|and)\s*Grammar\s*Notes:/gi,
-    '<div style="margin-top: 1.25rem; margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: #fef3c7; color: #b45309; font-weight: 800; font-size: 0.95rem; border-left: 4px solid #d97706; border-radius: 0.375rem;">✍️ Usage & Grammar Notes</div>'
-  );
-
-  cleaned = cleaned.replace(
-    /Practical\s*Examples:/gi,
-    '<div style="margin-top: 1.25rem; margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: #d1fae5; color: #065f46; font-weight: 800; font-size: 0.95rem; border-left: 4px solid #059669; border-radius: 0.375rem;">💬 Practical Examples</div>'
-  );
-
-  cleaned = cleaned.replace(
-    /Common\s*Mistakes:/gi,
-    '<div style="margin-top: 1.25rem; margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 0.95rem; border-left: 4px solid #dc2626; border-radius: 0.375rem;">⚠️ Common Mistakes</div>'
-  );
-
-  cleaned = cleaned.replace(
-    /Key\s*Takeaways:/gi,
-    '<div style="margin-top: 1.25rem; margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: #f3e8ff; color: #6b21a8; font-weight: 800; font-size: 0.95rem; border-left: 4px solid #9333ea; border-radius: 0.375rem;">🎯 Key Takeaways</div>'
-  );
-
-  cleaned = cleaned.replace(
-    /Next\s*Step:/gi,
-    '<div style="margin-top: 1.25rem; margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: #ccfbf1; color: #115e59; font-weight: 800; font-size: 0.95rem; border-left: 4px solid #0d9488; border-radius: 0.375rem;">🚀 Next Step</div>'
-  );
-
-  cleaned = cleaned.replace(
-    /AI\s*Yamato\s*Feedback:/gi,
-    '<div style="font-weight: 900; color: #581c87; margin-bottom: 0.75rem; font-size: 1.05rem; border-bottom: 2px solid #f3e8ff; padding-bottom: 0.3rem;">🤖 AI Yamato Feedback</div>'
-  );
-
-  cleaned = cleaned.replace(
-    /^(\d+)\.\s+([A-Za-z\s&]+):\s*(.*)$/gm,
-    '<div style="margin: 0.5rem 0; padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0; font-size: 0.9rem;"><strong style="color: #334155;">$1. $2:</strong> <span style="color: #0f172a; font-weight: 600;">$3</span></div>'
-  );
-
-  cleaned = cleaned.replace(/\n/g, "<br>");
-
-  return cleaned;
-}
-
-export default function ElaborateDrillMode() {
+export default function EoyOralElaborate() {
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(10);
+  const [nickname, setNickname] = useState<string>("My friend");
 
   const [selectedLevel, setSelectedLevel] = useState<string>("level2");
   const [selectedSection, setSelectedSection] = useState<string>("sec1");
   const [selectedTopics, setSelectedTopics] = useState<string[]>(["アルバイト (Part-time Job)"]);
 
-  const [isAiTutorOpen, setIsAiTutorOpen] = useState<boolean>(false);
-  const [isAiFullscreen, setIsAiFullscreen] = useState<boolean>(false);
-  const [chatFontSize, setChatFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
-  const aiChatRef = useRef<HTMLDivElement>(null);
-
-  const [currentDrillContext, setCurrentDrillContext] = useState<{
-    question: string;
-    userAnswer: string;
-    aiFeedback: string;
-  } | null>(null);
-
-  const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      content: 'Welcome! Feel free to ask me anything about Japanese grammar or study tips.'
-    }
-  ]);
-  const [tutorInput, setTutorInput] = useState<string>('');
-  const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
-  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
-  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
-  const [tutorLevel, setTutorLevel] = useState<'steady' | 'normal' | 'accelerated'>('steady');
-
-  // Supabase session & credits
+  // Supabase session & credits/profile
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserCredits(session.user.id);
+        fetchUserData(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserCredits = async (userId: string) => {
+  const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, nickname, full_name')
         .eq('id', userId)
         .single();
       
       if (data && !error) {
-        const typedData = data as { credits?: number };
+        const typedData = data as { credits?: number; nickname?: string; full_name?: string };
         setCredits(typedData.credits ?? 10);
+        if (typedData.nickname) {
+          setNickname(typedData.nickname);
+        } else if (typedData.full_name) {
+          setNickname(typedData.full_name);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch user credits:', err);
+      console.error('Failed to fetch user profile:', err);
     }
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
-  };
-
-  const getFontSizeClass = () => {
-    switch (chatFontSize) {
-      case 'sm': return 'text-sm';
-      case 'base': return 'text-base';
-      case 'lg': return 'text-lg';
-      case 'xl': return 'text-xl';
-      default: return 'text-base';
-    }
-  };
-
-  const toggleAiFullscreen = async () => {
-    if (!aiChatRef.current) return;
-    try {
-      if (!document.fullscreenElement) {
-        await aiChatRef.current.requestFullscreen();
-        setIsAiFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsAiFullscreen(false);
-      }
-    } catch (err) {
-      console.error('Fullscreen toggle failed:', err);
-    }
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) setIsAiFullscreen(false);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  const handleSendTutorMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!tutorInput.trim() || isTutorLoading) return;
-    const userMsg = tutorInput.trim();
-    const needsVisual = requestVisualAid;
-    setTutorInput('');
-    setRequestVisualAid(false);
-    const newMessages: ChatMessage[] = [...tutorMessages, { role: 'user', content: userMsg }];
-    setTutorMessages(newMessages);
-    setIsTutorLoading(true);
-    try {
-      const visualPrompt = needsVisual
-        ? `Educational instructional diagram and visual aid for VCE Japanese high school students explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
-        : undefined;
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMsg,
-          chatHistory: tutorMessages,
-          learningPace: tutorLevel,
-          visualPrompt,
-          drillContext: currentDrillContext,
-        }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to get response from AI tutor');
-      }
-      const data = await res.json() as any;
-      const replyText = data.reply || "I'm here to help you with your Japanese studies!";
-      const imageUrl = data.imageUrl;
-      const formattedReply = formatAiTutorFeedbackToHtml(replyText);
-      setTutorMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: formattedReply,
-          imageUrl: imageUrl,
-        },
-      ]);
-    } catch (err) {
-      console.error(err);
-      setTutorMessages([
-        ...newMessages,
-        { role: 'assistant', content: 'Sorry, I encountered an error. Please try asking again!' },
-      ]);
-    } finally {
-      setIsTutorLoading(false);
-    }
   };
 
   const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
@@ -536,12 +381,6 @@ export default function ElaborateDrillMode() {
 
       const data = await response.json() as any;
       const rawAiFeedback = data.reply || "Content reviewed.";
-      
-      setCurrentDrillContext({
-        question: currentQ.text_original || currentQ.text,
-        userAnswer: userText,
-        aiFeedback: rawAiFeedback,
-      });
 
       const formattedFeedback = formatDrillFeedbackToHtml(rawAiFeedback);
 
@@ -803,7 +642,7 @@ export default function ElaborateDrillMode() {
                 <div className="flex justify-center sm:justify-end min-w-[120px]">
                   {isWaitingForNext && (
                     <button type="button" onClick={proceedToNextQuestion} className="glow-border-btn font-bold px-6 py-3 rounded-xl text-sm shadow-lg transition cursor-pointer">
-                      ➡ Proceed
+                      ➡️ Proceed
                     </button>
                   )}
                 </div>
@@ -830,210 +669,14 @@ export default function ElaborateDrillMode() {
           </div>
         </main>
 
-        <aside aria-label="AI Yamato" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-          {!isAiTutorOpen ? (
-            <button
-              type="button"
-              onClick={() => setIsAiTutorOpen(true)}
-              className="bg-purple-700 hover:bg-purple-800 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm"
-            >
-              <span>🤖</span>
-              <span>AI Yamato</span>
-            </button>
-          ) : (
-            <div
-              ref={aiChatRef}
-              className={`bg-white border-2 border-purple-300 rounded-2xl p-5 shadow-2xl flex flex-col transition-all ${
-                isAiFullscreen
-                  ? "w-screen h-screen rounded-none border-none p-6 sm:p-10 overflow-auto"
-                  : "w-80 sm:w-96 h-[560px] min-w-[280px] min-h-[350px] max-w-[90vw] max-h-[85vh] resize overflow-auto [transform:rotate(180deg)]"
-              }`}
-            >
-              <div className={`w-full h-full flex flex-col ${!isAiFullscreen ? "[transform:rotate(180deg)]" : ""}`}>
-                <div className="flex items-center justify-between border-b pb-2 mb-3 shrink-0">
-                  <h3 className="text-sm font-bold text-purple-900 flex items-center gap-2 m-0">
-                    <span>🤖</span> 日本語Tutor AI Yamato
-                  </h3>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={toggleAiFullscreen}
-                      className="text-slate-500 hover:text-slate-700 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer border border-slate-200"
-                      title={isAiFullscreen ? "元の大きさに戻す" : "デバイスの画面に合わせて最大化"}
-                    >
-                      {isAiFullscreen ? "🗗 縮小" : "🗖 最大化"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (document.fullscreenElement) {
-                          document.exitFullscreen().catch(() => {});
-                        }
-                        setIsAiTutorOpen(false);
-                        setIsAiFullscreen(false);
-                      }}
-                      className="text-slate-400 hover:text-slate-600 text-xs font-bold px-2 py-1 rounded-md transition cursor-pointer"
-                    >
-                      ✕ Close
-                    </button>
-                  </div>
-                </div>
-
-                <p className="text-xs text-slate-600 leading-relaxed mb-3 shrink-0">
-                  Ask questions about grammar, or get study advice!
-                </p>
-
-                <div className="bg-purple-50 border border-purple-200 rounded-xl p-2.5 mb-2 flex items-center justify-between shrink-0">
-                  <span className="text-xs font-bold text-purple-900">Learning Pace</span>
-                  <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-purple-200">
-                    {(['steady', 'normal', 'accelerated'] as const).map((level) => (
-                      <button
-                        key={level}
-                        type="button"
-                        onClick={() => setTutorLevel(level)}
-                        className={`px-2.5 py-1 rounded-md text-[10px] font-bold capitalize transition cursor-pointer ${
-                          tutorLevel === level
-                            ? "bg-purple-700 text-white shadow-xs"
-                            : "text-slate-600 hover:text-purple-800"
-                        }`}
-                      >
-                        {level}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-slate-100 border border-slate-200 rounded-xl p-2.5 mb-3 flex items-center justify-between shrink-0">
-                  <span className="text-xs font-bold text-slate-700">Font Size</span>
-                  <div className="inline-flex rounded-lg bg-white p-0.5 shadow-xs border border-slate-200">
-                    {(
-                      [
-                        { key: 'sm', label: '小' },
-                        { key: 'base', label: '中' },
-                        { key: 'lg', label: '大' },
-                        { key: 'xl', label: '特大' },
-                      ] as const
-                    ).map((size) => (
-                      <button
-                        key={size.key}
-                        type="button"
-                        onClick={() => setChatFontSize(size.key)}
-                        className={`px-2 py-1 rounded-md text-[10px] font-bold transition cursor-pointer ${
-                          chatFontSize === size.key
-                            ? "bg-purple-700 text-white shadow-xs"
-                            : "text-slate-600 hover:text-purple-800"
-                        }`}
-                      >
-                        {size.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`bg-slate-50 border border-slate-200 rounded-xl p-3 overflow-y-auto space-y-2.5 flex-grow mb-3 ${getFontSizeClass()}`}>
-                  {tutorMessages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                    >
-                      <div
-                        className={`max-w-[95%] p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap ${
-                          msg.role === 'user'
-                            ? "bg-purple-700 text-white rounded-br-xs"
-                            : "bg-white border border-slate-200 text-slate-800 rounded-bl-xs shadow-xs"
-                        }`}
-                      >
-                        {msg.role === 'user' ? (
-                          msg.content
-                        ) : (
-                          <div className="space-y-2">
-                            <div
-                              className="ai-markdown-content overflow-x-auto"
-                              dangerouslySetInnerHTML={{ __html: msg.content }}
-                            />
-                            {msg.imageUrl && (
-                              <div className="mt-2 rounded-lg overflow-hidden border border-purple-200 bg-purple-50/50 p-1">
-                                <img
-                                  src={msg.imageUrl}
-                                  alt="AI Yamato Visual Explanation"
-                                  onClick={() => setModalImageSrc(msg.imageUrl || null)}
-                                  className="w-full h-auto rounded-md object-contain max-h-48 cursor-pointer hover:opacity-95 transition"
-                                  title="クリックして画像を拡大"
-                                />
-                                <p className="text-[10px] text-purple-900 text-center mt-1 font-medium cursor-pointer" onClick={() => setModalImageSrc(msg.imageUrl || null)}>
-                                  ✨ ヤマト特製図解・イラスト（クリックして拡大）
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  {isTutorLoading && (
-                    <div className="text-slate-500 italic">🤖 かんがえちゅう...</div>
-                  )}
-                </div>
-
-                <form onSubmit={handleSendTutorMessage} className="flex flex-col gap-2 shrink-0">
-                  <div className="flex items-center gap-2 px-1">
-                    <label className="flex items-center gap-1.5 text-[11px] font-bold text-purple-900 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={requestVisualAid}
-                        onChange={(e) => setRequestVisualAid(e.target.checked)}
-                        disabled={isTutorLoading}
-                        className="rounded border-purple-300 text-purple-700 focus:ring-purple-500 w-3.5 h-3.5 cursor-pointer"
-                      />
-                      <span>🎨 explain with diagrams and illustrations</span>
-                    </label>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={tutorInput}
-                      onChange={(e) => setTutorInput(e.target.value)}
-                      placeholder="Ask AI tutor anything..."
-                      disabled={isTutorLoading}
-                      className="flex-grow p-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50/50"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isTutorLoading || !tutorInput.trim()}
-                      className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
-                    >
-                      Send
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
+        {/* 💡 直書きされていたAIチャットを削除し、ChatYamatoEoyOralElaborateコンポーネントをインポート・配置 */}
+        <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+          <ChatYamatoEoyOralElaborate
+            userId={user?.id}
+            userNickname={nickname}
+            credits={credits}
+          />
         </aside>
-
-        {modalImageSrc && (
-          <div
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
-            onClick={() => setModalImageSrc(null)}
-          >
-            <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-2xl p-2 shadow-2xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-              <button
-                type="button"
-                onClick={() => setModalImageSrc(null)}
-                className="absolute top-3 right-3 bg-slate-800/70 hover:bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition cursor-pointer z-10"
-              >
-                ✕
-              </button>
-              <img
-                src={modalImageSrc}
-                alt="Enlarged AI Yamato Visual"
-                className="max-w-full max-h-[80vh] rounded-lg object-contain"
-              />
-              <p className="text-xs text-slate-600 mt-2 font-medium">✨ AI Yamato 特製図解・イラスト（拡大表示）</p>
-            </div>
-          </div>
-        )}
       </div>
     </PageLayout>
   );

@@ -1,63 +1,29 @@
 /**
  * @file _index.tsx
- * @description AI Yamato Portal のランディングページ（PageLayout完全連動・Remix useNavigate対応・Custom Writing追加・クイズ完全対応版・期限切れクレジット失効処理対応）
+ * @description AI Yamato Portal のランディングページ
+ * 💡 PORTAL_CONTENT & PRICE_PLANS 完全動的連動・DataErrorState版
  */
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { 
-  Sparkles, 
-  Coins, 
-  Moon, 
-  Sun, 
-  FileText, 
-  Grid, 
-  Mic, 
-  Gamepad2, 
-  Check, 
-  ArrowRight, 
-  ArrowDown,
-  ShieldCheck, 
-  Award, 
-  X, 
-  KeyRound, 
-  LogOut, 
-  Loader2,
-  Flame,
-  ShoppingBag,
-  GraduationCap,
-  UserCheck,
-  Gauge,
-  Send
-} from 'lucide-react';
+import { Sparkles, Coins, FileText, Grid, Mic, Gamepad2, Check, ArrowRight, Loader2, Flame } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import PageLayout, { PageLayoutRef } from '../components/PageLayout';
-
-// 🤖 コンシェルジュ専用チャットウィジェットのインポート
+import { HeroDemoChat } from '../components/HeroDemoChat';
+import { DailyQuizModal } from '../components/DailyQuizModal';
 import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
+import { DataErrorState } from '../components/DataErrorState';
 
-// 💡 共通の price-plans から price-plans およびキャンペーン文言をインポート
-import { PRICE_PLANS, CREDIT_CONSUMPTION_GUIDE, CAMPAIGN_NOTICE } from '../data/price-plans';
+// 💡 Supabase 同期フック ＆ モジュール型定義
+import { usePortalContent, PortalModule } from '../data/portal-content';
 
-// 💡 1. インポート部：Quiz data and helper functions imported from external file
+// 💡 料金プラン非同期取得関数 ＆ 型定義
+import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
+
+// 💡 クイズデータおよび取得ヘルパー
 import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
 
-// Auto demo conversations in English
-const DEMO_CONVERSATIONS = [
-  {
-    user: "How do I practice Japanese writing?",
-    yamato: "Hello!🌸 You can use our EOY Writing Exam Tutor with 110 original prompts, Genkoyoshi layout tools, and instant AI feedback."
-  },
-  {
-    user: "Can I practice oral conversations here?",
-    yamato: "Yes! Our EOY Oral Mock Exam module provides realistic voice interaction and real-time AI examiner scoring."
-  },
-  {
-    user: "How do credits work?",
-    yamato: "Chats and vocabulary Q&A cost 1-2 credits. You also get daily free credits upon login, or you can top up anytime!"
-  }
-];
-
-// 💡 テキストAI・画像AIの最大予想消費クレジット数（キャップ設定）
+// 💡 最大予想クレジット消費設定
 const MAX_ESTIMATED_CREDITS = {
   textAi: 2,   // テキストチャット最大予想
   imageAi: 4,  // 画像生成・ビジュアル解説最大予想
@@ -66,132 +32,41 @@ const MAX_ESTIMATED_CREDITS = {
 export default function Home() {
   const navigate = useNavigate();
 
-  // 💡 root.tsx からグローバルデータを安全に取得
+  // root.tsx の loader からユーザー情報を取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
-    credits?: number;
     nickname?: string;
+    credits?: number;
     plan?: string;
     learningPace?: "steady" | "normal" | "accelerated";
   } | undefined;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
-   
-  // 💡 rootData から初期値を安全に連動
   const [user, setUser] = useState<any>(rootData?.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
-  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
-  const [learningPace, setLearningPace] = useState<"steady" | "normal" | "accelerated">(rootData?.learningPace ?? "normal");
+  const nickname = rootData?.nickname ?? "";
+  const learningPace = rootData?.learningPace ?? "normal";
 
-  // 💡 ユーザーデータ取得・失効チェック関数 (fetchUserData)
-  const fetchUserData = async (userId: string) => {
-    try {
-      // 💡 オーストラリア（メルボルン）の現地タイムゾーンで本日の日付 (YYYY-MM-DD) を取得
-      const todayStr = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Australia/Melbourne',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).format(new Date());
+  // 💡 PORTAL_CONTENT の動的取得
+  const { portalContent, isLoading: isPortalLoading, isError: isPortalError, errorMessage: portalErrorMessage } = usePortalContent(supabase);
 
-      // 1. プロフィールデータ（残高・最終クイズ解答日）を取得
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('credits, last_quiz_date, nickname, learning_pace')
-        .eq('id', userId)
-        .single();
-
-      // 🔍 デバッグ用ログ：プログラムが認識している日付とDBの値をコンソールに表示
-      console.log("【Quiz Debug】算出された todayStr:", todayStr);
-      console.log("【Quiz Debug】Supabaseの last_quiz_date:", profile?.last_quiz_date);
-
-      if (profile && !error) {
-        let currentCredits = profile.credits ?? 10;
-
-        // 💡 今日クイズ済みかどうかのチェック (1日1回限定のUI反映)
-        if (profile.last_quiz_date === todayStr) {
-          setHasCompletedTodayQuiz(true);
-        } else {
-          setHasCompletedTodayQuiz(false);
-        }
-
-        // 2. 期限切れの未処理クイズクレジットがあるかチェック＆失効処理
-        const { data: expiredLogs } = await supabase
-          .from('credit_transactions')
-          .select('id, amount')
-          .eq('user_id', userId)
-          .eq('feature_used', 'dailyQuiz')
-          .lt('expires_at', new Date().toISOString()) // 有効期限 < 現在日時
-          .gt('amount', 0); // まだ失効フラグ化（マイナス化）されていないログ
-
-        if (expiredLogs && expiredLogs.length > 0) {
-          // 期限切れになったポイントの合計
-          const totalExpired = expiredLogs.reduce((sum, log) => sum + log.amount, 0);
-          
-          // 残高から失効分を減算（マイナスにならないようガード）
-          const updatedCredits = Math.max(0, currentCredits - totalExpired);
-
-          // profiles の残高を更新
-          await supabase
-            .from('profiles')
-            .update({ credits: updatedCredits })
-            .eq('id', userId);
-
-          // 処理済みマークとして、対象ログの amount を 0 に更新（重複減算防止）
-          const expiredIds = expiredLogs.map(log => log.id);
-          await supabase
-            .from('credit_transactions')
-            .update({ description: 'Expired (7 days limit reached)', amount: 0 })
-            .in('id', expiredIds);
-
-          currentCredits = updatedCredits;
-        }
-
-        setCredits(currentCredits);
-        if (profile.nickname) setNickname(profile.nickname);
-        if (profile.learning_pace) setLearningPace(profile.learning_pace);
-      }
-    } catch (err) {
-      console.error('Failed to fetch user data:', err);
-    }
-  };
-
-  // セッションのフォールバック取得（ログイン状態の確実な同期用 & fetchUserData 呼び出し）
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        fetchUserData(session.user.id);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const activeSessionUser = session?.user ?? null;
-      setUser(activeSessionUser);
-      if (activeSessionUser) {
-        fetchUserData(activeSessionUser.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  // 💡 PRICE_PLANS の動的取得ステート
+  const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
+  const [isPriceLoading, setIsPriceLoading] = useState<boolean>(true);
+  const [isPriceError, setIsPriceError] = useState<boolean>(false);
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
-
-  // 💡 PageLayout の認証モーダルを外部から操作するために ref
   const layoutRef = useRef<PageLayoutRef>(null);
 
-  // 💡 2. ステート定義：Daily Quiz States
+  // 💡 Daily Quiz States（DAILY_QUIZZES[0] をフォールバックにして型不一致を解消）
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
-   
-  // ★ クイズが勝手に変わらないよう、ステートとして保持する
-  const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(DAILY_QUIZZES[0]);
+  const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAILY_QUIZZES) || DAILY_QUIZZES[0]);
 
-  // 初回ロード時に一度だけランダムなクイズをセット
+  // 初回ロード時にランダムなクイズをセット
   useEffect(() => {
     const randomQuiz = getRandomQuiz(DAILY_QUIZZES);
     if (randomQuiz) {
@@ -199,135 +74,116 @@ export default function Home() {
     }
   }, []);
 
-  // Auto demo states for hero section
-  const [currentStep, setCurrentStep] = useState(0);
-  const [chatHistory, setChatHistory] = useState<Array<{ user: string; yamato?: string }>>([]);
-  const [typedInputText, setTypedInputText] = useState('');        
-  const [isSending, setIsSending] = useState(false);                 
-  const [isThinking, setIsThinking] = useState(false);
-
-  // 自動スクロール用のref
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  // チャット欄が更新されたら自動で一番下へスクロール
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-    }
-  }, [chatHistory, isThinking, typedInputText]);
-
-  // 💡 チャット履歴が蓄積されていくデモコントローラー
-  useEffect(() => {
-    let isMounted = true;
-    const currentConv = DEMO_CONVERSATIONS[currentStep];
-
-    const runDemoSequence = async () => {
-      if (!isMounted) return;
-      setTypedInputText('');
-      setIsSending(false);
-      setIsThinking(false);
-
-      await new Promise((r) => setTimeout(r, 600));
-      if (!isMounted) return;
-
-      for (let i = 1; i <= currentConv.user.length; i++) {
-        if (!isMounted) return;
-        setTypedInputText(currentConv.user.slice(0, i));
-        await new Promise((r) => setTimeout(r, 45));
-      }
-
-      await new Promise((r) => setTimeout(r, 200));
-      if (!isMounted) return;
-
-      setIsSending(true);
-      await new Promise((r) => setTimeout(r, 350));
-      if (!isMounted) return;
-
-      setIsSending(false);
-      setTypedInputText('');
-      setChatHistory((prev) => [...prev, { user: currentConv.user }]);
-
-      await new Promise((r) => setTimeout(r, 400));
-      if (!isMounted) return;
-
-      setIsThinking(true);
-      await new Promise((r) => setTimeout(r, 3000));
-      if (!isMounted) return;
-
-      setIsThinking(false);
-      setChatHistory((prev) => {
-        const updated = [...prev];
-        const lastItem = updated[updated.length - 1];
-        if (lastItem) {
-          lastItem.yamato = currentConv.yamato;
-        }
-        return updated;
-      });
-
-      if (currentStep === DEMO_CONVERSATIONS.length - 1) {
-        await new Promise((r) => setTimeout(r, 4000));
-        if (!isMounted) return;
-        setChatHistory([]);
-        setCurrentStep(0);
+  // 💡 料金プランを Supabase からフェッチ
+  const loadPricePlans = useCallback(async () => {
+    setIsPriceLoading(true);
+    setIsPriceError(false);
+    try {
+      const data = await fetchPricePlansData(supabase);
+      if (data && data.pricePlans) {
+        setPriceData(data);
       } else {
-        await new Promise((r) => setTimeout(r, 2000));
-        if (!isMounted) return;
-        setCurrentStep((prev) => prev + 1);
+        setIsPriceError(true);
       }
-    };
-
-    runDemoSequence();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentStep]);
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    if (queryParams.get('success') === 'true') {
-      alert('Payment completed! Your credits have been updated.');
-      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (err) {
+      console.error("Failed to load price plans on home page:", err);
+      setIsPriceError(true);
+    } finally {
+      setIsPriceLoading(false);
     }
   }, []);
 
-  // 💡 テキストAI・画像AI利用時のクレジット検証ヘルパー関数
-  const validateFeatureCredits = async (featureType: 'textAi' | 'imageAi'): Promise<boolean> => {
-    let activeUser = user;
-    if (!activeUser) {
-      const { data: { session } } = await supabase.auth.getSession();
-      activeUser = session?.user ?? null;
-    }
+  useEffect(() => {
+    loadPricePlans();
+  }, [loadPricePlans]);
 
-    if (!activeUser) {
-      alert("やまと先生の機能を利用するにはログインが必要です");
+  // ユーザーのクレジット残高およびクイズ完了履歴を取得
+  const fetchUserCredits = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits, last_quiz_date')
+        .eq('id', userId)
+        .single();
+
+      if (data && !error) {
+        const typedData = data as { credits?: number; last_quiz_date?: string };
+        setCredits(typedData.credits ?? 10);
+
+        // 💡 .split('T')[0] で文字列として日付を取得して比較
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (typedData.last_quiz_date === todayStr) {
+          setHasCompletedTodayQuiz(true);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch user data:', err);
+    }
+  };
+
+  // セッション監視
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserCredits(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 決済成功リダイレクトの検知 & クレジット再取得
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.get('success') === 'true') {
+      alert('決済が完了しました！クレジットが反映されました。');
+      if (user) {
+        fetchUserCredits(user.id);
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [user]);
+
+  const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
+    if (layoutRef.current?.openAuthModal) {
+      layoutRef.current.openAuthModal(mode);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const validateFeatureCredits = async (featureType: 'textAi' | 'imageAi'): Promise<boolean> => {
+    if (!user) {
       handleOpenAuthModal('signup');
       return false;
     }
 
-    const maxRequired = MAX_ESTIMATED_CREDITS[featureType];
-    if (credits < maxRequired) {
-      alert(`この機能を利用するには最大 ${maxRequired} クレジットの余裕が必要です（現在残高: 🪙 ${credits} クレジット）。クレジットをチャージするか、デイリークイズで増やしてくださいね！`);
-      const pricingSection = document.getElementById('pricing');
-      if (pricingSection) {
-        pricingSection.scrollIntoView({ behavior: 'smooth' });
+    const requiredCredits = MAX_ESTIMATED_CREDITS[featureType] || 2;
+    if (credits < requiredCredits) {
+      const confirmed = window.confirm(
+        `この機能には約 ${requiredCredits} クレジットが必要です（現在の残高: ${credits} クレジット）。\n料金プランページでクレジットをチャージしますか？`
+      );
+      if (confirmed) {
+        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
       }
       return false;
     }
     return true;
   };
 
-  // 💡 3. 解答処理ロジック（1日1回制限 & 7日後の有効期限設定付き）
   const handleAnswerQuiz = async (selectedIndex: number) => {
-    let activeUser = user;
-    if (!activeUser) {
-      const { data: { session } } = await supabase.auth.getSession();
-      activeUser = session?.user ?? null;
-    }
-
-    // 💡 1日1回制限のガード（すでに回答済み、または未ログインなら受け付けない）
-    if (isAnswerSubmitted || hasCompletedTodayQuiz || !activeUser) return;
-
+    if (isAnswerSubmitted || !user) return;
     setSelectedOption(selectedIndex);
     setIsAnswerSubmitted(true);
 
@@ -335,59 +191,27 @@ export default function Home() {
     setIsQuizCorrect(correct);
 
     if (correct) {
-      // 💡 メルボルン現地日付を取得
-      const todayStr = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Australia/Melbourne',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).format(new Date());
-       
-      // 💡 7日後の日時（ISO文字列）を算出
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      // 💡 .split('T')[0] で文字列として日付を取得
+      const todayStr = new Date().toISOString().split('T')[0];
       const newCredits = credits + 2;
 
-      // 1. profiles テーブルの残高と本日の解答日 (last_quiz_date) を更新
-      const { error: profileError } = await supabase
+      const { error } = await supabase
         .from('profiles')
         .update({ 
           credits: newCredits,
           last_quiz_date: todayStr 
         })
-        .eq('id', activeUser.id);
+        .eq('id', user.id);
 
-      if (!profileError) {
+      if (!error) {
         setCredits(newCredits);
         setHasCompletedTodayQuiz(true);
-
-        // 2. credit_transactions テーブルへ有効期限付きの獲得ログ (+2) を挿入
-        await supabase
-          .from('credit_transactions')
-          .insert({
-            user_id: activeUser.id,
-            amount: 2, // 獲得のためプラス値
-            feature_used: 'dailyQuiz',
-            description: 'Earned from Daily Quiz (+2 credits, valid for 7 days)',
-            expires_at: expiresAt // 💡 7日後の日時を記録
-          });
       }
     }
   };
 
-  const handleOpenAuthModal = (mode: 'signin' | 'signup') => {
-    if (layoutRef.current) {
-      layoutRef.current.openAuthModal(mode);
-    }
-  };
-
   const handleCheckout = async (priceId: string) => {
-    let activeUser = user;
-    if (!activeUser) {
-      const { data: { session } } = await supabase.auth.getSession();
-      activeUser = session?.user ?? null;
-    }
-
-    if (!activeUser) {
+    if (!user) {
       alert("ログインが必要です");
       handleOpenAuthModal('signup');
       return;
@@ -399,7 +223,7 @@ export default function Home() {
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId: activeUser.id })
+        body: JSON.stringify({ priceId, userId: user.id })
       });
 
       const data = await response.json() as any;
@@ -421,687 +245,579 @@ export default function Home() {
     }
   };
 
+  const renderModuleIcon = (iconName: string, className: string) => {
+    switch (iconName) {
+      case "Grid": return <Grid className={className} />;
+      case "Sparkles": return <Sparkles className={className} />;
+      case "Mic": return <Mic className={className} />;
+      case "FileText": return <FileText className={className} />;
+      case "Gamepad2": return <Gamepad2 className={className} />;
+      default: return <FileText className={className} />;
+    }
+  };
+
+  // 1. PORTAL_CONTENT 取得失敗時は DataErrorState
+  if (isPortalError) {
+    return (
+      <DataErrorState
+        title="Unable to Load Portal Configuration"
+        message="A database connection error occurred while loading PORTAL_CONTENT. You can reload the page or report this error directly to our support team."
+        errorMessage={portalErrorMessage || 'Database connection error: Unable to load PORTAL_CONTENT.'}
+      />
+    );
+  }
+
+  // 2. 初回ローディング中
+  if (isPortalLoading || !portalContent) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 space-y-4">
+        <div className="animate-spin text-4xl">🤖</div>
+        <p className="text-sm font-semibold animate-pulse">Loading AI Yamato Portal...</p>
+      </div>
+    );
+  }
+
+  // Section 2 のモジュール自動分類
+  const vceSpeakingModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => {
+    const lowerName = mod.name.toLowerCase();
+    const lowerDesc = mod.description.toLowerCase();
+    const lowerId = mod.id.toLowerCase();
+    return lowerName.includes('speaking') || lowerName.includes('oral') || lowerDesc.includes('oral') || lowerDesc.includes('conversation') || lowerId.includes('oral') || lowerId.includes('speaking') || mod.iconName === 'Mic';
+  });
+
+  const vceWritingModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => {
+    if (mod.id === 'text-types' || mod.id === 'writing-styles') return false;
+    const lowerName = mod.name.toLowerCase();
+    const lowerDesc = mod.description.toLowerCase();
+    const lowerId = mod.id.toLowerCase();
+    return !vceSpeakingModules.includes(mod) && (lowerName.includes('writing') || lowerName.includes('essay') || lowerDesc.includes('writing') || lowerDesc.includes('kanji') || lowerDesc.includes('vocabulary') || lowerId.includes('writing') || lowerId.includes('genkoyoshi') || mod.iconName === 'FileText');
+  });
+
+  const categorizedIds = new Set([...vceSpeakingModules, ...vceWritingModules].map(m => m.id));
+  const unassignedModules = portalContent.modulesSection.section2.modules.filter((mod: PortalModule) => mod.id !== 'text-types' && mod.id !== 'writing-styles' && !categorizedIds.has(mod.id));
+  if (unassignedModules.length > 0) {
+    vceWritingModules.push(...unassignedModules);
+  }
+
   return (
-    <PageLayout 
+    <PageLayout
       ref={layoutRef}
+      user={user}
+      credits={credits}
+      onSignOut={handleSignOut}
       isDarkMode={isDarkMode}
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-            
 
-        {/* 2. Hero Section with YamatoChat-style Auto Demo */}
-        <section className="text-center space-y-6 max-w-4xl mx-auto">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 shadow-sm">
-            <Flame className="w-3.5 h-3.5 text-red-600 animate-pulse" />
-            <span>Decades of Expertise in Japanese Language Education</span>
-          </div>
+          {/* 1. Hero Section ＆ Auto Demo Chat */}
+          <HeroDemoChat
+            isDarkMode={isDarkMode}
+            user={user}
+            hasCompletedTodayQuiz={hasCompletedTodayQuiz}
+            onOpenAuthModal={handleOpenAuthModal}
+            onOpenQuizModal={() => {
+              if (!hasCompletedTodayQuiz) {
+                setSelectedOption(null);
+                setIsAnswerSubmitted(false);
+                setIsQuizCorrect(false);
+              }
+              setIsQuizModalOpen(true);
+            }}
+            validateFeatureCredits={validateFeatureCredits}
+            portalContent={portalContent}
+          />
 
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-red-600 bg-clip-text text-transparent">
-              Japanese Tutor AI Yamato
-            </span>
-            <span className="block text-2xl sm:text-3xl font-bold mt-3 text-slate-700 dark:text-slate-300">
-              Your Gateway to Japanese Mastery
-            </span>
-          </h1>
+          {/* 2. Pricing & Credit Packs（Supabase 動的連動） */}
+          <section id="pricing" className="space-y-12 text-center">
+            <div className="space-y-4 max-w-3xl mx-auto">
+              <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
+              <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                Start for free with daily credits, or top up with prepaid charge packs for intensive study.
+              </p>
 
-          <p className={`text-base sm:text-lg max-w-2xl mx-auto ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-            Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals.
-          </p>
-
-          {/* 💡 4. UI 描画コード①：Daily Quiz Banner (ログイン/未ログイン両対応で常に表示してアピール) */}
-          <div className="max-w-3xl mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-red-600/10 border border-blue-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-left">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
-                🧠
-              </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge</span>
-                  <span className="text-xs font-bold text-blue-700 dark:text-blue-300">+2 Credits</span>
-                </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Today's Japanese & Culture Quiz</h3>
-                <p className="text-xs text-slate-500">
-                  {!user 
-                    ? "Sign in to take today's quiz and earn 2 free credits! ✨" 
-                    : hasCompletedTodayQuiz 
-                    ? "You've already completed today's quiz! Come back tomorrow for more ✨" 
-                    : "Answer correctly to earn 2 credits! (Available once per day)"}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                if (!user) {
-                  handleOpenAuthModal('signup');
-                } else {
-                  setIsQuizModalOpen(true);
-                }
-              }}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5 cursor-pointer whitespace-nowrap ${
-                user && hasCompletedTodayQuiz 
-                  ? "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300" 
-                  : "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20"
-              }`}
-            >
-              <span>{!user ? "Sign In to Play Quiz" : hasCompletedTodayQuiz ? "View Quiz Results & Explanation" : "Take Today's Quiz"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className={`mt-8 p-5 sm:p-6 rounded-2xl border-2 border-blue-400 shadow-2xl backdrop-blur-sm text-left ${isDarkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white'}`}>
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center space-x-2">
-                <span className="text-base">🤖</span>
-                <span className="font-bold text-sm text-blue-900 dark:text-blue-200">Japanese Tutor AI Yamato (Auto Demo)</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 font-bold animate-pulse">● Live Demo</span>
-              </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md font-medium">
-                Step {currentStep + 1} / {DEMO_CONVERSATIONS.length}
-              </div>
-            </div>
-
-            <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-xl p-2.5 mb-4 flex items-center justify-between">
-              <span className="text-xs font-bold text-blue-900 dark:text-blue-300">Learning Pace (Demo)</span>
-              <div className="inline-flex rounded-lg bg-white dark:bg-slate-900 p-0.5 shadow-xs border border-blue-200 dark:border-blue-800">
-                <span className="px-2.5 py-1 rounded-md text-[10px] font-bold capitalize bg-blue-600 text-white shadow-xs">normal</span>
-              </div>
-            </div>
-
-            {/* チャット会話の蓄積表示エリア */}
-            <div 
-              ref={chatScrollRef}
-              className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-4 mb-4 h-[220px] overflow-y-auto flex flex-col scroll-smooth shadow-inner"
-            >
-              {chatHistory.length === 0 && !isThinking && (
-                <div className="my-auto text-center text-xs text-slate-400 dark:text-slate-500 italic">
-                  AI Yamato demo is starting...
+              {/* キャンペーンバナー */}
+              {priceData?.campaignNotice && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
+                  <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
+                  <span>{priceData.campaignNotice.rawText}</span>
                 </div>
               )}
+            </div>
 
-              {chatHistory.map((exchange, idx) => (
-                <div key={idx} className="space-y-3">
-                  <div className="flex justify-end">
-                    <div className="max-w-[85%] p-3 rounded-xl rounded-br-xs text-xs sm:text-sm shadow-xs text-left bg-blue-600 text-white font-medium">
-                      <p>{exchange.user}</p>
+            {isPriceLoading ? (
+              <div className="py-16 flex flex-col items-center justify-center space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                <p className="text-xs text-slate-400">Loading pricing plans...</p>
+              </div>
+            ) : isPriceError || !priceData ? (
+              <div className="py-6 max-w-xl mx-auto">
+                <DataErrorState
+                  title="Pricing Data Unavailable"
+                  message="Failed to load pricing packages from Supabase."
+                  errorMessage="Failed to fetch key 'PRICE_PLANS' from app_knowledge table in Supabase."
+                  onRetry={loadPricePlans}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+                  {/* Free Plan */}
+                  {priceData.pricePlans.free && (
+                    <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{priceData.pricePlans.free.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.free.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.free.period}</span>
+                        </div>
+                        {priceData.pricePlans.free.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
+                            {priceData.pricePlans.free.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.free.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.free.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => handleOpenAuthModal('signup')}
+                        className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                      >
+                        {priceData.pricePlans.free.ctaText || "Get Started Free"}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Starter Pack */}
+                  {priceData.pricePlans.starter && (
+                    <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData.pricePlans.starter.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.starter.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.starter.period}</span>
+                        </div>
+                        {priceData.pricePlans.starter.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                            {priceData.pricePlans.starter.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.starter.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.starter.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-6 space-y-3">
+                        <button 
+                          type="button"
+                          onClick={() => handleCheckout(priceData.pricePlans.starter.id)} 
+                          disabled={checkoutLoadingPriceId === priceData.pricePlans.starter.id}
+                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          {checkoutLoadingPriceId === priceData.pricePlans.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          <span>{priceData.pricePlans.starter.ctaText || "Buy Starter Pack"}</span>
+                        </button>
+                        <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Standard Pack */}
+                  {priceData.pricePlans.standard && (
+                    <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
+                        Most Popular
+                      </div>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData.pricePlans.standard.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.standard.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.standard.period}</span>
+                        </div>
+                        {priceData.pricePlans.standard.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
+                            {priceData.pricePlans.standard.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.standard.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.standard.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-6 space-y-3">
+                        <button 
+                          type="button"
+                          onClick={() => handleCheckout(priceData.pricePlans.standard.id)} 
+                          disabled={checkoutLoadingPriceId === priceData.pricePlans.standard.id}
+                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          {checkoutLoadingPriceId === priceData.pricePlans.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          <span>{priceData.pricePlans.standard.ctaText || "Buy Standard Pack"}</span>
+                        </button>
+                        <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pro Intensivist */}
+                  {priceData.pricePlans.pro && (
+                    <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
+                      <div className="space-y-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{priceData.pricePlans.pro.name}</span>
+                        <div>
+                          <span className="text-4xl font-black">{priceData.pricePlans.pro.price}</span>
+                          <span className="text-xs text-slate-500 ml-1">{priceData.pricePlans.pro.period}</span>
+                        </div>
+                        {priceData.pricePlans.pro.badge && (
+                          <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
+                            {priceData.pricePlans.pro.badge}
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">{priceData.pricePlans.pro.description}</p>
+                        <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                          {priceData.pricePlans.pro.features.map((feat: string, idx: number) => (
+                            <li key={idx} className="flex items-center space-x-2">
+                              <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-6 space-y-3">
+                        <button 
+                          type="button"
+                          onClick={() => handleCheckout(priceData.pricePlans.pro.id)} 
+                          disabled={checkoutLoadingPriceId === priceData.pricePlans.pro.id}
+                          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                        >
+                          {checkoutLoadingPriceId === priceData.pricePlans.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          <span>{priceData.pricePlans.pro.ctaText || "Buy Pro Pack"}</span>
+                        </button>
+                        <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
+                          By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* クレジット消費ガイド */}
+                {priceData.creditConsumptionGuide && (
+                  <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm mt-8`}>
+                    <div className="flex items-center justify-center space-x-2 font-bold mb-3">
+                      <Coins className="w-4 h-4 text-amber-500" />
+                      <span>Credit Consumption Guide</span>
+                    </div>
+                    <div className="space-y-2 text-slate-500">
+                      {priceData.creditConsumptionGuide.map((row, idx) => (
+                        <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
+                          <span>{row.item}</span>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-
-                  <div className="flex justify-start">
-                    {exchange.yamato ? (
-                      <div className="max-w-[85%] p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm shadow-xs text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
-                        <p>{exchange.yamato}</p>
-                      </div>
-                    ) : (
-                      isThinking && idx === chatHistory.length - 1 && (
-                        <div className="p-3 rounded-xl rounded-bl-xs text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex items-center space-x-2 shadow-xs">
-                          <span className="inline-block animate-spin text-sm">🤖</span>
-                          <span className="italic font-medium animate-pulse">かんがえちゅう...</span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center space-x-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 mb-4 shadow-xs">
-              <div className="flex-grow px-3 py-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200 flex items-center">
-                {typedInputText ? (
-                  <span>{typedInputText}</span>
-                ) : (
-                  <span className="text-slate-400 dark:text-slate-500">Ask Yamato a question...</span>
                 )}
-                {!isSending && <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-blue-600 animate-pulse"></span>}
-              </div>
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm transition-all duration-200 ${
-                isSending ? 'bg-blue-700 scale-95 ring-2 ring-blue-400/50 text-white' : 'bg-blue-600 text-white opacity-90'
-              }`}>
-                <Send className="w-3.5 h-3.5" />
-              </div>
+              </>
+            )}
+          </section>
+
+          {/* 3. Portal Pages & Modules */}
+          <section className="space-y-12">
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-extrabold tracking-tight">
+                {portalContent.modulesSection.header.title}
+              </h2>
+              <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                {portalContent.modulesSection.header.subtitle}
+              </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-between border border-blue-200 dark:border-blue-800/50 rounded-xl p-3 bg-blue-50/50 dark:bg-blue-950/20 text-sm gap-3">
-              <div className="flex flex-col space-y-1.5 text-xs text-slate-600 dark:text-slate-300 px-2 text-center sm:text-left font-medium">
-                <div className="flex items-center space-x-2">
-                  <span>✨</span>
-                  <span>Want to chat with Yamato-sensei? (Requires login & 2 credits for text chat)</span>
-                  <a 
-                    href="#pricing-credits-guide" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      document.getElementById('pricing-credits-guide')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="inline-flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:underline font-bold ml-1 cursor-pointer bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded-md"
-                    title="View Credit Consumption Guide"
+            {/* Section 1: Global & General Japanese Learners */}
+            <div id="section-general" className="space-y-4 pt-4">
+              <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                <span className="text-xl">{portalContent.modulesSection.section1.emoji}</span>
+                <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
+                  {portalContent.modulesSection.section1.title}
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {portalContent.modulesSection.section1.modules.map((mod: PortalModule) => (
+                  <div 
+                    key={mod.id} 
+                    className={`p-6 rounded-3xl border flex flex-col justify-between ${
+                      mod.isComingSoon 
+                        ? 'opacity-75' 
+                        : 'hover:border-blue-500/50'
+                    } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
                   >
-                    <span>Guide</span>
-                    <ArrowDown className="w-3 h-3 animate-bounce" />
-                  </a>
-                </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 pl-5">
-                  Answer today's Daily Quiz to earn 2 credits, or sign up now to receive 10 welcome credits!
-              </div>
-            </div>
-            <button 
-              onClick={async () => {
-                let activeUser = user;
-                if (!activeUser) {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  activeUser = session?.user ?? null;
-                }
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                          {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                        </div>
+                        {mod.isComingSoon && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
+                            Coming Soon
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-base">{mod.name}</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                    </div>
 
-                if (!activeUser) {
-                  handleOpenAuthModal('signup');
-                } else if (await validateFeatureCredits('textAi')) {
-                  alert("You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!");
-                }
-              }}
-              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <span>{user ? "Chat with Yamato" : "Free Sign Up"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Pricing & Credit Packs */}
-      <section className="space-y-12 text-center" id="pricing">
-        <div className="space-y-4 max-w-3xl mx-auto">
-          <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
-          <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Start for free with daily credits, or top up with prepaid charge packs for intensive study.</p>
-                 
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
-            <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
-            <span>{CAMPAIGN_NOTICE.rawText}</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-          {/* Free Plan */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{PRICE_PLANS.free.name}</span>
-              <div>
-                <span className="text-4xl font-black">{PRICE_PLANS.free.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.free.period}</span>
-              </div>
-              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                {PRICE_PLANS.free.badge}
-              </div>
-              <p className="text-xs text-slate-500">{PRICE_PLANS.free.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {PRICE_PLANS.free.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
-            </div>
-            <button 
-              onClick={() => handleOpenAuthModal('signup')}
-              className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              {PRICE_PLANS.free.ctaText}
-            </button>
-          </div>
-
-          {/* Starter Pack */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.starter.name}</span>
-              <div>
-                <span className="text-4xl font-black">{PRICE_PLANS.starter.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.starter.period}</span>
-              </div>
-              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                {PRICE_PLANS.starter.badge}
-              </div>
-              <p className="text-xs text-slate-500">{PRICE_PLANS.starter.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {PRICE_PLANS.starter.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-6 space-y-3">
-              <button 
-                onClick={() => handleCheckout(PRICE_PLANS.starter.id)} 
-                disabled={checkoutLoadingPriceId === PRICE_PLANS.starter.id}
-                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-              >
-                {checkoutLoadingPriceId === PRICE_PLANS.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>Buy Starter Pack</span>
-              </button>
-              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-              </p>
-            </div>
-          </div>
-
-          {/* Standard Pack */}
-          <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-              Most Popular
-            </div>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{PRICE_PLANS.standard.name}</span>
-              <div>
-                <span className="text-4xl font-black">{PRICE_PLANS.standard.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.standard.period}</span>
-              </div>
-              <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                {PRICE_PLANS.standard.badge}
-              </div>
-              <p className="text-xs text-slate-500">{PRICE_PLANS.standard.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {PRICE_PLANS.standard.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-6 space-y-3">
-              <button 
-                onClick={() => handleCheckout(PRICE_PLANS.standard.id)} 
-                disabled={checkoutLoadingPriceId === PRICE_PLANS.standard.id}
-                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-              >
-                {checkoutLoadingPriceId === PRICE_PLANS.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>Buy Standard Pack</span>
-              </button>
-              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-              </p>
-            </div>
-          </div>
-
-          {/* Pro Intensivist */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{PRICE_PLANS.pro.name}</span>
-              <div>
-                <span className="text-4xl font-black">{PRICE_PLANS.pro.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{PRICE_PLANS.pro.period}</span>
-              </div>
-              <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                {PRICE_PLANS.pro.badge}
-              </div>
-              <p className="text-xs text-slate-500">{PRICE_PLANS.pro.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {PRICE_PLANS.pro.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-6 space-y-3">
-              <button 
-                onClick={() => handleCheckout(PRICE_PLANS.pro.id)} 
-                disabled={checkoutLoadingPriceId === PRICE_PLANS.pro.id}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-              >
-                {checkoutLoadingPriceId === PRICE_PLANS.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>Buy Pro Pack</span>
-              </button>
-              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm scroll-mt-20`}>
-          <div className="flex items-center justify-center space-x-2 font-bold mb-3">
-            <Coins className="w-4 h-4 text-amber-500" />
-            <span>Credit Consumption Guide (Max Cap Guard Active)</span>
-          </div>
-          <div className="space-y-2 text-slate-500">
-            {CREDIT_CONSUMPTION_GUIDE.map((row: { item: string; cost: string }, idx: number) => (
-              <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
-                <span>{row.item}</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Portal Pages Navigation Cards */}
-      <section className="space-y-12">
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-extrabold tracking-tight">Portal Pages & Modules</h2>
-          <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Direct access to all specialized exam prep modules, tools, and learning spaces.</p>
-        </div>
-
-        {/* Section 1 */}
-        <div className="space-y-6">
-          <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-            <span className="text-2xl">🌍</span>
-            <h3 className="text-xl font-extrabold tracking-tight">Section 1: Global & General Japanese Learners</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Go (Igo) Mini Game - Card 1 (Active) */}
-            <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-blue-500/50 transition-colors`}>
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                  <Gamepad2 className="w-5 h-5" />
-                </div>
-                <h4 className="font-bold text-base">Go (Igo) Mini Game</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">Traditional Japanese board game mini-app with AI play modes to relax and build strategic thinking.</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-blue-600 font-medium">Mini Game</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigate("/game-igo");
-                  }}
-                  className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                >
-                  <span>Play Game</span> <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-
-            {/* Genkoyoshi Editor (General) - Card 2 (Coming Soon) */}
-            <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                    <Grid className="w-5 h-5" />
+                    <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                      <span className="text-slate-400 font-medium">{mod.category}</span>
+                      {!mod.isComingSoon ? (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                              navigate(mod.path);
+                            }
+                          }}
+                          className="text-blue-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                        >
+                          <span>{mod.actionLabel}</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      ) : (
+                        <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Section 2: Victorian Curriculum & VCE Students (Australia) */}
+            <div id="section-vce" className="space-y-8 pt-6">
+              <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                <span className="text-xl">{portalContent.modulesSection.section2.emoji}</span>
+                <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
+                  {portalContent.modulesSection.section2.title}
+                </h3>
+              </div>
+
+              {/* Sub-section 1: VCE Speaking */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2 text-sm font-bold text-red-600 dark:text-red-400">
+                  <span>🗣️</span>
+                  <h4>VCE Speaking</h4>
                 </div>
-                <h4 className="font-bold text-base">Genkoyoshi Editor (General)</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">Digital manuscript paper editor with image/text AI layout analysis (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-medium">AI Tool</span>
-                <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-            </div>
-          </div>
-        </div>
-      </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {vceSpeakingModules.map((mod: PortalModule) => (
+                    <div 
+                      key={mod.id} 
+                      className={`p-6 rounded-3xl border flex flex-col justify-between ${
+                        mod.isComingSoon 
+                          ? 'opacity-75' 
+                          : 'hover:border-red-500/50'
+                      } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                            {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                          </div>
+                          {mod.isComingSoon && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
+                              Coming Soon
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-base">{mod.name}</h4>
+                        <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                      </div>
 
-      {/* Section 2 */}
-      <div className="space-y-6 pt-6">
-        <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-          <span className="text-2xl">🇦🇺🐨🦘</span>
-          <h3 className="text-xl font-extrabold tracking-tight">Section 2: Victorian Curriculum & VCE Students (Australia)</h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
-                <Grid className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-base">Genkoyoshi Editor (VCE)</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Specialized VCE manuscript editor with strict criteria check and image/text AI essay advisor (Req max {MAX_ESTIMATED_CREDITS.imageAi} credits).</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">VCE AI Tool</span>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (await validateFeatureCredits('imageAi')) {
-                    navigate("/genkoyoshi-editor-vce");
-                  }
-                }}
-                className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-              >
-                <span>Open VCE Editor</span> <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          {/* ✨ Kanji & Grammar Checker カード */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-base">VCE Kanji & Grammar Checker</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Instantly verify unique VCE kanji and grammar patterns in your handwritten essay transcripts.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-amber-600 font-medium">VCE Tool</span>
-              <button
-                type="button"
-                onClick={() => {
-                  navigate("/kanji-grammar-checker");
-                }}
-                className="text-amber-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-              >
-                <span>Open Checker</span> <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                  <Mic className="w-5 h-5" />
+                      <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                        <span className="text-slate-400 font-medium">{mod.category}</span>
+                        {!mod.isComingSoon ? (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                                navigate(mod.path);
+                              }
+                            }}
+                            className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                          >
+                            <span>{mod.actionLabel}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                {vceSpeakingModules.length === 0 && (
+                  <p className="text-xs text-slate-400 italic">No modules currently assigned to VCE Speaking.</p>
+                )}
               </div>
-              <h4 className="font-bold text-base">EOY Oral Drill</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Targeted practice drills focusing on conversational fluidity and pronunciation for VCE oral exams.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Module</span>
-              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-          </div>
-          </div>
 
-          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-                  <Mic className="w-5 h-5" />
+              {/* Sub-section 2: VCE Writing */}
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center space-x-2 text-sm font-bold text-red-600 dark:text-red-400">
+                  <span>✍️</span>
+                  <h4>VCE Writing</h4>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-              </div>
-              <h4 className="font-bold text-base">EOY Oral Elaboration</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Deep-dive elaboration strategies and AI-assisted vocabulary building for Section 2 Detailed Study.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Module</span>
-              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-          </div>
-          </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {vceWritingModules.map((mod: PortalModule) => (
+                    <div 
+                      key={mod.id} 
+                      className={`p-6 rounded-3xl border flex flex-col justify-between ${
+                        mod.isComingSoon 
+                          ? 'opacity-75' 
+                          : 'hover:border-red-500/50'
+                      } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                            {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                          </div>
+                          {mod.isComingSoon && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
+                              Coming Soon
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-base">{mod.name}</h4>
+                        <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                      </div>
 
-          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
-                  <Mic className="w-5 h-5" />
+                      <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                        <span className="text-slate-400 font-medium">{mod.category}</span>
+                        {!mod.isComingSoon ? (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                                navigate(mod.path);
+                              }
+                            }}
+                            className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                          >
+                            <span>{mod.actionLabel}</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
+                {vceWritingModules.length === 0 && (
+                  <p className="text-xs text-slate-400 italic">No modules currently assigned to VCE Writing.</p>
+                )}
               </div>
-              <h4 className="font-bold text-base">EOY Oral Mock Exam</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Full-length simulated VCE oral exam environment with real-time AI examiner evaluation and scoring.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Module</span>
-              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-          </div>
-          </div>
 
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-red-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
-                <FileText className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-base">EOY Writing Exam Tutor</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Comprehensive writing exam practice suite featuring 110 original prompts and structured feedback (Req max {MAX_ESTIMATED_CREDITS.textAi} credits).</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-red-600 font-medium">VCE AI Tool</span>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (await validateFeatureCredits('textAi')) {
-                    navigate("/eoy-writing");
-                  }
-                }}
-                className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-              >
-                <span>Open Writing Tutor</span> <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
+              {/* Sub-section 3: VCE Writing References & Guides */}
+              {(() => {
+                const referenceModules = portalContent.modulesSection.section2.modules.filter(
+                  (m: PortalModule) => m.id === 'text-types' || m.id === 'writing-styles' || m.category === 'Reference Guide'
+                );
 
-          {/* ✨ 新規追加された EOY Writing Custom Practice カード */}
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm hover:border-indigo-500/50 transition-colors`}>
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-base">Custom Writing Practice (External / Past Exams)</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Upload any custom past exam paper, textbook prompt, or external questions along with your answer for instant AI feedback (Zero Data Stored).</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-indigo-600 font-medium">Custom AI Tool</span>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (await validateFeatureCredits('textAi')) {
-                    navigate("/eoy-writing-custom");
-                  }
-                }}
-                className="text-indigo-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-              >
-                <span>Open Custom Practice</span> <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
+                if (referenceModules.length === 0) return null;
 
-          <div className={`p-6 rounded-3xl border opacity-75 flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">Coming Soon</span>
-              </div>
-              <h4 className="font-bold text-base">Oral Exam Questions</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">Curated database of official and practice VCE oral examination questions with audio samples.</p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Reference</span>
-              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
-          </div>
-        </div>
-      </div>
-    </div>  
-      </section>
+                return (
+                  <div className="space-y-4 pt-4">
+                    <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                      <span className="text-lg">📚</span>
+                      <h4 className="font-bold text-base text-slate-700 dark:text-slate-300">
+                        VCE Writing References & Guides
+                      </h4>
+                    </div>
 
-    </main>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {referenceModules.map((mod: PortalModule) => (
+                        <div
+                          key={mod.id}
+                          className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-emerald-500/50 ${
+                            isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                          } shadow-sm transition-colors`}
+                        >
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                                {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                              </div>
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600">
+                                Reference
+                              </span>
+                            </div>
+                            <h5 className="font-bold text-base">{mod.name}</h5>
+                            <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                          </div>
+
+                          <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                            <span className="text-emerald-600 font-medium">{mod.category}</span>
+                            <button
+                              type="button"
+                              onClick={() => navigate(mod.path)}
+                              className="text-emerald-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                            >
+                              <span>{mod.actionLabel}</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </section>
+
+        </main>
 
         {/* 🤖 右下に常駐するコンシェルジュヤマト */}
-       <ChatYamatoConcierge
-       onOpenAuth={(mode) => handleOpenAuthModal(mode || 'signup')}
-       />
-       
-        {/* 💡 4. UI 描画コード②：Daily Quiz Modal */}
-        {isQuizModalOpen && (
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            onClick={() => setIsQuizModalOpen(false)}
-          >
-            <div 
-              className={`w-full max-w-lg rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button 
-                onClick={() => setIsQuizModalOpen(false)}
-                className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-500/15 transition-colors text-slate-400 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <ChatYamatoConcierge 
+          initialLearningPace={learningPace}
+          userId={user?.id}
+          credits={credits}
+          onOpenAuth={() => handleOpenAuthModal('signup')}
+        />
 
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">
-                    🧠
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 px-2 py-0.5 rounded bg-red-500/10">Daily Challenge (+2 Credits)</span>
-                    <h3 className="text-lg font-extrabold tracking-tight">Today's Japanese & Culture Quiz</h3>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-left">
-                  <p className="text-sm font-semibold leading-relaxed">{currentQuiz?.question}</p>
-                </div>
-
-                <div className="space-y-2.5">
-                  {currentQuiz?.options?.map((option, idx) => {
-                    let btnStyle = "border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/20";
-                    if (isAnswerSubmitted || hasCompletedTodayQuiz) {
-                      if (idx === currentQuiz.answer) {
-                        btnStyle = "bg-blue-500/10 border-blue-500 text-blue-700 dark:text-blue-300 font-bold";
-                      } else if (idx === selectedOption) {
-                        btnStyle = "bg-red-500/10 border-red-500 text-red-600";
-                      } else {
-                        btnStyle = "opacity-50 border-slate-200 dark:border-slate-700";
-                      }
-                    }
-
-                    return (
-                      <button
-                        key={idx}
-                        disabled={isAnswerSubmitted || hasCompletedTodayQuiz}
-                        onClick={() => handleAnswerQuiz(idx)}
-                        className={`w-full p-3.5 rounded-xl border text-xs sm:text-sm text-left transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
-                      >
-                        <span>{option}</span>
-                        {(isAnswerSubmitted || hasCompletedTodayQuiz) && idx === currentQuiz.answer && <Check className="w-4 h-4 text-blue-600" />}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {(isAnswerSubmitted || hasCompletedTodayQuiz) && (
-                  <div className="space-y-3 text-left">
-                    {currentQuiz.images && currentQuiz.images.length > 0 && (
-                      <div className="flex flex-wrap gap-3 justify-center my-2">
-                        {currentQuiz.images.map((imgSrc, index) => (
-                          <img 
-                            key={index}
-                            src={imgSrc} 
-                            alt={`Quiz illustration ${index + 1}`} 
-                            className="h-32 rounded-xl object-contain shadow-md border border-slate-200 dark:border-slate-700 bg-white p-2"
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    <div className={`p-4 rounded-2xl border text-xs space-y-2 ${hasCompletedTodayQuiz && !isAnswerSubmitted ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : isQuizCorrect ? 'bg-blue-500/10 border-blue-500/30 text-blue-800 dark:text-blue-200' : 'bg-red-500/10 border-red-500/30 text-red-800 dark:text-red-200'}`}>
-                      <p className="font-bold">
-                        {hasCompletedTodayQuiz && !isAnswerSubmitted 
-                          ? "✨ You have already completed today's quiz! (Credits earned: +2)" 
-                          : isQuizCorrect 
-                          ? "🎉 Correct! You earned 2 credits!" 
-                          : "💪 Incorrect! Try again tomorrow!"}
-                      </p>
-                      <p className="leading-relaxed text-slate-600 dark:text-slate-300">{currentQuiz.explanation}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    onClick={() => setIsQuizModalOpen(false)}
-                    className="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-bold transition cursor-pointer"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 💡 Daily Quiz Modal */}
+        <DailyQuizModal
+          isOpen={isQuizModalOpen}
+          onClose={() => setIsQuizModalOpen(false)}
+          isDarkMode={isDarkMode}
+          currentQuiz={currentQuiz}
+          selectedOption={selectedOption}
+          isAnswerSubmitted={isAnswerSubmitted}
+          hasCompletedTodayQuiz={hasCompletedTodayQuiz}
+          isQuizCorrect={isQuizCorrect}
+          onAnswer={handleAnswerQuiz}
+          portalContent={portalContent}
+        />
       </div>
     </PageLayout>
   );

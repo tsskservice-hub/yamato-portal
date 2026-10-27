@@ -39,7 +39,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-oral-criteria';
+const KNOWLEDGE_KEY = 'VCE_ORAL_CRITERIA';
 
 /**
  * Fetch VCE Oral Assessment Criteria data from Supabase 'app_knowledge' table.
@@ -47,7 +47,7 @@ const KNOWLEDGE_KEY = 'vce-oral-criteria';
 export async function fetchOralCriteriaMap(supabaseClient: SupabaseClient): Promise<OralCriteriaMap | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

@@ -30,7 +30,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-vocabulary-list';
+const KNOWLEDGE_KEY = 'VCE_VOCABULARY_LIST';
 
 /**
  * Fetch VCE Vocabulary List data from Supabase 'app_knowledge' table.
@@ -38,7 +38,7 @@ const KNOWLEDGE_KEY = 'vce-vocabulary-list';
 export async function fetchVocabularyListData(supabaseClient: SupabaseClient): Promise<VocabularyListData | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 

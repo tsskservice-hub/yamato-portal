@@ -60,7 +60,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-const KNOWLEDGE_KEY = 'vce-eoy-written-spec';
+const KNOWLEDGE_KEY = 'VCE_EOY_WRITTEN_SPEC';
 
 /**
  * Fetch VCE Written Examination Specification data from Supabase 'app_knowledge' table.
@@ -68,7 +68,7 @@ const KNOWLEDGE_KEY = 'vce-eoy-written-spec';
 export async function fetchWrittenSpecification(supabaseClient: SupabaseClient): Promise<WrittenSpecification | null> {
   const { data, error } = await supabaseClient
     .from('app_knowledge')
-    .select('content_json')
+    .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
 
