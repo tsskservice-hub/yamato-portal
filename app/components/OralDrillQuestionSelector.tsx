@@ -41,56 +41,64 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
 
   return (
     <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-      {/* 1段目: Learning Pace & Speech Speed */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-        {/* Learning Pace */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-            Learning Pace
+      {/* 1段目: Learning Pace & Yamato Speech Speed (視覚的にセクションを分離し、選択色をテーマカラーに統一) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Learning Pace セクション */}
+        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+            🌱 Learning Pace
           </span>
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-            {(["steady", "normal", "accelerated"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => handleLevelChange(m)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition cursor-pointer ${
-                  currentLevel === m
-                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                {m}
-              </button>
-            ))}
+          <div className="flex bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            {(["steady", "normal", "accelerated"] as const).map((m) => {
+              const isSelected = currentLevel === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => handleLevelChange(m)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold capitalize transition cursor-pointer text-center ${
+                    isSelected ? "text-white shadow-xs" : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                  style={{
+                    backgroundColor: isSelected ? themeColor : undefined,
+                  }}
+                >
+                  {m}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Speech Speed */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-            Speech Speed
+        {/* Yamato Speech Speed セクション（一目でわかるラベルに変更） */}
+        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+            🔊 Yamato Speech Speed
           </span>
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-            {speedOptions.map((spd) => (
-              <button
-                key={spd}
-                type="button"
-                onClick={() => onSelectSpeed && onSelectSpeed(spd)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  selectedSpeed === spd
-                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                {spd}x
-              </button>
-            ))}
+          <div className="flex bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            {speedOptions.map((spd) => {
+              const isSelected = selectedSpeed === spd;
+              return (
+                <button
+                  key={spd}
+                  type="button"
+                  onClick={() => onSelectSpeed && onSelectSpeed(spd)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer text-center ${
+                    isSelected ? "text-white shadow-xs" : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                  style={{
+                    backgroundColor: isSelected ? themeColor : undefined,
+                  }}
+                >
+                  {spd}x
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* 2段目: マルチセレクト対応のトピックフィルター（ここに親の機能を統合） */}
+      {/* 2段目: マルチセレクト対応のトピックフィルター */}
       {categories.length > 0 && (
         <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between">
@@ -98,7 +106,7 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 🏷 Select Topics (Multiple Selection Allowed)
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                 {selectedTopics.length} / {categories.length} selected
               </span>
             </div>
@@ -106,7 +114,8 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
               <button
                 type="button"
                 onClick={onSelectAllTopics}
-                className="text-xs text-amber-600 font-bold hover:underline cursor-pointer"
+                className="text-xs font-bold hover:underline cursor-pointer"
+                style={{ color: themeColor }}
               >
                 Select All
               </button>
