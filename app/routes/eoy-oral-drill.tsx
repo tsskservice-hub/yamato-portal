@@ -228,11 +228,15 @@ export default function EoyOralDrillPage() {
     // 各質問の現在の回答内容をチェック（10文字未満のものが無いか検証）
     for (const q of currentQuestions) {
       const currentAns = answers[q.id] || "";
-      if (currentAns.trim().length < 10) {
-        alert(`【文字数チェック】\n「${q.questionOriginal.slice(0, 20)}...」の回答が短すぎます。\nDrillの回答は10文字以上で入力してください。（現在: ${currentAns.trim().length}文字）`);
+      
+      
+if (currentAns.trim().length < 10) {
+        alert(`[Character Count Check]\nThe answer for "${q.questionOriginal.slice(0, 20)}..." is too short.\nPlease enter at least 10 characters for your drill response. (Current: ${currentAns.trim().length} characters)`);
         return;
       }
+
     }
+
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
