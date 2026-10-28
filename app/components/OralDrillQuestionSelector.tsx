@@ -2,13 +2,14 @@ import React from "react";
 
 export interface OralDrillQuestionSelectorProps {
   categories: string[];
-  selectedCategory: string;
-  onSelectCategory: (category: string) => void;
+  selectedTopics: string[];
+  onToggleTopic: (topic: string) => void;
+  onSelectAllTopics: () => void;
+  onClearAllTopics: () => void;
   selectedLevel?: "steady" | "normal" | "accelerated";
   onSelectLevel?: (level: "steady" | "normal" | "accelerated") => void;
   mode?: "steady" | "normal" | "accelerated";
   onSelectMode?: (mode: "steady" | "normal" | "accelerated") => void;
-  // 💡 追加: 読み上げスピード選択用プロパティ（デフォルト 1）
   selectedSpeed?: number;
   onSelectSpeed?: (speed: number) => void;
   questionsCount?: number;
@@ -17,13 +18,15 @@ export interface OralDrillQuestionSelectorProps {
 
 export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps> = ({
   categories,
-  selectedCategory = "all", // 第一要件: clear all の状態をデフォルトに
-  onSelectCategory,
+  selectedTopics,
+  onToggleTopic,
+  onSelectAllTopics,
+  onClearAllTopics,
   selectedLevel,
   onSelectLevel,
-  mode = "normal", // 第二要件: normal をデフォルトに
+  mode = "normal",
   onSelectMode,
-  selectedSpeed = 1, // 第三要件: スピードのデフォルトを 1 に
+  selectedSpeed = 1,
   onSelectSpeed,
   questionsCount = 0,
   themeColor = "#eab308",
@@ -37,8 +40,8 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
   const speedOptions = [0.75, 1, 1.25, 1.5];
 
   return (
-    <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-      {/* 1段目: Learning Pace & Speed と Speech Speed の設定 */}
+    <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      {/* 1段目: Learning Pace & Speech Speed */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
         {/* Learning Pace */}
         <div className="flex items-center justify-between">
@@ -63,7 +66,7 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
           </div>
         </div>
 
-        {/* 💡 第三要件: 問題文を読むスピードの選択 (デフォルト: 1x) */}
+        {/* Speech Speed */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Speech Speed
@@ -87,50 +90,62 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
         </div>
       </div>
 
-      {/* 2段目: Category Filter (第一要件: 初期状態は 'all' で全クリア) */}
-      <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-            Category Filter
-          </span>
-          {questionsCount > 0 && (
-            <span className="text-[10px] font-bold text-slate-400">
-              {questionsCount} Questions Available
-            </span>
-          )}
-        </div>
+      {/* 2段目: マルチセレクト対応のトピックフィルター（ここに親の機能を統合） */}
+      {categories.length > 0 && (
+        <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                🏷 Select Topics (Multiple Selection Allowed)
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
+                {selectedTopics.length} / {categories.length} selected
+              </span>
+            </div>
+            <div className="space-x-2">
+              <button
+                type="button"
+                onClick={onSelectAllTopics}
+                className="text-xs text-amber-600 font-bold hover:underline cursor-pointer"
+              >
+                Select All
+              </button>
+              <button
+                type="button"
+                onClick={onClearAllTopics}
+                className="text-xs text-slate-400 font-bold hover:underline cursor-pointer"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <button
-            type="button"
-            onClick={() => onSelectCategory("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ${
-              selectedCategory === "all"
-                ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
-            }`}
-          >
-            All Questions
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => onSelectCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ${
-                selectedCategory === cat
-                  ? "text-white shadow-xs"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
-              }`}
-              style={{
-                backgroundColor: selectedCategory === cat ? themeColor : undefined,
-              }}
-            >
-              {cat}
-            </button>
-          ))}
+          <div className="flex flex-wrap gap-2">
+            {categories.map((topic) => {
+              const isSelected = selectedTopics.includes(topic);
+              return (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => onToggleTopic(topic)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border flex items-center gap-1.5 ${
+                    isSelected
+                      ? "text-white shadow-xs"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
+                  }`}
+                  style={{
+                    backgroundColor: isSelected ? themeColor : undefined,
+                    borderColor: isSelected ? themeColor : undefined,
+                  }}
+                >
+                  <span>{isSelected ? "☑" : "□"}</span>
+                  <span>{topic}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

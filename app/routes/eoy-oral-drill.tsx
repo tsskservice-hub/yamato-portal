@@ -14,7 +14,7 @@ import { supabase } from "../lib/supabaseClient";
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
-import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector"; // 💡 追加: 共通セレクター
+import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector"; // 💡 共通セレクター
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
@@ -44,7 +44,7 @@ export default function EoyOralDrillPage() {
   // 💡 要件に対応したステート初期値の設定（Section 1, Normal ペース, スピード 1.0）
   const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom">("sec1");
   const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]); // 空配列 ＝ "all"（クリア状態）
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]); // 空配列 ＝ クリア状態（全選択など）
   const [speechSpeed, setSpeechSpeed] = useState<number>(1.0); // デフォルト 1.0
   const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
 
@@ -143,9 +143,7 @@ export default function EoyOralDrillPage() {
     return Array.from(set);
   }, [selectedSection, selectedLevel, questionsData, customQuestionsRaw]);
 
-  // タブやレベル変更時にトピックを初期化（クリア＝全て選択なし）するかどうかは運用によりますが、
-  // ここでは要望に合わせてクリア状態（空配列＝all）を保てるようにしています。
-
+  // マルチセレクト用のトピック切り替えハンドラー
   const toggleTopic = (topic: string) => {
     if (selectedTopics.includes(topic)) {
       setSelectedTopics(selectedTopics.filter((t) => t !== topic));
@@ -398,15 +396,14 @@ export default function EoyOralDrillPage() {
               </div>
             </div>
 
-            {/* 💡 共通の OralDrillQuestionSelector を統合し、Pace・Speech Speed・トピック選択を綺麗に管理 */}
+            {/* 💡 共通の OralDrillQuestionSelector にマルチセレクト機能を完全統合 */}
             {selectedSection !== "custom" && (
               <OralDrillQuestionSelector
                 categories={availableTopics}
-                selectedCategory={selectedTopics.length === 0 ? "all" : selectedTopics[0]} // 単一または複数選択の簡易表現
-                onSelectCategory={(cat) => {
-                  if (cat === "all") setSelectedTopics([]);
-                  else setSelectedTopics([cat]);
-                }}
+                selectedTopics={selectedTopics}
+                onToggleTopic={toggleTopic}
+                onSelectAllTopics={handleSelectAllTopics}
+                onClearAllTopics={handleClearAllTopics}
                 selectedLevel={selectedLevel}
                 onSelectLevel={setSelectedLevel}
                 selectedSpeed={speechSpeed}
@@ -414,59 +411,6 @@ export default function EoyOralDrillPage() {
                 themeColor={themeColor}
                 questionsCount={currentQuestions.length}
               />
-            )}
-
-            {/* トピックのマルチセレクト詳細表示（従来機能の維持） */}
-            {availableTopics.length > 0 && (
-              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                      🏷 Select Topics (Multiple Selection Allowed)
-                    </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
-                      {selectedTopics.length} / {availableTopics.length} selected (Clear All = All)
-                    </span>
-                  </div>
-                  <div className="space-x-2">
-                    <button
-                      type="button"
-                      onClick={handleSelectAllTopics}
-                      className="text-xs text-amber-600 font-bold hover:underline cursor-pointer"
-                    >
-                      Select All
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleClearAllTopics}
-                      className="text-xs text-slate-400 font-bold hover:underline cursor-pointer"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {availableTopics.map((topic) => {
-                    const isSelected = selectedTopics.includes(topic);
-                    return (
-                      <button
-                        key={topic}
-                        type="button"
-                        onClick={() => toggleTopic(topic)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border flex items-center gap-1.5 ${
-                          isSelected
-                            ? "bg-amber-500 text-white border-amber-600 shadow-xs"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
-                        }`}
-                      >
-                        <span>{isSelected ? "☑" : "□"}</span>
-                        <span>{topic}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             )}
           </div>
 

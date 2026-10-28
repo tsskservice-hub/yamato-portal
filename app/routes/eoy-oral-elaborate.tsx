@@ -15,7 +15,7 @@ import { supabase } from "../lib/supabaseClient";
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
-import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector"; // 💡 追加: 共通セレクター
+import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector"; // 💡 共通セレクター
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
@@ -403,15 +403,14 @@ export default function EoyOralElaboratePage() {
               </div>
             </div>
 
-            {/* 💡 共通の OralDrillQuestionSelector を統合し、Pace・Speech Speed・トピック選択を綺麗に管理 */}
+            {/* 💡 共通の OralDrillQuestionSelector にマルチセレクト機能を完全統合 */}
             {selectedSection !== "custom" && (
               <OralDrillQuestionSelector
                 categories={availableTopics}
-                selectedCategory={selectedTopics.length === 0 ? "all" : selectedTopics[0]}
-                onSelectCategory={(cat) => {
-                  if (cat === "all") setSelectedTopics([]);
-                  else setSelectedTopics([cat]);
-                }}
+                selectedTopics={selectedTopics}
+                onToggleTopic={toggleTopic}
+                onSelectAllTopics={handleSelectAllTopics}
+                onClearAllTopics={handleClearAllTopics}
                 selectedLevel={selectedLevel}
                 onSelectLevel={setSelectedLevel}
                 selectedSpeed={speechSpeed}
@@ -419,60 +418,6 @@ export default function EoyOralElaboratePage() {
                 themeColor={themeColor}
                 questionsCount={currentQuestions.length}
               />
-            )}
-
-            {/* 3. Multi-Topic Selection Filter (詳細なトピック複数選択・一括操作) */}
-            {availableTopics.length > 0 && (
-              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                      🏷 Select Topics (Multiple Selection Allowed)
-                    </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-300">
-                      {selectedTopics.length} / {availableTopics.length} selected (Clear All = All)
-                    </span>
-                  </div>
-                  <div className="space-x-2">
-                    <button
-                      type="button"
-                      onClick={handleSelectAllTopics}
-                      className="text-xs text-purple-600 font-bold hover:underline cursor-pointer"
-                    >
-                      Select All
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleClearAllTopics}
-                      className="text-xs text-slate-400 font-bold hover:underline cursor-pointer"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                </div>
-
-                {/* Topic Pill Buttons */}
-                <div className="flex flex-wrap gap-2">
-                  {availableTopics.map((topic) => {
-                    const isSelected = selectedTopics.includes(topic);
-                    return (
-                      <button
-                        key={topic}
-                        type="button"
-                        onClick={() => toggleTopic(topic)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border flex items-center gap-1.5 ${
-                          isSelected
-                            ? "bg-purple-600 text-white border-purple-700 shadow-xs"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200"
-                        }`}
-                      >
-                        <span>{isSelected ? "☑" : "□"}</span>
-                        <span>{topic}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             )}
           </div>
 
