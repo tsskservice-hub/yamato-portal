@@ -66,6 +66,7 @@ export default function EoyOralDrillPage() {
     }
   };
 
+  // 💡 Drillモードとして明示的に "drill" を指定してフックを呼び出し、answer_text を対象に読み書きする
   const {
     answers,
     customQuestionsRaw,
@@ -75,7 +76,7 @@ export default function EoyOralDrillPage() {
     handleAnswerBlur,
     addCustomQuestion,
     deleteCustomQuestion,
-  } = useSupabaseUserAnswers(supabase, user?.id);
+  } = useSupabaseUserAnswers(supabase, user?.id, "drill");
 
   const engine = useOralPracticeEngine(selectedLevel, speechSpeed);
 
@@ -168,15 +169,16 @@ export default function EoyOralDrillPage() {
         if (selectedTopics.length > 0 && !selectedTopics.includes(categoryName)) return;
 
         const qId = String(q.id);
+        const effectiveAnswer = q.answer_text || "";
         list.push({
           id: qId,
           question: q.question_text,
           questionOriginal: q.question_text,
           category: categoryName,
           isCustom: true,
-          defaultAnswerOriginal: q.answer_text || "",
+          defaultAnswerOriginal: effectiveAnswer,
         });
-        initialMap[qId] = q.answer_text || "";
+        initialMap[qId] = effectiveAnswer;
       });
     } else if (questionsData) {
       const secData = questionsData[selectedSection];

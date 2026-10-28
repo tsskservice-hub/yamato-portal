@@ -64,6 +64,7 @@ export default function EoyOralElaboratePage() {
     }
   };
 
+  // 💡 モードに "elaborate" を指定してフックを呼び出し、elaborate_text を対象に読み書き＆Drill回答の自動継承を行う
   const {
     answers,
     customQuestionsRaw,
@@ -73,7 +74,7 @@ export default function EoyOralElaboratePage() {
     handleAnswerBlur,
     addCustomQuestion,
     deleteCustomQuestion,
-  } = useSupabaseUserAnswers(supabase, user?.id);
+  } = useSupabaseUserAnswers(supabase, user?.id, "elaborate");
 
   const engine = useOralPracticeEngine(selectedLevel, speechSpeed);
 
@@ -170,15 +171,18 @@ export default function EoyOralElaboratePage() {
         if (selectedTopics.length > 0 && !selectedTopics.includes(categoryName)) return;
 
         const qId = String(q.id);
+        // フック側ですでに elaborate_text がなければ answer_text をフォールバックする処理が行われている
+        const effectiveAnswer = q.elaborate_text || q.answer_text || "";
+
         list.push({
           id: qId,
           question: q.question_text,
           questionOriginal: q.question_text,
           category: categoryName,
           isCustom: true,
-          defaultAnswerOriginal: q.answer_text || "",
+          defaultAnswerOriginal: effectiveAnswer,
         });
-        initialMap[qId] = q.answer_text || "";
+        initialMap[qId] = effectiveAnswer;
       });
     } else if (questionsData) {
       const secData = questionsData[selectedSection];
@@ -222,7 +226,7 @@ export default function EoyOralElaboratePage() {
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
-      question: q.question,                  // Ruby-formatted for UI display
+      question: q.question,                      // Ruby-formatted for UI display
       questionOriginal: q.questionOriginal, // Clean text for TTS engine
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
