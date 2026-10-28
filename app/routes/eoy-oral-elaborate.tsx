@@ -161,8 +161,8 @@ export default function EoyOralElaboratePage() {
   const handleClearAllTopics = () => setSelectedTopics([]);
 
   // Extract current questions based on selected topics
-  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = useMemo(() => {
-    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = [];
+  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = useMemo(() => {
+    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     if (selectedSection === "custom") {
@@ -181,6 +181,7 @@ export default function EoyOralElaboratePage() {
           category: categoryName,
           isCustom: true,
           defaultAnswerOriginal: effectiveAnswer,
+          minLength: 50, // 💡 Elaborateの最小文字数要件（50文字以上）
         });
         initialMap[qId] = effectiveAnswer;
       });
@@ -206,6 +207,7 @@ export default function EoyOralElaboratePage() {
               category: categoryName,
               isCustom: false,
               defaultAnswerOriginal: plainAnswer,
+              minLength: 50, // 💡 Elaborateの最小文字数要件（50文字以上）
             });
             initialMap[String(qId)] = plainAnswer;
           }
@@ -217,11 +219,21 @@ export default function EoyOralElaboratePage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
+  // 💡 バリデーションガード付きのエラボレーション練習開始ハンドラー（Elaborateは50文字以上が必要）
   const handleStartElaboration = () => {
     if (!user) {
       alert("詳細解説・会話練習を行うには、サインインが必要です！");
       handleOpenAuth();
       return;
+    }
+
+    // 各質問の現在の回答内容をチェック（50文字未満のものが無いか検証）
+    for (const q of currentQuestions) {
+      const currentAns = answers[q.id] || "";
+      if (currentAns.trim().length < 50) {
+        alert(`【文字数チェック】\n「${q.questionOriginal.slice(0, 20)}...」の回答が短すぎます。\nElaborateの回答は50文字以上で入力してください。（現在: ${currentAns.trim().length}文字）`);
+        return; // バリデーションに引っかかったら練習を開始しない
+      }
     }
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
@@ -249,6 +261,12 @@ export default function EoyOralElaboratePage() {
       alert("Please enter both the question and sample answer.");
       return;
     }
+    // カスタム追加時の文字数ガード（50文字以上）
+    if (newAnswerText.trim().length < 50) {
+      alert("Elaborateの回答は50文字以上で入力してください。");
+      return;
+    }
+
     const success = await addCustomQuestion(newQuestionText, newAnswerText, newCategory);
     if (success) {
       setNewQuestionText("");
@@ -330,7 +348,7 @@ export default function EoyOralElaboratePage() {
                 EOY Oral Elaboration Practice
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice in-depth elaboration across all stages of the VCE Oral Exam (Before Sec 1, Sec 1, Sec 2, and After Sec 2). Filter by multiple topics, auto-save your responses to Supabase, and build logical speaking fluency with AI Yamato.
+                Practice in-depth elaboration across all stages of the VCE Oral Exam (Before Sec 1, Sec 1, Sec 2, and After Sec 2). Filter by multiple topics, auto-save your responses, and build logical speaking fluency with AI Yamato. (Elaborate answer requirement: 50+ characters)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Elaboration" themeColor={themeColor} />

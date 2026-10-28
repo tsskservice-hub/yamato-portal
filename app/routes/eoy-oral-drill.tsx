@@ -159,8 +159,8 @@ export default function EoyOralDrillPage() {
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
   const handleClearAllTopics = () => setSelectedTopics([]);
 
-  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = useMemo(() => {
-    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = [];
+  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = useMemo(() => {
+    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     if (selectedSection === "custom") {
@@ -177,6 +177,7 @@ export default function EoyOralDrillPage() {
           category: categoryName,
           isCustom: true,
           defaultAnswerOriginal: effectiveAnswer,
+          minLength: 10, // 💡 Drillの最小文字数要件（10文字以上）
         });
         initialMap[qId] = effectiveAnswer;
       });
@@ -202,6 +203,7 @@ export default function EoyOralDrillPage() {
               category: categoryName,
               isCustom: false,
               defaultAnswerOriginal: plainAnswer,
+              minLength: 10, // 💡 Drillの最小文字数要件（10文字以上）
             });
             initialMap[String(qId)] = plainAnswer;
           }
@@ -213,11 +215,21 @@ export default function EoyOralDrillPage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
+  // 💡 バリデーションガード付きの練習開始ハンドラー（Drillは10文字以上が必要）
   const handleStartPractice = () => {
     if (!user) {
       alert("会話練習を行うには、サインインが必要です！");
       handleOpenAuth();
       return;
+    }
+
+    // 各質問の現在の回答内容をチェック（10文字未満のものが無いか検証）
+    for (const q of currentQuestions) {
+      const currentAns = answers[q.id] || "";
+      if (currentAns.trim().length < 10) {
+        alert(`【文字数チェック】\n「${q.questionOriginal.slice(0, 20)}...」の回答が短すぎます。\nDrillの回答は10文字以上で入力してください。（現在: ${currentAns.trim().length}文字）`);
+        return; // バリデーションに引っかかったら練習を開始しない
+      }
     }
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
@@ -245,6 +257,12 @@ export default function EoyOralDrillPage() {
       alert("Please enter both the question and answer.");
       return;
     }
+    // カスタム追加時の文字数ガード（10文字以上）
+    if (newAnswerText.trim().length < 10) {
+      alert("Drillの回答は10文字以上で入力してください。");
+      return;
+    }
+
     const success = await addCustomQuestion(newQuestionText, newAnswerText, newCategory);
     if (success) {
       setNewQuestionText("");
@@ -325,7 +343,7 @@ export default function EoyOralDrillPage() {
                 EOY Oral Exam Practice & Custom QA Bank
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice every stage of the VCE Japanese Oral Exam — from entrance greetings and Section 1 General Conversation to Section 2 Detailed Study and exit. Your custom answers are automatically saved so you can practice and edit them anytime, anywhere.
+                Practice every stage of the VCE Japanese Oral Exam — from entrance greetings and Section 1 General Conversation to Section 2 Detailed Study and exit. Your custom answers are automatically saved so you can practice and edit them anytime, anywhere. (Drill answer requirement: 10+ characters)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
