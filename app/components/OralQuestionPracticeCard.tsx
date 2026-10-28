@@ -68,7 +68,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = (await response.json().catch(() => ({}))) as any;
         if (response.status === 402) {
           alert(`Insufficient credits (${errorData.message || "Please top up credits"}).`);
           return;
@@ -76,7 +76,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
         throw new Error("API response error");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
 
