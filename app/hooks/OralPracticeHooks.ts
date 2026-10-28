@@ -1,3 +1,7 @@
+/**
+ * @file OralPracticeHooks.ts
+ * @description バックエンドAPIの音声・チャットエンドポイントと確実に通信するオーラル練習エンジンフック
+ */
 import { useState, useEffect, useRef } from "react";
 
 export type ChatMessage = {
@@ -8,11 +12,37 @@ export type ChatMessage = {
 
 export interface QuestionData {
   id: string;
-  question: string;         // 画面表示用 (ルビ付き HTML)
-  questionOriginal: string; // TTS音声再生用 (Supabase の text_original プレーンテキスト)
-  defaultAnswer?: string;   // 画面表示用モデル解答
-  defaultAnswerOriginal?: string; // プレーンテキストモデル解答 (default_answer_original)
+  question: string;
+  questionOriginal: string;
+  defaultAnswer?: string;
   category?: string;
+}
+
+export function getApiEndpoint(): string {
+  // 💡 常に本番・共通バックエンドの /chat エンドポイントへ直接リクエストを送るよう完全固定
+  return "https://api.jptutoraiyamato.com/chat";
+}
+
+export function fallbackWebSpeech(text: string, speed = 1.0) {
+  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    try {
+      window.speechSynthesis.cancel();
+      const cleaned = text
+        .replace(/<rt>.*?<\/rt>/g, "")
+        .replace(/<.*?>/g, "")
+        .replace(/【.*?】/g, "")
+        .replace(/※.*$/gm, "")
+        .trim();
+
+      if (!cleaned) return;
+      const utterance = new SpeechSynthesisUtterance(cleaned);
+      utterance.lang = "ja-JP";
+      utterance.rate = speed || 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn("Web Speech API fallback error:", e);
+    }
+  }
 }
 
 export function formatOralFeedbackToHtml(rawText: string): string {
@@ -47,7 +77,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "ようこそ！下の「Speak to AI Yamato」を押して中央画面で対話練習を始めましょう。",
+      content: "Welcome! Click 'Speak to AI Yamato' below to start practicing in the center screen.",
       isHtml: false,
     },
   ]);
@@ -62,39 +92,60 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // 💡 TTS 発話関数 (Supabaseのフリガナ無しの純粋プレーンテキスト text_original を直接再生)
+  // 💡 TTS Voice Playback via Backend API (絶対URLに固定)
   const playTTS = async (textToSpeak: string) => {
     try {
       if (!textToSpeak) return;
       const cleanedText = textToSpeak
+        .replace(/<rt>.*?<\/rt>/g, "")
+        .replace(/<.*?>/g, "")
         .replace(/【.*?】/g, "")
         .replace(/※.*$/gm, "")
         .trim();
 
-      const response = await fetch("/api/chat", {
+      if (!cleanedText) return;
+
+      const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
+
+      const response = await fetch(ttsEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          speakText: cleanedText,
-          level: selectedLevel,
-          speed: speechSpeed,
+          text: cleanedText,
         }),
       });
 
-      if (!response.ok) return;
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.play().catch((err) => console.error("Audio playback error:", err));
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.playbackRate = speechSpeed || 1.0;
+        await audio.play();
+      } else {
+        console.warn("Backend TTS failed, falling back to Web Speech API");
+        fallbackWebSpeech(cleanedText, speechSpeed);
+      }
     } catch (err) {
-      console.error("TTS error:", err);
+      console.warn("Server TTS connection error, falling back to Web Speech:", err);
+      fallbackWebSpeech(textToSpeak, speechSpeed);
     }
   };
 
+  // Start Audio Recording
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      
+      let mimeType = "audio/webm";
+      if (typeof MediaRecorder !== "undefined") {
+        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+          mimeType = "audio/webm;codecs=opus";
+        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -103,17 +154,19 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
       };
 
       mediaRecorder.onstop = async () => {
-        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
         await transcribeAudio(blob);
       };
 
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
-      alert("マイクへのアクセスが許可されていません。");
+      console.error("Microphone access error:", err);
+      alert("Microphone access is denied or not supported on this browser.");
     }
   };
 
+  // Stop Audio Recording
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
@@ -122,6 +175,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     }
   };
 
+  // Spacebar Keyboard Event Listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
@@ -143,34 +197,35 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPracticing, isAnalyzing, isWaitingForNext, isRecording]);
 
+  // 💡 Speech Transcription via Backend API (絶対URLに固定)
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsAnalyzing(true);
-    const currentQ = activeQuestions[currentQuestionIndex];
     const formData = new FormData();
-    formData.append("audio", audioBlob, "user-audio.webm");
-    formData.append("expectedQuestion", currentQ?.questionOriginal || currentQ?.question || "");
-    formData.append("mode", "drill-practice");
-    formData.append("level", selectedLevel);
+    formData.append("audio", audioBlob, "recording.webm");
 
     try {
-      const res = await fetch("/api/chat", { method: "POST", body: formData });
-      if (!res.ok) throw new Error();
+      const sttEndpoint = "https://api.jptutoraiyamato.com/api/test-stt";
+
+      const res = await fetch(sttEndpoint, { method: "POST", body: formData });
+      if (!res.ok) throw new Error(`Transcription HTTP Error: ${res.status}`);
       const data = (await res.json()) as any;
       setInputMessage(data.userText || "");
     } catch (err) {
-      alert("音声の書き起こしに失敗しました。");
+      console.error("Transcription error:", err);
+      alert("Audio transcription failed. Please try speaking again or typing your answer.");
     } finally {
       setIsAnalyzing(false);
     }
   };
 
+  // Start Practice Session
   const startPractice = (
     questionsList: QuestionData[],
     answersMap: { [key: string]: string },
     orderMode: "sequential" | "random" = "sequential"
   ) => {
     if (!questionsList || questionsList.length === 0) {
-      alert("練習対象の設問が見つかりませんでした。");
+      alert("No practice questions found for the selected filter.");
       return;
     }
 
@@ -191,15 +246,15 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     setChatMessages([
       {
         role: "assistant",
-        content: `【Practice Session Started】<br><br>Yamato: 「${firstQ.question}」<br><br>(あなたの作成解答: 「${userTargetAns || "（未入力）"}」)<br><br>マイクまたはテキストで回答してください！`,
+        content: `【Practice Session Started】<br><br>Yamato: 「${firstQ.question}」<br><br>(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br>Please respond using microphone or text!`,
         isHtml: true,
       },
     ]);
 
-    // 💡 フリガナなしプレーンテキスト (questionOriginal) を TTS で再生
     playTTS(firstQ.questionOriginal || firstQ.question);
   };
 
+  // Proceed to Next Question
   const proceedToNextQuestion = (answersMap: { [key: string]: string }) => {
     const nextIndex = currentQuestionIndex + 1;
     if (nextIndex < activeQuestions.length) {
@@ -210,16 +265,16 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         ...prev,
         {
           role: "assistant",
-          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)<br><br>どうぞ！`,
+          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
           isHtml: true,
         },
       ]);
       setIsWaitingForNext(false);
-      // 💡 フリガナなしプレーンテキスト (questionOriginal) を TTS で再生
       playTTS(nextQ.questionOriginal || nextQ.question);
     }
   };
 
+  // Send User Answer Message (Gemini Evaluation Chat)
   const sendAnswerMessage = async (
     e: React.FormEvent,
     answersMap: { [key: string]: string },
@@ -243,7 +298,9 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     const registeredAnswer = answersMap[currentQ.id] || "";
 
     try {
-      const res = await fetch("/api/chat", {
+      // 💡 相対パスによる404エラーを防ぐため、本番用絶対URLに固定します
+      const endpoint = "https://api.jptutoraiyamato.com/chat";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -255,6 +312,8 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
           section,
         }),
       });
+
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
       const data = (await res.json()) as any;
       const aiFeedback = data.reply || "◎ よくできました。";
@@ -273,7 +332,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
             { role: "assistant", content: formattedHtml, isHtml: true },
             {
               role: "assistant",
-              content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)<br><br>どうぞ！`,
+              content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
               isHtml: true,
             },
           ]);
@@ -291,16 +350,17 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
           ...newMessages,
           {
             role: "assistant",
-            content: `${formattedHtml}<br><br><b>🎉 すべての問題を完了しました！お疲れ様でした！</b>`,
+            content: `${formattedHtml}<br><br><b>🎉 All questions completed! Great job!</b>`,
             isHtml: true,
           },
         ]);
         setIsPracticing(false);
       }
     } catch (err) {
+      console.error("Send answer error:", err);
       setChatMessages([
         ...newMessages,
-        { role: "assistant", content: "エラーが発生しました。もう一度送信してください。", isHtml: false },
+        { role: "assistant", content: "An error occurred. Please try sending again.", isHtml: false },
       ]);
     } finally {
       setIsAnalyzing(false);
@@ -325,3 +385,5 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     sendAnswerMessage,
   };
 }
+
+export default useOralPracticeEngine;

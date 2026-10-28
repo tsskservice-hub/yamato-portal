@@ -11,15 +11,12 @@ export const generatedRoutes: string[] = [
   "/faq",
   "/game-igo",
   "/genkoyoshi-editor-vce",
-  "/image-test",
   "/kanji-grammar-checker",
   "/my-account",
   "/oral-exam-questions",
   "/prices",
   "/privacy",
   "/terms",
-  "/test-yamato",
-  "/test-yamato-note",
   "/text-types",
   "/writing-styles"
 ];

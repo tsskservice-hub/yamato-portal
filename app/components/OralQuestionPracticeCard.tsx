@@ -19,7 +19,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
   onSelectQuestion,
   selectedLevel = "normal",
   themeColor = "#a855f7",
-  apiEndpoint = "/api/chat",
+  apiEndpoint = "https://api.jptutoraiyamato.com/chat",
   modeLabel = "Practice",
 }) => {
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
@@ -28,11 +28,13 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
   const { isRecording, startRecording, stopRecording, audioBlob } = useOralAudioRecorder();
 
+  // Reset feedback & text on prompt change
   useEffect(() => {
     setFeedback(null);
     setUserSpeechText("");
   }, [selectedQuestion?.text]);
 
+  // Auto-submit audio once recorded
   useEffect(() => {
     if (audioBlob && selectedQuestion) {
       processAudioSubmission(audioBlob);
@@ -44,19 +46,23 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
     setIsAnalyzing(true);
     setFeedback(null);
 
-    try {
+try {
       const formData = new FormData();
       formData.append("audio", blob, "answer.webm");
       formData.append("mode", "drill-practice");
       formData.append("question", selectedQuestion.text);
       formData.append("level", selectedLevel);
 
+      // 💡 404エラーを防ぐため、本番用APIサーバーの絶対URLに固定します
+      // （※バックエンドの音声受付ルートに合わせて指定してください。例: 音声テスト等で使っているエンドポイントや専用のエンドポイント）
+      const apiEndpoint = "https://api.jptutoraiyamato.com/api/test-stt"; // または適切な絶対URL
+
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
-      if (!response.ok) throw new Error("API response error");
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
       const data = (await response.json()) as any;
 
-      setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
+      setUserSpeechText(data.userText || "(Transcribed Speech)");
 
       setFeedback({
         scoreLabel: data.scoreLabel || "👍 Great Answer!",
@@ -67,7 +73,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
       });
     } catch (err) {
       console.error("Failed to process oral response:", err);
-      alert("申し訳ありません。音声解析に失敗しました。もう一度お試しください。");
+      alert("Audio analysis failed. Please try speaking again.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -86,6 +92,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
   return (
     <div className="space-y-8">
+      {/* Question Selection Grid */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
           <span className="flex items-center gap-2">
@@ -101,7 +108,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
         {questions.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-slate-500 text-sm">
-            該当するカテゴリ・難易度の設問が見つかりませんでした。
+            No questions found for the selected topic and level.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -124,7 +131,9 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
                   }
                 >
                   <div className="space-y-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                    >
                       {q.category || "General"}
                     </span>
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug">
@@ -147,6 +156,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
         )}
       </div>
 
+      {/* Active Question Practice & Audio Recording Card */}
       {selectedQuestion && (
         <div
           className="bg-white dark:bg-slate-900 border-2 rounded-3xl p-6 shadow-md space-y-6"
@@ -166,13 +176,14 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
             </h2>
           </div>
 
+          {/* Microphone Recording Controls */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
             <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
               <p className="font-bold text-slate-800 dark:text-slate-200">
-                🎙 スピーキング回答手順:
+                🎙 Speaking Answer Instructions:
               </p>
               <p>
-                「Start Recording」を押して回答を録音し、終わったら「Stop & Submit」を押してください。
+                Click 'Start Recording' to record your response, then click 'Stop & Submit' when finished.
               </p>
             </div>
 
@@ -197,9 +208,10 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
             )}
           </div>
 
+          {/* Analysis & Transcription Status */}
           {isAnalyzing && (
             <div className="p-4 bg-purple-50/50 dark:bg-purple-950/20 rounded-xl border border-purple-200 dark:border-purple-900 text-center text-xs font-bold text-purple-700 dark:text-purple-300 animate-pulse">
-              ⏳ AI面接官が音声を聞き取って評価中...
+              ⏳ AI Examiner is listening and analyzing your speech...
             </div>
           )}
 
@@ -212,6 +224,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
             </div>
           )}
 
+          {/* AI Immediate Feedback Card */}
           {feedback && (
             <OralDrillFeedbackCard
               feedback={feedback}

@@ -1,11 +1,6 @@
 /**
  * @file eoy-oral-drill.tsx
- * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (All Oral Exam Stages & Multi-Topic Filter Edition)
- * 💡 Features:
- * 1. Covers all VCE Oral Exam stages (Before Sec 1, Sec 1 General Conversation, Sec 2 Detailed Study, After Sec 2, and Custom QA Bank)
- * 2. Multi-topic filtering for customized study sessions
- * 3. All UI instructions and prompts translated to English for English-speaking VCE students
- * 4. Separate text_original (clean text for TTS) and text (formatted ruby for display)
+ * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -117,7 +112,6 @@ export default function EoyOralDrillPage() {
     if (selectedSection === "custom") fetchCustomQuestions();
   }, [selectedSection, user?.id]);
 
-  // Available topics for the selected section & pace
   const availableTopics = useMemo(() => {
     const set = new Set<string>();
     if (selectedSection === "custom") {
@@ -132,12 +126,10 @@ export default function EoyOralDrillPage() {
     return Array.from(set);
   }, [selectedSection, selectedLevel, questionsData, customQuestionsRaw]);
 
-  // Default to selecting all available topics on section / level change
   useEffect(() => {
     setSelectedTopics(availableTopics);
   }, [selectedLevel, selectedSection, availableTopics.length]);
 
-  // Topic multi-selection toggle
   const toggleTopic = (topic: string) => {
     if (selectedTopics.includes(topic)) {
       setSelectedTopics(selectedTopics.filter((t) => t !== topic));
@@ -149,7 +141,6 @@ export default function EoyOralDrillPage() {
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
   const handleClearAllTopics = () => setSelectedTopics([]);
 
-  // Questions filtered by selected topics
   const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = useMemo(() => {
     const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string })[] = [];
     const initialMap: { [key: string]: string } = {};
@@ -187,8 +178,8 @@ export default function EoyOralDrillPage() {
 
             list.push({
               id: String(qId),
-              question: displayQuestion,          // Formatted HTML with furigana for UI
-              questionOriginal: plainQuestion,  // Clean text for speech synthesis
+              question: displayQuestion,
+              questionOriginal: plainQuestion,
               category: categoryName,
               isCustom: false,
               defaultAnswerOriginal: plainAnswer,
@@ -206,8 +197,8 @@ export default function EoyOralDrillPage() {
   const handleStartPractice = () => {
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
-      question: q.question,                 // UI Display
-      questionOriginal: q.questionOriginal, // Clean text for TTS
+      question: q.question,
+      questionOriginal: q.questionOriginal,
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
     }));
@@ -262,7 +253,6 @@ export default function EoyOralDrillPage() {
     <PageLayout user={user} credits={credits}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-4xl mx-auto space-y-8">
-          {/* Header Card & AI Examiner Avatar */}
           <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -281,9 +271,7 @@ export default function EoyOralDrillPage() {
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
           </div>
 
-          {/* Section & Filter Controls */}
           <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 rounded-3xl p-6 shadow-sm space-y-6">
-            {/* 1. Exam Stage / Section Selection */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">📂 Select Exam Stage / Source</h3>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -313,7 +301,6 @@ export default function EoyOralDrillPage() {
               </div>
             </div>
 
-            {/* 2. Pace Selection */}
             {selectedSection !== "custom" && (
               <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🌱 Select Learning Pace</h3>
@@ -340,7 +327,6 @@ export default function EoyOralDrillPage() {
               </div>
             )}
 
-            {/* 3. Multi-Topic Filter */}
             {availableTopics.length > 0 && (
               <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between">
@@ -370,7 +356,6 @@ export default function EoyOralDrillPage() {
                   </div>
                 </div>
 
-                {/* Topic Pill Buttons */}
                 <div className="flex flex-wrap gap-2">
                   {availableTopics.map((topic) => {
                     const isSelected = selectedTopics.includes(topic);
@@ -395,7 +380,6 @@ export default function EoyOralDrillPage() {
             )}
           </div>
 
-          {/* Add Custom Question Form */}
           {selectedSection === "custom" && (
             <OralCustomQuestionForm
               newQuestionText={newQuestionText}
@@ -409,7 +393,6 @@ export default function EoyOralDrillPage() {
             />
           )}
 
-          {/* 1. Review & Customize Answers List */}
           <OralUserAnswerList
             questions={currentQuestions}
             answers={answers}
@@ -422,7 +405,6 @@ export default function EoyOralDrillPage() {
             themeColor={themeColor}
           />
 
-          {/* 2. Central Interactive Practice Screen */}
           <div ref={chatContainerRef}>
             <OralCenterChatPractice
               chatMessages={engine.chatMessages}
@@ -446,7 +428,6 @@ export default function EoyOralDrillPage() {
             />
           </div>
 
-          {/* Floating Chat */}
           <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
             <ChatYamatoEoyOralDrill userId={user?.id} userNickname={nickname} credits={credits} />
           </aside>
