@@ -1,3 +1,7 @@
+/**
+ * @file OralPracticeHooks.ts
+ * @description バックエンドAPIの音声テスト用エンドポイント（/api/test-tts, /api/test-stt）と連携するオーラル練習エンジンフック
+ */
 import { useState, useEffect, useRef } from "react";
 
 export type ChatMessage = {
@@ -15,7 +19,7 @@ export interface QuestionData {
 }
 
 export function getApiEndpoint(): string {
-  // バックエンド（apiプロジェクト）の /chat エンドポイントへ直接リクエストを送るよう固定
+  // デフォルトのチャットAPI
   return "https://api.jptutoraiyamato.com/chat";
 }
 
@@ -88,7 +92,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // TTS Voice Playback with Fallback
+  // 💡 TTS Voice Playback via Backend API (/api/test-tts)
   const playTTS = async (textToSpeak: string) => {
     try {
       if (!textToSpeak) return;
@@ -101,14 +105,15 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
 
       if (!cleanedText) return;
 
-      const endpoint = getApiEndpoint();
-      const response = await fetch(endpoint, {
+      // ローカル/ステージング/本番に合わせたベースURL判定
+      const isLocal = typeof window !== "undefined" && (window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1"));
+      const ttsEndpoint = isLocal ? "http://127.0.0.1:8787/api/test-tts" : "https://api.jptutoraiyamato.com/api/test-tts";
+
+      const response = await fetch(ttsEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          speakText: cleanedText,
-          level: selectedLevel,
-          speed: speechSpeed,
+          text: cleanedText,
         }),
       });
 
@@ -116,12 +121,14 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
+        audio.playbackRate = speechSpeed || 1.0;
         await audio.play();
       } else {
+        console.warn("Backend TTS failed, falling back to Web Speech API");
         fallbackWebSpeech(cleanedText, speechSpeed);
       }
     } catch (err) {
-      console.warn("Server TTS failed or blocked, falling back to Web Speech:", err);
+      console.warn("Server TTS connection error, falling back to Web Speech:", err);
       fallbackWebSpeech(textToSpeak, speechSpeed);
     }
   };
@@ -192,19 +199,17 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPracticing, isAnalyzing, isWaitingForNext, isRecording]);
 
-  // Speech Transcription via Backend API
+  // 💡 Speech Transcription via Backend API (/api/test-stt)
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsAnalyzing(true);
-    const currentQ = activeQuestions[currentQuestionIndex];
     const formData = new FormData();
-    formData.append("audio", audioBlob, "user-audio.webm");
-    formData.append("expectedQuestion", currentQ?.questionOriginal || currentQ?.question || "");
-    formData.append("mode", "drill-practice");
-    formData.append("level", selectedLevel);
+    formData.append("audio", audioBlob, "recording.webm");
 
     try {
-      const endpoint = getApiEndpoint();
-      const res = await fetch(endpoint, { method: "POST", body: formData });
+      const isLocal = typeof window !== "undefined" && (window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1"));
+      const sttEndpoint = isLocal ? "http://127.0.0.1:8787/api/test-stt" : "https://api.jptutoraiyamato.com/api/test-stt";
+
+      const res = await fetch(sttEndpoint, { method: "POST", body: formData });
       if (!res.ok) throw new Error(`Transcription HTTP Error: ${res.status}`);
       const data = (await res.json()) as any;
       setInputMessage(data.userText || "");
@@ -272,7 +277,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     }
   };
 
-  // Send User Answer Message
+  // Send User Answer Message (Gemini Evaluation Chat)
   const sendAnswerMessage = async (
     e: React.FormEvent,
     answersMap: { [key: string]: string },
