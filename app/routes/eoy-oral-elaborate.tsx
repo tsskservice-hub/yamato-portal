@@ -53,6 +53,17 @@ export default function EoyOralElaboratePage() {
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // 💡 確実に認証モーダルやログイン画面を開くための共通トリガー関数
+  const handleOpenAuth = () => {
+    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
+    const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
+    if (authButton) {
+      authButton.click();
+    } else {
+      window.location.href = "/#auth";
+    }
+  };
+
   const {
     answers,
     customQuestionsRaw,
@@ -205,7 +216,7 @@ export default function EoyOralElaboratePage() {
   const handleStartElaboration = () => {
     if (!user) {
       alert("詳細解説・会話練習を行うには、サインインが必要です！");
-      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
+      handleOpenAuth();
       return;
     }
 
@@ -227,6 +238,7 @@ export default function EoyOralElaboratePage() {
     e.preventDefault();
     if (!user) {
       alert("カスタム質問を追加するにはサインインが必要です。");
+      handleOpenAuth();
       return;
     }
     if (!newQuestionText.trim() || !newAnswerText.trim()) {
@@ -247,6 +259,36 @@ export default function EoyOralElaboratePage() {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
             Loading EOY Oral Elaboration Practice...
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // 💡 未認証時のトップレベルガード画面（確実にログイン画面へ遷移するようボタンを修正）
+  if (!user) {
+    return (
+      <PageLayout user={user} credits={credits}>
+        <div className="min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center">
+          <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6">
+            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
+              🔒
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">
+                Sign In Required
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                EOY Oral Elaboration Practice requires you to sign in. Please sign in to access in-depth elaboration practice and save your notes.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenAuth}
+              className="w-full py-3 px-6 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs tracking-wider uppercase transition shadow-sm cursor-pointer"
+            >
+              Sign In / Sign Up Now
+            </button>
           </div>
         </div>
       </PageLayout>
@@ -432,7 +474,7 @@ export default function EoyOralElaboratePage() {
             title="Review & Customize Your Elaboration Answers"
           />
 
-          {/* 2. Central Interactive Practice Screen (未ログイン時はガード画面を表示) */}
+          {/* 2. Central Interactive Practice Screen */}
           <div ref={chatContainerRef}>
             {!user ? (
               <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
@@ -449,7 +491,7 @@ export default function EoyOralElaboratePage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }))}
+                  onClick={handleOpenAuth}
                   className="py-3 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
                 >
                   Sign In / Sign Up Now

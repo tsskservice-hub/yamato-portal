@@ -52,6 +52,20 @@ export default function EoyOralDrillPage() {
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // 💡 確実に認証モーダルやログイン画面を開くための共通トリガー関数
+  const handleOpenAuth = () => {
+    // 1. まずカスタムイベントを発火
+    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
+    // 2. もしイベント拾う要素がない場合のフォールバックとしてトップページのログインへ誘導、あるいは要素の存在確認
+    const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
+    if (authButton) {
+      authButton.click();
+    } else {
+      // 共通のヘッダーやサインインボタンが無い場合の安全策としてルートへリダイレクト
+      window.location.href = "/#auth";
+    }
+  };
+
   const {
     answers,
     customQuestionsRaw,
@@ -200,7 +214,7 @@ export default function EoyOralDrillPage() {
   const handleStartPractice = () => {
     if (!user) {
       alert("会話練習を行うには、サインインが必要です！");
-      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
+      handleOpenAuth();
       return;
     }
 
@@ -222,6 +236,7 @@ export default function EoyOralDrillPage() {
     e.preventDefault();
     if (!user) {
       alert("カスタム質問を追加するにはサインインが必要です。");
+      handleOpenAuth();
       return;
     }
     if (!newQuestionText.trim() || !newAnswerText.trim()) {
@@ -242,6 +257,36 @@ export default function EoyOralDrillPage() {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
             Loading EOY Oral Practice...
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // 💡 未認証時のトップレベルガード画面（確実にログイン画面へ遷移するようボタンを修正）
+  if (!user) {
+    return (
+      <PageLayout user={user} credits={credits}>
+        <div className="min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center">
+          <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
+              🔒
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">
+                Sign In Required
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                EOY Oral Practice & Custom QA Bank require you to sign in. Please sign in to access oral drills and save your custom answers.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenAuth}
+              className="w-full py-3 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs tracking-wider uppercase transition shadow-sm cursor-pointer"
+            >
+              Sign In / Sign Up Now
+            </button>
           </div>
         </div>
       </PageLayout>
@@ -418,7 +463,6 @@ export default function EoyOralDrillPage() {
             themeColor={themeColor}
           />
 
-          {/* 💡 会話練習エリア（未ログイン時はガード画面を表示） */}
           <div ref={chatContainerRef}>
             {!user ? (
               <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
@@ -435,7 +479,7 @@ export default function EoyOralDrillPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }))}
+                  onClick={handleOpenAuth}
                   className="py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
                 >
                   Sign In / Sign Up Now
