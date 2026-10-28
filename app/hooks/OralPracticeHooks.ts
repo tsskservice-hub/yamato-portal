@@ -305,6 +305,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
+          appType: "eoy-oral-drill", // 💡 ここで明確に EOY Oral Drill の頭脳を指定します
           expectedQuestion: currentQ.questionOriginal || currentQ.question,
           registeredAnswer: registeredAnswer,
           mode,
