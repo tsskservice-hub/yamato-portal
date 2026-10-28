@@ -41,10 +41,11 @@ export default function EoyOralElaboratePage() {
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
-  // 2. 口頭設問データ＆フィルターステート
+  // 2. 口頭設問データ＆フィルターステート（要望に応じたデフォルト値に設定）
   const [questionsData, setQuestionsData] = useState<OralExamQuestionsData>(ORAL_EXAM_QUESTIONS_DATA);
-  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal"); // デフォルト: Normal
+  const [selectedCategory, setSelectedCategory] = useState<string>("all"); // デフォルト: Clear All ("all")
+  const [selectedSpeed, setSelectedSpeed] = useState<number>(1); // デフォルト: スピード 1x
   const [selectedQuestion, setSelectedQuestion] = useState<OralExamQuestionItem | null>(null);
 
   // Supabase セッション＆設問データの同期
@@ -98,7 +99,7 @@ export default function EoyOralElaboratePage() {
 
   // 常駐AIチャットへの選択中プロンプト連携
   const currentSystemPrompt = selectedQuestion
-    ? `[Selected Section 2 Detailed Study Question]\nCategory: ${selectedQuestion.category}\nQuestion: ${selectedQuestion.text}\nSample Answer: ${selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original}`
+    ? `[Selected Section 2 Detailed Study Question]\nCategory: ${selectedQuestion.category}\nQuestion: ${selectedQuestion.text}\nSample Answer: ${selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original}\nSpeech Speed: ${selectedSpeed}x`
     : "";
 
   return (
@@ -129,7 +130,7 @@ export default function EoyOralElaboratePage() {
             />
           </div>
 
-          {/* Pace（難易度）＆ Category フィルター */}
+          {/* Pace（難易度）、Speech Speed ＆ Category フィルター */}
           <OralDrillQuestionSelector
             categories={categories}
             selectedCategory={selectedCategory}
@@ -139,6 +140,8 @@ export default function EoyOralElaboratePage() {
               setSelectedLevel(lvl);
               setSelectedQuestion(null);
             }}
+            selectedSpeed={selectedSpeed}
+            onSelectSpeed={setSelectedSpeed}
             themeColor={themeColor}
             questionsCount={filteredQuestions.length}
           />

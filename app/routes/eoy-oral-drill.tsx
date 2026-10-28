@@ -41,11 +41,12 @@ export default function EoyOralDrillPage() {
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
-  // 2. 口頭設問データ＆フィルターステート
+  // 2. 口頭設問データ＆フィルターステート（ご要望に応じたデフォルト値に修正）
   const [questionsData, setQuestionsData] = useState<OralExamQuestionsData>(ORAL_EXAM_QUESTIONS_DATA);
-  const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2">("sec1");
-  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2">("sec1"); // デフォルト: Section 1
+  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal"); // デフォルト: Normal
+  const [selectedCategory, setSelectedCategory] = useState<string>("all"); // デフォルト: Clear All ("all")
+  const [selectedSpeed, setSelectedSpeed] = useState<number>(1); // デフォルト: スピード 1x
   const [selectedQuestion, setSelectedQuestion] = useState<OralExamQuestionItem | null>(null);
 
   // Supabase セッション＆設問データの同期
@@ -99,7 +100,7 @@ export default function EoyOralDrillPage() {
 
   // 常駐AIチャットへの選択中プロンプト連携
   const currentSystemPrompt = selectedQuestion
-    ? `[Selected Section 1 General Conversation Question]\nCategory: ${selectedQuestion.category}\nQuestion: ${selectedQuestion.text}\nSample Answer: ${selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original}`
+    ? `[Selected Section 1 General Conversation Question]\nCategory: ${selectedQuestion.category}\nQuestion: ${selectedQuestion.text}\nSample Answer: ${selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original}\nSpeech Speed: ${selectedSpeed}x`
     : "";
 
   return (
@@ -157,7 +158,7 @@ export default function EoyOralDrillPage() {
             ))}
           </div>
 
-          {/* Pace（難易度）＆ Category フィルター */}
+          {/* Pace（難易度）、Speech Speed ＆ Category フィルター */}
           <OralDrillQuestionSelector
             categories={categories}
             selectedCategory={selectedCategory}
@@ -167,6 +168,8 @@ export default function EoyOralDrillPage() {
               setSelectedLevel(lvl);
               setSelectedQuestion(null);
             }}
+            selectedSpeed={selectedSpeed}
+            onSelectSpeed={setSelectedSpeed}
             themeColor={themeColor}
             questionsCount={filteredQuestions.length}
           />
