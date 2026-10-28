@@ -1,14 +1,10 @@
 /**
  * @file eoy-oral-drill.tsx
- * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (All Oral Exam Stages & Multi-Topic Filter Edition)
- * 💡 Features:
- * 1. Covers all VCE Oral Exam stages (Before Sec 1, Sec 1 General Conversation, Sec 2 Detailed Study, After Sec 2, and Custom QA Bank)
- * 2. Multi-topic filtering for customized study sessions
- * 3. All UI instructions and prompts translated to English for English-speaking VCE students
- * 4. Separate text_original (clean text for TTS) and text (formatted ruby for display)
+ * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Self-Contained Remix Route Edition)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import type { MetaFunction } from "@remix-run/react";
+import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import PageLayout from "../components/PageLayout";
 import { DataErrorState } from "../components/DataErrorState";
 import OralExaminerAvatar from "../components/OralExaminerAvatar";
@@ -34,9 +30,84 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// 💡 本番用APIエンドポイントのベースURLを固定定義（ステージング等からの404エラーを防止）
-const API_BASE_URL = "https://api.jptutoraiyamato.com";
+// ==========================================
+// 💡 サーバー側の自己完結型処理 (Remix Action)
+// ==========================================
+export async function action({ request }: ActionFunctionArgs) {
+  try {
+    const formData = await request.formData();
+    const actionType = formData.get("actionType"); // "tts", "stt", または "chat"
 
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return json({ error: "OpenAI API Key is not configured on the server." }, { status: 500 });
+    }
+
+    // 1. TTS (音声合成) の処理
+    if (actionType === "tts") {
+      const text = formData.get("text") as string;
+      if (!text) return json({ error: "Text is required for TTS" }, { status: 400 });
+
+      const ttsRes = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "tts-1",
+          input: text,
+          voice: "fable", // ユーザー様こだわりの音声
+        }),
+      });
+
+      if (!ttsRes.ok) {
+        const errBody = await ttsRes.text();
+        return json({ error: `TTS API Error: ${errBody}` }, { status: 500 });
+      }
+
+      const audioBuffer = await ttsRes.arrayBuffer();
+      return new Response(audioBuffer, {
+        headers: { "Content-Type": "audio/mpeg" },
+      });
+    }
+
+    // 2. STT (文字起こし / Whisper) の処理
+    if (actionType === "stt") {
+      const audioFile = formData.get("audio") as File;
+      if (!audioFile) return json({ error: "Audio file is required for STT" }, { status: 400 });
+
+      const apiFormData = new FormData();
+      apiFormData.append("file", audioFile, "recording.webm");
+      apiFormData.append("model", "whisper-1");
+      apiFormData.append("language", "ja");
+
+      const sttRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: apiFormData,
+      });
+
+      if (!sttRes.ok) {
+        const errBody = await sttRes.text();
+        return json({ error: `STT API Error: ${errBody}` }, { status: 500 });
+      }
+
+      const sttData = (await sttRes.json()) as { text?: string };
+      return json({ success: true, userText: sttData.text || "" });
+    }
+
+    return json({ error: "Invalid actionType" }, { status: 400 });
+  } catch (err: any) {
+    return json({ error: err.message || "Internal Server Error" }, { status: 500 });
+  }
+}
+
+// ==========================================
+// 💡 クライアント側の画面コンポーネント
+// ==========================================
 export default function EoyOralDrillPage() {
   const themeColor = "#eab308"; // Amber / Gold theme
 
