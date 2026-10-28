@@ -1,10 +1,9 @@
 /**
  * @file eoy-oral-drill.tsx
- * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Cloudflare-Compatible Self-Contained Edition)
+ * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { DataErrorState } from "../components/DataErrorState";
 import OralExaminerAvatar from "../components/OralExaminerAvatar";
@@ -30,86 +29,6 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// ==========================================
-// 💡 Cloudflare / Web Standard 対応のサーバー側処理
-// ==========================================
-export async function action({ request }: ActionFunctionArgs) {
-  try {
-    const formData = await request.formData();
-    const actionType = formData.get("actionType");
-
-    // Cloudflare Pages の環境変数から取得
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return json({ error: "OpenAI API Key is not configured on the server." }, { status: 500 });
-    }
-
-    // 1. TTS (音声合成) の処理
-    if (actionType === "tts") {
-      const text = formData.get("text") as string;
-      if (!text) return json({ error: "Text is required for TTS" }, { status: 400 });
-
-      const ttsRes = await fetch("https://api.openai.com/v1/audio/speech", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "tts-1",
-          input: text,
-          voice: "fable",
-        }),
-      });
-
-      if (!ttsRes.ok) {
-        const errBody = await ttsRes.text();
-        return json({ error: `TTS API Error: ${errBody}` }, { status: 500 });
-      }
-
-      const audioBuffer = await ttsRes.arrayBuffer();
-      return new Response(audioBuffer, {
-        headers: { "Content-Type": "audio/mpeg" },
-      });
-    }
-
-    // 2. STT (文字起こし / Whisper) の処理
-    if (actionType === "stt") {
-      const audioFile = formData.get("audio");
-      if (!audioFile) return json({ error: "Audio file is required for STT" }, { status: 400 });
-
-      // Web Standard の FormData をそのまま構築して OpenAI に転送
-      const apiFormData = new FormData();
-      apiFormData.append("file", audioFile);
-      apiFormData.append("model", "whisper-1");
-      apiFormData.append("language", "ja");
-
-      const sttRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: apiFormData,
-      });
-
-      if (!sttRes.ok) {
-        const errBody = await sttRes.text();
-        return json({ error: `STT API Error: ${errBody}` }, { status: 500 });
-      }
-
-      const sttData = (await sttRes.json()) as { text?: string };
-      return json({ success: true, userText: sttData.text || "" });
-    }
-
-    return json({ error: "Invalid actionType" }, { status: 400 });
-  } catch (err: any) {
-    return json({ error: err.message || "Internal Server Error" }, { status: 500 });
-  }
-}
-
-// ==========================================
-// 💡 クライアント側の画面コンポーネント
-// ==========================================
 export default function EoyOralDrillPage() {
   const themeColor = "#eab308"; // Amber / Gold theme
 
