@@ -1,3 +1,7 @@
+/**
+ * @file OralPracticeHooks.ts
+ * @description バックエンドAPIの音声・チャットエンドポイントと確実に通信するオーラル練習エンジンフック
+ */
 import { useState, useEffect, useRef } from "react";
 
 export type ChatMessage = {
@@ -8,32 +12,17 @@ export type ChatMessage = {
 
 export interface QuestionData {
   id: string;
-  question: string;         // HTML formatted display text (with ruby tags)
-  questionOriginal: string; // Clean plain text for TTS and speech recognition
+  question: string;
+  questionOriginal: string;
   defaultAnswer?: string;
-  defaultAnswerOriginal?: string;
   category?: string;
 }
 
-/**
- * Dynamically resolves the API endpoint URL to prevent 404 relative route errors.
- */
 export function getApiEndpoint(): string {
-  if (typeof window !== "undefined") {
-    if ((window as any).ENV?.API_URL) return (window as any).ENV.API_URL;
-    if (import.meta.env?.VITE_API_URL) return import.meta.env.VITE_API_URL;
-
-    const host = window.location.hostname;
-    if (host.includes("jptutoraiyamato.com") || host.includes("pages.dev")) {
-      return "https://api.jptutoraiyamato.com/chat";
-    }
-  }
+  // 💡 常に本番・共通バックエンドの /chat エンドポイントへ直接リクエストを送るよう完全固定
   return "https://api.jptutoraiyamato.com/chat";
 }
 
-/**
- * Browser-native Web Speech API fallback if server TTS is unavailable or blocked.
- */
 export function fallbackWebSpeech(text: string, speed = 1.0) {
   if (typeof window !== "undefined" && "speechSynthesis" in window) {
     try {
@@ -103,7 +92,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // TTS Voice Playback with Fallback (drill.tsx parameters added: learningPace, pace)
+  // 💡 TTS Voice Playback via Backend API (絶対URLに固定)
   const playTTS = async (textToSpeak: string) => {
     try {
       if (!textToSpeak) return;
@@ -116,16 +105,13 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
 
       if (!cleanedText) return;
 
-      const endpoint = getApiEndpoint();
-      const response = await fetch(endpoint, {
+      const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
+
+      const response = await fetch(ttsEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          speakText: cleanedText,
-          level: selectedLevel,
-          learningPace: selectedLevel,
-          pace: selectedLevel,
-          speed: speechSpeed,
+          text: cleanedText,
         }),
       });
 
@@ -133,17 +119,19 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
+        audio.playbackRate = speechSpeed || 1.0;
         await audio.play();
       } else {
+        console.warn("Backend TTS failed, falling back to Web Speech API");
         fallbackWebSpeech(cleanedText, speechSpeed);
       }
     } catch (err) {
-      console.warn("Server TTS failed or blocked, falling back to Web Speech:", err);
+      console.warn("Server TTS connection error, falling back to Web Speech:", err);
       fallbackWebSpeech(textToSpeak, speechSpeed);
     }
   };
 
-  // Start Audio Recording with Codec Support Check
+  // Start Audio Recording
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -187,7 +175,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     }
   };
 
-  // Spacebar Keyboard Event Listener for Toggle Recording
+  // Spacebar Keyboard Event Listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
@@ -209,24 +197,16 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPracticing, isAnalyzing, isWaitingForNext, isRecording]);
 
-  // Speech Transcription via Backend API (drill.tsx mode fix: -transcribe suffix & pace fields)
-  const transcribeAudio = async (audioBlob: Blob, baseMode = "drill-elaborate") => {
+  // 💡 Speech Transcription via Backend API (絶対URLに固定)
+  const transcribeAudio = async (audioBlob: Blob) => {
     setIsAnalyzing(true);
-    const currentQ = activeQuestions[currentQuestionIndex];
     const formData = new FormData();
-    formData.append("audio", audioBlob, "user-audio.webm");
-    formData.append("expectedQuestion", currentQ?.questionOriginal || currentQ?.question || "");
-    
-    // 💡 drill.tsx で正常動作していた文字起こし用モード名 (-transcribe)
-    const transcribeMode = baseMode.endsWith("-transcribe") ? baseMode : `${baseMode}-transcribe`;
-    formData.append("mode", transcribeMode);
-    formData.append("level", selectedLevel);
-    formData.append("learningPace", selectedLevel);
-    formData.append("pace", selectedLevel);
+    formData.append("audio", audioBlob, "recording.webm");
 
     try {
-      const endpoint = getApiEndpoint();
-      const res = await fetch(endpoint, { method: "POST", body: formData });
+      const sttEndpoint = "https://api.jptutoraiyamato.com/api/test-stt";
+
+      const res = await fetch(sttEndpoint, { method: "POST", body: formData });
       if (!res.ok) throw new Error(`Transcription HTTP Error: ${res.status}`);
       const data = (await res.json()) as any;
       setInputMessage(data.userText || "");
@@ -294,7 +274,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     }
   };
 
-  // Send User Answer Message
+  // Send User Answer Message (Gemini Evaluation Chat)
   const sendAnswerMessage = async (
     e: React.FormEvent,
     answersMap: { [key: string]: string },
@@ -328,13 +308,11 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
           registeredAnswer: registeredAnswer,
           mode,
           level: selectedLevel,
-          learningPace: selectedLevel,
-          pace: selectedLevel,
           section,
         }),
       });
 
-      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
       const data = (await res.json()) as any;
       const aiFeedback = data.reply || "◎ よくできました。";
