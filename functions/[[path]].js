@@ -45205,12 +45205,11 @@ var OralCustomQuestionForm = ({
     ] })
   ] });
 };
+
 var getApiUrl = () => {
-  if (typeof window !== "undefined" && window.location.hostname.includes("staging")) {
-    return "https://api.staging.jptutoraiyamato.com/chat";
-  }
   return "https://api.jptutoraiyamato.com/chat";
 };
+
 function formatOralFeedbackToHtml(rawText) {
   let cleaned = rawText.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "");
   cleaned = cleaned.replace(
