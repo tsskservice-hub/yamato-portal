@@ -54,19 +54,16 @@ export default function EoyOralDrillPage() {
 
   // 💡 確実に認証モーダルやログイン画面を開くための共通トリガー関数
   const handleOpenAuth = () => {
-    // 1. まずカスタムイベントを発火
     window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
-    // 2. もしイベント拾う要素がない場合のフォールバックとしてトップページのログインへ誘導、あるいは要素の存在確認
     const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
     if (authButton) {
       authButton.click();
     } else {
-      // 共通のヘッダーやサインインボタンが無い場合の安全策としてルートへリダイレクト
       window.location.href = "/#auth";
     }
   };
 
-  // 💡 Drillモードとして明示的に "drill" を指定してフックを呼び出し、answer_text を対象に読み書きする
+  // 💡 Drillモードとして明示的に "drill" を指定してフックを呼び出す
   const {
     answers,
     customQuestionsRaw,
@@ -177,7 +174,7 @@ export default function EoyOralDrillPage() {
           category: categoryName,
           isCustom: true,
           defaultAnswerOriginal: effectiveAnswer,
-          minLength: 10, // 💡 Drillの最小文字数要件（10文字以上）
+          minLength: 10,
         });
         initialMap[qId] = effectiveAnswer;
       });
@@ -203,7 +200,7 @@ export default function EoyOralDrillPage() {
               category: categoryName,
               isCustom: false,
               defaultAnswerOriginal: plainAnswer,
-              minLength: 10, // 💡 Drillの最小文字数要件（10文字以上）
+              minLength: 10,
             });
             initialMap[String(qId)] = plainAnswer;
           }
@@ -215,11 +212,17 @@ export default function EoyOralDrillPage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
-  // 💡 バリデーションガード付きの練習開始ハンドラー（Drillは10文字以上が必要）
-  const handleStartPractice = () => {
+  // 💡 バリデーションガード付きの練習開始ハンドラー（クレジット残高の事前検証も実施）
+  const handleStartPractice = async () => {
     if (!user) {
       alert("会話練習を行うには、サインインが必要です！");
       handleOpenAuth();
+      return;
+    }
+
+    // 💡 事前検証（クレジット残高が3クレジット以上あるかチェック）
+    if (credits < 3) {
+      alert("クレジットが不足しています（一問一答ドリルには3クレジット必要です）。チャージを行ってください。");
       return;
     }
 
@@ -228,7 +231,7 @@ export default function EoyOralDrillPage() {
       const currentAns = answers[q.id] || "";
       if (currentAns.trim().length < 10) {
         alert(`【文字数チェック】\n「${q.questionOriginal.slice(0, 20)}...」の回答が短すぎます。\nDrillの回答は10文字以上で入力してください。（現在: ${currentAns.trim().length}文字）`);
-        return; // バリデーションに引っかかったら練習を開始しない
+        return;
       }
     }
 
@@ -257,7 +260,6 @@ export default function EoyOralDrillPage() {
       alert("Please enter both the question and answer.");
       return;
     }
-    // カスタム追加時の文字数ガード（10文字以上）
     if (newAnswerText.trim().length < 10) {
       alert("Drillの回答は10文字以上で入力してください。");
       return;
@@ -268,6 +270,23 @@ export default function EoyOralDrillPage() {
       setNewQuestionText("");
       setNewAnswerText("");
       setNewCategory("");
+    }
+  };
+
+  // 💡 チャットメッセージ送信時にバックエンド経由で3クレジットが減算される仕組みを連動
+  const handleSendMessageWithCredit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (credits < 3) {
+      alert("クレジットが不足しています。");
+      return;
+    }
+
+    // エンジン側の送信処理を実行（サーバー側で "eoy-oral-drill" として3クレジットが事後減算・トランザクション処理される）
+    await engine.sendAnswerMessage(e, answers, "drill", selectedSection);
+
+    // 応答・減算成功後に最新のクレジット残高を再取得して画面を同期
+    if (user?.id) {
+      fetchProfile(user.id);
     }
   };
 
@@ -283,7 +302,6 @@ export default function EoyOralDrillPage() {
     );
   }
 
-  // 💡 未認証時のトップレベルガード画面（確実にログイン画面へ遷移するようボタンを修正）
   if (!user) {
     return (
       <PageLayout user={user} credits={credits}>
@@ -337,13 +355,13 @@ export default function EoyOralDrillPage() {
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
                   All VCE Oral Exam Stages
                 </span>
-                <span className="text-xs text-slate-500">VCE Japanese Oral Exam Prep</span>
+                <span className="text-xs text-slate-500">VCE Japanese Oral Exam Prep (Cost: 3 credits/session)</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
                 EOY Oral Exam Practice & Custom QA Bank
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice every stage of the VCE Japanese Oral Exam — from entrance greetings and Section 1 General Conversation to Section 2 Detailed Study and exit. Your custom answers are automatically saved so you can practice and edit them anytime, anywhere. (Drill answer requirement: 10+ characters)
+                Practice every stage of the VCE Japanese Oral Exam. Your custom answers are automatically saved. (Drill requirement: 10+ characters | 3 credits per practice session)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
@@ -523,7 +541,7 @@ export default function EoyOralDrillPage() {
                   if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
                 }}
                 onProceedNext={() => engine.proceedToNextQuestion(answers)}
-                onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill", selectedSection)}
+                onSendMessage={handleSendMessageWithCredit}
                 themeColor={themeColor}
               />
             )}

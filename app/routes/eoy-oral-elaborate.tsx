@@ -64,7 +64,7 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  // 💡 モードに "elaborate" を指定してフックを呼び出し、elaborate_text を対象に読み書き＆Drill回答の自動継承を行う
+  // 💡 モードに "elaborate" を指定してフックを呼び出す
   const {
     answers,
     customQuestionsRaw,
@@ -171,7 +171,6 @@ export default function EoyOralElaboratePage() {
         if (selectedTopics.length > 0 && !selectedTopics.includes(categoryName)) return;
 
         const qId = String(q.id);
-        // フック側ですでに elaborate_text がなければ answer_text をフォールバックする処理が行われている
         const effectiveAnswer = q.elaborate_text || q.answer_text || "";
 
         list.push({
@@ -181,7 +180,7 @@ export default function EoyOralElaboratePage() {
           category: categoryName,
           isCustom: true,
           defaultAnswerOriginal: effectiveAnswer,
-          minLength: 50, // 💡 Elaborateの最小文字数要件（50文字以上）
+          minLength: 50,
         });
         initialMap[qId] = effectiveAnswer;
       });
@@ -202,12 +201,12 @@ export default function EoyOralElaboratePage() {
 
             list.push({
               id: String(qId),
-              question: displayQuestion,          // Formatted HTML with furigana for UI
-              questionOriginal: plainQuestion,  // Clean text without furigana for TTS
+              question: displayQuestion,
+              questionOriginal: plainQuestion,
               category: categoryName,
               isCustom: false,
               defaultAnswerOriginal: plainAnswer,
-              minLength: 50, // 💡 Elaborateの最小文字数要件（50文字以上）
+              minLength: 50,
             });
             initialMap[String(qId)] = plainAnswer;
           }
@@ -219,11 +218,17 @@ export default function EoyOralElaboratePage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
-  // 💡 バリデーションガード付きのエラボレーション練習開始ハンドラー（Elaborateは50文字以上が必要）
-  const handleStartElaboration = () => {
+  // 💡 バリデーションガード付きのエラボレーション練習開始ハンドラー（クレジット事前検証：4クレジット必要）
+  const handleStartElaboration = async () => {
     if (!user) {
       alert("詳細解説・会話練習を行うには、サインインが必要です！");
       handleOpenAuth();
+      return;
+    }
+
+    // 💡 事前検証（クレジット残高が4クレジット以上あるかチェック）
+    if (credits < 4) {
+      alert("クレジットが不足しています（詳細応答・発展学習には4クレジット必要です）。チャージを行ってください。");
       return;
     }
 
@@ -232,14 +237,14 @@ export default function EoyOralElaboratePage() {
       const currentAns = answers[q.id] || "";
       if (currentAns.trim().length < 50) {
         alert(`【文字数チェック】\n「${q.questionOriginal.slice(0, 20)}...」の回答が短すぎます。\nElaborateの回答は50文字以上で入力してください。（現在: ${currentAns.trim().length}文字）`);
-        return; // バリデーションに引っかかったら練習を開始しない
+        return;
       }
     }
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
-      question: q.question,                      // Ruby-formatted for UI display
-      questionOriginal: q.questionOriginal, // Clean text for TTS engine
+      question: q.question,
+      questionOriginal: q.questionOriginal,
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
     }));
@@ -261,7 +266,6 @@ export default function EoyOralElaboratePage() {
       alert("Please enter both the question and sample answer.");
       return;
     }
-    // カスタム追加時の文字数ガード（50文字以上）
     if (newAnswerText.trim().length < 50) {
       alert("Elaborateの回答は50文字以上で入力してください。");
       return;
@@ -272,6 +276,23 @@ export default function EoyOralElaboratePage() {
       setNewQuestionText("");
       setNewAnswerText("");
       setNewCategory("");
+    }
+  };
+
+  // 💡 チャットメッセージ送信時にバックエンド経由で4クレジットが減算される仕組みを連動
+  const handleSendMessageWithCredit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (credits < 4) {
+      alert("クレジットが不足しています。");
+      return;
+    }
+
+    // エンジン側の送信処理を実行（サーバー側で "eoy-oral-elaborate" として4クレジットが事後減算・トランザクション処理される）
+    await engine.sendAnswerMessage(e, answers, "drill-elaborate", selectedSection);
+
+    // 応答・減算成功後に最新のクレジット残高を再取得して画面を同期
+    if (user?.id) {
+      fetchProfile(user.id);
     }
   };
 
@@ -287,7 +308,6 @@ export default function EoyOralElaboratePage() {
     );
   }
 
-  // 💡 未認証時のトップレベルガード画面（確実にログイン画面へ遷移するようボタンを修正）
   if (!user) {
     return (
       <PageLayout user={user} credits={credits}>
@@ -342,13 +362,13 @@ export default function EoyOralElaboratePage() {
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-300">
                   All VCE Oral Exam Stages
                 </span>
-                <span className="text-xs text-slate-500">VCE Japanese Oral Elaboration</span>
+                <span className="text-xs text-slate-500">VCE Japanese Oral Elaboration (Cost: 4 credits/session)</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
                 EOY Oral Elaboration Practice
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice in-depth elaboration across all stages of the VCE Oral Exam (Before Sec 1, Sec 1, Sec 2, and After Sec 2). Filter by multiple topics, auto-save your responses, and build logical speaking fluency with AI Yamato. (Elaborate answer requirement: 50+ characters)
+                Practice in-depth elaboration across all stages of the VCE Oral Exam. Filter by multiple topics, auto-save your responses, and build logical speaking fluency with AI Yamato. (Elaborate requirement: 50+ characters | 4 credits per session)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Elaboration" themeColor={themeColor} />
@@ -537,7 +557,7 @@ export default function EoyOralElaboratePage() {
                   if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
                 }}
                 onProceedNext={() => engine.proceedToNextQuestion(answers)}
-                onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill-elaborate", selectedSection)}
+                onSendMessage={handleSendMessageWithCredit}
                 themeColor={themeColor}
                 titleLabel="Detailed Elaboration Practice with AI Yamato"
               />
