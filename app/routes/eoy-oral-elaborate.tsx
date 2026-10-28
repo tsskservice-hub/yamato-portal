@@ -34,6 +34,7 @@ export default function EoyOralElaboratePage() {
   const themeColor = "#a855f7"; // Purple theme for Elaboration Practice
 
   const [user, setUser] = useState<any>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
@@ -68,11 +69,13 @@ export default function EoyOralElaboratePage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setIsAuthLoading(false);
       if (session?.user) fetchProfile(session.user.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setIsAuthLoading(false);
       if (session?.user) fetchProfile(session.user.id);
     });
 
@@ -110,7 +113,7 @@ export default function EoyOralElaboratePage() {
   };
 
   useEffect(() => {
-    if (selectedSection === "custom") fetchCustomQuestions();
+    if (selectedSection === "custom" && user?.id) fetchCustomQuestions();
   }, [selectedSection, user?.id]);
 
   // Extract all available topics for the current exam stage/section & pace
@@ -200,9 +203,15 @@ export default function EoyOralElaboratePage() {
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
   const handleStartElaboration = () => {
+    if (!user) {
+      alert("詳細解説・会話練習を行うには、サインインが必要です！");
+      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
+      return;
+    }
+
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
-      question: q.question,                 // Ruby-formatted for UI display
+      question: q.question,                  // Ruby-formatted for UI display
       questionOriginal: q.questionOriginal, // Clean text for TTS engine
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
@@ -216,6 +225,10 @@ export default function EoyOralElaboratePage() {
 
   const handleAddCustom = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      alert("カスタム質問を追加するにはサインインが必要です。");
+      return;
+    }
     if (!newQuestionText.trim() || !newAnswerText.trim()) {
       alert("Please enter both the question and sample answer.");
       return;
@@ -228,12 +241,12 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  if (isLoadingData) {
+  if (isAuthLoading || isLoadingData) {
     return (
       <PageLayout user={user} credits={credits}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
-            Loading Oral Exam Database from Supabase...
+            Loading EOY Oral Elaboration Practice...
           </div>
         </div>
       </PageLayout>
@@ -419,29 +432,52 @@ export default function EoyOralElaboratePage() {
             title="Review & Customize Your Elaboration Answers"
           />
 
-          {/* 2. Central Interactive Practice Screen */}
+          {/* 2. Central Interactive Practice Screen (未ログイン時はガード画面を表示) */}
           <div ref={chatContainerRef}>
-            <OralCenterChatPractice
-              chatMessages={engine.chatMessages}
-              isPracticing={engine.isPracticing}
-              currentQuestionIndex={engine.currentQuestionIndex}
-              totalQuestions={engine.activeQuestions.length}
-              isAnalyzing={engine.isAnalyzing}
-              isRecording={engine.isRecording}
-              isWaitingForNext={engine.isWaitingForNext}
-              inputMessage={engine.inputMessage}
-              setInputMessage={engine.setInputMessage}
-              onStartRecording={engine.startRecording}
-              onStopRecording={engine.stopRecording}
-              onRepeatQuestion={() => {
-                const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
-              }}
-              onProceedNext={() => engine.proceedToNextQuestion(answers)}
-              onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill-elaborate", selectedSection)}
-              themeColor={themeColor}
-              titleLabel="Detailed Elaboration Practice with AI Yamato"
-            />
+            {!user ? (
+              <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
+                <div className="w-14 h-14 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
+                  🔒
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
+                    Sign In Required for Elaboration Practice
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                    Please sign in to start in-depth EOY Oral Elaboration practice sessions with AI Yamato and save your custom elaboration notes.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }))}
+                  className="py-3 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
+                >
+                  Sign In / Sign Up Now
+                </button>
+              </div>
+            ) : (
+              <OralCenterChatPractice
+                chatMessages={engine.chatMessages}
+                isPracticing={engine.isPracticing}
+                currentQuestionIndex={engine.currentQuestionIndex}
+                totalQuestions={engine.activeQuestions.length}
+                isAnalyzing={engine.isAnalyzing}
+                isRecording={engine.isRecording}
+                isWaitingForNext={engine.isWaitingForNext}
+                inputMessage={engine.inputMessage}
+                setInputMessage={engine.setInputMessage}
+                onStartRecording={engine.startRecording}
+                onStopRecording={engine.stopRecording}
+                onRepeatQuestion={() => {
+                  const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
+                  if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
+                }}
+                onProceedNext={() => engine.proceedToNextQuestion(answers)}
+                onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill-elaborate", selectedSection)}
+                themeColor={themeColor}
+                titleLabel="Detailed Elaboration Practice with AI Yamato"
+              />
+            )}
           </div>
 
           {/* Floating Chat */}

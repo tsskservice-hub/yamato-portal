@@ -33,6 +33,7 @@ export default function EoyOralDrillPage() {
   const themeColor = "#eab308"; // Amber / Gold theme
 
   const [user, setUser] = useState<any>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
@@ -67,11 +68,13 @@ export default function EoyOralDrillPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setIsAuthLoading(false);
       if (session?.user) fetchProfile(session.user.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setIsAuthLoading(false);
       if (session?.user) fetchProfile(session.user.id);
     });
 
@@ -109,7 +112,7 @@ export default function EoyOralDrillPage() {
   };
 
   useEffect(() => {
-    if (selectedSection === "custom") fetchCustomQuestions();
+    if (selectedSection === "custom" && user?.id) fetchCustomQuestions();
   }, [selectedSection, user?.id]);
 
   const availableTopics = useMemo(() => {
@@ -195,6 +198,12 @@ export default function EoyOralDrillPage() {
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
   const handleStartPractice = () => {
+    if (!user) {
+      alert("会話練習を行うには、サインインが必要です！");
+      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
+      return;
+    }
+
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
       question: q.question,
@@ -211,6 +220,10 @@ export default function EoyOralDrillPage() {
 
   const handleAddCustom = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      alert("カスタム質問を追加するにはサインインが必要です。");
+      return;
+    }
     if (!newQuestionText.trim() || !newAnswerText.trim()) {
       alert("Please enter both the question and answer.");
       return;
@@ -223,12 +236,12 @@ export default function EoyOralDrillPage() {
     }
   };
 
-  if (isLoadingData) {
+  if (isAuthLoading || isLoadingData) {
     return (
       <PageLayout user={user} credits={credits}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
-            Loading Oral Exam Database from Supabase...
+            Loading EOY Oral Practice...
           </div>
         </div>
       </PageLayout>
@@ -405,27 +418,51 @@ export default function EoyOralDrillPage() {
             themeColor={themeColor}
           />
 
+          {/* 💡 会話練習エリア（未ログイン時はガード画面を表示） */}
           <div ref={chatContainerRef}>
-            <OralCenterChatPractice
-              chatMessages={engine.chatMessages}
-              isPracticing={engine.isPracticing}
-              currentQuestionIndex={engine.currentQuestionIndex}
-              totalQuestions={engine.activeQuestions.length}
-              isAnalyzing={engine.isAnalyzing}
-              isRecording={engine.isRecording}
-              isWaitingForNext={engine.isWaitingForNext}
-              inputMessage={engine.inputMessage}
-              setInputMessage={engine.setInputMessage}
-              onStartRecording={engine.startRecording}
-              onStopRecording={engine.stopRecording}
-              onRepeatQuestion={() => {
-                const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
-              }}
-              onProceedNext={() => engine.proceedToNextQuestion(answers)}
-              onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill", selectedSection)}
-              themeColor={themeColor}
-            />
+            {!user ? (
+              <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
+                <div className="w-14 h-14 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
+                  🔒
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
+                    Sign In Required for Oral Practice
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato and record your progress.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }))}
+                  className="py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
+                >
+                  Sign In / Sign Up Now
+                </button>
+              </div>
+            ) : (
+              <OralCenterChatPractice
+                chatMessages={engine.chatMessages}
+                isPracticing={engine.isPracticing}
+                currentQuestionIndex={engine.currentQuestionIndex}
+                totalQuestions={engine.activeQuestions.length}
+                isAnalyzing={engine.isAnalyzing}
+                isRecording={engine.isRecording}
+                isWaitingForNext={engine.isWaitingForNext}
+                inputMessage={engine.inputMessage}
+                setInputMessage={engine.setInputMessage}
+                onStartRecording={engine.startRecording}
+                onStopRecording={engine.stopRecording}
+                onRepeatQuestion={() => {
+                  const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
+                  if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
+                }}
+                onProceedNext={() => engine.proceedToNextQuestion(answers)}
+                onSendMessage={(e) => engine.sendAnswerMessage(e, answers, "drill", selectedSection)}
+                themeColor={themeColor}
+              />
+            )}
           </div>
 
           <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
