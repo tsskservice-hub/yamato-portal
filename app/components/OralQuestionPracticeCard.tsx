@@ -56,7 +56,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
       if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
-      const data = await response.json();
+      const data = (await response.json()) as any;
 
       setUserSpeechText(data.userText || "(Transcribed Speech)");
 

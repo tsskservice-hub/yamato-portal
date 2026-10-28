@@ -60,7 +60,7 @@ export default function KanjiGrammarCheckerPage() {
             .select('credits, nickname')
             .eq('id', session.user.id)
             .single();
-          
+           
           if (profile && isMounted) {
             if (typeof profile.credits === 'number') setCurrentCredits(profile.credits);
             if (profile.nickname) setNickname(profile.nickname);
@@ -109,8 +109,8 @@ export default function KanjiGrammarCheckerPage() {
   const handleAutoTranscribe = async (imageBase64: string) => {
     setIsTranscribing(true);
     try {
-      const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
-      const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
+      // 💡 常に本番用APIの絶対URLを使用するように修正
+      const apiBaseUrl = "https://api.jptutoraiyamato.com";
 
       const response = await fetch(`${apiBaseUrl}/chat`, {
         method: "POST",

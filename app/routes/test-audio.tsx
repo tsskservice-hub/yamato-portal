@@ -18,7 +18,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function TestAudioPage() {
-  // Config & Endpoint state
+  // 💡 Config & Endpoint state: 常に本番用APIの絶対URLを初期値に設定
   const [apiEndpoint, setApiEndpoint] = useState<string>("https://api.jptutoraiyamato.com/chat");
   const [logs, setLogs] = useState<string[]>([]);
 
@@ -245,16 +245,17 @@ export default function TestAudioPage() {
               <button
                 type="button"
                 onClick={() => setApiEndpoint("https://api.jptutoraiyamato.com/chat")}
-                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0"
+                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0 cursor-pointer"
               >
                 Reset to API Domain
               </button>
+              {/* 💡 404の原因となる相対パスではなく、安全な絶対URLをセットするように修正 */}
               <button
                 type="button"
-                onClick={() => setApiEndpoint("/chat")}
-                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0"
+                onClick={() => setApiEndpoint("https://api.jptutoraiyamato.com/chat")}
+                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0 cursor-pointer"
               >
-                Set Relative (/chat)
+                Set API Domain
               </button>
             </div>
           </div>
