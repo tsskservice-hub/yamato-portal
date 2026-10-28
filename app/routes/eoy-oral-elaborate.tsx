@@ -279,7 +279,8 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  // 💡 チャットメッセージ送信時にバックエンド経由で4クレジットが減算される仕組みを連動
+
+// 💡 チャットメッセージ送信時にバックエンド経由で4クレジットが減算される仕組みを連動
   const handleSendMessageWithCredit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (credits < 4) {
@@ -287,14 +288,15 @@ export default function EoyOralElaboratePage() {
       return;
     }
 
-    // エンジン側の送信処理を実行（サーバー側で "eoy-oral-elaborate" として4クレジットが事後減算・トランザクション処理される）
+    // エンジン側の送信処理を実行
     await engine.sendAnswerMessage(e, answers, "drill-elaborate", selectedSection);
 
-    // 応答・減算成功後に最新のクレジット残高を再取得して画面を同期
+    // 💡 応答・減算成功後に最新のクレジット残高を再取得してヘッダー表示を即時更新
     if (user?.id) {
-      fetchProfile(user.id);
+      await fetchProfile(user.id);
     }
   };
+
 
   if (isAuthLoading || isLoadingData) {
     return (
