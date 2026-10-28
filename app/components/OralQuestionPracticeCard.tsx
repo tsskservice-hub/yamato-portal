@@ -11,6 +11,8 @@ export interface OralQuestionPracticeCardProps {
   themeColor?: string;
   apiEndpoint?: string;
   modeLabel?: string;
+  userId?: string;
+  onCreditsUpdated?: (newCredits?: number) => void;
 }
 
 export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> = ({
@@ -21,6 +23,8 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
   themeColor = "#a855f7",
   apiEndpoint = "https://api.jptutoraiyamato.com/chat",
   modeLabel = "Practice",
+  userId,
+  onCreditsUpdated,
 }) => {
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -28,13 +32,13 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
   const { isRecording, startRecording, stopRecording, audioBlob } = useOralAudioRecorder();
 
-  // Reset feedback & text on prompt change
+  // 設問が変更されたらフィードバックとテキストをリセット
   useEffect(() => {
     setFeedback(null);
     setUserSpeechText("");
   }, [selectedQuestion?.text]);
 
-  // Auto-submit audio once recorded
+  // 音声データ生成時の自動AI送信
   useEffect(() => {
     if (audioBlob && selectedQuestion) {
       processAudioSubmission(audioBlob);
@@ -46,23 +50,35 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
     setIsAnalyzing(true);
     setFeedback(null);
 
-try {
+    try {
+      const isElaborate = modeLabel.toLowerCase().includes("detailed") || modeLabel.toLowerCase().includes("elaborate");
+      const appType = isElaborate ? "eoy-oral-elaborate" : "eoy-oral-drill";
+      const isVoiceMode = isElaborate ? "elaborate" : "drill";
+
       const formData = new FormData();
       formData.append("audio", blob, "answer.webm");
-      formData.append("mode", "drill-practice");
+      formData.append("mode", isElaborate ? "drill-elaborate-transcribe" : "drill-transcribe");
+      formData.append("appType", appType);
+      formData.append("isVoiceMode", isVoiceMode);
       formData.append("question", selectedQuestion.text);
       formData.append("level", selectedLevel);
-
-      // 💡 404エラーを防ぐため、本番用APIサーバーの絶対URLに固定します
-      // （※バックエンドの音声受付ルートに合わせて指定してください。例: 音声テスト等で使っているエンドポイントや専用のエンドポイント）
-      const apiEndpoint = "https://api.jptutoraiyamato.com/api/test-stt"; // または適切な絶対URL
+      if (userId) {
+        formData.append("userId", userId);
+      }
 
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
-      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 402) {
+          alert(`Insufficient credits (${errorData.message || "Please top up credits"}).`);
+          return;
+        }
+        throw new Error("API response error");
+      }
 
-      const data = (await response.json()) as any;
+      const data = await response.json();
 
-      setUserSpeechText(data.userText || "(Transcribed Speech)");
+      setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
 
       setFeedback({
         scoreLabel: data.scoreLabel || "👍 Great Answer!",
@@ -71,9 +87,20 @@ try {
         refinedPolishHtml: data.refinedPolishHtml || selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
         defaultAnswerWithRuby: selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
       });
+
+      // 💡 クレジット残高の動的更新通知
+      if (onCreditsUpdated) {
+        if (typeof data.remainingCredits === "number") {
+          onCreditsUpdated(data.remainingCredits);
+        } else if (typeof data.currentCredits === "number") {
+          onCreditsUpdated(data.currentCredits);
+        } else {
+          onCreditsUpdated();
+        }
+      }
     } catch (err) {
       console.error("Failed to process oral response:", err);
-      alert("Audio analysis failed. Please try speaking again.");
+      alert("申し訳ありません。音声解析に失敗しました。もう一度お試しください。");
     } finally {
       setIsAnalyzing(false);
     }
@@ -92,7 +119,7 @@ try {
 
   return (
     <div className="space-y-8">
-      {/* Question Selection Grid */}
+      {/* 設問選択グリッド */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
           <span className="flex items-center gap-2">
@@ -108,7 +135,7 @@ try {
 
         {questions.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-slate-500 text-sm">
-            No questions found for the selected topic and level.
+            該当するカテゴリ・難易度の設問が見つかりませんでした。
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -156,7 +183,7 @@ try {
         )}
       </div>
 
-      {/* Active Question Practice & Audio Recording Card */}
+      {/* 選択中設問の練習 ＆ 録音エリア */}
       {selectedQuestion && (
         <div
           className="bg-white dark:bg-slate-900 border-2 rounded-3xl p-6 shadow-md space-y-6"
@@ -176,14 +203,14 @@ try {
             </h2>
           </div>
 
-          {/* Microphone Recording Controls */}
+          {/* マイク録音コントロール */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
             <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
               <p className="font-bold text-slate-800 dark:text-slate-200">
-                🎙 Speaking Answer Instructions:
+                🎙 スピーキング回答手順:
               </p>
               <p>
-                Click 'Start Recording' to record your response, then click 'Stop & Submit' when finished.
+                「Start Recording」を押して回答を録音し、終わったら「Stop & Submit」を押してください。
               </p>
             </div>
 
@@ -208,10 +235,10 @@ try {
             )}
           </div>
 
-          {/* Analysis & Transcription Status */}
+          {/* 解析・書き起こし状況 */}
           {isAnalyzing && (
             <div className="p-4 bg-purple-50/50 dark:bg-purple-950/20 rounded-xl border border-purple-200 dark:border-purple-900 text-center text-xs font-bold text-purple-700 dark:text-purple-300 animate-pulse">
-              ⏳ AI Examiner is listening and analyzing your speech...
+              ⏳ AI面接官が音声を聞き取って評価中...
             </div>
           )}
 
@@ -224,7 +251,7 @@ try {
             </div>
           )}
 
-          {/* AI Immediate Feedback Card */}
+          {/* AI 即時フィードバックカード */}
           {feedback && (
             <OralDrillFeedbackCard
               feedback={feedback}
