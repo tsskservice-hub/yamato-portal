@@ -46,12 +46,16 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
     setIsAnalyzing(true);
     setFeedback(null);
 
-    try {
+try {
       const formData = new FormData();
       formData.append("audio", blob, "answer.webm");
       formData.append("mode", "drill-practice");
       formData.append("question", selectedQuestion.text);
       formData.append("level", selectedLevel);
+
+      // 💡 404エラーを防ぐため、本番用APIサーバーの絶対URLに固定します
+      // （※バックエンドの音声受付ルートに合わせて指定してください。例: 音声テスト等で使っているエンドポイントや専用のエンドポイント）
+      const apiEndpoint = "https://api.jptutoraiyamato.com/api/test-stt"; // または適切な絶対URL
 
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
       if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);

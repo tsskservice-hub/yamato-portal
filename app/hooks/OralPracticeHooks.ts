@@ -298,7 +298,8 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
     const registeredAnswer = answersMap[currentQ.id] || "";
 
     try {
-      const endpoint = getApiEndpoint();
+      // 💡 相対パスによる404エラーを防ぐため、本番用絶対URLに固定します
+      const endpoint = "https://api.jptutoraiyamato.com/chat";
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
