@@ -34,6 +34,9 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+// 💡 本番用APIエンドポイントのベースURLを固定定義（ステージング等からの404エラーを防止）
+const API_BASE_URL = "https://api.jptutoraiyamato.com";
+
 export default function EoyOralDrillPage() {
   const themeColor = "#eab308"; // Amber / Gold theme
 
@@ -206,7 +209,7 @@ export default function EoyOralDrillPage() {
   const handleStartPractice = () => {
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
-      question: q.question,                 // UI Display
+      question: q.question,                     // UI Display
       questionOriginal: q.questionOriginal, // Clean text for TTS
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
