@@ -82,7 +82,7 @@ export default function TestYamatoPage() {
   // 💡 デバッグログイン用の状態管理
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [debugEmail, setDebugEmail] = useState("preview@jptutoraiyamato.com");
-  const [debugPassword, setDebugPassword] = useState("Previewtest12345");
+  const [debugPassword, setDebugPassword] = useState("123test");
   const [debugStatus, setDebugStatus] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
