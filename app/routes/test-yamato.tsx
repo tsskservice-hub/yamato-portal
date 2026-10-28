@@ -1,6 +1,6 @@
 /**
  * @file test-yamato.tsx
- * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加版）
+ * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加・プレビューデバッグログイン対応版）
  */
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
@@ -79,6 +79,56 @@ export default function TestYamatoPage() {
   const [yamatoConfigs, setYamatoConfigs] = useState<YamatoConfigsData | null>(null);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(true);
 
+  // 💡 デバッグログイン用の状態管理
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [debugEmail, setDebugEmail] = useState("preview@jptutoraiyamato.com");
+  const [debugPassword, setDebugPassword] = useState("Previewtest12345");
+  const [debugStatus, setDebugStatus] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // 💡 現在のログインセッション状態を監視
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 💡 プレビュー用一発ログイン実行関数
+  const handleDebugLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!debugPassword) {
+      setDebugStatus("⚠️ パスワードを入力してください。");
+      return;
+    }
+    setIsLoggingIn(true);
+    setDebugStatus("ログイン処理中...");
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: debugEmail,
+        password: debugPassword,
+      });
+      if (error) throw error;
+      setDebugStatus("✅ ログイン成功！セッションが確立されました。");
+    } catch (err: any) {
+      setDebugStatus(`❌ ログイン失敗: ${err.message}`);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // 💡 ログアウト実行関数
+  const handleDebugLogout = async () => {
+    await supabase.auth.signOut();
+    setDebugStatus("🔒 ログアウトしました。");
+  };
+
   // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
   useEffect(() => {
     async function fetchData() {
@@ -143,6 +193,73 @@ export default function TestYamatoPage() {
           >
             📖 アーキテクチャノートを見る →
           </Link>
+        </div>
+
+        {/* 🧪 プレビュー環境用デバッグログインパネル */}
+        <div style={{ backgroundColor: "#ffffff", border: "2px dashed #f59e0b", borderRadius: "16px", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <h2 style={{ fontSize: "15px", fontWeight: "bold", color: "#b45309", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span>🧪</span> プレビュー環境用デバッグログイン (パスキーバイパス)
+          </h2>
+          <p style={{ fontSize: "12px", color: "#64748b", marginBottom: "14px" }}>
+            CloudflareプレビューURLなどでパスキー認証が使えない場合、ここでメール＆パスワードによりセッションを直接確立できます。
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ fontSize: "13px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span>現在の状態:</span>
+              {currentUser ? (
+                <span style={{ color: "#16a34a", backgroundColor: "#dcfce7", padding: "2px 8px", borderRadius: "6px", fontSize: "12px" }}>
+                  🟢 ログイン中 ({currentUser.email})
+                </span>
+              ) : (
+                <span style={{ color: "#dc2626", backgroundColor: "#fee2e2", padding: "2px 8px", borderRadius: "6px", fontSize: "12px" }}>
+                  🔴 未ログイン (ゲスト状態)
+                </span>
+              )}
+            </div>
+
+            {!currentUser ? (
+              <form onSubmit={handleDebugLogin} style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
+                <input
+                  type="email"
+                  value={debugEmail}
+                  onChange={(e) => setDebugEmail(e.target.value)}
+                  placeholder="Email"
+                  style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "12px", width: "240px" }}
+                />
+                <input
+                  type="password"
+                  value={debugPassword}
+                  onChange={(e) => setDebugPassword(e.target.value)}
+                  placeholder="パスワードを入力"
+                  style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "12px", width: "180px" }}
+                />
+                <button
+                  type="submit"
+                  disabled={isLoggingIn}
+                  style={{ padding: "8px 16px", backgroundColor: "#f59e0b", color: "#ffffff", border: "none", borderRadius: "8px", fontWeight: "bold", fontSize: "12px", cursor: "pointer" }}
+                >
+                  {isLoggingIn ? "ログイン中..." : "🚀 テストログイン実行"}
+                </button>
+              </form>
+            ) : (
+              <div>
+                <button
+                  type="button"
+                  onClick={handleDebugLogout}
+                  style={{ padding: "8px 16px", backgroundColor: "#ef4444", color: "#ffffff", border: "none", borderRadius: "8px", fontWeight: "bold", fontSize: "12px", cursor: "pointer" }}
+                >
+                  🔒 ログアウトする
+                </button>
+              </div>
+            )}
+
+            {debugStatus && (
+              <div style={{ fontSize: "12px", fontFamily: "monospace", color: "#334155", backgroundColor: "#f8fafc", padding: "8px 12px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                {debugStatus}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* セクション1：ヤマトAI 独立APIテスト画面 */}
