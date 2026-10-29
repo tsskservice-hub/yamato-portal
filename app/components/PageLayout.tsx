@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
-import DataErrorState from "./DataErrorState"; // 👈 エラー表示コンポーネントをインポート
+import DataErrorState from "./DataErrorState";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
@@ -39,9 +39,9 @@ type PageLayoutProps = {
   breadcrumbTitle?: string;
   scrollTopClassName?: string;
   onSignOut?: () => void | Promise<void>;
-  error?: any;           // 👈 追加: エラー状態 (boolean / Error / エラー詳細)
-  errorMessage?: string; // 👈 追加: エラー時の詳細メッセージ
-  onRetry?: () => void;  // 👈 追加: 再読み込み関数
+  error?: any;           
+  errorMessage?: string; 
+  onRetry?: () => void;  
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -66,25 +66,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   } | undefined;
 
   const location = useLocation();
-
-  // Scroll to top states & listener
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   // パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
@@ -301,20 +282,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       </main>
       
       <Footer onOpenAuth={handleOpenAuthModal} />
-
-      {/* ⬆️ ページトップへ戻るボタン */}
-      {showScrollTop && (
-        <div className="fixed bottom-24 right-6 z-40">
-          <button
-            type="button"
-            onClick={scrollToTop}
-            className={`w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center ${scrollTopClassName}`}
-            title="ページトップへ戻る"
-          >
-            ▲
-          </button>
-        </div>
-      )}
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (
