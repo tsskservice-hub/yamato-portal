@@ -74,7 +74,8 @@ export function formatOralFeedbackToHtml(rawText: string): string {
 export function useOralPracticeEngine(
   selectedLevel = "normal",
   speechSpeed = 1.0,
-  userId?: string
+  userId?: string,
+  userNickname?: string
 ) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -302,20 +303,23 @@ export function useOralPracticeEngine(
     try {
       // 💡 相対パスによる404エラーを防ぐため、本番用絶対URLに固定します
       const endpoint = "https://api.jptutoraiyamato.com/chat";
+      
       const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userText,
-          appType: "eoy-oral-drill",
-          expectedQuestion: currentQ.questionOriginal || currentQ.question,
-          registeredAnswer: registeredAnswer,
-          mode,
-          level: selectedLevel,
-          section,
-          userId: userId, // 💡 Supabaseでクレジットを減算するために userId を含める
-        }),
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    message: userText,
+    appType: "eoy-oral-drill",
+    expectedQuestion: currentQ.questionOriginal || currentQ.question,
+    registeredAnswer: registeredAnswer,
+    mode,
+    level: selectedLevel,
+    section,
+    userId: userId,
+    userNickname: userNickname, // 💡 ここを追加
+  }),
+});
+      
 
       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
