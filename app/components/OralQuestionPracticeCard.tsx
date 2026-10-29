@@ -8,11 +8,13 @@ export interface OralQuestionPracticeCardProps {
   selectedQuestion: OralExamQuestionItem | null;
   onSelectQuestion: (question: OralExamQuestionItem | null) => void;
   selectedLevel?: "steady" | "normal" | "accelerated";
+  userId?: string;
+  appType?: string;
+  isVoiceMode?: string;
+  onCreditsUpdated?: (newCredits: number) => void;
   themeColor?: string;
   apiEndpoint?: string;
   modeLabel?: string;
-  userId?: string;
-  onCreditsUpdated?: (newCredits?: number) => void;
 }
 
 export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> = ({
@@ -20,11 +22,13 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
   selectedQuestion,
   onSelectQuestion,
   selectedLevel = "normal",
+  userId,
+  appType = "eoy-oral-drill",
+  isVoiceMode = "drill",
+  onCreditsUpdated,
   themeColor = "#a855f7",
   apiEndpoint = "https://api.jptutoraiyamato.com/chat",
   modeLabel = "Practice",
-  userId,
-  onCreditsUpdated,
 }) => {
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -51,53 +55,46 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
     setFeedback(null);
 
     try {
-      const isElaborate = modeLabel.toLowerCase().includes("detailed") || modeLabel.toLowerCase().includes("elaborate");
-      const appType = isElaborate ? "eoy-oral-elaborate" : "eoy-oral-drill";
-      const isVoiceMode = isElaborate ? "elaborate" : "drill";
-
       const formData = new FormData();
       formData.append("audio", blob, "answer.webm");
-      formData.append("mode", isElaborate ? "drill-elaborate-transcribe" : "drill-transcribe");
-      formData.append("appType", appType);
-      formData.append("isVoiceMode", isVoiceMode);
+      formData.append("mode", "drill-practice");
       formData.append("question", selectedQuestion.text);
+      formData.append("expectedQuestion", selectedQuestion.text);
+      formData.append(
+        "registeredAnswer",
+        selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original || ""
+      );
       formData.append("level", selectedLevel);
+      formData.append("learningPace", selectedLevel);
+      formData.append("pace", selectedLevel);
+
+      // 💡 userId, appType, isVoiceMode を追加送信して Supabase のクレジット減算を有効化
       if (userId) {
         formData.append("userId", userId);
       }
+      formData.append("appType", appType);
+      formData.append("isVoiceMode", isVoiceMode);
 
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
-      if (!response.ok) {
-        const errorData = (await response.json().catch(() => ({}))) as any;
-        if (response.status === 402) {
-          alert(`Insufficient credits (${errorData.message || "Please top up credits"}).`);
-          return;
-        }
-        throw new Error("API response error");
-      }
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
 
       const data = (await response.json()) as any;
 
       setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
 
+      // 💡 最新クレジット残高が返ってきた場合、親コンポーネント（ヘッダー）に通知
+      if (typeof data.currentCredits === "number" && onCreditsUpdated) {
+        onCreditsUpdated(data.currentCredits);
+      }
+
       setFeedback({
         scoreLabel: data.scoreLabel || "👍 Great Answer!",
         evaluationHtml: data.evaluationHtml || "Well structured response with good grammar usage.",
         correctionsHtml: data.correctionsHtml || "Try adding more detail with 〜からです or 〜ので.",
-        refinedPolishHtml: data.refinedPolishHtml || selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
+        refinedPolishHtml:
+          data.refinedPolishHtml || selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
         defaultAnswerWithRuby: selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
       });
-
-      // 💡 クレジット残高の動的更新通知
-      if (onCreditsUpdated) {
-        if (typeof data.remainingCredits === "number") {
-          onCreditsUpdated(data.remainingCredits);
-        } else if (typeof data.currentCredits === "number") {
-          onCreditsUpdated(data.currentCredits);
-        } else {
-          onCreditsUpdated();
-        }
-      }
     } catch (err) {
       console.error("Failed to process oral response:", err);
       alert("申し訳ありません。音声解析に失敗しました。もう一度お試しください。");
@@ -151,16 +148,10 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
                       ? "bg-purple-50/90 dark:bg-purple-950/40 border-purple-500 ring-2 ring-purple-300 shadow-md"
                       : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-purple-300"
                   }`}
-                  style={
-                    isSelected
-                      ? { borderColor: themeColor }
-                      : {}
-                  }
+                  style={isSelected ? { borderColor: themeColor } : {}}
                 >
                   <div className="space-y-2">
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                    >
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {q.category || "General"}
                     </span>
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug">

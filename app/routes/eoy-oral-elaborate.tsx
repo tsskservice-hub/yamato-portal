@@ -1,7 +1,7 @@
 /**
  * @file eoy-oral-elaborate.tsx
  * @description VCE Japanese - Comprehensive EOY Oral Elaborate Practice & Custom QA Bank
- * Covers all stages of the VCE Oral Exam: Before Section 1, Section 1, Section 2, and After Section 2 with multi-topic selection for Section 1 and all sections.
+ * Covers all stages of the VCE Oral Exam: Before Section 1, Section 1, Section 2, and After Section 2 with multi-topic selection.
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -15,7 +15,7 @@ import { supabase } from "../lib/supabaseClient";
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
-import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector"; // 💡 共通セレクター
+import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector";
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
@@ -42,11 +42,11 @@ export default function EoyOralElaboratePage() {
   const [questionsData, setQuestionsData] = useState<OralExamQuestionsData | null>(null);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
 
-  // 💡 要件に対応したステート初期値の設定（Section 2, Normal ペース, クリア状態/all, スピード 1.0）
+  // ステート初期値の設定（Section 2, Normal ペース, クリア状態/all, スピード 1.0）
   const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom">("sec2");
   const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]); // 空配列 ＝ 全クリア（All状態）
-  const [speechSpeed, setSpeechSpeed] = useState<number>(1.0); // デフォルト 1.0
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]); // マルチセレクト用（空配列 ＝ クリア/全選択状態）
+  const [speechSpeed, setSpeechSpeed] = useState<number>(1.0);
   const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
 
   const [newQuestionText, setNewQuestionText] = useState("");
@@ -55,7 +55,6 @@ export default function EoyOralElaboratePage() {
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // 💡 確実に認証モーダルやログイン画面を開くための共通トリガー関数
   const handleOpenAuth = () => {
     window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
     const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
@@ -66,7 +65,6 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  // 💡 モードに "elaborate" を指定してフックを呼び出す
   const {
     answers,
     customQuestionsRaw,
@@ -130,7 +128,7 @@ export default function EoyOralElaboratePage() {
     if (selectedSection === "custom" && user?.id) fetchCustomQuestions();
   }, [selectedSection, user?.id]);
 
-  // Extract all available topics for the current exam stage/section & pace
+  // 現在のセクション・レベルに応じた利用可能トピックの抽出
   const availableTopics = useMemo(() => {
     const set = new Set<string>();
     if (selectedSection === "custom") {
@@ -145,7 +143,6 @@ export default function EoyOralElaboratePage() {
     return Array.from(set);
   }, [selectedSection, selectedLevel, questionsData, customQuestionsRaw]);
 
-  // Multi-topic selection toggle
   const toggleTopic = (topic: string) => {
     if (selectedTopics.includes(topic)) {
       setSelectedTopics(selectedTopics.filter((t) => t !== topic));
@@ -157,7 +154,7 @@ export default function EoyOralElaboratePage() {
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
   const handleClearAllTopics = () => setSelectedTopics([]);
 
-  // Extract current questions based on selected topics
+  // 選択中のトピックに基づいた質問リストの生成
   const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = useMemo(() => {
     const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = [];
     const initialMap: { [key: string]: string } = {};
@@ -215,7 +212,7 @@ export default function EoyOralElaboratePage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
-  // 💡 バリデーションガード付きのエラボレーション練習開始ハンドラー（クレジット事前検証：4クレジット必要）
+  // エラボレーション練習開始ハンドラー（4クレジット必要・50文字バリデーション）
   const handleStartElaboration = async () => {
     if (!user) {
       alert("詳細解説・会話練習を行うには、サインインが必要です！");
@@ -223,22 +220,19 @@ export default function EoyOralElaboratePage() {
       return;
     }
 
-    // 💡 事前検証（クレジット残高が4クレジット以上あるかチェック）
     if (credits < 4) {
-      alert("クレジットが不足しています（詳細応答・発展学習には4クレジット必要です）。チャージを行ってください。");
+      alert("Insufficient credits for elaboration practice (4 credits required). Please top up.");
       return;
     }
 
-    // 各質問の現在の回答内容をチェック（50文字未満のものが無いか検証）
-   
-   for (const q of currentQuestions) {
+    for (const q of currentQuestions) {
       const currentAns = answers[q.id] || "";
       if (currentAns.trim().length < 50) {
         alert(`[Character Count Check]\nThe answer for "${q.questionOriginal.slice(0, 20)}..." is too short.\nPlease enter at least 50 characters for your elaboration response. (Current: ${currentAns.trim().length} characters)`);
         return;
       }
     }
-   
+
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
       question: q.question,
@@ -277,18 +271,15 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  // 💡 チャットメッセージ送信時にバックエンド経由で4クレジットが減算される仕組みを連動
   const handleSendMessageWithCredit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (credits < 4) {
-      alert("クレジットが不足しています。");
+      alert("Insufficient credits.");
       return;
     }
 
-    // エンジン側の送信処理を実行
     await engine.sendAnswerMessage(e, answers, "drill-elaborate", selectedSection);
 
-    // 💡 応答・減算成功後に最新のクレジット残高を再取得してヘッダー表示を即時更新
     if (user?.id) {
       await fetchProfile(user.id);
     }
@@ -404,7 +395,7 @@ export default function EoyOralElaboratePage() {
               </div>
             </div>
 
-            {/* 💡 共通の OralDrillQuestionSelector にマルチセレクト機能を完全統合 */}
+            {/* 2. 共通セレクター（Pace・Speed・マルチセレクトトピック統合） */}
             {selectedSection !== "custom" && (
               <OralDrillQuestionSelector
                 categories={availableTopics}
@@ -436,7 +427,7 @@ export default function EoyOralElaboratePage() {
             />
           )}
 
-          {/* 1. Review & Customize Elaboration Answers List */}
+          {/* Review & Customize Elaboration Answers List */}
           <OralUserAnswerList
             questions={currentQuestions}
             answers={answers}
@@ -450,7 +441,7 @@ export default function EoyOralElaboratePage() {
             title="Review & Customize Your Elaboration Answers"
           />
 
-          {/* 2. Central Interactive Practice Screen */}
+          {/* Central Interactive Practice Screen */}
           <div ref={chatContainerRef}>
             {!user ? (
               <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
