@@ -3,15 +3,17 @@ import { OralExamQuestionItem } from "../data/oral-exam-questions";
 import useOralAudioRecorder from "./OralAudioRecorder";
 import OralDrillFeedbackCard, { FeedbackData } from "./OralDrillFeedbackCard";
 
+// 💡 1. Props の型定義（追加パラメータを網羅して型エラーを防止）
 export interface OralQuestionPracticeCardProps {
   questions: OralExamQuestionItem[];
   selectedQuestion: OralExamQuestionItem | null;
   onSelectQuestion: (question: OralExamQuestionItem | null) => void;
   selectedLevel?: "steady" | "normal" | "accelerated";
-  userId?: string;
-  appType?: string;
-  isVoiceMode?: string;
-  onCreditsUpdated?: (newCredits: number) => void;
+  userId?: string;                          // 👈 追加：Supabase減算用のユーザーID
+  userNickname?: string;                    // 👈 追加：AIの呼びかけ用ニックネーム
+  appType?: string;                         // 👈 追加：クレジット判定用アプリ種別
+  isVoiceMode?: string;                     // 👈 追加：音声モード指定
+  onCreditsUpdated?: (newCredits: number) => void; // 👈 追加：ヘッダー表示の即時同期
   themeColor?: string;
   apiEndpoint?: string;
   modeLabel?: string;
@@ -23,6 +25,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
   onSelectQuestion,
   selectedLevel = "normal",
   userId,
+  userNickname = "VCE Student",
   appType = "eoy-oral-drill",
   isVoiceMode = "drill",
   onCreditsUpdated,
@@ -65,32 +68,34 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
         selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original || ""
       );
       formData.append("level", selectedLevel);
-      formData.append("learningPace", selectedLevel);
-      formData.append("pace", selectedLevel);
 
-      // 💡 userId, appType, isVoiceMode を追加送信して Supabase のクレジット減算を有効化
+      // 💡 2. ログイン情報・機能パラメータを FormData に追加（Supabase減算と呼びかけを有効化）
       if (userId) {
         formData.append("userId", userId);
+      }
+      if (userNickname) {
+        formData.append("userNickname", userNickname);
       }
       formData.append("appType", appType);
       formData.append("isVoiceMode", isVoiceMode);
 
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
+      if (!response.ok) throw new Error(`API response error: ${response.status}`);
 
+      // 💡 3. (await response.json()) as any で型キャストを行い、ts(18046) エラーを解消
       const data = (await response.json()) as any;
 
       setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
 
-      // 💡 最新クレジット残高が返ってきた場合、親コンポーネント（ヘッダー）に通知
+      // 💡 4. 最新残高が返ってきた場合、親ページ（ヘッダー）のステートを即時更新
       if (typeof data.currentCredits === "number" && onCreditsUpdated) {
         onCreditsUpdated(data.currentCredits);
       }
 
       setFeedback({
         scoreLabel: data.scoreLabel || "👍 Great Answer!",
-        evaluationHtml: data.evaluationHtml || "Well structured response with good grammar usage.",
-        correctionsHtml: data.correctionsHtml || "Try adding more detail with 〜からです or 〜ので.",
+        evaluationHtml: data.evaluationHtml || "",
+        correctionsHtml: data.correctionsHtml || "",
         refinedPolishHtml:
           data.refinedPolishHtml || selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
         defaultAnswerWithRuby: selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
