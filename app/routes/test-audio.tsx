@@ -18,7 +18,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function TestAudioPage() {
-  // 💡 Config & Endpoint state: 常に本番用APIの絶対URLを初期値に設定
+  // Config & Endpoint state
   const [apiEndpoint, setApiEndpoint] = useState<string>("https://api.jptutoraiyamato.com/chat");
   const [logs, setLogs] = useState<string[]>([]);
 
@@ -47,7 +47,7 @@ export default function TestAudioPage() {
     appendLog("=== Audio Debug Environment Initialized ===");
     if (typeof window !== "undefined") {
       appendLog(`User Agent: ${navigator.userAgent}`);
-      if (Boolean(navigator.mediaDevices?.getUserMedia)) {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         appendLog("✅ Navigator MediaDevices API supported.");
       } else {
         appendLog("❌ Navigator MediaDevices API NOT supported!");
@@ -101,28 +101,22 @@ export default function TestAudioPage() {
         const errText = await response.text();
         appendLog(`❌ Server Error (${response.status}): ${errText.slice(0, 200)}`);
         appendLog("⚠️ Triggering Web Speech API (Browser Fallback)...");
-        triggerWebSpeechFallback(ttsText, ttsSpeed);
+        triggerTtsError("OpenAI TTS サーバーへの接続に失敗しました。");
       }
     } catch (err: any) {
       appendLog(`❌ Network / Fetch Error: ${err.message || String(err)}`);
       appendLog("⚠️ Triggering Web Speech API (Browser Fallback)...");
-      triggerWebSpeechFallback(ttsText, ttsSpeed);
+      triggerTtsError("OpenAI TTS サーバーへの接続に失敗しました。");
     } finally {
       setIsTtsLoading(false);
     }
   };
 
-  const triggerWebSpeechFallback = (text: string, speed: number) => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "ja-JP";
-      utterance.rate = speed;
-      window.speechSynthesis.speak(utterance);
-      appendLog("🔊 Fallback WebSpeech utterance queued.");
-    } else {
-      appendLog("❌ Web Speech API not supported on this browser.");
-    }
+  // 💡 Web Speech API ブラウザ代替機能は廃止し、DataErrorStateを表示
+  const triggerTtsError = (msg: string) => {
+    setTtsError(true);
+    setErrorMessage(msg);
+    appendLog(`❌ OpenAI TTS Error: ${msg}`);
   };
 
   // 2. STT Recording Start Handler
@@ -196,7 +190,7 @@ export default function TestAudioPage() {
       appendLog(`STT HTTP Response Status: ${response.status} ${response.statusText}`);
 
       if (response.ok) {
-        const data = (await response.json()) as { userText?: string };
+        const data = await response.json();
         appendLog(`✅ STT Response JSON: ${JSON.stringify(data)}`);
         setTranscribedText(data.userText || "（文字起こし結果が空でした）");
       } else {
@@ -245,17 +239,16 @@ export default function TestAudioPage() {
               <button
                 type="button"
                 onClick={() => setApiEndpoint("https://api.jptutoraiyamato.com/chat")}
-                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0 cursor-pointer"
+                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0"
               >
                 Reset to API Domain
               </button>
-              {/* 💡 404の原因となる相対パスではなく、安全な絶対URLをセットするように修正 */}
               <button
                 type="button"
-                onClick={() => setApiEndpoint("https://api.jptutoraiyamato.com/chat")}
-                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0 cursor-pointer"
+                onClick={() => setApiEndpoint("/api/chat")}
+                className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs font-bold rounded-xl shrink-0"
               >
-                Set API Domain
+                Set Relative (/api/chat)
               </button>
             </div>
           </div>

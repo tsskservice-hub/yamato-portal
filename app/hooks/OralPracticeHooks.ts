@@ -1,6 +1,6 @@
 /**
- *  @file OralPracticeHooks.ts
- *  @description バックエンドAPIの音声・チャットエンドポイントと確実に通信するオーラル練習エンジンフック
+ * @file OralPracticeHooks.ts
+ * @description VCE Oral Examination Practice Hook (OpenAI TTS fable 固定・ブラウザ読み上げ廃止＆DataErrorState連動対応版)
  */
 import { useState, useEffect, useRef } from "react";
 
@@ -18,33 +18,6 @@ export interface QuestionData {
   category?: string;
 }
 
-export function getApiEndpoint(): string {
-  // 💡 常に本番・共通バックエンドの /chat エンドポイントへ直接リクエストを送るよう完全固定
-  return "https://api.jptutoraiyamato.com/chat";
-}
-
-export function fallbackWebSpeech(text: string, speed = 1.0) {
-  if (typeof window !== "undefined" && "speechSynthesis" in window) {
-    try {
-      window.speechSynthesis.cancel();
-      const cleaned = text
-        .replace(/<rt>.*?<\/rt>/g, "")
-        .replace(/<.*?>/g, "")
-        .replace(/【.*?】/g, "")
-        .replace(/※.*$/gm, "")
-        .trim();
-
-      if (!cleaned) return;
-      const utterance = new SpeechSynthesisUtterance(cleaned);
-      utterance.lang = "ja-JP";
-      utterance.rate = speed || 1.0;
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn("Web Speech API fallback error:", e);
-    }
-  }
-}
-
 export function formatOralFeedbackToHtml(rawText: string): string {
   if (!rawText) return "";
   let cleaned = rawText.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "");
@@ -53,14 +26,17 @@ export function formatOralFeedbackToHtml(rawText: string): string {
     /Evaluation\s*(&|and)\s*Score:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #0284c7; border-radius: 0.375rem;">📊 Evaluation & Score</div>'
   );
+
   cleaned = cleaned.replace(
     /Analysis\s*(&|and)\s*Corrections:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #fef3c7; color: #b45309; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #d97706; border-radius: 0.375rem;">💡 Analysis & Corrections</div>'
   );
+
   cleaned = cleaned.replace(
     /Grammar\s*(&|and)\s*Vocabulary\s*Notes:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #ffedd5; color: #c2410c; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #ea580c; border-radius: 0.375rem;">📚 Grammar & Vocabulary Notes</div>'
   );
+
   cleaned = cleaned.replace(
     /Refined\s*Expression\s*(&|and)\s*Polish:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #d1fae5; color: #065f46; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #059669; border-radius: 0.375rem;">✨ Refined Expression & Polish</div>'
@@ -70,17 +46,11 @@ export function formatOralFeedbackToHtml(rawText: string): string {
   return cleaned;
 }
 
-// 💡 第3引数に userId?: string を受け取るよう拡張
-export function useOralPracticeEngine(
-  selectedLevel = "normal",
-  speechSpeed = 1.0,
-  userId?: string,
-  userNickname?: string
-) {
+export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.0) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Welcome! Click 'Speak to AI Yamato' below to start practicing in the center screen.",
+      content: "ようこそ！下の「Speak to AI Yamato」を押して中央画面で対話練習を始めましょう。",
       isHtml: false,
     },
   ]);
@@ -92,45 +62,54 @@ export function useOralPracticeEngine(
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isWaitingForNext, setIsWaitingForNext] = useState<boolean>(false);
 
+  // 💡 TTS エラー管理用ステート（DataErrorState表示用）
+  const [ttsError, setTtsError] = useState<boolean>(false);
+  const [ttsErrorMessage, setTtsErrorMessage] = useState<string>("");
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // 💡 TTS Voice Playback via Backend API (絶対URLに固定)
+  // 💡 OpenAI TTS（サーバー経由固定・fableボイス指定）
   const playTTS = async (textToSpeak: string) => {
     try {
-      if (!textToSpeak) return;
+      setTtsError(false);
+      setTtsErrorMessage("");
+
       const cleanedText = textToSpeak
-        .replace(/<rt>.*?<\/rt>/g, "")
-        .replace(/<.*?>/g, "")
         .replace(/【.*?】/g, "")
         .replace(/※.*$/gm, "")
         .trim();
 
-      if (!cleanedText) return;
-
-      const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
-
-      const response = await fetch(ttsEndpoint, {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: cleanedText,
+          speakText: cleanedText,
+          voice: "fable", // 💡 OpenAI TTS fable ボイス固定
+          level: selectedLevel,
+          speed: speechSpeed,
         }),
       });
 
-      if (response.ok) {
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.playbackRate = speechSpeed || 1.0;
-        await audio.play();
-      } else {
-        console.warn("Backend TTS failed, falling back to Web Speech API");
-        fallbackWebSpeech(cleanedText, speechSpeed);
+      if (!response.ok) {
+        throw new Error(`OpenAI TTS Server Response Error (${response.status})`);
       }
-    } catch (err) {
-      console.warn("Server TTS connection error, falling back to Web Speech:", err);
-      fallbackWebSpeech(textToSpeak, speechSpeed);
+
+      const audioBlob = await response.blob();
+      if (audioBlob.size === 0) {
+        throw new Error("Received empty audio blob from OpenAI TTS server");
+      }
+
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      await audio.play();
+    } catch (err: any) {
+      console.error("❌ OpenAI TTS connection error:", err);
+      // 💡 ブラウザ代替読み上げ（Web Speech API）は行わず、DataErrorState トリガーのステートを設定
+      setTtsError(true);
+      setTtsErrorMessage(
+        `OpenAI TTS (fable) サーバーへの接続に失敗しました: ${err.message || String(err)}`
+      );
     }
   };
 
@@ -138,17 +117,7 @@ export function useOralPracticeEngine(
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      let mimeType = "audio/webm";
-      if (typeof MediaRecorder !== "undefined") {
-        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-          mimeType = "audio/webm;codecs=opus";
-        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
-          mimeType = "audio/mp4";
-        }
-      }
-
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -157,15 +126,14 @@ export function useOralPracticeEngine(
       };
 
       mediaRecorder.onstop = async () => {
-        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         await transcribeAudio(blob);
       };
 
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
-      console.error("Microphone access error:", err);
-      alert("Microphone access is denied or not supported on this browser.");
+      alert("マイクへのアクセスが許可されていません。");
     }
   };
 
@@ -178,7 +146,7 @@ export function useOralPracticeEngine(
     }
   };
 
-  // Spacebar Keyboard Event Listener
+  // Keyboard Spacebar listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
@@ -200,22 +168,23 @@ export function useOralPracticeEngine(
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPracticing, isAnalyzing, isWaitingForNext, isRecording]);
 
-  // 💡 Speech Transcription via Backend API (絶対URLに固定)
+  // Speech Transcription via /api/chat
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsAnalyzing(true);
+    const currentQ = activeQuestions[currentQuestionIndex];
     const formData = new FormData();
-    formData.append("audio", audioBlob, "recording.webm");
+    formData.append("audio", audioBlob, "user-audio.webm");
+    formData.append("expectedQuestion", currentQ?.questionOriginal || "");
+    formData.append("mode", "drill-practice");
+    formData.append("level", selectedLevel);
 
     try {
-      const sttEndpoint = "https://api.jptutoraiyamato.com/api/test-stt";
-
-      const res = await fetch(sttEndpoint, { method: "POST", body: formData });
-      if (!res.ok) throw new Error(`Transcription HTTP Error: ${res.status}`);
+      const res = await fetch("/api/chat", { method: "POST", body: formData });
+      if (!res.ok) throw new Error();
       const data = (await res.json()) as any;
       setInputMessage(data.userText || "");
     } catch (err) {
-      console.error("Transcription error:", err);
-      alert("Audio transcription failed. Please try speaking again or typing your answer.");
+      alert("音声の書き起こしに失敗しました。");
     } finally {
       setIsAnalyzing(false);
     }
@@ -228,7 +197,7 @@ export function useOralPracticeEngine(
     orderMode: "sequential" | "random" = "sequential"
   ) => {
     if (!questionsList || questionsList.length === 0) {
-      alert("No practice questions found for the selected filter.");
+      alert("練習対象の設問が見つかりませんでした。");
       return;
     }
 
@@ -249,12 +218,12 @@ export function useOralPracticeEngine(
     setChatMessages([
       {
         role: "assistant",
-        content: `【Practice Session Started】<br><br>Yamato: 「${firstQ.question}」<br><br>(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br>Please respond using microphone or text!`,
+        content: `【Practice Session Started】\n\nYamato: 「${firstQ.question}」\n\n(あなたの作成解答: 「${userTargetAns || "（未入力）"}」)\n\nマイクまたはテキストで回答してください！`,
         isHtml: true,
       },
     ]);
 
-    playTTS(firstQ.questionOriginal || firstQ.question);
+    playTTS(firstQ.questionOriginal);
   };
 
   // Proceed to Next Question
@@ -268,16 +237,16 @@ export function useOralPracticeEngine(
         ...prev,
         {
           role: "assistant",
-          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
+          content: `【Next Question】\nYamato: 「${nextQ.question}」\n(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)\n\nどうぞ！`,
           isHtml: true,
         },
       ]);
       setIsWaitingForNext(false);
-      playTTS(nextQ.questionOriginal || nextQ.question);
+      playTTS(nextQ.questionOriginal);
     }
   };
 
-  // Send User Answer Message (Gemini Evaluation Chat)
+  // Send Answer Message
   const sendAnswerMessage = async (
     e: React.FormEvent,
     answersMap: { [key: string]: string },
@@ -301,27 +270,18 @@ export function useOralPracticeEngine(
     const registeredAnswer = answersMap[currentQ.id] || "";
 
     try {
-      // 💡 相対パスによる404エラーを防ぐため、本番用絶対URLに固定します
-      const endpoint = "https://api.jptutoraiyamato.com/chat";
-      
-      const res = await fetch(endpoint, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    message: userText,
-    appType: "eoy-oral-drill",
-    expectedQuestion: currentQ.questionOriginal || currentQ.question,
-    registeredAnswer: registeredAnswer,
-    mode,
-    level: selectedLevel,
-    section,
-    userId: userId,
-    userNickname: userNickname, // 💡 ここを追加
-  }),
-});
-      
-
-      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userText,
+          expectedQuestion: currentQ.questionOriginal,
+          registeredAnswer: registeredAnswer,
+          mode,
+          level: selectedLevel,
+          section,
+        }),
+      });
 
       const data = (await res.json()) as any;
       const aiFeedback = data.reply || "◎ よくできました。";
@@ -340,12 +300,12 @@ export function useOralPracticeEngine(
             { role: "assistant", content: formattedHtml, isHtml: true },
             {
               role: "assistant",
-              content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
+              content: `【Next Question】\nYamato: 「${nextQ.question}」\n(あなたの作成解答: 「${nextTargetAns || "（未入力）"}」)\n\nどうぞ！`,
               isHtml: true,
             },
           ]);
           setIsWaitingForNext(false);
-          playTTS(nextQ.questionOriginal || nextQ.question);
+          playTTS(nextQ.questionOriginal);
         }, 500);
       } else if (nextIndex < activeQuestions.length) {
         setIsWaitingForNext(true);
@@ -358,17 +318,16 @@ export function useOralPracticeEngine(
           ...newMessages,
           {
             role: "assistant",
-            content: `${formattedHtml}<br><br><b>🎉 All questions completed! Great job!</b>`,
+            content: `${formattedHtml}<br><br><b>🎉 すべての問題を完了しました！お疲れ様でした！</b>`,
             isHtml: true,
           },
         ]);
         setIsPracticing(false);
       }
     } catch (err) {
-      console.error("Send answer error:", err);
       setChatMessages([
         ...newMessages,
-        { role: "assistant", content: "An error occurred. Please try sending again.", isHtml: false },
+        { role: "assistant", content: "エラーが発生しました。もう一度送信してください。", isHtml: false },
       ]);
     } finally {
       setIsAnalyzing(false);
@@ -385,6 +344,9 @@ export function useOralPracticeEngine(
     isAnalyzing,
     isRecording,
     isWaitingForNext,
+    ttsError,
+    ttsErrorMessage,
+    resetTtsError: () => setTtsError(false),
     startRecording,
     stopRecording,
     playTTS,
@@ -393,5 +355,3 @@ export function useOralPracticeEngine(
     sendAnswerMessage,
   };
 }
-
-export default useOralPracticeEngine;
