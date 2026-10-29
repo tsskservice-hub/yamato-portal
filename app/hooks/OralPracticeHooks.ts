@@ -1,6 +1,6 @@
 /**
- * @file OralPracticeHooks.ts
- * @description バックエンドAPIの音声・チャットエンドポイントと確実に通信するオーラル練習エンジンフック
+ *  @file OralPracticeHooks.ts
+ *  @description バックエンドAPIの音声・チャットエンドポイントと確実に通信するオーラル練習エンジンフック
  */
 import { useState, useEffect, useRef } from "react";
 
@@ -53,17 +53,14 @@ export function formatOralFeedbackToHtml(rawText: string): string {
     /Evaluation\s*(&|and)\s*Score:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #0284c7; border-radius: 0.375rem;">📊 Evaluation & Score</div>'
   );
-
   cleaned = cleaned.replace(
     /Analysis\s*(&|and)\s*Corrections:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #fef3c7; color: #b45309; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #d97706; border-radius: 0.375rem;">💡 Analysis & Corrections</div>'
   );
-
   cleaned = cleaned.replace(
     /Grammar\s*(&|and)\s*Vocabulary\s*Notes:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #ffedd5; color: #c2410c; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #ea580c; border-radius: 0.375rem;">📚 Grammar & Vocabulary Notes</div>'
   );
-
   cleaned = cleaned.replace(
     /Refined\s*Expression\s*(&|and)\s*Polish:/gi,
     '<div style="margin-top: 1rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #d1fae5; color: #065f46; font-weight: 800; font-size: 0.9rem; border-left: 4px solid #059669; border-radius: 0.375rem;">✨ Refined Expression & Polish</div>'
@@ -73,7 +70,12 @@ export function formatOralFeedbackToHtml(rawText: string): string {
   return cleaned;
 }
 
-export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.0) {
+// 💡 第3引数に userId?: string を受け取るよう拡張
+export function useOralPracticeEngine(
+  selectedLevel = "normal",
+  speechSpeed = 1.0,
+  userId?: string
+) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
@@ -135,7 +137,7 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+
       let mimeType = "audio/webm";
       if (typeof MediaRecorder !== "undefined") {
         if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
@@ -305,12 +307,13 @@ export function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1.
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
-          appType: "eoy-oral-drill", // 💡 ここで明確に EOY Oral Drill の頭脳を指定します
+          appType: "eoy-oral-drill",
           expectedQuestion: currentQ.questionOriginal || currentQ.question,
           registeredAnswer: registeredAnswer,
           mode,
           level: selectedLevel,
           section,
+          userId: userId, // 💡 Supabaseでクレジットを減算するために userId を含める
         }),
       });
 

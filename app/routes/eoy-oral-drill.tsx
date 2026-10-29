@@ -84,7 +84,7 @@ export default function EoyOralDrillPage() {
     deleteCustomQuestion,
   } = useSupabaseUserAnswers(supabase, user?.id, "drill");
 
-  const engine = useOralPracticeEngine(selectedLevel, speechSpeed);
+  const engine = useOralPracticeEngine(selectedLevel, speechSpeed, user?.id);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
