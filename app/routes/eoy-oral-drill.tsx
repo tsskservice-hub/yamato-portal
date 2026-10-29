@@ -1,6 +1,6 @@
 /**
- * @file eoy-oral-drill.tsx
- * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
+ *  @file eoy-oral-drill.tsx
+ *  @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -14,19 +14,24 @@ import { supabase } from "../lib/supabaseClient";
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
-import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector"; // 💡 共通セレクター
+import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector";
+import OralQuestionPracticeCard from "../components/OralQuestionPracticeCard"; // 👈 追加
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
-
 import {
   fetchOralExamQuestionsData,
   OralExamQuestionsData,
+  OralExamQuestionItem,
 } from "../data/oral-exam-questions";
 
 export const meta: MetaFunction = () => {
   return [
     { title: "VCE Japanese - EOY Oral Drill & Custom QA Bank | JPTutor AI Yamato" },
-    { name: "description", content: "Comprehensive VCE Japanese Oral Exam practice covering all stages from entrance greetings to Section 1 & Section 2 Detailed Study." },
+    {
+      name: "description",
+      content:
+        "Comprehensive VCE Japanese Oral Exam practice covering all stages from entrance greetings to Section 1 & Section 2 Detailed Study.",
+    },
   ];
 };
 
@@ -42,11 +47,18 @@ export default function EoyOralDrillPage() {
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
 
   // 💡 要件に対応したステート初期値の設定（Section 1, Normal ペース, スピード 1.0）
-  const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom">("sec1");
-  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
+  const [selectedSection, setSelectedSection] = useState<
+    "beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom"
+  >("sec1");
+  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">(
+    "normal"
+  );
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]); // 空配列 ＝ クリア状態（全選択など）
   const [speechSpeed, setSpeechSpeed] = useState<number>(1.0); // デフォルト 1.0
   const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
+
+  // 💡 OralQuestionPracticeCard 用の選択中質問ステート
+  const [selectedPracticeQuestion, setSelectedPracticeQuestion] = useState<OralExamQuestionItem | null>(null);
 
   const [newQuestionText, setNewQuestionText] = useState("");
   const [newAnswerText, setNewAnswerText] = useState("");
@@ -56,7 +68,7 @@ export default function EoyOralDrillPage() {
 
   // 💡 確実に認証モーダルやログイン画面を開くための共通トリガー関数
   const handleOpenAuth = () => {
-    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: 'signin' } }));
+    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
     const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
     if (authButton) {
       authButton.click();
@@ -86,7 +98,9 @@ export default function EoyOralDrillPage() {
       if (session?.user) fetchProfile(session.user.id);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setIsAuthLoading(false);
       if (session?.user) fetchProfile(session.user.id);
@@ -129,6 +143,23 @@ export default function EoyOralDrillPage() {
     if (selectedSection === "custom" && user?.id) fetchCustomQuestions();
   }, [selectedSection, user?.id]);
 
+  // OralQuestionPracticeCard 用の設問リストの算出
+  const practiceQuestions: OralExamQuestionItem[] = useMemo(() => {
+    if (!questionsData || selectedSection === "custom") return [];
+    const secData = questionsData[selectedSection];
+    if (!secData) return [];
+    return secData[selectedLevel] || secData["normal"] || secData["steady"] || [];
+  }, [questionsData, selectedSection, selectedLevel]);
+
+  // 設問リスト更新時の初期選択設定
+  useEffect(() => {
+    if (practiceQuestions.length > 0) {
+      setSelectedPracticeQuestion(practiceQuestions[0]);
+    } else {
+      setSelectedPracticeQuestion(null);
+    }
+  }, [practiceQuestions]);
+
   const availableTopics = useMemo(() => {
     const set = new Set<string>();
     if (selectedSection === "custom") {
@@ -155,8 +186,16 @@ export default function EoyOralDrillPage() {
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
   const handleClearAllTopics = () => setSelectedTopics([]);
 
-  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = useMemo(() => {
-    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = [];
+  const currentQuestions: (QuestionItem & {
+    questionOriginal: string;
+    defaultAnswerOriginal?: string;
+    minLength?: number;
+  })[] = useMemo(() => {
+    const list: (QuestionItem & {
+      questionOriginal: string;
+      defaultAnswerOriginal?: string;
+      minLength?: number;
+    })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     if (selectedSection === "custom") {
@@ -228,15 +267,18 @@ export default function EoyOralDrillPage() {
     // 各質問の現在の回答内容をチェック（10文字未満のものが無いか検証）
     for (const q of currentQuestions) {
       const currentAns = answers[q.id] || "";
-      
-      
-if (currentAns.trim().length < 10) {
-        alert(`[Character Count Check]\nThe answer for "${q.questionOriginal.slice(0, 20)}..." is too short.\nPlease enter at least 10 characters for your drill response. (Current: ${currentAns.trim().length} characters)`);
+      if (currentAns.trim().length < 10) {
+        alert(
+          `[Character Count Check]\nThe answer for "${q.questionOriginal.slice(
+            0,
+            20
+          )}..." is too short.\nPlease enter at least 10 characters for your drill response. (Current: ${
+            currentAns.trim().length
+          } characters)`
+        );
         return;
       }
-
     }
-
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
@@ -318,7 +360,8 @@ if (currentAns.trim().length < 10) {
                 Sign In Required
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                EOY Oral Practice & Custom QA Bank require you to sign in. Please sign in to access oral drills and save your custom answers.
+                EOY Oral Practice & Custom QA Bank require you to sign in. Please sign in to access
+                oral drills and save your custom answers.
               </p>
             </div>
             <button
@@ -358,13 +401,17 @@ if (currentAns.trim().length < 10) {
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
                   All VCE Oral Exam Stages
                 </span>
-                <span className="text-xs text-slate-500">VCE Japanese Oral Exam Prep (Cost: 3 credits/session)</span>
+                <span className="text-xs text-slate-500">
+                  VCE Japanese Oral Exam Prep (Cost: 3 credits/session)
+                </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
                 EOY Oral Exam Practice & Custom QA Bank
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice every stage of the VCE Japanese Oral Exam. Your custom answers are automatically saved. (Drill requirement: 10+ characters | 3 credits per practice session)
+                Practice every stage of the VCE Japanese Oral Exam. Your custom answers are
+                automatically saved. (Drill requirement: 10+ characters | 3 credits per practice
+                session)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
@@ -372,7 +419,9 @@ if (currentAns.trim().length < 10) {
 
           <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 rounded-3xl p-6 shadow-sm space-y-6">
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">📂 Select Exam Stage / Source</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                📂 Select Exam Stage / Source
+              </h3>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {[
                   { id: "beforeSec1", label: "Before Sec 1 (Entrance)" },
@@ -431,6 +480,27 @@ if (currentAns.trim().length < 10) {
             />
           )}
 
+          {/* 💡 会話練習スクリーン（OralQuestionPracticeCard） */}
+          {selectedSection !== "custom" && practiceQuestions.length > 0 && (
+            <OralQuestionPracticeCard
+              questions={practiceQuestions}
+              selectedQuestion={selectedPracticeQuestion}
+              onSelectQuestion={setSelectedPracticeQuestion}
+              selectedLevel={selectedLevel}
+              userId={user?.id}
+              userNickname={nickname}
+              appType="eoy-oral-drill"
+              isVoiceMode="drill"
+              themeColor={themeColor}
+              // 💡 ステップ１：音声分析・減算完了時に Supabase から最新の残高を再取得する関数を渡す
+              onCreditsUpdated={() => {
+                if (user?.id) {
+                  fetchProfile(user.id);
+                }
+              }}
+            />
+          )}
+
           <OralUserAnswerList
             questions={currentQuestions}
             answers={answers}
@@ -454,7 +524,8 @@ if (currentAns.trim().length < 10) {
                     Sign In Required for Oral Practice
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato and record your progress.
+                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato
+                    and record your progress.
                   </p>
                 </div>
                 <button
@@ -489,7 +560,10 @@ if (currentAns.trim().length < 10) {
             )}
           </div>
 
-          <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+          <aside
+            aria-label="Floating Controls"
+            className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
+          >
             <ChatYamatoEoyOralDrill userId={user?.id} userNickname={nickname} credits={credits} />
           </aside>
         </main>

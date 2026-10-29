@@ -3,17 +3,17 @@ import { OralExamQuestionItem } from "../data/oral-exam-questions";
 import useOralAudioRecorder from "./OralAudioRecorder";
 import OralDrillFeedbackCard, { FeedbackData } from "./OralDrillFeedbackCard";
 
-// 💡 1. Props の型定義（追加パラメータを網羅して型エラーを防止）
+// Props の型定義
 export interface OralQuestionPracticeCardProps {
   questions: OralExamQuestionItem[];
   selectedQuestion: OralExamQuestionItem | null;
   onSelectQuestion: (question: OralExamQuestionItem | null) => void;
   selectedLevel?: "steady" | "normal" | "accelerated";
-  userId?: string;                          // 👈 追加：Supabase減算用のユーザーID
-  userNickname?: string;                    // 👈 追加：AIの呼びかけ用ニックネーム
-  appType?: string;                         // 👈 追加：クレジット判定用アプリ種別
-  isVoiceMode?: string;                     // 👈 追加：音声モード指定
-  onCreditsUpdated?: (newCredits: number) => void; // 👈 追加：ヘッダー表示の即時同期
+  userId?: string;                          // Supabase減算用のユーザーID
+  userNickname?: string;                    // AIの呼びかけ用ニックネーム
+  appType?: string;                         // クレジット判定用アプリ種別
+  isVoiceMode?: string;                     // 音声モード指定
+  onCreditsUpdated?: (newCredits: number) => void; // ヘッダー表示の即時同期
   themeColor?: string;
   apiEndpoint?: string;
   modeLabel?: string;
@@ -69,7 +69,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
       );
       formData.append("level", selectedLevel);
 
-      // 💡 2. ログイン情報・機能パラメータを FormData に追加（Supabase減算と呼びかけを有効化）
+      // ログイン情報・機能パラメータを FormData に追加
       if (userId) {
         formData.append("userId", userId);
       }
@@ -82,14 +82,14 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
       if (!response.ok) throw new Error(`API response error: ${response.status}`);
 
-      // 💡 3. (await response.json()) as any で型キャストを行い、ts(18046) エラーを解消
       const data = (await response.json()) as any;
 
       setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
 
-      // 💡 4. 最新残高が返ってきた場合、親ページ（ヘッダー）のステートを即時更新
-      if (typeof data.currentCredits === "number" && onCreditsUpdated) {
-        onCreditsUpdated(data.currentCredits);
+      // 💡 【修正ポイント (ステップ２)】
+      // API通信成功後に親側の fetchProfile(user.id) 等を起動できるよう無条件で onCreditsUpdated を呼び出す
+      if (onCreditsUpdated) {
+        onCreditsUpdated(typeof data.currentCredits === "number" ? data.currentCredits : 0);
       }
 
       setFeedback({
@@ -110,9 +110,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
   const handleNextQuestion = () => {
     if (!questions || questions.length === 0) return;
-    const currentIndex = selectedQuestion
-      ? questions.findIndex((q) => q.text === selectedQuestion.text)
-      : -1;
+    const currentIndex = selectedQuestion ? questions.findIndex((q) => q.text === selectedQuestion.text) : -1;
     const nextIndex = (currentIndex + 1) % questions.length;
     onSelectQuestion(questions[nextIndex]);
     setFeedback(null);
