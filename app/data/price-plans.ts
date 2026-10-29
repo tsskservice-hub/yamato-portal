@@ -1,11 +1,7 @@
 /**
  * @file price-plans.ts
- * @description Supabase 'app_knowledge' (key: 'PRICE_PLANS') からの料金プラン取得データモジュール
- * 
- * 💡 変更点:
- * 1. 静的フォールバック（ハードコードデータ）を完全に削除。
- * 2. Supabaseからの取得失敗時には null を返却し、呼び出し元のページが 
- *    PageLayout の error プロパティ経由で自動的に DataErrorState を表示・サポート自動報告できるように変更。
+ * @description Type definitions, Supabase client integration, and helper functions for pricing plans (Yamato Portal)
+ * Stores data in Supabase 'app_knowledge' table under key: 'PRICE_PLANS'.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -52,12 +48,28 @@ export interface PricePlansKnowledge {
   creditConsumptionGuide?: CreditConsumptionGuideItem[];
 }
 
+// 💡 他コンポーネント（CreditCostFooter.tsxなど）が直接インポートして参照するデフォルトのガイドデータ（ビルドエラー防止用）
+export const CREDIT_CONSUMPTION_GUIDE: CreditConsumptionGuideItem[] = [
+  { item: "Text Chat (Q&A / Vocabulary)", cost: "2 credits / turn" },
+  { item: "Image Attachment (1) / Image Gen", cost: "4 credits" },
+  { item: "Image Attachments (2) [Multi-image discount]", cost: "6 credits" },
+  { item: "Essay / Genkoyoshi Correctors", cost: "20-30 credits / session" },
+  { item: "Oral Exam / Voice Roleplay", cost: "15-25 credits / min" },
+  { item: "Mini Games & Drills", cost: "Free / 0.5 credits" },
+];
+
+export const CAMPAIGN_NOTICE: CampaignNotice = {
+  title: "Limited-Time Campaign (Until October 29)",
+  description: "Paid packs include bonus credits valid until October 29! Standard base credits do not expire.",
+  rawText: "Limited-Time Campaign (Until October 29): Paid packs include bonus credits valid until October 29! (Bonus credits expire on Oct 29; standard base credits are unexpired.)"
+};
+
 // Supabase app_knowledge のキー名
 const KNOWLEDGE_KEY = 'PRICE_PLANS';
 
 /**
  * Supabase 'app_knowledge' テーブルから PRICE_PLANS データを取得します。
- * 静的フォールバックは廃止し、取得失敗・データ不在時は null を返します。
+ * 取得失敗・データ不在時は null を返し、PageLayout 経由で DataErrorState を表示させます。
  */
 export async function fetchPricePlansData(
   supabaseClient: SupabaseClient
