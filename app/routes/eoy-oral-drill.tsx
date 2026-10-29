@@ -14,7 +14,7 @@ import { supabase } from "../lib/supabaseClient";
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
-import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector";
+
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 import {
@@ -386,10 +386,10 @@ export default function EoyOralDrillPage() {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
                   All VCE Oral Exam Stages
-                </span>
+              </span>
                 <span className="text-xs text-slate-500">
                   VCE Japanese Oral Exam Prep (Cost: 3 credits/session)
-                </span>
+              </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
                 EOY Oral Exam Practice & Custom QA Bank
@@ -534,5 +534,141 @@ export default function EoyOralDrillPage() {
         </main>
       </div>
     </PageLayout>
+  );
+}
+
+/**
+ * 💡 OralDrillQuestionSelector component implementation
+ * Updated to use selected stage/source button styling for learning pace and speech speed.
+ */
+function OralDrillQuestionSelector({
+  categories,
+  selectedTopics,
+  onToggleTopic,
+  onSelectAllTopics,
+  onClearAllTopics,
+  selectedLevel,
+  onSelectLevel,
+  selectedSpeed,
+  onSelectSpeed,
+  themeColor,
+  questionsCount,
+}: {
+  categories: string[];
+  selectedTopics: string[];
+  onToggleTopic: (topic: string) => void;
+  onSelectAllTopics: () => void;
+  onClearAllTopics: () => void;
+  selectedLevel: "steady" | "normal" | "accelerated";
+  onSelectLevel: (level: "steady" | "normal" | "accelerated") => void;
+  selectedSpeed: number;
+  onSelectSpeed: (speed: number) => void;
+  themeColor: string;
+  questionsCount: number;
+}) {
+  return (
+    <div className="space-y-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+      {/* Learning Pace / Level Selection */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          ⚡ Learning Pace / Level
+        </h3>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { id: "steady", label: "Steady" },
+            { id: "normal", label: "Normal" },
+            { id: "accelerated", label: "Accelerated" },
+          ].map((lvl) => (
+            <button
+              key={lvl.id}
+              type="button"
+              onClick={() => onSelectLevel(lvl.id as any)}
+              className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                selectedLevel === lvl.id
+                  ? "bg-amber-500 text-white border-amber-600 shadow-sm"
+                  : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"
+              }`}
+            >
+              {lvl.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Speech Speed Selection */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          🗣️ Speech Speed
+        </h3>
+        <div className="grid grid-cols-4 gap-2">
+          {[0.8, 1.0, 1.2, 1.5].map((spd) => (
+            <button
+              key={spd}
+              type="button"
+              onClick={() => onSelectSpeed(spd)}
+              className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                selectedSpeed === spd
+                  ? "bg-amber-500 text-white border-amber-600 shadow-sm"
+                  : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"
+              }`}
+            >
+              {spd}x Speed
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Categories / Topics Selection */}
+      {categories.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              🏷️ Filter Topics ({selectedTopics.length === 0 ? "All Selected" : `${selectedTopics.length} Selected`})
+            </h3>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={onSelectAllTopics}
+                className="text-[10px] font-bold text-amber-600 hover:underline cursor-pointer"
+              >
+                Select All
+              </button>
+              <span className="text-slate-300">|</span>
+              <button
+                type="button"
+                onClick={onClearAllTopics}
+                className="text-[10px] font-bold text-slate-500 hover:underline cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => {
+              const isSelected = selectedTopics.length === 0 || selectedTopics.includes(cat);
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => onToggleTopic(cat)}
+                  className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer ${
+                    selectedTopics.includes(cat)
+                      ? "bg-amber-500 text-white border-amber-600 shadow-sm"
+                      : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-amber-50"
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="pt-2 text-xs text-slate-500 font-medium flex items-center justify-between">
+        <span>Active Questions in Current Filter:</span>
+        <span className="font-bold text-slate-800 dark:text-slate-200">{questionsCount} questions</span>
+      </div>
+    </div>
   );
 }

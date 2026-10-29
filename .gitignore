@@ -46,3 +46,5 @@ pids
 .env
 .env.local
 .env.*.local
+
+note.md
