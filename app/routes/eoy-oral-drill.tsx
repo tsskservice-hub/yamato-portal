@@ -15,7 +15,6 @@ import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
 import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector"; // 💡 共通セレクター
-import OralQuestionPracticeCard from "../components/OralQuestionPracticeCard"; // 💡 追加
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
 
@@ -52,9 +51,6 @@ export default function EoyOralDrillPage() {
   const [newQuestionText, setNewQuestionText] = useState("");
   const [newAnswerText, setNewAnswerText] = useState("");
   const [newCategory, setNewCategory] = useState("");
-
-  // 💡 練習カード用のステートを追加
-  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -159,8 +155,8 @@ export default function EoyOralDrillPage() {
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
   const handleClearAllTopics = () => setSelectedTopics([]);
 
-  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number; text?: string })[] = useMemo(() => {
-    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number; text?: string })[] = [];
+  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = useMemo(() => {
+    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     if (selectedSection === "custom") {
@@ -178,7 +174,6 @@ export default function EoyOralDrillPage() {
           isCustom: true,
           defaultAnswerOriginal: effectiveAnswer,
           minLength: 10,
-          text: q.question_text,
         });
         initialMap[qId] = effectiveAnswer;
       });
@@ -205,7 +200,6 @@ export default function EoyOralDrillPage() {
               isCustom: false,
               defaultAnswerOriginal: plainAnswer,
               minLength: 10,
-              text: displayQuestion,
             });
             initialMap[String(qId)] = plainAnswer;
           }
@@ -216,9 +210,6 @@ export default function EoyOralDrillPage() {
     loadSavedAnswers(initialMap);
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
-
-  // 💡 フィルタリングされた質問リスト（練習カード用）
-  const filteredQuestions = currentQuestions;
 
   // 💡 バリデーションガード付きの練習開始ハンドラー（クレジット残高の事前検証も実施）
   const handleStartPractice = async () => {
@@ -238,11 +229,14 @@ export default function EoyOralDrillPage() {
     for (const q of currentQuestions) {
       const currentAns = answers[q.id] || "";
       
-      if (currentAns.trim().length < 10) {
+      
+if (currentAns.trim().length < 10) {
         alert(`[Character Count Check]\nThe answer for "${q.questionOriginal.slice(0, 20)}..." is too short.\nPlease enter at least 10 characters for your drill response. (Current: ${currentAns.trim().length} characters)`);
         return;
       }
+
     }
+
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
       id: q.id,
@@ -447,20 +441,6 @@ export default function EoyOralDrillPage() {
             orderMode={orderMode}
             setOrderMode={setOrderMode}
             themeColor={themeColor}
-          />
-
-          <OralQuestionPracticeCard
-            questions={filteredQuestions as any}
-            selectedQuestion={selectedQuestion}
-            onSelectQuestion={setSelectedQuestion}
-            selectedLevel={selectedLevel}
-            userId={user?.id}
-            userNickname={nickname}
-            appType="eoy-oral-drill"
-            isVoiceMode="drill"
-            onCreditsUpdated={(newCredits) => setCredits(newCredits)}
-            themeColor={themeColor}
-            modeLabel={`${selectedSection.toUpperCase()} Drill`}
           />
 
           <div ref={chatContainerRef}>
