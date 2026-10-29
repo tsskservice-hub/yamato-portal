@@ -1,17 +1,15 @@
 /**
  * @file eoy-writing.tsx
- * @description EOY Writing Practice モジュール
+ * @description EOY Writing Practice モジュール (PageLayout 統合型データエラーガード対応版)
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import TextTypeModal from "../components/TextTypeModal";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
-import { DataErrorState } from "../components/DataErrorState";
 import GenkoyoshiModal from "../components/GenkoyoshiModal";
 
-// 💡 外部データ・APIフェッチ関数のインポート（getGenkoyoshiData は削除）
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
 import { fetchTextTypesData, TextTypesData } from "../data/texttypes";
 import { fetchWritingStylesData, WritingStylesData } from "../data/writing-styles";
@@ -24,16 +22,20 @@ export default function Dashboard() {
   const [activeStyleModal, setActiveStyleModal] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
 
-  // 💡 Genkoyoshi モダル専用の 1つの boolean ステート
   const [isGenkoyoshiOpen, setIsGenkoyoshiOpen] = useState<boolean>(false);
 
-  // 💡 ステート管理（非同期取得前は null または初期配列）
   const [questions, setQuestions] = useState<any[]>(WRITING_EXAM_QUESTIONS_FALLBACK);
   const [modalData, setModalData] = useState<TextTypesData | null>(null);
   const [stylesData, setStylesData] = useState<WritingStylesData>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
 
-  const rootData = useRouteLoaderData("root") as { user?: any; credits?: number; nickname?: string; } | undefined;
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    credits?: number;
+    nickname?: string;
+  } | undefined;
+
   const user = rootData?.user ?? null;
   const credits = rootData?.credits ?? 10;
   const nickname = rootData?.nickname ?? "";
@@ -49,35 +51,37 @@ export default function Dashboard() {
     document.title = "Learning Dashboard | VCE EOY Exam Writing Tutor";
   }, []);
 
-  // 💡 Supabase からデータを非同期取得
-  const loadDataFromSupabase = async () => {
+  const loadDataFromSupabase = useCallback(async () => {
     setIsLoading(true);
+    setError(false);
     try {
-      // 1. 設問一覧
       const fetchedQuestions = await fetchWritingExamQuestionsData(supabase);
       if (fetchedQuestions && Array.isArray(fetchedQuestions) && fetchedQuestions.length > 0) {
         setQuestions(fetchedQuestions);
       }
 
-      // 2. TEXTTYPES
       const fetchedTextTypes = await fetchTextTypesData(supabase);
       setModalData(fetchedTextTypes);
 
-      // 3. WRITING_STYLES
       const fetchedStyles = await fetchWritingStylesData(supabase);
       if (fetchedStyles && typeof fetchedStyles === "object") {
         setStylesData(fetchedStyles);
       }
+
+      if (!fetchedTextTypes || Object.keys(fetchedTextTypes).length === 0 || !fetchedStyles || Object.keys(fetchedStyles).length === 0) {
+        setError(true);
+      }
     } catch (err) {
       console.error("Failed to load data from Supabase:", err);
+      setError(true);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadDataFromSupabase();
-  }, []);
+  }, [loadDataFromSupabase]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -105,59 +109,20 @@ export default function Dashboard() {
     ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}`
     : "";
 
-  // 💡 各テキストタイプ用モーダルのデータ解決
   const activeModalData = activeModal && modalData ? modalData[activeModal] || null : null;
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
 
-  // 1. ローディング中の表示
-  if (isLoading) {
-    return (
-      <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
-        <div className="min-h-screen bg-white text-slate-800 font-sans flex items-center justify-center p-8">
-          <div className="text-slate-600 font-bold text-lg animate-pulse">Loading Writing Resources...</div>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  // 2. TEXTTYPES の取得失敗時は DataErrorState を表示
-  if (!modalData || Object.keys(modalData).length === 0) {
-    return (
-      <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
-        <div className="min-h-screen bg-white text-slate-800 font-sans px-4 py-8 max-w-4xl mx-auto">
-          <DataErrorState
-            title="Text Types Specification Unavailable"
-            message="Unable to load Text Types and Genkoyoshi guides from the database. Please reload or report this error."
-            errorMessage="Failed to fetch key 'TEXTTYPES' from app_knowledge table in Supabase."
-            onRetry={loadDataFromSupabase}
-          />
-        </div>
-      </PageLayout>
-    );
-  }
-
-  // 3. WRITING_STYLES の取得失敗時も DataErrorState を表示
-  if (!stylesData || Object.keys(stylesData).length === 0) {
-    return (
-      <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
-        <div className="min-h-screen bg-white text-slate-800 font-sans px-4 py-8 max-w-4xl mx-auto">
-          <DataErrorState
-            title="Writing Styles Unavailable"
-            message="Unable to load Writing Styles information from the database."
-            errorMessage="Failed to fetch key 'WRITING_STYLES' from app_knowledge table in Supabase."
-            onRetry={loadDataFromSupabase}
-          />
-        </div>
-      </PageLayout>
-    );
-  }
-
   return (
-    <PageLayout ref={layoutRef} breadcrumbTitle="End of Year Writing Practice">
+    <PageLayout
+      ref={layoutRef}
+      breadcrumbTitle="End of Year Writing Practice"
+      isLoading={isLoading}
+      error={error || (!isLoading && (!modalData || Object.keys(modalData).length === 0 || !stylesData || Object.keys(stylesData).length === 0))}
+      errorMessage="Unable to load Text Types and Writing Styles specifications from Supabase."
+      onRetry={loadDataFromSupabase}
+    >
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
-
-          {/* 上部原稿用紙ガイドボタン（1つの boolean ステートで極めてシンプルに呼び出し） */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <button
               type="button"
@@ -183,7 +148,6 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          {/* AIヤマト案内エリア */}
           <div className="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4">
             <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2 text-indigo-900 font-bold text-lg">
@@ -214,7 +178,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* 選択中の問題 */}
             <div id="active-ai-tutor-banner" className="px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <span>🎯 Active Question Q</span>
@@ -267,14 +230,12 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* 設問一覧ヘッダー */}
           <div className="flex justify-between items-end border-b-2 border-slate-200 pb-2 mb-6">
             <h1 className="text-slate-800 text-2xl sm:text-3xl font-bold m-0">
               📚 Task List ({filteredQuestions.length} questions)
             </h1>
           </div>
 
-          {/* フィルターボタン群 */}
           <div className="mb-6">
             <div className="mb-2 text-lg font-bold text-slate-600">Filter by Writing Style</div>
             <div className="flex gap-2.5 flex-wrap mb-4">
@@ -309,7 +270,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 設問カード一覧 */}
           <div className="flex flex-col gap-6 mb-12">
             {filteredQuestions.map((q) => {
               const isSelected = selectedQuestion?.id === q.id;
@@ -361,7 +321,6 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* チャットウィジェット */}
           <ChatYamatoEoyWriting
             systemPrompt={currentSystemPrompt}
             userId={user?.id}
@@ -377,7 +336,6 @@ export default function Dashboard() {
             }}
           />
 
-          {/* 画像拡大モーダル */}
           {modalImageSrc && (
             <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setModalImageSrc(null)}>
               <div className="relative max-w-4xl max-h-[90vh]">
@@ -389,13 +347,11 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* 💡 独立した GenkoyoshiModal コンポーネントの配置 */}
           <GenkoyoshiModal
             isOpen={isGenkoyoshiOpen}
             onClose={() => setIsGenkoyoshiOpen(false)}
           />
 
-          {/* 💡 各テキストタイプ用モーダル */}
           {activeModal && activeModalData && (
             <TextTypeModal
               isOpen={true}
@@ -405,7 +361,6 @@ export default function Dashboard() {
             />
           )}
 
-          {/* Writing Style 専用モーダル */}
           {activeStyleModal && activeWritingStyleData && (
             <div
               className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4"
@@ -457,7 +412,6 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-
         </main>
       </div>
     </PageLayout>

@@ -1,40 +1,35 @@
 /**
- *  @file eoy-oral-drill.tsx
- *  @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
+ * @file eoy-oral-drill.tsx
+ * @description VCE Japanese - EOY Oral Practice & Custom QA Bank (PageLayout 統合型データエラーガード対応版)
  */
-import React, { useState, useEffect, useMemo, useRef } from "react";
+
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
-import { DataErrorState } from "../components/DataErrorState";
 import OralExaminerAvatar from "../components/OralExaminerAvatar";
 import ChatYamatoEoyOralDrill from "../components/ChatYamatoEoyOralDrill";
 import { supabase } from "../lib/supabaseClient";
 
-// 💡 Modular Oral components & hooks
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
 import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
 import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector";
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
 import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
-import {
-  fetchOralExamQuestionsData,
-  OralExamQuestionsData,
-} from "../data/oral-exam-questions";
+import { fetchOralExamQuestionsData, OralExamQuestionsData } from "../data/oral-exam-questions";
 
 export const meta: MetaFunction = () => {
   return [
     { title: "VCE Japanese - EOY Oral Drill & Custom QA Bank | JPTutor AI Yamato" },
     {
       name: "description",
-      content:
-        "Comprehensive VCE Japanese Oral Exam practice covering all stages from entrance greetings to Section 1 & Section 2 Detailed Study.",
+      content: "Comprehensive VCE Japanese Oral Exam practice covering all stages from entrance greetings to Section 1 & Section 2 Detailed Study.",
     },
   ];
 };
 
 export default function EoyOralDrillPage() {
-  const themeColor = "#eab308"; // Amber / Gold theme
+  const themeColor = "#eab308";
 
   const [user, setUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
@@ -43,16 +38,12 @@ export default function EoyOralDrillPage() {
 
   const [questionsData, setQuestionsData] = useState<OralExamQuestionsData | null>(null);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
 
-  // 💡 要件に対応したステート初期値の設定（Section 1, Normal ペース, スピード 1.0）
-  const [selectedSection, setSelectedSection] = useState<
-    "beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom"
-  >("sec1");
-  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">(
-    "normal"
-  );
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]); // 空配列 ＝ クリア状態（全選択など）
-  const [speechSpeed, setSpeechSpeed] = useState<number>(1.0); // デフォルト 1.0
+  const [selectedSection, setSelectedSection] = useState<"beforeSec1" | "sec1" | "sec2" | "afterSec2" | "custom">("sec1");
+  const [selectedLevel, setSelectedLevel] = useState<"steady" | "normal" | "accelerated">("normal");
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [speechSpeed, setSpeechSpeed] = useState<number>(1.0);
   const [orderMode, setOrderMode] = useState<"sequential" | "random">("sequential");
 
   const [newQuestionText, setNewQuestionText] = useState("");
@@ -61,7 +52,6 @@ export default function EoyOralDrillPage() {
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // 💡 確実に認証モーダルやログイン画面を開くための共通トリガー関数
   const handleOpenAuth = () => {
     window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
     const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
@@ -72,7 +62,6 @@ export default function EoyOralDrillPage() {
     }
   };
 
-  // 💡 Drillモードとして明示的に "drill" を指定してフックを呼び出す
   const {
     answers,
     customQuestionsRaw,
@@ -86,6 +75,24 @@ export default function EoyOralDrillPage() {
 
   const engine = useOralPracticeEngine(selectedLevel, speechSpeed, user?.id, nickname);
 
+  const loadQuestions = useCallback(async () => {
+    setIsLoadingData(true);
+    setError(false);
+    try {
+      const fetched = await fetchOralExamQuestionsData(supabase);
+      if (fetched && Object.keys(fetched).length > 0) {
+        setQuestionsData(fetched);
+      } else {
+        setError(true);
+      }
+    } catch (err) {
+      console.error("Failed to load oral exam questions:", err);
+      setError(true);
+    } finally {
+      setIsLoadingData(false);
+    }
+  }, []);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -93,29 +100,16 @@ export default function EoyOralDrillPage() {
       if (session?.user) fetchProfile(session.user.id);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setIsAuthLoading(false);
       if (session?.user) fetchProfile(session.user.id);
     });
 
-    async function loadQuestions() {
-      setIsLoadingData(true);
-      try {
-        const fetched = await fetchOralExamQuestionsData(supabase);
-        setQuestionsData(fetched);
-      } catch (err) {
-        setQuestionsData(null);
-      } finally {
-        setIsLoadingData(false);
-      }
-    }
     loadQuestions();
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [loadQuestions]);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -134,7 +128,6 @@ export default function EoyOralDrillPage() {
     }
   };
 
-  // 💡 【修正ポイント】AIの音声解析（isAnalyzing）が完了したタイミングで Supabase から最新の残高を自動同期する
   useEffect(() => {
     if (!engine.isAnalyzing && user?.id) {
       fetchProfile(user.id);
@@ -159,7 +152,6 @@ export default function EoyOralDrillPage() {
     return Array.from(set);
   }, [selectedSection, selectedLevel, questionsData, customQuestionsRaw]);
 
-  // マルチセレクト用のトピック切り替えハンドラー
   const toggleTopic = (topic: string) => {
     if (selectedTopics.includes(topic)) {
       setSelectedTopics(selectedTopics.filter((t) => t !== topic));
@@ -171,16 +163,8 @@ export default function EoyOralDrillPage() {
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
   const handleClearAllTopics = () => setSelectedTopics([]);
 
-  const currentQuestions: (QuestionItem & {
-    questionOriginal: string;
-    defaultAnswerOriginal?: string;
-    minLength?: number;
-  })[] = useMemo(() => {
-    const list: (QuestionItem & {
-      questionOriginal: string;
-      defaultAnswerOriginal?: string;
-      minLength?: number;
-    })[] = [];
+  const currentQuestions: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number; })[] = useMemo(() => {
+    const list: (QuestionItem & { questionOriginal: string; defaultAnswerOriginal?: string; minLength?: number; })[] = [];
     const initialMap: { [key: string]: string } = {};
 
     if (selectedSection === "custom") {
@@ -235,7 +219,6 @@ export default function EoyOralDrillPage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
-  // 💡 バリデーションガード付きの練習開始ハンドラー（クレジット残高の事前検証も実施）
   const handleStartPractice = async () => {
     if (!user) {
       alert("会話練習を行うには、サインインが必要です！");
@@ -243,13 +226,11 @@ export default function EoyOralDrillPage() {
       return;
     }
 
-    // 💡 事前検証（クレジット残高が3クレジット以上あるかチェック）
     if (credits < 3) {
       alert("クレジットが不足しています（一問一答ドリルには3クレジット必要です）。チャージを行ってください。");
       return;
     }
 
-    // 各質問の現在の回答内容をチェック（10文字未満のものが無いか検証）
     for (const q of currentQuestions) {
       const currentAns = answers[q.id] || "";
       if (currentAns.trim().length < 10) {
@@ -303,7 +284,6 @@ export default function EoyOralDrillPage() {
     }
   };
 
-  // 💡 チャットメッセージ送信時にバックエンド経由で3クレジットが減算される仕組みを連動
   const handleSendMessageWithCredit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (credits < 3) {
@@ -311,30 +291,22 @@ export default function EoyOralDrillPage() {
       return;
     }
 
-    // エンジン側の送信処理を実行
     await engine.sendAnswerMessage(e, answers, "drill", selectedSection);
 
-    // 💡 応答・減算成功後に最新のクレジット残高を再取得してヘッダー表示を即時更新
     if (user?.id) {
       await fetchProfile(user.id);
     }
   };
 
-  if (isAuthLoading || isLoadingData) {
-    return (
-      <PageLayout user={user} credits={credits}>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
-          <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
-            Loading EOY Oral Practice...
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  if (!user) {
-    return (
-      <PageLayout user={user} credits={credits}>
+  return (
+    <PageLayout
+      user={user}
+      credits={credits}
+      error={error || (!isLoadingData && (!questionsData || Object.keys(questionsData).length === 0))}
+      errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+      onRetry={loadQuestions}
+    >
+      {!user ? (
         <div className="min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center">
           <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6">
             <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
@@ -345,8 +317,7 @@ export default function EoyOralDrillPage() {
                 Sign In Required
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                EOY Oral Practice & Custom QA Bank require you to sign in. Please sign in to access
-                oral drills and save your custom answers.
+                EOY Oral Practice & Custom QA Bank require you to sign in. Please sign in to access oral drills and save your custom answers.
               </p>
             </div>
             <button
@@ -358,149 +329,104 @@ export default function EoyOralDrillPage() {
             </button>
           </div>
         </div>
-      </PageLayout>
-    );
-  }
-
-  if (!questionsData || Object.keys(questionsData).length === 0) {
-    return (
-      <PageLayout user={user} credits={credits}>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 max-w-4xl mx-auto">
-          <DataErrorState
-            title="Oral Exam Database Unavailable"
-            message="Unable to load Oral Exam Questions from Supabase. Please reload or report this error."
-            errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
-          />
-        </div>
-      </PageLayout>
-    );
-  }
-
-  return (
-    <PageLayout user={user} credits={credits}>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
-        <main className="max-w-4xl mx-auto space-y-8">
-          <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
-                  All VCE Oral Exam Stages
-                </span>
-                <span className="text-xs text-slate-500">
-                  VCE Japanese Oral Exam Prep (Cost: 3 credits/session)
-                </span>
+      ) : questionsData && (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
+          <main className="max-w-4xl mx-auto space-y-8">
+            <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300">
+                    All VCE Oral Exam Stages
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    VCE Japanese Oral Exam Prep (Cost: 3 credits/session)
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
+                  EOY Oral Exam Practice & Custom QA Bank
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Practice every stage of the VCE Japanese Oral Exam. Your custom answers are automatically saved. (Drill requirement: 10+ characters | 3 credits per practice session)
+                </p>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
-                EOY Oral Exam Practice & Custom QA Bank
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice every stage of the VCE Japanese Oral Exam. Your custom answers are
-                automatically saved. (Drill requirement: 10+ characters | 3 credits per practice
-                session)
-              </p>
-            </div>
-            <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 rounded-3xl p-6 shadow-sm space-y-6">
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                📂 Select Exam Stage / Source
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {[
-                  { id: "beforeSec1", label: "Before Sec 1 (Entrance)" },
-                  { id: "sec1", label: "Section 1 (General)" },
-                  { id: "sec2", label: "Section 2 (Detailed)" },
-                  { id: "afterSec2", label: "After Sec 2 (Exit)" },
-                  { id: "custom", label: "⭐ My Custom Bank" },
-                ].map((sec) => (
-                  <button
-                    key={sec.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedSection(sec.id as any);
-                      setSelectedTopics([]);
-                    }}
-                    className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
-                      selectedSection === sec.id
-                        ? "bg-amber-500 text-white border-amber-600 shadow-sm"
-                        : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"
-                    }`}
-                  >
-                    {sec.label}
-                  </button>
-                ))}
-              </div>
+              <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
             </div>
 
-            {/* 💡 共通の OralDrillQuestionSelector にマルチセレクト機能を完全統合 */}
-            {selectedSection !== "custom" && (
-              <OralDrillQuestionSelector
-                categories={availableTopics}
-                selectedTopics={selectedTopics}
-                onToggleTopic={toggleTopic}
-                onSelectAllTopics={handleSelectAllTopics}
-                onClearAllTopics={handleClearAllTopics}
-                selectedLevel={selectedLevel}
-                onSelectLevel={setSelectedLevel}
-                selectedSpeed={speechSpeed}
-                onSelectSpeed={setSpeechSpeed}
+            <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 rounded-3xl p-6 shadow-sm space-y-6">
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  📂 Select Exam Stage / Source
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {[
+                    { id: "beforeSec1", label: "Before Sec 1 (Entrance)" },
+                    { id: "sec1", label: "Section 1 (General)" },
+                    { id: "sec2", label: "Section 2 (Detailed)" },
+                    { id: "afterSec2", label: "After Sec 2 (Exit)" },
+                    { id: "custom", label: "⭐ My Custom Bank" },
+                  ].map((sec) => (
+                    <button
+                      key={sec.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSection(sec.id as any);
+                        setSelectedTopics([]);
+                      }}
+                      className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                        selectedSection === sec.id
+                          ? "bg-amber-500 text-white border-amber-600 shadow-sm"
+                          : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"
+                      }`}
+                    >
+                      {sec.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {selectedSection !== "custom" && (
+                <OralDrillQuestionSelector
+                  categories={availableTopics}
+                  selectedTopics={selectedTopics}
+                  onToggleTopic={toggleTopic}
+                  onSelectAllTopics={handleSelectAllTopics}
+                  onClearAllTopics={handleClearAllTopics}
+                  selectedLevel={selectedLevel}
+                  onSelectLevel={setSelectedLevel}
+                  selectedSpeed={speechSpeed}
+                  onSelectSpeed={setSpeechSpeed}
+                  themeColor={themeColor}
+                  questionsCount={currentQuestions.length}
+                />
+              )}
+            </div>
+
+            {selectedSection === "custom" && (
+              <OralCustomQuestionForm
+                newQuestionText={newQuestionText}
+                setNewQuestionText={setNewQuestionText}
+                newAnswerText={newAnswerText}
+                setNewAnswerText={setNewAnswerText}
+                newCategory={newCategory}
+                setNewCategory={setNewCategory}
+                onSubmit={handleAddCustom}
                 themeColor={themeColor}
-                questionsCount={currentQuestions.length}
               />
             )}
-          </div>
 
-          {selectedSection === "custom" && (
-            <OralCustomQuestionForm
-              newQuestionText={newQuestionText}
-              setNewQuestionText={setNewQuestionText}
-              newAnswerText={newAnswerText}
-              setNewAnswerText={setNewAnswerText}
-              newCategory={newCategory}
-              setNewCategory={setNewCategory}
-              onSubmit={handleAddCustom}
+            <OralUserAnswerList
+              questions={currentQuestions}
+              answers={answers}
+              onAnswerChange={handleAnswerChange}
+              onAnswerBlur={handleAnswerBlur}
+              onDeleteCustom={deleteCustomQuestion}
+              onStartPractice={handleStartPractice}
+              orderMode={orderMode}
+              setOrderMode={setOrderMode}
               themeColor={themeColor}
             />
-          )}
 
-          <OralUserAnswerList
-            questions={currentQuestions}
-            answers={answers}
-            onAnswerChange={handleAnswerChange}
-            onAnswerBlur={handleAnswerBlur}
-            onDeleteCustom={deleteCustomQuestion}
-            onStartPractice={handleStartPractice}
-            orderMode={orderMode}
-            setOrderMode={setOrderMode}
-            themeColor={themeColor}
-          />
-
-          <div ref={chatContainerRef}>
-            {!user ? (
-              <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
-                <div className="w-14 h-14 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
-                  🔒
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
-                    Sign In Required for Oral Practice
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato
-                    and record your progress.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleOpenAuth}
-                  className="py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
-                >
-                  Sign In / Sign Up Now
-                </button>
-              </div>
-            ) : (
+            <div ref={chatContainerRef}>
               <OralCenterChatPractice
                 chatMessages={engine.chatMessages}
                 isPracticing={engine.isPracticing}
@@ -521,17 +447,17 @@ export default function EoyOralDrillPage() {
                 onSendMessage={handleSendMessageWithCredit}
                 themeColor={themeColor}
               />
-            )}
-          </div>
+            </div>
 
-          <aside
-            aria-label="Floating Controls"
-            className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
-          >
-            <ChatYamatoEoyOralDrill userId={user?.id} userNickname={nickname} credits={credits} />
-          </aside>
-        </main>
-      </div>
+            <aside
+              aria-label="Floating Controls"
+              className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
+            >
+              <ChatYamatoEoyOralDrill userId={user?.id} userNickname={nickname} credits={credits} />
+            </aside>
+          </main>
+        </div>
+      )}
     </PageLayout>
   );
 }
