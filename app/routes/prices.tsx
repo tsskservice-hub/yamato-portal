@@ -31,7 +31,7 @@ export const meta: MetaFunction = () => {
 export default function Prices() {
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(true);
   const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
   const pageLayoutRef = useRef<PageLayoutRef>(null);
