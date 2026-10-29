@@ -1,18 +1,17 @@
 /**
  * @file OralDrillQuestionSelector.tsx
- * @description 口頭試験ドリル用の難易度（Pace/Speed）およびカテゴリーフィルターコンポーネント（プロパティ柔軟対応版）
+ * @description 口頭試験ドリル用の難易度（Pace/Speed）およびカテゴリーフィルターコンポーネント（元仕様100%完全互換版）
  */
 import React from "react";
 
 export interface OralDrillQuestionSelectorProps {
   categories: string[];
-  selectedCategory?: string;
-  category?: string;
+  selectedCategory: string;
   onSelectCategory: (category: string) => void;
-  selectedLevel?: "steady" | "normal" | "accelerated";
-  onSelectLevel?: (level: "steady" | "normal" | "accelerated") => void;
   mode?: "steady" | "normal" | "accelerated";
   onSelectMode?: (mode: "steady" | "normal" | "accelerated") => void;
+  selectedLevel?: "steady" | "normal" | "accelerated";
+  onSelectLevel?: (level: "steady" | "normal" | "accelerated") => void;
   questionsCount?: number;
   themeColor?: string;
 }
@@ -20,18 +19,15 @@ export interface OralDrillQuestionSelectorProps {
 export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps> = ({
   categories,
   selectedCategory,
-  category,
   onSelectCategory,
-  selectedLevel,
-  onSelectLevel,
   mode,
   onSelectMode,
+  selectedLevel,
+  onSelectLevel,
   questionsCount = 0,
   themeColor = "#eab308",
 }) => {
-  const activeCategory = selectedCategory || category || "all";
   const currentLevel = selectedLevel || mode || "normal";
-
   const handleLevelChange = (lvl: "steady" | "normal" | "accelerated") => {
     if (onSelectLevel) onSelectLevel(lvl);
     if (onSelectMode) onSelectMode(lvl);
@@ -80,7 +76,7 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
             type="button"
             onClick={() => onSelectCategory("all")}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ${
-              activeCategory === "all"
+              selectedCategory === "all"
                 ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
             }`}
@@ -93,12 +89,12 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
               type="button"
               onClick={() => onSelectCategory(cat)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ${
-                activeCategory === cat
+                selectedCategory === cat
                   ? "text-white shadow-xs"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
               }`}
               style={{
-                backgroundColor: activeCategory === cat ? themeColor : undefined,
+                backgroundColor: selectedCategory === cat ? themeColor : undefined,
               }}
             >
               {cat}
