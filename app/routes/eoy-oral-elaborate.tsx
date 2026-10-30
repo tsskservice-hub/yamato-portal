@@ -1,6 +1,6 @@
 /**
- *  @file eoy-oral-elaborate.tsx
- *  @description VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
+ * @file eoy-oral-elaborate.tsx
+ * @description VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -22,6 +22,11 @@ import {
   OralExamQuestionsData,
 } from "../data/oral-exam-questions";
 
+// 💡 【切り出しファイルのインポート & 追加アイコン】
+import { Lightbulb, Download, X } from "lucide-react";
+import ElaborateHintModal from "../components/ElaborateHintModal";
+import { countValidSentences } from "../utils/oralValidation";
+
 export const meta: MetaFunction = () => {
   return [
     { title: "VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank | JPTutor AI Yamato" },
@@ -38,6 +43,7 @@ export default function EoyOralElaboratePage() {
 
   const [user, setUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
@@ -58,6 +64,11 @@ export default function EoyOralElaboratePage() {
   const [newAnswerText, setNewAnswerText] = useState("");
   const [newCategory, setNewCategory] = useState("");
 
+  // 💡 【新規追加ステート】モーダル開閉・インポート状態・メッセージ
+  const [isHintModalOpen, setIsHintModalOpen] = useState<boolean>(false);
+  const [isImporting, setIsImporting] = useState<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleOpenAuth = () => {
@@ -70,6 +81,7 @@ export default function EoyOralElaboratePage() {
     }
   };
 
+  // 💡 フックからDrill解答取得・インポート用の拡張関数も取得
   const {
     answers,
     customQuestionsRaw,
@@ -79,10 +91,40 @@ export default function EoyOralElaboratePage() {
     handleAnswerBlur,
     addCustomQuestion,
     deleteCustomQuestion,
+    importDrillAnswers,
   } = useSupabaseUserAnswers(supabase, user?.id, "elaborate");
 
   // 💡 userId と nickname をフックに渡す
   const engine = useOralPracticeEngine(selectedLevel, speechSpeed, user?.id, nickname);
+
+  // 💡 【新規追加関数】Drill解答インポートのハンドラー
+  const handleImportFromDrill = async (targetQuestionId?: string) => {
+    if (!user) {
+      alert("Drillの解答を読み込むにはサインインが必要です。");
+      handleOpenAuth();
+      return;
+    }
+    setIsImporting(true);
+    setStatusMessage(null);
+
+    try {
+      const success = await importDrillAnswers(targetQuestionId);
+      if (success) {
+        setStatusMessage(
+          targetQuestionId
+            ? "該当質問のDrillでの解答を1文目にインポートしました！"
+            : "Drillからの全解答をインポートしました！2文目・3文目を追加して深掘りしましょう。"
+        );
+      } else {
+        setStatusMessage("インポート可能なDrillの解答が見つかりませんでした。直接入力から始められます。");
+      }
+    } catch (err) {
+      console.error(err);
+      setStatusMessage("Drill解答のインポート中にエラーが発生しました。");
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -232,13 +274,13 @@ export default function EoyOralElaboratePage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
+  // 💡 【要件更新】練習開始時のバリデーション（1文10文字以上の有効な日本語が3文以上あるか検証）
   const handleStartPractice = async () => {
     if (!user) {
       alert("会話練習を行うには、サインインが必要です！");
       handleOpenAuth();
       return;
     }
-
     if (credits < 4) {
       alert("クレジットが不足しています（Elaborate練習には4クレジット必要です）。チャージを行ってください。");
       return;
@@ -246,14 +288,15 @@ export default function EoyOralElaboratePage() {
 
     for (const q of currentQuestions) {
       const currentAns = answers[q.id] || "";
-      if (currentAns.trim().length < 10) {
+      const sentences = currentAns.split(/[。！?\n]+/).filter((s) => s.trim().length > 0);
+      const validSentenceCount = countValidSentences(sentences);
+
+      if (validSentenceCount < 3) {
         alert(
-          `[Character Count Check]\nThe answer for "${q.questionOriginal.slice(
+          `【Elaborate 3文条件チェック】\n質問「${q.questionOriginal.slice(
             0,
             20
-          )}..." is too short.\nPlease enter at least 10 characters for your practice response. (Current: ${
-            currentAns.trim().length
-          } characters)`
+          )}...」の解答が不十分です。\n\n1文あたり10文字以上の日本語文章を【3文以上】入力してください。（現在の有効な文: ${validSentenceCount}文）`
         );
         return;
       }
@@ -288,7 +331,6 @@ export default function EoyOralElaboratePage() {
       alert("回答は10文字以上で入力してください。");
       return;
     }
-
     const success = await addCustomQuestion(newQuestionText, newAnswerText, newCategory);
     if (success) {
       setNewQuestionText("");
@@ -303,15 +345,12 @@ export default function EoyOralElaboratePage() {
       alert("クレジットが不足しています。");
       return;
     }
-
     await engine.sendAnswerMessage(e, answers, "elaborate", selectedSection);
-
     if (user?.id) {
       await fetchProfile(user.id);
     }
   };
 
-  // 💡 【修正ポイント】PageLayout のプロパティエラー（isLoading等）を解消するための Early Return 構造
   if (isAuthLoading || isLoadingData) {
     return (
       <PageLayout user={user} credits={credits}>
@@ -371,8 +410,9 @@ export default function EoyOralElaboratePage() {
     <PageLayout user={user} credits={credits}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-4xl mx-auto space-y-8">
+          {/* 💡 ヘッダーバナー（ヒントボタン＆Drillインポートボタンを追加） */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-300">
                   All VCE Oral Exam Stages
@@ -385,12 +425,50 @@ export default function EoyOralElaboratePage() {
                 EOY Oral Exam Elaborate Practice & Custom QA Bank
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice every stage of the VCE Japanese Oral Exam with detailed elaboration. Your custom answers are automatically saved. (Requirement: 10+ characters | 4 credits per turn/response)
+                Practice every stage of the VCE Japanese Oral Exam with detailed elaboration. Your custom answers are automatically saved. (Requirement: 3+ sentences | 4 credits per turn/response)
               </p>
+
+              {/* 💡 【新規追加】アクションボタン群 */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsHintModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-xs rounded-xl border border-amber-200 dark:border-amber-800 transition shadow-sm cursor-pointer"
+                >
+                  <Lightbulb size={16} className="text-amber-600 dark:text-amber-400" />
+                  <span>深掘り（Elaborate）のヒント</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleImportFromDrill()}
+                  disabled={isImporting}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  <Download size={16} />
+                  <span>{isImporting ? "読み込み中..." : "Drillから全問インポート"}</span>
+                </button>
+              </div>
             </div>
+
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
           </div>
 
+          {/* 💡 【新規追加】ステータスメッセージ表示 */}
+          {statusMessage && (
+            <div className="p-3 bg-purple-50 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-2xl text-xs flex items-center justify-between">
+              <span>{statusMessage}</span>
+              <button
+                type="button"
+                onClick={() => setStatusMessage(null)}
+                className="text-purple-500 hover:text-purple-700 p-1"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* セクション選択エリア */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -453,6 +531,7 @@ export default function EoyOralElaboratePage() {
             />
           )}
 
+          {/* 解答一覧・入力エリア */}
           <OralUserAnswerList
             questions={currentQuestions}
             answers={answers}
@@ -465,6 +544,7 @@ export default function EoyOralElaboratePage() {
             themeColor={themeColor}
           />
 
+          {/* チャット練習エリア */}
           <div ref={chatContainerRef}>
             {!user ? (
               <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
@@ -520,6 +600,12 @@ export default function EoyOralElaboratePage() {
           </aside>
         </main>
       </div>
+
+      {/* 💡 【新規追加】深掘りのヒント モーダルコンポーネント */}
+      <ElaborateHintModal
+        isOpen={isHintModalOpen}
+        onClose={() => setIsHintModalOpen(false)}
+      />
     </PageLayout>
   );
 }
