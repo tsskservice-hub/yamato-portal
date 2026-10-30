@@ -3,11 +3,17 @@ import { OralExamQuestionItem } from "../data/oral-exam-questions";
 import useOralAudioRecorder from "./OralAudioRecorder";
 import OralDrillFeedbackCard, { FeedbackData } from "./OralDrillFeedbackCard";
 
+// Props の型定義
 export interface OralQuestionPracticeCardProps {
   questions: OralExamQuestionItem[];
   selectedQuestion: OralExamQuestionItem | null;
   onSelectQuestion: (question: OralExamQuestionItem | null) => void;
   selectedLevel?: "steady" | "normal" | "accelerated";
+  userId?: string;                          // Supabase減算用のユーザーID
+  userNickname?: string;                    // AIの呼びかけ用ニックネーム
+  appType?: string;                         // クレジット判定用アプリ種別
+  isVoiceMode?: string;                     // 音声モード指定
+  onCreditsUpdated?: (newCredits: number) => void; // ヘッダー表示の即時同期
   themeColor?: string;
   apiEndpoint?: string;
   modeLabel?: string;
@@ -18,6 +24,11 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
   selectedQuestion,
   onSelectQuestion,
   selectedLevel = "normal",
+  userId,
+  userNickname = "VCE Student",
+  appType = "eoy-oral-drill",
+  isVoiceMode = "drill",
+  onCreditsUpdated,
   themeColor = "#a855f7",
   apiEndpoint = "https://api.jptutoraiyamato.com/chat",
   modeLabel = "Practice",
@@ -28,13 +39,13 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
 
   const { isRecording, startRecording, stopRecording, audioBlob } = useOralAudioRecorder();
 
-  // Reset feedback & text on prompt change
+  // 設問が変更されたらフィードバックとテキストをリセット
   useEffect(() => {
     setFeedback(null);
     setUserSpeechText("");
   }, [selectedQuestion?.text]);
 
-  // Auto-submit audio once recorded
+  // 音声データ生成時の自動AI送信
   useEffect(() => {
     if (audioBlob && selectedQuestion) {
       processAudioSubmission(audioBlob);
@@ -46,34 +57,52 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
     setIsAnalyzing(true);
     setFeedback(null);
 
-try {
+    try {
       const formData = new FormData();
       formData.append("audio", blob, "answer.webm");
       formData.append("mode", "drill-practice");
       formData.append("question", selectedQuestion.text);
+      formData.append("expectedQuestion", selectedQuestion.text);
+      formData.append(
+        "registeredAnswer",
+        selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original || ""
+      );
       formData.append("level", selectedLevel);
 
-      // 💡 404エラーを防ぐため、本番用APIサーバーの絶対URLに固定します
-      // （※バックエンドの音声受付ルートに合わせて指定してください。例: 音声テスト等で使っているエンドポイントや専用のエンドポイント）
-      const apiEndpoint = "https://api.jptutoraiyamato.com/api/test-stt"; // または適切な絶対URL
+      // ログイン情報・機能パラメータを FormData に追加
+      if (userId) {
+        formData.append("userId", userId);
+      }
+      if (userNickname) {
+        formData.append("userNickname", userNickname);
+      }
+      formData.append("appType", appType);
+      formData.append("isVoiceMode", isVoiceMode);
 
       const response = await fetch(apiEndpoint, { method: "POST", body: formData });
-      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      if (!response.ok) throw new Error(`API response error: ${response.status}`);
 
       const data = (await response.json()) as any;
 
-      setUserSpeechText(data.userText || "(Transcribed Speech)");
+      setUserSpeechText(data.userText || "（音声入力の書き起こし完了）");
+
+      // 💡 【修正ポイント (ステップ２)】
+      // API通信成功後に親側の fetchProfile(user.id) 等を起動できるよう無条件で onCreditsUpdated を呼び出す
+      if (onCreditsUpdated) {
+        onCreditsUpdated(typeof data.currentCredits === "number" ? data.currentCredits : 0);
+      }
 
       setFeedback({
         scoreLabel: data.scoreLabel || "👍 Great Answer!",
-        evaluationHtml: data.evaluationHtml || "Well structured response with good grammar usage.",
-        correctionsHtml: data.correctionsHtml || "Try adding more detail with 〜からです or 〜ので.",
-        refinedPolishHtml: data.refinedPolishHtml || selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
+        evaluationHtml: data.evaluationHtml || "",
+        correctionsHtml: data.correctionsHtml || "",
+        refinedPolishHtml:
+          data.refinedPolishHtml || selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
         defaultAnswerWithRuby: selectedQuestion.defaultAnswer || selectedQuestion.default_answer_original,
       });
     } catch (err) {
       console.error("Failed to process oral response:", err);
-      alert("Audio analysis failed. Please try speaking again.");
+      alert("申し訳ありません。音声解析に失敗しました。もう一度お試しください。");
     } finally {
       setIsAnalyzing(false);
     }
@@ -81,9 +110,7 @@ try {
 
   const handleNextQuestion = () => {
     if (!questions || questions.length === 0) return;
-    const currentIndex = selectedQuestion
-      ? questions.findIndex((q) => q.text === selectedQuestion.text)
-      : -1;
+    const currentIndex = selectedQuestion ? questions.findIndex((q) => q.text === selectedQuestion.text) : -1;
     const nextIndex = (currentIndex + 1) % questions.length;
     onSelectQuestion(questions[nextIndex]);
     setFeedback(null);
@@ -92,7 +119,7 @@ try {
 
   return (
     <div className="space-y-8">
-      {/* Question Selection Grid */}
+      {/* 設問選択グリッド */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
           <span className="flex items-center gap-2">
@@ -108,7 +135,7 @@ try {
 
         {questions.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-slate-500 text-sm">
-            No questions found for the selected topic and level.
+            該当するカテゴリ・難易度の設問が見つかりませんでした。
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -124,16 +151,10 @@ try {
                       ? "bg-purple-50/90 dark:bg-purple-950/40 border-purple-500 ring-2 ring-purple-300 shadow-md"
                       : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-purple-300"
                   }`}
-                  style={
-                    isSelected
-                      ? { borderColor: themeColor }
-                      : {}
-                  }
+                  style={isSelected ? { borderColor: themeColor } : {}}
                 >
                   <div className="space-y-2">
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                    >
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {q.category || "General"}
                     </span>
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug">
@@ -156,7 +177,7 @@ try {
         )}
       </div>
 
-      {/* Active Question Practice & Audio Recording Card */}
+      {/* 選択中設問の練習 ＆ 録音エリア */}
       {selectedQuestion && (
         <div
           className="bg-white dark:bg-slate-900 border-2 rounded-3xl p-6 shadow-md space-y-6"
@@ -176,14 +197,14 @@ try {
             </h2>
           </div>
 
-          {/* Microphone Recording Controls */}
+          {/* マイク録音コントロール */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
             <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
               <p className="font-bold text-slate-800 dark:text-slate-200">
-                🎙 Speaking Answer Instructions:
+                🎙 スピーキング回答手順:
               </p>
               <p>
-                Click 'Start Recording' to record your response, then click 'Stop & Submit' when finished.
+                「Start Recording」を押して回答を録音し、終わったら「Stop & Submit」を押してください。
               </p>
             </div>
 
@@ -208,10 +229,10 @@ try {
             )}
           </div>
 
-          {/* Analysis & Transcription Status */}
+          {/* 解析・書き起こし状況 */}
           {isAnalyzing && (
             <div className="p-4 bg-purple-50/50 dark:bg-purple-950/20 rounded-xl border border-purple-200 dark:border-purple-900 text-center text-xs font-bold text-purple-700 dark:text-purple-300 animate-pulse">
-              ⏳ AI Examiner is listening and analyzing your speech...
+              ⏳ AI面接官が音声を聞き取って評価中...
             </div>
           )}
 
@@ -224,7 +245,7 @@ try {
             </div>
           )}
 
-          {/* AI Immediate Feedback Card */}
+          {/* AI 即時フィードバックカード */}
           {feedback && (
             <OralDrillFeedbackCard
               feedback={feedback}

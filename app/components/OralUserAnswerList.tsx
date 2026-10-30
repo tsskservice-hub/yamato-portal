@@ -40,7 +40,7 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
             1. {title} ({questions.length} Questions)
           </h3>
           <p className="text-xs text-slate-500">
-            Auto-saves your answers to Supabase when you click outside the text box (onBlur).
+            Auto-saves your answers when you click outside the text box.
           </p>
         </div>
       </div>

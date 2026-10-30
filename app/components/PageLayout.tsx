@@ -1,27 +1,27 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル完全内包・ref対応・共通パンくずリスト自動生成・ヘッダークレジット即時同期版）
- * 💡 上戻りボタンは YamatoChatCommon 側へ集約・カラー完全連動されたため、PageLayout からは削除してクリーン化しています。
+ * @description ポータル共通レイアウト（認証ロジック・モーダル・パンくず・自動エラーガード機能統合版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
-import {
-  KeyRound,
-  ShieldCheck,
-  X,
-  ArrowRight,
-  Fingerprint,
-  Mail,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Lock,
-  Sparkles,
-  Home,
-  ChevronRight
+import { 
+  KeyRound, 
+  ShieldCheck, 
+  X, 
+  ArrowRight, 
+  Fingerprint, 
+  Mail, 
+  CheckCircle2, 
+  ChevronDown, 
+  ChevronUp, 
+  Lock, 
+  Sparkles, 
+  Home, 
+  ChevronRight 
 } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
+import DataErrorState from "./DataErrorState";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
@@ -34,43 +34,51 @@ type PageLayoutProps = {
   user?: any;
   credits?: number;
   nickname?: string;
-  learningPace?: "steady" | "normal" | "accelerated";
+  learningPace?: "steady" | "normal" | "accelerated"; 
   isDarkMode?: boolean;
   breadcrumbTitle?: string;
+  scrollTopClassName?: string;
   onSignOut?: () => void | Promise<void>;
+  error?: any;           
+  errorMessage?: string; 
+  onRetry?: () => void;  
 };
 
-const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
-  children,
-  user: propUser,
-  credits: propCredits,
+const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
+  children,  
+  user: propUser,  
+  credits: propCredits,  
   nickname: propNickname,
-  learningPace: propLearningPace,
+  learningPace: propLearningPace, 
   isDarkMode = false,
   breadcrumbTitle,
-  onSignOut: propOnSignOut
+  scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50",
+  onSignOut: propOnSignOut,
+  error = null,
+  errorMessage = "データの読み込み中に問題が発生しました。",
+  onRetry,
 }, ref) => {
-  const rootData = useRouteLoaderData("root") as {
-    user?: any;
-    credits?: number;
-    nickname?: string;
-    learningPace?: "steady" | "normal" | "accelerated";
+  const rootData = useRouteLoaderData("root") as {  
+    user?: any;  
+    credits?: number;  
+    nickname?: string;  
+    learningPace?: "steady" | "normal" | "accelerated"; 
   } | undefined;
 
   const location = useLocation();
 
-  // 💡 パンくずリスト自動生成ロジック
+  // パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
     const paths = location.pathname.split("/").filter(Boolean);
     const crumbs: { label: string; path: string }[] = [];
-
+    
     let currentPath = "";
     paths.forEach((segment, index) => {
       currentPath += `/${segment}`;
-
+      
       let label = segment.replace(/-/g, " ");
       label = label.charAt(0).toUpperCase() + label.slice(1);
-
+      
       if (segment === "eoy-writing") label = "EOY Writing Practice";
       if (segment === "kanji-grammar-checker") label = "Kanji & Grammar Checker";
       if (segment === "dashboard") label = "Dashboard";
@@ -87,25 +95,16 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const breadcrumbs = generateBreadcrumbs();
 
-  // 💡 ユーザー情報・クレジット・ニックネームの状態管理
   const [user, setUser] = useState<any>(propUser !== undefined ? propUser : (rootData?.user ?? null));
   const [credits, setCredits] = useState<number>(propCredits !== undefined ? propCredits : (rootData?.credits ?? 10));
   const [nickname, setNickname] = useState<string>(propNickname !== undefined ? propNickname : (rootData?.nickname ?? ""));
 
   const rawLearningPace = propLearningPace !== undefined ? propLearningPace : rootData?.learningPace;
-  const learningPace: "steady" | "normal" | "accelerated" =
+  const learningPace: "steady" | "normal" | "accelerated" = 
     (rawLearningPace === "steady" || rawLearningPace === "normal" || rawLearningPace === "accelerated")
       ? rawLearningPace
       : "normal";
 
-  // props からの更新を受け取る
-  useEffect(() => {
-    if (propUser !== undefined) setUser(propUser);
-    if (propCredits !== undefined) setCredits(propCredits);
-    if (propNickname !== undefined) setNickname(propNickname);
-  }, [propUser, propCredits, propNickname]);
-
-  // Supabase からユーザーデータを取得
   const fetchUserData = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -113,11 +112,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         .select('credits, nickname')
         .eq('id', userId)
         .single();
-
+      
       if (data && !error) {
-        if (typeof (data as any).credits === 'number') {
-          setCredits((data as any).credits);
-        }
+        setCredits((data as any).credits ?? 10);
         if ((data as any).nickname) {
           setNickname((data as any).nickname);
         }
@@ -127,7 +124,12 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     }
   };
 
-  // ログインセッションの監視
+  useEffect(() => {
+    if (propUser !== undefined) setUser(propUser);
+    if (propCredits !== undefined) setCredits(propCredits);
+    if (propNickname !== undefined) setNickname(propNickname);
+  }, [propUser, propCredits, propNickname]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       if (propUser === undefined) {
@@ -148,52 +150,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     return () => subscription.unsubscribe();
   }, []);
 
-  // 🌟【クレジット即時同期】ブラウザ内即時イベント受信（F5なし即時連動）
-  useEffect(() => {
-    const handleCreditUpdate = (e: any) => {
-      if (typeof e.detail?.credits === 'number') {
-        setCredits(e.detail.credits);
-      }
-    };
-
-    window.addEventListener("yamato:credits-updated", handleCreditUpdate);
-    return () => {
-      window.removeEventListener("yamato:credits-updated", handleCreditUpdate);
-    };
-  }, []);
-
-  // 🌟【クレジット即時同期】Supabase Realtime 監視（他端末・Webhook等）
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel(`realtime-profile-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`,
-        },
-        (payload: any) => {
-          if (payload.new) {
-            if (typeof payload.new.credits === 'number') {
-              setCredits(payload.new.credits);
-            }
-            if (payload.new.nickname !== undefined && payload.new.nickname !== null) {
-              setNickname(payload.new.nickname);
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
-
   const handleSignOut = async () => {
     if (propOnSignOut) {
       await propOnSignOut();
@@ -204,7 +160,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setNickname("");
   };
 
-  // 認証モーダル管理
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGuideStep, setIsGuideStep] = useState(false);
@@ -265,12 +220,12 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   return (
     <div className={`flex flex-col min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
-      <Header
-        user={user}
-        credits={credits}
-        nickname={resolvedNickname}
-        onOpenAuth={handleOpenAuthModal}
-        onSignOut={handleSignOut}
+      <Header 
+        user={user} 
+        credits={credits} 
+        nickname={resolvedNickname} 
+        onOpenAuth={handleOpenAuthModal} 
+        onSignOut={handleSignOut} 
       />
 
       {/* 🍞 共通パンくずリスト（トップページ '/' 以外の階層でのみ表示） */}
@@ -302,17 +257,37 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         </nav>
       )}
 
+      {/* 💡 メインコンテンツエリア：error が存在する場合は自動的に DataErrorState を表示 */}
       <main className="flex-grow">
-        {children}
+        {error ? (
+          <div className="max-w-2xl mx-auto px-4 py-12">
+            <DataErrorState
+              errorMessage={typeof error === "string" ? error : errorMessage}
+              onRetry={onRetry}
+            />
+          </div>
+        ) : (
+          React.Children.map(children, (child) => {
+            if (React.isValidElement(child)) {
+              return React.cloneElement(child as React.ReactElement<any>, {
+                user: user !== undefined ? user : (child.props as any).user,
+                credits: credits !== undefined ? credits : (child.props as any).credits,
+                nickname: nickname !== undefined ? nickname : (child.props as any).nickname,
+                learningPace: learningPace !== undefined ? learningPace : (child.props as any).learningPace,
+              });
+            }
+            return child;
+          })
+        )}
       </main>
-
+      
       <Footer onOpenAuth={handleOpenAuthModal} />
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
-            <button
+            <button 
               onClick={() => {
                 setIsAuthModalOpen(false);
                 setIsGuideStep(false);
@@ -337,7 +312,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                 </div>
 
                 <div>
-                  <button
+                  <button 
                     onClick={() => setIsGuideStep(false)}
                     className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
@@ -417,8 +392,8 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                     {authMode === 'signup' ? 'Create Account with Passkey' : 'Sign In with Passkey'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {authMode === 'signup'
-                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.'
+                    {authMode === 'signup' 
+                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.' 
                       : 'Authenticate instantly with your registered biometric passkey.'}
                   </p>
                 </div>
@@ -433,7 +408,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   {authMode === 'signup' && (
                     <div className="space-y-1.5 text-left">
                       <label className="text-xs font-semibold text-slate-500">Email Address</label>
-                      <input
+                      <input 
                         type="email"
                         required
                         placeholder="your.email@school.vic.edu.au"
@@ -444,7 +419,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                     </div>
                   )}
 
-                  <button
+                  <button 
                     type="submit"
                     disabled={authLoading}
                     className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"

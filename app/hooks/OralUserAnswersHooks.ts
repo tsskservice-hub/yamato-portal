@@ -1,27 +1,46 @@
+/**
+ * @file OralUserAnswersHooks.ts
+ * @description Supabase hooks for managing user drill answers, elaborate answers, and custom QA bank.
+ */
 import { useState } from "react";
 
 export interface CustomQuestionItem {
   id: string;
   question_text: string;
   answer_text?: string;
+  elaborate_text?: string;
   category?: string;
 }
 
-export function useSupabaseUserAnswers(supabaseClient: any, userId?: string) {
+export function useSupabaseUserAnswers(
+  supabaseClient: any,
+  userId?: string,
+  mode: "drill" | "elaborate" = "drill"
+) {
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   const [customQuestionsRaw, setCustomQuestionsRaw] = useState<CustomQuestionItem[]>([]);
+
+  // ターゲットとなるカラム名を決定
+  const textColumn = mode === "elaborate" ? "elaborate_text" : "answer_text";
 
   const fetchCustomQuestions = async () => {
     if (!userId) return;
     try {
       const { data, error } = await supabaseClient
         .from("user_custom_questions")
-        .select("id, question_text, answer_text, category")
+        .select(`id, question_text, answer_text, elaborate_text, category`)
         .eq("user_id", userId)
         .order("created_at", { ascending: true });
 
       if (!error && data) {
-        setCustomQuestionsRaw(data);
+        // カスタム質問においても、elaborateモードかつelaborate_textが空ならanswer_textをフォールバックとして採用
+        const mappedData = data.map((q: any) => {
+          if (mode === "elaborate" && !q.elaborate_text && q.answer_text) {
+            return { ...q, elaborate_text: q.answer_text };
+          }
+          return q;
+        });
+        setCustomQuestionsRaw(mappedData);
       }
     } catch (err) {
       console.error("Failed to fetch custom questions:", err);
@@ -34,16 +53,32 @@ export function useSupabaseUserAnswers(supabaseClient: any, userId?: string) {
       return;
     }
     try {
+      // elaborate モードの場合は、両方のカラムを取得してフォールバック判定できるようにする
+      const selectFields = mode === "elaborate" 
+        ? "question_id, answer_text, elaborate_text" 
+        : "question_id, answer_text";
+
       const { data, error } = await supabaseClient
         .from("user_drill_answers")
-        .select("question_id, answer_text")
+        .select(selectFields)
         .eq("user_id", userId);
 
       if (!error && data) {
         const updated = { ...initialMap };
-        data.forEach((row: { question_id: string; answer_text: string }) => {
+        data.forEach((row: { question_id: string; answer_text?: string; elaborate_text?: string }) => {
           if (row.question_id) {
-            updated[row.question_id] = row.answer_text;
+            if (mode === "elaborate") {
+              // elaborate モード：elaborate_text があればそれを優先、なければ answer_text（Drillの答え）を継承、どちらもなければ initialMap
+              const effectiveText = row.elaborate_text || row.answer_text;
+              if (effectiveText) {
+                updated[row.question_id] = effectiveText;
+              }
+            } else {
+              // drill モード
+              if (row.answer_text) {
+                updated[row.question_id] = row.answer_text;
+              }
+            }
           }
         });
         setAnswers(updated);
@@ -66,15 +101,21 @@ export function useSupabaseUserAnswers(supabaseClient: any, userId?: string) {
       if (isCustom) {
         await supabaseClient
           .from("user_custom_questions")
-          .update({ answer_text: text, updated_at: new Date().toISOString() })
+          .update({ [textColumn]: text, updated_at: new Date().toISOString() })
           .eq("id", id);
       } else {
+        // user_drill_answers テーブルに対して upsert を実行
+        // ※ 既存レコードのもう一方のカラム（drillならelaborate、elaborateならdrill）を上書きしないよう、upsertDataを動的に構築
+        const upsertData: any = {
+          user_id: userId,
+          question_id: id,
+          [textColumn]: text,
+          updated_at: new Date().toISOString(),
+        };
+
         await supabaseClient
           .from("user_drill_answers")
-          .upsert(
-            { user_id: userId, question_id: id, answer_text: text, updated_at: new Date().toISOString() },
-            { onConflict: "user_id, question_id" }
-          );
+          .upsert(upsertData, { onConflict: "user_id, question_id" });
       }
     } catch (err) {
       console.error("❌ 解答自動保存エラー:", err);
@@ -87,18 +128,24 @@ export function useSupabaseUserAnswers(supabaseClient: any, userId?: string) {
       return false;
     }
     try {
+      // モードに応じて保存する初期テキストを割り振る
+      const payload: any = {
+        user_id: userId,
+        question_text: questionText.trim(),
+        category: category.trim() || "General",
+        updated_at: new Date().toISOString(),
+      };
+
+      if (mode === "elaborate") {
+        payload.elaborate_text = answerText.trim();
+        payload.answer_text = answerText.trim(); // 両方に初期値として入れると安全
+      } else {
+        payload.answer_text = answerText.trim();
+      }
+
       const { data, error } = await supabaseClient
         .from("user_custom_questions")
-        .upsert(
-          {
-            user_id: userId,
-            question_text: questionText.trim(),
-            answer_text: answerText.trim(),
-            category: category.trim() || "General",
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id,question_text" }
-        )
+        .upsert(payload, { onConflict: "user_id,question_text" })
         .select()
         .single();
 
