@@ -257,8 +257,8 @@ export function useOralPracticeEngine(
     playTTS(firstQ.questionOriginal || firstQ.question);
   };
 
-  // Proceed to Next Question
-  const proceedToNextQuestion = (answersMap: { [key: string]: string }) => {
+  // Proceed to Next Question (型注釈を追加して自己参照エラーを解消)
+  const proceedToNextQuestion: (answersMap: { [key: string]: string }) => void = (answersMap) => {
     const nextIndex = currentQuestionIndex + 1;
     if (nextIndex < activeQuestions.length) {
       setCurrentQuestionIndex(nextIndex);
