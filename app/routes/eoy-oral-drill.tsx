@@ -396,8 +396,7 @@ export default function EoyOralDrillPage() {
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 Practice every stage of the VCE Japanese Oral Exam. Your custom answers are
-                automatically saved. (Drill requirement: 10+ characters | 3 credits per practice
-                session)
+                automatically saved. (Drill requirement: 10+ characters | 3 credits per turn/response)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
