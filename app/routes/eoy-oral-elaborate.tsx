@@ -649,16 +649,19 @@ export default function EoyOralElaboratePage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* Import all from drill button */}
-                <button
-                  type="button"
-                  onClick={handleImportAllFromDrill}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-xs rounded-xl border border-purple-200 dark:border-purple-800 transition shadow-sm cursor-pointer"
-                >
-                  <Download size={14} />
-                  <span>Import from Drill (All)</span>
-                </button>
+              <div className="flex flex-wrap items-center gap-3">
+                {/* 💡 全問の第一文をドリルからインポートする文言 ＋ [import] ボタン */}
+                <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                  <span>Import the first sentence from Drill for all questions</span>
+                  <button
+                    type="button"
+                    onClick={handleImportAllFromDrill}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-sm cursor-pointer"
+                  >
+                    <Download size={13} />
+                    <span>[import]</span>
+                  </button>
+                </div>
 
                 {/* Order mode toggle */}
                 <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
@@ -698,37 +701,29 @@ export default function EoyOralElaboratePage() {
                     key={q.id}
                     className="p-5 bg-slate-50/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-4"
                   >
-                    {/* Question Header & Individual Drill Import Button */}
+                    {/* Question Header (ルビ表示対応) */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-md">
                           {q.category || `Q${qIdx + 1}`}
                         </span>
-                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                          {q.question}
-                        </h3>
+                        {/* 💡 ルビHTMLタグを正確に表示 */}
+                        <h3
+                          className="text-sm font-bold text-slate-800 dark:text-slate-100"
+                          dangerouslySetInnerHTML={{ __html: q.question }}
+                        />
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        {q.isCustom && (
-                          <button
-                            type="button"
-                            onClick={() => deleteCustomQuestion(q.id)}
-                            className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1 p-1"
-                          >
-                            <Trash2 size={14} />
-                            <span>Delete</span>
-                          </button>
-                        )}
+                      {q.isCustom && (
                         <button
                           type="button"
-                          onClick={() => handleImportDrillForQuestion(q.id)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800 rounded-xl transition cursor-pointer"
+                          onClick={() => deleteCustomQuestion(q.id)}
+                          className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1 p-1 self-start sm:self-auto"
                         >
-                          <Download size={13} />
-                          <span>Import from Drill</span>
+                          <Trash2 size={14} />
+                          <span>Delete</span>
                         </button>
-                      </div>
+                      )}
                     </div>
 
                     {/* Sentence 1, 2, 3... Input Fields */}
@@ -736,10 +731,21 @@ export default function EoyOralElaboratePage() {
                       {sentences.map((sText, sIdx) => (
                         <div key={sIdx} className="space-y-1">
                           <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
-                            <span>
-                              Sentence {sIdx + 1}
-                              {sIdx === 0 ? " (Importable from Drill)" : ""}
-                            </span>
+                            {/* 💡 Sentence 1 の隣に [import from Drill] ボタンを配置 */}
+                            <div className="flex items-center gap-2">
+                              <span>Sentence {sIdx + 1}</span>
+                              {sIdx === 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleImportDrillForQuestion(q.id)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800 rounded-lg transition cursor-pointer"
+                                >
+                                  <Download size={12} />
+                                  <span>[import from Drill]</span>
+                                </button>
+                              )}
+                            </div>
+
                             {sIdx >= 3 && (
                               <button
                                 type="button"
