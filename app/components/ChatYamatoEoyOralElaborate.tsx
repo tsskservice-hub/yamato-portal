@@ -1,11 +1,11 @@
 /**
  * @file ChatYamatoEoyOralElaborate.tsx
- * @description Supabase YAMATO_CONFIGS から設定を動的取得する VCE EOY Oral Elaborate 専用AIチャットコンポーネント（ラッパー方式）
+ * @description Supabase YAMATO_CONFIGS から設定を動的取得する VCE EOY Oral Elaborate 専用AIチャットコンポーネント（ラッパー方式・クレジット判定独立対応版）
  * 💡 特徴：
  *   1. YamatoChatCommon をベースにした完全ラッパー方式
- *   2. Supabase の "eoy-oral-elaborate" 設定（テーマカラー #a855f7、ボタンスタイル等）を動的反映
- *   3. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
- *   4. 動的クレジット計算：テキストのみ=2クレジット / 画像1枚=4クレジット / 画像2〜4枚=6クレジット
+ *   2. appType を "eoy-oral-elaborate-chat" に変更し、中央の音声会話練習(4cr)と右下チャット(テキスト2cr/画像1枚4cr/画像2~4枚6cr)のクレジット判定を独立分離
+ *   3. Supabase の "eoy-oral-elaborate-chat"（または "eoy-oral-elaborate"）設定を動的反映
+ *   4. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
  */
 import React, { useState, useEffect } from "react";
 import YamatoChatCommon from "./YamatoChatCommon";
@@ -30,15 +30,20 @@ export const ChatYamatoEoyOralElaborate: React.FC<ChatYamatoEoyOralElaborateProp
   defaultOpen = false,
   ...restProps
 }) => {
-  const appType = "eoy-oral-elaborate";
+  // 💡 中央画面の音声会話練習(4cr)と区別するため、チャット専用の appType を指定
+  const appType = "eoy-oral-elaborate-chat";
   const [config, setConfig] = useState<BotConfig | null>(null);
 
   useEffect(() => {
     async function loadConfig() {
       try {
         const configsData = await fetchYamatoConfigsData(supabase);
-        if (configsData && configsData[appType]) {
-          setConfig(configsData[appType]);
+        if (configsData) {
+          // eoy-oral-elaborate-chat の設定、無ければ eoy-oral-elaborate の設定をフォールバック使用
+          const loadedConfig = configsData[appType] || configsData["eoy-oral-elaborate"];
+          if (loadedConfig) {
+            setConfig(loadedConfig);
+          }
         }
       } catch (err) {
         console.error("Failed to load eoy-oral-elaborate config from Supabase:", err);
