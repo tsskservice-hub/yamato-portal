@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（customWidget・onExportPdf・動的クレジット計算対応版）
+ * @description ポータル共通AIチャットウィジェット（プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）
  */
 import React, { useState, useEffect, useRef } from "react";
 import { themeStyles, type ThemeColorKey } from "../styles/chatThemes";
@@ -24,9 +24,13 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.11.0",
-  role: "ポータル共通AIチャットウィジェット（カスタムウィジェット・PDF出力・動的クレジット計算対応版）",
+  version: "4.12.1",
+  role: "ポータル共通AIチャットウィジェット（プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）",
   features: [
+    {
+      featureName: "Unregistered Prompt Error Handling",
+      description: "index.tsからの UNREGISTERED_APP_PROMPT エラーを検知しシンプルな英語エラーを表示",
+    },
     {
       featureName: "Custom Widget Support",
       description: "customWidget プロパティにより外部から任意のUIパーツを柔軟に挿入可能",
@@ -103,7 +107,7 @@ export type YamatoChatCommonProps = {
   assignedQuestion?: string;
   customWidget?: React.ReactNode;
   onExportPdf?: (content: string) => void;
-  // 💡 追加された動的クレジット計算プロパティ
+  // 動的クレジット計算プロパティ
   calculateCreditCost?: (imageCount: number) => number;
   baseCreditCost?: number;
   image1CreditCost?: number;
@@ -411,6 +415,7 @@ export function YamatoChatCommon({
       }
 
       if (!response.ok) {
+        // 💡 1. クレジット不足エラー（402）
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
@@ -436,6 +441,20 @@ export function YamatoChatCommon({
             return;
           }
         }
+
+        // 💡 2. プロンプト未設定エラー（UNREGISTERED_APP_PROMPT / 400）
+        if (data?.error === "UNREGISTERED_APP_PROMPT") {
+          setIsTutorLoading(false);
+          setTutorMessages([
+            ...newMessages,
+            {
+              role: "assistant",
+              content: `⚠️ An error occurred while processing your request. Please try again or contact support.`,
+            },
+          ]);
+          return;
+        }
+
         throw new Error(data?.error || `APIエラー (${response.status})`);
       }
 
