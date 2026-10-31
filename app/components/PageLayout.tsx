@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（認証ロジック・モーダル・パンくず・自動エラーガード機能統合版）
+ * @description ポータル共通レイアウト（未ログイン時の無料登録ガード・認証モーダル・共通パンくず・スクロールトップ機能完全統合版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -17,11 +17,11 @@ import {
   Lock, 
   Sparkles, 
   Home, 
-  ChevronRight 
+  ChevronRight,
+  UserPlus
 } from "lucide-react";
 import Header from "./header";
 import Footer from "./Footer";
-import DataErrorState from "./DataErrorState";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
@@ -36,12 +36,10 @@ type PageLayoutProps = {
   nickname?: string;
   learningPace?: "steady" | "normal" | "accelerated"; 
   isDarkMode?: boolean;
-  breadcrumbTitle?: string;
-  scrollTopClassName?: string;
-  onSignOut?: () => void | Promise<void>;
-  error?: any;           
-  errorMessage?: string; 
-  onRetry?: () => void;  
+  breadcrumbTitle?: string; // 個別ページでカスタム名称を指定したい場合のオプション
+  scrollTopClassName?: string; // 個別ページからスクロールトップボタンのスタイル/色を上書きするためのオプション
+  onSignOut?: () => void | Promise<void>; // 各ルートファイルから渡されるサインアウト処理に対応
+  requireAuth?: boolean; // 明示的に未ログインアクセス制限をオン/オフ指定したい場合のプロパティ
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -54,9 +52,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   breadcrumbTitle,
   scrollTopClassName = "bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50",
   onSignOut: propOnSignOut,
-  error = null,
-  errorMessage = "データの読み込み中に問題が発生しました。",
-  onRetry,
+  requireAuth
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  
@@ -66,6 +62,25 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   } | undefined;
 
   const location = useLocation();
+
+  // Scroll to top states & listener
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
@@ -160,6 +175,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     setNickname("");
   };
 
+  // 認証モーダル・パスキーのステート管理
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGuideStep, setIsGuideStep] = useState(false);
@@ -218,6 +234,16 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const resolvedNickname = nickname && nickname.trim() !== "" ? nickname : "My friend";
 
+  // 💡 【パターンA】未ログイン時の登録ガード判定ロジック
+  // 公開ページ（誰でもアクセス可能なページ）の定義
+  const publicPaths = ["/", "/privacy", "/terms", "/disclaimer", "/prices", "/faq", "/contact"];
+  const isPublicPage = publicPaths.includes(location.pathname);
+
+  // requireAuth プロパティが指定されていればそれを優先。未指定の場合は「非公開（学習・ツール系）ページかつ未ログイン」の時にロック
+  const shouldRequireAuth = requireAuth !== undefined 
+    ? requireAuth 
+    : (!isPublicPage && !user);
+
   return (
     <div className={`flex flex-col min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
       <Header 
@@ -257,31 +283,84 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         </nav>
       )}
 
-      {/* 💡 メインコンテンツエリア：error が存在する場合は自動的に DataErrorState を表示 */}
-      <main className="flex-grow">
-        {error ? (
-          <div className="max-w-2xl mx-auto px-4 py-12">
-            <DataErrorState
-              errorMessage={typeof error === "string" ? error : errorMessage}
-              onRetry={onRetry}
-            />
+      {/* メインコンテンツエリア：未ログイン時かつ要認証ページの場合は登録誘導カードを表示 */}
+      <main className="flex-grow relative">
+        {shouldRequireAuth ? (
+          <div className="min-h-[70vh] flex items-center justify-center p-4 sm:p-8 bg-slate-50/50 dark:bg-slate-950/50">
+            <div className={`w-full max-w-lg rounded-3xl p-8 sm:p-10 border shadow-2xl text-center space-y-6 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+              <div className="w-16 h-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-xl shadow-blue-500/30 animate-bounce">
+                <Lock className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800">
+                  Free Member Exclusive
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800 dark:text-slate-100">
+                  無料登録で全機能を開放 🌸
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                  このコンテンツ・学習ツールは無料会員限定です。簡単なパスキー（生体認証）登録ですぐにご利用いただけます！
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-left space-y-2 text-xs">
+                <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
+                  <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>無料登録で利用可能になる機能：</span>
+                </div>
+                <ul className="space-y-1.5 text-slate-600 dark:text-slate-400 pl-6 list-disc">
+                  <li>AIヤマトによる口頭試験（Section 1 & 2）インタラクティブ練習</li>
+                  <li>VCE日本語ライティング・原稿用紙エディタ＆即時AI添削</li>
+                  <li>漢字・文法チェッカー＆デジタル回答解析</li>
+                  <li>毎日ログインボーナスクレジットの受取り</li>
+                </ul>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleOpenAuthModal('signup')}
+                  className="w-full py-4 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  <span>今すぐ無料登録（Passkey登録 10秒）</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+
+                <p className="text-xs text-slate-500">
+                  すでにアカウントをお持ちの方は{' '}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAuthModal('signin')}
+                    className="text-blue-600 font-bold hover:underline bg-transparent border-none p-0 cursor-pointer"
+                  >
+                    サインイン
+                  </button>
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
-          React.Children.map(children, (child) => {
-            if (React.isValidElement(child)) {
-              return React.cloneElement(child as React.ReactElement<any>, {
-                user: user !== undefined ? user : (child.props as any).user,
-                credits: credits !== undefined ? credits : (child.props as any).credits,
-                nickname: nickname !== undefined ? nickname : (child.props as any).nickname,
-                learningPace: learningPace !== undefined ? learningPace : (child.props as any).learningPace,
-              });
-            }
-            return child;
-          })
+          children
         )}
       </main>
       
       <Footer onOpenAuth={handleOpenAuthModal} />
+
+      {/* ⬆️ ページトップへ戻るボタン */}
+      {showScrollTop && (
+        <div className="fixed bottom-24 right-6 z-40">
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className={`w-10 h-10 rounded-full shadow-lg transition-all cursor-pointer text-xs font-bold flex items-center justify-center ${scrollTopClassName}`}
+            title="ページトップへ戻る"
+          >
+            ▲
+          </button>
+        </div>
+      )}
 
       {/* 共通のパスキー認証・登録モーダル */}
       {isAuthModalOpen && (

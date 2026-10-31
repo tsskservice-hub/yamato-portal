@@ -1,6 +1,6 @@
 /**
  * @file eoy-oral-elaborate.tsx
- * @description VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
+ * @description VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
@@ -10,9 +10,8 @@ import OralExaminerAvatar from "../components/OralExaminerAvatar";
 import ChatYamatoEoyOralDrill from "../components/ChatYamatoEoyOralDrill";
 import { supabase } from "../lib/supabaseClient";
 
-// 💡 Modular Oral components & hooks
+// Modular Oral components & hooks
 import OralCenterChatPractice from "../components/OralCenterChatPractice";
-import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
 import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
 import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector";
 import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
@@ -22,10 +21,14 @@ import {
   OralExamQuestionsData,
 } from "../data/oral-exam-questions";
 
-// 💡 【切り出しファイルのインポート & 追加アイコン】
-import { Lightbulb, Download, X } from "lucide-react";
-import ElaborateHintModal from "../components/ElaborateHintModal";
-import { countValidSentences } from "../utils/oralValidation";
+import { Download, Plus, Trash2, Play } from "lucide-react";
+
+export interface QuestionItem {
+  id: string;
+  question: string;
+  category?: string;
+  isCustom?: boolean;
+}
 
 export const meta: MetaFunction = () => {
   return [
@@ -64,10 +67,8 @@ export default function EoyOralElaboratePage() {
   const [newAnswerText, setNewAnswerText] = useState("");
   const [newCategory, setNewCategory] = useState("");
 
-  // 💡 【新規追加ステート】モーダル開閉・インポート状態・メッセージ
-  const [isHintModalOpen, setIsHintModalOpen] = useState<boolean>(false);
-  const [isImporting, setIsImporting] = useState<boolean>(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  // 各質問IDごとの文配列管理用ステート ({ [qId: string]: ["1文目", "2文目", "3文目", ...] })
+  const [sentencesMap, setSentencesMap] = useState<{ [qId: string]: string[] }>({});
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -81,7 +82,6 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  // 💡 フックからDrill解答取得・インポート用の拡張関数も取得
   const {
     answers,
     customQuestionsRaw,
@@ -91,40 +91,10 @@ export default function EoyOralElaboratePage() {
     handleAnswerBlur,
     addCustomQuestion,
     deleteCustomQuestion,
-    importDrillAnswers,
+    fetchDrillAnswers,
   } = useSupabaseUserAnswers(supabase, user?.id, "elaborate");
 
-  // 💡 userId と nickname をフックに渡す
   const engine = useOralPracticeEngine(selectedLevel, speechSpeed, user?.id, nickname);
-
-  // 💡 【新規追加関数】Drill解答インポートのハンドラー
-  const handleImportFromDrill = async (targetQuestionId?: string) => {
-    if (!user) {
-      alert("Drillの解答を読み込むにはサインインが必要です。");
-      handleOpenAuth();
-      return;
-    }
-    setIsImporting(true);
-    setStatusMessage(null);
-
-    try {
-      const success = await importDrillAnswers(targetQuestionId);
-      if (success) {
-        setStatusMessage(
-          targetQuestionId
-            ? "該当質問のDrillでの解答を1文目にインポートしました！"
-            : "Drillからの全解答をインポートしました！2文目・3文目を追加して深掘りしましょう。"
-        );
-      } else {
-        setStatusMessage("インポート可能なDrillの解答が見つかりませんでした。直接入力から始められます。");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatusMessage("Drill解答のインポート中にエラーが発生しました。");
-    } finally {
-      setIsImporting(false);
-    }
-  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -174,7 +144,6 @@ export default function EoyOralElaboratePage() {
     }
   };
 
-  // 💡 AIの解析（isAnalyzing）完了時に最新クレジットを再取得して連動
   useEffect(() => {
     if (!engine.isAnalyzing && user?.id) {
       fetchProfile(user.id);
@@ -274,7 +243,112 @@ export default function EoyOralElaboratePage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
-  // 💡 【要件更新】練習開始時のバリデーション（1文10文字以上の有効な日本語が3文以上あるか検証）
+  // ---------------------------------------------------------
+  // 💡 【文単位の入力管理ロジック】
+  // ---------------------------------------------------------
+  const getSentencesForQuestion = (qId: string): string[] => {
+    if (sentencesMap[qId]) return sentencesMap[qId];
+
+    const existingText = answers[qId] || "";
+    if (existingText.trim()) {
+      const parts = existingText
+        .split(/(?<=[。！？\n])/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (parts.length >= 3) return parts;
+      return [parts[0] || "", parts[1] || "", parts[2] || ""];
+    }
+    return ["", "", ""];
+  };
+
+  const handleSentenceChange = (qId: string, index: number, value: string) => {
+    const current = getSentencesForQuestion(qId);
+    const updated = [...current];
+    updated[index] = value;
+
+    setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
+
+    const combined = updated.filter((s) => s.trim() !== "").join("。");
+    handleAnswerChange(qId, combined);
+  };
+
+  const handleSentenceBlur = (qId: string, isCustom?: boolean) => {
+    const current = getSentencesForQuestion(qId);
+    const combined = current.filter((s) => s.trim() !== "").join("。");
+    handleAnswerBlur(qId, combined, isCustom);
+  };
+
+  // 💡 個別質問の1文目に Drill の解答をインポート
+  const handleImportDrillForQuestion = async (qId: string) => {
+    if (!fetchDrillAnswers) return;
+    const drillMap = await fetchDrillAnswers();
+    const drillAns = drillMap[qId];
+    if (!drillAns) {
+      alert("この質問に対する Drill での解答が見つかりませんでした。");
+      return;
+    }
+
+    const current = getSentencesForQuestion(qId);
+    const updated = [...current];
+    updated[0] = drillAns; // 1文目にDrill解答を上書き反映
+
+    setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
+
+    const combined = updated.filter((s) => s.trim() !== "").join("。");
+    handleAnswerChange(qId, combined);
+    handleAnswerBlur(qId, combined);
+  };
+
+  // 💡 全質問の1文目に Drill の解答を一括インポート
+  const handleImportAllFromDrill = async () => {
+    if (!fetchDrillAnswers) return;
+    const drillMap = await fetchDrillAnswers();
+    if (Object.keys(drillMap).length === 0) {
+      alert("インポート可能な Drill の解答が見つかりませんでした。");
+      return;
+    }
+
+    const nextSentencesMap = { ...sentencesMap };
+    let importedCount = 0;
+
+    currentQuestions.forEach((q) => {
+      const drillAns = drillMap[q.id];
+      if (drillAns) {
+        const current = getSentencesForQuestion(q.id);
+        const updated = [...current];
+        updated[0] = drillAns;
+        nextSentencesMap[q.id] = updated;
+
+        const combined = updated.filter((s) => s.trim() !== "").join("。");
+        handleAnswerChange(q.id, combined);
+        handleAnswerBlur(q.id, combined);
+        importedCount++;
+      }
+    });
+
+    setSentencesMap(nextSentencesMap);
+    alert(`${importedCount} 件の質問の1文目に Drill の解答をインポートしました！`);
+  };
+
+  // 💡 4文目以降の枠を追加
+  const handleAddSentence = (qId: string) => {
+    const current = getSentencesForQuestion(qId);
+    const updated = [...current, ""];
+    setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
+  };
+
+  // 💡 追加した枠の削除
+  const handleRemoveSentence = (qId: string, index: number) => {
+    const current = getSentencesForQuestion(qId);
+    if (current.length <= 1) return;
+    const updated = current.filter((_, i) => i !== index);
+    setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
+
+    const combined = updated.filter((s) => s.trim() !== "").join("。");
+    handleAnswerChange(qId, combined);
+    handleAnswerBlur(qId, combined);
+  };
+
   const handleStartPractice = async () => {
     if (!user) {
       alert("会話練習を行うには、サインインが必要です！");
@@ -287,16 +361,14 @@ export default function EoyOralElaboratePage() {
     }
 
     for (const q of currentQuestions) {
-      const currentAns = answers[q.id] || "";
-      const sentences = currentAns.split(/[。！?\n]+/).filter((s) => s.trim().length > 0);
-      const validSentenceCount = countValidSentences(sentences);
-
-      if (validSentenceCount < 3) {
+      const sentences = getSentencesForQuestion(q.id);
+      const filledSentences = sentences.filter((s) => s.trim().length > 0);
+      if (filledSentences.length < 3) {
         alert(
-          `【Elaborate 3文条件チェック】\n質問「${q.questionOriginal.slice(
+          `質問「${q.questionOriginal.slice(
             0,
             20
-          )}...」の解答が不十分です。\n\n1文あたり10文字以上の日本語文章を【3文以上】入力してください。（現在の有効な文: ${validSentenceCount}文）`
+          )}...」の解答が不十分です。3文以上入力してください。`
         );
         return;
       }
@@ -410,7 +482,7 @@ export default function EoyOralElaboratePage() {
     <PageLayout user={user} credits={credits}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-4xl mx-auto space-y-8">
-          {/* 💡 ヘッダーバナー（ヒントボタン＆Drillインポートボタンを追加） */}
+          {/* ヘッダーバナー */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2">
@@ -427,46 +499,10 @@ export default function EoyOralElaboratePage() {
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 Practice every stage of the VCE Japanese Oral Exam with detailed elaboration. Your custom answers are automatically saved. (Requirement: 3+ sentences | 4 credits per turn/response)
               </p>
-
-              {/* 💡 【新規追加】アクションボタン群 */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsHintModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-xs rounded-xl border border-amber-200 dark:border-amber-800 transition shadow-sm cursor-pointer"
-                >
-                  <Lightbulb size={16} className="text-amber-600 dark:text-amber-400" />
-                  <span>深掘り（Elaborate）のヒント</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleImportFromDrill()}
-                  disabled={isImporting}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-sm cursor-pointer disabled:opacity-50"
-                >
-                  <Download size={16} />
-                  <span>{isImporting ? "読み込み中..." : "Drillから全問インポート"}</span>
-                </button>
-              </div>
             </div>
 
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
           </div>
-
-          {/* 💡 【新規追加】ステータスメッセージ表示 */}
-          {statusMessage && (
-            <div className="p-3 bg-purple-50 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-2xl text-xs flex items-center justify-between">
-              <span>{statusMessage}</span>
-              <button
-                type="button"
-                onClick={() => setStatusMessage(null)}
-                className="text-purple-500 hover:text-purple-700 p-1"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
 
           {/* セクション選択エリア */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
@@ -531,18 +567,168 @@ export default function EoyOralElaboratePage() {
             />
           )}
 
-          {/* 解答一覧・入力エリア */}
-          <OralUserAnswerList
-            questions={currentQuestions}
-            answers={answers}
-            onAnswerChange={handleAnswerChange}
-            onAnswerBlur={handleAnswerBlur}
-            onDeleteCustom={deleteCustomQuestion}
-            onStartPractice={handleStartPractice}
-            orderMode={orderMode}
-            setOrderMode={setOrderMode}
-            themeColor={themeColor}
-          />
+          {/* --------------------------------------------------------- */}
+          {/* 💡 Review & Customize Your Answers セクション            */}
+          {/* --------------------------------------------------------- */}
+          <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h2 className="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <span>📝 Review & Customize Your Answers</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  各質問に対して3文以上入力してください。1文目はDrillでの解答をインポートできます。
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* drill から全問一括インポートボタン */}
+                <button
+                  type="button"
+                  onClick={handleImportAllFromDrill}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-xs rounded-xl border border-purple-200 dark:border-purple-800 transition shadow-sm cursor-pointer"
+                >
+                  <Download size={14} />
+                  <span>drill からインポート（全問）</span>
+                </button>
+
+                {/* 順序モード切替 */}
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setOrderMode("sequential")}
+                    className={`px-3 py-1.5 rounded-lg transition ${
+                      orderMode === "sequential"
+                        ? "bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-300 shadow-sm"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    順序通り
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrderMode("random")}
+                    className={`px-3 py-1.5 rounded-lg transition ${
+                      orderMode === "random"
+                        ? "bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-300 shadow-sm"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    ランダム
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 各質問ごとの回答入力エリア */}
+            <div className="space-y-6">
+              {currentQuestions.map((q, qIdx) => {
+                const sentences = getSentencesForQuestion(q.id);
+
+                return (
+                  <div
+                    key={q.id}
+                    className="p-5 bg-slate-50/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-4"
+                  >
+                    {/* 質問ヘッダー & 個別Drillインポートボタン */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-md">
+                          {q.category || `Q${qIdx + 1}`}
+                        </span>
+                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                          {q.question}
+                        </h3>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {q.isCustom && (
+                          <button
+                            type="button"
+                            onClick={() => deleteCustomQuestion(q.id)}
+                            className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1 p-1"
+                          >
+                            <Trash2 size={14} />
+                            <span>削除</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleImportDrillForQuestion(q.id)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800 rounded-xl transition cursor-pointer"
+                        >
+                          <Download size={13} />
+                          <span>drill からインポート</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 1文目・2文目・3文目... 入力欄 */}
+                    <div className="space-y-3">
+                      {sentences.map((sText, sIdx) => (
+                        <div key={sIdx} className="space-y-1">
+                          <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
+                            <span>
+                              {sIdx + 1}文目
+                              {sIdx === 0 ? " (drill からインポート可能)" : ""}
+                            </span>
+                            {sIdx >= 3 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveSentence(q.id, sIdx)}
+                                className="text-rose-500 hover:text-rose-700 text-xs flex items-center gap-1 cursor-pointer"
+                              >
+                                <Trash2 size={13} />
+                                <span>枠を削除</span>
+                              </button>
+                            )}
+                          </div>
+                          <textarea
+                            value={sText}
+                            onChange={(e) => handleSentenceChange(q.id, sIdx, e.target.value)}
+                            onBlur={() => handleSentenceBlur(q.id, q.isCustom)}
+                            placeholder={
+                              sIdx === 0
+                                ? "1文目: 主張・結論を入力（または drill からインポート）"
+                                : sIdx === 1
+                                ? "2文目: 理由や背景などを入力"
+                                : sIdx === 2
+                                ? "3文目: 具体例や詳細などを入力"
+                                : `${sIdx + 1}文目を入力`
+                            }
+                            rows={2}
+                            className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition resize-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* ＋ 文を追加するボタン */}
+                    <button
+                      type="button"
+                      onClick={() => handleAddSentence(q.id)}
+                      className="w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-purple-50/40 text-purple-700 dark:text-purple-300 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Plus size={16} />
+                      <span>＋ 文を追加する</span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 会話練習開始ボタン */}
+            <div className="pt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={handleStartPractice}
+                className="py-3.5 px-8 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm tracking-wide uppercase transition shadow-md flex items-center gap-2 cursor-pointer"
+              >
+                <Play size={18} />
+                <span>会話練習を開始する</span>
+              </button>
+            </div>
+          </div>
 
           {/* チャット練習エリア */}
           <div ref={chatContainerRef}>
@@ -600,12 +786,6 @@ export default function EoyOralElaboratePage() {
           </aside>
         </main>
       </div>
-
-      {/* 💡 【新規追加】深掘りのヒント モーダルコンポーネント */}
-      <ElaborateHintModal
-        isOpen={isHintModalOpen}
-        onClose={() => setIsHintModalOpen(false)}
-      />
     </PageLayout>
   );
 }

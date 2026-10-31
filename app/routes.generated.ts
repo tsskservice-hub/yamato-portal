@@ -17,6 +17,7 @@ export const generatedRoutes: string[] = [
   "/prices",
   "/privacy",
   "/terms",
+  "/test-audio",
   "/text-types",
   "/writing-styles"
 ];
