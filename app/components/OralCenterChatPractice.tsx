@@ -23,7 +23,8 @@ export interface OralCenterChatPracticeProps {
   onSendMessage: (e: React.FormEvent) => void;
   themeColor?: string;
   titleLabel?: string;
-  headerRight?: React.ReactNode; // 💡 ヘッダー右側のアクションボタン受取用
+  headerRight?: React.ReactNode;
+  creditCost?: number; // 💡 音声会話練習の消費クレジット数（デフォルト: 4）
 }
 
 export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
@@ -44,6 +45,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
   themeColor = "#eab308",
   titleLabel = "Conversation Practice with AI Yamato",
   headerRight,
+  creditCost = 4,
 }) => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -61,12 +63,17 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
         <div className="space-y-1">
-          <span
-            className="text-xs font-bold uppercase tracking-wider"
-            style={{ color: themeColor }}
-          >
-            Main Interactive Practice Screen
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="text-xs font-bold uppercase tracking-wider"
+              style={{ color: themeColor }}
+            >
+              Main Interactive Practice Screen
+            </span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+              🪙 {creditCost} credits / turn
+            </span>
+          </div>
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <span>2. {titleLabel}</span> 🎙️
           </h2>
@@ -177,7 +184,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
               isWaitingForNext
                 ? "Click 'Next Question' above to proceed..."
                 : isPracticing
-                ? "Record audio or type your response here..."
+                ? `Record audio or type your response here... (Cost: ${creditCost} credits)`
                 : "Click 'Speak to AI Yamato' above to start..."
             }
             disabled={!isPracticing || isAnalyzing || isWaitingForNext}
@@ -191,7 +198,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             className="text-white font-bold px-6 py-3 rounded-xl transition text-xs sm:text-sm shrink-0 cursor-pointer disabled:opacity-50"
             style={{ backgroundColor: themeColor }}
           >
-            Send
+            Send ({creditCost} 🪙)
           </button>
         </form>
       </div>

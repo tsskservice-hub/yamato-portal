@@ -79,7 +79,7 @@ export function useOralPracticeEngine(
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Welcome! Click 'Speak to AI Yamato' below to start practicing in the center screen.",
+      content: "ようこそ！ Click 'SPEAK TO AI YAMATO' above to start practicing in the center screen.",
       isHtml: false,
     },
   ]);
