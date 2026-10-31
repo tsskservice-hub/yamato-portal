@@ -7,7 +7,7 @@ import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 import { DataErrorState } from "../components/DataErrorState";
 import OralExaminerAvatar from "../components/OralExaminerAvatar";
-import ChatYamatoEoyOralDrill from "../components/ChatYamatoEoyOralDrill";
+import ChatYamatoEoyOralElaborate from "../components/ChatYamatoEoyOralElaborate";
 import { supabase } from "../lib/supabaseClient";
 
 // Modular Oral components & hooks
@@ -247,24 +247,19 @@ export default function EoyOralElaboratePage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
-  // ---------------------------------------------------------
-  // 💡 安全に文章を結合するヘルパー関数 (二重句点「。。」を自動修正)
-  // ---------------------------------------------------------
+  // 安全に文章を結合するヘルパー関数 (二重句点「。。」を自動修正)
   const combineSentencesList = (sentences: string[]): string => {
     const valid = sentences.map((s) => s.trim()).filter(Boolean);
     if (valid.length === 0) return "";
     return valid.map((s) => s.replace(/[。！？]+$/, "")).join("。") + "。";
   };
 
-  // ---------------------------------------------------------
   // Sentence-based Input Management Logic
-  // ---------------------------------------------------------
   const getSentencesForQuestion = (qId: string): string[] => {
     if (sentencesMap[qId]) return sentencesMap[qId];
 
     const existingText = answers[qId] || "";
     if (existingText.trim()) {
-      // 💡 連続する句点を1つに修復してから分割
       const normalized = existingText.replace(/([。！？])\1+/g, "$1");
       const parts = normalized
         .split(/(?<=[。！？\n])/)
@@ -305,7 +300,7 @@ export default function EoyOralElaboratePage() {
 
     const current = getSentencesForQuestion(qId);
     const updated = [...current];
-    updated[0] = drillAns; // Overwrite Sentence 1 with Drill answer
+    updated[0] = drillAns; // ⭕ 1文目(インデックス0)を書き換え
 
     setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
 
@@ -331,7 +326,7 @@ export default function EoyOralElaboratePage() {
       if (drillAns) {
         const current = getSentencesForQuestion(q.id);
         const updated = [...current];
-        updated[0] = drillAns;
+        updated[0] = drillAns; // ⭕ 1文目(インデックス0)を書き換え
         nextSentencesMap[q.id] = updated;
 
         const combined = combineSentencesList(updated);
@@ -591,6 +586,7 @@ export default function EoyOralElaboratePage() {
 
           {/* Section Selection Area */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
+            {/* Stage Selection */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 📂 Select Exam Stage / Source
@@ -619,6 +615,63 @@ export default function EoyOralElaboratePage() {
                     {sec.label}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Learning Pace & Speech Speed (2カラムレイアウト ＆ 統一スタイル) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+              {/* Column 1: Learning Pace */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  ⚡ Learning Pace
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: "steady", label: "Steady" },
+                    { id: "normal", label: "Normal" },
+                    { id: "accelerated", label: "Accelerated" },
+                  ].map((lvl) => (
+                    <button
+                      key={lvl.id}
+                      type="button"
+                      onClick={() => setSelectedLevel(lvl.id as any)}
+                      className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                        selectedLevel === lvl.id
+                          ? "bg-purple-600 text-white border-purple-700 shadow-sm"
+                          : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"
+                      }`}
+                    >
+                      {lvl.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 2: Speech Speed */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  🔊 Speech Speed
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { speed: 0.8, label: "0.8x" },
+                    { speed: 1.0, label: "1.0x" },
+                    { speed: 1.2, label: "1.2x" },
+                  ].map((spd) => (
+                    <button
+                      key={spd.speed}
+                      type="button"
+                      onClick={() => setSpeechSpeed(spd.speed)}
+                      className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
+                        speechSpeed === spd.speed
+                          ? "bg-purple-600 text-white border-purple-700 shadow-sm"
+                          : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"
+                      }`}
+                    >
+                      {spd.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -716,7 +769,7 @@ export default function EoyOralElaboratePage() {
                     key={q.id}
                     className="p-5 bg-slate-50/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-4"
                   >
-                    {/* Question Header (拡大表示) */}
+                    {/* Question Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-md">
@@ -819,7 +872,7 @@ export default function EoyOralElaboratePage() {
             aria-label="Floating Controls"
             className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
           >
-            <ChatYamatoEoyOralDrill userId={user?.id} userNickname={nickname} credits={credits} />
+            <ChatYamatoEoyOralElaborate userId={user?.id} userNickname={nickname} credits={credits} />
           </aside>
         </main>
       </div>
