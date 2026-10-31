@@ -300,7 +300,7 @@ export default function EoyOralElaboratePage() {
 
     const current = getSentencesForQuestion(qId);
     const updated = [...current];
-    updated[0] = drillAns; // ⭕ 1文目(インデックス0)を書き換え
+    updated[0] = drillAns; // 1文目(インデックス0)を書き換え
 
     setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
 
@@ -326,7 +326,7 @@ export default function EoyOralElaboratePage() {
       if (drillAns) {
         const current = getSentencesForQuestion(q.id);
         const updated = [...current];
-        updated[0] = drillAns; // ⭕ 1文目(インデックス0)を書き換え
+        updated[0] = drillAns; // 1文目(インデックス0)を書き換え
         nextSentencesMap[q.id] = updated;
 
         const combined = combineSentencesList(updated);
@@ -514,77 +514,43 @@ export default function EoyOralElaboratePage() {
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
           </div>
 
-          {/* 2. Conversation Practice with AI Yamato 🎙️ */}
-          <div ref={chatContainerRef} className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div>
-                <h2 className="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <span>2. Conversation Practice with AI Yamato 🎙️</span>
-                </h2>
-                <p className="text-xs text-slate-500 mt-1">
-                  Welcome! Click 'Speak to AI Yamato' above to start practicing in the center screen.
-                </p>
-              </div>
-
-              {!engine.isPracticing && (
-                <button
-                  type="button"
-                  onClick={handleStartPractice}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm cursor-pointer shrink-0"
-                >
-                  <Play size={16} />
-                  <span>Speak to AI Yamato</span>
-                </button>
-              )}
-            </div>
-
-            {!user ? (
-              <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
-                <div className="w-14 h-14 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
-                  🔒
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
-                    Sign In Required for Oral Practice
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato
-                    and record your progress.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleOpenAuth}
-                  className="py-3 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
-                >
-                  Sign In / Sign Up Now
-                </button>
-              </div>
-            ) : (
-              <OralCenterChatPractice
-                chatMessages={engine.chatMessages}
-                isPracticing={engine.isPracticing}
-                currentQuestionIndex={engine.currentQuestionIndex}
-                totalQuestions={engine.activeQuestions.length}
-                isAnalyzing={engine.isAnalyzing}
-                isRecording={engine.isRecording}
-                isWaitingForNext={engine.isWaitingForNext}
-                inputMessage={engine.inputMessage}
-                setInputMessage={engine.setInputMessage}
-                onStartRecording={engine.startRecording}
-                onStopRecording={engine.stopRecording}
-                onRepeatQuestion={() => {
-                  const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                  if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
-                }}
-                onProceedNext={() => engine.proceedToNextQuestion(answers)}
-                onSendMessage={handleSendMessageWithCredit}
-                themeColor={themeColor}
-              />
-            )}
+          {/* 2. Conversation Practice with AI Yamato 🎙️ (単一のインタラクティブ・コンポーネント) */}
+          <div ref={chatContainerRef}>
+            <OralCenterChatPractice
+              chatMessages={engine.chatMessages}
+              isPracticing={engine.isPracticing}
+              currentQuestionIndex={engine.currentQuestionIndex}
+              totalQuestions={engine.activeQuestions.length}
+              isAnalyzing={engine.isAnalyzing}
+              isRecording={engine.isRecording}
+              isWaitingForNext={engine.isWaitingForNext}
+              inputMessage={engine.inputMessage}
+              setInputMessage={engine.setInputMessage}
+              onStartRecording={engine.startRecording}
+              onStopRecording={engine.stopRecording}
+              onRepeatQuestion={() => {
+                const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
+                if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
+              }}
+              onProceedNext={() => engine.proceedToNextQuestion(answers)}
+              onSendMessage={handleSendMessageWithCredit}
+              themeColor={themeColor}
+              headerRight={
+                !engine.isPracticing && (
+                  <button
+                    type="button"
+                    onClick={handleStartPractice}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm cursor-pointer shrink-0"
+                  >
+                    <Play size={16} />
+                    <span>Speak to AI Yamato</span>
+                  </button>
+                )
+              }
+            />
           </div>
 
-          {/* Section Selection Area */}
+          {/* Section Selection Area & Control Selector */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
             {/* Stage Selection */}
             <div className="space-y-3">
@@ -615,63 +581,6 @@ export default function EoyOralElaboratePage() {
                     {sec.label}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Learning Pace & Speech Speed (2カラムレイアウト ＆ 統一スタイル) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-              {/* Column 1: Learning Pace */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  ⚡ Learning Pace
-                </h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: "steady", label: "Steady" },
-                    { id: "normal", label: "Normal" },
-                    { id: "accelerated", label: "Accelerated" },
-                  ].map((lvl) => (
-                    <button
-                      key={lvl.id}
-                      type="button"
-                      onClick={() => setSelectedLevel(lvl.id as any)}
-                      className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
-                        selectedLevel === lvl.id
-                          ? "bg-purple-600 text-white border-purple-700 shadow-sm"
-                          : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"
-                      }`}
-                    >
-                      {lvl.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 2: Speech Speed */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  🔊 Speech Speed
-                </h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { speed: 0.8, label: "0.8x" },
-                    { speed: 1.0, label: "1.0x" },
-                    { speed: 1.2, label: "1.2x" },
-                  ].map((spd) => (
-                    <button
-                      key={spd.speed}
-                      type="button"
-                      onClick={() => setSpeechSpeed(spd.speed)}
-                      className={`p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${
-                        speechSpeed === spd.speed
-                          ? "bg-purple-600 text-white border-purple-700 shadow-sm"
-                          : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"
-                      }`}
-                    >
-                      {spd.label}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 

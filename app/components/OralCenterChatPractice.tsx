@@ -23,6 +23,7 @@ export interface OralCenterChatPracticeProps {
   onSendMessage: (e: React.FormEvent) => void;
   themeColor?: string;
   titleLabel?: string;
+  headerRight?: React.ReactNode; // 💡 ヘッダー右側のアクションボタン受取用
 }
 
 export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
@@ -42,6 +43,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
   onSendMessage,
   themeColor = "#eab308",
   titleLabel = "Conversation Practice with AI Yamato",
+  headerRight,
 }) => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -53,35 +55,45 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
 
   return (
     <div
-      ref={chatContainerRef}
       className="bg-white dark:bg-slate-900 border-2 rounded-3xl p-6 shadow-md space-y-6"
       style={{ borderColor: themeColor }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
         <div className="space-y-1">
-          <span className="text-xs font-bold uppercase tracking-wider" style={{ color: themeColor }}>
+          <span
+            className="text-xs font-bold uppercase tracking-wider"
+            style={{ color: themeColor }}
+          >
             Main Interactive Practice Screen
           </span>
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <span>2. {titleLabel}</span> 🎙️
           </h2>
         </div>
-        {isPracticing && (
-          <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold animate-pulse">
-            🟢 Active (Q{currentQuestionIndex + 1}/{totalQuestions})
-          </span>
-        )}
+
+        <div className="flex items-center gap-3 shrink-0">
+          {isPracticing && (
+            <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold animate-pulse">
+              🟢 Active (Q{currentQuestionIndex + 1}/{totalQuestions})
+            </span>
+          )}
+          {headerRight}
+        </div>
       </div>
 
       {/* Chat Messages Container */}
-      <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 h-96 overflow-y-auto space-y-4">
+      <div
+        ref={chatContainerRef}
+        className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 h-96 overflow-y-auto space-y-4"
+      >
         {chatMessages.map((msg, idx) => (
           <div
             key={idx}
-            className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
+            className={`flex flex-col ${
+              msg.role === "user" ? "items-end" : "items-start"
+            }`}
           >
-            {/* 💡 メッセージ（問題文や返答）のフォントサイズを text-sm sm:text-base へ拡大 */}
             <div
               className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl text-sm sm:text-base leading-relaxed whitespace-pre-wrap shadow-xs ${
                 msg.role === "user"
@@ -94,7 +106,10 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
           </div>
         ))}
         {isAnalyzing && (
-          <div className="text-xs font-bold italic animate-pulse p-2" style={{ color: themeColor }}>
+          <div
+            className="text-xs font-bold italic animate-pulse p-2"
+            style={{ color: themeColor }}
+          >
             ⏳ AI Yamato is analyzing your response and creating feedback...
           </div>
         )}
@@ -112,7 +127,9 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
                 className="bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-bold px-6 py-3 rounded-xl shadow-md transition cursor-pointer text-xs sm:text-sm shrink-0 flex items-center gap-2"
               >
                 <span>🎙️</span> Record{" "}
-                <span className="text-[10px] bg-rose-800 px-2 py-0.5 rounded-full">[Spacebar]</span>
+                <span className="text-[10px] bg-rose-800 px-2 py-0.5 rounded-full">
+                  [Spacebar]
+                </span>
               </button>
             ) : (
               <button
@@ -122,7 +139,9 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
                 style={{ backgroundColor: themeColor }}
               >
                 <span>⏹</span> Stop{" "}
-                <span className="text-[10px] bg-black/20 px-2 py-0.5 rounded-full">[Spacebar]</span>
+                <span className="text-[10px] bg-black/20 px-2 py-0.5 rounded-full">
+                  [Spacebar]
+                </span>
               </button>
             )}
 
@@ -166,7 +185,9 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
           />
           <button
             type="submit"
-            disabled={!isPracticing || isAnalyzing || !inputMessage.trim() || isWaitingForNext}
+            disabled={
+              !isPracticing || isAnalyzing || !inputMessage.trim() || isWaitingForNext
+            }
             className="text-white font-bold px-6 py-3 rounded-xl transition text-xs sm:text-sm shrink-0 cursor-pointer disabled:opacity-50"
             style={{ backgroundColor: themeColor }}
           >
