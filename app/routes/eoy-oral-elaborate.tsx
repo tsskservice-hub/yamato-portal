@@ -67,7 +67,7 @@ export default function EoyOralElaboratePage() {
   const [newAnswerText, setNewAnswerText] = useState("");
   const [newCategory, setNewCategory] = useState("");
 
-  // 各質問IDごとの文配列管理用ステート ({ [qId: string]: ["1文目", "2文目", "3文目", ...] })
+  // Sentence map state for each question ID: { [qId: string]: ["Sentence 1", "Sentence 2", "Sentence 3", ...] }
   const [sentencesMap, setSentencesMap] = useState<{ [qId: string]: string[] }>({});
 
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -244,7 +244,7 @@ export default function EoyOralElaboratePage() {
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
   // ---------------------------------------------------------
-  // 💡 【文単位の入力管理ロジック】
+  // Sentence-based Input Management Logic
   // ---------------------------------------------------------
   const getSentencesForQuestion = (qId: string): string[] => {
     if (sentencesMap[qId]) return sentencesMap[qId];
@@ -278,19 +278,19 @@ export default function EoyOralElaboratePage() {
     handleAnswerBlur(qId, combined, isCustom);
   };
 
-  // 💡 個別質問の1文目に Drill の解答をインポート
+  // Import Drill answer into Sentence 1 for a specific question
   const handleImportDrillForQuestion = async (qId: string) => {
     if (!fetchDrillAnswers) return;
     const drillMap = await fetchDrillAnswers();
     const drillAns = drillMap[qId];
     if (!drillAns) {
-      alert("この質問に対する Drill での解答が見つかりませんでした。");
+      alert("No Drill answer found for this question.");
       return;
     }
 
     const current = getSentencesForQuestion(qId);
     const updated = [...current];
-    updated[0] = drillAns; // 1文目にDrill解答を上書き反映
+    updated[0] = drillAns; // Overwrite Sentence 1 with Drill answer
 
     setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
 
@@ -299,12 +299,12 @@ export default function EoyOralElaboratePage() {
     handleAnswerBlur(qId, combined);
   };
 
-  // 💡 全質問の1文目に Drill の解答を一括インポート
+  // Import Drill answers into Sentence 1 for all questions
   const handleImportAllFromDrill = async () => {
     if (!fetchDrillAnswers) return;
     const drillMap = await fetchDrillAnswers();
     if (Object.keys(drillMap).length === 0) {
-      alert("インポート可能な Drill の解答が見つかりませんでした。");
+      alert("No importable Drill answers found.");
       return;
     }
 
@@ -327,17 +327,17 @@ export default function EoyOralElaboratePage() {
     });
 
     setSentencesMap(nextSentencesMap);
-    alert(`${importedCount} 件の質問の1文目に Drill の解答をインポートしました！`);
+    alert(`Imported Drill answers into Sentence 1 for ${importedCount} questions!`);
   };
 
-  // 💡 4文目以降の枠を追加
+  // Add 4th and subsequent sentence boxes
   const handleAddSentence = (qId: string) => {
     const current = getSentencesForQuestion(qId);
     const updated = [...current, ""];
     setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
   };
 
-  // 💡 追加した枠の削除
+  // Remove sentence box
   const handleRemoveSentence = (qId: string, index: number) => {
     const current = getSentencesForQuestion(qId);
     if (current.length <= 1) return;
@@ -351,12 +351,12 @@ export default function EoyOralElaboratePage() {
 
   const handleStartPractice = async () => {
     if (!user) {
-      alert("会話練習を行うには、サインインが必要です！");
+      alert("Sign-in is required to start conversation practice!");
       handleOpenAuth();
       return;
     }
     if (credits < 4) {
-      alert("クレジットが不足しています（Elaborate練習には4クレジット必要です）。チャージを行ってください。");
+      alert("Insufficient credits (4 credits required for Elaborate practice). Please top up your credits.");
       return;
     }
 
@@ -365,10 +365,10 @@ export default function EoyOralElaboratePage() {
       const filledSentences = sentences.filter((s) => s.trim().length > 0);
       if (filledSentences.length < 3) {
         alert(
-          `質問「${q.questionOriginal.slice(
+          `Answer for question "${q.questionOriginal.slice(
             0,
             20
-          )}...」の解答が不十分です。3文以上入力してください。`
+          )}..." is incomplete. Please enter at least 3 sentences.`
         );
         return;
       }
@@ -391,7 +391,7 @@ export default function EoyOralElaboratePage() {
   const handleAddCustom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert("カスタム質問を追加するにはサインインが必要です。");
+      alert("Sign-in is required to add custom questions.");
       handleOpenAuth();
       return;
     }
@@ -400,7 +400,7 @@ export default function EoyOralElaboratePage() {
       return;
     }
     if (newAnswerText.trim().length < 10) {
-      alert("回答は10文字以上で入力してください。");
+      alert("Please enter at least 10 characters for your response.");
       return;
     }
     const success = await addCustomQuestion(newQuestionText, newAnswerText, newCategory);
@@ -414,7 +414,7 @@ export default function EoyOralElaboratePage() {
   const handleSendMessageWithCredit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (credits < 4) {
-      alert("クレジットが不足しています。");
+      alert("Insufficient credits.");
       return;
     }
     await engine.sendAnswerMessage(e, answers, "elaborate", selectedSection);
@@ -482,7 +482,7 @@ export default function EoyOralElaboratePage() {
     <PageLayout user={user} credits={credits}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-4xl mx-auto space-y-8">
-          {/* ヘッダーバナー */}
+          {/* Header Banner Section */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2">
@@ -504,7 +504,77 @@ export default function EoyOralElaboratePage() {
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
           </div>
 
-          {/* セクション選択エリア */}
+          {/* 2. Conversation Practice with AI Yamato 🎙️ */}
+          <div ref={chatContainerRef} className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h2 className="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <span>2. Conversation Practice with AI Yamato 🎙️</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Welcome! Click 'Speak to AI Yamato' above to start practicing in the center screen.
+                </p>
+              </div>
+
+              {!engine.isPracticing && (
+                <button
+                  type="button"
+                  onClick={handleStartPractice}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm cursor-pointer shrink-0"
+                >
+                  <Play size={16} />
+                  <span>Speak to AI Yamato</span>
+                </button>
+              )}
+            </div>
+
+            {!user ? (
+              <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
+                <div className="w-14 h-14 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
+                  🔒
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
+                    Sign In Required for Oral Practice
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato
+                    and record your progress.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenAuth}
+                  className="py-3 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
+                >
+                  Sign In / Sign Up Now
+                </button>
+              </div>
+            ) : (
+              <OralCenterChatPractice
+                chatMessages={engine.chatMessages}
+                isPracticing={engine.isPracticing}
+                currentQuestionIndex={engine.currentQuestionIndex}
+                totalQuestions={engine.activeQuestions.length}
+                isAnalyzing={engine.isAnalyzing}
+                isRecording={engine.isRecording}
+                isWaitingForNext={engine.isWaitingForNext}
+                inputMessage={engine.inputMessage}
+                setInputMessage={engine.setInputMessage}
+                onStartRecording={engine.startRecording}
+                onStopRecording={engine.stopRecording}
+                onRepeatQuestion={() => {
+                  const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
+                  if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
+                }}
+                onProceedNext={() => engine.proceedToNextQuestion(answers)}
+                onSendMessage={handleSendMessageWithCredit}
+                themeColor={themeColor}
+              />
+            )}
+          </div>
+
+          {/* Section Selection Area */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -567,9 +637,7 @@ export default function EoyOralElaboratePage() {
             />
           )}
 
-          {/* --------------------------------------------------------- */}
-          {/* 💡 Review & Customize Your Answers セクション            */}
-          {/* --------------------------------------------------------- */}
+          {/* Review & Customize Your Answers Section */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
@@ -577,22 +645,22 @@ export default function EoyOralElaboratePage() {
                   <span>📝 Review & Customize Your Answers</span>
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  各質問に対して3文以上入力してください。1文目はDrillでの解答をインポートできます。
+                  Please enter 3 or more sentences for each question. You can import your answer from Drill into Sentence 1.
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                {/* drill から全問一括インポートボタン */}
+                {/* Import all from drill button */}
                 <button
                   type="button"
                   onClick={handleImportAllFromDrill}
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-xs rounded-xl border border-purple-200 dark:border-purple-800 transition shadow-sm cursor-pointer"
                 >
                   <Download size={14} />
-                  <span>drill からインポート（全問）</span>
+                  <span>Import from Drill (All)</span>
                 </button>
 
-                {/* 順序モード切替 */}
+                {/* Order mode toggle */}
                 <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
                   <button
                     type="button"
@@ -603,7 +671,7 @@ export default function EoyOralElaboratePage() {
                         : "text-slate-500"
                     }`}
                   >
-                    順序通り
+                    Sequential
                   </button>
                   <button
                     type="button"
@@ -614,13 +682,13 @@ export default function EoyOralElaboratePage() {
                         : "text-slate-500"
                     }`}
                   >
-                    ランダム
+                    Random
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 各質問ごとの回答入力エリア */}
+            {/* Answer input area for each question */}
             <div className="space-y-6">
               {currentQuestions.map((q, qIdx) => {
                 const sentences = getSentencesForQuestion(q.id);
@@ -630,7 +698,7 @@ export default function EoyOralElaboratePage() {
                     key={q.id}
                     className="p-5 bg-slate-50/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-4"
                   >
-                    {/* 質問ヘッダー & 個別Drillインポートボタン */}
+                    {/* Question Header & Individual Drill Import Button */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-md">
@@ -649,7 +717,7 @@ export default function EoyOralElaboratePage() {
                             className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1 p-1"
                           >
                             <Trash2 size={14} />
-                            <span>削除</span>
+                            <span>Delete</span>
                           </button>
                         )}
                         <button
@@ -658,19 +726,19 @@ export default function EoyOralElaboratePage() {
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800 rounded-xl transition cursor-pointer"
                         >
                           <Download size={13} />
-                          <span>drill からインポート</span>
+                          <span>Import from Drill</span>
                         </button>
                       </div>
                     </div>
 
-                    {/* 1文目・2文目・3文目... 入力欄 */}
+                    {/* Sentence 1, 2, 3... Input Fields */}
                     <div className="space-y-3">
                       {sentences.map((sText, sIdx) => (
                         <div key={sIdx} className="space-y-1">
                           <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
                             <span>
-                              {sIdx + 1}文目
-                              {sIdx === 0 ? " (drill からインポート可能)" : ""}
+                              Sentence {sIdx + 1}
+                              {sIdx === 0 ? " (Importable from Drill)" : ""}
                             </span>
                             {sIdx >= 3 && (
                               <button
@@ -679,7 +747,7 @@ export default function EoyOralElaboratePage() {
                                 className="text-rose-500 hover:text-rose-700 text-xs flex items-center gap-1 cursor-pointer"
                               >
                                 <Trash2 size={13} />
-                                <span>枠を削除</span>
+                                <span>Delete Box</span>
                               </button>
                             )}
                           </div>
@@ -689,12 +757,12 @@ export default function EoyOralElaboratePage() {
                             onBlur={() => handleSentenceBlur(q.id, q.isCustom)}
                             placeholder={
                               sIdx === 0
-                                ? "1文目: 主張・結論を入力（または drill からインポート）"
+                                ? "Sentence 1: Enter your main point / conclusion (or import from Drill)"
                                 : sIdx === 1
-                                ? "2文目: 理由や背景などを入力"
+                                ? "Sentence 2: Enter reasons or background"
                                 : sIdx === 2
-                                ? "3文目: 具体例や詳細などを入力"
-                                : `${sIdx + 1}文目を入力`
+                                ? "Sentence 3: Enter specific examples or details"
+                                : `Enter Sentence ${sIdx + 1}`
                             }
                             rows={2}
                             className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition resize-none"
@@ -703,79 +771,19 @@ export default function EoyOralElaboratePage() {
                       ))}
                     </div>
 
-                    {/* ＋ 文を追加するボタン */}
+                    {/* Add Sentence Button */}
                     <button
                       type="button"
                       onClick={() => handleAddSentence(q.id)}
                       className="w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-purple-50/40 text-purple-700 dark:text-purple-300 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer"
                     >
                       <Plus size={16} />
-                      <span>＋ 文を追加する</span>
+                      <span>+ Add Sentence</span>
                     </button>
                   </div>
                 );
               })}
             </div>
-
-            {/* 会話練習開始ボタン */}
-            <div className="pt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={handleStartPractice}
-                className="py-3.5 px-8 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm tracking-wide uppercase transition shadow-md flex items-center gap-2 cursor-pointer"
-              >
-                <Play size={18} />
-                <span>会話練習を開始する</span>
-              </button>
-            </div>
-          </div>
-
-          {/* チャット練習エリア */}
-          <div ref={chatContainerRef}>
-            {!user ? (
-              <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
-                <div className="w-14 h-14 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
-                  🔒
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
-                    Sign In Required for Oral Practice
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato
-                    and record your progress.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleOpenAuth}
-                  className="py-3 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
-                >
-                  Sign In / Sign Up Now
-                </button>
-              </div>
-            ) : (
-              <OralCenterChatPractice
-                chatMessages={engine.chatMessages}
-                isPracticing={engine.isPracticing}
-                currentQuestionIndex={engine.currentQuestionIndex}
-                totalQuestions={engine.activeQuestions.length}
-                isAnalyzing={engine.isAnalyzing}
-                isRecording={engine.isRecording}
-                isWaitingForNext={engine.isWaitingForNext}
-                inputMessage={engine.inputMessage}
-                setInputMessage={engine.setInputMessage}
-                onStartRecording={engine.startRecording}
-                onStopRecording={engine.stopRecording}
-                onRepeatQuestion={() => {
-                  const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                  if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
-                }}
-                onProceedNext={() => engine.proceedToNextQuestion(answers)}
-                onSendMessage={handleSendMessageWithCredit}
-                themeColor={themeColor}
-              />
-            )}
           </div>
 
           <aside
