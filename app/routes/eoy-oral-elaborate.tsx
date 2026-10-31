@@ -248,6 +248,15 @@ export default function EoyOralElaboratePage() {
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
   // ---------------------------------------------------------
+  // 💡 安全に文章を結合するヘルパー関数 (二重句点「。。」を自動修正)
+  // ---------------------------------------------------------
+  const combineSentencesList = (sentences: string[]): string => {
+    const valid = sentences.map((s) => s.trim()).filter(Boolean);
+    if (valid.length === 0) return "";
+    return valid.map((s) => s.replace(/[。！？]+$/, "")).join("。") + "。";
+  };
+
+  // ---------------------------------------------------------
   // Sentence-based Input Management Logic
   // ---------------------------------------------------------
   const getSentencesForQuestion = (qId: string): string[] => {
@@ -255,10 +264,12 @@ export default function EoyOralElaboratePage() {
 
     const existingText = answers[qId] || "";
     if (existingText.trim()) {
-      const parts = existingText
+      // 💡 連続する句点を1つに修復してから分割
+      const normalized = existingText.replace(/([。！？])\1+/g, "$1");
+      const parts = normalized
         .split(/(?<=[。！？\n])/)
         .map((s) => s.trim())
-        .filter(Boolean);
+        .filter((s) => s !== "" && s !== "。" && s !== "！" && s !== "？");
       if (parts.length >= 3) return parts;
       return [parts[0] || "", parts[1] || "", parts[2] || ""];
     }
@@ -272,13 +283,13 @@ export default function EoyOralElaboratePage() {
 
     setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
 
-    const combined = updated.filter((s) => s.trim() !== "").join("。");
+    const combined = combineSentencesList(updated);
     handleAnswerChange(qId, combined);
   };
 
   const handleSentenceBlur = (qId: string, isCustom?: boolean) => {
     const current = getSentencesForQuestion(qId);
-    const combined = current.filter((s) => s.trim() !== "").join("。");
+    const combined = combineSentencesList(current);
     handleAnswerBlur(qId, combined, isCustom);
   };
 
@@ -298,7 +309,7 @@ export default function EoyOralElaboratePage() {
 
     setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
 
-    const combined = updated.filter((s) => s.trim() !== "").join("。");
+    const combined = combineSentencesList(updated);
     handleAnswerChange(qId, combined);
     handleAnswerBlur(qId, combined);
   };
@@ -323,7 +334,7 @@ export default function EoyOralElaboratePage() {
         updated[0] = drillAns;
         nextSentencesMap[q.id] = updated;
 
-        const combined = updated.filter((s) => s.trim() !== "").join("。");
+        const combined = combineSentencesList(updated);
         handleAnswerChange(q.id, combined);
         handleAnswerBlur(q.id, combined);
         importedCount++;
@@ -348,7 +359,7 @@ export default function EoyOralElaboratePage() {
     const updated = current.filter((_, i) => i !== index);
     setSentencesMap((prev) => ({ ...prev, [qId]: updated }));
 
-    const combined = updated.filter((s) => s.trim() !== "").join("。");
+    const combined = combineSentencesList(updated);
     handleAnswerChange(qId, combined);
     handleAnswerBlur(qId, combined);
   };
@@ -705,13 +716,12 @@ export default function EoyOralElaboratePage() {
                     key={q.id}
                     className="p-5 bg-slate-50/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-4"
                   >
-                    {/* Question Header (フォントサイズ拡大 text-base sm:text-lg) */}
+                    {/* Question Header (拡大表示) */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-md">
                           {q.category || `Q${qIdx + 1}`}
                         </span>
-                        {/* 💡 質問文のフォントサイズを一回り大きく修正 */}
                         <h3
                           className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100"
                           dangerouslySetInnerHTML={{ __html: q.question }}
@@ -737,7 +747,7 @@ export default function EoyOralElaboratePage() {
                           <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
                             <div className="flex items-center gap-2">
                               <span>Sentence {sIdx + 1}</span>
-                              {/* 💡 Sentence 1: [import from Drill] ボタン */}
+                              {/* Sentence 1: [import from Drill] ボタン */}
                               {sIdx === 0 && (
                                 <button
                                   type="button"
@@ -748,7 +758,7 @@ export default function EoyOralElaboratePage() {
                                   <span>[import from Drill]</span>
                                 </button>
                               )}
-                              {/* 💡 Sentence 2 & 3: [Elaborate Hint] ボタン */}
+                              {/* Sentence 2 & 3: [Elaborate Hint] ボタン */}
                               {(sIdx === 1 || sIdx === 2) && (
                                 <button
                                   type="button"
@@ -814,7 +824,7 @@ export default function EoyOralElaboratePage() {
         </main>
       </div>
 
-      {/* 💡 Elaborate Hint モーダルコンポーネント */}
+      {/* Elaborate Hint モーダル */}
       <ElaborateHintModal
         isOpen={isHintModalOpen}
         onClose={() => setIsHintModalOpen(false)}
