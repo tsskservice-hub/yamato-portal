@@ -21,7 +21,8 @@ import {
   OralExamQuestionsData,
 } from "../data/oral-exam-questions";
 
-import { Download, Plus, Trash2, Play } from "lucide-react";
+import { Download, Plus, Trash2, Play, Lightbulb } from "lucide-react";
+import ElaborateHintModal from "../components/ElaborateHintModal";
 
 export interface QuestionItem {
   id: string;
@@ -66,6 +67,9 @@ export default function EoyOralElaboratePage() {
   const [newQuestionText, setNewQuestionText] = useState("");
   const [newAnswerText, setNewAnswerText] = useState("");
   const [newCategory, setNewCategory] = useState("");
+
+  // Modal State for Elaborate Hint
+  const [isHintModalOpen, setIsHintModalOpen] = useState<boolean>(false);
 
   // Sentence map state for each question ID: { [qId: string]: ["Sentence 1", "Sentence 2", "Sentence 3", ...] }
   const [sentencesMap, setSentencesMap] = useState<{ [qId: string]: string[] }>({});
@@ -650,7 +654,7 @@ export default function EoyOralElaboratePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                {/* 💡 全問の第一文をドリルからインポートする文言 ＋ [import] ボタン */}
+                {/* 全問の第一文をドリルからインポートする文言 ＋ [import] ボタン */}
                 <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                   <span>Import the first sentence from Drill for all questions</span>
                   <button
@@ -701,15 +705,15 @@ export default function EoyOralElaboratePage() {
                     key={q.id}
                     className="p-5 bg-slate-50/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-4"
                   >
-                    {/* Question Header (ルビ表示対応) */}
+                    {/* Question Header (フォントサイズ拡大 text-base sm:text-lg) */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-md">
                           {q.category || `Q${qIdx + 1}`}
                         </span>
-                        {/* 💡 ルビHTMLタグを正確に表示 */}
+                        {/* 💡 質問文のフォントサイズを一回り大きく修正 */}
                         <h3
-                          className="text-sm font-bold text-slate-800 dark:text-slate-100"
+                          className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100"
                           dangerouslySetInnerHTML={{ __html: q.question }}
                         />
                       </div>
@@ -731,9 +735,9 @@ export default function EoyOralElaboratePage() {
                       {sentences.map((sText, sIdx) => (
                         <div key={sIdx} className="space-y-1">
                           <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
-                            {/* 💡 Sentence 1 の隣に [import from Drill] ボタンを配置 */}
                             <div className="flex items-center gap-2">
                               <span>Sentence {sIdx + 1}</span>
+                              {/* 💡 Sentence 1: [import from Drill] ボタン */}
                               {sIdx === 0 && (
                                 <button
                                   type="button"
@@ -742,6 +746,17 @@ export default function EoyOralElaboratePage() {
                                 >
                                   <Download size={12} />
                                   <span>[import from Drill]</span>
+                                </button>
+                              )}
+                              {/* 💡 Sentence 2 & 3: [Elaborate Hint] ボタン */}
+                              {(sIdx === 1 || sIdx === 2) && (
+                                <button
+                                  type="button"
+                                  onClick={() => setIsHintModalOpen(true)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 rounded-lg transition cursor-pointer"
+                                >
+                                  <Lightbulb size={12} />
+                                  <span>[Elaborate Hint]</span>
                                 </button>
                               )}
                             </div>
@@ -763,11 +778,9 @@ export default function EoyOralElaboratePage() {
                             onBlur={() => handleSentenceBlur(q.id, q.isCustom)}
                             placeholder={
                               sIdx === 0
-                                ? "Sentence 1: Enter your main point / conclusion (or import from Drill)"
-                                : sIdx === 1
-                                ? "Sentence 2: Enter reasons or background"
-                                : sIdx === 2
-                                ? "Sentence 3: Enter specific examples or details"
+                                ? "Importable from Drill"
+                                : sIdx === 1 || sIdx === 2
+                                ? "If you don't know what to write, check [Elaborate Hint]"
                                 : `Enter Sentence ${sIdx + 1}`
                             }
                             rows={2}
@@ -800,6 +813,12 @@ export default function EoyOralElaboratePage() {
           </aside>
         </main>
       </div>
+
+      {/* 💡 Elaborate Hint モーダルコンポーネント */}
+      <ElaborateHintModal
+        isOpen={isHintModalOpen}
+        onClose={() => setIsHintModalOpen(false)}
+      />
     </PageLayout>
   );
 }
