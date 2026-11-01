@@ -14,10 +14,7 @@ export interface YamatoChatCommonMetaType {
   componentName: string;
   version: string;
   role: string;
-  features: {
-    featureName: string;
-    description: string;
-  }[];
+  features: { featureName: string; description: string }[];
   supportedThemes: string[];
   learningPaces: string[];
 }
