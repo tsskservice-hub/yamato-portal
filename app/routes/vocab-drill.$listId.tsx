@@ -14,6 +14,16 @@ interface Vocabulary {
 
 type DrillMode = "mcq" | "audio_en_typing" | "jp_en_typing" | "en_jp_typing";
 
+// カンマ区切りの英語訳を綺麗に分解・正規化するヘルパー関数
+function parseEnglishAnswers(rawEnglishText: string): string[] {
+  if (!rawEnglishText) return [];
+  return rawEnglishText
+    .replace(/、/g, ",") // 全角カンマが混ざっていても半角に統一
+    .split(",")          // カンマで分割
+    .map((s) => s.trim().toLowerCase()) // 前後の空白削除 ＆ 小文字化
+    .filter(Boolean);    // 空文字を除外
+}
+
 export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const { listId } = params;
   const { supabase } = createServerSupabaseClient(request, context);
@@ -141,8 +151,8 @@ export default function DrillSessionPage() {
     const userClean = inputText.trim().toLowerCase();
 
     if (mode === "audio_en_typing" || mode === "jp_en_typing") {
-      const targetEnglish = currentItem.english.trim().toLowerCase();
-      const possibleAnswers = targetEnglish.split(/[,/]/).map(s => s.trim());
+      // ★ カンマ区切りの複数の正解候補に分解して判定
+      const possibleAnswers = parseEnglishAnswers(currentItem.english);
       correctCondition = possibleAnswers.includes(userClean);
     } else if (mode === "en_jp_typing") {
       const jpClean = currentItem.japanese.trim();
