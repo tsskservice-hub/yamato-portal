@@ -1,7 +1,8 @@
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { useLoaderData, useFetcher } from "@remix-run/react";
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { createServerSupabaseClient } from "../lib/supabase.server";
+import { supabase } from "../lib/supabaseClient"; // ◀ クライアントサイド用のSupabaseインポート
 
 interface Vocabulary {
   id: string;
@@ -13,9 +14,9 @@ interface Vocabulary {
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { supabase } = createServerSupabaseClient(request, context);
+  const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   
-  const { data: vocabularies, error } = await supabase
+  const { data: vocabularies, error } = await serverSupabase
     .from("vocabularies")
     .select("id, japanese, kana, romaji, english, category")
     .order("id", { ascending: true });
@@ -27,92 +28,25 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   return json({ vocabularies: vocabularies || [] });
 }
 
-export async function action({ request, context }: ActionFunctionArgs) {
-  const { supabase } = createServerSupabaseClient(request, context);
-
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return json({ error: "ログインが必要です。" }, { status: 401 });
-  }
-
-  const formData = await request.formData();
-  
-  const title = formData.get("title") as string;
-  const creatorName = formData.get("creatorName") as string;
-  const drillMode = formData.get("drillMode") as string || "mcq";
-  const taskType = formData.get("taskType") as string || "homework";
-  const dueDate = formData.get("dueDate") as string;
-  const blockSchoolHours = formData.get("blockSchoolHours") === "on";
-  const selectedIdsString = formData.get("selectedIds") as string;
-  
-  const selectedIds: string[] = selectedIdsString ? JSON.parse(selectedIdsString) : [];
-
-  if (!title || selectedIds.length === 0) {
-    return json({ error: "タイトルと1つ以上の単語選択が必要です。" }, { status: 400 });
-  }
-
-  try {
-    const { data: listData, error: listError } = await supabase
-      .from("vocab_lists")
-      .insert({ title, creator_name: creatorName, drill_mode: drillMode })
-      .select("id")
-      .single();
-
-    if (listError || !listData) {
-      return json({ error: `リストの作成に失敗しました: ${listError?.message}` }, { status: 500 });
-    }
-
-    const listId = listData.id;
-
-    const itemsToInsert = selectedIds.map((vocabId) => ({
-      list_id: listId,
-      vocabulary_id: vocabId,
-    }));
-
-    const { error: itemsError } = await supabase
-      .from("vocab_list_items")
-      .insert(itemsToInsert);
-
-    if (itemsError) {
-      return json({ error: `単語の紐付けに失敗しました: ${itemsError.message}` }, { status: 500 });
-    }
-
-    const { error: taskError } = await supabase
-      .from("tasks")
-      .insert({
-        title: title,
-        task_type: taskType,
-        content_type: 'vocab',
-        content_id: listId,
-        teacher_id: user.id,
-        due_date: dueDate ? new Date(dueDate).toISOString() : null,
-        block_school_hours: blockSchoolHours,
-        is_published: true,
-      });
-
-    if (taskError) {
-      return json({ error: `課題の配信登録に失敗しました: ${taskError.message}` }, { status: 500 });
-    }
-
-    return json({ success: true, listId });
-  } catch (err: any) {
-    return json({ error: `予期せぬエラーが発生しました: ${err?.message || err}` }, { status: 500 });
-  }
-}
-
 export default function VocabCreatorPage() {
   const { vocabularies } = useLoaderData<typeof loader>();
-  const fetcher = useFetcher<typeof action>();
+  const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [creatorName, setCreatorName] = useState("");
   const [drillMode, setDrillMode] = useState("mcq");
+  const [taskType, setTaskType] = useState("homework");
+  const [dueDate, setDueDate] = useState("");
+  const [blockSchoolHours, setBlockSchoolHours] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // ★ 検索画面から sessionStorage 経由で渡された単語IDを確実に受け取る処理
+  // 検索画面からの単語引き継ぎ
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedIds = sessionStorage.getItem("preselected_vocab_ids");
@@ -125,19 +59,87 @@ export default function VocabCreatorPage() {
         } catch (e) {
           console.error("Failed to parse preselected vocab IDs", e);
         }
-        // 一度読み込んだらストレージをきれいにする
         sessionStorage.removeItem("preselected_vocab_ids");
       }
     }
   }, []);
 
-  useEffect(() => {
-    if (fetcher.data && typeof fetcher.data === "object" && "success" in fetcher.data && fetcher.data.success && "listId" in fetcher.data) {
-      const baseUrl = window.location.origin;
-      setCreatedUrl(`${baseUrl}/vocab-drill/${fetcher.data.listId}`);
-      setCopied(false);
+  // クライアントサイドでの保存処理（ボタンクリック時）
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (!title || selectedIds.length === 0) {
+      setErrorMessage("タイトルと1つ以上の単語選択が必要です。");
+      return;
     }
-  }, [fetcher.data]);
+
+    setIsSubmitting(true);
+
+    try {
+      // 1. 現在ログイン中のユーザー情報をクライアント側で取得
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error("ログインセッションが見つかりません。デバッグログイン等を確認してください。");
+      }
+
+      // 2. vocab_lists にインサート
+      const { data: listData, error: listError } = await supabase
+        .from("vocab_lists")
+        .insert({ title, creator_name: creatorName, drill_mode: drillMode })
+        .select("id")
+        .single();
+
+      if (listError || !listData) {
+        throw new Error(`リストの作成に失敗しました: ${listError?.message}`);
+      }
+
+      const listId = listData.id;
+
+      // 3. 選択された単語を vocab_list_items に一括登録
+      const itemsToInsert = selectedIds.map((vocabId) => ({
+        list_id: listId,
+        vocabulary_id: vocabId,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("vocab_list_items")
+        .insert(itemsToInsert);
+
+      if (itemsError) {
+        throw new Error(`単語の紐付けに失敗しました: ${itemsError.message}`);
+      }
+
+      // 4. tasks テーブルへ配信データとして登録
+      const { error: taskError } = await supabase
+        .from("tasks")
+        .insert({
+          title: title,
+          task_type: taskType,
+          content_type: 'vocab',
+          content_id: listId,
+          teacher_id: user.id,
+          due_date: dueDate ? new Date(dueDate).toISOString() : null,
+          block_school_hours: blockSchoolHours,
+          is_published: true,
+        });
+
+      if (taskError) {
+        throw new Error(`課題の配信登録に失敗しました: ${taskError.message}`);
+      }
+
+      // 成功時の処理（URL生成）
+      const baseUrl = window.location.origin;
+      setCreatedUrl(`${baseUrl}/vocab-drill/${listId}`);
+      setCopied(false);
+
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setErrorMessage(err.message || "予期せぬエラーが発生しました。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const toggleSelect = (id: string) => {
     if (selectedIds.includes(id)) {
@@ -180,7 +182,8 @@ export default function VocabCreatorPage() {
           選択された単語: <strong className="text-indigo-600">{selectedIds.length} 語</strong>
         </p>
 
-        <fetcher.Form method="post" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 space-y-4">
+        {/* 通常の Form ではなく onSubmit で処理 */}
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
@@ -188,7 +191,6 @@ export default function VocabCreatorPage() {
               </label>
               <input
                 type="text"
-                name="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="例: Year 7 Term 3 復習テスト"
@@ -203,7 +205,6 @@ export default function VocabCreatorPage() {
               </label>
               <input
                 type="text"
-                name="creatorName"
                 value={creatorName}
                 onChange={(e) => setCreatorName(e.target.value)}
                 placeholder="例: 山本先生"
@@ -218,8 +219,8 @@ export default function VocabCreatorPage() {
                 課題の種類 (Task Type)
               </label>
               <select
-                name="taskType"
-                defaultValue="homework"
+                value={taskType}
+                onChange={(e) => setTaskType(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium text-gray-800"
               >
                 <option value="homework">宿題 (Homework)</option>
@@ -235,7 +236,8 @@ export default function VocabCreatorPage() {
               </label>
               <input
                 type="datetime-local"
-                name="dueDate"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
               />
             </div>
@@ -245,7 +247,8 @@ export default function VocabCreatorPage() {
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                name="blockSchoolHours"
+                checked={blockSchoolHours}
+                onChange={(e) => setBlockSchoolHours(e.target.checked)}
                 className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
               />
               <div>
@@ -260,7 +263,6 @@ export default function VocabCreatorPage() {
               学習モード（出題形式）の指定
             </label>
             <select
-              name="drillMode"
               value={drillMode}
               onChange={(e) => setDrillMode(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium text-gray-800"
@@ -273,20 +275,19 @@ export default function VocabCreatorPage() {
           </div>
 
           <div>
-            <input type="hidden" name="selectedIds" value={JSON.stringify(selectedIds)} />
             <button
               type="submit"
-              disabled={!title || selectedIds.length === 0 || fetcher.state === "submitting"}
+              disabled={!title || selectedIds.length === 0 || isSubmitting}
               className="w-full bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 transition-colors text-sm mt-2"
             >
-              {fetcher.state === "submitting" ? "作成中..." : `選択した ${selectedIds.length} 語でドリルURLを発行する`}
+              {isSubmitting ? "作成中..." : `選択した ${selectedIds.length} 語でドリルURLを発行する`}
             </button>
           </div>
 
-          {fetcher.data && typeof fetcher.data === "object" && "error" in fetcher.data && (
-            <p className="text-red-600 text-sm">{(fetcher.data as any).error}</p>
+          {errorMessage && (
+            <p className="text-red-600 text-sm">{errorMessage}</p>
           )}
-        </fetcher.Form>
+        </form>
 
         {createdUrl && (
           <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl shadow-sm mb-6">
