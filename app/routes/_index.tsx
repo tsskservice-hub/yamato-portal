@@ -5,32 +5,15 @@
  */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { 
-  Sparkles, 
-  Coins, 
-  FileText, 
-  Grid, 
-  Mic, 
-  Gamepad2, 
-  Check, 
-  ArrowRight, 
-  Loader2, 
-  Flame 
-} from 'lucide-react';
+import { Sparkles, Coins, FileText, Grid, Mic, Gamepad2, Check, ArrowRight, Loader2, Flame } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import PageLayout, { PageLayoutRef } from '../components/PageLayout';
 import { HeroDemoChat } from '../components/HeroDemoChat';
 import { DailyQuizModal } from '../components/DailyQuizModal';
 import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
 import { DataErrorState } from '../components/DataErrorState';
-
-// 💡 Supabase 同期フック ＆ モジュール型定義
 import { usePortalContent, PortalModule } from '../data/portal-content';
-
-// 💡 料金プラン非同期取得関数 ＆ 型定義
 import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
-
-// 💡 クイズデータおよび取得ヘルパー
 import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
 
 // 💡 最大予想クレジット消費設定
@@ -43,12 +26,12 @@ export default function Home() {
   const navigate = useNavigate();
 
   // root.tsx の loader からユーザー情報を取得
-  const rootData = useRouteLoaderData("root") as {
-    user?: any;
-    nickname?: string;
-    credits?: number;
-    plan?: string;
-    learningPace?: "steady" | "normal" | "accelerated";
+  const rootData = useRouteLoaderData("root") as { 
+    user?: any; 
+    nickname?: string; 
+    credits?: number; 
+    plan?: string; 
+    learningPace?: "steady" | "normal" | "accelerated"; 
   } | undefined;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -74,13 +57,13 @@ export default function Home() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
-  const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAILY_QUIZZES) || DAILY_QUIZZES[0]);
 
-  // 💡 Supabase から DAILY_QUIZZES をフェッチしてランダムに1つセット（失敗時はローカルフォールバック）
+const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAILY_QUIZZES) || DAILY_QUIZZES[0]);
+
+  // 💡 Supabase から DAILY_QUIZZES をフェッチしてランダムに1つセット
   useEffect(() => {
     async function fetchDailyQuizFromSupabase() {
       try {
-        // 1. app_knowledge テーブルから key = 'DAILY_QUIZZES' のデータを検索
         const { data, error } = await supabase
           .from('app_knowledge')
           .select('data')
@@ -101,7 +84,6 @@ export default function Home() {
           }
         }
 
-        // 2. app_knowledge で見つからない場合、quizzes テーブルも確認
         const { data: quizzesTableData, error: quizzesError } = await supabase
           .from('quizzes')
           .select('*');
@@ -117,7 +99,6 @@ export default function Home() {
         console.error("Failed to fetch quizzes from Supabase, falling back to local:", err);
       }
 
-      // 3. エラー時やデータ未検出時はローカルの DAILY_QUIZZES フォールバックを使用
       const fallbackRandom = getRandomQuiz(DAILY_QUIZZES);
       if (fallbackRandom) {
         setCurrentQuiz(fallbackRandom);
@@ -163,6 +144,7 @@ export default function Home() {
         setCredits(typedData.credits ?? 10);
 
         const todayStr = new Date().toISOString().split('T')[0];
+
         if (typedData.last_quiz_date === todayStr) {
           setHasCompletedTodayQuiz(true);
         }
@@ -217,7 +199,6 @@ export default function Home() {
       handleOpenAuthModal('signup');
       return false;
     }
-
     const requiredCredits = MAX_ESTIMATED_CREDITS[featureType] || 2;
     if (credits < requiredCredits) {
       const confirmed = window.confirm(
@@ -240,7 +221,7 @@ export default function Home() {
     setIsQuizCorrect(correct);
 
     if (correct) {
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = new Date().toISOString().split('T');
       const newCredits = credits + 2;
 
       const { error } = await supabase
@@ -264,7 +245,6 @@ export default function Home() {
       handleOpenAuthModal('signup');
       return;
     }
-
     try {
       setCheckoutLoadingPriceId(priceId);
 
@@ -304,6 +284,11 @@ export default function Home() {
     }
   };
 
+  // 💡 7〜10年生（Years 7–10）用モジュールの抽出
+  const years7to10Modules = portalContent?.modulesSection?.section2?.modules?.filter(
+    (mod: PortalModule) => mod.id === 'vocab-years-7-10' || mod.category === 'Years 7-10'
+  ) || [];
+
   const vceSpeakingModules = portalContent?.modulesSection?.section2?.modules?.filter((mod: PortalModule) => {
     const lowerName = mod.name.toLowerCase();
     const lowerDesc = mod.description.toLowerCase();
@@ -312,14 +297,14 @@ export default function Home() {
   }) || [];
 
   const vceWritingModules = portalContent?.modulesSection?.section2?.modules?.filter((mod: PortalModule) => {
-    if (mod.id === 'text-types' || mod.id === 'writing-styles') return false;
+    if (mod.id === 'text-types' || mod.id === 'writing-styles' || mod.id === 'vocab-years-7-10' || mod.category === 'Years 7-10') return false;
     const lowerName = mod.name.toLowerCase();
     const lowerDesc = mod.description.toLowerCase();
     const lowerId = mod.id.toLowerCase();
     return !vceSpeakingModules.includes(mod) && (lowerName.includes('writing') || lowerName.includes('essay') || lowerDesc.includes('writing') || lowerDesc.includes('kanji') || lowerDesc.includes('vocabulary') || lowerId.includes('writing') || lowerId.includes('genkoyoshi') || mod.iconName === 'FileText');
   }) || [];
 
-  const categorizedIds = new Set([...vceSpeakingModules, ...vceWritingModules].map(m => m.id));
+  const categorizedIds = new Set([...vceSpeakingModules, ...vceWritingModules, ...years7to10Modules].map(m => m.id));
   const unassignedModules = portalContent?.modulesSection?.section2?.modules?.filter((mod: PortalModule) => mod.id !== 'text-types' && mod.id !== 'writing-styles' && !categorizedIds.has(mod.id)) || [];
   if (unassignedModules.length > 0) {
     vceWritingModules.push(...unassignedModules);
@@ -819,6 +804,73 @@ export default function Home() {
                     </div>
                   );
                 })()}
+
+                {/* 💡 新設: Years 7–10 Japanese セクション */}
+                {years7to10Modules.length > 0 && (
+                  <div className="space-y-4 pt-4">
+                    <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                      <span className="text-lg">📖</span>
+                      <h4 className="font-bold text-base text-indigo-600 dark:text-indigo-400">
+                        Years 7–10 Japanese
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {years7to10Modules.map((mod: PortalModule) => (
+                        <div 
+                          key={mod.id} 
+                          onClick={async () => {
+                            if (mod.isComingSoon) return;
+                            if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                              navigate(mod.path);
+                            }
+                          }}
+                          className={`p-6 rounded-3xl border flex flex-col justify-between ${
+                            mod.isComingSoon 
+                              ? 'opacity-75 cursor-not-allowed' 
+                              : 'hover:border-indigo-500/50 cursor-pointer'
+                          } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
+                        >
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                                {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                              </div>
+                              {mod.isComingSoon && (
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
+                                  Coming Soon
+                                </span>
+                              )}
+                            </div>
+                            <h4 className="font-bold text-base">{mod.name}</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                          </div>
+
+                          <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                            <span className="text-slate-400 font-medium">{mod.category}</span>
+                            {!mod.isComingSoon ? (
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                                    navigate(mod.path);
+                                  }
+                                }}
+                                className="text-indigo-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                              >
+                                <span>{mod.actionLabel}</span>
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
+                            ) : (
+                              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           </main>
