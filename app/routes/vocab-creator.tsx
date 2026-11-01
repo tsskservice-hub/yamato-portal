@@ -33,6 +33,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   
   const title = formData.get("title") as string;
   const creatorName = formData.get("creatorName") as string;
+  const drillMode = formData.get("drillMode") as string || "mcq";
   const selectedIdsString = formData.get("selectedIds") as string;
   
   const selectedIds: string[] = selectedIdsString ? JSON.parse(selectedIdsString) : [];
@@ -42,10 +43,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   try {
-    // 1. vocab_lists に親データをインサート
+    // 1. vocab_lists に親データと drill_mode をインサート
     const { data: listData, error: listError } = await supabase
       .from("vocab_lists")
-      .insert({ title, creator_name: creatorName })
+      .insert({ title, creator_name: creatorName, drill_mode: drillMode })
       .select("id")
       .single();
 
@@ -88,12 +89,12 @@ export default function VocabCreatorPage() {
 
   const [title, setTitle] = useState("");
   const [creatorName, setCreatorName] = useState("");
+  const [drillMode, setDrillMode] = useState("mcq");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // フォーム送信が成功したらURLを生成して状態に保持する
   useEffect(() => {
     if (fetcher.data && typeof fetcher.data === "object" && "success" in fetcher.data && fetcher.data.success && "listId" in fetcher.data) {
       const baseUrl = window.location.origin;
@@ -140,27 +141,27 @@ export default function VocabCreatorPage() {
           ドリルリスト作成・URL発行
         </h1>
         <p className="text-sm text-gray-600 mb-6">
-          授業や課題で出題したい単語を選択し、共有用のドリルURLを発行します。
+          授業や課題で出題したい単語を選択し、学習モードを指定した共有用ドリルURLを発行します。
         </p>
 
         {/* 作成フォーム */}
         <fetcher.Form method="post" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
-              リストのタイトル
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="例: Year 7 Term 3 Week 2 復習テスト"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            />
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                リストのタイトル
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="例: Year 7 Term 3 復習テスト"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
                 作成者（先生の名前など）
@@ -174,16 +175,35 @@ export default function VocabCreatorPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
               />
             </div>
-            <div className="flex items-end">
-              <input type="hidden" name="selectedIds" value={JSON.stringify(selectedIds)} />
-              <button
-                type="submit"
-                disabled={!title || selectedIds.length === 0 || fetcher.state === "submitting"}
-                className="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 transition-colors text-sm"
-              >
-                {fetcher.state === "submitting" ? "作成中..." : `選択した ${selectedIds.length} 語でドリルURLを発行する`}
-              </button>
-            </div>
+          </div>
+
+          {/* 学習モード選択 */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              学習モード（出題形式）の指定
+            </label>
+            <select
+              name="drillMode"
+              value={drillMode}
+              onChange={(e) => setDrillMode(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium text-gray-800"
+            >
+              <option value="mcq">① 4択選択式 (英語 → 日本語)</option>
+              <option value="audio_en_typing">② 音声リスニング ➔ 英語タイピング (Dictation)</option>
+              <option value="jp_en_typing">③ 日本語表記 ➔ 英語タイピング (Reading)</option>
+              <option value="en_jp_typing">④ 英語 ➔ 日本語タイピング</option>
+            </select>
+          </div>
+
+          <div>
+            <input type="hidden" name="selectedIds" value={JSON.stringify(selectedIds)} />
+            <button
+              type="submit"
+              disabled={!title || selectedIds.length === 0 || fetcher.state === "submitting"}
+              className="w-full bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 transition-colors text-sm mt-2"
+            >
+              {fetcher.state === "submitting" ? "作成中..." : `選択した ${selectedIds.length} 語でドリルURLを発行する`}
+            </button>
           </div>
 
           {fetcher.data && typeof fetcher.data === "object" && "error" in fetcher.data && (
@@ -191,14 +211,14 @@ export default function VocabCreatorPage() {
           )}
         </fetcher.Form>
 
-        {/* ★ 発行されたURLを表示するエリア */}
+        {/* 発行されたURL表示エリア */}
         {createdUrl && (
           <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl shadow-sm mb-6 animate-fade-in">
             <h2 className="text-base font-bold text-emerald-900 mb-1">
               🎉 ドリルURLが作成されました！
             </h2>
             <p className="text-xs text-emerald-700 mb-4">
-              以下のURLをコピーして生徒に共有するか、ボタンを押してプレビュー（確認）してください。
+              以下のURLをコピーして生徒に共有してください。
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <input

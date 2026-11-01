@@ -18,6 +18,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const { listId } = params;
   const { supabase } = createServerSupabaseClient(request, context);
 
+  // 1. リストのメタ情報取得 (drill_mode も含む)
   const { data: listMeta, error: metaError } = await supabase
     .from("vocab_lists")
     .select("*")
@@ -28,6 +29,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     throw new Response("Drill list not found", { status: 404 });
   }
 
+  // 2. リストに紐づく単語を取得
   const { data: listItems, error: itemsError } = await supabase
     .from("vocab_list_items")
     .select(`
@@ -56,9 +58,9 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
 export default function DrillSessionPage() {
   const { listMeta, vocabularies } = useLoaderData<typeof loader>();
 
-  // モード選択 ("select" はモード選択画面)
-  const [mode, setMode] = useState<DrillMode | "select">("select");
-  
+  // データベースから保存されているモードを取得（デフォルトは 4択 "mcq"）
+  const mode: DrillMode = (listMeta.drill_mode as DrillMode) || "mcq";
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   
@@ -77,19 +79,19 @@ export default function DrillSessionPage() {
   // 日本語音声を読み上げる関数 (Web Speech API)
   const speakJapanese = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel(); // 連続再生防止
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "ja-JP";
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   };
 
-  // モードがリスニングに変わったとき、自動で音声を再生
+  // リスニングモードのとき、問題が変わったら自動で音声を再生
   useEffect(() => {
     if (mode === "audio_en_typing" && currentItem && !isFinished && !isAnswered) {
       speakJapanese(currentItem.japanese);
     }
-  }, [currentIndex, mode, isFinished]);
+  }, [currentIndex, mode, isFinished, currentItem, isAnswered]);
 
   // 4択の選択肢生成
   const options = useMemo(() => {
@@ -110,6 +112,17 @@ export default function DrillSessionPage() {
     );
   }
 
+  // モード名の日本語表示用ラベル
+  const getModeLabel = (m: DrillMode) => {
+    switch (m) {
+      case "mcq": return "4択選択式 (英語 → 日本語)";
+      case "audio_en_typing": return "音声リスニング ➔ 英語タイピング";
+      case "jp_en_typing": return "日本語表記 ➔ 英語タイピング";
+      case "en_jp_typing": return "英語 ➔ 日本語タイピング";
+      default: return "";
+    }
+  };
+
   // 4択の解答処理
   const handleSelectOption = (option: string) => {
     if (selectedAnswer !== null) return;
@@ -128,13 +141,10 @@ export default function DrillSessionPage() {
     const userClean = inputText.trim().toLowerCase();
 
     if (mode === "audio_en_typing" || mode === "jp_en_typing") {
-      // 英語を入力させるモード (英単語やスペース区切りの答えに対応)
       const targetEnglish = currentItem.english.trim().toLowerCase();
-      // カンマ区切りの複数訳がある場合を考慮
       const possibleAnswers = targetEnglish.split(/[,/]/).map(s => s.trim());
       correctCondition = possibleAnswers.includes(userClean);
     } else if (mode === "en_jp_typing") {
-      // 日本語（かな、あるいは漢字・ローマ字）を入力させるモード
       const jpClean = currentItem.japanese.trim();
       const kanaClean = currentItem.kana.trim();
       const romajiClean = currentItem.romaji.trim().toLowerCase();
@@ -156,8 +166,7 @@ export default function DrillSessionPage() {
     setIsCorrect(null);
 
     if (currentIndex + 1 < vocabularies.length) {
-      const nextIdx = currentIndex + 1;
-      setCurrentIndex(nextIdx);
+      setCurrentIndex(currentIndex + 1);
     } else {
       setIsFinished(true);
     }
@@ -184,67 +193,25 @@ export default function DrillSessionPage() {
               <h1 className="text-lg sm:text-xl font-extrabold text-gray-900">
                 {listMeta.title}
               </h1>
-              {listMeta.creator_name && (
-                <p className="text-xs text-gray-500 mt-0.5">作成者: {listMeta.creator_name}</p>
-              )}
+              <div className="flex items-center gap-2 mt-1">
+                {listMeta.creator_name && (
+                  <span className="text-xs text-gray-500">作成者: {listMeta.creator_name}</span>
+                )}
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded">
+                  {getModeLabel(mode)}
+                </span>
+              </div>
             </div>
-            {mode !== "select" && !isFinished && (
-              <button
-                onClick={() => { setMode("select"); restartDrill(); }}
-                className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2.5 py-1 rounded-lg"
-              >
-                モード変更
-              </button>
+            {!isFinished && (
+              <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full whitespace-nowrap">
+                {currentIndex + 1} / {vocabularies.length} 問
+              </span>
             )}
           </div>
 
-          {/* 1. モード選択画面 */}
-          {mode === "select" ? (
-            <div className="py-4">
-              <h2 className="text-base font-bold text-gray-800 mb-4 text-center">学習モードを選んでください</h2>
-              <div className="space-y-3">
-                <button
-                  onClick={() => setMode("mcq")}
-                  className="w-full p-4 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl text-left transition-all"
-                >
-                  <div className="font-bold text-indigo-900">① 4択選択式 (英語 → 日本語)</div>
-                  <div className="text-xs text-indigo-700 mt-0.5">英語を見て、正しい日本語の意味を選択します。</div>
-                </button>
-
-                <button
-                  onClick={() => setMode("audio_en_typing")}
-                  className="w-full p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-left transition-all"
-                >
-                  <div className="font-bold text-emerald-900">② 日本語音声 ➔ 英語タイピング (Dictation)</div>
-                  <div className="text-xs text-emerald-700 mt-0.5">音声を聞いて、対応する英単語をタイプします。</div>
-                </button>
-
-                <button
-                  onClick={() => setMode("jp_en_typing")}
-                  className="w-full p-4 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-left transition-all"
-                >
-                  <div className="font-bold text-amber-900">③ 日本語表記 ➔ 英語タイピング (Reading)</div>
-                  <div className="text-xs text-amber-700 mt-0.5">漢字・かなを見て、対応する英単語をタイプします。</div>
-                </button>
-
-                <button
-                  onClick={() => setMode("en_jp_typing")}
-                  className="w-full p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-left transition-all"
-                >
-                  <div className="font-bold text-purple-900">④ 英語 ➔ 日本語タイピング</div>
-                  <div className="text-xs text-purple-700 mt-0.5">英語を見て、対応する日本語（かな・ローマ字）をタイプします。</div>
-                </button>
-              </div>
-            </div>
-          ) : !isFinished ? (
+          {!isFinished ? (
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
-                  問題 {currentIndex + 1} / {vocabularies.length}
-                </span>
-              </div>
-
-              {/* モードごとの出題エリア */}
+              {/* 4択モード */}
               {mode === "mcq" && (
                 <div>
                   <div className="text-center my-6">
@@ -297,7 +264,7 @@ export default function DrillSessionPage() {
                 </div>
               )}
 
-              {/* タイピング系共通レイアウト */}
+              {/* タイピング系モード */}
               {(mode === "audio_en_typing" || mode === "jp_en_typing" || mode === "en_jp_typing") && (
                 <div>
                   <div className="text-center my-6">
@@ -397,19 +364,19 @@ export default function DrillSessionPage() {
               <p className="text-gray-600 mb-6">
                 正解数: <strong className="text-2xl text-indigo-600">{score}</strong> / {vocabularies.length} 問
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex gap-3 justify-center">
                 <button
                   onClick={restartDrill}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors text-sm"
                 >
-                  同じモードでもう一度
+                  もう一度挑戦する
                 </button>
-                <button
-                  onClick={() => { setMode("select"); restartDrill(); }}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm"
+                <a
+                  href="/vocab"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm inline-flex items-center"
                 >
-                  モードを選び直す
-                </button>
+                  検索トップに戻る
+                </a>
               </div>
             </div>
           )}
