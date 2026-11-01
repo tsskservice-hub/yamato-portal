@@ -123,7 +123,7 @@ export default function VocabIndexPage() {
     if (selectedIds.length === 0) return;
     // URLのクエリパラメータに選択されたIDを渡して作成画面へジャンプ（または sessionStorage 等を利用）
     sessionStorage.setItem("preselected_vocab_ids", JSON.stringify(selectedIds));
-    navigate("/vocab/create"); // ※プロジェクトのドリル作成ページのパスに合わせて適宜変更してください
+    navigate("/vocab-creator"); // ※プロジェクトのドリル作成ページのパスに合わせて適宜変更してください
   };
 
   return (
