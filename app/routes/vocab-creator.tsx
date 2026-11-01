@@ -29,11 +29,20 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const { supabase } = createServerSupabaseClient(request, context);
+
+  // 1. 現在ログインしている教師（ユーザー）の情報を取得
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
   const formData = await request.formData();
   
   const title = formData.get("title") as string;
   const creatorName = formData.get("creatorName") as string;
   const drillMode = formData.get("drillMode") as string || "mcq";
+  const taskType = formData.get("taskType") as string || "homework";
+  const dueDate = formData.get("dueDate") as string;
   const selectedIdsString = formData.get("selectedIds") as string;
   
   const selectedIds: string[] = selectedIdsString ? JSON.parse(selectedIdsString) : [];
@@ -43,7 +52,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   try {
-    // 1. vocab_lists に親データと drill_mode をインサート
+    // 2. vocab_lists に親データと drill_mode をインサート
     const { data: listData, error: listError } = await supabase
       .from("vocab_lists")
       .insert({ title, creator_name: creatorName, drill_mode: drillMode })
@@ -61,7 +70,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     const listId = listData.id;
 
-    // 2. 選択された単語を vocab_list_items に一括登録
+    // 3. 選択された単語を vocab_list_items に一括登録
     const itemsToInsert = selectedIds.map((vocabId) => ({
       list_id: listId,
       vocabulary_id: vocabId,
@@ -74,6 +83,24 @@ export async function action({ request, context }: ActionFunctionArgs) {
     if (itemsError) {
       console.error("vocab_list_items insert error:", itemsError);
       return json({ error: `単語の紐付けに失敗しました: ${itemsError.message}` }, { status: 500 });
+    }
+
+    // 4. tasks テーブルへ配信データとして登録
+    const { error: taskError } = await supabase
+      .from("tasks")
+      .insert({
+        title: title,
+        task_type: taskType,                  // 'homework', 'classwork', 'quiz', 'exam'
+        content_type: 'vocab',                // 語彙コンテンツであることを示す
+        content_id: listId,                   // 作成した vocab_lists の ID
+        teacher_id: user.id,                  // ログイン中の教師のID
+        due_date: dueDate ? new Date(dueDate).toISOString() : null, // 提出期限
+        is_published: true,
+      });
+
+    if (taskError) {
+      console.error("tasks insert error:", taskError);
+      return json({ error: `課題の配信登録に失敗しました: ${taskError.message}` }, { status: 500 });
     }
 
     return json({ success: true, listId });
@@ -173,6 +200,36 @@ export default function VocabCreatorPage() {
                 onChange={(e) => setCreatorName(e.target.value)}
                 placeholder="例: 山本先生"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
+          </div>
+
+          {/* 課題の種類・期限の選択 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                課題の種類 (Task Type)
+              </label>
+              <select
+                name="taskType"
+                defaultValue="homework"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-medium text-gray-800"
+              >
+                <option value="homework">宿題 (Homework)</option>
+                <option value="classwork">授業内課題 (Classwork)</option>
+                <option value="quiz">小テスト (Quiz)</option>
+                <option value="exam">定期試験 (Exam)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                提出期限 (Due Date) ※任意
+              </label>
+              <input
+                type="datetime-local"
+                name="dueDate"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
               />
             </div>
           </div>

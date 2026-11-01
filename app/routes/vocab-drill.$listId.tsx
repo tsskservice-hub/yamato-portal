@@ -1,5 +1,5 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { useLoaderData } from "@remix-run/react";
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useLoaderData, useFetcher } from "@remix-run/react";
 import { useState, useMemo, useEffect } from "react";
 import { createServerSupabaseClient } from "../lib/supabase.server";
 
@@ -39,7 +39,15 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     throw new Response("Drill list not found", { status: 404 });
   }
 
-  // 2. リストに紐づく単語を取得
+  // 2. このリストに紐づくタスク（tasks）のIDを取得（成績保存用）
+  const { data: taskData } = await supabase
+    .from("tasks")
+    .select("id")
+    .eq("content_id", listId)
+    .eq("content_type", "vocab")
+    .single();
+
+  // 3. リストに紐づく単語を取得
   const { data: listItems, error: itemsError } = await supabase
     .from("vocab_list_items")
     .select(`
@@ -62,11 +70,51 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     .map((item: any) => item.vocabularies)
     .filter(Boolean);
 
-  return json({ listMeta, vocabularies });
+  return json({ listMeta, taskId: taskData?.id || null, vocabularies });
+}
+
+export async function action({ request, context }: ActionFunctionArgs) {
+  const { supabase } = createServerSupabaseClient(request, context);
+
+  // ログイン中の生徒の情報を取得
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
+  const formData = await request.formData();
+  const taskId = formData.get("taskId") as string;
+  const score = Number(formData.get("score"));
+
+  if (!taskId) {
+    // タスクとして紐づいていない純粋な練習URLの場合はそのまま成功を返す
+    return json({ success: true });
+  }
+
+  // task_submissions に結果を保存（すでに存在する場合はスコアとステータスを更新）
+  const { error: submitError } = await supabase
+    .from("task_submissions")
+    .upsert({
+      task_id: taskId,
+      student_id: user.id,
+      status: "completed",
+      score: score,
+      completed_at: new Date().toISOString(),
+    }, {
+      onConflict: "task_id, student_id",
+    });
+
+  if (submitError) {
+    console.error("task_submissions save error:", submitError);
+    return json({ error: "成績の保存に失敗しました。" }, { status: 500 });
+  }
+
+  return json({ success: true });
 }
 
 export default function DrillSessionPage() {
-  const { listMeta, vocabularies } = useLoaderData<typeof loader>();
+  const { listMeta, taskId, vocabularies } = useLoaderData<typeof loader>();
+  const submitFetcher = useFetcher();
 
   // データベースから保存されているモードを取得（デフォルトは 4択 "mcq"）
   const mode: DrillMode = (listMeta.drill_mode as DrillMode) || "mcq";
@@ -83,6 +131,7 @@ export default function DrillSessionPage() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
   const [isFinished, setIsFinished] = useState(false);
+  const [hasSubmittedScore, setHasSubmittedScore] = useState(false);
 
   const currentItem = vocabularies[currentIndex];
 
@@ -111,6 +160,17 @@ export default function DrillSessionPage() {
     const dummyOptions = shuffledOthers.slice(0, 3).map((v) => v.japanese);
     return [...dummyOptions, currentItem.japanese].sort(() => 0.5 - Math.random());
   }, [currentIndex, vocabularies, mode, currentItem]);
+
+  // ドリル終了時に成績を自動送信
+  useEffect(() => {
+    if (isFinished && !hasSubmittedScore && taskId) {
+      setHasSubmittedScore(true);
+      const formData = new FormData();
+      formData.append("taskId", taskId);
+      formData.append("score", score.toString());
+      submitFetcher.submit(formData, { method: "post" });
+    }
+  }, [isFinished, hasSubmittedScore, taskId, score, submitFetcher]);
 
   if (vocabularies.length === 0) {
     return (
@@ -151,7 +211,6 @@ export default function DrillSessionPage() {
     const userClean = inputText.trim().toLowerCase();
 
     if (mode === "audio_en_typing" || mode === "jp_en_typing") {
-      // ★ カンマ区切りの複数の正解候補に分解して判定
       const possibleAnswers = parseEnglishAnswers(currentItem.english);
       correctCondition = possibleAnswers.includes(userClean);
     } else if (mode === "en_jp_typing") {
@@ -190,6 +249,7 @@ export default function DrillSessionPage() {
     setIsAnswered(false);
     setIsCorrect(null);
     setIsFinished(false);
+    setHasSubmittedScore(false);
   };
 
   return (
@@ -371,9 +431,14 @@ export default function DrillSessionPage() {
             /* 結果発表画面 */
             <div className="text-center py-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">ドリル終了！お疲れ様でした</h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-2">
                 正解数: <strong className="text-2xl text-indigo-600">{score}</strong> / {vocabularies.length} 問
               </p>
+              {taskId && (
+                <p className="text-xs text-emerald-600 font-semibold mb-6">
+                  {submitFetcher.state === "submitting" ? "成績を保存中..." : "✓ 成績が教師に送信されました"}
+                </p>
+              )}
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={restartDrill}
