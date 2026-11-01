@@ -41,34 +41,45 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "タイトルと1つ以上の単語選択が必要です。" }, { status: 400 });
   }
 
-  // 1. vocab_lists に親データをインサート
-  const { data: listData, error: listError } = await supabase
-    .from("vocab_lists")
-    .insert({ title, creator_name: creatorName })
-    .select("id")
-    .single();
+  try {
+    // 1. vocab_lists に親データをインサート
+    const { data: listData, error: listError } = await supabase
+      .from("vocab_lists")
+      .insert({ title, creator_name: creatorName })
+      .select("id")
+      .single();
 
-  if (listError || !listData) {
-    return json({ error: "リストの作成に失敗しました。" }, { status: 500 });
+    if (listError) {
+      console.error("vocab_lists insert error:", listError);
+      return json({ error: `リストの作成に失敗しました: ${listError.message}` }, { status: 500 });
+    }
+
+    if (!listData) {
+      return json({ error: "リストの作成に失敗しました（データなし）。" }, { status: 500 });
+    }
+
+    const listId = listData.id;
+
+    // 2. 選択された単語を vocab_list_items に一括登録
+    const itemsToInsert = selectedIds.map((vocabId) => ({
+      list_id: listId,
+      vocabulary_id: vocabId,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from("vocab_list_items")
+      .insert(itemsToInsert);
+
+    if (itemsError) {
+      console.error("vocab_list_items insert error:", itemsError);
+      return json({ error: `単語の紐付けに失敗しました: ${itemsError.message}` }, { status: 500 });
+    }
+
+    return json({ success: true, listId });
+  } catch (err: any) {
+    console.error("Unexpected action error:", err);
+    return json({ error: `予期せぬエラーが発生しました: ${err?.message || err}` }, { status: 500 });
   }
-
-  const listId = listData.id;
-
-  // 2. 選択された単語を vocab_list_items に一括登録
-  const itemsToInsert = selectedIds.map((vocabId) => ({
-    list_id: listId,
-    vocabulary_id: vocabId,
-  }));
-
-  const { error: itemsError } = await supabase
-    .from("vocab_list_items")
-    .insert(itemsToInsert);
-
-  if (itemsError) {
-    return json({ error: "単語の紐付けに失敗しました。" }, { status: 500 });
-  }
-
-  return json({ success: true, listId });
 }
 
 export default function VocabCreatorPage() {
@@ -84,7 +95,7 @@ export default function VocabCreatorPage() {
 
   // フォーム送信が成功したらURLを生成して状態に保持する
   useEffect(() => {
-    if (fetcher.data && "success" in fetcher.data && fetcher.data.success && fetcher.data.listId) {
+    if (fetcher.data && typeof fetcher.data === "object" && "success" in fetcher.data && fetcher.data.success && "listId" in fetcher.data) {
       const baseUrl = window.location.origin;
       setCreatedUrl(`${baseUrl}/vocab/drill/${fetcher.data.listId}`);
       setCopied(false);
@@ -175,8 +186,8 @@ export default function VocabCreatorPage() {
             </div>
           </div>
 
-          {fetcher.data && "error" in fetcher.data && (
-            <p className="text-red-600 text-sm">{fetcher.data.error}</p>
+          {fetcher.data && typeof fetcher.data === "object" && "error" in fetcher.data && (
+            <p className="text-red-600 text-sm">{(fetcher.data as any).error}</p>
           )}
         </fetcher.Form>
 

@@ -211,7 +211,7 @@ export const PORTAL_CONTENT: PortalContentData = {
     },
     section1: {
       id: "general",
-      title: "Section 1: Global & General Japanese Learners",
+      title: "Global & General Japanese Learners",
       emoji: "🌍",
       modules: [
         {
@@ -242,7 +242,7 @@ export const PORTAL_CONTENT: PortalContentData = {
     },
     section2: {
       id: "vce",
-      title: "Section 2: Victorian Curriculum & VCE Students (Australia)",
+      title: "Victorian Curriculum & VCE Students (Australia)",
       emoji: "🇦🇺🐨🦘",
       modules: [
         {
