@@ -1,9 +1,10 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（AI Vision自動文字起こし・クレジット表示・確実なセッション取得対応・SEO Meta対応版）
+ * @description VCE Kanji & Grammar Checker 独立ページ（Supabase共通メタヘルパー対応版・AI Vision自動文字起こし・クレジット表示対応）
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useRouteLoaderData, useRevalidator, type MetaFunction } from '@remix-run/react';
+import { Link, useRouteLoaderData, useRevalidator, useLoaderData, type MetaFunction } from '@remix-run/react';
+import { json, type LoaderFunctionArgs } from '@remix-run/node'; // 💡 LoaderFunctionArgs は @remix-run/node からインポート
 import { 
   Sparkles, 
   Coins, 
@@ -23,25 +24,54 @@ import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGramm
 import { VCE_KANJI_LIST } from '../data/kanji-list';
 import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
 import { supabase } from '../lib/supabaseClient';
+import { generateModuleMeta } from '../utils/seoMeta'; // 💡 共通SEOヘルパーをインポート
 
 /**
- * 💡 Remixの標準 meta 関数によるSEOメタディスクリプションとタイトルの動的設定
+ * 💡 1. loader で Supabase から PORTAL_CONTENT をサーバー側で取得
  */
-export const meta: MetaFunction = () => {
-  return [
-    { title: "VCE Kanji & Grammar Checker | AI Yamato Portal" },
-    { 
-      name: "description", 
-      content: "Paste your Japanese essay transcripts to instantly verify your usage of mandatory VCE kanji and essential grammatical structures. Track your vocabulary and grammar proficiency at a glance to maximize exam performance." 
-    },
-    { name: "keywords", content: "VCE Japanese, Kanji checker, VCE grammar, Japanese writing practice, Genkoyoshi" }
-  ];
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+
+    return json({
+      portalContent: portalData?.content || null,
+      currentPath: url.pathname,
+    });
+  } catch (err) {
+    console.error("Loader error fetching portal content:", err);
+    return json({
+      portalContent: null,
+      currentPath: url.pathname,
+    });
+  }
+}
+
+/**
+ * 💡 2. Remix の meta 関数で loader のデータを受け取り、共通ヘルパーで動的生成
+ */
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  if (!data) {
+    return [
+      { title: "VCE Kanji & Grammar Checker | AI Yamato Portal" },
+      { name: "description", content: "Instantly verify unique VCE kanji and grammar patterns in your handwritten essay transcripts." }
+    ];
+  }
+  return generateModuleMeta(data.portalContent, data.currentPath);
 };
 
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const revalidator = useRevalidator(); // 💡 クレジット減算後にヘッダー等を再検証するためのフック
+
+  // loaderからデータを取得（Supabase連携の有無に関わらず安全に保持）
+  const loaderData = useLoaderData<typeof loader>();
 
   // 画像アップロードおよび文字起こし用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -115,9 +145,12 @@ export default function KanjiGrammarCheckerPage() {
     "私は日本へ行って、日本語の勉強をたくさんしなければなりません。"
   );
 
+  // 💡 loaderDataが正常に読み込まれていることをコンソール等で確認する場合に利用可能
   useEffect(() => {
-    document.title = "VCE Kanji & Grammar Checker | AI Yamato Portal";
-  }, []);
+    if (loaderData?.portalContent) {
+      console.log("Portal content successfully loaded for SEO meta tags.");
+    }
+  }, [loaderData]);
 
   // 💡 バックエンドのAI (Vision API) を利用して手書き画像を自動文字起こしする関数
   const handleAutoTranscribe = async (imageBase64: string) => {
