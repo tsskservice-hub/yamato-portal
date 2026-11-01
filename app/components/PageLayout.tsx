@@ -51,6 +51,8 @@ type PageLayoutProps = {
   breadcrumbTitle?: string; // 個別ページでカスタム名称を指定したい場合のオプション
   onSignOut?: () => void | Promise<void>; // 各ルートファイルから渡されるサインアウト処理に対応
   requireAuth?: boolean; // 明示的に未ログインアクセス制限をオン/オフ指定したい場合のプロパティ
+  error?: boolean; // データ読み込みエラーフラグ
+  errorMessage?: string; // エラーメッセージ詳細
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -62,7 +64,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   isDarkMode = false,
   breadcrumbTitle,
   onSignOut: propOnSignOut,
-  requireAuth
+  requireAuth,
+  error = false,
+  errorMessage
 }, ref) => {
   const rootData = useRouteLoaderData("root") as {  
     user?: any;  

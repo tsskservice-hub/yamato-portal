@@ -1,30 +1,48 @@
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
- * 💡 PORTAL_CONTENT & PRICE_PLANS 完全動的連動・PageLayout 統合型データエラーガード対応版
+ * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版
  */
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { Sparkles, Coins, FileText, Grid, Mic, Gamepad2, Check, ArrowRight, Loader2 } from 'lucide-react';
+import { 
+  Sparkles, 
+  Coins, 
+  FileText, 
+  Grid, 
+  Mic, 
+  Gamepad2, 
+  Check, 
+  ArrowRight, 
+  Loader2, 
+  Flame 
+} from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import PageLayout, { PageLayoutRef } from '../components/PageLayout';
 import { HeroDemoChat } from '../components/HeroDemoChat';
 import { DailyQuizModal } from '../components/DailyQuizModal';
 import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
+import { DataErrorState } from '../components/DataErrorState';
 
+// 💡 Supabase 同期フック ＆ モジュール型定義
 import { usePortalContent, PortalModule } from '../data/portal-content';
+
+// 💡 料金プラン非同期取得関数 ＆ 型定義
 import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
+
+// 💡 クイズデータおよび取得ヘルパー
 import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
 
+// 💡 最大予想クレジット消費設定
 const MAX_ESTIMATED_CREDITS = {
-  textAi: 2,
-  imageAi: 4,
+  textAi: 2,   // テキストチャット最大予想
+  imageAi: 4,  // 画像生成・ビジュアル解説最大予想
 };
 
 export default function Home() {
   const navigate = useNavigate();
 
+  // root.tsx の loader からユーザー情報を取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     nickname?: string;
@@ -39,8 +57,10 @@ export default function Home() {
   const nickname = rootData?.nickname ?? "";
   const learningPace = rootData?.learningPace ?? "normal";
 
+  // 💡 PORTAL_CONTENT の動的取得
   const { portalContent, isLoading: isPortalLoading, isError: isPortalError, errorMessage: portalErrorMessage } = usePortalContent(supabase);
 
+  // 💡 PRICE_PLANS の動的取得ステート
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [isPriceLoading, setIsPriceLoading] = useState<boolean>(true);
   const [isPriceError, setIsPriceError] = useState<boolean>(false);
@@ -48,6 +68,7 @@ export default function Home() {
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
   const layoutRef = useRef<PageLayoutRef>(null);
 
+  // 💡 Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -55,13 +76,58 @@ export default function Home() {
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
   const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAILY_QUIZZES) || DAILY_QUIZZES[0]);
 
+  // 💡 Supabase から DAILY_QUIZZES をフェッチしてランダムに1つセット（失敗時はローカルフォールバック）
   useEffect(() => {
-    const randomQuiz = getRandomQuiz(DAILY_QUIZZES);
-    if (randomQuiz) {
-      setCurrentQuiz(randomQuiz);
+    async function fetchDailyQuizFromSupabase() {
+      try {
+        // 1. app_knowledge テーブルから key = 'DAILY_QUIZZES' のデータを検索
+        const { data, error } = await supabase
+          .from('app_knowledge')
+          .select('data')
+          .eq('key', 'DAILY_QUIZZES')
+          .single();
+
+        if (!error && data && data.data) {
+          const quizList = Array.isArray(data.data) 
+            ? data.data 
+            : (data.data.quizzes || data.data.DAILY_QUIZZES);
+
+          if (quizList && quizList.length > 0) {
+            const random = getRandomQuiz(quizList as QuizItem[]);
+            if (random) {
+              setCurrentQuiz(random);
+              return;
+            }
+          }
+        }
+
+        // 2. app_knowledge で見つからない場合、quizzes テーブルも確認
+        const { data: quizzesTableData, error: quizzesError } = await supabase
+          .from('quizzes')
+          .select('*');
+
+        if (!quizzesError && quizzesTableData && quizzesTableData.length > 0) {
+          const random = getRandomQuiz(quizzesTableData as QuizItem[]);
+          if (random) {
+            setCurrentQuiz(random);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch quizzes from Supabase, falling back to local:", err);
+      }
+
+      // 3. エラー時やデータ未検出時はローカルの DAILY_QUIZZES フォールバックを使用
+      const fallbackRandom = getRandomQuiz(DAILY_QUIZZES);
+      if (fallbackRandom) {
+        setCurrentQuiz(fallbackRandom);
+      }
     }
+
+    fetchDailyQuizFromSupabase();
   }, []);
 
+  // 💡 料金プランを Supabase からフェッチ
   const loadPricePlans = useCallback(async () => {
     setIsPriceLoading(true);
     setIsPriceError(false);
