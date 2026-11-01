@@ -1,9 +1,9 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（AI Vision自動文字起こし・クレジット表示・確実なセッション取得対応版）
+ * @description VCE Kanji & Grammar Checker 独立ページ（AI Vision自動文字起こし・クレジット表示・確実なセッション取得対応・SEO Meta対応版）
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useRouteLoaderData, useRevalidator } from '@remix-run/react';
+import { Link, useRouteLoaderData, useRevalidator, type MetaFunction } from '@remix-run/react';
 import { 
   Sparkles, 
   Coins, 
@@ -23,6 +23,20 @@ import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGramm
 import { VCE_KANJI_LIST } from '../data/kanji-list';
 import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
 import { supabase } from '../lib/supabaseClient';
+
+/**
+ * 💡 Remixの標準 meta 関数によるSEOメタディスクリプションとタイトルの動的設定
+ */
+export const meta: MetaFunction = () => {
+  return [
+    { title: "VCE Kanji & Grammar Checker | AI Yamato Portal" },
+    { 
+      name: "description", 
+      content: "Paste your Japanese essay transcripts to instantly verify your usage of mandatory VCE kanji and essential grammatical structures. Track your vocabulary and grammar proficiency at a glance to maximize exam performance." 
+    },
+    { name: "keywords", content: "VCE Japanese, Kanji checker, VCE grammar, Japanese writing practice, Genkoyoshi" }
+  ];
+};
 
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
