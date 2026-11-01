@@ -30,7 +30,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export async function action({ request, context }: ActionFunctionArgs) {
   const { supabase } = createServerSupabaseClient(request, context);
 
-  // 1. 現在ログインしている教師（ユーザー）の情報を取得
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     return json({ error: "ログインが必要です。" }, { status: 401 });
@@ -43,6 +42,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const drillMode = formData.get("drillMode") as string || "mcq";
   const taskType = formData.get("taskType") as string || "homework";
   const dueDate = formData.get("dueDate") as string;
+  const blockSchoolHours = formData.get("blockSchoolHours") === "on";
   const selectedIdsString = formData.get("selectedIds") as string;
   
   const selectedIds: string[] = selectedIdsString ? JSON.parse(selectedIdsString) : [];
@@ -52,25 +52,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   try {
-    // 2. vocab_lists に親データと drill_mode をインサート
     const { data: listData, error: listError } = await supabase
       .from("vocab_lists")
       .insert({ title, creator_name: creatorName, drill_mode: drillMode })
       .select("id")
       .single();
 
-    if (listError) {
-      console.error("vocab_lists insert error:", listError);
-      return json({ error: `リストの作成に失敗しました: ${listError.message}` }, { status: 500 });
-    }
-
-    if (!listData) {
-      return json({ error: "リストの作成に失敗しました（データなし）。" }, { status: 500 });
+    if (listError || !listData) {
+      return json({ error: `リストの作成に失敗しました: ${listError?.message}` }, { status: 500 });
     }
 
     const listId = listData.id;
 
-    // 3. 選択された単語を vocab_list_items に一括登録
     const itemsToInsert = selectedIds.map((vocabId) => ({
       list_id: listId,
       vocabulary_id: vocabId,
@@ -81,31 +74,28 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .insert(itemsToInsert);
 
     if (itemsError) {
-      console.error("vocab_list_items insert error:", itemsError);
       return json({ error: `単語の紐付けに失敗しました: ${itemsError.message}` }, { status: 500 });
     }
 
-    // 4. tasks テーブルへ配信データとして登録
     const { error: taskError } = await supabase
       .from("tasks")
       .insert({
         title: title,
-        task_type: taskType,                  // 'homework', 'classwork', 'quiz', 'exam'
-        content_type: 'vocab',                // 語彙コンテンツであることを示す
-        content_id: listId,                   // 作成した vocab_lists の ID
-        teacher_id: user.id,                  // ログイン中の教師のID
-        due_date: dueDate ? new Date(dueDate).toISOString() : null, // 提出期限
+        task_type: taskType,
+        content_type: 'vocab',
+        content_id: listId,
+        teacher_id: user.id,
+        due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        block_school_hours: blockSchoolHours,
         is_published: true,
       });
 
     if (taskError) {
-      console.error("tasks insert error:", taskError);
       return json({ error: `課題の配信登録に失敗しました: ${taskError.message}` }, { status: 500 });
     }
 
     return json({ success: true, listId });
   } catch (err: any) {
-    console.error("Unexpected action error:", err);
     return json({ error: `予期せぬエラーが発生しました: ${err?.message || err}` }, { status: 500 });
   }
 }
@@ -121,6 +111,25 @@ export default function VocabCreatorPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // ★ 検索画面から sessionStorage 経由で渡された単語IDを確実に受け取る処理
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedIds = sessionStorage.getItem("preselected_vocab_ids");
+      if (savedIds) {
+        try {
+          const parsed = JSON.parse(savedIds);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSelectedIds(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse preselected vocab IDs", e);
+        }
+        // 一度読み込んだらストレージをきれいにする
+        sessionStorage.removeItem("preselected_vocab_ids");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (fetcher.data && typeof fetcher.data === "object" && "success" in fetcher.data && fetcher.data.success && "listId" in fetcher.data) {
@@ -168,10 +177,9 @@ export default function VocabCreatorPage() {
           ドリルリスト作成・URL発行
         </h1>
         <p className="text-sm text-gray-600 mb-6">
-          授業や課題で出題したい単語を選択し、学習モードを指定した共有用ドリルURLを発行します。
+          選択された単語: <strong className="text-indigo-600">{selectedIds.length} 語</strong>
         </p>
 
-        {/* 作成フォーム */}
         <fetcher.Form method="post" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -204,7 +212,6 @@ export default function VocabCreatorPage() {
             </div>
           </div>
 
-          {/* 課題の種類・期限の選択 */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
@@ -234,7 +241,20 @@ export default function VocabCreatorPage() {
             </div>
           </div>
 
-          {/* 学習モード選択 */}
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="blockSchoolHours"
+                className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+              />
+              <div>
+                <span className="text-sm font-bold text-amber-900">学校の授業時間中（平日の 9:00 〜 15:30）のアクセスを禁止する</span>
+                <p className="text-xs text-amber-700">生徒が授業中に宿題を進めてしまわないよう、この時間帯はアクセスをブロックします。</p>
+              </div>
+            </label>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
               学習モード（出題形式）の指定
@@ -268,46 +288,29 @@ export default function VocabCreatorPage() {
           )}
         </fetcher.Form>
 
-        {/* 発行されたURL表示エリア */}
         {createdUrl && (
-          <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl shadow-sm mb-6 animate-fade-in">
-            <h2 className="text-base font-bold text-emerald-900 mb-1">
-              🎉 ドリルURLが作成されました！
-            </h2>
-            <p className="text-xs text-emerald-700 mb-4">
-              以下のURLをコピーして生徒に共有してください。
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl shadow-sm mb-6">
+            <h2 className="text-base font-bold text-emerald-900 mb-1">🎉 ドリルURLが作成されました！</h2>
+            <div className="flex flex-col sm:flex-row items-center gap-3 mt-3">
               <input
                 type="text"
                 readOnly
                 value={createdUrl}
                 className="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-sm text-gray-700 select-all"
               />
-              <div className="flex gap-2 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors whitespace-nowrap"
-                >
-                  {copied ? "コピーしました！" : "URLをコピー"}
-                </button>
-                <a
-                  href={createdUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors text-center whitespace-nowrap"
-                >
-                  ドリルを開く ↗
-                </a>
-              </div>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors whitespace-nowrap"
+              >
+                {copied ? "コピーしました！" : "URLをコピー"}
+              </button>
             </div>
           </div>
         )}
 
-        {/* 単語選択エリア */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+          <div className="flex justify-between items-center mb-4 gap-4">
             <input
               type="text"
               value={searchQuery}
@@ -315,18 +318,13 @@ export default function VocabCreatorPage() {
               placeholder="単語を検索して絞り込む..."
               className="w-full sm:w-72 px-3 py-2 border border-gray-300 rounded-lg text-sm"
             />
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
-                選択中: <strong className="text-indigo-600">{selectedIds.length}</strong> 語
-              </span>
-              <button
-                type="button"
-                onClick={toggleSelectAll}
-                className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-bold text-gray-700"
-              >
-                表示中をすべて選択/解除
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={toggleSelectAll}
+              className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-bold text-gray-700 whitespace-nowrap"
+            >
+              表示中をすべて選択/解除
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-1 border rounded-lg bg-gray-50">
@@ -337,9 +335,7 @@ export default function VocabCreatorPage() {
                   key={item.id}
                   onClick={() => toggleSelect(item.id)}
                   className={`p-3 rounded-lg border cursor-pointer transition-all flex flex-col justify-between ${
-                    isSelected
-                      ? "bg-indigo-50 border-indigo-500 shadow-sm"
-                      : "bg-white border-gray-200 hover:border-gray-300"
+                    isSelected ? "bg-indigo-50 border-indigo-500 shadow-sm" : "bg-white border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   <div>

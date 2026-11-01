@@ -118,13 +118,15 @@ export default function VocabIndexPage() {
     }
   };
 
-  // 選択した単語を持ってドリル作成画面へ遷移
-  const handleCreateDrillWithSelected = () => {
-    if (selectedIds.length === 0) return;
-    // URLのクエリパラメータに選択されたIDを渡して作成画面へジャンプ（または sessionStorage 等を利用）
-    sessionStorage.setItem("preselected_vocab_ids", JSON.stringify(selectedIds));
-    navigate("/vocab-creator"); // ※プロジェクトのドリル作成ページのパスに合わせて適宜変更してください
-  };
+
+// 選択した単語を持ってドリル作成画面へ遷移する部分
+const handleCreateDrillWithSelected = () => {
+  if (selectedIds.length === 0) return;
+  // sessionStorage に確実に保存
+  sessionStorage.setItem("preselected_vocab_ids", JSON.stringify(selectedIds));
+  // 実際のドリル作成画面のルート（パス）に合わせる（例: /vocab/create など）
+  navigate("/vocab/create"); 
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-24">
