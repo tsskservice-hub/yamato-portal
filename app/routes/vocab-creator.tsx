@@ -97,7 +97,7 @@ export default function VocabCreatorPage() {
   useEffect(() => {
     if (fetcher.data && typeof fetcher.data === "object" && "success" in fetcher.data && fetcher.data.success && "listId" in fetcher.data) {
       const baseUrl = window.location.origin;
-      setCreatedUrl(`${baseUrl}/vocab/drill/${fetcher.data.listId}`);
+      setCreatedUrl(`${baseUrl}/vocab-drill/${fetcher.data.listId}`);
       setCopied(false);
     }
   }, [fetcher.data]);
