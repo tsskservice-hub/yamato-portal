@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（未ログイン時の英語無料登録ガード・認証モーダル・共通パンくず完全統合版）
+ * @description ポータル共通レイアウト（リアルタイムクレジット同期・英語無料登録ガード・認証モーダル・共通パンくず完全統合版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -24,6 +24,18 @@ import Header from "./header";
 import Footer from "./Footer";
 import { supabase } from "../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
+
+/**
+ * 💡 リアルタイムクレジット更新通知ヘルパー関数
+ * アプリ内の任意の場所から呼び出すことで、F5リロードなしでヘッダー等のクレジット表記を即座に最新化します。
+ */
+export const notifyCreditsUpdated = (newCredits?: number) => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("yamato:credits-updated", { detail: newCredits })
+    );
+  }
+};
 
 export type PageLayoutRef = {
   openAuthModal: (mode: 'signin' | 'signup' | string) => void;
@@ -123,6 +135,34 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     if (propCredits !== undefined) setCredits(propCredits);
     if (propNickname !== undefined) setNickname(propNickname);
   }, [propUser, propCredits, propNickname]);
+
+  // 💡 リアルタイムクレジット同期イベントの監視設定
+  useEffect(() => {
+    const handleCreditsUpdated = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (typeof customEvent.detail === "number") {
+        setCredits(customEvent.detail);
+      } else if (user?.id) {
+        fetchUserData(user.id);
+      } else {
+        supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
+          if (session?.user) {
+            fetchUserData(session.user.id);
+          }
+        });
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("yamato:credits-updated", handleCreditsUpdated);
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("yamato:credits-updated", handleCreditsUpdated);
+      }
+    };
+  }, [user]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
