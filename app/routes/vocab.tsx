@@ -125,7 +125,7 @@ const handleCreateDrillWithSelected = () => {
   // sessionStorage に確実に保存
   sessionStorage.setItem("preselected_vocab_ids", JSON.stringify(selectedIds));
   // 実際のドリル作成画面のルート（パス）に合わせる（例: /vocab/create など）
-  navigate("/vocab/create"); 
+  navigate("/vocab-creator"); 
 };
 
   return (
