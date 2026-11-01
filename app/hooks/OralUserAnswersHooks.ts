@@ -28,7 +28,7 @@ export function useSupabaseUserAnswers(
     try {
       const { data, error } = await supabaseClient
         .from("user_custom_questions")
-        .select(`id, question_text, answer_text, elaborate_text, category`)
+        .select("id, question_text, answer_text, elaborate_text, category")
         .eq("user_id", userId)
         .order("created_at", { ascending: true });
 
@@ -54,9 +54,10 @@ export function useSupabaseUserAnswers(
     }
     try {
       // elaborate モードの場合は、両方のカラムを取得してフォールバック判定できるようにする
-      const selectFields = mode === "elaborate" 
-        ? "question_id, answer_text, elaborate_text" 
-        : "question_id, answer_text";
+      const selectFields =
+        mode === "elaborate"
+          ? "question_id, answer_text, elaborate_text"
+          : "question_id, answer_text";
 
       const { data, error } = await supabaseClient
         .from("user_drill_answers")
@@ -65,22 +66,24 @@ export function useSupabaseUserAnswers(
 
       if (!error && data) {
         const updated = { ...initialMap };
-        data.forEach((row: { question_id: string; answer_text?: string; elaborate_text?: string }) => {
-          if (row.question_id) {
-            if (mode === "elaborate") {
-              // elaborate モード：elaborate_text があればそれを優先、なければ answer_text（Drillの答え）を継承、どちらもなければ initialMap
-              const effectiveText = row.elaborate_text || row.answer_text;
-              if (effectiveText) {
-                updated[row.question_id] = effectiveText;
-              }
-            } else {
-              // drill モード
-              if (row.answer_text) {
-                updated[row.question_id] = row.answer_text;
+        data.forEach(
+          (row: { question_id: string; answer_text?: string; elaborate_text?: string }) => {
+            if (row.question_id) {
+              if (mode === "elaborate") {
+                // elaborate モード：elaborate_text があればそれを優先、なければ answer_text（Drillの答え）を継承、どちらもなければ initialMap
+                const effectiveText = row.elaborate_text || row.answer_text;
+                if (effectiveText) {
+                  updated[row.question_id] = effectiveText;
+                }
+              } else {
+                // drill モード
+                if (row.answer_text) {
+                  updated[row.question_id] = row.answer_text;
+                }
               }
             }
           }
-        });
+        );
         setAnswers(updated);
       } else {
         setAnswers(initialMap);
@@ -122,7 +125,11 @@ export function useSupabaseUserAnswers(
     }
   };
 
-  const addCustomQuestion = async (questionText: string, answerText: string, category: string) => {
+  const addCustomQuestion = async (
+    questionText: string,
+    answerText: string,
+    category: string
+  ) => {
     if (!userId) {
       alert("カスタム設問を保存するにはログインが必要です。");
       return false;
@@ -171,7 +178,62 @@ export function useSupabaseUserAnswers(
     }
   };
 
+  // =========================================================
+  // 💡 【新規追加】機能1: Drillの解答を取得する関数
+  // =========================================================
+  const fetchDrillAnswers = async (): Promise<{ [key: string]: string }> => {
+    if (!userId) return {};
+    try {
+      const { data, error } = await supabaseClient
+        .from("user_drill_answers")
+        .select("question_id, answer_text")
+        .eq("user_id", userId);
+
+      if (error || !data) {
+        console.error("Failed to fetch drill answers:", error);
+        return {};
+      }
+
+      const drillMap: { [key: string]: string } = {};
+      data.forEach((row: { question_id: string; answer_text?: string }) => {
+        if (row.question_id && row.answer_text) {
+          drillMap[row.question_id] = row.answer_text;
+        }
+      });
+      return drillMap;
+    } catch (err) {
+      console.error("Error in fetchDrillAnswers:", err);
+      return {};
+    }
+  };
+
+  // =========================================================
+  // 💡 【新規追加】機能1: Drillの解答をステート(answers)にインポートする関数
+  // =========================================================
+  const importDrillAnswers = async (targetQuestionId?: string): Promise<boolean> => {
+    const drillMap = await fetchDrillAnswers();
+    if (Object.keys(drillMap).length === 0) return false;
+
+    setAnswers((prev) => {
+      const next = { ...prev };
+      if (targetQuestionId) {
+        if (drillMap[targetQuestionId]) {
+          next[targetQuestionId] = drillMap[targetQuestionId];
+        }
+      } else {
+        Object.keys(drillMap).forEach((qId) => {
+          if (drillMap[qId]) {
+            next[qId] = drillMap[qId];
+          }
+        });
+      }
+      return next;
+    });
+    return true;
+  };
+
   return {
+    // --- 既存のプロパティ（完全互換） ---
     answers,
     setAnswers,
     customQuestionsRaw,
@@ -181,5 +243,9 @@ export function useSupabaseUserAnswers(
     handleAnswerBlur,
     addCustomQuestion,
     deleteCustomQuestion,
+
+    // --- 【機能1用追加プロパティ】 ---
+    fetchDrillAnswers,
+    importDrillAnswers,
   };
 }
