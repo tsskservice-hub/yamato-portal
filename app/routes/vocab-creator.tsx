@@ -1,7 +1,7 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { useState, useEffect } from "react";
-import { createServerSupabaseClient } from "~/lib/supabase.server";
+import { createServerSupabaseClient } from "../lib/supabase.server";
 
 interface Vocabulary {
   id: string;
