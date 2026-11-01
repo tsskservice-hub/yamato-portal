@@ -1,6 +1,6 @@
 /**
  * @file genkoyoshi-editor-vce.tsx
- * @description VCE日本語 原稿用紙エディタ ＆ AI添削（完全クリーン・型エラー解消版）
+ * @description VCE Japanese Genkoyoshi Editor & AI Feedback (English UI with Vertical/Horizontal Writing Toggle)
  */
 import React, { useState, useEffect, useRef } from "react";
 import type { LinksFunction } from "@remix-run/cloudflare";
@@ -10,72 +10,72 @@ import {
   Trash2, 
   Copy, 
   Printer, 
-  Sparkles, 
   BookOpen, 
   Check, 
-  HelpCircle,
-  ChevronDown,
-  ChevronUp
+  HelpCircle, 
+  Info, 
+  ChevronDown, 
+  ChevronUp,
+  Edit3,
+  AlignLeft,
+  AlignJustify
 } from "lucide-react";
+
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import { generateGenkoyoshiPages, calculateCharCount } from "../utils/genkoyoshi-engine";
-import GenkoyoshiPreviewPane from "../components/GenkoyoshiPreviewPane";
 import ChatYamatoGenkoyoshiEditorVce from "../components/ChatYamatoGenkoyoshiEditorVce";
+import GenkoyoshiPreviewPane from "../components/GenkoyoshiPreviewPane";
+import { generateGenkoyoshiPages, calculateCharCount } from "../utils/genkoyoshi-engine";
 import genkoStyles from "../styles/genkoyoshi.css?url";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: genkoStyles },
 ];
 
-export default function GenkoyoshiEditorVce() {
-  const rootData = useRouteLoaderData("root") as {
-    user?: any;
-    credits?: number;
-    nickname?: string;
-  } | undefined;
-
-  const [user, setUser] = useState<any>(rootData?.user ?? null);
-  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
-  const nickname = rootData?.nickname ?? "";
-
+export default function GenkoyoshiEditorVCE() {
   const layoutRef = useRef<PageLayoutRef>(null);
 
-  // 原稿用紙フォームステート
-  const [format, setFormat] = useState<string>("400");
+  const rootData = useRouteLoaderData("root") as {
+    user?: any;
+    nickname?: string;
+    credits?: number;
+    learningPace?: "steady" | "normal" | "accelerated";
+  } | undefined;
+
+  const user = rootData?.user ?? null;
+  const credits = rootData?.credits ?? 10;
+  const nickname = rootData?.nickname ?? "";
+  const learningPace = rootData?.learningPace ?? "normal";
+
+  // Form & Layout States
+  const [format, setFormat] = useState<string>("400"); // "400" | "200"
+  const [writingMode, setWritingMode] = useState<"vertical" | "horizontal">("vertical");
   const [title, setTitle] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [text, setText] = useState<string>("");
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [showGuide, setShowGuide] = useState<boolean>(false);
   const [isClient, setIsClient] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [showFaq, setShowFaq] = useState<boolean>(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // 計算エンジンからページデータと文字数を取得
-  const pages = isClient ? generateGenkoyoshiPages({ text, title, name, format }) : [];
+  const pages = isClient 
+    ? generateGenkoyoshiPages({ text, title, name, format }) 
+    : [];
   const charCount = calculateCharCount(text);
 
-  const handleClear = () => {
-    if (window.confirm("入力内容をすべて消去しますか？")) {
-      setTitle("");
-      setName("");
-      setText("");
-    }
-  };
-
-  const handleCopy = () => {
-    const parts: string[] = [];
-    if (title) parts.push("【題名】" + title);
-    if (name) parts.push("【氏名】" + name);
-    if (text) parts.push(text);
-    const fullContent = parts.join("\n\n");
-    
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(fullContent);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  const handleCopyText = async () => {
+    if (!text && !title && !name) return;
+    try {
+      const fullContent = [title && "Title: " + title, name && "Name: " + name, text]
+        .filter(Boolean)
+        .join("\n\n");
+      await navigator.clipboard.writeText(fullContent);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
     }
   };
 
@@ -83,174 +83,257 @@ export default function GenkoyoshiEditorVce() {
     window.print();
   };
 
+  const handleReset = () => {
+    if (window.confirm("Are you sure you want to clear all inputs?")) {
+      setTitle("");
+      setName("");
+      setText("");
+    }
+  };
+
   return (
-    <PageLayout 
-      ref={layoutRef} 
-      user={user} 
-      credits={credits} 
+    <PageLayout
+      ref={layoutRef}
+      user={user}
+      credits={credits}
       nickname={nickname}
-      breadcrumbTitle="VCE Genkoyoshi Editor"
+      breadcrumbTitle="Genkoyoshi Editor (VCE)"
     >
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          
-          {/* ヘッダーセクション */}
-          <div className="text-center space-y-3">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-bold border border-blue-200 dark:border-blue-800">
-              <FileText className="w-3.5 h-3.5" />
-              <span>VCE Japanese Writing Tool</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* Header Section */}
+        <div className="space-y-3 border-b border-slate-200 dark:border-slate-800 pb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-2xl bg-red-600/10 text-red-600 dark:bg-red-500/20 dark:text-red-400 flex items-center justify-center shadow-inner">
+                <Edit3 className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+                  <span>VCE Genkoyoshi Essay Editor</span>
+                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800">
+                    Genkoyoshi
+                  </span>
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Real-time Japanese manuscript grid layout, paragraph indents, Kinsoku punctuation rules, and instant AI tutoring.
+                </p>
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              原稿用紙エディタ (VCE仕様) 🌸
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              文字数や縦書き禁則処理を自動リアルタイム計算。VCE試験本番の原稿用紙レイアウトを忠実に再現します。
-            </p>
+
+            <button
+              type="button"
+              onClick={() => setShowGuide(!showGuide)}
+              className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <HelpCircle className="w-4 h-4 text-red-600" />
+              <span>Writing Guidelines</span>
+              {showGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
           </div>
 
-          {/* メインレイアウト（2カラム：エディタフォーム / プレビュー） */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* 左カラム：テキスト入力フォーム */}
-            <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
-              
-              {/* フォーマット＆操作ボタン */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold text-slate-500">用紙形式:</span>
-                  <select
-                    value={format}
-                    onChange={(e) => setFormat(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl border text-xs font-bold bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 outline-none focus:border-blue-500"
+          {/* Guidelines Accordion */}
+          {showGuide && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-red-50/70 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-xs text-slate-700 dark:text-slate-300 space-y-3 animate-fadeIn">
+              <div className="flex items-center gap-2 font-bold text-red-900 dark:text-red-200">
+                <Info className="w-4 h-4 text-red-600 shrink-0" />
+                <span>VCE Japanese Genkoyoshi Rules (Automatically Handled)</span>
+              </div>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pl-5 list-disc text-slate-600 dark:text-slate-400">
+                <li><strong>Title:</strong> Placed on Line 1 with 3 blank cells at the top.</li>
+                <li><strong>Name:</strong> Placed on Line 2, right-aligned leaving 1 blank cell at the bottom.</li>
+                <li><strong>Paragraph Indent:</strong> The first cell of each paragraph is automatically indented by 1 blank cell.</li>
+                <li><strong>Line-Head Punctuation (Kinsoku):</strong> Punctuation (、。) and closing quotes (」) never start a line; they append to the last cell of the preceding line.</li>
+                <li><strong>Two-Digit Numbers:</strong> Half-width 2-digit numbers (e.g. "25") fit side-by-side inside a single cell.</li>
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Main 2-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Input Form */}
+          <div className="lg:col-span-5 space-y-5 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h2 className="font-extrabold text-base text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-red-600" />
+                <span>Essay Input & Format</span>
+              </h2>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Paper Grid Selector */}
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setFormat("400")}
+                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                      format === "400" 
+                        ? "bg-red-600 text-white shadow-sm" 
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                    }`}
                   >
-                    <option value="400">400字詰め (20×20)</option>
-                    <option value="200">200字詰め (20×10)</option>
-                  </select>
+                    400 Grid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormat("200")}
+                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                      format === "200" 
+                        ? "bg-red-600 text-white shadow-sm" 
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                    }`}
+                  >
+                    200 Grid
+                  </button>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                {/* Writing Direction Selector (Vertical / Horizontal) */}
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
                   <button
                     type="button"
-                    onClick={handleCopy}
-                    className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-                    title="テキストをコピー"
+                    onClick={() => setWritingMode("vertical")}
+                    title="Vertical Writing (縦書き)"
+                    className={`px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                      writingMode === "vertical" 
+                        ? "bg-red-600 text-white shadow-sm" 
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                    }`}
                   >
-                    {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    <AlignJustify className="w-3.5 h-3.5 rotate-90" />
+                    <span>Vertical</span>
                   </button>
                   <button
                     type="button"
-                    onClick={handleClear}
-                    className="p-2 rounded-xl border border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 transition-colors cursor-pointer"
-                    title="入力内容を消去"
+                    onClick={() => setWritingMode("horizontal")}
+                    title="Horizontal Writing (横書き)"
+                    className={`px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                      writingMode === "horizontal" 
+                        ? "bg-red-600 text-white shadow-sm" 
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                    }`}
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    className="p-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-colors cursor-pointer"
-                    title="原稿用紙を印刷 / PDF出力"
-                  >
-                    <Printer className="w-4 h-4" />
+                    <AlignLeft className="w-3.5 h-3.5" />
+                    <span>Horizontal</span>
                   </button>
                 </div>
               </div>
+            </div>
 
-              {/* 題名＆氏名入力欄 */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">題名（1行目に配置）</label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="例: 私の将来の夢"
-                    className="w-full px-4 py-2 rounded-xl border text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">氏名（2行目に配置）</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="例: 山本 太郎"
-                    className="w-full px-4 py-2 rounded-xl border text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 outline-none focus:border-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* 本文入力欄 */}
+            {/* Inputs: Title & Author Name */}
+            <div className="space-y-3">
               <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block text-xs font-bold text-slate-500">本文</label>
-                  <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
-                    {charCount} 文字
-                  </span>
-                </div>
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  rows={14}
-                  placeholder="ここに日本語の文章を入力してください。改行、句読点（。、）、鍵かっこ（「」）の原稿用紙ルールが自動適用されます..."
-                  className="w-full px-4 py-3 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 outline-none focus:border-blue-500 leading-relaxed font-sans"
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+                  Essay Title (Line 1)
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. 私の将来の夢 (My Future Dream)"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-red-500 transition-colors"
                 />
               </div>
 
-              {/* FAQ アコーディオン */}
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowFaq(!showFaq)}
-                  className="w-full flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
-                >
-                  <span className="flex items-center space-x-1.5">
-                    <HelpCircle className="w-4 h-4 text-blue-600" />
-                    <span>原稿用紙のルールと使い方</span>
-                  </span>
-                  {showFaq ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-
-                {showFaq && (
-                  <div className="mt-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 text-xs space-y-2 text-slate-600 dark:text-slate-300 leading-relaxed">
-                    <p>📌 <strong>インデント:</strong> 段落の冒頭は自動的に1マス空けられます。</p>
-                    <p>📌 <strong>禁則処理:</strong> 句読点（。、）や閉じかっこ（」）が行頭に来る場合、前の行の最後のマスに自動でぶら下げ配置されます。</p>
-                    <p>📌 <strong>2桁数字:</strong> 半角の2桁数字（例: 25）は1つのマス目に横並びで配置されます。</p>
-                  </div>
-                )}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+                  Author Name (Line 2)
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. 山田 太郎 (Taro Yamada)"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                />
               </div>
-
             </div>
 
-            {/* 右カラム：原稿用紙プレビュー表示（GenkoyoshiPreviewPane） */}
-            <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl min-h-[600px]">
-              <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h2 className="font-extrabold text-base flex items-center space-x-2">
-                  <BookOpen className="w-4 h-4 text-blue-600" />
-                  <span>リアルタイム原稿用紙プレビュー</span>
-                </h2>
-                <span className="text-xs font-medium text-slate-400">
-                  {pages.length} ページ作成済み
+            {/* Main Textarea */}
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400">
+                  Essay Body Text
+                </label>
+                <span className={`text-xs font-extrabold ${charCount > 500 ? "text-amber-600" : "text-slate-500"}`}>
+                  Character Count: {charCount}
                 </span>
               </div>
-
-              {/* モジュール化した GenkoyoshiPreviewPane の呼び出し */}
-              <GenkoyoshiPreviewPane 
-                pages={pages} 
-                format={format} 
-                totalCharCount={charCount} 
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={14}
+                placeholder="Type or paste your Japanese essay here. Paragraph indents, punctuation rules, and quotes will be automatically formatted..."
+                className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm leading-relaxed focus:outline-none focus:border-red-500 transition-colors resize-y font-sans"
               />
             </div>
 
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="px-3 py-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear All</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyText}
+                  disabled={!text && !title && !name}
+                  className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer"
+                >
+                  {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{isCopied ? "Copied!" : "Copy Text"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  disabled={!text && !title}
+                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print Genkoyoshi</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* AIチャットコンシェルジュ（ChatYamatoGenkoyoshiEditorVce） */}
-          <ChatYamatoGenkoyoshiEditorVce 
-            onOpenAuth={(mode) => layoutRef.current?.openAuthModal(mode || 'signup')} 
-          />
+          {/* Right Column: Genkoyoshi Grid Preview */}
+          <div className="lg:col-span-7 space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="font-extrabold text-base text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-red-600" />
+                <span>Real-Time Genkoyoshi Preview</span>
+              </h2>
+              <span className="text-xs text-slate-400">
+                {pages.length > 0 ? `${pages.length} Page(s) Generated` : ""}
+              </span>
+            </div>
 
+            {/* Genkoyoshi Grid Component */}
+            <GenkoyoshiPreviewPane 
+              pages={pages} 
+              format={format} 
+              writingMode={writingMode}
+              totalCharCount={charCount} 
+            />
+          </div>
         </div>
       </div>
+
+      {/* AI Yamato Chat Concierge */}
+      <ChatYamatoGenkoyoshiEditorVce
+        initialLearningPace={learningPace}
+        userId={user?.id}
+        userNickname={nickname}
+        credits={credits}
+        onOpenAuth={(mode) => layoutRef.current?.openAuthModal(mode || 'signup')}
+      />
     </PageLayout>
   );
 }
