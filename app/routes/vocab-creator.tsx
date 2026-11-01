@@ -1,7 +1,7 @@
-import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData, useFetcher } from "@remix-run/react";
-import { useState } from "react";
-import { createServerSupabaseClient } from "../lib/supabase.server";
+import { useState, useEffect } from "react";
+import { createServerSupabaseClient } from "~/lib/supabase.server";
 
 interface Vocabulary {
   id: string;
@@ -15,7 +15,6 @@ interface Vocabulary {
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase } = createServerSupabaseClient(request, context);
   
-  // 登録されている全語彙を取得してリスト化する
   const { data: vocabularies, error } = await supabase
     .from("vocabularies")
     .select("id, japanese, kana, romaji, english, category")
@@ -69,8 +68,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "単語の紐付けに失敗しました。" }, { status: 500 });
   }
 
-  // 作成完了したら生成されたドリル画面へリダイレクト
-  return redirect(`/vocab/drill/${listId}`);
+  return json({ success: true, listId });
 }
 
 export default function VocabCreatorPage() {
@@ -81,8 +79,18 @@ export default function VocabCreatorPage() {
   const [creatorName, setCreatorName] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [createdUrl, setCreatedUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  // 単語の選択 / 解除の切り替え
+  // フォーム送信が成功したらURLを生成して状態に保持する
+  useEffect(() => {
+    if (fetcher.data && "success" in fetcher.data && fetcher.data.success && fetcher.data.listId) {
+      const baseUrl = window.location.origin;
+      setCreatedUrl(`${baseUrl}/vocab/drill/${fetcher.data.listId}`);
+      setCopied(false);
+    }
+  }, [fetcher.data]);
+
   const toggleSelect = (id: string) => {
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter((item) => item !== id));
@@ -91,7 +99,6 @@ export default function VocabCreatorPage() {
     }
   };
 
-  // すべて選択 / 解除
   const toggleSelectAll = () => {
     if (selectedIds.length === filteredVocabularies.length) {
       setSelectedIds([]);
@@ -100,7 +107,14 @@ export default function VocabCreatorPage() {
     }
   };
 
-  // 検索フィルタリング
+  const handleCopy = () => {
+    if (createdUrl) {
+      navigator.clipboard.writeText(createdUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   const filteredVocabularies = vocabularies.filter(
     (item) =>
       item.japanese.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -118,7 +132,8 @@ export default function VocabCreatorPage() {
           授業や課題で出題したい単語を選択し、共有用のドリルURLを発行します。
         </p>
 
-        <form method="post" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 space-y-4">
+        {/* 作成フォーム */}
+        <fetcher.Form method="post" className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
               リストのタイトル
@@ -152,18 +167,55 @@ export default function VocabCreatorPage() {
               <input type="hidden" name="selectedIds" value={JSON.stringify(selectedIds)} />
               <button
                 type="submit"
-                disabled={!title || selectedIds.length === 0}
+                disabled={!title || selectedIds.length === 0 || fetcher.state === "submitting"}
                 className="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 transition-colors text-sm"
               >
-                選択した {selectedIds.length} 語でドリルURLを発行する
+                {fetcher.state === "submitting" ? "作成中..." : `選択した ${selectedIds.length} 語でドリルURLを発行する`}
               </button>
             </div>
           </div>
 
-          {fetcher.data?.error && (
+          {fetcher.data && "error" in fetcher.data && (
             <p className="text-red-600 text-sm">{fetcher.data.error}</p>
           )}
-        </form>
+        </fetcher.Form>
+
+        {/* ★ 発行されたURLを表示するエリア */}
+        {createdUrl && (
+          <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl shadow-sm mb-6 animate-fade-in">
+            <h2 className="text-base font-bold text-emerald-900 mb-1">
+              🎉 ドリルURLが作成されました！
+            </h2>
+            <p className="text-xs text-emerald-700 mb-4">
+              以下のURLをコピーして生徒に共有するか、ボタンを押してプレビュー（確認）してください。
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <input
+                type="text"
+                readOnly
+                value={createdUrl}
+                className="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-sm text-gray-700 select-all"
+              />
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors whitespace-nowrap"
+                >
+                  {copied ? "コピーしました！" : "URLをコピー"}
+                </button>
+                <a
+                  href={createdUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors text-center whitespace-nowrap"
+                >
+                  ドリルを開く ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 単語選択エリア */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
