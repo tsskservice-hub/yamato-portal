@@ -1,6 +1,6 @@
 /**
  * @file GenkoyoshiPreviewPane.tsx
- * @description 原稿用紙のプレビュー表示・マス目レンダリング専用コンポーネント (英語表示・縦横切替・ハイライト解除対応版)
+ * @description Genkoyoshi layout preview component supporting vertical and horizontal writing modes.
  */
 import React from 'react';
 import { Item } from '../utils/genkoyoshi-engine';
@@ -8,23 +8,23 @@ import { Item } from '../utils/genkoyoshi-engine';
 export interface GenkoyoshiPreviewPaneProps {
   pages: Item[][][];
   format?: string; // "400" | "200"
-  writingMode?: 'vertical' | 'horizontal'; // 縦書き | 横書き
+  writingMode?: 'vertical' | 'horizontal';
   totalCharCount?: number;
 }
 
 export const GenkoyoshiPreviewPane: React.FC<GenkoyoshiPreviewPaneProps> = ({
   pages,
   format = "400",
-  writingMode = 'vertical',
+  writingMode = "horizontal",
   totalCharCount
 }) => {
   const is200 = format === "200";
-  const isHorizontal = writingMode === 'horizontal';
+  const isHorizontal = writingMode === "horizontal";
 
   if (!pages || pages.length === 0) {
     return (
       <div className="p-8 text-center text-slate-400 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
-        <p className="text-sm font-medium">Enter your text above to see the Genkoyoshi layout preview.</p>
+        <p className="text-sm font-medium">Type your text to preview it on the genkoyoshi grid.</p>
       </div>
     );
   }
@@ -38,18 +38,22 @@ export const GenkoyoshiPreviewPane: React.FC<GenkoyoshiPreviewPaneProps> = ({
           style={{ minWidth: is200 ? '360px' : '680px' }}
         >
           <div className="flex justify-between items-center mb-3 text-xs text-red-800/70 border-b border-red-200 pb-1 font-mono">
-            <span>Genkoyoshi Grid ({format} Grid - {isHorizontal ? 'Horizontal' : 'Vertical'})</span>
+            <span>Genkoyoshi Grid ({format} Squares - {isHorizontal ? "Horizontal" : "Vertical"})</span>
             <span>Page {pageIdx + 1} / {pages.length}</span>
           </div>
 
-          {/* 縦書き (Vertical: flex-row-reverse + flex-col) / 横書き (Horizontal: flex-col + flex-row) */}
-          <div className={`genko-grid flex gap-1 sm:gap-1.5 my-2 ${
-            isHorizontal ? 'flex-col justify-start' : 'flex-row-reverse justify-start'
-          }`}>
+          <div 
+            className={`genko-grid flex ${
+              isHorizontal ? 'flex-col justify-start' : 'flex-row-reverse justify-start'
+            } gap-1 sm:gap-1.5 my-2`}
+          >
             {page.map((row, rowIdx) => (
-              <div key={rowIdx} className={`genko-row flex gap-0.5 ${
-                isHorizontal ? 'flex-row' : 'flex-col'
-              }`}>
+              <div 
+                key={rowIdx} 
+                className={`genko-row flex ${
+                  isHorizontal ? 'flex-row' : 'flex-col'
+                } gap-0.5`}
+              >
                 {row.map((cell, colIdx) => {
                   let cellContent = "";
                   let isCo = false;
@@ -71,7 +75,7 @@ export const GenkoyoshiPreviewPane: React.FC<GenkoyoshiPreviewPaneProps> = ({
                       className={`genko-cell w-6 h-6 sm:w-7 sm:h-7 border border-red-400/50 flex items-center justify-center font-serif text-slate-900 leading-none select-none relative ${
                         isCo ? 'text-[10px] sm:text-[11px] font-bold text-slate-900' : ''
                       } ${isNum ? 'text-[11px] font-mono tracking-tighter' : 'text-sm sm:text-base'}`}
-                      title={`P.${pageIdx + 1} Line ${rowIdx + 1}, Cell ${colIdx + 1}`}
+                      title={`P.${pageIdx + 1} Row ${rowIdx + 1}, Square ${colIdx + 1}`}
                     >
                       {cellContent}
                     </div>
