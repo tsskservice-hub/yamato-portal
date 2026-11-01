@@ -14,7 +14,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "renshuu"
   },
   {
     "id": "v-u10-06",
@@ -31,7 +33,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chatto"
   },
   {
     "id": "v-u9-gen-14",
@@ -49,7 +53,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "paatii"
   },
   {
     "id": "v-u9-gen-02",
@@ -67,7 +73,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shiai"
   },
   {
     "id": "v-u9-gen-12",
@@ -85,7 +93,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "konsaato"
   },
   {
     "id": "v-u9-gen-01",
@@ -103,7 +113,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "eiga"
   },
   {
     "id": "v-ob1-u1-04",
@@ -120,7 +132,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "okaimono"
   },
   {
     "id": "v-obento-u9-09",
@@ -137,7 +151,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimono"
   },
   {
     "id": "v-obd-u9-07",
@@ -154,7 +170,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "renshuu"
   },
   {
     "id": "v-gen-u12-08",
@@ -171,7 +189,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "saikuringu"
   },
   {
     "id": "v-u5-01",
@@ -188,7 +208,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ookii"
   },
   {
     "id": "v-u5-02",
@@ -205,7 +227,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chiisai"
   },
   {
     "id": "v-u5-wb-08",
@@ -222,7 +246,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kawaii"
   },
   {
     "id": "v-u12-g-04",
@@ -239,7 +265,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kowai"
   },
   {
     "id": "v-u5-008",
@@ -256,7 +284,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "urusai"
   },
   {
     "id": "v-u5-06",
@@ -273,7 +303,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "okashii"
   },
   {
     "id": "v-u5-010",
@@ -290,7 +322,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kusai"
   },
   {
     "id": "v-u5-07",
@@ -307,7 +341,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sugoi"
   },
   {
     "id": "v-u5-wb-09",
@@ -324,7 +360,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "omoshiroi"
   },
   {
     "id": "v-u12-g-01",
@@ -341,7 +379,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oishii"
   },
   {
     "id": "v-obd-p6-021",
@@ -358,7 +398,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "daisuki"
   },
   {
     "id": "v-obd-p6-022",
@@ -375,7 +417,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suki"
   },
   {
     "id": "v-obd-p6-024",
@@ -392,7 +436,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kirai"
   },
   {
     "id": "v-obd-p6-025",
@@ -409,7 +455,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "daikirai"
   },
   {
     "id": "v-u12-g-07",
@@ -426,7 +474,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tanoshii"
   },
   {
     "id": "v-u12-gen-005",
@@ -444,7 +494,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsumaranai"
   },
   {
     "id": "v-u11-08",
@@ -461,7 +513,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mazui"
   },
   {
     "id": "v-u12-g-09",
@@ -478,7 +532,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "muzukashii"
   },
   {
     "id": "v-ob14-003",
@@ -495,7 +551,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 14"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yasashii"
   },
   {
     "id": "v-ob14-004",
@@ -512,7 +570,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 14"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "takai"
   },
   {
     "id": "v-ob14-005",
@@ -529,7 +589,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 14"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yasui"
   },
   {
     "id": "v-u11-gen-10",
@@ -546,7 +608,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ii"
   },
   {
     "id": "v-u11-gen-01",
@@ -563,7 +627,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tanoshii"
   },
   {
     "id": "v-u12-gen-003",
@@ -581,7 +647,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oishii"
   },
   {
     "id": "v-u5-09",
@@ -598,7 +666,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "omoshiroi"
   },
   {
     "id": "v-u11-01",
@@ -615,7 +685,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "isogashii"
   },
   {
     "id": "v-u11-gen-06",
@@ -632,7 +704,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yasashii"
   },
   {
     "id": "v-u12-gen-004",
@@ -650,7 +724,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "muzukashii"
   },
   {
     "id": "v-u12-gen-002",
@@ -668,7 +744,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "takai"
   },
   {
     "id": "v-u11-gen-09",
@@ -685,7 +763,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yasui"
   },
   {
     "id": "v-u5-006",
@@ -702,7 +782,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chiisai"
   },
   {
     "id": "v-obd-u5-kawaii",
@@ -719,7 +801,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kawaii"
   },
   {
     "id": "v-odg-u12-06",
@@ -737,7 +821,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsumaranakatta"
   },
   {
     "id": "v-odg-u12-07",
@@ -755,7 +841,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "muzukashikatta"
   },
   {
     "id": "v-odg-u12-08",
@@ -773,7 +861,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mazukatta"
   },
   {
     "id": "v-odg-u12-09",
@@ -791,7 +881,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yokatta"
   },
   {
     "id": "v-u5-04",
@@ -808,7 +900,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kowai"
   },
   {
     "id": "v-u5-08",
@@ -825,7 +919,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kusai"
   },
   {
     "id": "v-u5-007",
@@ -842,7 +938,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ookii"
   },
   {
     "id": "v-u6-004",
@@ -859,7 +957,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "daisuki"
   },
   {
     "id": "v-u6-005",
@@ -876,7 +976,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suki"
   },
   {
     "id": "v-u6-007",
@@ -893,7 +995,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kirai"
   },
   {
     "id": "v-u6-008",
@@ -910,7 +1014,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "daikirai"
   },
   {
     "id": "v-u12-02",
@@ -927,7 +1033,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dou"
   },
   {
     "id": "v-odg-u12-001",
@@ -944,7 +1052,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "takusan"
   },
   {
     "id": "v-u6-006",
@@ -961,7 +1071,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "anmari"
   },
   {
     "id": "v-ob14-007",
@@ -978,7 +1090,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 14"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "isshoni"
   },
   {
     "id": "v-ob-u1-07",
@@ -995,7 +1109,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "isshoni"
   },
   {
     "id": "v-u10-14",
@@ -1012,7 +1128,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "isshoni"
   },
   {
     "id": "v-obd-gen-15",
@@ -1029,7 +1147,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "amari"
   },
   {
     "id": "v-obd-gen-14",
@@ -1046,7 +1166,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sukoshi"
   },
   {
     "id": "v-obd-gen-16",
@@ -1063,7 +1185,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "zenzen"
   },
   {
     "id": "v-obento-p3-07",
@@ -1080,7 +1204,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hatachi"
   },
   {
     "id": "v-obento-u2-02",
@@ -1097,7 +1223,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sansai"
   },
   {
     "id": "v-obento-u2-03",
@@ -1114,7 +1242,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gosai"
   },
   {
     "id": "v-obento-u2-04",
@@ -1131,7 +1261,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "rokusai"
   },
   {
     "id": "v-obento-u2-05",
@@ -1148,7 +1280,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jussai-/-jissai"
   },
   {
     "id": "v-obento-u4-13",
@@ -1165,7 +1299,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juunisai"
   },
   {
     "id": "v-obento-u2-06",
@@ -1182,7 +1318,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuyonsai"
   },
   {
     "id": "v-obento-p3-02",
@@ -1199,7 +1337,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juugosai"
   },
   {
     "id": "v-obento-p3-03",
@@ -1216,7 +1356,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juurokusai"
   },
   {
     "id": "v-obento-p3-04",
@@ -1233,7 +1375,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juunanasai"
   },
   {
     "id": "v-obento-u2-07",
@@ -1250,7 +1394,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuhassai"
   },
   {
     "id": "v-obento-p3-06",
@@ -1267,7 +1413,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juukyuusai"
   },
   {
     "id": "v-obento-p3-08",
@@ -1284,7 +1432,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nansai"
   },
   {
     "id": "v-obento-u2-01",
@@ -1301,7 +1451,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sai"
   },
   {
     "id": "v-obento-u2-08",
@@ -1318,7 +1470,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nijuunanasai"
   },
   {
     "id": "v-obento-u2-09",
@@ -1335,7 +1489,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nijuukyuusai"
   },
   {
     "id": "v-obento-u2-10",
@@ -1352,7 +1508,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sanjussai-/-sanjissai"
   },
   {
     "id": "v-obd-g-02",
@@ -1369,7 +1527,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nansai"
   },
   {
     "id": "v-ob-gen-pet",
@@ -1386,7 +1546,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "petto"
   },
   {
     "id": "v-obd-u5-ahiru",
@@ -1403,7 +1565,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ahiru"
   },
   {
     "id": "v-ob-gen-inu",
@@ -1420,7 +1584,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "inu"
   },
   {
     "id": "v-ob-gen-usagi",
@@ -1437,7 +1603,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "usagi"
   },
   {
     "id": "v-u4-004",
@@ -1454,7 +1622,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "uma"
   },
   {
     "id": "v-obento-u5-03",
@@ -1471,7 +1641,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kingyo"
   },
   {
     "id": "v-u4-006",
@@ -1488,7 +1660,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tori"
   },
   {
     "id": "v-ob-gen-neko",
@@ -1505,7 +1679,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "neko"
   },
   {
     "id": "v-ob-gen-hebi",
@@ -1522,7 +1698,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hebi"
   },
   {
     "id": "v-obento-p5-012",
@@ -1539,7 +1717,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "inu-no-esa"
   },
   {
     "id": "v-obd-gen-u11-01",
@@ -1556,7 +1736,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "emyuu"
   },
   {
     "id": "v-obento-g-013",
@@ -1573,7 +1755,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "inu"
   },
   {
     "id": "v-u5-004",
@@ -1590,7 +1774,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "neko"
   },
   {
     "id": "v-u5-wb-05",
@@ -1607,7 +1793,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hebi"
   },
   {
     "id": "v-u5-005",
@@ -1624,7 +1812,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kingyo"
   },
   {
     "id": "v-obd-u6-005",
@@ -1641,7 +1831,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "usagi"
   },
   {
     "id": "v-obd-g-u4-008",
@@ -1658,7 +1850,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ahiru"
   },
   {
     "id": "v-ob1-u1-12",
@@ -1675,7 +1869,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suwatte-kudasai"
   },
   {
     "id": "v-ob1-u1-13",
@@ -1692,7 +1888,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaite-kudasai"
   },
   {
     "id": "v-ob1-u1-14",
@@ -1709,7 +1907,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yonde-kudasai"
   },
   {
     "id": "v-ob1-u1-07",
@@ -1726,7 +1926,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kiite-kudasai"
   },
   {
     "id": "v-ob1-u1-10",
@@ -1743,7 +1945,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shizuka-ni-shite-kudasai"
   },
   {
     "id": "v-ob1-u1-08",
@@ -1760,7 +1964,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mite-kudasai"
   },
   {
     "id": "v-ob1-u1-09",
@@ -1777,7 +1983,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "misete-kudasai"
   },
   {
     "id": "v-ob1-u1-11",
@@ -1794,7 +2002,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tatte-kudasai"
   },
   {
     "id": "v-u2-012",
@@ -1811,7 +2021,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsukue"
   },
   {
     "id": "v-u2-013",
@@ -1828,7 +2040,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mado"
   },
   {
     "id": "v-ob1-gen-misetekudasai",
@@ -1845,7 +2059,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "misete-kudasai"
   },
   {
     "id": "v-ob1-u1-02",
@@ -1862,7 +2078,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "natsufuku"
   },
   {
     "id": "v-u10-g-011",
@@ -1879,7 +2097,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kutsu"
   },
   {
     "id": "v-obd-u6-017",
@@ -1896,7 +2116,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "meeru"
   },
   {
     "id": "v-u12-gen-011",
@@ -1914,7 +2136,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tegami"
   },
   {
     "id": "v-obd-gen-u12-13",
@@ -1931,7 +2155,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "denwa"
   },
   {
     "id": "v-u10-13",
@@ -1948,7 +2174,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "henji"
   },
   {
     "id": "v-obd-g-002",
@@ -1965,7 +2193,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "denwa"
   },
   {
     "id": "v-ob-gen-u5-09",
@@ -1983,7 +2213,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "soshite"
   },
   {
     "id": "v-u10-11",
@@ -2001,7 +2233,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sorekara"
   },
   {
     "id": "v-u5-014",
@@ -2018,24 +2252,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
-  },
-  {
-    "id": "v-u12-g-04",
-    "japanese": "だから",
-    "kana": "だから",
-    "romaji": "dakara",
-    "english": "therefore / so",
-    "category": "conjunctions",
-    "yearLevel": [
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
+    "examples": [],
+    "audioKey": "demo"
   },
   {
     "id": "v-odg-u12-004",
@@ -2052,7 +2271,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tokorode"
   },
   {
     "id": "v-u6-20",
@@ -2069,7 +2290,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "furaipan"
   },
   {
     "id": "v-u3-p9-04",
@@ -2086,7 +2309,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "-sai"
   },
   {
     "id": "v-u4-003",
@@ -2103,7 +2328,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nannin"
   },
   {
     "id": "v-u4-002",
@@ -2120,58 +2347,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
-  },
-  {
-    "id": "v-u4-003",
-    "japanese": "三人",
-    "kana": "さんにん",
-    "romaji": "sannin",
-    "english": "3 people / three people",
-    "category": "counters",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 4"
-      }
-    ]
-  },
-  {
-    "id": "v-u4-004",
-    "japanese": "四人",
-    "kana": "よにん",
-    "romaji": "yonin",
-    "english": "4 people / four people",
-    "category": "counters",
-    "yearLevel": [
-      7
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 4"
-      }
-    ]
-  },
-  {
-    "id": "v-u4-006",
-    "japanese": "六人",
-    "kana": "ろくにん",
-    "romaji": "rokunin",
-    "english": "6 people / six people",
-    "category": "counters",
-    "yearLevel": [
-      7
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 4"
-      }
-    ]
+    "examples": [],
+    "audioKey": "futari"
   },
   {
     "id": "v-u4-007",
@@ -2188,7 +2366,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shichinin"
   },
   {
     "id": "v-u4-008",
@@ -2205,7 +2385,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hachinin"
   },
   {
     "id": "v-u3-gen-005",
@@ -2222,7 +2404,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nihon"
   },
   {
     "id": "v-obento-gen-u3-006",
@@ -2239,7 +2423,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "amerika"
   },
   {
     "id": "v-u3-gen-03",
@@ -2256,7 +2442,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kanada"
   },
   {
     "id": "v-u3-gen-01",
@@ -2273,7 +2461,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nyuujiirando"
   },
   {
     "id": "v-u3-gen-02",
@@ -2290,7 +2480,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "indoneshia"
   },
   {
     "id": "v-u3-gen-05",
@@ -2307,7 +2499,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "igirisu"
   },
   {
     "id": "v-obd-p8-034",
@@ -2325,7 +2519,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aikidou"
   },
   {
     "id": "v-obd-p8-035",
@@ -2343,7 +2539,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyuudou"
   },
   {
     "id": "v-obd-p8-036",
@@ -2361,7 +2559,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juudou"
   },
   {
     "id": "v-obd-p8-037",
@@ -2379,7 +2579,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shodou"
   },
   {
     "id": "v-obd-p8-038",
@@ -2397,7 +2599,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikebana"
   },
   {
     "id": "v-ob-p9-001",
@@ -2414,7 +2618,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sadou"
   },
   {
     "id": "v-ob-p9-002",
@@ -2431,7 +2637,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kadou"
   },
   {
     "id": "v-u7-gen-18",
@@ -2448,7 +2656,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "undoukai"
   },
   {
     "id": "v-gen-u1-07",
@@ -2465,7 +2675,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "obentou"
   },
   {
     "id": "v-obento-u8-012",
@@ -2482,7 +2694,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oshougatsu"
   },
   {
     "id": "v-obento-u8-011",
@@ -2499,7 +2713,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "setsubun"
   },
   {
     "id": "v-u7-gen-11",
@@ -2516,7 +2732,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hinamatsuri"
   },
   {
     "id": "v-obento-u8-009",
@@ -2533,7 +2751,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kodomo-no-hi"
   },
   {
     "id": "v-u7-gen-13",
@@ -2550,7 +2770,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "obon"
   },
   {
     "id": "v-obento-u8-013",
@@ -2567,7 +2789,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shichigosan"
   },
   {
     "id": "v-u7-gen-15",
@@ -2584,7 +2808,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hanami"
   },
   {
     "id": "v-u7-gen-16",
@@ -2601,7 +2827,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tanabata"
   },
   {
     "id": "v-u7-gen-19",
@@ -2618,7 +2846,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bunka-no-hi"
   },
   {
     "id": "v-obento-u8-010",
@@ -2635,7 +2865,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hinamatsuri"
   },
   {
     "id": "v-ob-gen-10-02",
@@ -2652,7 +2884,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nikki"
   },
   {
     "id": "v-u7-gen-01",
@@ -2669,7 +2903,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsuitachi"
   },
   {
     "id": "v-u7-gen-02",
@@ -2686,7 +2922,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "futsuka"
   },
   {
     "id": "v-u7-gen-03",
@@ -2703,7 +2941,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mikka"
   },
   {
     "id": "v-u7-gen-04",
@@ -2720,7 +2960,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yokka"
   },
   {
     "id": "v-u7-gen-05",
@@ -2737,7 +2979,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "itsuka"
   },
   {
     "id": "v-u7-gen-06",
@@ -2754,7 +2998,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "muika"
   },
   {
     "id": "v-u7-gen-07",
@@ -2771,7 +3017,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nanoka"
   },
   {
     "id": "v-u7-gen-08",
@@ -2788,7 +3036,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "youka"
   },
   {
     "id": "v-u7-gen-09",
@@ -2805,7 +3055,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kokonoka"
   },
   {
     "id": "v-u7-gen-10",
@@ -2822,24 +3074,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
-  },
-  {
-    "id": "v-u7-gen-11",
-    "japanese": "十四日",
-    "kana": "じゅうよっか",
-    "romaji": "juuyokka",
-    "english": "14th day of the month",
-    "category": "date",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 7"
-      }
-    ]
+    "examples": [],
+    "audioKey": "tooka"
   },
   {
     "id": "v-u7-gen-12",
@@ -2856,24 +3093,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
-  },
-  {
-    "id": "v-u7-gen-13",
-    "japanese": "三十一日",
-    "kana": "さんじゅういちにち",
-    "romaji": "sanjuuichinichi",
-    "english": "31st day of the month",
-    "category": "date",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 7"
-      }
-    ]
+    "examples": [],
+    "audioKey": "nijuuyokka"
   },
   {
     "id": "v-obd-p7-033",
@@ -2890,7 +3112,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juukunichi"
   },
   {
     "id": "v-obd-p7-036",
@@ -2907,7 +3131,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nijuukunichi"
   },
   {
     "id": "v-obento-u8-004",
@@ -2924,7 +3150,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nan'youbi"
   },
   {
     "id": "v-obento-u8-005",
@@ -2941,7 +3169,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nangatsu-nannichi"
   },
   {
     "id": "v-obd-u6-012",
@@ -2958,7 +3188,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ocha"
   },
   {
     "id": "v-u6-05",
@@ -2975,7 +3207,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "miruku"
   },
   {
     "id": "v-ob-u6-26",
@@ -2993,7 +3227,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "orenji-juusu"
   },
   {
     "id": "v-ob-u6-25",
@@ -3011,7 +3247,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mizu"
   },
   {
     "id": "v-obdt-u6-06",
@@ -3028,7 +3266,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mizu"
   },
   {
     "id": "v-u7-coffee",
@@ -3046,7 +3286,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "koohii"
   },
   {
     "id": "v-u7-cola",
@@ -3064,7 +3306,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "koora"
   },
   {
     "id": "v-obdt-u6-09",
@@ -3081,7 +3325,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ocha"
   },
   {
     "id": "v-u6-gen-003",
@@ -3098,7 +3344,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "koucha"
   },
   {
     "id": "v-u11-11",
@@ -3115,7 +3363,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "rajio"
   },
   {
     "id": "v-obento-g-005",
@@ -3132,7 +3382,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "eiga"
   },
   {
     "id": "v-ob-p9-020",
@@ -3149,7 +3401,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suieikai"
   },
   {
     "id": "v-ob-p9-023",
@@ -3166,7 +3420,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dansupaatii"
   },
   {
     "id": "v-od-g-013",
@@ -3183,7 +3439,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "pikunikku"
   },
   {
     "id": "v-ob-p9-028",
@@ -3200,7 +3458,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "futtoboorunoshiai"
   },
   {
     "id": "v-ob-p9-029",
@@ -3217,7 +3477,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yakyuunoshiai"
   },
   {
     "id": "v-obento-u5-01",
@@ -3234,7 +3496,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bunkasai"
   },
   {
     "id": "v-obd-g7-04",
@@ -3251,7 +3515,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suieitaikai"
   },
   {
     "id": "v-obento-u8-006",
@@ -3268,7 +3534,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kurisumasu"
   },
   {
     "id": "v-obento-u9-10",
@@ -3285,7 +3553,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ensoku"
   },
   {
     "id": "v-gen-u1-03",
@@ -3302,7 +3572,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hai"
   },
   {
     "id": "v-ob1-u2-010",
@@ -3319,7 +3591,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kudasai"
   },
   {
     "id": "v-obd-p10-015",
@@ -3337,7 +3611,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sukoshi-dekimasu"
   },
   {
     "id": "v-obd-p10-016",
@@ -3355,7 +3631,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "amari-dekimasen"
   },
   {
     "id": "v-obd-p10-017",
@@ -3373,7 +3651,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "zenzen-dekimasen"
   },
   {
     "id": "v-ob14-008",
@@ -3390,7 +3670,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 14"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dou-deshita-ka"
   },
   {
     "id": "v-ob14-009",
@@ -3407,7 +3689,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 14"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sou-shimashou"
   },
   {
     "id": "v-ob14-010",
@@ -3424,7 +3708,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 14"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sore-wa-chotto..."
   },
   {
     "id": "v-u1-gen-05",
@@ -3441,7 +3727,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yattaa"
   },
   {
     "id": "v-odg-u12-003",
@@ -3458,24 +3746,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u12-g-07",
-    "japanese": "信じられない",
-    "kana": "しんじられない",
-    "romaji": "shinjirarenai",
-    "english": "unbelievable / I can't believe it",
-    "category": "expressions",
-    "yearLevel": [
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
+    "examples": [],
+    "audioKey": "zannen"
   },
   {
     "id": "v-u4-001",
@@ -3492,24 +3765,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
-  },
-  {
-    "id": "v-u7-gen-09",
-    "japanese": "お父さん",
-    "kana": "おとうさん",
-    "romaji": "otousan",
-    "english": "father",
-    "category": "family",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 7"
-      }
-    ]
+    "examples": [],
+    "audioKey": "kazoku"
   },
   {
     "id": "v-od-g-008",
@@ -3526,7 +3784,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "okaasan"
   },
   {
     "id": "v-od-p4-18",
@@ -3543,7 +3803,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ojiisan"
   },
   {
     "id": "v-od-p4-19",
@@ -3560,7 +3822,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "obaasan"
   },
   {
     "id": "v-obento-gen-006",
@@ -3577,7 +3841,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oniisan"
   },
   {
     "id": "v-obento-gen-005",
@@ -3594,7 +3860,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oneesan"
   },
   {
     "id": "v-obento-gen-002",
@@ -3611,7 +3879,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "otouto"
   },
   {
     "id": "v-obento-gen-001",
@@ -3628,7 +3898,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "imouto"
   },
   {
     "id": "v-obento-g-010",
@@ -3645,7 +3917,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kazoku"
   },
   {
     "id": "v-ob-u4-02",
@@ -3663,7 +3937,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chichi"
   },
   {
     "id": "v-ob-u4-03",
@@ -3681,7 +3957,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "haha"
   },
   {
     "id": "v-ob-u4-04",
@@ -3699,7 +3977,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ani"
   },
   {
     "id": "v-ob-u4-05",
@@ -3717,7 +3997,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ane"
   },
   {
     "id": "v-u9-08",
@@ -3734,7 +4016,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ojiisan"
   },
   {
     "id": "v-obento-gen-u9-15",
@@ -3752,7 +4036,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "obaasan"
   },
   {
     "id": "v-obento-u4-07",
@@ -3769,7 +4055,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "imouto"
   },
   {
     "id": "v-u5-013",
@@ -3786,7 +4074,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oneesan"
   },
   {
     "id": "v-obento-u4-04",
@@ -3803,7 +4093,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "okaasan"
   },
   {
     "id": "v-obento-g-011",
@@ -3820,7 +4112,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "otousan"
   },
   {
     "id": "v-obento-u4-08",
@@ -3837,7 +4131,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "akachan"
   },
   {
     "id": "v-u5-012",
@@ -3854,7 +4150,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "otouto"
   },
   {
     "id": "v-u5-002",
@@ -3871,7 +4169,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nan-nin-kazoku"
   },
   {
     "id": "v-u9-09",
@@ -3888,24 +4188,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
-  },
-  {
-    "id": "v-u5-007",
-    "japanese": "えさ",
-    "kana": "えさ",
-    "romaji": "esa",
-    "english": "pet food",
-    "category": "food",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 5"
-      }
-    ]
+    "examples": [],
+    "audioKey": "tanoshimi"
   },
   {
     "id": "v-u6-01",
@@ -3922,7 +4207,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "asagohan"
   },
   {
     "id": "v-u6-15",
@@ -3939,7 +4226,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gohan"
   },
   {
     "id": "v-u6-04",
@@ -3956,7 +4245,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tamago"
   },
   {
     "id": "v-u6-16",
@@ -3973,7 +4264,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sakana"
   },
   {
     "id": "v-u6-gen-008",
@@ -3990,7 +4283,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "niku"
   },
   {
     "id": "v-u6-gen-011",
@@ -4007,7 +4302,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yasai"
   },
   {
     "id": "v-obd-u6-07",
@@ -4024,7 +4321,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kudamono"
   },
   {
     "id": "v-u12-14",
@@ -4042,7 +4341,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "okashi"
   },
   {
     "id": "v-gen-u12-06",
@@ -4059,7 +4360,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "okonomiyaki"
   },
   {
     "id": "v-u6-gen-010",
@@ -4076,7 +4379,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shiriaru"
   },
   {
     "id": "v-u6-gen-012",
@@ -4093,7 +4398,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "toosuto"
   },
   {
     "id": "v-ob-u6-22",
@@ -4111,7 +4418,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "pan"
   },
   {
     "id": "v-u6-gen-009",
@@ -4128,7 +4437,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sandoitchi"
   },
   {
     "id": "v-u7-burger",
@@ -4146,7 +4457,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hanbaagaa"
   },
   {
     "id": "v-u6-gen-017",
@@ -4163,24 +4476,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
-  },
-  {
-    "id": "v-u6-15",
-    "japanese": "チキン",
-    "kana": "ちきん",
-    "romaji": "chikin",
-    "english": "chicken",
-    "category": "food",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 6"
-      }
-    ]
+    "examples": [],
+    "audioKey": "piza"
   },
   {
     "id": "v-u7-pasta",
@@ -4198,7 +4496,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "pasuta"
   },
   {
     "id": "v-u6-gen-019",
@@ -4215,7 +4515,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sooseeji"
   },
   {
     "id": "v-u6-gen-020",
@@ -4232,7 +4534,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sarada"
   },
   {
     "id": "v-u7-curry",
@@ -4250,7 +4554,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kareeraisu"
   },
   {
     "id": "v-od-g-006",
@@ -4267,24 +4573,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
-  },
-  {
-    "id": "v-u6-gen-011",
-    "japanese": "アイスクリーム",
-    "kana": "あいすくりーむ",
-    "romaji": "aisukuriimu",
-    "english": "ice cream",
-    "category": "food",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 6"
-      }
-    ]
+    "examples": [],
+    "audioKey": "chiizu"
   },
   {
     "id": "v-u6-gen-015",
@@ -4301,7 +4592,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chokoreeto"
   },
   {
     "id": "v-u7-cake",
@@ -4319,7 +4612,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "keeki"
   },
   {
     "id": "v-u6-gen-023",
@@ -4336,7 +4631,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sushi"
   },
   {
     "id": "v-obd-p6-005",
@@ -4353,7 +4650,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "koucha"
   },
   {
     "id": "v-u6-17",
@@ -4370,7 +4669,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "obentou"
   },
   {
     "id": "v-u12-g-06",
@@ -4387,24 +4688,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u12-g-01",
-    "japanese": "バーベキュー",
-    "kana": "ばーべきゅー",
-    "romaji": "baabekyuu",
-    "english": "barbecue",
-    "category": "food",
-    "yearLevel": [
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
+    "examples": [],
+    "audioKey": "aji"
   },
   {
     "id": "v-obd-gen-u11-05",
@@ -4421,7 +4707,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juusu"
   },
   {
     "id": "v-obd-gen-u11-14",
@@ -4438,7 +4726,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "banirasheiku"
   },
   {
     "id": "v-obd-gen-u11-15",
@@ -4455,7 +4745,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "supagetthi"
   },
   {
     "id": "v-od-g-001",
@@ -4472,7 +4764,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "asagohan"
   },
   {
     "id": "v-u11-04",
@@ -4489,7 +4783,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "poppukoon"
   },
   {
     "id": "v-u6-02",
@@ -4506,7 +4802,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hirugohan"
   },
   {
     "id": "v-u12-11",
@@ -4524,7 +4822,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "misoshiru"
   },
   {
     "id": "v-obd-u6-12",
@@ -4541,7 +4841,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yakitori"
   },
   {
     "id": "v-u5-wb-07",
@@ -4558,24 +4860,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
-  },
-  {
-    "id": "v-u6-gen-008",
-    "japanese": "たまご",
-    "kana": "たまご",
-    "romaji": "tamago",
-    "english": "egg",
-    "category": "food",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 6"
-      }
-    ]
+    "examples": [],
+    "audioKey": "doggufuudo"
   },
   {
     "id": "v-u6-gen-001",
@@ -4592,7 +4879,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gohan"
   },
   {
     "id": "v-u6-07",
@@ -4609,7 +4898,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sakana"
   },
   {
     "id": "v-ob-u6-04",
@@ -4627,7 +4918,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "niku"
   },
   {
     "id": "v-u6-gen-004",
@@ -4644,7 +4937,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yasai"
   },
   {
     "id": "v-od-g-004",
@@ -4661,7 +4956,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kudamono"
   },
   {
     "id": "v-u6-gen-002",
@@ -4678,7 +4975,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "okashi"
   },
   {
     "id": "v-u6-003",
@@ -4695,7 +4994,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aji"
   },
   {
     "id": "v-u6-03",
@@ -4712,7 +5013,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bangohan"
   },
   {
     "id": "v-u6-gen-016",
@@ -4729,7 +5032,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sushi"
   },
   {
     "id": "v-obd-u6-013",
@@ -4746,7 +5051,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "teriyakichikin"
   },
   {
     "id": "v-od-g-002",
@@ -4763,7 +5070,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hirugohan"
   },
   {
     "id": "v-od-g-003",
@@ -4780,7 +5089,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bangohan"
   },
   {
     "id": "v-obd-u6-09",
@@ -4797,7 +5108,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "misoshiru"
   },
   {
     "id": "v-obd-u6-10",
@@ -4814,7 +5127,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "onigiri"
   },
   {
     "id": "v-obd-u6-11",
@@ -4831,7 +5146,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sukiyaki"
   },
   {
     "id": "v-obd-u6-13",
@@ -4848,7 +5165,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tempura"
   },
   {
     "id": "v-obd-u6-14",
@@ -4865,7 +5184,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "udon"
   },
   {
     "id": "v-obento-gen-u9-01",
@@ -4883,7 +5204,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suika"
   },
   {
     "id": "v-obd-u6-015",
@@ -4900,7 +5223,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tokidoki"
   },
   {
     "id": "v-u5-011",
@@ -4917,7 +5242,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "namae"
   },
   {
     "id": "v-obd-g-003",
@@ -4934,7 +5261,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bangou"
   },
   {
     "id": "v-ob-gen-u5-07",
@@ -4952,7 +5281,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hontou"
   },
   {
     "id": "v-ob-gen-u5-08",
@@ -4970,7 +5301,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "uso"
   },
   {
     "id": "v-u3-p9-02",
@@ -4987,7 +5320,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "konnichiwa"
   },
   {
     "id": "v-u3-p9-01",
@@ -5004,7 +5339,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "minasan"
   },
   {
     "id": "v-obd-g-04",
@@ -5021,7 +5358,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ohayou-gozaimasu"
   },
   {
     "id": "v-ob1-u1-003",
@@ -5038,7 +5377,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "konbanwa"
   },
   {
     "id": "v-obento-gen-003",
@@ -5055,24 +5396,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
-  },
-  {
-    "id": "v-ob1-u1-04",
-    "japanese": "またあした",
-    "kana": "またあした",
-    "romaji": "mata ashita",
-    "english": "see you tomorrow",
-    "category": "greetings",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 1"
-      }
-    ]
+    "examples": [],
+    "audioKey": "sayounara"
   },
   {
     "id": "v-ob1-u1-06",
@@ -5089,24 +5415,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
-  },
-  {
-    "id": "v-ob1-u1-04",
-    "japanese": "はじめまして",
-    "kana": "はじめまして",
-    "romaji": "hajimemashite",
-    "english": "nice to meet you",
-    "category": "greetings",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 1"
-      }
-    ]
+    "examples": [],
+    "audioKey": "douzo-yoroshiku"
   },
   {
     "id": "v-ob1-u1-008",
@@ -5123,7 +5434,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "matane"
   },
   {
     "id": "v-ob1-u1-009",
@@ -5140,7 +5453,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oyasuminasai"
   },
   {
     "id": "v-u1-gen-07",
@@ -5157,7 +5472,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "arigatou"
   },
   {
     "id": "v-ob1-u1-011",
@@ -5174,7 +5491,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "douitashimashite"
   },
   {
     "id": "v-ob1-u1-013",
@@ -5191,7 +5510,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "iie"
   },
   {
     "id": "v-u5-001",
@@ -5208,7 +5529,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "onamae"
   },
   {
     "id": "v-gen-u1-02",
@@ -5225,7 +5548,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "o-namae-wa?"
   },
   {
     "id": "v-ob1-u1-05",
@@ -5242,24 +5567,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
-  },
-  {
-    "id": "v-obento-gen-002",
-    "japanese": "おはよう",
-    "kana": "おはよう",
-    "romaji": "ohayou",
-    "english": "good morning",
-    "category": "greetings",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "General"
-      }
-    ]
+    "examples": [],
+    "audioKey": "onamae-wa"
   },
   {
     "id": "v-ob-gen-u5-11",
@@ -5277,7 +5587,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "byouki"
   },
   {
     "id": "v-u8-009",
@@ -5294,7 +5606,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dokusho"
   },
   {
     "id": "v-u8-007",
@@ -5311,7 +5625,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimono"
   },
   {
     "id": "v-u8-012",
@@ -5328,7 +5644,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ryouri"
   },
   {
     "id": "v-gen-ongaku",
@@ -5346,7 +5664,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ongaku"
   },
   {
     "id": "v-obd-p8-012",
@@ -5364,7 +5684,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dansu"
   },
   {
     "id": "v-u8-010",
@@ -5381,7 +5703,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "konpyuutaa"
   },
   {
     "id": "v-u8-015",
@@ -5398,7 +5722,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "anime"
   },
   {
     "id": "v-u10-g-005",
@@ -5415,7 +5741,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ongaku"
   },
   {
     "id": "v-obd-gen-u12-14",
@@ -5432,7 +5760,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shashin"
   },
   {
     "id": "v-u10-001",
@@ -5450,7 +5780,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "konpyuutaageemu"
   },
   {
     "id": "v-gen-shumi",
@@ -5468,7 +5800,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shumi"
   },
   {
     "id": "v-obd-gen-u12-15",
@@ -5485,7 +5819,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sukeetoboodo"
   },
   {
     "id": "v-ob1-u8-01",
@@ -5502,7 +5838,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shumi"
   },
   {
     "id": "v-u2-011",
@@ -5519,7 +5857,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikutsu"
   },
   {
     "id": "v-obento-u11-04",
@@ -5536,7 +5876,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shashin"
   },
   {
     "id": "v-obd-p13-021",
@@ -5553,7 +5895,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 13"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kutsu"
   },
   {
     "id": "v-obd-p13-022",
@@ -5570,7 +5914,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 13"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "keitai"
   },
   {
     "id": "v-u3-kanji-hi",
@@ -5587,7 +5933,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ni"
   },
   {
     "id": "v-u3-kanji-hon",
@@ -5604,7 +5952,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hon"
   },
   {
     "id": "v-u3-kanji-jin",
@@ -5621,7 +5971,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jin"
   },
   {
     "id": "v-u8-g-02",
@@ -5638,7 +5990,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "eigo"
   },
   {
     "id": "v-gen-nihongo",
@@ -5656,7 +6010,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nihongo"
   },
   {
     "id": "v-u1-002",
@@ -5673,7 +6029,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hiragana"
   },
   {
     "id": "v-u1-003",
@@ -5690,7 +6048,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "katakana"
   },
   {
     "id": "v-ob-p9-005",
@@ -5707,7 +6067,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chuugokugo"
   },
   {
     "id": "v-ob-p9-006",
@@ -5724,7 +6086,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "furansugo"
   },
   {
     "id": "v-ob-p9-007",
@@ -5741,7 +6105,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "italiago"
   },
   {
     "id": "v-ob-p9-008",
@@ -5758,7 +6124,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "indonesiago"
   },
   {
     "id": "v-u10-03",
@@ -5775,7 +6143,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sutaato"
   },
   {
     "id": "v-u10-04",
@@ -5792,7 +6162,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gooru"
   },
   {
     "id": "v-u6-gen-005",
@@ -5809,7 +6181,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "asagohan"
   },
   {
     "id": "v-u6-gen-006",
@@ -5826,7 +6200,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hirugohan"
   },
   {
     "id": "v-u6-gen-007",
@@ -5843,7 +6219,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bangohan"
   },
   {
     "id": "v-ob-gen-10-01",
@@ -5860,7 +6238,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "zasshi"
   },
   {
     "id": "v-obd-gen-u12-01",
@@ -5877,7 +6257,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "terebi"
   },
   {
     "id": "v-u10-20",
@@ -5894,7 +6276,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yuuchuubu"
   },
   {
     "id": "v-u10-16",
@@ -5911,7 +6295,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bideo-kurippu"
   },
   {
     "id": "v-obd-p13-015",
@@ -5928,7 +6314,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 13"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "diibuudii"
   },
   {
     "id": "v-obd-gen-u12-02",
@@ -5945,24 +6333,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u10-11",
-    "japanese": "まんが",
-    "kana": "まんが",
-    "romaji": "manga",
-    "english": "comic book / manga",
-    "category": "media",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "bideo"
   },
   {
     "id": "v-obento-u10-03",
@@ -5980,7 +6353,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bangumi"
   },
   {
     "id": "v-obd-p7-009",
@@ -5997,7 +6372,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ichigatsu"
   },
   {
     "id": "v-obd-p7-010",
@@ -6014,7 +6391,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nigatsu"
   },
   {
     "id": "v-obd-p7-011",
@@ -6031,7 +6410,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sangatsu"
   },
   {
     "id": "v-obd-p7-012",
@@ -6048,7 +6429,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shigatsu"
   },
   {
     "id": "v-obd-p7-013",
@@ -6065,7 +6448,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gogatsu"
   },
   {
     "id": "v-obd-p7-014",
@@ -6082,7 +6467,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "rokugatsu"
   },
   {
     "id": "v-obd-p7-015",
@@ -6099,7 +6486,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shichigatsu"
   },
   {
     "id": "v-obd-p7-016",
@@ -6116,7 +6505,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hachigatsu"
   },
   {
     "id": "v-obd-p7-017",
@@ -6133,7 +6524,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kugatsu"
   },
   {
     "id": "v-obd-p7-018",
@@ -6150,7 +6543,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juugatsu"
   },
   {
     "id": "v-obd-p7-019",
@@ -6167,7 +6562,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuichigatsu"
   },
   {
     "id": "v-u8-008",
@@ -6184,7 +6581,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "piano"
   },
   {
     "id": "v-u8-013",
@@ -6201,7 +6600,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gitaa"
   },
   {
     "id": "v-u8-014",
@@ -6218,7 +6619,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "karaoke"
   },
   {
     "id": "v-u3-g-03",
@@ -6235,7 +6638,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kanadajin"
   },
   {
     "id": "v-u3-g-02",
@@ -6252,7 +6657,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nyuujiirandojin"
   },
   {
     "id": "v-u3-g-05",
@@ -6269,41 +6676,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
-  },
-  {
-    "id": "v-u3-gen-02",
-    "japanese": "アメリカ人",
-    "kana": "あめりかじん",
-    "romaji": "amerikajin",
-    "english": "American person",
-    "category": "nationality",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 3"
-      }
-    ]
-  },
-  {
-    "id": "v-u3-gen-03",
-    "japanese": "インドネシア人",
-    "kana": "いんどねしあじん",
-    "romaji": "indoneshiajin",
-    "english": "Indonesian person",
-    "category": "nationality",
-    "yearLevel": [
-      7
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 3"
-      }
-    ]
+    "examples": [],
+    "audioKey": "oosutorariajin"
   },
   {
     "id": "v-u3-gen-007",
@@ -6320,7 +6695,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nanijin"
   },
   {
     "id": "v-obd-gen-u3-04",
@@ -6337,7 +6714,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nihonjin"
   },
   {
     "id": "v-obd-gen-u3-05",
@@ -6354,7 +6733,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kanadajin"
   },
   {
     "id": "v-obd-gen-u3-06",
@@ -6371,7 +6752,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "amerikajin"
   },
   {
     "id": "v-obd-gen-u3-07",
@@ -6388,7 +6771,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oosutorariajin"
   },
   {
     "id": "v-obd-gen-u3-08",
@@ -6405,7 +6790,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "indoneshiajin"
   },
   {
     "id": "v-ob-gen-u5-02",
@@ -6423,7 +6810,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kusa"
   },
   {
     "id": "v-ob-gen-namae",
@@ -6440,7 +6829,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "namae"
   },
   {
     "id": "v-ob10-11",
@@ -6457,7 +6848,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "manga"
   },
   {
     "id": "v-odg-u12-008",
@@ -6474,7 +6867,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shinbun"
   },
   {
     "id": "v-odg-u12-007",
@@ -6491,7 +6886,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "omiyage"
   },
   {
     "id": "v-ob10-03",
@@ -6508,7 +6905,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oshaberi"
   },
   {
     "id": "v-u3-08",
@@ -6525,7 +6924,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "toshi"
   },
   {
     "id": "v-u3-gen-003",
@@ -6542,24 +6943,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
-  },
-  {
-    "id": "v-obento-gen-005",
-    "japanese": "宝島",
-    "kana": "たからじま",
-    "romaji": "takarajima",
-    "english": "treasure island",
-    "category": "nouns",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "General"
-      }
-    ]
+    "examples": [],
+    "audioKey": "denwa-bangou"
   },
   {
     "id": "v-u8-g-14",
@@ -6576,7 +6962,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "otoko"
   },
   {
     "id": "v-obento-p2-006",
@@ -6593,7 +6981,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "rei-/-zero"
   },
   {
     "id": "v-od-u2-003",
@@ -6610,7 +7000,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ichi"
   },
   {
     "id": "v-od-u2-004",
@@ -6627,7 +7019,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ni"
   },
   {
     "id": "v-od-u2-005",
@@ -6644,7 +7038,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "san"
   },
   {
     "id": "v-u2-004",
@@ -6661,24 +7057,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
-  },
-  {
-    "id": "v-u4-002",
-    "japanese": "五",
-    "kana": "ご",
-    "romaji": "go",
-    "english": "five",
-    "category": "numbers",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 4"
-      }
-    ]
+    "examples": [],
+    "audioKey": "yon"
   },
   {
     "id": "v-u2-006",
@@ -6695,7 +7076,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "roku"
   },
   {
     "id": "v-u2-007",
@@ -6712,24 +7095,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
-  },
-  {
-    "id": "v-u4-003",
-    "japanese": "八",
-    "kana": "はち",
-    "romaji": "hachi",
-    "english": "eight",
-    "category": "numbers",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 4"
-      }
-    ]
+    "examples": [],
+    "audioKey": "nana"
   },
   {
     "id": "v-u2-009",
@@ -6746,7 +7114,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyuu"
   },
   {
     "id": "v-u2-010",
@@ -6763,7 +7133,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juu"
   },
   {
     "id": "v-obento-p2-017",
@@ -6780,7 +7152,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuichi"
   },
   {
     "id": "v-obento-p2-018",
@@ -6797,7 +7171,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuni"
   },
   {
     "id": "v-obento-p2-019",
@@ -6814,7 +7190,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juusan"
   },
   {
     "id": "v-od-u2-05",
@@ -6831,7 +7209,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuyon"
   },
   {
     "id": "v-obento-p2-021",
@@ -6848,7 +7228,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juugo"
   },
   {
     "id": "v-obento-p2-022",
@@ -6865,7 +7247,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuroku"
   },
   {
     "id": "v-obento-p2-023",
@@ -6882,7 +7266,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juunana-/-juushichi"
   },
   {
     "id": "v-obento-p2-024",
@@ -6899,7 +7285,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuhachi"
   },
   {
     "id": "v-obento-p2-025",
@@ -6916,7 +7304,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juukyuu-/-juuku"
   },
   {
     "id": "v-obento-p2-027",
@@ -6933,7 +7323,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sanjuu"
   },
   {
     "id": "v-obento-p2-028",
@@ -6950,7 +7342,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yonjuu"
   },
   {
     "id": "v-obento-p2-029",
@@ -6967,7 +7361,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gojuu"
   },
   {
     "id": "v-obento-p2-030",
@@ -6984,7 +7380,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "issai"
   },
   {
     "id": "v-obento-p2-031",
@@ -7001,7 +7399,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nisai"
   },
   {
     "id": "v-obento-p2-033",
@@ -7018,7 +7418,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yonsai"
   },
   {
     "id": "v-obento-p2-036",
@@ -7035,7 +7437,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nanasai"
   },
   {
     "id": "v-obento-p2-037",
@@ -7052,7 +7456,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hassai"
   },
   {
     "id": "v-obento-p2-038",
@@ -7069,7 +7475,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyuusai"
   },
   {
     "id": "v-obento-p2-040",
@@ -7086,7 +7494,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juuissai"
   },
   {
     "id": "v-obento-p2-042",
@@ -7103,7 +7513,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juusansai"
   },
   {
     "id": "v-od-p4-26",
@@ -7120,7 +7532,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nannin"
   },
   {
     "id": "v-u4-gen-10",
@@ -7137,7 +7551,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gonin"
   },
   {
     "id": "v-od-p4-35",
@@ -7154,7 +7570,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyuunin"
   },
   {
     "id": "v-obento-p5-001",
@@ -7171,7 +7589,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "juunin"
   },
   {
     "id": "v-obento-u4-03",
@@ -7189,7 +7609,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "~sai"
   },
   {
     "id": "v-obento-u4-12",
@@ -7206,7 +7628,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yonin"
   },
   {
     "id": "v-u10-23",
@@ -7223,7 +7647,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kamera"
   },
   {
     "id": "v-u10-g-009",
@@ -7240,7 +7666,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tegami"
   },
   {
     "id": "v-u10-08",
@@ -7257,7 +7685,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nikki"
   },
   {
     "id": "v-u10-g-008",
@@ -7274,7 +7704,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "zasshi"
   },
   {
     "id": "v-u10-g-010",
@@ -7291,7 +7723,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shinbun"
   },
   {
     "id": "v-u10-24",
@@ -7308,7 +7742,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "keitai"
   },
   {
     "id": "v-u10-25",
@@ -7325,7 +7761,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "omiyage"
   },
   {
     "id": "v-u5-wanwan",
@@ -7342,7 +7780,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "wanwan"
   },
   {
     "id": "v-u5-gaagaa",
@@ -7359,7 +7799,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gaagaa"
   },
   {
     "id": "v-u3-p9-06",
@@ -7376,7 +7818,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kara"
   },
   {
     "id": "v-ob1-u10-002",
@@ -7393,7 +7837,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "o"
   },
   {
     "id": "v-obento-p2-001",
@@ -7410,7 +7856,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "~san"
   },
   {
     "id": "v-obento-p2-002",
@@ -7427,7 +7875,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "~kun"
   },
   {
     "id": "v-obento-p2-003",
@@ -7444,7 +7894,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "~chan"
   },
   {
     "id": "v-obento-g-003",
@@ -7461,7 +7913,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sensei"
   },
   {
     "id": "v-obento-p2-005",
@@ -7478,7 +7932,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "~jin"
   },
   {
     "id": "v-obento-u4-11",
@@ -7495,7 +7951,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nihonjin"
   },
   {
     "id": "v-obento-u4-02",
@@ -7513,7 +7971,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "watashi"
   },
   {
     "id": "v-obento-gen-u9-06",
@@ -7531,7 +7991,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hitori"
   },
   {
     "id": "v-obento-gen-u9-07",
@@ -7549,24 +8011,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
-  },
-  {
-    "id": "v-od-g-002",
-    "japanese": "一人で",
-    "kana": "ひとりで",
-    "romaji": "hitori de",
-    "english": "alone / by oneself",
-    "category": "people",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "General"
-      }
-    ]
+    "examples": [],
+    "audioKey": "tomodachi"
   },
   {
     "id": "v-ob-u1-08",
@@ -7583,7 +8030,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "minasan"
   },
   {
     "id": "v-obento-g-002",
@@ -7600,7 +8049,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tomodachi"
   },
   {
     "id": "v-u10-01",
@@ -7618,25 +8069,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
-  },
-  {
-    "id": "v-u10-02",
-    "japanese": "後輩",
-    "kana": "こうはい",
-    "romaji": "kouhai",
-    "english": "junior schoolmate/colleague",
-    "category": "people",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "senpai"
   },
   {
     "id": "v-obento-gen-009",
@@ -7653,7 +8088,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sensei"
   },
   {
     "id": "v-obento-g-007",
@@ -7670,7 +8107,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gaarufurendo"
   },
   {
     "id": "v-obento-g-008",
@@ -7687,7 +8126,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "booifurendo"
   },
   {
     "id": "v-obento-u9-06",
@@ -7704,7 +8145,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "minna"
   },
   {
     "id": "v-obd-g-03",
@@ -7721,7 +8164,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "denwa-bangou"
   },
   {
     "id": "v-obd-gen-03",
@@ -7738,7 +8183,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tanjoubi"
   },
   {
     "id": "v-obd-gen-02",
@@ -7755,7 +8202,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "toshi"
   },
   {
     "id": "v-obento-u5-05",
@@ -7772,7 +8221,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tori"
   },
   {
     "id": "v-obento-u5-04",
@@ -7789,7 +8240,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "uma"
   },
   {
     "id": "v-obd-u4-010",
@@ -7806,25 +8259,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
-  },
-  {
-    "id": "v-u10-01",
-    "japanese": "何をしますか",
-    "kana": "なにをしますか",
-    "romaji": "nani o shimasu ka",
-    "english": "What do you do? / What will you do?",
-    "category": "phrases",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "kame"
   },
   {
     "id": "v-u3-gen-002",
@@ -7841,7 +8278,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nansai"
   },
   {
     "id": "v-u3-gen-001",
@@ -7858,7 +8297,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dokokara"
   },
   {
     "id": "v-u3-gen-004",
@@ -7875,7 +8316,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "doko-ni"
   },
   {
     "id": "v-u7-aus",
@@ -7893,7 +8336,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oosutoraria"
   },
   {
     "id": "v-u3-g-09",
@@ -7910,7 +8355,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shidonii"
   },
   {
     "id": "v-obento-p3-24",
@@ -7927,7 +8374,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "meruborun"
   },
   {
     "id": "v-obento-p3-25",
@@ -7944,24 +8393,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
-  },
-  {
-    "id": "v-u3-gen-03",
-    "japanese": "ニューヨーク",
-    "kana": "にゅーよーく",
-    "romaji": "nyuuyooku",
-    "english": "New York",
-    "category": "places",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 3"
-      }
-    ]
+    "examples": [],
+    "audioKey": "paasu"
   },
   {
     "id": "v-u3-gen-07",
@@ -7978,7 +8412,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ookurando"
   },
   {
     "id": "v-obento-p3-28",
@@ -7995,7 +8431,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "toronto"
   },
   {
     "id": "v-u3-gen-04",
@@ -8012,7 +8450,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bari"
   },
   {
     "id": "v-obento-p3-30",
@@ -8029,7 +8469,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "burisuben"
   },
   {
     "id": "v-obento-p3-31",
@@ -8046,7 +8488,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jirongu"
   },
   {
     "id": "v-obento-p3-32",
@@ -8063,7 +8507,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyanbera"
   },
   {
     "id": "v-obento-p3-33",
@@ -8080,7 +8526,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "adereedo"
   },
   {
     "id": "v-obento-p3-34",
@@ -8097,7 +8545,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "pari"
   },
   {
     "id": "v-obento-p3-35",
@@ -8114,7 +8564,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "rondon"
   },
   {
     "id": "v-obento-p3-36",
@@ -8131,7 +8583,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "rosanzerusu"
   },
   {
     "id": "v-obento-p3-37",
@@ -8148,7 +8602,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "goorudokoosuto"
   },
   {
     "id": "v-obento-p3-38",
@@ -8165,7 +8621,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tasumania"
   },
   {
     "id": "v-od-p4-01",
@@ -8182,7 +8640,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "eaazurokku"
   },
   {
     "id": "v-od-p4-02",
@@ -8199,7 +8659,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "keanzu"
   },
   {
     "id": "v-od-p4-03",
@@ -8216,7 +8678,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gureeto-baria-riifu"
   },
   {
     "id": "v-od-p4-04",
@@ -8233,7 +8697,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aomori"
   },
   {
     "id": "v-od-p4-05",
@@ -8250,24 +8716,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
-  },
-  {
-    "id": "v-u3-gen-02",
-    "japanese": "東京",
-    "kana": "とうきょう",
-    "romaji": "toukyou",
-    "english": "Tokyo",
-    "category": "places",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 3"
-      }
-    ]
+    "examples": [],
+    "audioKey": "sapporo"
   },
   {
     "id": "v-u3-gen-10",
@@ -8284,7 +8735,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "oosaka"
   },
   {
     "id": "v-obd-u9-08",
@@ -8301,7 +8754,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyouto"
   },
   {
     "id": "v-od-p4-09",
@@ -8318,7 +8773,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hiroshima"
   },
   {
     "id": "v-od-p4-10",
@@ -8335,7 +8792,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nara"
   },
   {
     "id": "v-od-p4-11",
@@ -8352,7 +8811,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kumamoto"
   },
   {
     "id": "v-u9-04",
@@ -8369,24 +8830,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
-  },
-  {
-    "id": "v-u10-04",
-    "japanese": "街",
-    "kana": "まち",
-    "romaji": "machi",
-    "english": "town / city",
-    "category": "places",
-    "yearLevel": [
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "uchi"
   },
   {
     "id": "v-obento-gen-u9-05",
@@ -8404,7 +8850,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "umi"
   },
   {
     "id": "v-obento-gen-u9-09",
@@ -8422,7 +8870,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gakkou"
   },
   {
     "id": "v-obento-gen-u9-08",
@@ -8440,7 +8890,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "depaato"
   },
   {
     "id": "v-obento-gen-u9-02",
@@ -8458,7 +8910,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "resutoran"
   },
   {
     "id": "v-ob-p9-015",
@@ -8475,7 +8929,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "obaasannouchi"
   },
   {
     "id": "v-od-g-010",
@@ -8492,7 +8948,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tomodachi-no-uchi"
   },
   {
     "id": "v-odg-u12-04",
@@ -8510,7 +8968,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "toshokan"
   },
   {
     "id": "v-obento-gen-04",
@@ -8527,7 +8987,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jinja"
   },
   {
     "id": "v-obento-gen-03",
@@ -8544,7 +9006,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "otera"
   },
   {
     "id": "v-obd-p13-033",
@@ -8561,7 +9025,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 13"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jettokoosutaa"
   },
   {
     "id": "v-obd-gen-u11-06",
@@ -8578,7 +9044,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jakaruta"
   },
   {
     "id": "v-obd-gen-u11-09",
@@ -8595,7 +9063,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "finrando"
   },
   {
     "id": "v-obd-gen-u11-10",
@@ -8612,7 +9082,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyuuba"
   },
   {
     "id": "v-obd-gen-u11-12",
@@ -8629,7 +9101,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suweeden"
   },
   {
     "id": "v-u11-03",
@@ -8646,7 +9120,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "puuru"
   },
   {
     "id": "v-odg-u12-002",
@@ -8663,7 +9139,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kiyomizudera"
   },
   {
     "id": "v-obd-gen-u12-04",
@@ -8680,7 +9158,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "toshokan"
   },
   {
     "id": "v-obento-g-009",
@@ -8697,7 +9177,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "umi"
   },
   {
     "id": "v-u12-g-08",
@@ -8714,7 +9196,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "eigakan"
   },
   {
     "id": "v-u12-13",
@@ -8732,7 +9216,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suupaa"
   },
   {
     "id": "v-ob-gen-u5-12",
@@ -8750,7 +9236,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 5"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "doubutsu-byouin"
   },
   {
     "id": "v-obento-u9-07",
@@ -8767,7 +9255,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gakkou"
   },
   {
     "id": "v-u9-012",
@@ -8784,7 +9274,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tomodachi-no-uchi"
   },
   {
     "id": "v-obento-u9-01",
@@ -8801,7 +9293,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "machi"
   },
   {
     "id": "v-u9-05",
@@ -8818,7 +9312,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "piza-resutoran"
   },
   {
     "id": "v-obento-gen-u9-10",
@@ -8836,7 +9332,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "machi"
   },
   {
     "id": "v-obento-u4-15",
@@ -8853,7 +9351,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "watashi"
   },
   {
     "id": "v-obento-u4-14",
@@ -8870,7 +9370,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "boku"
   },
   {
     "id": "v-obd-g-06",
@@ -8887,25 +9389,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
-  },
-  {
-    "id": "v-u10-01",
-    "japanese": "なに",
-    "kana": "なに",
-    "romaji": "nani",
-    "english": "what",
-    "category": "question",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "boku"
   },
   {
     "id": "v-ob1-u8-02",
@@ -8922,24 +9408,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
-  },
-  {
-    "id": "v-u7-gen-03",
-    "japanese": "いつ",
-    "kana": "いつ",
-    "romaji": "itsu",
-    "english": "when",
-    "category": "question words",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 7"
-      }
-    ]
+    "examples": [],
+    "audioKey": "donna"
   },
   {
     "id": "v-obd-g-004",
@@ -8956,7 +9427,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nan"
   },
   {
     "id": "v-obd-u10-05",
@@ -8973,7 +9446,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dare"
   },
   {
     "id": "v-obento-g-015",
@@ -8990,7 +9465,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "doko"
   },
   {
     "id": "v-obento-g-016",
@@ -9007,7 +9484,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dare"
   },
   {
     "id": "v-u9-nande",
@@ -9024,7 +9503,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nande"
   },
   {
     "id": "v-obento-u8-008",
@@ -9041,7 +9522,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tesuto"
   },
   {
     "id": "v-odg-u12-05",
@@ -9059,7 +9542,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sakubun"
   },
   {
     "id": "v-odg-u12-02",
@@ -9077,7 +9562,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shiken"
   },
   {
     "id": "v-gen-u12-15",
@@ -9094,7 +9581,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sotsugyooshiki"
   },
   {
     "id": "v-gen-u12-09",
@@ -9111,7 +9600,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nyuugakushiki"
   },
   {
     "id": "v-gen-u12-12",
@@ -9128,7 +9619,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "natsuyasumi"
   },
   {
     "id": "v-obd-u9-06",
@@ -9145,7 +9638,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shuugakuryokou"
   },
   {
     "id": "v-obd-gen-u12-10",
@@ -9162,7 +9657,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shukudai"
   },
   {
     "id": "v-u11-gen-15",
@@ -9179,7 +9676,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shukudai"
   },
   {
     "id": "v-ob-gen-10-07",
@@ -9196,25 +9695,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
-  },
-  {
-    "id": "v-u10-03",
-    "japanese": "部活",
-    "kana": "ぶかつ",
-    "romaji": "bukatsu",
-    "english": "club activities",
-    "category": "school",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "benkyou"
   },
   {
     "id": "v-gen-u12-11",
@@ -9231,7 +9714,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "haruyasumi"
   },
   {
     "id": "v-gen-u12-13",
@@ -9248,7 +9733,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "fuyuyasumi"
   },
   {
     "id": "v-u7-03",
@@ -9265,7 +9752,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ensoku"
   },
   {
     "id": "v-u7-04",
@@ -9282,7 +9771,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyanpu"
   },
   {
     "id": "v-u10-002",
@@ -9300,7 +9791,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "katakana"
   },
   {
     "id": "v-ob2-u8-03",
@@ -9317,7 +9810,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "supootsu"
   },
   {
     "id": "v-u8-g-09",
@@ -9334,7 +9829,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suiei"
   },
   {
     "id": "v-u9-01",
@@ -9351,7 +9848,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yakyuu"
   },
   {
     "id": "v-u8-011",
@@ -9368,7 +9867,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jouba"
   },
   {
     "id": "v-u9-002",
@@ -9385,7 +9886,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sakkaa"
   },
   {
     "id": "v-obento-gen-u9-03",
@@ -9403,7 +9906,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tenisu"
   },
   {
     "id": "v-obd-gen-13",
@@ -9420,7 +9925,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sukii"
   },
   {
     "id": "v-ob1-u8-09",
@@ -9437,24 +9944,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
-  },
-  {
-    "id": "v-u8-012",
-    "japanese": "ゴルフ",
-    "kana": "ごるふ",
-    "romaji": "gorufu",
-    "english": "golf",
-    "category": "sports",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 8"
-      }
-    ]
+    "examples": [],
+    "audioKey": "sukeeto"
   },
   {
     "id": "v-obd-gen-12",
@@ -9471,7 +9963,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "saafin"
   },
   {
     "id": "v-u8-004",
@@ -9488,7 +9982,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kuriketto"
   },
   {
     "id": "v-u8-005",
@@ -9505,24 +10001,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
-  },
-  {
-    "id": "v-obento-u9-09",
-    "japanese": "ラグビー",
-    "kana": "らぐびー",
-    "romaji": "ragubii",
-    "english": "rugby",
-    "category": "sports",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 9"
-      }
-    ]
+    "examples": [],
+    "audioKey": "hokkee"
   },
   {
     "id": "v-u8-003",
@@ -9539,7 +10020,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "basukettobooru"
   },
   {
     "id": "v-u8-g-06",
@@ -9556,7 +10039,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sofutobo-ru"
   },
   {
     "id": "v-u8-g-07",
@@ -9573,7 +10058,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bare-bo-ru"
   },
   {
     "id": "v-u8-g-12",
@@ -9590,7 +10077,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nettobo-ru"
   },
   {
     "id": "v-obd-p8-032",
@@ -9608,24 +10097,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 8"
       }
-    ]
-  },
-  {
-    "id": "v-u8-014",
-    "japanese": "空手",
-    "kana": "からて",
-    "romaji": "karate",
-    "english": "karate",
-    "category": "sports",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 8"
-      }
-    ]
+    "examples": [],
+    "audioKey": "futtobooru"
   },
   {
     "id": "v-gen-kendou",
@@ -9643,7 +10117,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kendou"
   },
   {
     "id": "v-obd-gen-u11-11",
@@ -9660,24 +10136,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
-  },
-  {
-    "id": "v-u8-013",
-    "japanese": "オーストラリアンフットボール",
-    "kana": "おーすとらりあんふっとぼーる",
-    "romaji": "oosutorarianfuttobooru",
-    "english": "Australian rules football",
-    "category": "sports",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 8"
-      }
-    ]
+    "examples": [],
+    "audioKey": "figyuasukeeto"
   },
   {
     "id": "v-ob1-u8-07",
@@ -9694,7 +10155,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "karate"
   },
   {
     "id": "v-ob1-u8-08",
@@ -9711,7 +10174,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kendou"
   },
   {
     "id": "v-u3-p9-05",
@@ -9728,7 +10193,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "-jin"
   },
   {
     "id": "v-obento-u10-04",
@@ -9745,7 +10212,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "webusaito"
   },
   {
     "id": "v-obento-u10-05",
@@ -9762,7 +10231,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hoomupeeji"
   },
   {
     "id": "v-obento-u10-07",
@@ -9779,7 +10250,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "akaunto"
   },
   {
     "id": "v-obento-u10-08",
@@ -9796,7 +10269,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "apuri"
   },
   {
     "id": "v-obento-u10-09",
@@ -9813,7 +10288,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "bukkumaaku"
   },
   {
     "id": "v-obento-u10-10",
@@ -9830,7 +10307,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyanseru"
   },
   {
     "id": "v-obento-u10-11",
@@ -9847,7 +10326,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "forudaa"
   },
   {
     "id": "v-obento-u10-12",
@@ -9864,7 +10345,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "herupu"
   },
   {
     "id": "v-obento-u10-13",
@@ -9881,7 +10364,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "intaanetto"
   },
   {
     "id": "v-obento-u10-14",
@@ -9898,7 +10383,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "roguin"
   },
   {
     "id": "v-obento-u10-15",
@@ -9915,7 +10402,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "roguauto"
   },
   {
     "id": "v-obento-u10-16",
@@ -9932,7 +10421,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "memori"
   },
   {
     "id": "v-obento-u10-17",
@@ -9949,7 +10440,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "menyuu"
   },
   {
     "id": "v-obento-u10-18",
@@ -9966,7 +10459,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "onrain"
   },
   {
     "id": "v-obento-u10-19",
@@ -9983,7 +10478,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sukuriinshotto"
   },
   {
     "id": "v-obento-u10-21",
@@ -10000,7 +10497,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "wikipedeia"
   },
   {
     "id": "v-obento-u10-22",
@@ -10017,7 +10516,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "waiyaresu"
   },
   {
     "id": "v-ob-gen-10-03",
@@ -10034,7 +10535,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "keitai-denwa"
   },
   {
     "id": "v-u9-07",
@@ -10051,7 +10554,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nichiyoubi"
   },
   {
     "id": "v-obento-gen-u9-16",
@@ -10069,7 +10574,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "getsuyoubi"
   },
   {
     "id": "v-od-g-011",
@@ -10086,41 +10593,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
-  },
-  {
-    "id": "v-od-g-004",
-    "japanese": "水曜日",
-    "kana": "すいようび",
-    "romaji": "suiyoubi",
-    "english": "Wednesday",
-    "category": "time",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "General"
-      }
-    ]
-  },
-  {
-    "id": "v-od-g-001",
-    "japanese": "木曜日",
-    "kana": "もくようび",
-    "romaji": "mokuyoubi",
-    "english": "Thursday",
-    "category": "time",
-    "yearLevel": [
-      1
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "General"
-      }
-    ]
+    "examples": [],
+    "audioKey": "kayoubi"
   },
   {
     "id": "v-od-g-007",
@@ -10137,7 +10612,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kinyoubi"
   },
   {
     "id": "v-u9-gen-11",
@@ -10155,7 +10632,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "doyoubi"
   },
   {
     "id": "v-obd-gen-u12-07",
@@ -10172,24 +10651,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u7-gen-04",
-    "japanese": "何月",
-    "kana": "なんがつ",
-    "romaji": "nangatsu",
-    "english": "which month",
-    "category": "time",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 7"
-      }
-    ]
+    "examples": [],
+    "audioKey": "juunigatsu"
   },
   {
     "id": "v-u7-gen-014",
@@ -10206,24 +10670,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 7"
       }
-    ]
-  },
-  {
-    "id": "v-u7-gen-05",
-    "japanese": "何日",
-    "kana": "なんにち",
-    "romaji": "nannichi",
-    "english": "which day of the month / how many days",
-    "category": "time",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 7"
-      }
-    ]
+    "examples": [],
+    "audioKey": "hatsuka"
   },
   {
     "id": "v-obento-u8-002",
@@ -10240,7 +10689,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyou"
   },
   {
     "id": "v-obento-u8-003",
@@ -10257,7 +10708,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 8"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ashita"
   },
   {
     "id": "v-obento-gen-u9-13",
@@ -10275,7 +10728,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shuumatsu"
   },
   {
     "id": "v-obento-gen-u9-14",
@@ -10293,7 +10748,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yasumi"
   },
   {
     "id": "v-obd-p10-021",
@@ -10311,7 +10768,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10, 11, 12, Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kinou"
   },
   {
     "id": "v-obd-p10-022",
@@ -10329,7 +10788,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10, 11, 12, Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "senshuu"
   },
   {
     "id": "v-obd-p10-023",
@@ -10347,7 +10808,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10, 11, 12, Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sengetsu"
   },
   {
     "id": "v-obd-p10-024",
@@ -10365,7 +10828,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10, 11, 12, Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kyonen"
   },
   {
     "id": "v-u11-05",
@@ -10383,7 +10848,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ashita-no-asa"
   },
   {
     "id": "v-u11-007",
@@ -10400,7 +10867,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "asa"
   },
   {
     "id": "v-u11-008",
@@ -10417,7 +10886,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yoru"
   },
   {
     "id": "v-obd-p10-028",
@@ -10435,25 +10906,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10, 11, 12, Page 10"
       }
-    ]
-  },
-  {
-    "id": "v-u11-04",
-    "japanese": "昼休みに",
-    "kana": "ひるやすみに",
-    "romaji": "hiru yasumi ni",
-    "english": "at lunchtime",
-    "category": "time",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 11"
-      }
-    ]
+    "examples": [],
+    "audioKey": "kinyoubi-no-ban"
   },
   {
     "id": "v-obento-11-02",
@@ -10470,7 +10925,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gakkou-no-mae-ni"
   },
   {
     "id": "v-obento-11-03",
@@ -10487,25 +10944,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
-  },
-  {
-    "id": "v-u11-03",
-    "japanese": "後で",
-    "kana": "あとで",
-    "romaji": "ato de",
-    "english": "later / afterwards",
-    "category": "time",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 11"
-      }
-    ]
+    "examples": [],
+    "audioKey": "gakkou-no-ato-de"
   },
   {
     "id": "v-u11-02",
@@ -10523,7 +10964,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "himana-toki-ni"
   },
   {
     "id": "v-obento-gen-u9-04",
@@ -10541,7 +10984,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ashita"
   },
   {
     "id": "v-obd-gen-u11-07",
@@ -10558,7 +11003,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "wiikuendo"
   },
   {
     "id": "v-u6-18",
@@ -10575,24 +11022,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
-  },
-  {
-    "id": "v-u11-02",
-    "japanese": "ひまなとき",
-    "kana": "ひまなとき",
-    "romaji": "himana toki",
-    "english": "spare time / free time",
-    "category": "time",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 11"
-      }
-    ]
+    "examples": [],
+    "audioKey": "mainichi"
   },
   {
     "id": "v-u11-002",
@@ -10609,7 +11041,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ato"
   },
   {
     "id": "v-u11-003",
@@ -10626,7 +11060,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mae"
   },
   {
     "id": "v-u11-004",
@@ -10643,24 +11079,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
-  },
-  {
-    "id": "v-u11-05",
-    "japanese": "暇",
-    "kana": "ひま",
-    "romaji": "hima",
-    "english": "free time",
-    "category": "time",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 11"
-      }
-    ]
+    "examples": [],
+    "audioKey": "himana-toki"
   },
   {
     "id": "v-u11-06",
@@ -10678,7 +11099,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "gakkou-no-ato-de"
   },
   {
     "id": "v-obd-gen-u12-03",
@@ -10695,7 +11118,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kinou"
   },
   {
     "id": "v-u9-013",
@@ -10712,7 +11137,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shuumatsu"
   },
   {
     "id": "v-obd-gen-u12-11",
@@ -10729,25 +11156,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u12-02",
-    "japanese": "ばん",
-    "kana": "ばん",
-    "romaji": "ban",
-    "english": "evening / night",
-    "category": "time",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
+    "examples": [],
+    "audioKey": "kyou"
   },
   {
     "id": "v-odg-u12-13",
@@ -10765,7 +11176,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "atode"
   },
   {
     "id": "v-u6-19",
@@ -10782,7 +11195,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tokidoki"
   },
   {
     "id": "v-gen-u1-04",
@@ -10799,7 +11214,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "san"
   },
   {
     "id": "v-gen-u1-05",
@@ -10816,7 +11233,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 1"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kun"
   },
   {
     "id": "v-obd-u9-03",
@@ -10833,7 +11252,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kuruma"
   },
   {
     "id": "v-od-g-012",
@@ -10850,7 +11271,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jitensha"
   },
   {
     "id": "v-u9-02",
@@ -10867,7 +11290,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hikouki"
   },
   {
     "id": "v-ob-p9-033",
@@ -10884,7 +11309,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "fune"
   },
   {
     "id": "v-obento-gen-u9-12",
@@ -10902,7 +11329,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "densha"
   },
   {
     "id": "v-u9-gen-06",
@@ -10920,7 +11349,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aruite"
   },
   {
     "id": "v-obento-gen-u9-11",
@@ -10938,7 +11369,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shinkansen"
   },
   {
     "id": "v-u9-03",
@@ -10955,24 +11388,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
-  },
-  {
-    "id": "v-u9-01",
-    "japanese": "タクシー",
-    "kana": "たくしー",
-    "romaji": "takushii",
-    "english": "taxi",
-    "category": "transport",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 9"
-      }
-    ]
+    "examples": [],
+    "audioKey": "basu"
   },
   {
     "id": "v-obd-u9-05",
@@ -10989,7 +11407,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ferii"
   },
   {
     "id": "v-obd-p10-003",
@@ -11007,7 +11427,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sukuutaa"
   },
   {
     "id": "v-obd-p10-004",
@@ -11025,7 +11447,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yotto"
   },
   {
     "id": "v-obd-p10-005",
@@ -11043,7 +11467,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chikatetsu"
   },
   {
     "id": "v-obd-gen-u12-12",
@@ -11060,7 +11486,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "jitensha"
   },
   {
     "id": "v-u12-05",
@@ -11078,7 +11506,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "densha"
   },
   {
     "id": "v-odg-u12-03",
@@ -11096,7 +11526,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ryokou"
   },
   {
     "id": "v-ob1-u2-001",
@@ -11113,7 +11545,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tatte"
   },
   {
     "id": "v-ob1-u2-002",
@@ -11130,7 +11564,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suwatte"
   },
   {
     "id": "v-ob1-u2-003",
@@ -11147,7 +11583,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kiite"
   },
   {
     "id": "v-ob1-u2-004",
@@ -11164,7 +11602,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yonde"
   },
   {
     "id": "v-ob1-u2-005",
@@ -11181,7 +11621,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "itte"
   },
   {
     "id": "v-ob1-u2-006",
@@ -11198,7 +11640,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaite"
   },
   {
     "id": "v-ob1-u2-007",
@@ -11215,7 +11659,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mite"
   },
   {
     "id": "v-ob1-u2-008",
@@ -11232,7 +11678,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "misete"
   },
   {
     "id": "v-ob1-u2-009",
@@ -11249,7 +11697,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shizuka-ni-shite"
   },
   {
     "id": "v-ob1-u2-011",
@@ -11266,7 +11716,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mado-o-akete"
   },
   {
     "id": "v-ob1-u2-012",
@@ -11283,7 +11735,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mado-o-shimete"
   },
   {
     "id": "v-ob1-u2-013",
@@ -11300,7 +11754,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "doa-o-akete"
   },
   {
     "id": "v-ob1-u2-014",
@@ -11317,7 +11773,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "doa-o-shimete"
   },
   {
     "id": "v-ob1-u2-015",
@@ -11334,7 +11792,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "matte"
   },
   {
     "id": "v-ob1-u2-016",
@@ -11351,7 +11811,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chotto-matte"
   },
   {
     "id": "v-ob1-u2-017",
@@ -11368,7 +11830,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hon-o-dashite"
   },
   {
     "id": "v-ob1-u2-018",
@@ -11385,7 +11849,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "pen-o-kashite"
   },
   {
     "id": "v-ob1-u2-019",
@@ -11402,7 +11868,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "hajime"
   },
   {
     "id": "v-ob1-u2-020",
@@ -11419,41 +11887,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 2"
       }
-    ]
-  },
-  {
-    "id": "v-od-g-007",
-    "japanese": "食べます",
-    "kana": "たべます",
-    "romaji": "tabemasu",
-    "english": "to eat",
-    "category": "verbs",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "General"
-      }
-    ]
-  },
-  {
-    "id": "v-od-g-008",
-    "japanese": "飲みます",
-    "kana": "のみます",
-    "romaji": "nomimasu",
-    "english": "to drink",
-    "category": "verbs",
-    "yearLevel": [
-      1
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "General"
-      }
-    ]
+    "examples": [],
+    "audioKey": "owari"
   },
   {
     "id": "v-u4-gen-03",
@@ -11471,7 +11907,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 4"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "imasu"
   },
   {
     "id": "v-obd-p6-029",
@@ -11488,7 +11926,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "imasen"
   },
   {
     "id": "v-obd-p10-013",
@@ -11506,7 +11946,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dekimasu"
   },
   {
     "id": "v-obd-u10-06",
@@ -11523,7 +11965,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikimasu"
   },
   {
     "id": "v-obento-11-38",
@@ -11540,7 +11984,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikimasen"
   },
   {
     "id": "v-obd-p10-011",
@@ -11558,7 +12004,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikimashita"
   },
   {
     "id": "v-obento-u11-13",
@@ -11575,7 +12023,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shimasu"
   },
   {
     "id": "v-obd-p10-014",
@@ -11593,7 +12043,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "dekimasen"
   },
   {
     "id": "v-obento-11-06",
@@ -11610,7 +12062,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "benkyou-o-shimasu"
   },
   {
     "id": "v-obento-11-07",
@@ -11627,7 +12081,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shukudai-o-shimasu"
   },
   {
     "id": "v-obento-11-08",
@@ -11644,7 +12100,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "renshuu-o-shimasu"
   },
   {
     "id": "v-obento-11-09",
@@ -11661,7 +12119,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "denwa-o-shimasu"
   },
   {
     "id": "v-obento-11-10",
@@ -11678,7 +12138,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimono-o-shimasu"
   },
   {
     "id": "v-obento-11-11",
@@ -11695,7 +12157,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "paatii-o-shimasu"
   },
   {
     "id": "v-obento-11-12",
@@ -11712,7 +12176,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "karaoke-o-shimasu"
   },
   {
     "id": "v-obento-11-13",
@@ -11729,7 +12195,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "chatto-o-shimasu"
   },
   {
     "id": "v-obento-11-14",
@@ -11746,7 +12214,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "supootsu-o-shimasu"
   },
   {
     "id": "v-obento-u11-09",
@@ -11763,7 +12233,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yomimasu"
   },
   {
     "id": "v-obento-11-16",
@@ -11780,7 +12252,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimasu"
   },
   {
     "id": "v-obento-11-17",
@@ -11797,25 +12271,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
-  },
-  {
-    "id": "v-u10-08",
-    "japanese": "撮ります",
-    "kana": "とります",
-    "romaji": "torimasu",
-    "english": "to take (a photo)",
-    "category": "verbs",
-    "yearLevel": [
-      7,
-      8
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "kakimasu"
   },
   {
     "id": "v-obento-gen-09",
@@ -11832,7 +12290,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimasu"
   },
   {
     "id": "v-u10-10",
@@ -11850,7 +12310,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsukurimasu"
   },
   {
     "id": "v-u11-gen-02",
@@ -11867,7 +12329,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mimasu"
   },
   {
     "id": "v-obento-gen-10",
@@ -11884,7 +12348,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aimasu"
   },
   {
     "id": "v-obento-gen-11",
@@ -11901,7 +12367,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nemasu"
   },
   {
     "id": "v-obento-gen-08",
@@ -11918,7 +12386,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "norimasu"
   },
   {
     "id": "v-obento-11-26",
@@ -11935,7 +12405,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "benkyou-o-shimasen"
   },
   {
     "id": "v-obento-11-27",
@@ -11952,7 +12424,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shukudai-o-shimasen"
   },
   {
     "id": "v-obento-11-28",
@@ -11969,7 +12443,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tabemasen"
   },
   {
     "id": "v-obento-11-29",
@@ -11986,7 +12462,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nomimasen"
   },
   {
     "id": "v-obento-11-30",
@@ -12003,7 +12481,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mimasen"
   },
   {
     "id": "v-obento-11-31",
@@ -12020,7 +12500,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimasen"
   },
   {
     "id": "v-obento-11-32",
@@ -12037,7 +12519,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakimasen"
   },
   {
     "id": "v-obento-11-33",
@@ -12054,7 +12538,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yomimasen"
   },
   {
     "id": "v-obento-11-34",
@@ -12071,7 +12557,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimansen"
   },
   {
     "id": "v-obento-11-35",
@@ -12088,7 +12576,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "torimasen"
   },
   {
     "id": "v-obento-11-36",
@@ -12105,7 +12595,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shimasen"
   },
   {
     "id": "v-obento-11-37",
@@ -12122,7 +12614,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsukurimasen"
   },
   {
     "id": "v-obento-11-39",
@@ -12139,7 +12633,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aimasen"
   },
   {
     "id": "v-obento-11-40",
@@ -12156,7 +12652,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nemasu"
   },
   {
     "id": "v-obento-11-41",
@@ -12173,7 +12671,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "norimasen"
   },
   {
     "id": "v-obento-12-01",
@@ -12190,7 +12690,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tabemashou"
   },
   {
     "id": "v-obento-12-02",
@@ -12207,7 +12709,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nomimashou"
   },
   {
     "id": "v-obento-12-03",
@@ -12224,7 +12728,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mimashou"
   },
   {
     "id": "v-obento-12-04",
@@ -12241,7 +12747,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimashou"
   },
   {
     "id": "v-obento-12-05",
@@ -12258,7 +12766,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakimashou"
   },
   {
     "id": "v-obento-12-06",
@@ -12275,7 +12785,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yomimashou"
   },
   {
     "id": "v-obento-12-07",
@@ -12292,7 +12804,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimashou"
   },
   {
     "id": "v-obento-12-08",
@@ -12309,7 +12823,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "torimashou"
   },
   {
     "id": "v-obento-12-09",
@@ -12326,7 +12842,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shimashou"
   },
   {
     "id": "v-obento-12-10",
@@ -12343,7 +12861,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsukurimashou"
   },
   {
     "id": "v-obento-12-11",
@@ -12360,7 +12880,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikimashou"
   },
   {
     "id": "v-obento-12-12",
@@ -12377,7 +12899,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aimashou"
   },
   {
     "id": "v-obento-12-13",
@@ -12394,7 +12918,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nemashou"
   },
   {
     "id": "v-obento-12-14",
@@ -12411,7 +12937,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "norimashou"
   },
   {
     "id": "v-obento-u12-002",
@@ -12429,7 +12957,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tabemashita"
   },
   {
     "id": "v-obento-u12-003",
@@ -12447,7 +12977,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nomashita"
   },
   {
     "id": "v-obento-u12-004",
@@ -12465,7 +12997,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mimashita"
   },
   {
     "id": "v-obento-u12-005",
@@ -12483,7 +13017,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimashita"
   },
   {
     "id": "v-obento-u12-006",
@@ -12501,7 +13037,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakimashita"
   },
   {
     "id": "v-obento-u12-007",
@@ -12519,7 +13057,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yomashita"
   },
   {
     "id": "v-obento-u12-008",
@@ -12537,7 +13077,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimashita"
   },
   {
     "id": "v-obento-12-22",
@@ -12554,7 +13096,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "torimashita"
   },
   {
     "id": "v-obento-12-23",
@@ -12571,7 +13115,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shimashita"
   },
   {
     "id": "v-obento-u12-010",
@@ -12589,7 +13135,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsukurimashita"
   },
   {
     "id": "v-obento-12-25",
@@ -12606,7 +13154,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikimashita"
   },
   {
     "id": "v-obento-u12-009",
@@ -12624,7 +13174,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aimashita"
   },
   {
     "id": "v-obento-u12-001",
@@ -12642,7 +13194,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nemashita"
   },
   {
     "id": "v-obento-12-28",
@@ -12659,7 +13213,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "norimashita"
   },
   {
     "id": "v-obento-12-29",
@@ -12676,7 +13232,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tabemasen-deshita"
   },
   {
     "id": "v-obento-12-30",
@@ -12693,7 +13251,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nomimasen-deshita"
   },
   {
     "id": "v-obento-12-31",
@@ -12710,7 +13270,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mimasen-deshita"
   },
   {
     "id": "v-obento-12-32",
@@ -12727,7 +13289,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimasen-deshita"
   },
   {
     "id": "v-obento-12-33",
@@ -12744,7 +13308,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakimasen-deshita"
   },
   {
     "id": "v-obento-12-34",
@@ -12761,7 +13327,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yomimasen-deshita"
   },
   {
     "id": "v-obento-12-35",
@@ -12778,7 +13346,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimasen-deshita"
   },
   {
     "id": "v-obento-12-36",
@@ -12795,7 +13365,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "torimasen-deshita"
   },
   {
     "id": "v-u12-12",
@@ -12812,7 +13384,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "shimasen-deshita"
   },
   {
     "id": "v-obento-12-38",
@@ -12829,7 +13403,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsukurimasen-deshita"
   },
   {
     "id": "v-obento-12-39",
@@ -12846,7 +13422,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikimasen-deshita"
   },
   {
     "id": "v-obento-12-40",
@@ -12863,7 +13441,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aimasen-deshita"
   },
   {
     "id": "v-obento-12-41",
@@ -12880,7 +13460,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "nemasen-deshita"
   },
   {
     "id": "v-obento-12-42",
@@ -12897,7 +13479,9 @@
         "book": "Obento Deluxe",
         "ref": "Page 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "norimasen-deshita"
   },
   {
     "id": "v-u10-004",
@@ -12914,7 +13498,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yomimasu"
   },
   {
     "id": "v-u10-33",
@@ -12931,7 +13517,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakimasu"
   },
   {
     "id": "v-u10-34",
@@ -12948,7 +13536,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimasu"
   },
   {
     "id": "v-u10-003",
@@ -12965,24 +13555,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
-  },
-  {
-    "id": "v-u10-002",
-    "japanese": "とります",
-    "kana": "とり ます",
-    "romaji": "torimasu",
-    "english": "take (a photo)",
-    "category": "verbs",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 10"
-      }
-    ]
+    "examples": [],
+    "audioKey": "mimasu"
   },
   {
     "id": "v-u10-37",
@@ -12999,7 +13574,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimasu"
   },
   {
     "id": "v-u10-38",
@@ -13016,7 +13593,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tsukurimasu"
   },
   {
     "id": "v-u10-39",
@@ -13033,7 +13612,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 10"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "aimasu"
   },
   {
     "id": "v-ob10-04",
@@ -13050,7 +13631,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "taberu"
   },
   {
     "id": "v-ob10-06",
@@ -13067,7 +13650,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kiku"
   },
   {
     "id": "v-ob10-07",
@@ -13084,7 +13669,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "au"
   },
   {
     "id": "v-ob10-12",
@@ -13101,7 +13688,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "iku"
   },
   {
     "id": "v-ob10-13",
@@ -13118,7 +13707,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "miru"
   },
   {
     "id": "v-ob10-14",
@@ -13135,7 +13726,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "neru"
   },
   {
     "id": "v-ob10-16",
@@ -13152,7 +13745,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "suru"
   },
   {
     "id": "v-obento-u11-10",
@@ -13169,7 +13764,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 11"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimasu"
   },
   {
     "id": "v-obento-gen-12",
@@ -13186,7 +13783,9 @@
         "book": "Obento Deluxe",
         "ref": "General"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakimasu"
   },
   {
     "id": "v-u12-03",
@@ -13203,7 +13802,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tabemasen-deshita"
   },
   {
     "id": "v-u12-04",
@@ -13220,24 +13821,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u12-05",
-    "japanese": "見ませんでした",
-    "kana": "みませんでした",
-    "romaji": "mimasen deshita",
-    "english": "didn't watch / see",
-    "category": "verbs",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
+    "examples": [],
+    "audioKey": "nomimasen-deshita"
   },
   {
     "id": "v-u12-06",
@@ -13254,7 +13840,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kikimasen-deshita"
   },
   {
     "id": "v-u12-07",
@@ -13271,7 +13859,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakimasen-deshita"
   },
   {
     "id": "v-u12-08",
@@ -13288,7 +13878,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yomimasen-deshita"
   },
   {
     "id": "v-u12-09",
@@ -13305,7 +13897,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kaimasen-deshita"
   },
   {
     "id": "v-u12-10",
@@ -13322,58 +13916,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u12-11",
-    "japanese": "作りませんでした",
-    "kana": "つくりませんでした",
-    "romaji": "tsukurimasen deshita",
-    "english": "didn't make",
-    "category": "verbs",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
-  },
-  {
-    "id": "v-u12-13",
-    "japanese": "行きませんでした",
-    "kana": "いきませんでした",
-    "romaji": "ikimasen deshita",
-    "english": "didn't go",
-    "category": "verbs",
-    "yearLevel": [
-      7
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
-  },
-  {
-    "id": "v-u12-14",
-    "japanese": "会いませんでした",
-    "kana": "あいませんでした",
-    "romaji": "aimasen deshita",
-    "english": "didn't meet",
-    "category": "verbs",
-    "yearLevel": [
-      7
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 12"
-      }
-    ]
+    "examples": [],
+    "audioKey": "torimasen-deshita"
   },
   {
     "id": "v-u12-15",
@@ -13390,24 +13935,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 12"
       }
-    ]
-  },
-  {
-    "id": "v-u3-gen-04",
-    "japanese": "住んでいます",
-    "kana": "すんでいます",
-    "romaji": "sunde imasu",
-    "english": "living (in)",
-    "category": "verbs",
-    "yearLevel": [
-      7
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 3"
-      }
-    ]
+    "examples": [],
+    "audioKey": "norimasen-deshita"
   },
   {
     "id": "v-u3-gen-08",
@@ -13424,7 +13954,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kimashita"
   },
   {
     "id": "v-u3-p9-08",
@@ -13441,7 +13973,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "sunde-imasu"
   },
   {
     "id": "v-u3-p9-07",
@@ -13458,7 +13992,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 3"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kimashita"
   },
   {
     "id": "v-obdt-u6-04",
@@ -13475,7 +14011,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "tabemasu"
   },
   {
     "id": "v-obdt-u6-05",
@@ -13492,41 +14030,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
-  },
-  {
-    "id": "v-u6-006",
-    "japanese": "たべません",
-    "kana": "たべません",
-    "romaji": "tabemasen",
-    "english": "do not eat",
-    "category": "verbs",
-    "yearLevel": [
-      1
     ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 6"
-      }
-    ]
-  },
-  {
-    "id": "v-u6-007",
-    "japanese": "のみません",
-    "kana": "のみません",
-    "romaji": "nomimasen",
-    "english": "do not drink",
-    "category": "verbs",
-    "yearLevel": [
-      1
-    ],
-    "textbookMapping": [
-      {
-        "book": "Obento Deluxe",
-        "ref": "Unit 6"
-      }
-    ]
+    "examples": [],
+    "audioKey": "nomimasu"
   },
   {
     "id": "v-u6-21",
@@ -13543,7 +14049,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "iremasu"
   },
   {
     "id": "v-u6-22",
@@ -13560,7 +14068,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "yakimasu"
   },
   {
     "id": "v-u6-23",
@@ -13577,7 +14087,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "mazemasu"
   },
   {
     "id": "v-u6-24",
@@ -13594,7 +14106,9 @@
         "book": "Obento Deluxe",
         "ref": "Unit 6"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "kakemasu"
   },
   {
     "id": "v-u9-ikimasu",
@@ -13611,6 +14125,8 @@
         "book": "Obento Deluxe",
         "ref": "Unit 9"
       }
-    ]
+    ],
+    "examples": [],
+    "audioKey": "ikimasu"
   }
 ]
