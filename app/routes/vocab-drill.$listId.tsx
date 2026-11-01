@@ -39,13 +39,58 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     throw new Response("Drill list not found", { status: 404 });
   }
 
-  // 2. このリストに紐づくタスク（tasks）のIDを取得（成績保存用）
+  // 2. このリストに紐づくタスク（tasks）のIDとブロック設定を取得
   const { data: taskData } = await supabase
     .from("tasks")
-    .select("id")
+    .select("id, block_school_hours")
     .eq("content_id", listId)
     .eq("content_type", "vocab")
     .single();
+
+  // ★ 授業中のアクセスブロック判定 ＆ デバッグログ出力
+  if (taskData?.block_school_hours) {
+    const now = new Date();
+
+    // オーストラリア（メルボルンなど）の現地時間を正確に取得
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Australia/Melbourne', // 必要に応じて地域のタイムゾーンに変更してください
+      weekday: 'short', // 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(now);
+    let weekday = '';
+    let hour = 0;
+    let minute = 0;
+
+    for (const part of parts) {
+      if (part.type === 'weekday') weekday = part.value;
+      if (part.type === 'hour') hour = parseInt(part.value, 10);
+      if (part.type === 'minute') minute = parseInt(part.value, 10);
+    }
+
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    const isWeekday = weekdays.includes(weekday);
+    const currentTimeMinutes = hour * 60 + minute;
+    const isSchoolHours = currentTimeMinutes >= 540 && currentTimeMinutes <= 930; // 9:00 (540分) 〜 15:30 (930分)
+
+    // デバッグ用ログ（ターミナルに表示されます）
+    console.log("=== 授業中アクセスブロック判定 ===");
+    console.log("判定基準タイムゾーン: Australia/Melbourne");
+    console.log(`曜日: ${weekday} (平日か: ${isWeekday})`);
+    console.log(`時刻: ${hour}:${minute} (${currentTimeMinutes}分)`);
+    console.log(`学校時間内(9:00〜15:30)か: ${isSchoolHours}`);
+    console.log(`ブロック発動するか: ${isWeekday && isSchoolHours}`);
+
+    if (isWeekday && isSchoolHours) {
+      throw new Response(
+        "この宿題は学校の授業時間中（9:00 〜 15:30）はアクセスできません。放課後（15:30以降）に取り組んでください。",
+        { status: 403 }
+      );
+    }
+  }
 
   // 3. リストに紐づく単語を取得
   const { data: listItems, error: itemsError } = await supabase
@@ -87,11 +132,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const score = Number(formData.get("score"));
 
   if (!taskId) {
-    // タスクとして紐づいていない純粋な練習URLの場合はそのまま成功を返す
     return json({ success: true });
   }
 
-  // task_submissions に結果を保存（すでに存在する場合はスコアとステータスを更新）
   const { error: submitError } = await supabase
     .from("task_submissions")
     .upsert({
@@ -116,16 +159,12 @@ export default function DrillSessionPage() {
   const { listMeta, taskId, vocabularies } = useLoaderData<typeof loader>();
   const submitFetcher = useFetcher();
 
-  // データベースから保存されているモードを取得（デフォルトは 4択 "mcq"）
   const mode: DrillMode = (listMeta.drill_mode as DrillMode) || "mcq";
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   
-  // 4択用
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  
-  // タイピング用
   const [inputText, setInputText] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -135,7 +174,6 @@ export default function DrillSessionPage() {
 
   const currentItem = vocabularies[currentIndex];
 
-  // 日本語音声を読み上げる関数 (Web Speech API)
   const speakJapanese = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
@@ -145,14 +183,12 @@ export default function DrillSessionPage() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // リスニングモードのとき、問題が変わったら自動で音声を再生
   useEffect(() => {
     if (mode === "audio_en_typing" && currentItem && !isFinished && !isAnswered) {
       speakJapanese(currentItem.japanese);
     }
   }, [currentIndex, mode, isFinished, currentItem, isAnswered]);
 
-  // 4択の選択肢生成
   const options = useMemo(() => {
     if (!currentItem || mode !== "mcq") return [];
     const others = vocabularies.filter((v) => v.id !== currentItem.id);
@@ -161,7 +197,6 @@ export default function DrillSessionPage() {
     return [...dummyOptions, currentItem.japanese].sort(() => 0.5 - Math.random());
   }, [currentIndex, vocabularies, mode, currentItem]);
 
-  // ドリル終了時に成績を自動送信
   useEffect(() => {
     if (isFinished && !hasSubmittedScore && taskId) {
       setHasSubmittedScore(true);
@@ -182,7 +217,6 @@ export default function DrillSessionPage() {
     );
   }
 
-  // モード名の日本語表示用ラベル
   const getModeLabel = (m: DrillMode) => {
     switch (m) {
       case "mcq": return "4択選択式 (英語 → 日本語)";
@@ -193,7 +227,6 @@ export default function DrillSessionPage() {
     }
   };
 
-  // 4択の解答処理
   const handleSelectOption = (option: string) => {
     if (selectedAnswer !== null) return;
     const correct = option === currentItem.japanese;
@@ -202,7 +235,6 @@ export default function DrillSessionPage() {
     if (correct) setScore(score + 1);
   };
 
-  // タイピングの解答判定処理
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isAnswered) return;
@@ -257,7 +289,6 @@ export default function DrillSessionPage() {
       <div className="max-w-xl mx-auto">
         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
           
-          {/* ヘッダー情報 */}
           <div className="flex justify-between items-center mb-6 pb-4 border-b">
             <div>
               <h1 className="text-lg sm:text-xl font-extrabold text-gray-900">
@@ -281,7 +312,6 @@ export default function DrillSessionPage() {
 
           {!isFinished ? (
             <div>
-              {/* 4択モード */}
               {mode === "mcq" && (
                 <div>
                   <div className="text-center my-6">
@@ -334,7 +364,6 @@ export default function DrillSessionPage() {
                 </div>
               )}
 
-              {/* タイピング系モード */}
               {(mode === "audio_en_typing" || mode === "jp_en_typing" || mode === "en_jp_typing") && (
                 <div>
                   <div className="text-center my-6">
@@ -428,7 +457,6 @@ export default function DrillSessionPage() {
 
             </div>
           ) : (
-            /* 結果発表画面 */
             <div className="text-center py-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">ドリル終了！お疲れ様でした</h2>
               <p className="text-gray-600 mb-2">
