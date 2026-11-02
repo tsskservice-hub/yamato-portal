@@ -4,7 +4,8 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouteLoaderData, useRevalidator, useLoaderData } from '@remix-run/react';
-import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node';
+// 💡 修正: Cloudflareワーカー環境に合わせて @remix-run/cloudflare からインポート
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import { 
   Sparkles, 
   Coins, 
