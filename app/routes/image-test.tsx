@@ -1,33 +1,31 @@
-import { useRef } from 'react';
 /**
  * @file image-test.tsx
  * @description 画像生成AI（gemini-3.1-flash-lite-image）の最小限単体テスト画面
  */
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useRef, useState } from 'react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
 import { type PageLayoutRef } from '../components/PageLayout';
-
-import { useState } from "react";
-
+import { generateModuleMeta } from '../utils/seoMeta';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
 
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
 
 export default function ImageTestPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -60,7 +58,7 @@ export default function ImageTestPage() {
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
-      <div style={{ padding: "32px", fontFamily: "sans-serif", maxWidth: "800px", margin: "0 auto" }}>
+<div style={{ padding: "32px", fontFamily: "sans-serif", maxWidth: "800px", margin: "0 auto" }}>
       <h1>🎨 画像生成AI 最小限テスト</h1>
       <p style={{ color: "#666", fontSize: "14px", marginBottom: "20px" }}>
         Supabaseやクレジットの依存を排除し、Vertex AI のみで画像生成をテストする画面です。
@@ -90,6 +88,10 @@ export default function ImageTestPage() {
         </div>
       )}
     </div>
-    </ToolPageWrapper>
+</ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

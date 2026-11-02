@@ -1,21 +1,37 @@
-import { useRef } from 'react';
 /**
  * @file test-yamato.tsx
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加・プレビューデバッグログイン対応版）
  */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
-import type { MetaFunction } from "@remix-run/react";
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
 import { YamatoChatCommon } from "../components/YamatoChatCommon";
 import { fetchYamatoConfigsData, YamatoConfigsData, AppType } from "../data/yamato-configs";
 import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
 // 💡 スポーツチームのユニフォーム配色テンプレート（枠線を4pxに変更）
@@ -72,21 +88,6 @@ const sportsColorTemplates = [
   { name: "日本代表（サムライブルー）", sport: "サッカー / 日本", border: "4px solid #BC002D", background: "#002B49", color: "#FFFFFF" },
 ];
 
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
-
-  return json({
-    portalContent: portalData?.content || null,
-    currentPath: url.pathname,
-  });
-}
-
 export default function TestYamatoPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
@@ -114,9 +115,7 @@ export default function TestYamatoPage() {
       setCurrentUser(session?.user ?? null);
     });
 
-    return (
-    <ToolPageWrapper layoutRef={layoutRef}>
-      ) => subscription.unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   // 💡 プレビュー用一発ログイン実行関数
@@ -187,7 +186,8 @@ export default function TestYamatoPage() {
   const currentConfig = yamatoConfigs ? yamatoConfigs[activeAppType] : null;
 
   return (
-    <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
+    <ToolPageWrapper layoutRef={layoutRef}>
+      <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
       {/* メインコンテンツ（上下フルワイド配置） */}
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>

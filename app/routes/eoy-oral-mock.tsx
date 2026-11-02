@@ -1,45 +1,52 @@
-import { useRef } from 'react';
 /**
  * @file eoy-oral-mock.tsx
  * @description VCE Japanese - AI Mock Oral Exam (PageLayout 統合型データエラーガード対応版)
  */
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
-
-import React, { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
-import { supabase } from "../lib/supabaseClient";
-
-import { OralMockConfig, MockExamConfig } from "../components/OralMockConfig";
-import { OralMockSession, ExamResultData } from "../components/OralMockSession";
-import { OralMockReport } from "../components/OralMockReport";
-import ChatYamatoEoyOralMock from "../components/ChatYamatoEoyOralMock";
-
-import { fetchOralExamQuestionsData, OralExamQuestionsData } from "../data/oral-exam-questions";
-
-const SessionComponent = OralMockSession as any;
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { supabase } from '../lib/supabaseClient';
+import { MockExamConfig, OralMockConfig } from '../components/OralMockConfig';
+import { ExamResultData, OralMockSession } from '../components/OralMockSession';
+import { OralMockReport } from '../components/OralMockReport';
+import ChatYamatoEoyOralMock from '../components/ChatYamatoEoyOralMock';
+import { OralExamQuestionsData, fetchOralExamQuestionsData } from '../data/oral-exam-questions';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+const SessionComponent = OralMockSession as any;
+
+};
 
 export default function MockOralMode() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -165,3 +172,8 @@ export default function MockOralMode() {
     </ToolPageWrapper>
   );
 }
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

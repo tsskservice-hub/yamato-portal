@@ -2,43 +2,52 @@
  * @file eoy-writing.tsx
  * @description EOY Writing Practice モジュール (PageLayout 統合型データエラーガード対応版)
  */
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
-
-
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import TextTypeModal from "../components/TextTypeModal";
-import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
-import GenkoyoshiModal from "../components/GenkoyoshiModal";
-
-import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
-import { fetchTextTypesData, TextTypesData } from "../data/texttypes";
-import { fetchWritingStylesData, WritingStylesData } from "../data/writing-styles";
-import { supabase } from "../lib/supabaseClient";
-
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import TextTypeModal from '../components/TextTypeModal';
+import ChatYamatoEoyWriting from '../components/ChatYamatoEoyWriting';
+import GenkoyoshiModal from '../components/GenkoyoshiModal';
+import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from '../data/writing-exam-questions';
+import { TextTypesData, fetchTextTypesData } from '../data/texttypes';
+import { WritingStylesData, fetchWritingStylesData } from '../data/writing-styles';
+import { supabase } from '../lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
 
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
+
+
+
+
+
+
+
+
+
+
 
 export default function Dashboard() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeTextType, setActiveTextType] = useState<string>("all");
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -63,7 +72,7 @@ export default function Dashboard() {
   const credits = rootData?.credits ?? 10;
   const nickname = rootData?.nickname ?? "";
 
-  const layoutRef = useRef<PageLayoutRef>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -433,3 +442,8 @@ export default function Dashboard() {
     </ToolPageWrapper>
   );
 }
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

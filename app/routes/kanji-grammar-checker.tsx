@@ -2,67 +2,53 @@
  * @file kanji-grammar-checker.tsx
  * @description VCE Kanji & Grammar Checker 独立ページ（Supabase共通メタヘルパー対応版・AI Vision自動文字起こし・クレジット表示対応）
  */
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
-
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useRouteLoaderData, useRevalidator, useLoaderData, type MetaFunction } from '@remix-run/react';
-import { json, type LoaderFunctionArgs } from '@remix-run/node'; // 💡 LoaderFunctionArgs は @remix-run/node からインポート
-import { 
-  Sparkles, 
-  Coins, 
-  FileText, 
-  Check, 
-  ArrowRight, 
-  ArrowLeft,
-  Loader2,
-  Flame,
-  ShieldCheck
-} from 'lucide-react';
-import PageLayout, { PageLayoutRef } from '../components/PageLayout';
-// 💡 YamatoChatKanjiGrammarCheckerVce をインポート
-import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGrammarCheckerVce'; 
-
-// 外部データファイルからのインポート
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ArrowLeft, ArrowRight, Check, Coins, FileText, Flame, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
+import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGrammarCheckerVce';
 import { VCE_KANJI_LIST } from '../data/kanji-list';
 import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
 import { supabase } from '../lib/supabaseClient';
-import { generateModuleMeta } from '../utils/seoMeta'; // 💡 共通SEOヘルパーをインポート
+
+// 💡 LoaderFunctionArgs は @remix-run/cloudflare からインポート
+
+
+// 💡 YamatoChatKanjiGrammarCheckerVce をインポート
+ 
+
+// 外部データファイルからのインポート
+
+
+
+ // 💡 共通SEOヘルパーをインポート
 
 /**
  * 💡 1. loader で Supabase から PORTAL_CONTENT をサーバー側で取得
  */
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  
+  let portalContent = null;
   try {
     const { data: portalData } = await supabase
       .from('portal_settings')
       .select('content')
       .eq('key', 'PORTAL_CONTENT')
       .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
-    return json({
-      portalContent: portalData?.content || null,
-      currentPath: url.pathname,
-    });
-  } catch (err) {
-    console.error("Loader error fetching portal content:", err);
-    return json({
-      portalContent: null,
-      currentPath: url.pathname,
-    });
-  }
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
 }
-
-/**
- * 💡 2. Remix の meta 関数で loader のデータを受け取り、共通ヘルパーで動的生成
- */
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const revalidator = useRevalidator(); // 💡 クレジット減算後にヘッダー等を再検証するためのフック
 
@@ -419,3 +405,7 @@ export default function KanjiGrammarCheckerPage() {
     </ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

@@ -6,29 +6,37 @@ import React, { useRef } from 'react';
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import { useLoaderData, Link } from '@remix-run/react';
 import { Sparkles, BookOpen, Users, Heart, Cpu } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { createServerSupabaseClient } from '../lib/supabase.server';
 import { generateModuleMeta } from '../utils/seoMeta';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
 import { type PageLayoutRef } from '../components/PageLayout';
 import ScrollTopButton from '../components/ScrollTopButton';
 
 // ① Supabase から PORTAL_CONTENT をサーバー側で取得
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  const { supabase } = createServerSupabaseClient(request, context);
+
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {
+    console.error("Loader error fetching portal content:", e);
+  }
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
 
 // ② 共通SEOヘルパーでメタタグ（title, description）を自動生成
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 

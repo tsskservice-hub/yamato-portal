@@ -1,24 +1,11 @@
-import { useRef } from 'react';
-/**
- * @file disclaimer.tsx
- * @description 免責事項ページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
- */
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Link, useRouteLoaderData } from "@remix-run/react";
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
 import { type PageLayoutRef } from '../components/PageLayout';
-
-
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/cloudflare";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
+import { generateModuleMeta } from '../utils/seoMeta';
 import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
 import { supabase } from "../lib/supabaseClient";
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -33,6 +20,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
     currentPath: url.pathname,
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
+};
 
 export default function Disclaimer() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -101,22 +92,24 @@ export default function Disclaimer() {
                           <button
                             type="button"
                             onClick={() => setActiveTab("global")}
-                            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
-                              activeTab === "global"
+                            className={
+                              "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " +
+                              (activeTab === "global"
                                 ? "bg-indigo-600 text-white shadow-sm"
-                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200")
+                            }
                           >
                             Global Learners
                           </button>
                           <button
                             type="button"
                             onClick={() => setActiveTab("vce")}
-                            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
-                              activeTab === "vce"
+                            className={
+                              "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " +
+                              (activeTab === "vce"
                                 ? "bg-indigo-600 text-white shadow-sm"
-                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200")
+                            }
                           >
                             VCE Learners (Victoria, Australia)
                           </button>

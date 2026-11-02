@@ -1,22 +1,39 @@
-import { useRef } from 'react';
 /**
  * @file contact.tsx
  * @description お問い合わせページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
  */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
 
-
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction, ActionFunctionArgs } from "@remix-run/cloudflare";
-import { json } from "@remix-run/cloudflare";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { json, type MetaFunction, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Link, useActionData, useNavigation, useRouteLoaderData } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
 import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
 import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+
+    return json({
+      portalContent: portalData?.content || null,
+      currentPath: url.pathname,
+    });
+  } catch (err) {
+    return json({
+      portalContent: null,
+      currentPath: url.pathname,
+    });
+  }
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
@@ -42,21 +59,6 @@ export async function action({ request }: ActionFunctionArgs) {
   return json<ActionData>({
     success: true,
     message: "Thank you! Your message has been sent successfully. We will get back to you soon.",
-  });
-}
-
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
-
-  return json({
-    portalContent: portalData?.content || null,
-    currentPath: url.pathname,
   });
 }
 

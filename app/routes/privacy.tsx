@@ -1,38 +1,37 @@
-import { useRef } from 'react';
 /**
  * @file privacy.tsx
  * @description プライバシーポリシーページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
  */
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
-
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/cloudflare";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
-import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
-import { supabase } from "../lib/supabaseClient";
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { fetchLegalContentData, LegalDocument } from '../data/legal-content';
+import { supabase } from '../lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
+};
 
 export default function PrivacyPolicy() {
   const layoutRef = useRef<PageLayoutRef>(null);

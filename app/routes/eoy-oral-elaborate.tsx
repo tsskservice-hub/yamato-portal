@@ -1,13 +1,13 @@
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { generateModuleMeta } from "../utils/seoMeta";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
 /**
  * @file eoy-oral-elaborate.tsx
  * @description VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank
  */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import type { MetaFunction } from "@remix-run/react";
+
 import PageLayout from "../components/PageLayout";
 import { DataErrorState } from "../components/DataErrorState";
 import OralExaminerAvatar from "../components/OralExaminerAvatar";
@@ -35,24 +35,29 @@ export interface QuestionItem {
   isCustom?: boolean;
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
 
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
+};
 
 export default function EoyOralElaboratePage() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -460,7 +465,7 @@ export default function EoyOralElaboratePage() {
 
   if (!user) {
     return (
-      <PageLayout user={user} credits={credits}>
+      <ToolPageWrapper layoutRef={layoutRef}>
         <div className="min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center">
           <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6">
             <div className="w-16 h-16 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
@@ -489,7 +494,7 @@ export default function EoyOralElaboratePage() {
 
   if (!questionsData || Object.keys(questionsData).length === 0) {
     return (
-      <PageLayout user={user} credits={credits}>
+      <ToolPageWrapper layoutRef={layoutRef}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 max-w-4xl mx-auto">
           <DataErrorState
             title="Oral Exam Database Unavailable"
@@ -502,7 +507,7 @@ export default function EoyOralElaboratePage() {
   }
 
   return (
-    <PageLayout user={user} credits={credits}>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-4xl mx-auto space-y-8">
           {/* Header Banner Section */}

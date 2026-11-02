@@ -1,38 +1,39 @@
-import { useRef } from 'react';
-/**
- * @file oral-exam-questions.tsx
- * @description VCE Japanese Oral Exam 音声設問ライブラリページ (PageLayout 統合型データエラーガード対応版)
- */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
-
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/react";
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
 import PageLayout from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
 import ChatYamatoOralExamQuestions from "../components/ChatYamatoOralExamQuestions";
 import { fetchOralExamQuestionsData, OralExamQuestionsData, OralExamQuestionItem } from "../data/oral-exam-questions";
 import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
+/**
+ * @file oral-exam-questions.tsx
+ * @description VCE Japanese Oral Exam 音声設問ライブラリページ (PageLayout 統合型データエラーガード対応版)
+ */
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
+};
 
 export default function OralExamQuestions() {
   const layoutRef = useRef<PageLayoutRef>(null);

@@ -2,12 +2,9 @@
  * @file genkoyoshi-editor-vce.tsx
  * @description VCE Japanese Genkoyoshi Editor & AI Feedback (English UI, Horizontal Default, GenkoyoshiModal)
  */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-
-import React, { useState, useEffect, useRef } from "react";
-import type { LinksFunction } from "@remix-run/cloudflare";
+import { json, type LinksFunction, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useRouteLoaderData } from "@remix-run/react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   FileText, 
   Trash2, 
@@ -23,35 +20,40 @@ import {
   AlignJustify
 } from "lucide-react";
 
-import PageLayout, { PageLayoutRef } from "../components/PageLayout";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import PageLayout, { type PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoGenkoyoshiEditorVce from "../components/ChatYamatoGenkoyoshiEditorVce";
 import GenkoyoshiPreviewPane from "../components/GenkoyoshiPreviewPane";
 import GenkoyoshiModal from "../components/GenkoyoshiModal";
 import { generateGenkoyoshiPages, calculateCharCount } from "../utils/genkoyoshi-engine";
 import genkoStyles from "../styles/genkoyoshi.css?url";
+import { generateModuleMeta } from "../utils/seoMeta";
+import { supabase } from "../lib/supabaseClient";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: genkoStyles },
 ];
 
-
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
 
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
 export default function GenkoyoshiEditorVce() {

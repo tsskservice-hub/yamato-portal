@@ -1,32 +1,27 @@
-import { useRef } from 'react';
 /**
  * @file my-account.tsx
  * @description アカウント設定画面（クレジット残高・履歴のクライアント同期対応版）
  */
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
-import { useState, useEffect } from "react";
-import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
-import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { json, redirect } from "@remix-run/cloudflare";
-import { UserCheck, Gauge, History, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
-import { supabase } from "../lib/supabaseClient";
-import PageLayout from "../components/PageLayout";
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ArrowDownRight, ArrowUpRight, Gauge, History, UserCheck } from 'lucide-react';
+import { createAdminSupabaseClient, createServerSupabaseClient } from '../lib/supabase.server';
+import { supabase } from '../lib/supabaseClient';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
+  const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
+  const { data: portalData } = await serverSupabase
     .from('portal_settings')
     .select('content')
     .eq('key', 'PORTAL_CONTENT')
     .single();
-
-  const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
-  const { data: { user } } = await serverSupabase.auth.getUser();
+const { data: { user } } = await serverSupabase.auth.getUser();
 
   let initialNickname = "";
   let initialPace = "normal";
@@ -55,7 +50,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     nickname: initialNickname,
     learningPace: initialPace,
     createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
-  , portalContent: portalData?.content || null, currentPath: url.pathname });
+  });
 }
 
 // Action: アカウント削除処理
@@ -67,20 +62,20 @@ export async function action({ request, context }: LoaderFunctionArgs) {
   const { data: { user } } = await serverSupabase.auth.getUser();
 
   if (!user) {
-    return json({ error: "Authentication error occurred.", success: false }, { status: 401 , portalContent: portalData?.content || null, currentPath: url.pathname });
+    return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
   }
 
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
     if (confirmText !== "DELETE") {
-      return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 , portalContent: portalData?.content || null, currentPath: url.pathname });
+      return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
     }
 
     const supabaseAdmin = createAdminSupabaseClient(context);
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
-      return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 , portalContent: portalData?.content || null, currentPath: url.pathname });
+      return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
     }
 
     return redirect("/", {
@@ -91,13 +86,8 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     });
   }
 
-  return json({ success: true, error: null , portalContent: portalData?.content || null, currentPath: url.pathname });
+  return json({ success: true, error: null });
 }
-
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
 
 export default function AccountSettingsRoute() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -479,3 +469,7 @@ export default function AccountSettingsRoute() {
     </ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

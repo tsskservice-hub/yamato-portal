@@ -3,21 +3,51 @@
  * @description AI Yamato Portal のランディングページ
  * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版
  */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { Sparkles, Coins, FileText, Grid, Mic, Gamepad2, Check, ArrowRight, Loader2, Flame } from 'lucide-react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ArrowRight, Check, Coins, FileText, Flame, Gamepad2, Grid, Loader2, Mic, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import PageLayout, { PageLayoutRef } from '../components/PageLayout';
 import { HeroDemoChat } from '../components/HeroDemoChat';
 import { DailyQuizModal } from '../components/DailyQuizModal';
 import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
 import { DataErrorState } from '../components/DataErrorState';
-import { usePortalContent, PortalModule } from '../data/portal-content';
-import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
-import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
+import { PortalModule, usePortalContent } from '../data/portal-content';
+import { PricePlansKnowledge, fetchPricePlansData } from '../data/price-plans';
+import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '../data/quizzes';
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 // 💡 最大予想クレジット消費設定
 const MAX_ESTIMATED_CREDITS = {
@@ -25,27 +55,8 @@ const MAX_ESTIMATED_CREDITS = {
   imageAi: 4,  // 画像生成・ビジュアル解説最大予想
 };
 
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
-
-  return json({
-    portalContent: portalData?.content || null,
-    currentPath: url.pathname,
-  });
-}
-
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
 export default function Home() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const navigate = useNavigate();
 
   // root.tsx の loader からユーザー情報を取得
@@ -72,7 +83,7 @@ export default function Home() {
   const [isPriceError, setIsPriceError] = useState<boolean>(false);
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
-  const layoutRef = useRef<PageLayoutRef>(null);
+  
 
   // 💡 Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
@@ -914,3 +925,7 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
     </ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

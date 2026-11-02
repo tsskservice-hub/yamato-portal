@@ -1,17 +1,15 @@
-import { useRef } from 'react';
 /**
  * @file vocab-creator.tsx
  * @description AI Yamato Japanese Hub - vocab-creator.tsx
  */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createServerSupabaseClient } from "../lib/supabase.server";
-import { supabase } from "../lib/supabaseClient"; // ◀ クライアントサイド用のSupabaseインポート
+import { supabase } from "../lib/supabaseClient";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
 
 interface Vocabulary {
   id: string;
@@ -24,14 +22,18 @@ interface Vocabulary {
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
-
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   
+  let portalContent = null;
+  try {
+    const { data: portalData } = await serverSupabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
   const { data: vocabularies, error } = await serverSupabase
     .from("vocabularies")
     .select("id, japanese, kana, romaji, english, category")
@@ -41,13 +43,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     throw new Response("Failed to fetch vocabularies", { status: 500 });
   }
 
-  return json({ vocabularies: vocabularies || [] , portalContent: portalData?.content || null, currentPath: url.pathname });
+  return json({
+    vocabularies: vocabularies || [],
+    portalContent,
+    currentPath: url.pathname,
+  });
 }
 
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
+
 
 export default function VocabCreatorPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -196,7 +202,7 @@ export default function VocabCreatorPage() {
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+<div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">
           ドリルリスト作成・URL発行

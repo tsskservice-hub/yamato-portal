@@ -1,33 +1,36 @@
-import { useRef } from 'react';
 /**
  * @file test-yamato-note.tsx
  * @description AIヤマト・エコシステム アーキテクチャ構成表 & 詳細コラム（独立ノートページ）
  */
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-
-import type { MetaFunction } from "@remix-run/react";
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { Link, useSearchParams } from "@remix-run/react";
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
+import React, { useRef } from "react";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
+import { supabase } from "../lib/supabaseClient";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
+};
 
 export default function TestYamatoNotePage() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -37,7 +40,7 @@ export default function TestYamatoNotePage() {
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
-      <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
+    <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
@@ -428,6 +431,6 @@ export default function TestYamatoNotePage() {
         <p>&copy; 2026 JPTutor AI Yamato.</p>
       </footer>
     </div>
-    </ToolPageWrapper>
+      </ToolPageWrapper>
   );
 }

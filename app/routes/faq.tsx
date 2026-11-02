@@ -1,40 +1,40 @@
-import { useRef } from 'react';
 /**
  * @file faq.tsx
  * @description VCE Japanese Portal FAQ ページ (PageLayout 統合型データエラーガード対応版)
  */
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Link, useLocation } from '@remix-run/react';
+import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
 import { type PageLayoutRef } from '../components/PageLayout';
-
-
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Link, useLocation } from '@remix-run/react';
-import type { MetaFunction } from "@remix-run/cloudflare";
-import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import ScrollTopButton from '../components/ScrollTopButton';
+import { generateModuleMeta } from '../utils/seoMeta';
 import { fetchFaqData, FaqItem } from '../data/faq-database';
 import { supabase } from '../lib/supabaseClient';
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};
-
-
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { data: portalData } = await supabase
-    .from('portal_settings')
-    .select('content')
-    .eq('key', 'PORTAL_CONTENT')
-    .single();
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
   return json({
-    portalContent: portalData?.content || null,
+    portalContent,
     currentPath: url.pathname,
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
+};
 
 export default function FaqPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
