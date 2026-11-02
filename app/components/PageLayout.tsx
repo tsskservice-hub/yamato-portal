@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（リアルタイムクレジット同期・英語無料登録ガード・認証モーダル・共通パンくず・ダークモード状態管理＆Header連携完全統合版）
+ * @description ポータル共通レイアウト（リアルタイムクレジット同期・英語無料登録ガード・認証モーダル・共通パンくず・Header連携統合版 / ダークモード廃止・常時ライトモード）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -46,7 +46,6 @@ type PageLayoutProps = {
   credits?: number;
   nickname?: string;
   learningPace?: "steady" | "normal" | "accelerated"; 
-  isDarkMode?: boolean;
   breadcrumbTitle?: string;
   onSignOut?: () => void | Promise<void>;
   requireAuth?: boolean;
@@ -60,7 +59,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   credits: propCredits,  
   nickname: propNickname,
   learningPace: propLearningPace, 
-  isDarkMode: propIsDarkMode = false,
   breadcrumbTitle,
   onSignOut: propOnSignOut,
   requireAuth,
@@ -75,39 +73,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   } | undefined;
 
   const location = useLocation();
-
-  // 💡 ダークモードのステート管理（props もしくは localStorage から復元）
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("yamato:dark-mode");
-      if (saved !== null) {
-        return saved === "true";
-      }
-    }
-    return propIsDarkMode;
-  });
-
-  // ダークモード切り替え時に localStorage と HTML の dark クラスを同期
-  const toggleDarkMode = () => {
-    const nextMode = !isDarkMode;
-    setIsDarkMode(nextMode);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("yamato:dark-mode", String(nextMode));
-      if (nextMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
 
   // パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
@@ -297,21 +262,19 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     : (!isPublicPage && !user);
 
   return (
-    <div className={`flex flex-col min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100 dark' : 'bg-white text-slate-900'}`}>
-      {/* 💡 ヘッダーへダークモードの状態と切り替え関数をプロパティとして渡します */}
+    <div className="flex flex-col min-h-screen bg-white text-slate-900">
+      {/* ヘッダー */}
       <Header 
         user={user} 
         credits={credits} 
         nickname={resolvedNickname} 
-        isDarkMode={isDarkMode}
-        onToggleDarkMode={toggleDarkMode}
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={handleSignOut} 
       />
 
       {/* 🍞 共通パンくずリスト */}
       {location.pathname !== "/" && (
-        <nav aria-label="Breadcrumb" className={`w-full border-b px-4 py-2.5 text-xs sm:text-sm font-medium ${isDarkMode ? 'bg-slate-900/60 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+        <nav aria-label="Breadcrumb" className="w-full border-b px-4 py-2.5 text-xs sm:text-sm font-medium bg-slate-50 border-slate-200 text-slate-600">
           <div className="max-w-4xl mx-auto flex items-center space-x-2 overflow-x-auto whitespace-nowrap">
             <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
               <Home className="w-3.5 h-3.5" />
@@ -323,7 +286,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                 <div key={crumb.path} className="flex items-center space-x-2">
                   <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   {isLast ? (
-                    <span className={`font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                    <span className="font-bold text-slate-800">
                       {crumb.label}
                     </span>
                   ) : (
@@ -341,30 +304,30 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       {/* メインコンテンツエリア */}
       <main className="flex-grow relative">
         {shouldRequireAuth ? (
-          <div className="min-h-[70vh] flex items-center justify-center p-4 sm:p-8 bg-slate-50/50 dark:bg-slate-950/50">
-            <div className={`w-full max-w-lg rounded-3xl p-8 sm:p-10 border shadow-2xl text-center space-y-6 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+          <div className="min-h-[70vh] flex items-center justify-center p-4 sm:p-8 bg-slate-50/50">
+            <div className="w-full max-w-lg rounded-3xl p-8 sm:p-10 border shadow-2xl text-center space-y-6 bg-white border-slate-200">
               <div className="w-16 h-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-xl shadow-blue-500/30 animate-bounce">
                 <Lock className="w-8 h-8" />
               </div>
 
               <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800">
+                <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-300">
                   Free Member Exclusive
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800 dark:text-slate-100">
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">
                   Unlock Full Access for Free 🌸
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
                   This practice tool and content are exclusive to free registered members. Create your free account in seconds with Passkey (Biometrics) to get started!
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-left space-y-2 text-xs">
-                <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2 text-xs">
+                <div className="flex items-center gap-2 font-bold text-slate-800">
                   <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Features included with your free account:</span>
                 </div>
-                <ul className="space-y-1.5 text-slate-600 dark:text-slate-400 pl-6 list-disc">
+                <ul className="space-y-1.5 text-slate-600 pl-6 list-disc">
                   <li>Interactive VCE Japanese Oral Exam Practice (Section 1 & 2) with AI Yamato</li>
                   <li>VCE Japanese Writing Practice with Genkoyoshi Editor & instant AI feedback</li>
                   <li>Kanji & Grammar Checker with digital answer analysis</li>
@@ -406,7 +369,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       {/* 認証・登録モーダル */}
       {isAuthModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
+          <div className="w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative bg-white border-slate-200 text-slate-900">
             <button 
               onClick={() => {
                 setIsAuthModalOpen(false);
@@ -426,7 +389,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   <h3 className="text-xl font-extrabold tracking-tight">
                     Welcome to AI Yamato! 🌸
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Get started instantly with secure, passwordless authentication.
                   </p>
                 </div>
@@ -441,11 +404,11 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   </button>
                 </div>
 
-                <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
+                <div className="border-t border-slate-200 pt-4">
                   <button
                     type="button"
                     onClick={() => setIsToggleOpen(!isToggleOpen)}
-                    className="w-full flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline bg-transparent border-none p-0 cursor-pointer"
+                    className="w-full flex items-center justify-between text-xs font-bold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer"
                   >
                     <span className="flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" /> What is a Passkey & Why is it secure?
@@ -456,33 +419,33 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   {isToggleOpen && (
                     <div className="mt-3 space-y-4 text-left animate-fadeIn">
                       <div className="space-y-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-start space-x-2.5">
+                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-2.5">
                           <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</div>
                           <div className="text-[11px] space-y-0.5">
-                            <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                            <p className="font-bold text-slate-800 flex items-center gap-1">
                               <Mail className="w-3 h-3" /> Enter Email Address
                             </p>
-                            <p className="text-slate-500 dark:text-slate-400">Register with your email.</p>
+                            <p className="text-slate-500">Register with your email.</p>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-start space-x-2.5">
+                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-2.5">
                           <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</div>
                           <div className="text-[11px] space-y-0.5">
-                            <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                            <p className="font-bold text-slate-800 flex items-center gap-1">
                               <Fingerprint className="w-3 h-3" /> Biometric Authentication
                             </p>
-                            <p className="text-slate-500 dark:text-slate-400">Use Touch ID, Face ID, or Windows Hello.</p>
+                            <p className="text-slate-500">Use Touch ID, Face ID, or Windows Hello.</p>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-start space-x-2.5">
+                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start space-x-2.5">
                           <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</div>
                           <div className="text-[11px] space-y-0.5">
-                            <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                            <p className="font-bold text-slate-800 flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3" /> One-Touch Login
                             </p>
-                            <p className="text-slate-500 dark:text-slate-400">Log in instantly without passwords next time!</p>
+                            <p className="text-slate-500">Log in instantly without passwords next time!</p>
                           </div>
                         </div>
                       </div>
@@ -522,7 +485,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                         placeholder="your.email@school.vic.edu.au"
                         value={emailInput}
                         onChange={(e) => setEmailInput(e.target.value)}
-                        className={`w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-slate-100' : 'bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900'}`}
+                        className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900"
                       />
                     </div>
                   )}
