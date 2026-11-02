@@ -4,6 +4,7 @@
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useRef, useState } from 'react';
+import { Link } from '@remix-run/react';
 import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
 import { supabase } from '../lib/supabaseClient';
 
@@ -52,12 +53,12 @@ export default function TeacherDashboardPage() {
             <h1 className="text-xl font-bold text-slate-800">👨‍🏫 教師用コントロールパネル</h1>
             <p className="text-xs text-slate-500 mt-0.5">Year 9 Japanese クラス管理</p>
           </div>
-          <a
-            href="/games/tower-defense"
-            className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2 rounded-lg border border-indigo-200 transition"
+          <Link
+            to="/games/tower-defense"
+            className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2 rounded-lg border border-indigo-200 transition no-underline inline-flex items-center"
           >
             生徒用ゲーム画面へ ↗
-          </a>
+          </Link>
         </header>
 
         {/* クラス全体スイッチ */}

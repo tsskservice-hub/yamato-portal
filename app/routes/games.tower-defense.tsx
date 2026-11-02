@@ -1,5 +1,14 @@
-'client'; // または 'use client' (環境に合わせて調整)
-import React, { useState } from 'react';
+/**
+ * @file tower-defense.tsx
+ * @description 生徒用タイピング防衛戦 (ToolPageWrapper 統合型・PageLayoutラップ対応版)
+ */
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useRef, useState } from 'react';
+import { Link } from '@remix-run/react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import type { PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { supabase } from '../lib/supabaseClient';
 
 const MOCK_CHARACTERS = [
   { id: 1, char: 'あ', romaji: 'a', type: 'hiragana' },
@@ -10,10 +19,32 @@ const MOCK_CHARACTERS = [
   { id: 6, char: '本', romaji: 'hon', type: 'kanji' },
 ];
 
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
+};
+
 export default function StudentTowerDefensePage() {
-  // ※本来はSupabaseから「現在のログイン生徒のデータ」と「クラスのロック状態」をリアルタイムで取得します
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false); // 先生が個別に解除したフラグ
+  const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false);
   const [isCodeUnlocked, setIsCodeUnlocked] = useState(false);
   const [inputPasscode, setInputPasscode] = useState('');
 
@@ -21,7 +52,7 @@ export default function StudentTowerDefensePage() {
 
   const handlePasscodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputPasscode === '8842') { // 先生が指定したパスコード
+    if (inputPasscode === '8842') {
       setIsCodeUnlocked(true);
       alert('✨ 認証成功！ゲームが一時的に解放されました。');
     } else {
@@ -30,25 +61,31 @@ export default function StudentTowerDefensePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-6 font-sans">
-      <div className="max-w-xl mx-auto space-y-6">
-        <header className="bg-slate-800 border border-slate-700 p-4 rounded-xl flex justify-between items-center">
-          <h1 className="text-lg font-bold text-red-400">🇯🇵 AI Yamato タイピング防衛戦</h1>
-          <a href="/teacher/dashboard" className="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-slate-300">
+    <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Typing Tower Defense">
+      <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
+        <header className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center shadow-sm">
+          <div>
+            <h1 className="text-xl font-bold text-slate-800">🇯🇵 AI Yamato タイピング防衛戦</h1>
+            <p className="text-xs text-slate-500 mt-0.5">VCE Japanese Typing Practice</p>
+          </div>
+          <Link
+            to="/teacher/dashboard"
+            className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2 rounded-lg border border-indigo-200 transition no-underline inline-flex items-center"
+          >
             教師用ダッシュボードへ ↗
-          </a>
+          </Link>
         </header>
 
         {isAccessible ? (
           <GameArena />
         ) : (
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center space-y-6 shadow-xl">
-            <div className="w-16 h-16 bg-slate-700/60 rounded-full flex items-center justify-center mx-auto text-3xl">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm">
+            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
               🔒
             </div>
             <div>
-              <h2 className="text-xl font-bold mb-2">このエリアは現在ロックされています</h2>
-              <p className="text-sm text-slate-400">
+              <h2 className="text-xl font-bold text-slate-800 mb-2">このエリアは現在ロックされています</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
                 授業の課題を終わらせるか、先生から伝えられたパスコードを入力してください。早く終わった生徒は先生が個別に解放してくれます！
               </p>
             </div>
@@ -60,16 +97,19 @@ export default function StudentTowerDefensePage() {
                 placeholder="4桁コード"
                 value={inputPasscode}
                 onChange={(e) => setInputPasscode(e.target.value)}
-                className="bg-slate-900 border border-slate-600 rounded px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-100 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
               />
-              <button type="submit" className="bg-red-600 hover:bg-red-500 font-semibold px-4 py-2 rounded text-white text-sm">
+              <button
+                type="submit"
+                className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
+              >
                 解除
               </button>
             </form>
           </div>
         )}
       </div>
-    </div>
+    </ToolPageWrapper>
   );
 }
 
@@ -91,15 +131,15 @@ function GameArena() {
   };
 
   return (
-    <div className="bg-slate-800 border border-emerald-500/40 rounded-2xl p-6 text-center space-y-6 shadow-2xl">
-      <div className="flex justify-between items-center bg-slate-900/60 p-3 rounded-xl border border-slate-700 text-sm">
-        <span className="text-emerald-400 font-semibold">🟢 ステータス: プレイ可能</span>
-        <span className="font-bold text-amber-400">SCORE: {score} pt</span>
+    <div className="bg-white border border-emerald-200 rounded-2xl p-6 text-center space-y-6 shadow-sm">
+      <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200 text-sm">
+        <span className="text-emerald-700 font-bold">🟢 ステータス: プレイ可能</span>
+        <span className="font-bold text-amber-600">SCORE: {score} pt</span>
       </div>
 
-      <div className="bg-slate-950 border border-slate-700 rounded-xl p-8 relative">
-        <div className="w-24 h-24 bg-red-600/20 border-2 border-red-500/60 rounded-2xl mx-auto flex flex-col items-center justify-center mb-6 animate-pulse">
-          <span className="text-4xl font-black text-white">{currentItem.char}</span>
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 relative">
+        <div className="w-24 h-24 bg-red-50 border-2 border-red-200 rounded-2xl mx-auto flex flex-col items-center justify-center mb-6 shadow-xs animate-pulse">
+          <span className="text-4xl font-black text-red-600">{currentItem.char}</span>
         </div>
 
         <form onSubmit={handleSubmit} className="max-w-xs mx-auto flex gap-2">
@@ -109,9 +149,12 @@ function GameArena() {
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             placeholder={`ローマ字 ("${currentItem.romaji}")`}
-            className="bg-slate-800 border border-slate-600 rounded px-4 py-2 text-center text-lg font-mono text-slate-100 w-full focus:outline-none focus:border-emerald-500"
+            className="bg-white border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono text-slate-900 w-full focus:outline-none focus:border-emerald-500 shadow-2xs"
           />
-          <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 font-bold px-4 py-2 rounded text-white text-sm">
+          <button
+            type="submit"
+            className="bg-emerald-600 hover:bg-emerald-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
+          >
             攻撃
           </button>
         </form>
