@@ -1,7 +1,7 @@
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
- * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版
+ * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版 ＋ ゲーミフィケーション・教師用バナー統合
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -18,6 +18,8 @@ import { DataErrorState } from '../components/DataErrorState';
 import { PortalModule, usePortalContent } from '../data/portal-content';
 import { PricePlansKnowledge, fetchPricePlansData } from '../data/price-plans';
 import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '../data/quizzes';
+// 💡 教師用クイックアクセスペインのインポート
+import { TeacherQuickAccessBanner } from '../components/TeacherQuickAccessBanner';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -37,18 +39,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 // 💡 最大予想クレジット消費設定
 const MAX_ESTIMATED_CREDITS = {
   textAi: 2,   // テキストチャット最大予想
@@ -66,6 +56,7 @@ export default function Home() {
     credits?: number; 
     plan?: string; 
     learningPace?: "steady" | "normal" | "accelerated"; 
+    isTeacher?: boolean; // 教師権限フラグ
   } | undefined;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -83,7 +74,6 @@ export default function Home() {
   const [isPriceError, setIsPriceError] = useState<boolean>(false);
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
-  
 
   // 💡 Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
@@ -92,7 +82,7 @@ export default function Home() {
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
 
-const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAILY_QUIZZES) || DAILY_QUIZZES[0]);
+  const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAILY_QUIZZES) || DAILY_QUIZZES[0]);
 
   // 💡 Supabase から DAILY_QUIZZES をフェッチしてランダムに1つセット
   useEffect(() => {
@@ -223,11 +213,6 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
-
   const validateFeatureCredits = async (featureType: 'textAi' | 'imageAi'): Promise<boolean> => {
     if (!user) {
       handleOpenAuthModal('signup');
@@ -255,7 +240,7 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
     setIsQuizCorrect(correct);
 
     if (correct) {
-      const todayStr = new Date().toISOString().split('T');
+      const todayStr = new Date().toISOString().split('T')[0];
       const newCredits = credits + 2;
 
       const { error } = await supabase
@@ -349,6 +334,13 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
       {portalContent && (
         <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
+            
+            {/* 💡 教師用クイックアクセスバナー（教師ログイン時のみ表示） */}
+            <TeacherQuickAccessBanner 
+              user={user} 
+              isTeacher={rootData?.isTeacher} 
+            />
+
             {/* 1. Hero Section ＆ Auto Demo Chat */}
             <HeroDemoChat
               isDarkMode={isDarkMode}
@@ -641,6 +633,48 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
                 </div>
               </div>
 
+              {/* 💡 新設: Learn with Games / ゲーミフィケーション・セクション */}
+              <div className="space-y-4 pt-6">
+                <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span className="text-xl">🎮</span>
+                  <h3 className="font-extrabold text-lg text-red-600 dark:text-red-400">
+                    Learn with Games & Practice Arena
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div 
+                    onClick={() => navigate('/games/tower-defense')}
+                    className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-red-500/50 cursor-pointer ${
+                      isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                    } shadow-sm transition-colors`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                          <Gamepad2 className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/10 text-red-600">
+                          Interactive
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-base">ひらがな・カタカナ・漢字タワーディフェンス</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Supabase連動の文字マスターを使って、ローマ字タイピングでモンスターを撃破！授業の最後のお楽しみや基礎定着に最適。
+                      </p>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                      <span className="text-slate-400 font-medium">Gamification</span>
+                      <span className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                        <span>Play Game</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Section 2 */}
               <div id="section-vce" className="space-y-8 pt-6">
                 <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -831,7 +865,7 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
                   );
                 })()}
 
-                {/* 💡 新設: Years 7–10 Japanese セクション */}
+                {/* 💡 Years 7–10 Japanese セクション */}
                 {years7to10Modules.length > 0 && (
                   <div className="space-y-4 pt-4">
                     <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
