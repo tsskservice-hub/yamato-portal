@@ -1,7 +1,7 @@
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
- * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版 ＋ ゲーミフィケーション・教師用バナー統合
+ * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版 ＋ 教師自動リダイレクト統合
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -18,8 +18,6 @@ import { DataErrorState } from '../components/DataErrorState';
 import { PortalModule, usePortalContent } from '../data/portal-content';
 import { PricePlansKnowledge, fetchPricePlansData } from '../data/price-plans';
 import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '../data/quizzes';
-// 💡 教師用クイックアクセスペインのインポート
-import { TeacherQuickAccessBanner } from '../components/TeacherQuickAccessBanner';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -64,6 +62,14 @@ export default function Home() {
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
   const nickname = rootData?.nickname ?? "";
   const learningPace = rootData?.learningPace ?? "normal";
+  const isTeacher = rootData?.isTeacher ?? false;
+
+  // 💡 先生がログインしている場合、トップページを開いた瞬間に教師ダッシュボードへ自動リダイレクト
+  useEffect(() => {
+    if (user && isTeacher) {
+      navigate('/teacher/dashboard', { replace: true });
+    }
+  }, [user, isTeacher, navigate]);
 
   // 💡 PORTAL_CONTENT の動的取得
   const { portalContent, isLoading: isPortalLoading, isError: isPortalError, errorMessage: portalErrorMessage } = usePortalContent(supabase);
@@ -329,18 +335,22 @@ export default function Home() {
     vceWritingModules.push(...unassignedModules);
   }
 
+  // 💡 もし教師判定中でリダイレクト待機中の場合はシンプルなローディングを表示
+  if (user && isTeacher) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <p className="text-sm text-slate-400 font-medium">教師用ダッシュボードへ移動しています...</p>
+      </div>
+    );
+  }
+
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       {portalContent && (
         <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
             
-            {/* 💡 教師用クイックアクセスバナー（教師ログイン時のみ表示） */}
-            <TeacherQuickAccessBanner 
-              user={user} 
-              isTeacher={rootData?.isTeacher} 
-            />
-
             {/* 1. Hero Section ＆ Auto Demo Chat */}
             <HeroDemoChat
               isDarkMode={isDarkMode}
