@@ -1,5 +1,4 @@
-'client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const INITIAL_STUDENTS = [
   { id: 's1', name: 'Liam Smith', progress: 'Lesson 5 完了', isUnlocked: false },
