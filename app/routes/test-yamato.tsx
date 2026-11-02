@@ -46,28 +46,35 @@ export default function TestYamatoPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 💡 プレビュー用一発ログイン実行関数
+  // 💡 プレビュー用一発ログイン実行関数（汎用）
+  const handleDirectLogin = async (email: string, pass: string) => {
+    setDebugEmail(email);
+    setDebugPassword(pass);
+    setIsLoggingIn(true);
+    setDebugStatus(`${email} でログイン処理中...`);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: pass,
+      });
+      if (error) throw error;
+      setDebugStatus(`✅ ログイン成功！ (${email})`);
+    } catch (err: any) {
+      setDebugStatus(`❌ ログイン失敗: ${err.message}`);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // 💡 フォーム送信によるデバッグログイン実行関数
   const handleDebugLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!debugPassword) {
       setDebugStatus("⚠️ パスワードを入力してください。");
       return;
     }
-    setIsLoggingIn(true);
-    setDebugStatus("ログイン処理中...");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: debugEmail,
-        password: debugPassword,
-      });
-      if (error) throw error;
-      setDebugStatus("✅ ログイン成功！セッションが確立されました。");
-    } catch (err: any) {
-      setDebugStatus(`❌ ログイン失敗: ${err.message}`);
-    } finally {
-      setIsLoggingIn(false);
-    }
+    await handleDirectLogin(debugEmail, debugPassword);
   };
 
   // 💡 ログアウト実行関数
@@ -147,7 +154,7 @@ export default function TestYamatoPage() {
             <span>🧪</span> プレビュー環境用デバッグログイン (パスキーバイパス)
           </h2>
           <p style={{ fontSize: "12px", color: "#64748b", marginBottom: "14px" }}>
-            CloudflareプレビューURLなどでパスキー認証が使えない場合、ここでメール＆パスワードによりセッションを直接確立できます。
+            CloudflareプレビューURLなどでパスキー認証が使えない場合、テストアカウントのワンタップボタンまたは手動入力によりセッションを直接確立できます。
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -164,6 +171,27 @@ export default function TestYamatoPage() {
               )}
             </div>
 
+            {/* 💡 クイックアカウント（ワンタップ直接ログイン）ボタン */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+              <span style={{ fontSize: "12px", fontWeight: "bold", color: "#475569" }}>クイックテストアカウント:</span>
+              <button
+                type="button"
+                onClick={() => handleDirectLogin("preview@jptutoraiyamato.com", "123test")}
+                disabled={isLoggingIn}
+                style={{ padding: "6px 12px", borderRadius: "8px", backgroundColor: "#fef3c7", border: "1px solid #f59e0b", color: "#92400e", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}
+              >
+                🎓 生徒用 (preview@jptutoraiyamato.com)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDirectLogin("sample@jptutoraiyamato.com", "teacher123")}
+                disabled={isLoggingIn}
+                style={{ padding: "6px 12px", borderRadius: "8px", backgroundColor: "#e0e7ff", border: "1px solid #6366f1", color: "#3730a3", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}
+              >
+                👨‍🏫 先生用 (sample@jptutoraiyamato.com)
+              </button>
+            </div>
+
             {!currentUser ? (
               <form onSubmit={handleDebugLogin} style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
                 <input
@@ -178,7 +206,7 @@ export default function TestYamatoPage() {
                   value={debugPassword}
                   onChange={(e) => setDebugPassword(e.target.value)}
                   placeholder="パスワードを入力"
-                  style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "12px", width: "180px" }}
+                  style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "12px", width: "160px" }}
                 />
                 <button
                   type="submit"
