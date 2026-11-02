@@ -1,16 +1,18 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタンを追加版・Yamatoの枠を削除・ホーム画面のみ表示）
+ * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタンを追加版・Yamatoの枠を削除・ホーム画面のみ表示・ダークモード切替ボタン追加）
  */
 import React from 'react';
 import { Link, useLocation } from '@remix-run/react';
-import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle } from 'lucide-react';
+import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle, Sun, Moon } from 'lucide-react';
 
 type HeaderProps = {
   title?: string;
   user?: any;
   credits?: number;
   nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティ
+  isDarkMode?: boolean; // 💡 ダークモード状態
+  onToggleDarkMode?: () => void; // 💡 ダークモード切り替えハンドラー
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
 };
@@ -20,6 +22,8 @@ export default function Header({
   user, 
   credits = 10, 
   nickname = "",
+  isDarkMode = false,
+  onToggleDarkMode,
   onOpenAuth, 
   onSignOut 
 }: HeaderProps) {
@@ -32,7 +36,7 @@ export default function Header({
   const displayNickname = trimmedNickname !== "" ? trimmedNickname : "Set Nickname";
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+    <header className={`${isDarkMode ? 'bg-slate-900/80 border-slate-800 text-slate-100' : 'bg-white/80 border-slate-200 text-slate-900'} backdrop-blur-md border-b sticky top-0 z-50 shadow-xs transition-colors`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* 左側グループ：ロゴ ＆ クイックジャンプボタン */}
         <div className="flex items-center space-x-6">
@@ -55,14 +59,14 @@ export default function Header({
             <div className="hidden md:flex items-center space-x-2">
               <a 
                 href="/#section-general" 
-                className="px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 ${isDarkMode ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' : 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20'}`}
               >
                 <span>🌐</span>
                 <span>General</span>
               </a>
               <a 
                 href="/#section-vce" 
-                className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 ${isDarkMode ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-red-500/10 text-red-600 hover:bg-red-500/20'}`}
               >
                 <span>🇦🇺</span>
                 <span>VCE</span>
@@ -71,23 +75,23 @@ export default function Header({
           )}
         </div>
 
-        {/* 右側グループ：ユーザー情報、プラン、FAQ、My Account、認証ボタン */}
+        {/* 右側グループ：ユーザー情報、プラン、FAQ、My Account、認証ボタン ＋ ダークモード切替 */}
         <div className="flex items-center space-x-3">
           {/* 1. Nickname (ログイン時のみ表示) */}
           {user && (
             <Link 
               to="/my-account"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-all cursor-pointer shadow-xs"
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs ${isDarkMode ? 'bg-blue-950/60 border-blue-800 text-blue-300 hover:bg-blue-900/60' : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'}`}
               title="Click to change your nickname in Account Settings"
             >
-              <User className="w-3.5 h-3.5 text-blue-600" />
+              <User className="w-3.5 h-3.5 text-blue-500" />
               <span>{displayNickname}</span>
             </Link>
           )}
 
           {/* 2. Credit (ログイン時のみ表示) */}
           {user && (
-            <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-amber-50 border-amber-200 text-amber-700">
+            <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${isDarkMode ? 'bg-amber-950/50 border-amber-800 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
               <Coins className="w-3.5 h-3.5" />
               <span>Credits: {credits}</span>
             </div>
@@ -96,7 +100,7 @@ export default function Header({
           {/* 3. Pricing */}
           <Link 
             to="/prices" 
-            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all hidden sm:flex items-center space-x-1"
+            className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hidden sm:flex items-center space-x-1 ${isDarkMode ? 'border-slate-800 hover:bg-slate-800 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-700'}`}
           >
             <span>Pricing</span>
           </Link>
@@ -104,18 +108,18 @@ export default function Header({
           {/* 4. FAQ */}
           <Link 
             to="/faq" 
-            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all hidden sm:flex items-center space-x-1"
+            className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hidden sm:flex items-center space-x-1 ${isDarkMode ? 'border-slate-800 hover:bg-slate-800 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-700'}`}
           >
-            <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
+            <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
             <span>FAQ</span>
           </Link>
 
           {/* 5. My Account */}
           <Link 
             to="/my-account" 
-            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1"
+            className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center space-x-1 ${isDarkMode ? 'border-slate-800 hover:bg-slate-800 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-700'}`}
           >
-            <User className="w-3.5 h-3.5 text-slate-500" />
+            <User className="w-3.5 h-3.5 text-slate-400" />
             <span>My Account</span>
           </Link>
 
@@ -123,7 +127,7 @@ export default function Header({
           {user ? (
             <button 
               onClick={onSignOut}
-              className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1 cursor-pointer"
+              className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center space-x-1 cursor-pointer ${isDarkMode ? 'border-slate-800 hover:bg-slate-800 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-700'}`}
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
@@ -132,9 +136,9 @@ export default function Header({
             <>
               <button 
                 onClick={() => onOpenAuth?.('signin')}
-                className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all hidden sm:flex items-center space-x-1 cursor-pointer"
+                className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hidden sm:flex items-center space-x-1 cursor-pointer ${isDarkMode ? 'border-slate-800 hover:bg-slate-800 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-700'}`}
               >
-                <KeyRound className="w-3.5 h-3.5 text-blue-500" />
+                <KeyRound className="w-3.5 h-3.5 text-blue-400" />
                 <span>Sign In</span>
               </button>
 
@@ -146,6 +150,18 @@ export default function Header({
                 <span>Free Sign Up</span>
               </button>
             </>
+          )}
+
+          {/* 7. ダークモード切替ボタン（一番右側・最端に配置） */}
+          {onToggleDarkMode && (
+            <button
+              onClick={onToggleDarkMode}
+              className={`p-2 rounded-full border transition-colors cursor-pointer flex items-center justify-center ${isDarkMode ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700' : 'bg-slate-100 border-slate-200 text-indigo-600 hover:bg-slate-200'}`}
+              aria-label="Toggle Dark Mode"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
           )}
         </div>
       </div>

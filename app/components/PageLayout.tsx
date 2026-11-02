@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（リアルタイムクレジット同期・英語無料登録ガード・認証モーダル・共通パンくず完全統合版）
+ * @description ポータル共通レイアウト（リアルタイムクレジット同期・英語無料登録ガード・認証モーダル・共通パンくず・ダークモード状態管理＆Header連携完全統合版）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -27,7 +27,6 @@ import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
 
 /**
  * 💡 リアルタイムクレジット更新通知ヘルパー関数
- * アプリ内の任意の場所から呼び出すことで、F5リロードなしでヘッダー等のクレジット表記を即座に最新化します。
  */
 export const notifyCreditsUpdated = (newCredits?: number) => {
   if (typeof window !== "undefined") {
@@ -48,11 +47,11 @@ type PageLayoutProps = {
   nickname?: string;
   learningPace?: "steady" | "normal" | "accelerated"; 
   isDarkMode?: boolean;
-  breadcrumbTitle?: string; // 個別ページでカスタム名称を指定したい場合のオプション
-  onSignOut?: () => void | Promise<void>; // 各ルートファイルから渡されるサインアウト処理に対応
-  requireAuth?: boolean; // 明示的に未ログインアクセス制限をオン/オフ指定したい場合のプロパティ
-  error?: boolean; // データ読み込みエラーフラグ
-  errorMessage?: string; // エラーメッセージ詳細
+  breadcrumbTitle?: string;
+  onSignOut?: () => void | Promise<void>;
+  requireAuth?: boolean;
+  error?: boolean;
+  errorMessage?: string;
 };
 
 const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({  
@@ -61,7 +60,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   credits: propCredits,  
   nickname: propNickname,
   learningPace: propLearningPace, 
-  isDarkMode = false,
+  isDarkMode: propIsDarkMode = false,
   breadcrumbTitle,
   onSignOut: propOnSignOut,
   requireAuth,
@@ -76,6 +75,39 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   } | undefined;
 
   const location = useLocation();
+
+  // 💡 ダークモードのステート管理（props もしくは localStorage から復元）
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("yamato:dark-mode");
+      if (saved !== null) {
+        return saved === "true";
+      }
+    }
+    return propIsDarkMode;
+  });
+
+  // ダークモード切り替え時に localStorage と HTML の dark クラスを同期
+  const toggleDarkMode = () => {
+    const nextMode = !isDarkMode;
+    setIsDarkMode(nextMode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("yamato:dark-mode", String(nextMode));
+      if (nextMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   // パス名から自動でパンくずの項目を生成するロジック
   const generateBreadcrumbs = () => {
@@ -257,27 +289,27 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const resolvedNickname = nickname && nickname.trim() !== "" ? nickname : "My friend";
 
-  // 💡 未ログイン時の登録ガード判定ロジック
-  // 公開ページ（誰でもアクセス可能なページ）の定義
   const publicPaths = ["/", "/privacy", "/terms", "/disclaimer", "/prices", "/faq", "/contact"];
   const isPublicPage = publicPaths.includes(location.pathname);
 
-  // requireAuth プロパティが指定されていればそれを優先。未指定の場合は「非公開（学習・ツール系）ページかつ未ログイン」の時にロック
   const shouldRequireAuth = requireAuth !== undefined 
     ? requireAuth 
     : (!isPublicPage && !user);
 
   return (
-    <div className={`flex flex-col min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
+    <div className={`flex flex-col min-h-screen ${isDarkMode ? 'bg-slate-950 text-slate-100 dark' : 'bg-white text-slate-900'}`}>
+      {/* 💡 ヘッダーへダークモードの状態と切り替え関数をプロパティとして渡します */}
       <Header 
         user={user} 
         credits={credits} 
         nickname={resolvedNickname} 
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={toggleDarkMode}
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={handleSignOut} 
       />
 
-      {/* 🍞 共通パンくずリスト（トップページ '/' 以外の階層でのみ表示） */}
+      {/* 🍞 共通パンくずリスト */}
       {location.pathname !== "/" && (
         <nav aria-label="Breadcrumb" className={`w-full border-b px-4 py-2.5 text-xs sm:text-sm font-medium ${isDarkMode ? 'bg-slate-900/60 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
           <div className="max-w-4xl mx-auto flex items-center space-x-2 overflow-x-auto whitespace-nowrap">
@@ -306,7 +338,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         </nav>
       )}
 
-      {/* メインコンテンツエリア：未ログイン時かつ要認証ページの場合は英語登録誘導カードを表示 */}
+      {/* メインコンテンツエリア */}
       <main className="flex-grow relative">
         {shouldRequireAuth ? (
           <div className="min-h-[70vh] flex items-center justify-center p-4 sm:p-8 bg-slate-50/50 dark:bg-slate-950/50">
@@ -371,7 +403,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       
       <Footer onOpenAuth={handleOpenAuthModal} />
 
-      {/* 共通のパスキー認証・登録モーダル */}
+      {/* 認証・登録モーダル */}
       {isAuthModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className={`w-full max-w-md rounded-3xl p-6 sm:p-8 border shadow-2xl relative ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
@@ -453,18 +485,6 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                             <p className="text-slate-500 dark:text-slate-400">Log in instantly without passwords next time!</p>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 text-[11px] text-slate-600 dark:text-slate-300 space-y-2 leading-relaxed">
-                        <p className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
-                          <Lock className="w-3.5 h-3.5 text-blue-600" /> How Passkeys Keep You Safe 🔒
-                        </p>
-                        <p>
-                          ✨ <strong>Device-Based Security:</strong> Passkeys use your own device's screen lock (such as your fingerprint, face scan, or PIN) to log you in.
-                        </p>
-                        <p>
-                          🛡️ <strong>Extremely Secure & Easy:</strong> Because your login key stays safely inside your personal device, it cannot be guessed or stolen by hackers. 🚀
-                        </p>
                       </div>
                     </div>
                   )}
