@@ -1,10 +1,10 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（Supabase共通メタヘルパー対応版・AI Vision自動文字起こし・クレジット表示対応）
+ * @description VCE Kanji & Grammar Checker 独立ページ（ToolPageWrapper対応版・サーバー用Supabase連携・AI Vision自動文字起こし対応）
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useRouteLoaderData, useRevalidator, useLoaderData, type MetaFunction } from '@remix-run/react';
-import { json, type LoaderFunctionArgs } from '@remix-run/node'; // 💡 LoaderFunctionArgs は @remix-run/node からインポート
+import { useRouteLoaderData, useRevalidator, useLoaderData } from '@remix-run/react';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node';
 import { 
   Sparkles, 
   Coins, 
@@ -16,24 +16,29 @@ import {
   Flame,
   ShieldCheck
 } from 'lucide-react';
-import PageLayout, { PageLayoutRef } from '../components/PageLayout';
+import { type PageLayoutRef } from '../components/PageLayout';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
 // 💡 YamatoChatKanjiGrammarCheckerVce をインポート
 import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGrammarCheckerVce'; 
 
 // 外部データファイルからのインポート
 import { VCE_KANJI_LIST } from '../data/kanji-list';
 import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
-import { supabase } from '../lib/supabaseClient';
-import { generateModuleMeta } from '../utils/seoMeta'; // 💡 共通SEOヘルパーをインポート
+import { supabase } from '../lib/supabaseClient'; // クライアント側（ブラウザ）用
+import { createServerSupabaseClient } from '../lib/supabase.server'; // 💡 サーバー側（loader）専用のファクトリ関数
+import { generateModuleMeta } from '../utils/seoMeta'; 
 
 /**
- * 💡 1. loader で Supabase から PORTAL_CONTENT をサーバー側で取得
+ * 💡 1. サーバー側の loader で Supabase から PORTAL_CONTENT を安全に取得
  */
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs & { context?: any }) {
   const url = new URL(request.url);
   
+  // サーバーサイド用 Supabase クライアントの生成
+  const { supabase: supabaseServer } = createServerSupabaseClient(request, context);
+
   try {
-    const { data: portalData } = await supabase
+    const { data: portalData } = await supabaseServer
       .from('portal_settings')
       .select('content')
       .eq('key', 'PORTAL_CONTENT')
@@ -53,7 +58,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 /**
- * 💡 2. Remix の meta 関数で loader のデータを受け取り、共通ヘルパーで動的生成
+ * 💡 2. 共通SEOヘルパーでメタタグを動的生成
  */
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   if (!data) {
@@ -70,7 +75,7 @@ export default function KanjiGrammarCheckerPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const revalidator = useRevalidator(); // 💡 クレジット減算後にヘッダー等を再検証するためのフック
 
-  // loaderからデータを取得（Supabase連携の有無に関わらず安全に保持）
+  // loaderからデータを取得
   const loaderData = useLoaderData<typeof loader>();
 
   // 画像アップロードおよび文字起こし用ステート
@@ -85,12 +90,12 @@ export default function KanjiGrammarCheckerPage() {
     nickname?: string;
   } | undefined;
 
-  // 💡 YamatoChatCommon と同様に、Supabaseセッションから直接ユーザーIDを確実に取得するステート
+  // Supabaseセッションから直接ユーザーIDを確実に取得するステート
   const [activeUserId, setActiveUserId] = useState<string | null>(rootData?.user?.id ?? null);
   const [currentCredits, setCurrentCredits] = useState<number>(rootData?.credits ?? 10);
   const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
 
-  // 💡 コンポーネントマウント時および認証状態の変化時にユーザーIDとクレジットを確実に同期
+  // コンポーネントマウント時および認証状態の変化時にユーザーIDとクレジットを確実に同期
   useEffect(() => {
     let isMounted = true;
 
@@ -145,18 +150,10 @@ export default function KanjiGrammarCheckerPage() {
     "私は日本へ行って、日本語の勉強をたくさんしなければなりません。"
   );
 
-  // 💡 loaderDataが正常に読み込まれていることをコンソール等で確認する場合に利用可能
-  useEffect(() => {
-    if (loaderData?.portalContent) {
-      console.log("Portal content successfully loaded for SEO meta tags.");
-    }
-  }, [loaderData]);
-
-  // 💡 バックエンドのAI (Vision API) を利用して手書き画像を自動文字起こしする関数
+  // バックエンドのAI (Vision API) を利用して手書き画像を自動文字起こしする関数
   const handleAutoTranscribe = async (imageBase64: string) => {
     setIsTranscribing(true);
     try {
-      // 💡 常に本番用APIの絶対URLを使用するように修正
       const apiBaseUrl = "https://api.jptutoraiyamato.com";
 
       const response = await fetch(`${apiBaseUrl}/chat`, {
@@ -165,19 +162,15 @@ export default function KanjiGrammarCheckerPage() {
         body: JSON.stringify({
           message: "Please transcribe the handwritten Japanese text in this photo accurately and output ONLY the transcribed Japanese text without any extra explanations or conversational filler.",
           imageBase64: imageBase64,
-          userId: activeUserId, // 💡 確実に取得した activeUserId を送信
+          userId: activeUserId,
           appType: "kanji-grammar-checker-ocr"
         }),
       });
 
-      // 💡 型エラー解消のため data に any 型を明示
       const data: any = await response.json();
       if (response.ok && data.reply) {
-        // AIの返答から余分な引用符などを除去してテキストエリアにセット
         const cleanedText = data.reply.trim().replace(/^["「]|["」]$/g, "");
         setText(cleanedText);
-
-        // 💡 4クレジット消費が成功したため、画面全体およびヘッダーの残高を即座に再検証・更新
         revalidator.revalidate();
       } else {
         alert(data.error || "Failed to transcribe image automatically. Please try typing or use the chat widget.");
@@ -199,7 +192,6 @@ export default function KanjiGrammarCheckerPage() {
       reader.onloadend = () => {
         const base64Result = reader.result as string;
         setSelectedImagePreview(base64Result);
-        // 画像読み込み完了と同時に自動でバックエンドAI文字起こしを実行
         handleAutoTranscribe(base64Result);
       };
       reader.readAsDataURL(file);
@@ -284,7 +276,7 @@ export default function KanjiGrammarCheckerPage() {
   const { html, kanjiCount, grammarCount } = getHighlightedText();
 
   return (
-    <PageLayout ref={layoutRef}>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-slate-50 text-slate-900 font-sans py-12 px-4 sm:px-6 lg:px-8 relative">
         <main className="max-w-4xl mx-auto space-y-8">
           {/* Header Card */}
@@ -412,7 +404,7 @@ export default function KanjiGrammarCheckerPage() {
           </div>
         </main>
 
-        {/* 右下のフローティングエリア（インポートしたラッパー版ヤマトチャットの配置） */}
+        {/* 右下のフローティングエリア */}
         <aside aria-label="Floating Controls" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
           <YamatoChatKanjiGrammarCheckerVce
             userId={activeUserId || undefined}
@@ -420,6 +412,6 @@ export default function KanjiGrammarCheckerPage() {
           />
         </aside>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
