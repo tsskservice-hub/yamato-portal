@@ -2,6 +2,9 @@
  * @file prices.tsx
  * @description 料金プランページ（Supabase PRICE_PLANS 100%動的連動・PageLayoutデータエラーガード完全対応版）
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import type { MetaFunction } from "@remix-run/cloudflare";
@@ -18,23 +21,33 @@ import PageLayout, { PageLayoutRef } from "../components/PageLayout";
 import { fetchPricePlansData, PricePlansKnowledge } from "../data/price-plans";
 import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Pricing & Plans - JP Tutor AI Yamato" },
-    {
-      name: "description",
-      content: "Explore flexible pricing plans and credit packs for AI Yamato Japanese tutoring.",
-    },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
 export default function Prices() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
-  const pageLayoutRef = useRef<PageLayoutRef>(null);
+  const pageLayoutRef = useRef<ToolPageWrapper layoutRef={layoutRef}>(null);
 
   // root.tsx からユーザー情報を取得
   const rootData = useRouteLoaderData("root") as {
@@ -409,6 +422,6 @@ export default function Prices() {
           </main>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

@@ -6,18 +6,35 @@
  * 2. Test Speech Transcription (STT) with microphone recording & mode selection
  * 3. Real-time API log console for endpoint, status codes, and error inspection
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import React, { useState, useRef, useEffect } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Audio & Speech Test Page | JPTutor AI Yamato Debug Tools" },
-    { name: "description", content: "Standalone test environment for Speech-to-Text (STT) and Text-to-Speech (TTS) audio APIs." },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
 export default function TestAudioPage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   // Config & Endpoint state
   const [apiEndpoint, setApiEndpoint] = useState<string>("https://api.jptutoraiyamato.com/chat");
   const [logs, setLogs] = useState<string[]>([]);
@@ -205,7 +222,7 @@ export default function TestAudioPage() {
   };
 
   return (
-    <PageLayout>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4">
         <main className="max-w-4xl mx-auto space-y-6">
           {/* Header */}
@@ -415,6 +432,6 @@ export default function TestAudioPage() {
           </div>
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

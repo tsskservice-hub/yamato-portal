@@ -1,7 +1,12 @@
+import { useRef } from 'react';
 /**
  * @file my-account.tsx
  * @description アカウント設定画面（クレジット残高・履歴のクライアント同期対応版）
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import { useState, useEffect } from "react";
 import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
@@ -13,6 +18,13 @@ import PageLayout from "../components/PageLayout";
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
 
@@ -43,7 +55,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     nickname: initialNickname,
     learningPace: initialPace,
     createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
-  });
+  , portalContent: portalData?.content || null, currentPath: url.pathname });
 }
 
 // Action: アカウント削除処理
@@ -55,20 +67,20 @@ export async function action({ request, context }: LoaderFunctionArgs) {
   const { data: { user } } = await serverSupabase.auth.getUser();
 
   if (!user) {
-    return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
+    return json({ error: "Authentication error occurred.", success: false }, { status: 401 , portalContent: portalData?.content || null, currentPath: url.pathname });
   }
 
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
     if (confirmText !== "DELETE") {
-      return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
+      return json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 , portalContent: portalData?.content || null, currentPath: url.pathname });
     }
 
     const supabaseAdmin = createAdminSupabaseClient(context);
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
-      return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
+      return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 , portalContent: portalData?.content || null, currentPath: url.pathname });
     }
 
     return redirect("/", {
@@ -79,10 +91,16 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     });
   }
 
-  return json({ success: true, error: null });
+  return json({ success: true, error: null , portalContent: portalData?.content || null, currentPath: url.pathname });
 }
 
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
+
 export default function AccountSettingsRoute() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const initialData = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
@@ -228,7 +246,7 @@ export default function AccountSettingsRoute() {
   };
 
   return (
-    <PageLayout>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
@@ -458,6 +476,6 @@ export default function AccountSettingsRoute() {
         )}
 
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

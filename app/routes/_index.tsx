@@ -3,6 +3,9 @@
  * @description AI Yamato Portal のランディングページ
  * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
 import { Sparkles, Coins, FileText, Grid, Mic, Gamepad2, Check, ArrowRight, Loader2, Flame } from 'lucide-react';
@@ -20,6 +23,26 @@ import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
 const MAX_ESTIMATED_CREDITS = {
   textAi: 2,   // テキストチャット最大予想
   imageAi: 4,  // 画像生成・ビジュアル解説最大予想
+};
+
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
 export default function Home() {
@@ -311,15 +334,7 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
   }
 
   return (
-    <PageLayout
-      ref={layoutRef}
-      user={user}
-      credits={credits}
-      onSignOut={handleSignOut}
-      isDarkMode={isDarkMode}
-      error={isPortalError}
-      errorMessage={portalErrorMessage || 'Database connection error: Unable to load PORTAL_CONTENT.'}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {portalContent && (
         <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
@@ -896,6 +911,6 @@ const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAI
           />
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

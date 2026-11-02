@@ -2,6 +2,10 @@
  *  @file eoy-oral-drill.tsx
  *  @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
@@ -22,18 +26,27 @@ import {
   OralExamQuestionsData,
 } from "../data/oral-exam-questions";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "VCE Japanese - EOY Oral Drill & Custom QA Bank | JPTutor AI Yamato" },
-    {
-      name: "description",
-      content:
-        "Comprehensive VCE Japanese Oral Exam practice covering all stages from entrance greetings to Section 1 & Section 2 Detailed Study.",
-    },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
 export default function EoyOralDrillPage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const themeColor = "#eab308"; // Amber / Gold theme
 
   const [user, setUser] = useState<any>(null);
@@ -323,13 +336,13 @@ export default function EoyOralDrillPage() {
 
   if (isAuthLoading || isLoadingData) {
     return (
-      <PageLayout user={user} credits={credits}>
+      <ToolPageWrapper layoutRef={layoutRef}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
             Loading EOY Oral Practice...
           </div>
         </div>
-      </PageLayout>
+      </ToolPageWrapper>
     );
   }
 
@@ -359,7 +372,7 @@ export default function EoyOralDrillPage() {
             </button>
           </div>
         </div>
-      </PageLayout>
+      </ToolPageWrapper>
     );
   }
 
@@ -373,7 +386,7 @@ export default function EoyOralDrillPage() {
             errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
           />
         </div>
-      </PageLayout>
+      </ToolPageWrapper>
     );
   }
 
@@ -532,6 +545,6 @@ export default function EoyOralDrillPage() {
           </aside>
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

@@ -2,6 +2,10 @@
  * @file eoy-oral-elaborate.tsx
  * @description VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import type { MetaFunction } from "@remix-run/react";
 import PageLayout from "../components/PageLayout";
@@ -31,18 +35,27 @@ export interface QuestionItem {
   isCustom?: boolean;
 }
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank | JPTutor AI Yamato" },
-    {
-      name: "description",
-      content:
-        "Comprehensive VCE Japanese Oral Exam practice covering all stages with detailed elaboration and deep conversational responses.",
-    },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
 export default function EoyOralElaboratePage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const themeColor = "#a855f7"; // Purple / Violet theme for Elaborate
 
   const [user, setUser] = useState<any>(null);
@@ -435,13 +448,13 @@ export default function EoyOralElaboratePage() {
 
   if (isAuthLoading || isLoadingData) {
     return (
-      <PageLayout user={user} credits={credits}>
+      <ToolPageWrapper layoutRef={layoutRef}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
             Loading EOY Oral Practice...
           </div>
         </div>
-      </PageLayout>
+      </ToolPageWrapper>
     );
   }
 
@@ -470,7 +483,7 @@ export default function EoyOralElaboratePage() {
             </button>
           </div>
         </div>
-      </PageLayout>
+      </ToolPageWrapper>
     );
   }
 
@@ -484,7 +497,7 @@ export default function EoyOralElaboratePage() {
             errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
           />
         </div>
-      </PageLayout>
+      </ToolPageWrapper>
     );
   }
 
@@ -791,6 +804,6 @@ export default function EoyOralElaboratePage() {
         isOpen={isHintModalOpen}
         onClose={() => setIsHintModalOpen(false)}
       />
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

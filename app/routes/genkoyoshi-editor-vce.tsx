@@ -2,6 +2,9 @@
  * @file genkoyoshi-editor-vce.tsx
  * @description VCE Japanese Genkoyoshi Editor & AI Feedback (English UI, Horizontal Default, GenkoyoshiModal)
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+
 import React, { useState, useEffect, useRef } from "react";
 import type { LinksFunction } from "@remix-run/cloudflare";
 import { useRouteLoaderData } from "@remix-run/react";
@@ -30,6 +33,26 @@ import genkoStyles from "../styles/genkoyoshi.css?url";
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: genkoStyles },
 ];
+
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
 
 export default function GenkoyoshiEditorVce() {
   const layoutRef = useRef<PageLayoutRef>(null);
@@ -88,13 +111,7 @@ export default function GenkoyoshiEditorVce() {
   };
 
   return (
-    <PageLayout 
-      ref={layoutRef} 
-      user={user} 
-      credits={credits} 
-      nickname={nickname}
-      breadcrumbTitle="VCE Genkoyoshi Editor"
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8">
           
@@ -309,6 +326,6 @@ export default function GenkoyoshiEditorVce() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

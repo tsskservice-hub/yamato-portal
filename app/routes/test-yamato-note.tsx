@@ -1,24 +1,43 @@
+import { useRef } from 'react';
 /**
  * @file test-yamato-note.tsx
  * @description AIヤマト・エコシステム アーキテクチャ構成表 & 詳細コラム（独立ノートページ）
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import type { MetaFunction } from "@remix-run/react";
 import { Link, useSearchParams } from "@remix-run/react";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "AI Yamato アーキテクチャノート" },
-    { name: "description", content: "AIヤマト・エコシステムのアーキテクチャ構成と詳細解説ノートです。" },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
 export default function TestYamatoNotePage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
   const tokenQuery = token ? `?token=${token}` : "";
 
   return (
-    <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
+    <ToolPageWrapper layoutRef={layoutRef}>
+      <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
       
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
@@ -409,5 +428,6 @@ export default function TestYamatoNotePage() {
         <p>&copy; 2026 JPTutor AI Yamato.</p>
       </footer>
     </div>
+    </ToolPageWrapper>
   );
 }

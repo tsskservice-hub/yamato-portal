@@ -2,6 +2,9 @@
  * @file eoy-writing-custom.tsx
  * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+
 import { useState, useEffect, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
 import PageLayout, { PageLayoutRef } from "../components/PageLayout";
@@ -13,6 +16,26 @@ interface UploadedImage {
   file: File;
   preview: string;
 }
+
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
 
 export default function CustomDashboard() {
   // 💡 原稿用紙ガイドモーダルの開閉ステート
@@ -117,7 +140,7 @@ export default function CustomDashboard() {
     : "";
 
   return (
-    <PageLayout ref={layoutRef} breadcrumbTitle="Custom Practice (External / Past Exams)">
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           
@@ -376,6 +399,6 @@ export default function CustomDashboard() {
           />
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

@@ -1,7 +1,12 @@
+import { useRef } from 'react';
 /**
  * @file text-types.tsx
  * @description VCE Japanese Text Types 一覧ページ (PageLayout 統合型データエラーガード対応版)
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from '@remix-run/react';
@@ -10,14 +15,12 @@ import PageLayout from '../components/PageLayout';
 import { fetchTextTypesData, TextTypesData } from '../data/texttypes';
 import { supabase } from '../lib/supabaseClient';
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "VCE Japanese Text Types | AI Yamato" },
-    { name: "description", content: "VCE Japanese Second Language text types specifications, conventions, and structures." },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
 export const TextTypesComponent: React.FC = () => {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [data, setData] = useState<TextTypesData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
@@ -47,12 +50,7 @@ export const TextTypesComponent: React.FC = () => {
   const textTypeEntries = data ? Object.entries(data) : [];
 
   return (
-    <PageLayout
-      breadcrumbTitle="Text Types"
-      error={error || (!loading && (!data || textTypeEntries.length === 0))}
-      errorMessage="Failed to fetch key 'TEXTTYPES' from app_knowledge table in Supabase."
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {data && textTypeEntries.length > 0 && (
         <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
@@ -129,8 +127,23 @@ export const TextTypesComponent: React.FC = () => {
           </div>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 };
+
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
 
 export default TextTypesComponent;

@@ -1,3 +1,12 @@
+import { useRef } from 'react';
+/**
+ * @file vocab-creator.tsx
+ * @description AI Yamato Japanese Hub - vocab-creator.tsx
+ */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import { useState, useEffect } from "react";
@@ -14,6 +23,13 @@ interface Vocabulary {
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   
   const { data: vocabularies, error } = await serverSupabase
@@ -25,10 +41,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     throw new Response("Failed to fetch vocabularies", { status: 500 });
   }
 
-  return json({ vocabularies: vocabularies || [] });
+  return json({ vocabularies: vocabularies || [] , portalContent: portalData?.content || null, currentPath: url.pathname });
 }
 
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
+
 export default function VocabCreatorPage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const { vocabularies } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
@@ -173,7 +195,8 @@ export default function VocabCreatorPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <ToolPageWrapper layoutRef={layoutRef}>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">
           ドリルリスト作成・URL発行
@@ -352,5 +375,6 @@ export default function VocabCreatorPage() {
 
       </div>
     </div>
+    </ToolPageWrapper>
   );
 }

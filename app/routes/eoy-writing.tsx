@@ -2,6 +2,9 @@
  * @file eoy-writing.tsx
  * @description EOY Writing Practice モジュール (PageLayout 統合型データエラーガード対応版)
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
@@ -14,6 +17,26 @@ import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "
 import { fetchTextTypesData, TextTypesData } from "../data/texttypes";
 import { fetchWritingStylesData, WritingStylesData } from "../data/writing-styles";
 import { supabase } from "../lib/supabaseClient";
+
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
 
 export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -113,14 +136,7 @@ export default function Dashboard() {
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
 
   return (
-    <PageLayout
-      ref={layoutRef}
-      breadcrumbTitle="End of Year Writing Practice"
-      isLoading={isLoading}
-      error={error || (!isLoading && (!modalData || Object.keys(modalData).length === 0 || !stylesData || Object.keys(stylesData).length === 0))}
-      errorMessage="Unable to load Text Types and Writing Styles specifications from Supabase."
-      onRetry={loadDataFromSupabase}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -414,6 +430,6 @@ export default function Dashboard() {
           )}
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

@@ -2,6 +2,10 @@
  * @file game-igo.tsx
  * @description ミニ5路 囲碁対局ページ（確実な石取り・クリーンアップ処理・AI投了判定対応版）
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { MetaFunction } from "@remix-run/react";
 import { useNavigate } from "@remix-run/react";
@@ -12,11 +16,8 @@ import { Loader2, RotateCcw, Swords, GraduationCap, Flag } from "lucide-react";
 import { calculateAiMove, shouldAiResign } from "../lib/igoAlgorithm";
 import { getRandomComment } from "../data/igoFreeComments";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "ミニ5路 囲碁 | JPTutor AI Yamato" },
-    { name: "description", content: "Enjoy 5x5 Go teaching games and free matches with AI Yamato-sensei." },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
 /**
@@ -454,7 +455,23 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
   );
 }
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
 export default function IgoRoute() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<any>(null);
@@ -522,7 +539,7 @@ export default function IgoRoute() {
   }
 
   return (
-    <PageLayout>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16">
         <main className="max-w-4xl mx-auto px-4 pt-8">
           {userCredits !== null && (
@@ -538,6 +555,6 @@ export default function IgoRoute() {
           </div>
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

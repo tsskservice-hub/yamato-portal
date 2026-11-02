@@ -1,4 +1,14 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { supabase } from "../lib/supabaseClient";
+import { useRef } from 'react';
+/**
+ * @file vocab.tsx
+ * @description AI Yamato Japanese Hub - vocab.tsx
+ */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
+import { json, type LoaderFunctionArgs , type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import { useState, useMemo } from "react";
 import { createServerSupabaseClient } from "../lib/supabase.server";
@@ -21,7 +31,16 @@ interface Vocabulary {
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
   const { supabase } = createServerSupabaseClient(request, context);
+  
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  
 
   // 1. 語彙データと教科書マッピングを結合して取得
   const { data: vocabularies, error } = await supabase
@@ -55,10 +74,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     )
   ).sort();
 
-  return json({ vocabularies: vocabList, availableBooks: uniqueBooks });
+  return json({ vocabularies: vocabList, availableBooks: uniqueBooks , portalContent: portalData?.content || null, currentPath: url.pathname });
 }
 
+
+export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
+
 export default function VocabIndexPage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const { vocabularies, availableBooks } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   
@@ -129,7 +154,8 @@ const handleCreateDrillWithSelected = () => {
 };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-24">
+    <ToolPageWrapper layoutRef={layoutRef}>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-24">
       <div className="max-w-5xl mx-auto">
         
         {/* ヘッダーとコントロール（文字サイズ変更など） */}
@@ -326,5 +352,6 @@ const handleCreateDrillWithSelected = () => {
         </div>
       )}
     </div>
+    </ToolPageWrapper>
   );
 }

@@ -1,7 +1,12 @@
+import { useRef } from 'react';
 /**
  * @file test-yamato.tsx
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加・プレビューデバッグログイン対応版）
  */
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
@@ -9,11 +14,8 @@ import { YamatoChatCommon } from "../components/YamatoChatCommon";
 import { fetchYamatoConfigsData, YamatoConfigsData, AppType } from "../data/yamato-configs";
 import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "AI Yamato 独立APIテスト画面" },
-    { name: "description", content: "独立APIサーバーと連携するヤマトのテストページです。" },
-  ];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
 // 💡 スポーツチームのユニフォーム配色テンプレート（枠線を4pxに変更）
@@ -70,7 +72,23 @@ const sportsColorTemplates = [
   { name: "日本代表（サムライブルー）", sport: "サッカー / 日本", border: "4px solid #BC002D", background: "#002B49", color: "#FFFFFF" },
 ];
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
 export default function TestYamatoPage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
   const [apiFields, setApiFields] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState<boolean>(false);
@@ -96,7 +114,9 @@ export default function TestYamatoPage() {
       setCurrentUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    return (
+    <ToolPageWrapper layoutRef={layoutRef}>
+      ) => subscription.unsubscribe();
   }, []);
 
   // 💡 プレビュー用一発ログイン実行関数
@@ -490,5 +510,6 @@ export default function TestYamatoPage() {
         <p>&copy; 2026 JPTutor AI Yamato.</p>
       </footer>
     </div>
+    </ToolPageWrapper>
   );
 }
