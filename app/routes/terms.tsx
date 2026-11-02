@@ -29,15 +29,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-
-
-
-
-
-
-
-};
-
 export default function TermsOfService() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const rootData = useRouteLoaderData("root") as {

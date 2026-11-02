@@ -1,16 +1,10 @@
-/**
- * @file test-audio.tsx
- * @description Audio TTS (Text-to-Speech) & STT (Speech-to-Text) Dedicated Debug Test Page
- * 💡 Features:
- * 1. Test AI Voice Generation (TTS) with detailed API response logs & Web Speech API Fallback
- * 2. Test Speech Transcription (STT) with microphone recording & mode selection
- * 3. Real-time API log console for endpoint, status codes, and error inspection
- */
-import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import React, { useEffect, useRef, useState } from 'react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import React, { useState, useRef, useEffect } from "react";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
+import PageLayout from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
+import { supabase } from "../lib/supabaseClient";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -30,13 +24,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-
-
-
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
 export default function TestAudioPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
+  const [ttsError, setTtsError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
   // Config & Endpoint state
   const [apiEndpoint, setApiEndpoint] = useState<string>("https://api.jptutoraiyamato.com/chat");
   const [logs, setLogs] = useState<string[]>([]);
@@ -66,7 +62,7 @@ export default function TestAudioPage() {
     appendLog("=== Audio Debug Environment Initialized ===");
     if (typeof window !== "undefined") {
       appendLog(`User Agent: ${navigator.userAgent}`);
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
         appendLog("✅ Navigator MediaDevices API supported.");
       } else {
         appendLog("❌ Navigator MediaDevices API NOT supported!");
@@ -209,7 +205,7 @@ export default function TestAudioPage() {
       appendLog(`STT HTTP Response Status: ${response.status} ${response.statusText}`);
 
       if (response.ok) {
-        const data = await response.json();
+        const data: any = await response.json();
         appendLog(`✅ STT Response JSON: ${JSON.stringify(data)}`);
         setTranscribedText(data.userText || "（文字起こし結果が空でした）");
       } else {
@@ -437,8 +433,3 @@ export default function TestAudioPage() {
     </ToolPageWrapper>
   );
 }
-
-
-export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
-  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
-};

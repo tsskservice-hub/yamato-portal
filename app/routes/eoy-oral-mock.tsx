@@ -32,21 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 const SessionComponent = OralMockSession as any;
-
-};
 
 export default function MockOralMode() {
   const layoutRef = useRef<PageLayoutRef>(null);
