@@ -184,7 +184,7 @@ export default function TestYamatoPage() {
               </button>
               <button
                 type="button"
-                onClick={() => handleDirectLogin("sample@jptutoraiyamato.com", "teacher123")}
+                onClick={() => handleDirectLogin("sample@jptutoraiyamato.com", "abcd1234")}
                 disabled={isLoggingIn}
                 style={{ padding: "6px 12px", borderRadius: "8px", backgroundColor: "#e0e7ff", border: "1px solid #6366f1", color: "#3730a3", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}
               >
