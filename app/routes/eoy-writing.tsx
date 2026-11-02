@@ -2,20 +2,52 @@
  * @file eoy-writing.tsx
  * @description EOY Writing Practice モジュール (PageLayout 統合型データエラーガード対応版)
  */
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useRouteLoaderData } from '@remix-run/react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import TextTypeModal from '../components/TextTypeModal';
+import ChatYamatoEoyWriting from '../components/ChatYamatoEoyWriting';
+import GenkoyoshiModal from '../components/GenkoyoshiModal';
+import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from '../data/writing-exam-questions';
+import { TextTypesData, fetchTextTypesData } from '../data/texttypes';
+import { WritingStylesData, fetchWritingStylesData } from '../data/writing-styles';
+import { supabase } from '../lib/supabaseClient';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import TextTypeModal from "../components/TextTypeModal";
-import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import ChatYamatoEoyWriting from "../components/ChatYamatoEoyWriting";
-import GenkoyoshiModal from "../components/GenkoyoshiModal";
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
-import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from "../data/writing-exam-questions";
-import { fetchTextTypesData, TextTypesData } from "../data/texttypes";
-import { fetchWritingStylesData, WritingStylesData } from "../data/writing-styles";
-import { supabase } from "../lib/supabaseClient";
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 export default function Dashboard() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [activeTextType, setActiveTextType] = useState<string>("all");
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -40,7 +72,7 @@ export default function Dashboard() {
   const credits = rootData?.credits ?? 10;
   const nickname = rootData?.nickname ?? "";
 
-  const layoutRef = useRef<PageLayoutRef>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -113,14 +145,7 @@ export default function Dashboard() {
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
 
   return (
-    <PageLayout
-      ref={layoutRef}
-      breadcrumbTitle="End of Year Writing Practice"
-      isLoading={isLoading}
-      error={error || (!isLoading && (!modalData || Object.keys(modalData).length === 0 || !stylesData || Object.keys(stylesData).length === 0))}
-      errorMessage="Unable to load Text Types and Writing Styles specifications from Supabase."
-      onRetry={loadDataFromSupabase}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -414,6 +439,11 @@ export default function Dashboard() {
           )}
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

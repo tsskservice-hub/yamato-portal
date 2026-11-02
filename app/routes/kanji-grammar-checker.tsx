@@ -1,33 +1,59 @@
 /**
  * @file kanji-grammar-checker.tsx
- * @description VCE Kanji & Grammar Checker 独立ページ（AI Vision自動文字起こし・クレジット表示・確実なセッション取得対応版）
+ * @description VCE Kanji & Grammar Checker 独立ページ（Supabase共通メタヘルパー対応版・AI Vision自動文字起こし・クレジット表示対応）
  */
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useRouteLoaderData, useRevalidator } from '@remix-run/react';
-import { 
-  Sparkles, 
-  Coins, 
-  FileText, 
-  Check, 
-  ArrowRight, 
-  ArrowLeft,
-  Loader2,
-  Flame,
-  ShieldCheck
-} from 'lucide-react';
-import PageLayout, { PageLayoutRef } from '../components/PageLayout';
-// 💡 YamatoChatKanjiGrammarCheckerVce をインポート
-import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGrammarCheckerVce'; 
-
-// 外部データファイルからのインポート
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ArrowLeft, ArrowRight, Check, Coins, FileText, Flame, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
+import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGrammarCheckerVce';
 import { VCE_KANJI_LIST } from '../data/kanji-list';
 import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
 import { supabase } from '../lib/supabaseClient';
 
+// 💡 LoaderFunctionArgs は @remix-run/cloudflare からインポート
+
+
+// 💡 YamatoChatKanjiGrammarCheckerVce をインポート
+ 
+
+// 外部データファイルからのインポート
+
+
+
+ // 💡 共通SEOヘルパーをインポート
+
+/**
+ * 💡 1. loader で Supabase から PORTAL_CONTENT をサーバー側で取得
+ */
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
 export default function KanjiGrammarCheckerPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const revalidator = useRevalidator(); // 💡 クレジット減算後にヘッダー等を再検証するためのフック
+
+  // loaderからデータを取得（Supabase連携の有無に関わらず安全に保持）
+  const loaderData = useLoaderData<typeof loader>();
 
   // 画像アップロードおよび文字起こし用ステート
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -101,9 +127,12 @@ export default function KanjiGrammarCheckerPage() {
     "私は日本へ行って、日本語の勉強をたくさんしなければなりません。"
   );
 
+  // 💡 loaderDataが正常に読み込まれていることをコンソール等で確認する場合に利用可能
   useEffect(() => {
-    document.title = "VCE Kanji & Grammar Checker | AI Yamato Portal";
-  }, []);
+    if (loaderData?.portalContent) {
+      console.log("Portal content successfully loaded for SEO meta tags.");
+    }
+  }, [loaderData]);
 
   // 💡 バックエンドのAI (Vision API) を利用して手書き画像を自動文字起こしする関数
   const handleAutoTranscribe = async (imageBase64: string) => {
@@ -237,7 +266,7 @@ export default function KanjiGrammarCheckerPage() {
   const { html, kanjiCount, grammarCount } = getHighlightedText();
 
   return (
-    <PageLayout ref={layoutRef}>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-slate-50 text-slate-900 font-sans py-12 px-4 sm:px-6 lg:px-8 relative">
         <main className="max-w-4xl mx-auto space-y-8">
           {/* Header Card */}
@@ -373,6 +402,10 @@ export default function KanjiGrammarCheckerPage() {
           />
         </aside>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

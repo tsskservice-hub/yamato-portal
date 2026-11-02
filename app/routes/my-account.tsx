@@ -2,19 +2,26 @@
  * @file my-account.tsx
  * @description アカウント設定画面（クレジット残高・履歴のクライアント同期対応版）
  */
-import { useState, useEffect } from "react";
-import { useLoaderData, useNavigate, useRouteLoaderData, useRevalidator } from "@remix-run/react";
-import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { json, redirect } from "@remix-run/cloudflare";
-import { UserCheck, Gauge, History, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { createServerSupabaseClient, createAdminSupabaseClient } from "../lib/supabase.server";
-import { supabase } from "../lib/supabaseClient";
-import PageLayout from "../components/PageLayout";
+import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from '@remix-run/react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ArrowDownRight, ArrowUpRight, Gauge, History, UserCheck } from 'lucide-react';
+import { createAdminSupabaseClient, createServerSupabaseClient } from '../lib/supabase.server';
+import { supabase } from '../lib/supabaseClient';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
-  const { data: { user } } = await serverSupabase.auth.getUser();
+  const { data: portalData } = await serverSupabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+const { data: { user } } = await serverSupabase.auth.getUser();
 
   let initialNickname = "";
   let initialPace = "normal";
@@ -83,6 +90,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 }
 
 export default function AccountSettingsRoute() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const initialData = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
@@ -228,7 +236,7 @@ export default function AccountSettingsRoute() {
   };
 
   return (
-    <PageLayout>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
@@ -458,6 +466,10 @@ export default function AccountSettingsRoute() {
         )}
 
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

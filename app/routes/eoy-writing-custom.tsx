@@ -2,17 +2,43 @@
  * @file eoy-writing-custom.tsx
  * @description 外部教材・過去問持ち込み型 Custom EOY Writing Practice モジュール
  */
-import { useState, useEffect, useRef } from "react";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import ChatYamatoEoyWritingCustom from "../components/ChatYamatoEoyWritingCustom";
-import GenkoyoshiModal from "../components/GenkoyoshiModal";
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useRouteLoaderData } from '@remix-run/react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { supabase } from '../lib/supabaseClient';
+import ChatYamatoEoyWritingCustom from '../components/ChatYamatoEoyWritingCustom';
+import GenkoyoshiModal from '../components/GenkoyoshiModal';
 
 interface UploadedImage {
   id: string;
   file: File;
   preview: string;
 }
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
 
 export default function CustomDashboard() {
   // 💡 原稿用紙ガイドモーダルの開閉ステート
@@ -117,7 +143,7 @@ export default function CustomDashboard() {
     : "";
 
   return (
-    <PageLayout ref={layoutRef} breadcrumbTitle="Custom Practice (External / Past Exams)">
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           
@@ -376,6 +402,6 @@ export default function CustomDashboard() {
           />
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

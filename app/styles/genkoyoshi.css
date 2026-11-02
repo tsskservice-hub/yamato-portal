@@ -1,0 +1,79 @@
+/**
+ * @file genkoyoshi.css
+ * @description VCE 原稿用紙エディター専用スタイリング＆印刷（Print）設定
+ */
+
+/* --------------------------------------------------
+ * 1. 原稿用紙全体・グリッド設定
+ * -------------------------------------------------- */
+.genko-preview-container {
+  --cell-size-sm: 1.5rem; /* スマホ時のマス目サイズ */
+  --cell-size-md: 1.75rem; /* PC時のマス目サイズ */
+}
+
+/* ページ枠（朱色・オレンジ系の伝統的な原稿用紙カラー） */
+.genko-page {
+  box-sizing: border-box;
+  background-color: rgba(255, 247, 237, 0.4); /* あたたかみのある紙色 */
+}
+
+/* 縦書き配置用フレックス方向 */
+.genko-grid {
+  direction: ltr;
+}
+
+/* --------------------------------------------------
+ * 2. マス目（セル）のスタイリング
+ * -------------------------------------------------- */
+.genko-cell {
+  font-family: "Sawarabi Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  aspect-ratio: 1 / 1;
+  transition: background-color 0.15s ease;
+}
+
+/* ぶら下げ禁則（行末の句読点・閉じ括弧など）ハイライト */
+.genko-cell-co {
+  background-color: rgba(254, 243, 199, 0.8); /* amber-100 */
+  color: #991b1b; /* red-800 */
+}
+
+/* 2桁数字（1マス納め）スタイル */
+.genko-cell-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  letter-spacing: -0.05em;
+}
+
+/* --------------------------------------------------
+ * 3. 印刷（Print）用スタイル
+ * A4用紙等にプリントアウトする際、不要なヘッダー・チャット・ボタンを非表示
+ * -------------------------------------------------- */
+@media print {
+  /* 印刷時はナビゲーション・ヘッダー・AIチャット・フッターを隠す */
+  header,
+  footer,
+  nav,
+  .yamato-chat-floating-button,
+  .yamato-chat-window,
+  .no-print {
+    display: none !important;
+  }
+
+  /* 背景色とマス目線を印刷可能にする */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .genko-page {
+    border-color: #991b1b !important;
+    box-shadow: none !important;
+    page-break-after: always;
+    margin: 0 auto !important;
+  }
+
+  .genko-cell {
+    border-color: #f87171 !important;
+  }
+}

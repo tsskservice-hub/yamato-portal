@@ -1,26 +1,32 @@
-/**
- * @file disclaimer.tsx
- * @description 免責事項ページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
- */
-
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/cloudflare";
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
 import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
 import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Disclaimer | AI Yamato Japanese Tutoring" },
-    {
-      name: "description",
-      content: "Educational use limitations, AI output disclaimers, custom practice prompts, and service availability for AI Yamato.",
-    },
-  ];
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const { data: portalData } = await supabase
+    .from('portal_settings')
+    .select('content')
+    .eq('key', 'PORTAL_CONTENT')
+    .single();
+
+  return json({
+    portalContent: portalData?.content || null,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
 export default function Disclaimer() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -55,15 +61,7 @@ export default function Disclaimer() {
   }, [loadData]);
 
   return (
-    <PageLayout
-      user={rootData?.user}
-      credits={rootData?.credits}
-      nickname={rootData?.nickname}
-      breadcrumbTitle={doc?.title || "Disclaimer"}
-      error={error || (!loading && !doc)}
-      errorMessage="Failed to load Disclaimer from the database."
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {doc && (
         <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">
@@ -94,22 +92,24 @@ export default function Disclaimer() {
                           <button
                             type="button"
                             onClick={() => setActiveTab("global")}
-                            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
-                              activeTab === "global"
+                            className={
+                              "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " +
+                              (activeTab === "global"
                                 ? "bg-indigo-600 text-white shadow-sm"
-                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200")
+                            }
                           >
                             Global Learners
                           </button>
                           <button
                             type="button"
                             onClick={() => setActiveTab("vce")}
-                            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
-                              activeTab === "vce"
+                            className={
+                              "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " +
+                              (activeTab === "vce"
                                 ? "bg-indigo-600 text-white shadow-sm"
-                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                            }`}
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200")
+                            }
                           >
                             VCE Learners (Victoria, Australia)
                           </button>
@@ -156,6 +156,6 @@ export default function Disclaimer() {
           </div>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

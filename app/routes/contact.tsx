@@ -3,22 +3,38 @@
  * @description お問い合わせページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
  */
 
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction, ActionFunctionArgs } from "@remix-run/cloudflare";
-import { json } from "@remix-run/cloudflare";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { json, type MetaFunction, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Link, useActionData, useNavigation, useRouteLoaderData } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
 import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
 import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Contact Us | AI Yamato Japanese Tutoring" },
-    {
-      name: "description",
-      content: "Contact the AI Yamato team for support, technical help, feedback, and school classroom licensing.",
-    },
-  ];
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+
+    return json({
+      portalContent: portalData?.content || null,
+      currentPath: url.pathname,
+    });
+  } catch (err) {
+    return json({
+      portalContent: null,
+      currentPath: url.pathname,
+    });
+  }
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
 };
 
 type ActionData = {
@@ -47,6 +63,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Contact() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const actionData = useActionData<typeof action>() as ActionData | undefined;
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -84,15 +101,7 @@ export default function Contact() {
   }, [loadData]);
 
   return (
-    <PageLayout
-      user={rootData?.user}
-      credits={rootData?.credits}
-      nickname={rootData?.nickname}
-      breadcrumbTitle={doc?.title || "Contact Us"}
-      error={error || (!loading && !doc)}
-      errorMessage="Failed to load contact information from the database."
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {doc && (
         <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">
@@ -207,6 +216,6 @@ export default function Contact() {
           </div>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

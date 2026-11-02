@@ -1,565 +1,333 @@
 /**
  * @file genkoyoshi-editor-vce.tsx
- * @description 原稿用紙エディター（PageLayout認証モーダル制御 & ChatYamatoGenkoyoshiEditorVce連携完全版）
+ * @description VCE Japanese Genkoyoshi Editor & AI Feedback (English UI, Horizontal Default, GenkoyoshiModal)
  */
+import { json, type LinksFunction, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { useRouteLoaderData } from "@remix-run/react";
 import React, { useState, useEffect, useRef } from "react";
-import type { MetaFunction } from "@remix-run/react";
-import { useNavigate, useRouteLoaderData } from "@remix-run/react";
-import { supabase } from "../lib/supabaseClient";
-import PageLayout, { PageLayoutRef } from "../components/PageLayout";
+import { 
+  FileText, 
+  Trash2, 
+  Copy, 
+  Printer, 
+  Sparkles, 
+  BookOpen, 
+  Check, 
+  HelpCircle,
+  RotateCcw,
+  Edit3,
+  AlignLeft,
+  AlignJustify
+} from "lucide-react";
 
-// 💡 専用ラッパーチャットコンポーネントをインポート
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import PageLayout, { type PageLayoutRef } from "../components/PageLayout";
 import ChatYamatoGenkoyoshiEditorVce from "../components/ChatYamatoGenkoyoshiEditorVce";
+import GenkoyoshiPreviewPane from "../components/GenkoyoshiPreviewPane";
+import GenkoyoshiModal from "../components/GenkoyoshiModal";
+import { generateGenkoyoshiPages, calculateCharCount } from "../utils/genkoyoshi-engine";
+import genkoStyles from "../styles/genkoyoshi.css?url";
+import { generateModuleMeta } from "../utils/seoMeta";
+import { supabase } from "../lib/supabaseClient";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Genkoyoshi Editor for VCE | AI Yamato Portal" },
-    { name: "description", content: "VCE Japanese Genkoyoshi manuscript paper editor with instant character count, PDF export, and AI tutor support." },
-  ];
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: genkoStyles },
+];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
-type Item =
-  | { type: "num"; value: string }
-  | { type: "char"; value: string }
-  | { type: "co"; main: string; sub: string };
-
-export default function GenkoyoshiEditor() {
-  const navigate = useNavigate();
-
-  // 💡 PageLayout の ref 参照用（認証モーダル制御）
+export default function GenkoyoshiEditorVce() {
   const layoutRef = useRef<PageLayoutRef>(null);
 
-  // 💡 root.tsx からグローバルデータを安全に取得
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
     nickname?: string;
+    learningPace?: "steady" | "normal" | "accelerated";
   } | undefined;
 
-  const [format, setFormat] = useState<string>("400");
+  const user = rootData?.user ?? null;
+  const credits = rootData?.credits ?? 10;
+  const nickname = rootData?.nickname ?? "";
+  const learningPace = rootData?.learningPace ?? "normal";
+
+  // Form states
+  const [format, setFormat] = useState<string>("400"); // "400" | "200"
+  const [writingMode, setWritingMode] = useState<"vertical" | "horizontal">("horizontal"); // Default: horizontal
   const [title, setTitle] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [text, setText] = useState<string>("");
   const [isClient, setIsClient] = useState<boolean>(false);
-
-  const [user, setUser] = useState<any>(rootData?.user ?? null);
-  const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
-  const [nickname, setNickname] = useState<string>(rootData?.nickname ?? "");
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // 💡 rootData が更新された場合にステートを同期
-  useEffect(() => {
-    if (rootData) {
-      if (rootData.user !== undefined) setUser(rootData.user);
-      if (rootData.credits !== undefined) setCredits(rootData.credits);
-      if (rootData.nickname !== undefined) setNickname(rootData.nickname);
+  const pages = isClient ? generateGenkoyoshiPages({ text, title, name, format }) : [];
+  const charCount = calculateCharCount(text);
+
+  const handleCopyText = async () => {
+    if (!text) return;
+    try {
+      const fullContent = [title && `[Title] ${title}`, name && `[Name] ${name}`, text].filter(Boolean).join("\n\n");
+      await navigator.clipboard.writeText(fullContent);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
     }
-  }, [rootData]);
-
-  // 💡 Auth and session handling
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const isPunctuation = (char: string): boolean => {
-    return ["、", "。", "，", "．", "！", "？", "」", "』", "）", "〕", "］", "｝", "』", "〉", "》"].includes(char);
-  };
-
-  const isHalfWidthDigit = (char: string): boolean => {
-    return /^[1-9]$/.test(char);
-  };
-
-  const parseTextToItems = (inputText: string): Item[] => {
-    const chars = Array.from(inputText);
-    const items: Item[] = [];
-    let i = 0;
-    while (i < chars.length) {
-      const c1 = chars[i];
-      if (isHalfWidthDigit(c1) && i + 1 < chars.length && isHalfWidthDigit(chars[i + 1])) {
-        items.push({ type: "num", value: c1 + chars[i + 1] });
-        i += 2;
-      } else {
-        items.push({ type: "char", value: c1 });
-        i += 1;
-      }
-    }
-    return items;
-  };
-
-  const createEmptyCell = (): Item => ({ type: "char", value: "" });
-
-  const padRowToLength = (row: Item[], colsPerLine: number = 20): Item[] => {
-    const padded = [...row];
-    while (padded.length < colsPerLine) {
-      padded.push(createEmptyCell());
-    }
-    return padded;
-  };
-
-  const generatePages = (): Item[][][] => {
-    const colsPerLine = 20;
-    const maxRows = format === "400" ? 20 : 10;
-    const paragraphs = text.split("\n");
-    const contentLines: Item[][] = [];
-
-    for (const p of paragraphs) {
-      const parsedItems = parseTextToItems(p);
-      if (parsedItems.length > 0) {
-        const first = parsedItems[0];
-        if (!(first.type === "char" && first.value === " ")) {
-          parsedItems.unshift({ type: "char", value: " " });
-        }
-      }
-
-      let currentLineItems: Item[] = [];
-      let i = 0;
-      while (i < parsedItems.length) {
-        const item = parsedItems[i];
-
-        if (currentLineItems.length === colsPerLine) {
-          contentLines.push(padRowToLength(currentLineItems, colsPerLine));
-          currentLineItems = [];
-        }
-
-        if (
-          currentLineItems.length === 0 &&
-          item.type === "char" &&
-          isPunctuation(item.value) &&
-          contentLines.length > 0
-        ) {
-          const prevLine = contentLines[contentLines.length - 1];
-          if (prevLine.length > 0) {
-            const lastItem = prevLine[prevLine.length - 1];
-            if (lastItem.type === "co") {
-              prevLine[prevLine.length - 1] = {
-                type: "co",
-                main: lastItem.main,
-                sub: lastItem.sub + item.value,
-              };
-            } else if (lastItem.type === "char") {
-              prevLine[prevLine.length - 1] = {
-                type: "co",
-                main: lastItem.value,
-                sub: item.value,
-              };
-            }
-            i++;
-            continue;
-          }
-        }
-
-        currentLineItems.push(item);
-        i++;
-      }
-      if (currentLineItems.length > 0) {
-        contentLines.push(padRowToLength(currentLineItems, colsPerLine));
-      }
-    }
-
-    const allPagesLines: Item[][][] = [];
-    let currentPageLines: Item[][] = [];
-
-    const row0: Item[] = Array.from({ length: colsPerLine }, createEmptyCell);
-    if (title) {
-      const titleItems = parseTextToItems(title);
-      for (let idx = 0; idx < titleItems.length && 3 + idx < colsPerLine; idx++) {
-        row0[3 + idx] = titleItems[idx];
-      }
-    }
-    currentPageLines.push(row0);
-
-    const row1: Item[] = Array.from({ length: colsPerLine }, createEmptyCell);
-    if (name) {
-      const nameItems = parseTextToItems(name);
-      let startIndex = colsPerLine - 1 - nameItems.length;
-      if (startIndex < 0) startIndex = 0;
-      for (let idx = 0; idx < nameItems.length && startIndex + idx < colsPerLine - 1; idx++) {
-        row1[startIndex + idx] = nameItems[idx];
-      }
-    }
-    currentPageLines.push(row1);
-
-    let contentIndex = 0;
-    while (contentIndex < contentLines.length) {
-      if (currentPageLines.length >= maxRows) {
-        allPagesLines.push(currentPageLines);
-        currentPageLines = [];
-      }
-      currentPageLines.push(contentLines[contentIndex]);
-      contentIndex++;
-    }
-
-    if (currentPageLines.length > 0) {
-      allPagesLines.push(currentPageLines);
-    }
-
-    return allPagesLines.map((pageLines) => {
-      const paddedPage = [...pageLines];
-      while (paddedPage.length < maxRows) {
-        paddedPage.push(Array.from({ length: colsPerLine }, createEmptyCell));
-      }
-      return paddedPage;
-    });
-  };
-
-  const pages = isClient ? generatePages() : [];
-  const charCount = text.replace(/\n/g, "").length;
-
-  const clearAll = () => {
-    setTitle("");
-    setName("");
-    setText("");
   };
 
   const handlePrint = () => {
-    if (typeof window !== "undefined") {
-      window.print();
+    window.print();
+  };
+
+  const handleReset = () => {
+    if (window.confirm("Are you sure you want to clear all inputs?")) {
+      setTitle("");
+      setName("");
+      setText("");
     }
   };
 
   return (
-    <PageLayout 
-      ref={layoutRef}
-      user={user} 
-      credits={credits} 
-      nickname={nickname}
-      breadcrumbTitle="Genkoyoshi Editor for VCE"
-    >
-      <div className="genko-editor-root flex flex-col min-h-screen">
-        <style>{`
-          :root {
-            --cell-size: 41px;
-            --line-gap: 8px;
-          }
+    <ToolPageWrapper layoutRef={layoutRef}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          
+          {/* Header Section */}
+          <div className="space-y-3 border-b border-slate-200 dark:border-slate-800 pb-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-2xl bg-red-600/10 text-red-600 dark:bg-red-500/20 dark:text-red-400 flex items-center justify-center shadow-inner">
+                  <Edit3 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+                    <span>VCE Japanese Genkoyoshi Editor</span>
+                    <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800">
+                      Genkoyoshi
+                    </span>
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    Automatic character counts, line wrap rules, and instant AI tutor feedback for VCE writing tasks.
+                  </p>
+                </div>
+              </div>
 
-          .genko-editor-root {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f6f9;
-            color: #333;
-            position: relative;
-          }
-
-          .genko-container {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-          }
-
-          .genko-editor-pane {
-            flex: 1;
-            min-width: 300px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          }
-
-          .genko-preview-pane {
-            flex: 1.5;
-            min-width: 350px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow-x: auto;
-          }
-
-          .genko-control-group {
-            margin-bottom: 15px;
-          }
-
-          .genko-control-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-          }
-
-          .genko-control-group input[type="text"],
-          .genko-control-group textarea,
-          .genko-control-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 1rem;
-          }
-
-          .genko-control-group textarea {
-            height: 150px;
-            resize: vertical;
-          }
-
-          .genko-btn-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-          }
-
-          .genko-btn-container button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-          }
-
-          .genko-btn-print {
-            background-color: #0066cc;
-            color: #fff;
-            flex: 1;
-          }
-
-          .genko-btn-print:hover {
-            background-color: #0052a3;
-          }
-
-          .genko-btn-clear {
-            background-color: #e0e0e0;
-            color: #333;
-          }
-
-          .genko-btn-clear:hover {
-            background-color: #d0d0d0;
-          }
-
-          .genko-stats {
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: #555;
-          }
-
-          .genko-sheet {
-            background: #fff;
-            border: 1px solid #ccc;
-            padding: 30px;
-            box-sizing: border-box;
-            display: inline-block;
-            min-width: 100%;
-            margin-bottom: 20px;
-          }
-
-          .genko-grid {
-            display: flex;
-            flex-direction: column;
-            gap: var(--line-gap);
-          }
-
-          .genko-row {
-            display: flex;
-            gap: 0;
-          }
-
-          .genko-cell {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            border: 1px solid #999;
-            box-sizing: border-box;
-            display: flex;
-            align-items: flex-end;    
-            justify-content: center;    
-            padding-bottom: 2mm;        
-            font-size: 1.35rem;         
-            line-height: 1;
-            position: relative;
-            background-color: #fff;
-          }
-
-          .genko-cell::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border: 1px dotted #ffcccc;
-            pointer-events: none;
-          }
-
-          .co-cell {
-            justify-content: flex-end; 
-            padding-right: 2px;
-          }
-
-          .co-wrapper {
-            display: flex;
-            align-items: flex-end;     
-            font-size: 1.35rem;         
-            line-height: 1;
-            transform: translateX(3mm); 
-          }
-
-          .co-main {
-            display: inline-block;
-          }
-
-          .co-sub {
-            display: inline-block;
-            font-size: 1.35rem;         
-          }
-
-          .num-cell {
-            justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 2mm;
-          }
-
-          .num-pair {
-            display: inline-flex;
-            font-size: 1.2rem;
-            letter-spacing: -0.5px;
-            line-height: 1;
-          }
-
-          @page {
-            size: B4 portrait;
-            margin: 10mm;
-          }
-
-          @media print {
-            body, .genko-editor-root {
-              background: none !important;
-              padding: 0 !important;
-            }
-            header,
-            footer,
-            .genko-editor-pane,
-            .genko-btn-container,
-            aside {
-              display: none !important;
-            }
-            .genko-preview-pane {
-              box-shadow: none !important;
-              padding: 0 !important;
-              overflow: visible !important;
-            }
-            .genko-sheet {
-              border: none !important;
-              margin: 0 !important;
-              page-break-after: always;
-            }
-          }
-        `}</style>
-
-        <div className="genko-container mt-6">
-          <div className="genko-editor-pane">
-            <div className="genko-control-group">
-              <label htmlFor="format">用紙フォーマット</label>
-              <select
-                id="format"
-                value={format}
-                onChange={(e) => setFormat(e.target.value)}
-              >
-                <option value="400">400字詰め（20字×20行）</option>
-                <option value="200">200字詰め（20字×10行）</option>
-              </select>
-            </div>
-
-            <div className="genko-control-group">
-              <label htmlFor="titleInput">題名（タイトル）</label>
-              <input
-                type="text"
-                id="titleInput"
-                placeholder="例：日本のアニメについて"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-
-            <div className="genko-control-group">
-              <label htmlFor="nameInput">氏名</label>
-              <input
-                type="text"
-                id="nameInput"
-                placeholder="例：山田 太郎"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-
-            <div className="genko-control-group">
-              <label htmlFor="textInput">本文</label>
-              <textarea
-                id="textInput"
-                placeholder="ここに文を書いてください。"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-              />
-            </div>
-
-            <div className="genko-stats">文字数: {charCount}字</div>
-
-            <div className="genko-btn-container">
-              <button className="genko-btn-print" onClick={handlePrint}>
-                印刷する / PDF保存
-              </button>
-              <button className="genko-btn-clear" onClick={clearAll}>
-                消す
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                >
+                  <HelpCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  <span>Writing Guidelines</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="genko-preview-pane">
-            <div>
-              {isClient &&
-                pages.map((pageRows, pageIdx) => (
-                  <div key={pageIdx} className="genko-sheet">
-                    <div className="genko-grid">
-                      {pageRows.map((rowItems, rowIdx) => (
-                        <div key={rowIdx} className="genko-row">
-                          {rowItems.map((item, colIdx) => {
-                            if (item.type === "co") {
-                              return (
-                                <div key={colIdx} className="genko-cell co-cell">
-                                  <div className="co-wrapper">
-                                    <span className="co-main">{item.main}</span>
-                                    <span className="co-sub">{item.sub}</span>
-                                  </div>
-                                </div>
-                              );
-                            } else if (item.type === "num") {
-                              return (
-                                <div key={colIdx} className="genko-cell num-cell">
-                                  <span className="num-pair">{item.value}</span>
-                                </div>
-                              );
-                            } else if (item.type === "char") {
-                              return (
-                                <div key={colIdx} className="genko-cell">
-                                  {item.value}
-                                </div>
-                              );
-                            }
-                            return <div key={colIdx} className="genko-cell"></div>;
-                          })}
-                        </div>
-                      ))}
-                    </div>
+          {/* Main Content Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Left Column / Essay Input Form */}
+            <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+              
+              {/* Form Options Header */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                
+                {/* Format Selection */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs font-bold text-slate-500">Grid:</span>
+                  <select
+                    value={format}
+                    onChange={(e) => setFormat(e.target.value)}
+                    className="px-3 py-1.5 rounded-xl border text-xs font-bold bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 outline-none focus:border-red-500"
+                  >
+                    <option value="400">400 Squares (20×20)</option>
+                    <option value="200">200 Squares (20×10)</option>
+                  </select>
+                </div>
+
+                {/* Direction Toggle */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs font-bold text-slate-500">Direction:</span>
+                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setWritingMode("horizontal")}
+                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                        writingMode === "horizontal"
+                          ? "bg-red-600 text-white shadow-sm"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }`}
+                      title="Horizontal Writing Mode"
+                    >
+                      <AlignLeft className="w-3.5 h-3.5" />
+                      <span>Horizontal</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWritingMode("vertical")}
+                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                        writingMode === "vertical"
+                          ? "bg-red-600 text-white shadow-sm"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }`}
+                      title="Vertical Writing Mode"
+                    >
+                      <AlignJustify className="w-3.5 h-3.5" />
+                      <span>Vertical</span>
+                    </button>
                   </div>
-                ))}
-            </div>
-          </div>
-        </div>
+                </div>
+              </div>
 
-        {/* 💡 右下常駐チャット：専用ラッパーコンポーネントを配置（Supabase YAMATO_CONFIGS の色・枠線が自動連動） */}
-        <ChatYamatoGenkoyoshiEditorVce
-          userId={user?.id}
-          userNickname={nickname || (user?.email ? user.email.split('@') : "Student")}
-          credits={credits}
-          onOpenAuth={(mode) => layoutRef.current?.openAuthModal?.(mode || "signin")}
-        />
+              {/* Title & Name Inputs */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">
+                    Title (Line 1)
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. 私の将来の夢"
+                    className="w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 outline-none focus:border-red-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">
+                    Author Name (Line 2)
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. 山本 太郎"
+                    className="w-full px-4 py-2.5 rounded-xl border text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 outline-none focus:border-red-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Main Essay Text Area */}
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-bold text-slate-500">
+                    Essay Text
+                  </label>
+                  <span className={`text-xs font-mono font-bold ${charCount > 500 ? "text-amber-600" : "text-slate-500"}`}>
+                    Character Count: {charCount}
+                  </span>
+                </div>
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={14}
+                  placeholder="Type or paste your Japanese essay here. Paragraph indentation, punctuation rules, and number pairs will be formatted automatically..."
+                  className="w-full px-4 py-3 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 outline-none focus:border-red-500 leading-relaxed font-sans"
+                />
+              </div>
+
+              {/* Form Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="px-3 py-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Clear All</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyText}
+                    disabled={!text}
+                    className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer"
+                  >
+                    {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{isCopied ? "Copied!" : "Copy Text"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    disabled={!text && !title}
+                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Genkoyoshi</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column / Real-time Genkoyoshi Grid Preview */}
+            <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xl min-h-[600px]">
+              <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h2 className="font-extrabold text-base flex items-center space-x-2">
+                  <BookOpen className="w-4 h-4 text-red-600" />
+                  <span>Real-time Genkoyoshi Preview</span>
+                </h2>
+                <span className="text-xs font-medium text-slate-400">
+                  {pages.length > 0 ? `Total Pages: ${pages.length}` : ""}
+                </span>
+              </div>
+
+              {/* Genkoyoshi Preview Grid */}
+              <GenkoyoshiPreviewPane 
+                pages={pages} 
+                format={format} 
+                writingMode={writingMode}
+                totalCharCount={charCount} 
+              />
+            </div>
+
+          </div>
+
+          {/* AI Tutor Chat Widget */}
+          <ChatYamatoGenkoyoshiEditorVce 
+            initialLearningPace={learningPace}
+            userId={user?.id}
+            userNickname={nickname}
+            credits={credits}
+            onOpenAuth={(mode) => layoutRef.current?.openAuthModal(mode || 'signup')} 
+          />
+
+        </div>
       </div>
-    </PageLayout>
+
+      {/* Writing Guidelines Modal */}
+      <GenkoyoshiModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </ToolPageWrapper>
   );
 }

@@ -1,36 +1,60 @@
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
- * 💡 PORTAL_CONTENT & PRICE_PLANS 完全動的連動・PageLayout 統合型データエラーガード対応版
+ * 💡 Supabase DAILY_QUIZZES 動的取得 ＆ PORTAL_CONTENT & PRICE_PLANS 完全動的連動版 ＋ 教師自動リダイレクト統合
  */
-
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { Sparkles, Coins, FileText, Grid, Mic, Gamepad2, Check, ArrowRight, Loader2 } from 'lucide-react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { ArrowRight, Check, Coins, FileText, Flame, Gamepad2, Grid, Loader2, Mic, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import PageLayout, { PageLayoutRef } from '../components/PageLayout';
 import { HeroDemoChat } from '../components/HeroDemoChat';
 import { DailyQuizModal } from '../components/DailyQuizModal';
 import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
+import { DataErrorState } from '../components/DataErrorState';
+import { PortalModule, usePortalContent } from '../data/portal-content';
+import { PricePlansKnowledge, fetchPricePlansData } from '../data/price-plans';
+import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '../data/quizzes';
 
-import { usePortalContent, PortalModule } from '../data/portal-content';
-import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
-import { getRandomQuiz, DAILY_QUIZZES, QuizItem } from '../data/quizzes';
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+// 💡 最大予想クレジット消費設定
 const MAX_ESTIMATED_CREDITS = {
-  textAi: 2,
-  imageAi: 4,
+  textAi: 2,   // テキストチャット最大予想
+  imageAi: 4,  // 画像生成・ビジュアル解説最大予想
 };
 
 export default function Home() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const navigate = useNavigate();
 
-  const rootData = useRouteLoaderData("root") as {
-    user?: any;
-    nickname?: string;
-    credits?: number;
-    plan?: string;
-    learningPace?: "steady" | "normal" | "accelerated";
+  // root.tsx の loader からユーザー情報を取得
+  const rootData = useRouteLoaderData("root") as { 
+    user?: any; 
+    nickname?: string; 
+    credits?: number; 
+    plan?: string; 
+    learningPace?: "steady" | "normal" | "accelerated"; 
+    isTeacher?: boolean; // 教師権限フラグ
   } | undefined;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -38,30 +62,83 @@ export default function Home() {
   const [credits, setCredits] = useState<number>(rootData?.credits ?? 10);
   const nickname = rootData?.nickname ?? "";
   const learningPace = rootData?.learningPace ?? "normal";
+  const isTeacher = rootData?.isTeacher ?? false;
 
+  // 💡 先生がログインしている場合、トップページを開いた瞬間に教師ダッシュボードへ自動リダイレクト
+  useEffect(() => {
+    if (user && isTeacher) {
+      navigate('/teacher/dashboard', { replace: true });
+    }
+  }, [user, isTeacher, navigate]);
+
+  // 💡 PORTAL_CONTENT の動的取得
   const { portalContent, isLoading: isPortalLoading, isError: isPortalError, errorMessage: portalErrorMessage } = usePortalContent(supabase);
 
+  // 💡 PRICE_PLANS の動的取得ステート
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [isPriceLoading, setIsPriceLoading] = useState<boolean>(true);
   const [isPriceError, setIsPriceError] = useState<boolean>(false);
 
   const [checkoutLoadingPriceId, setCheckoutLoadingPriceId] = useState<string | null>(null);
-  const layoutRef = useRef<PageLayoutRef>(null);
 
+  // 💡 Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
+
   const [currentQuiz, setCurrentQuiz] = useState<QuizItem>(() => getRandomQuiz(DAILY_QUIZZES) || DAILY_QUIZZES[0]);
 
+  // 💡 Supabase から DAILY_QUIZZES をフェッチしてランダムに1つセット
   useEffect(() => {
-    const randomQuiz = getRandomQuiz(DAILY_QUIZZES);
-    if (randomQuiz) {
-      setCurrentQuiz(randomQuiz);
+    async function fetchDailyQuizFromSupabase() {
+      try {
+        const { data, error } = await supabase
+          .from('app_knowledge')
+          .select('data')
+          .eq('key', 'DAILY_QUIZZES')
+          .single();
+
+        if (!error && data && data.data) {
+          const quizList = Array.isArray(data.data) 
+            ? data.data 
+            : (data.data.quizzes || data.data.DAILY_QUIZZES);
+
+          if (quizList && quizList.length > 0) {
+            const random = getRandomQuiz(quizList as QuizItem[]);
+            if (random) {
+              setCurrentQuiz(random);
+              return;
+            }
+          }
+        }
+
+        const { data: quizzesTableData, error: quizzesError } = await supabase
+          .from('quizzes')
+          .select('*');
+
+        if (!quizzesError && quizzesTableData && quizzesTableData.length > 0) {
+          const random = getRandomQuiz(quizzesTableData as QuizItem[]);
+          if (random) {
+            setCurrentQuiz(random);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch quizzes from Supabase, falling back to local:", err);
+      }
+
+      const fallbackRandom = getRandomQuiz(DAILY_QUIZZES);
+      if (fallbackRandom) {
+        setCurrentQuiz(fallbackRandom);
+      }
     }
+
+    fetchDailyQuizFromSupabase();
   }, []);
 
+  // 💡 料金プランを Supabase からフェッチ
   const loadPricePlans = useCallback(async () => {
     setIsPriceLoading(true);
     setIsPriceError(false);
@@ -97,6 +174,7 @@ export default function Home() {
         setCredits(typedData.credits ?? 10);
 
         const todayStr = new Date().toISOString().split('T')[0];
+
         if (typedData.last_quiz_date === todayStr) {
           setHasCompletedTodayQuiz(true);
         }
@@ -141,17 +219,11 @@ export default function Home() {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
-
   const validateFeatureCredits = async (featureType: 'textAi' | 'imageAi'): Promise<boolean> => {
     if (!user) {
       handleOpenAuthModal('signup');
       return false;
     }
-
     const requiredCredits = MAX_ESTIMATED_CREDITS[featureType] || 2;
     if (credits < requiredCredits) {
       const confirmed = window.confirm(
@@ -198,7 +270,6 @@ export default function Home() {
       handleOpenAuthModal('signup');
       return;
     }
-
     try {
       setCheckoutLoadingPriceId(priceId);
 
@@ -238,6 +309,11 @@ export default function Home() {
     }
   };
 
+  // 💡 7〜10年生（Years 7–10）用モジュールの抽出
+  const years7to10Modules = portalContent?.modulesSection?.section2?.modules?.filter(
+    (mod: PortalModule) => mod.id === 'vocab-years-7-10' || mod.category === 'Years 7-10'
+  ) || [];
+
   const vceSpeakingModules = portalContent?.modulesSection?.section2?.modules?.filter((mod: PortalModule) => {
     const lowerName = mod.name.toLowerCase();
     const lowerDesc = mod.description.toLowerCase();
@@ -246,32 +322,35 @@ export default function Home() {
   }) || [];
 
   const vceWritingModules = portalContent?.modulesSection?.section2?.modules?.filter((mod: PortalModule) => {
-    if (mod.id === 'text-types' || mod.id === 'writing-styles') return false;
+    if (mod.id === 'text-types' || mod.id === 'writing-styles' || mod.id === 'vocab-years-7-10' || mod.category === 'Years 7-10') return false;
     const lowerName = mod.name.toLowerCase();
     const lowerDesc = mod.description.toLowerCase();
     const lowerId = mod.id.toLowerCase();
     return !vceSpeakingModules.includes(mod) && (lowerName.includes('writing') || lowerName.includes('essay') || lowerDesc.includes('writing') || lowerDesc.includes('kanji') || lowerDesc.includes('vocabulary') || lowerId.includes('writing') || lowerId.includes('genkoyoshi') || mod.iconName === 'FileText');
   }) || [];
 
-  const categorizedIds = new Set([...vceSpeakingModules, ...vceWritingModules].map(m => m.id));
+  const categorizedIds = new Set([...vceSpeakingModules, ...vceWritingModules, ...years7to10Modules].map(m => m.id));
   const unassignedModules = portalContent?.modulesSection?.section2?.modules?.filter((mod: PortalModule) => mod.id !== 'text-types' && mod.id !== 'writing-styles' && !categorizedIds.has(mod.id)) || [];
   if (unassignedModules.length > 0) {
     vceWritingModules.push(...unassignedModules);
   }
 
+  // 💡 もし教師判定中でリダイレクト待機中の場合はシンプルなローディングを表示
+  if (user && isTeacher) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <p className="text-sm text-slate-400 font-medium">教師用ダッシュボードへ移動しています...</p>
+      </div>
+    );
+  }
+
   return (
-    <PageLayout
-      ref={layoutRef}
-      user={user}
-      credits={credits}
-      onSignOut={handleSignOut}
-      isDarkMode={isDarkMode}
-      error={isPortalError}
-      errorMessage={portalErrorMessage || 'Database connection error: Unable to load PORTAL_CONTENT.'}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {portalContent && (
         <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
+            
             {/* 1. Hero Section ＆ Auto Demo Chat */}
             <HeroDemoChat
               isDarkMode={isDarkMode}
@@ -564,6 +643,48 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* 💡 新設: Learn with Games / ゲーミフィケーション・セクション */}
+              <div className="space-y-4 pt-6">
+                <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span className="text-xl">🎮</span>
+                  <h3 className="font-extrabold text-lg text-red-600 dark:text-red-400">
+                    Learn with Games & Practice Arena
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div 
+                    onClick={() => navigate('/games/tower-defense')}
+                    className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-red-500/50 cursor-pointer ${
+                      isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                    } shadow-sm transition-colors`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
+                          <Gamepad2 className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/10 text-red-600">
+                          Interactive
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-base">ひらがな・カタカナ・漢字タワーディフェンス</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Supabase連動の文字マスターを使って、ローマ字タイピングでモンスターを撃破！授業の最後のお楽しみや基礎定着に最適。
+                      </p>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                      <span className="text-slate-400 font-medium">Gamification</span>
+                      <span className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
+                        <span>Play Game</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Section 2 */}
               <div id="section-vce" className="space-y-8 pt-6">
                 <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -753,6 +874,73 @@ export default function Home() {
                     </div>
                   );
                 })()}
+
+                {/* 💡 Years 7–10 Japanese セクション */}
+                {years7to10Modules.length > 0 && (
+                  <div className="space-y-4 pt-4">
+                    <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                      <span className="text-lg">📖</span>
+                      <h4 className="font-bold text-base text-indigo-600 dark:text-indigo-400">
+                        Years 7–10 Japanese
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {years7to10Modules.map((mod: PortalModule) => (
+                        <div 
+                          key={mod.id} 
+                          onClick={async () => {
+                            if (mod.isComingSoon) return;
+                            if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                              navigate(mod.path);
+                            }
+                          }}
+                          className={`p-6 rounded-3xl border flex flex-col justify-between ${
+                            mod.isComingSoon 
+                              ? 'opacity-75 cursor-not-allowed' 
+                              : 'hover:border-indigo-500/50 cursor-pointer'
+                          } ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm transition-colors`}
+                        >
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                                {renderModuleIcon(mod.iconName, "w-5 h-5")}
+                              </div>
+                              {mod.isComingSoon && (
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-500/10 text-slate-500">
+                                  Coming Soon
+                                </span>
+                              )}
+                            </div>
+                            <h4 className="font-bold text-base">{mod.name}</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">{mod.description}</p>
+                          </div>
+
+                          <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
+                            <span className="text-slate-400 font-medium">{mod.category}</span>
+                            {!mod.isComingSoon ? (
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                                    navigate(mod.path);
+                                  }
+                                }}
+                                className="text-indigo-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
+                              >
+                                <span>{mod.actionLabel}</span>
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
+                            ) : (
+                              <span className="text-slate-400 font-medium cursor-not-allowed">Coming Soon</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           </main>
@@ -778,6 +966,10 @@ export default function Home() {
           />
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

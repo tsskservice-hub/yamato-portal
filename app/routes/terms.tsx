@@ -2,25 +2,35 @@
  * @file terms.tsx
  * @description 利用規約ページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
  */
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useRouteLoaderData } from '@remix-run/react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { LegalDocument, fetchLegalContentData } from '../data/legal-content';
+import { supabase } from '../lib/supabaseClient';
 
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/cloudflare";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
-import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
-import { supabase } from "../lib/supabaseClient";
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Terms of Service | AI Yamato Japanese Tutoring" },
-    {
-      name: "description",
-      content: "Terms of Service governing educational use of AI Yamato Japanese tutoring platform, passkey authentication, and user responsibilities.",
-    },
-  ];
-};
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
 
 export default function TermsOfService() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -54,16 +64,7 @@ export default function TermsOfService() {
   }, [loadData]);
 
   return (
-    <PageLayout
-      user={rootData?.user}
-      credits={rootData?.credits}
-      nickname={rootData?.nickname}
-      breadcrumbTitle={doc?.title || "Terms of Service"}
-      isLoading={loading}
-      error={error || (!loading && !doc)}
-      errorMessage="Failed to load Terms of Service from the database."
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {doc && (
         <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">
@@ -110,6 +111,11 @@ export default function TermsOfService() {
           </div>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

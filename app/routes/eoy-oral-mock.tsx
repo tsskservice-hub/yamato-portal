@@ -2,32 +2,40 @@
  * @file eoy-oral-mock.tsx
  * @description VCE Japanese - AI Mock Oral Exam (PageLayout 統合型データエラーガード対応版)
  */
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { supabase } from '../lib/supabaseClient';
+import { MockExamConfig, OralMockConfig } from '../components/OralMockConfig';
+import { ExamResultData, OralMockSession } from '../components/OralMockSession';
+import { OralMockReport } from '../components/OralMockReport';
+import ChatYamatoEoyOralMock from '../components/ChatYamatoEoyOralMock';
+import { OralExamQuestionsData, fetchOralExamQuestionsData } from '../data/oral-exam-questions';
 
-import React, { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
-import { supabase } from "../lib/supabaseClient";
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
-import { OralMockConfig, MockExamConfig } from "../components/OralMockConfig";
-import { OralMockSession, ExamResultData } from "../components/OralMockSession";
-import { OralMockReport } from "../components/OralMockReport";
-import ChatYamatoEoyOralMock from "../components/ChatYamatoEoyOralMock";
-
-import { fetchOralExamQuestionsData, OralExamQuestionsData } from "../data/oral-exam-questions";
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
 
 const SessionComponent = OralMockSession as any;
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "VCE Japanese - AI Mock Oral Mode | JPTutor AI Yamato" },
-    {
-      name: "description",
-      content: "VCE Japanese Mock Oral mode featuring elapsed time, topic deep-dive rotation, examiner persona, and fluency tracking.",
-    },
-  ];
-};
-
 export default function MockOralMode() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
@@ -108,14 +116,7 @@ export default function MockOralMode() {
   };
 
   return (
-    <PageLayout
-      user={user}
-      credits={credits}
-      isLoading={isLoading}
-      error={error || (!isLoading && (!questionsData || Object.keys(questionsData).length === 0))}
-      errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
-      onRetry={loadQuestions}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {questionsData && (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
           {examPhase === "config" && (
@@ -154,6 +155,11 @@ export default function MockOralMode() {
           </aside>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

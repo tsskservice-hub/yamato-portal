@@ -2,21 +2,38 @@
  * @file writing-styles.tsx
  * @description VCE Writing Styles Guide ページ (PageLayout 統合型データエラーガード対応版)
  */
-
-import React, { useState, useEffect, useCallback } from 'react';
-import type { MetaFunction } from '@remix-run/cloudflare';
-import PageLayout from '../components/PageLayout';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
 import { fetchWritingStylesData, WritingStylesData, WritingStyleDetail } from '../data/writing-styles';
 import { supabase } from '../lib/supabaseClient';
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "VCE Writing Styles Guide | AI Yamato" },
-    { name: "description", content: "Explore the 5 core writing styles for VCE Japanese, complete with purpose, key features, grammar, compatible text types, and effective vocabulary." },
-  ];
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
 };
 
 export default function WritingStylesGuide() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [stylesData, setStylesData] = useState<WritingStylesData | null>(null);
   const [activeStyleKey, setActiveStyleKey] = useState<string>('Informative');
   const [loading, setLoading] = useState<boolean>(true);
@@ -51,12 +68,7 @@ export default function WritingStylesGuide() {
   const currentStyle: WritingStyleDetail | undefined = stylesData ? stylesData[activeStyleKey] : undefined;
 
   return (
-    <PageLayout
-      breadcrumbTitle="Writing Styles"
-      error={error || (!loading && (!stylesData || Object.keys(stylesData).length === 0))}
-      errorMessage="Failed to fetch key 'WRITING_STYLES' from app_knowledge table in Supabase."
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {stylesData && Object.keys(stylesData).length > 0 && (
         <div className="max-w-6xl mx-auto p-6 bg-slate-50 min-h-screen text-slate-800">
           <div className="mb-8 text-center">
@@ -181,6 +193,6 @@ export default function WritingStylesGuide() {
           )}
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

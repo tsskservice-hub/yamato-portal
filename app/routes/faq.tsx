@@ -2,27 +2,42 @@
  * @file faq.tsx
  * @description VCE Japanese Portal FAQ ページ (PageLayout 統合型データエラーガード対応版)
  */
-
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useLocation } from '@remix-run/react';
-import type { MetaFunction } from "@remix-run/cloudflare";
 import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
 import PageLayout from '../components/PageLayout';
 import ScrollTopButton from '../components/ScrollTopButton';
+import { generateModuleMeta } from '../utils/seoMeta';
 import { fetchFaqData, FaqItem } from '../data/faq-database';
 import { supabase } from '../lib/supabaseClient';
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "FAQ & AI Guide | AI Yamato Japanese Tutoring" },
-    {
-      name: "description",
-      content: "Frequently Asked Questions and guidance for VCE Japanese external exams, text types, genkoyoshi, and portal usage.",
-    },
-  ];
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
 export default function FaqPage() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const location = useLocation();
 
   const [faqs, setFaqs] = useState<FaqItem[] | null>(null);
@@ -124,12 +139,7 @@ export default function FaqPage() {
   }, [faqs]);
 
   return (
-    <PageLayout
-      breadcrumbTitle="FAQ & AI Guide"
-      error={error || (!loading && (!faqs || faqs.length === 0))}
-      errorMessage="Failed to fetch key 'FAQ' from app_knowledge table in Supabase."
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {faqJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       )}
@@ -256,6 +266,6 @@ export default function FaqPage() {
           <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" />
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

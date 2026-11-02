@@ -2,26 +2,40 @@
  * @file game-igo.tsx
  * @description ミニ5路 囲碁対局ページ（確実な石取り・クリーンアップ処理・AI投了判定対応版）
  */
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useRef } from 'react';
-import type { MetaFunction } from "@remix-run/react";
-import { useNavigate } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
-import { supabase } from "../lib/supabaseClient";
-import { Loader2, RotateCcw, Swords, GraduationCap, Flag } from "lucide-react";
+import { useNavigate } from '@remix-run/react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { supabase } from '../lib/supabaseClient';
+import { Loader2, RotateCcw, Swords, GraduationCap, Flag } from 'lucide-react';
 
-import { calculateAiMove, shouldAiResign } from "../lib/igoAlgorithm";
-import { getRandomComment } from "../data/igoFreeComments";
+import { calculateAiMove, shouldAiResign } from '../lib/igoAlgorithm';
+import { getRandomComment } from '../data/igoFreeComments';
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "ミニ5路 囲碁 | JPTutor AI Yamato" },
-    { name: "description", content: "Enjoy 5x5 Go teaching games and free matches with AI Yamato-sensei." },
-  ];
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
 };
 
-/**
- * 盤面上のすべての石のグループ（連）と、その呼吸点（リバティ）を計算する関数
- */
 function findAllGroups(board: number[][], color: number) {
   const SIZE = board.length;
   const visited: boolean[][] = Array(SIZE).fill(false).map(() => Array(SIZE).fill(false));
@@ -455,6 +469,7 @@ function IgoBoard({ userId, credits }: { userId: string | null; credits: number 
 }
 
 export default function IgoRoute() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<any>(null);
@@ -513,16 +528,18 @@ export default function IgoRoute() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#f4f1ea] font-sans">
+      <ToolPageWrapper layoutRef={layoutRef}>
+        <div className="flex justify-center items-center h-screen bg-[#f4f1ea] font-sans">
         <h3 className="text-xl font-semibold text-slate-700 animate-pulse">
           Loading 5x5 Go Board... ♟️
         </h3>
-      </div>
+        </div>
+      </ToolPageWrapper>
     );
   }
 
   return (
-    <PageLayout>
+    <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16">
         <main className="max-w-4xl mx-auto px-4 pt-8">
           {userCredits !== null && (
@@ -538,6 +555,6 @@ export default function IgoRoute() {
           </div>
         </main>
       </div>
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

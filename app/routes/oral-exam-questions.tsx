@@ -1,23 +1,42 @@
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { ToolPageWrapper } from "../components/ToolPageWrapper";
+import { type PageLayoutRef } from "../components/PageLayout";
+import PageLayout from "../components/PageLayout";
+import { generateModuleMeta } from "../utils/seoMeta";
+import ChatYamatoOralExamQuestions from "../components/ChatYamatoOralExamQuestions";
+import { fetchOralExamQuestionsData, OralExamQuestionsData, OralExamQuestionItem } from "../data/oral-exam-questions";
+import { supabase } from "../lib/supabaseClient";
+
 /**
  * @file oral-exam-questions.tsx
  * @description VCE Japanese Oral Exam 音声設問ライブラリページ (PageLayout 統合型データエラーガード対応版)
  */
 
-import { useState, useEffect, useCallback } from "react";
-import type { MetaFunction } from "@remix-run/react";
-import PageLayout from "../components/PageLayout";
-import ChatYamatoOralExamQuestions from "../components/ChatYamatoOralExamQuestions";
-import { fetchOralExamQuestionsData, OralExamQuestionsData, OralExamQuestionItem } from "../data/oral-exam-questions";
-import { supabase } from "../lib/supabaseClient";
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "VCE Japanese Oral Exam - Free Audio Resources | JPTutor AI Yamato" },
-    { name: "description", content: "VCE Japanese EOY Oral Exam Free Audio Resources and Practice Library" },
-  ];
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
 export default function OralExamQuestions() {
+  const layoutRef = useRef<PageLayoutRef>(null);
   const [oralData, setOralData] = useState<OralExamQuestionsData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
@@ -141,11 +160,7 @@ export default function OralExamQuestions() {
   const userNickname = user?.email ? user.email.split('@')[0] : "Student";
 
   return (
-    <PageLayout
-      error={error || (!loading && !oralData)}
-      errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {oralData && (
         <div className="bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative">
           <main className="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">
@@ -260,6 +275,6 @@ export default function OralExamQuestions() {
           </aside>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }

@@ -1,10 +1,11 @@
 /**
  * @file ChatYamatoEoyOralElaborate.tsx
- * @description Supabase YAMATO_CONFIGS から設定を動的取得する VCE EOY Oral Elaborate 専用AIチャットコンポーネント（ラッパー方式）
+ * @description Supabase YAMATO_CONFIGS から設定を動的取得する VCE EOY Oral Elaborate 専用AIチャットコンポーネント（ラッパー方式・クレジット判定独立対応版）
  * 💡 特徴：
  *   1. YamatoChatCommon をベースにした完全ラッパー方式
- *   2. Supabase の "eoy-oral-elaborate" 設定（テーマカラー #a855f7、ボタンスタイル等）を動的反映
- *   3. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
+ *   2. appType を "eoy-oral-elaborate-chat" に変更し、中央の音声会話練習(4cr)と右下チャット(テキスト2cr/画像1枚4cr/画像2~4枚6cr)のクレジット判定を独立分離
+ *   3. Supabase の "eoy-oral-elaborate-chat"（または "eoy-oral-elaborate"）設定を動的反映
+ *   4. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
  */
 import React, { useState, useEffect } from "react";
 import YamatoChatCommon from "./YamatoChatCommon";
@@ -17,7 +18,7 @@ export interface ChatYamatoEoyOralElaborateProps {
   userId?: string;
   userNickname?: string;
   credits?: number;
-  onOpenAuth?: (mode?: 'signin' | 'signup') => void;
+  onOpenAuth?: (mode?: "signin" | "signup") => void;
   externalImageFile?: File | null;
   externalImagePreview?: string | null;
   onClearExternalImage?: () => void;
@@ -29,15 +30,20 @@ export const ChatYamatoEoyOralElaborate: React.FC<ChatYamatoEoyOralElaborateProp
   defaultOpen = false,
   ...restProps
 }) => {
-  const appType = "eoy-oral-elaborate";
+  // 💡 中央画面の音声会話練習(4cr)と区別するため、チャット専用の appType を指定
+  const appType = "eoy-oral-elaborate-chat";
   const [config, setConfig] = useState<BotConfig | null>(null);
 
   useEffect(() => {
     async function loadConfig() {
       try {
         const configsData = await fetchYamatoConfigsData(supabase);
-        if (configsData && configsData[appType]) {
-          setConfig(configsData[appType]);
+        if (configsData) {
+          // eoy-oral-elaborate-chat の設定、無ければ eoy-oral-elaborate の設定をフォールバック使用
+          const loadedConfig = configsData[appType] || configsData["eoy-oral-elaborate"];
+          if (loadedConfig) {
+            setConfig(loadedConfig);
+          }
         }
       } catch (err) {
         console.error("Failed to load eoy-oral-elaborate config from Supabase:", err);
@@ -46,10 +52,18 @@ export const ChatYamatoEoyOralElaborate: React.FC<ChatYamatoEoyOralElaborateProp
     loadConfig();
   }, [appType]);
 
+  // 💡 添付画像の枚数に応じた動的クレジット計算関数
+  const calculateCreditCost = (imageCount: number): number => {
+    if (imageCount === 0) return 2; // テキストチャットのみ: 2クレジット
+    if (imageCount === 1) return 4; // 画像1枚添付: 4クレジット
+    if (imageCount >= 2 && imageCount <= 4) return 6; // 画像2〜4枚添付: 6クレジット
+    return 2;
+  };
+
   const defaultButtonStyle = {
     background: "#a855f7",
     border: "2px solid #e9d5ff",
-    color: "#ffffff"
+    color: "#ffffff",
   };
 
   return (
@@ -64,7 +78,11 @@ export const ChatYamatoEoyOralElaborate: React.FC<ChatYamatoEoyOralElaborateProp
       themeColor={config?.themeColor || "#a855f7"}
       buttonStyle={config?.floatingButtonStyle || config?.buttonStyle || defaultButtonStyle}
       defaultOpen={defaultOpen}
-      enableImageUpload={true} // 💡 写真アップロードボタン（Upload Photo）を表示
+      enableImageUpload={true}
+      calculateCreditCost={calculateCreditCost}
+      baseCreditCost={2}
+      image1CreditCost={4}
+      image2To4CreditCost={6}
       {...restProps}
     />
   );

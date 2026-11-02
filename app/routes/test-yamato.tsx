@@ -2,6 +2,7 @@
  * @file test-yamato.tsx
  * @description ヤマトAI 独立APIテスト画面（Supabase YAMATO_CONFIGS 動的取得・漢字文法チェッカー追加・プレビューデバッグログイン対応版）
  */
+
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
@@ -15,60 +16,6 @@ export const meta: MetaFunction = () => {
     { name: "description", content: "独立APIサーバーと連携するヤマトのテストページです。" },
   ];
 };
-
-// 💡 スポーツチームのユニフォーム配色テンプレート（枠線を4pxに変更）
-const sportsColorTemplates = [
-  { name: "セルティック", sport: "サッカー / スコットランド", border: "4px solid #000000", background: "#018749", color: "#FFFFFF" },
-  { name: "マンチェスター・シティ", sport: "サッカー / イングランド", border: "4px solid #FFFFFF", background: "#6CABDD", color: "#000000" },
-  { name: "マンチェスター・ユナイテッド", sport: "サッカー / イングランド", border: "4px solid #FBE122", background: "#DA291C", color: "#FFFFFF" },
-  { name: "Aston Villa", sport: "サッカー / イングランド", border: "4px solid #F1BE48", background: "#670E36", color: "#95BFE5" },
-  { name: "レアル・マドリード", sport: "サッカー / スペイン", border: "4px solid #FEBE10", background: "#FFFFFF", color: "#00529F" },
-  { name: "リヴァプールFC", sport: "サッカー / イングランド", border: "4px solid #F6EB61", background: "#C8102E", color: "#FFFFFF" },
-  { name: "アーセナルFC", sport: "サッカー / イングランド", border: "4px solid #9C824A", background: "#FFFFFF", color: "#EF0107" },
-  { name: "チェルシーFC", sport: "サッカー / イングランド", border: "4px solid #034694", background: "#1A1A1A", color: "#FFFFFF" },
-  { name: "トッテナム・ホットスパー", sport: "サッカー / イングランド", border: "4px solid #132257", background: "#FFFFFF", color: "#132257" },
-  { name: "ユベントスFC", sport: "サッカー / イタリア", border: "4px solid #000000", background: "#FFFFFF", color: "#000000" },
-  { name: "ACミラン", sport: "サッカー / イタリア", border: "4px solid #FB090B", background: "#FFFFFF", color: "#000000" },
-  { name: "インテル・ミラノ", sport: "サッカー / イタリア", border: "4px solid #000000", background: "#111111", color: "#0099FF" },
-  { name: "ASローマ", sport: "サッカー / イタリア", border: "4px solid #8B0000", background: "#5B0E2D", color: "#F1BE48" },
-  { name: "バイエルン・ミュンヘン", sport: "サッカー / ドイツ", border: "4px solid #DC052D", background: "#0066B2", color: "#FFFFFF" },
-  { name: "ボルシア・ドルトムント", sport: "サッカー / ドイツ", border: "4px solid #000000", background: "#FDE100", color: "#000000" },
-  { name: "パリ・サンジェルマン", sport: "サッカー / フランス", border: "4px solid #004170", background: "#FFFFFF", color: "#DA291C" },
-  { name: "オリンピック・マルセイユ", sport: "サッカー / フランス", border: "4px solid #0096D6", background: "#FFFFFF", color: "#0096D6" },
-  { name: "アヤックス・アムステルダム", sport: "サッカー / オランダ", border: "4px solid #D2122E", background: "#FFFFFF", color: "#D2122E" },
-  { name: "FCポルト", sport: "サッカー / ポルトガル", border: "4px solid #003399", background: "#003399", color: "#FFFFFF" },
-  { name: "SLベンフィカ", sport: "サッカー / ポルトガル", border: "4px solid #ED1C24", background: "#000000", color: "#FFFFFF" },
-  { name: "ボカ・ジュニアーズ", sport: "サッカー / アルゼンチン", border: "4px solid #FCD116", background: "#003399", color: "#FCD116" },
-  { name: "リーベル・プレート", sport: "サッカー / アルゼンチン", border: "4px solid #ED1C24", background: "#FFFFFF", color: "#000000" },
-  { name: "フラメンゴ", sport: "サッカー / ブラジル", border: "4px solid #000000", background: "#C32021", color: "#FFFFFF" },
-  { name: "コリンチャンス", sport: "サッカー / ブラジル", border: "4px solid #000000", background: "#FFFFFF", color: "#000000" },
-  { name: "鹿島アントラーズ", sport: "Jリーグ / 日本", border: "4px solid #A80000", background: "#FFFFFF", color: "#000000" },
-  { name: "浦和レッドダイヤモンズ", sport: "Jリーグ / 日本", border: "4px solid #000000", background: "#E60012", color: "#FFFFFF" },
-  { name: "横浜F・マリノス", sport: "Jリーグ / 日本", border: "4px solid #002D62", background: "#FFFFFF", color: "#ED1C24" },
-  { name: "川崎フロンターレ", sport: "Jリーグ / 日本", border: "4px solid #1E90FF", background: "#FFFFFF", color: "#000000" },
-  { name: "FC東京", sport: "Jリーグ / 日本", border: "4px solid #002060", background: "#FFFFFF", color: "#CC0000" },
-  { name: "サンフレッチェ広島", sport: "Jリーグ / 日本", border: "4px solid #5C2D91", background: "#FFFFFF", color: "#E5A823" },
-  { name: "ヴィッセル神戸", sport: "Jリーグ / 日本", border: "4px solid #7A003C", background: "#000000", color: "#FFFFFF" },
-  { name: "名古屋グランパス", sport: "Jリーグ / 日本", border: "4px solid #FF6600", background: "#CC0000", color: "#FFFFFF" },
-  { name: "ガンバ大阪", sport: "Jリーグ / 日本", border: "4px solid #000080", background: "#000000", color: "#00FFFF" },
-  { name: "セレッソ大阪", sport: "Jリーグ / 日本", border: "4px solid #E4007F", background: "#FFFFFF", color: "#000000" },
-  { name: "シカゴ・ブルズ", sport: "NBA / アメリカ", border: "4px solid #CE1141", background: "#000000", color: "#FFFFFF" },
-  { name: "ロサンゼルス・レイカーズ", sport: "NBA / アメリカ", border: "4px solid #FDB927", background: "#FFFFFF", color: "#552583" },
-  { name: "ボストン・セルティックス", sport: "NBA / アメリカ", border: "4px solid #007A33", background: "#000000", color: "#FFFFFF" },
-  { name: "ゴールデンステート・ウォリアーズ", sport: "NBA / アメリカ", border: "4px solid #1D428A", background: "#FFFFFF", color: "#FFC72C" },
-  { name: "ニューヨーク・ヤンキース", sport: "MLB / アメリカ", border: "4px solid #0C2340", background: "#0C2340", color: "#FFFFFF" },
-  { name: "ロサンゼルス・ドジャース", sport: "MLB / アメリカ", border: "4px solid #005A9C", background: "#FFFFFF", color: "#005A9C" },
-  { name: "オールブラックキーズ / ニュージーランド代表", sport: "ラグビー / ニュージーランド", border: "4px solid #C0C0C0", background: "#000000", color: "#FFFFFF" },
-  { name: "スプリングボクス / 南アフリカ代表", sport: "ラグビー / 南アフリカ", border: "4px solid #007A3D", background: "#FFFFFF", color: "#FFB81C" },
-  { name: "ワラビーズ / オーストラリア代表", sport: "ラグビー / オーストラリア", border: "4px solid #006600", background: "#FFCC00", color: "#006600" },
-  { name: "イングランド代表", sport: "ラグビー / イングランド", border: "4px solid #0B162A", background: "#FFFFFF", color: "#0B162A" },
-  { name: "ブラジル代表", sport: "サッカー / ブラジル", border: "4px solid #009B3A", background: "#FEDF00", color: "#002776" },
-  { name: "アルゼンチン代表", sport: "サッカー / アルゼンチン", border: "4px solid #75AADB", background: "#FFFFFF", color: "#000000" },
-  { name: "ドイツ代表", sport: "サッカー / ドイツ", border: "4px solid #000000", background: "#FFFFFF", color: "#000000" },
-  { name: "フランス代表", sport: "サッカー / フランス", border: "4px solid #002395", background: "#FFFFFF", color: "#ED2939" },
-  { name: "イタリア代表", sport: "サッカー / イタリア", border: "4px solid #FFFFFF", background: "#002F6C", color: "#FFFFFF" },
-  { name: "日本代表（サムライブルー）", sport: "サッカー / 日本", border: "4px solid #BC002D", background: "#002B49", color: "#FFFFFF" },
-];
 
 export default function TestYamatoPage() {
   const [activeAppType, setActiveAppType] = useState<AppType>("concierge");
@@ -99,28 +46,35 @@ export default function TestYamatoPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 💡 プレビュー用一発ログイン実行関数
+  // 💡 プレビュー用一発ログイン実行関数（汎用）
+  const handleDirectLogin = async (email: string, pass: string) => {
+    setDebugEmail(email);
+    setDebugPassword(pass);
+    setIsLoggingIn(true);
+    setDebugStatus(`${email} でログイン処理中...`);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: pass,
+      });
+      if (error) throw error;
+      setDebugStatus(`✅ ログイン成功！ (${email})`);
+    } catch (err: any) {
+      setDebugStatus(`❌ ログイン失敗: ${err.message}`);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // 💡 フォーム送信によるデバッグログイン実行関数
   const handleDebugLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!debugPassword) {
       setDebugStatus("⚠️ パスワードを入力してください。");
       return;
     }
-    setIsLoggingIn(true);
-    setDebugStatus("ログイン処理中...");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: debugEmail,
-        password: debugPassword,
-      });
-      if (error) throw error;
-      setDebugStatus("✅ ログイン成功！セッションが確立されました。");
-    } catch (err: any) {
-      setDebugStatus(`❌ ログイン失敗: ${err.message}`);
-    } finally {
-      setIsLoggingIn(false);
-    }
+    await handleDirectLogin(debugEmail, debugPassword);
   };
 
   // 💡 ログアウト実行関数
@@ -168,7 +122,6 @@ export default function TestYamatoPage() {
 
   return (
     <div style={{ backgroundColor: "#f1f5f9", minHeight: "100vh", color: "#1e293b", display: "flex", flexDirection: "column", justifyContent: "space-between", fontFamily: "sans-serif", padding: "32px" }}>
-      
       {/* メインコンテンツ（上下フルワイド配置） */}
       <main style={{ maxWidth: "1400px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
         
@@ -201,7 +154,7 @@ export default function TestYamatoPage() {
             <span>🧪</span> プレビュー環境用デバッグログイン (パスキーバイパス)
           </h2>
           <p style={{ fontSize: "12px", color: "#64748b", marginBottom: "14px" }}>
-            CloudflareプレビューURLなどでパスキー認証が使えない場合、ここでメール＆パスワードによりセッションを直接確立できます。
+            CloudflareプレビューURLなどでパスキー認証が使えない場合、テストアカウントのワンタップボタンまたは手動入力によりセッションを直接確立できます。
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -218,6 +171,27 @@ export default function TestYamatoPage() {
               )}
             </div>
 
+            {/* 💡 クイックアカウント（ワンタップ直接ログイン）ボタン */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+              <span style={{ fontSize: "12px", fontWeight: "bold", color: "#475569" }}>クイックテストアカウント:</span>
+              <button
+                type="button"
+                onClick={() => handleDirectLogin("preview@jptutoraiyamato.com", "123test")}
+                disabled={isLoggingIn}
+                style={{ padding: "6px 12px", borderRadius: "8px", backgroundColor: "#fef3c7", border: "1px solid #f59e0b", color: "#92400e", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}
+              >
+                🎓 生徒用 (preview@jptutoraiyamato.com)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDirectLogin("sample@jptutoraiyamato.com", "teacher123")}
+                disabled={isLoggingIn}
+                style={{ padding: "6px 12px", borderRadius: "8px", backgroundColor: "#e0e7ff", border: "1px solid #6366f1", color: "#3730a3", fontSize: "12px", fontWeight: "bold", cursor: "pointer" }}
+              >
+                👨‍🏫 先生用 (sample@jptutoraiyamato.com)
+              </button>
+            </div>
+
             {!currentUser ? (
               <form onSubmit={handleDebugLogin} style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
                 <input
@@ -232,7 +206,7 @@ export default function TestYamatoPage() {
                   value={debugPassword}
                   onChange={(e) => setDebugPassword(e.target.value)}
                   placeholder="パスワードを入力"
-                  style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "12px", width: "180px" }}
+                  style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "12px", width: "160px" }}
                 />
                 <button
                   type="submit"
@@ -419,58 +393,6 @@ export default function TestYamatoPage() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* ⚽ セクション2：スポーツチーム配色テンプレート (チャットボタンサイズプレビュー) */}
-        <div style={{ width: "100%", backgroundColor: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: "bold", color: "#0f172a", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span>⚽</span> スポーツチーム配色テンプレート (チャットボタンサイズプレビュー)
-          </h2>
-          <p style={{ fontSize: "13px", color: "#475569", lineHeight: "1.5", marginBottom: "24px" }}>
-            実際の常駐チャットボタンサイズより一回り小さくし、枠線を <code>4px</code> にして表示雰囲気を比較できる配色案です。
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
-            {sportsColorTemplates.map((template, idx) => (
-              <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "6px", backgroundColor: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                
-                {/* 💬 チャットボタンプレビュー（ボタンサイズを縮小 & 枠線4pxに設定） */}
-                <div
-                  style={{
-                    border: template.border,
-                    backgroundColor: template.background,
-                    color: template.color,
-                    padding: "8px 14px",
-                    borderRadius: "9999px",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)",
-                    cursor: "default"
-                  }}
-                >
-                  <span style={{ fontSize: "16px" }}>🤖</span>
-                  <span>大和ヤマト</span>
-                </div>
-
-                {/* 元のチーム名 & スポーツ種目 */}
-                <div style={{ marginTop: "4px", width: "100%" }}>
-                  <div style={{ fontSize: "13px", fontWeight: "bold", color: "#0f172a" }}>
-                    {template.name}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#64748b" }}>
-                    {template.sport}
-                  </div>
-                  <div style={{ fontSize: "10px", color: "#94a3b8", fontFamily: "monospace", marginTop: "2px" }}>
-                    枠: {template.border} / 背景: {template.background} / 文字: {template.color}
-                  </div>
-                </div>
-
-              </div>
-            ))}
           </div>
         </div>
 

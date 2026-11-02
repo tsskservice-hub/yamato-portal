@@ -2,9 +2,13 @@
  * @file prices.tsx
  * @description 料金プランページ（Supabase PRICE_PLANS 100%動的連動・PageLayoutデータエラーガード完全対応版）
  */
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Link, useRouteLoaderData } from "@remix-run/react";
-import type { MetaFunction } from "@remix-run/cloudflare";
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import { Link, useRouteLoaderData } from '@remix-run/react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ToolPageWrapper } from '../components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
+import { generateModuleMeta } from '../utils/seoMeta';
+import { supabase } from '../lib/supabaseClient';
 import { 
   ShieldCheck, 
   Check, 
@@ -13,19 +17,29 @@ import {
   ChevronDown, 
   ChevronUp, 
   SlidersHorizontal 
-} from "lucide-react";
-import PageLayout, { PageLayoutRef } from "../components/PageLayout";
-import { fetchPricePlansData, PricePlansKnowledge } from "../data/price-plans";
-import { supabase } from "../lib/supabaseClient";
+} from 'lucide-react';
+import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Pricing & Plans - JP Tutor AI Yamato" },
-    {
-      name: "description",
-      content: "Explore flexible pricing plans and credit packs for AI Yamato Japanese tutoring.",
-    },
-  ];
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
 };
 
 export default function Prices() {
@@ -34,7 +48,7 @@ export default function Prices() {
   const [error, setError] = useState<boolean>(false);
   const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
-  const pageLayoutRef = useRef<PageLayoutRef>(null);
+  const layoutRef = useRef<PageLayoutRef>(null);
 
   // root.tsx からユーザー情報を取得
   const rootData = useRouteLoaderData("root") as {
@@ -72,7 +86,7 @@ export default function Prices() {
 
   const handleCheckout = async (priceId: string) => {
     if (!user) {
-      pageLayoutRef.current?.openAuthModal('signin');
+      layoutRef.current?.openAuthModal('signin');
       return;
     }
 
@@ -104,15 +118,7 @@ export default function Prices() {
   const pricePlans = priceData?.pricePlans;
 
   return (
-    <PageLayout
-      ref={pageLayoutRef}
-      user={user}
-      credits={credits}
-      nickname={nickname}
-      error={error}
-      errorMessage="Supabase から料金プランデータ (PRICE_PLANS) の取得に失敗しました。"
-      onRetry={loadData}
-    >
+    <ToolPageWrapper layoutRef={layoutRef}>
       {priceData && pricePlans && (
         <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
           <main className="flex-grow">
@@ -409,6 +415,6 @@ export default function Prices() {
           </main>
         </div>
       )}
-    </PageLayout>
+    </ToolPageWrapper>
   );
 }
