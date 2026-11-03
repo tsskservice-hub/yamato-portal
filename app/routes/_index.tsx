@@ -643,41 +643,41 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 💡 新設: Learn with Games / ゲーミフィケーション・セクション */}
+              {/* 💡 変更: ゲーム総合ポータル（games.tsx / /games）へのポータル誘導カード */}
               <div className="space-y-4 pt-6">
                 <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
                   <span className="text-xl">🎮</span>
                   <h3 className="font-extrabold text-lg text-red-600 dark:text-red-400">
-                    Learn with Games & Practice Arena
+                    Learn with Games & Practice Arcade
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div 
-                    onClick={() => navigate('/games/tower-defense')}
+                    onClick={() => navigate('/games')}
                     className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-red-500/50 cursor-pointer ${
                       isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-                    } shadow-sm transition-colors`}
+                    } shadow-sm transition-colors group`}
                   >
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
                           <Gamepad2 className="w-5 h-5" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/10 text-red-600">
-                          Interactive
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 border border-red-500/20">
+                          Arcade Portal
                         </span>
                       </div>
-                      <h4 className="font-bold text-base">ひらがな・カタカナ・漢字タワーディフェンス</h4>
+                      <h4 className="font-bold text-base group-hover:text-red-500 transition-colors">日本語学習ゲーム・アーケード</h4>
                       <p className="text-xs text-slate-500 leading-relaxed">
-                        Supabase連動の文字マスターを使って、ローマ字タイピングでモンスターを撃破！授業の最後のお楽しみや基礎定着に最適。
+                        ショーシャンク脱出ゲームやタイピング防衛戦など、楽しく遊んでひらがな・カタカナ・ローマ字をマスターできるゲーム一覧はこちら！
                       </p>
                     </div>
 
                     <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium">Gamification</span>
-                      <span className="text-red-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer">
-                        <span>Play Game</span>
+                      <span className="text-slate-400 font-medium">Explore Games</span>
+                      <span className="text-red-600 font-bold flex items-center space-x-1 group-hover:translate-x-1 transition-transform">
+                        <span>View Arcade</span>
                         <ArrowRight className="w-3 h-3" />
                       </span>
                     </div>
