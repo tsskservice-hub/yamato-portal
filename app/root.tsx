@@ -1,6 +1,6 @@
 /**
  * @file root.tsx
- * @description アプリケーション大元レイアウト（グローバルローダー・learning_pace & is_teacher 対応 & ノーキャッシュ対応版）
+ * @description アプリケーション大元レイアウト（グローバルローダー・learning_pace & is_teacher 一時スキップ対応 & ノーキャッシュ対応版）
  */
 import {
   Links,
@@ -32,7 +32,7 @@ export const links: LinksFunction = () => [
   },
 ];
 
-// 💡 グローバルローダー：常に最新のユーザー情報と profiles データ（learning_pace, is_teacher含む）を取得し、キャッシュを残さないように設定
+// 💡 グローバルローダー：常に最新のユーザー情報と profiles データを取得し、キャッシュを残さないように設定
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
@@ -41,10 +41,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let credits = 10;
   let plan = "Free Plan";
   let learningPace: "steady" | "normal" | "accelerated" = "normal"; // デフォルト値
-  let isTeacher = false; // 💡 教師フラグの初期値
+  let isTeacher = false; // 💡 初期値
 
   if (user) {
-    // 💡 profiles テーブルから nickname, credits, learning_pace に加えて is_teacher を取得
+    // 💡 profiles テーブルから nickname, credits, learning_pace を取得
     const { data: profile, error } = await serverSupabase
       .from("profiles")
       .select("nickname, credits, learning_pace, is_teacher")
@@ -54,7 +54,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     if (profile && !error) {
       nickname = (profile as any).nickname ?? "";
       credits = (profile as any).credits ?? 10;
-      isTeacher = Boolean((profile as any).is_teacher); // 💡 教師判定
+      
+      // 🛠 【テスト段階のため一時的にスキップ】
+      // ログイン中のユーザーであれば誰でも教師パネルを表示できるように true に固定しています
+      // 本番運用に戻す際は `isTeacher = Boolean((profile as any).is_teacher);` に戻してください。
+      isTeacher = true; 
       
       // データベースの値が有効な形式であれば反映、そうでなければデフォルト
       const dbPace = (profile as any).learning_pace;
