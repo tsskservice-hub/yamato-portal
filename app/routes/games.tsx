@@ -1,7 +1,7 @@
 /**
  * @file games.tsx
  * @description 日本語学習ゲーム一覧ページ
- * 💡 Supabase GAMES_CONTENT 動的取得・フォールバック廃止・ToolPageWrapper 統合型対応版
+ * 💡 Supabase GAMES_CONTENT 動的取得・フォールバック廃止・ToolPageWrapper 統合型対応版（デバッグログ追加）
  */
 
 import React from 'react';
@@ -24,7 +24,6 @@ export default function GamesPage() {
       case 'Zap': return <Zap className="w-6 h-6" />;
       case 'Target': return <Target className="w-6 h-6" />;
       default: 
-        //もし iconName が絵文字やカスタム文字列の場合はそのままテキストとして描画、それ以外は Sparkles
         if (iconName && iconName.length <= 2) {
           return <span className="text-xl">{iconName}</span>;
         }
@@ -33,8 +32,17 @@ export default function GamesPage() {
   };
 
   const handleCardClick = (game: GameItem) => {
+    console.log('--- Game Card Clicked ---');
+    console.log('Game Object:', game);
+    console.log('Game Name:', game.name);
+    console.log('Path:', game.path);
+    console.log('Is Coming Soon:', game.isComingSoon);
+
     if (!game.isComingSoon && game.path) {
+      console.log('Executing navigate to:', game.path);
       navigate(game.path);
+    } else {
+      console.warn('Navigation skipped: isComingSoon is true or path is missing.');
     }
   };
 
@@ -125,7 +133,7 @@ export default function GamesPage() {
                       <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                         <span className="text-slate-400 font-medium">{game.category || 'Arcade'}</span>
                         {!game.isComingSoon ? (
-                          <span className="text-purple-600 font-bold flex items-center space-x-1 group-hover:underline">
+                          <span className="text-purple-600 font-bold flex items-center space-x-1">
                             <span>{game.actionLabel || 'Play Now'}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </span>
