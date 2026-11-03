@@ -64,6 +64,43 @@ export default function GamesPortal() {
     loadData();
   }, [loadData]);
 
+  // Supabase側のデータが万が一未設定の場合のフォールバック用ゲーム一覧
+  const fallbackGames = [
+    {
+      id: 'ogre-star-sword',
+      name: '鬼星の剣',
+      category: 'Typing Defense',
+      description: '迫ってくる鬼をタイピングと手裏剣の垂直直線軌道で迎撃せよ！VCE日本語学習向け防衛アクション。',
+      icon: '⚔️',
+      badge: 'Popular',
+      path: '/games/ogre-star-sword',
+      isComingSoon: false,
+    },
+    {
+      id: 'tunnel-escape',
+      name: 'トンネル脱出',
+      category: 'Word Adventure',
+      description: '暗いトンネルの奥から言葉の力を頼りに脱出を目指す、スリリングなタイピング・アドベンチャーゲーム。',
+      icon: '🔦',
+      badge: 'New',
+      path: '/games/tunnel-escape',
+      isComingSoon: false,
+    },
+  ];
+
+  // 実際の描画データ（Supabaseデータがあればそれを優先、無ければフォールバックを使用しつつパスを確実に上書き）
+  const activeGames = gamesData?.games
+    ? gamesData.games.map((g) => {
+        if (g.id === 'ogre-star-sword' || g.name.includes('鬼星の剣')) {
+          return { ...g, path: '/games/ogre-star-sword', isComingSoon: false };
+        }
+        if (g.id === 'tunnel-escape' || g.name.includes('トンネル脱出')) {
+          return { ...g, path: '/games/tunnel-escape', isComingSoon: false };
+        }
+        return g;
+      })
+    : fallbackGames;
+
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Japanese Learning Arcade">
       <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -89,9 +126,9 @@ export default function GamesPortal() {
               <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
               <p className="text-xs text-slate-400">Loading games arcade...</p>
             </div>
-          ) : error || !gamesData ? (
+          ) : error && !gamesData ? (
             <div className="p-8 bg-rose-950/30 border border-rose-800/50 rounded-2xl text-center space-y-4">
-              <p className="text-sm text-rose-300 font-semibold">Failed to load arcade games data from Supabase.</p>
+              <p className="text-sm text-rose-300 font-semibold">Failed to load arcade games data from Supabase. Using default games.</p>
               <button
                 onClick={loadData}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-sm"
@@ -99,10 +136,12 @@ export default function GamesPortal() {
                 Retry
               </button>
             </div>
-          ) : (
-            /* ゲームカード一覧グリッド */
+          ) : null}
+
+          {/* ゲームカード一覧グリッド */}
+          {!loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {gamesData.games.map((game) => (
+              {activeGames.map((game) => (
                 <div
                   key={game.id}
                   onClick={() => !game.isComingSoon && navigate(game.path)}

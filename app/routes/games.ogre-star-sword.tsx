@@ -1,6 +1,6 @@
 /**
- * @file tower-defense.tsx
- * @description 生徒用タイピング防衛戦 (手裏剣の垂直直線軌道対応版)
+ * @file games.ogre-star-sword.tsx
+ * @description 生徒用タイピング防衛戦 (手裏剣の垂直直線軌道対応版 / 鬼星の剣)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -69,7 +69,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
 };
 
-export default function StudentTowerDefensePage() {
+export default function OgreStarSwordPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
   const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false);
@@ -89,12 +89,12 @@ export default function StudentTowerDefensePage() {
   };
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Typing Tower Defense">
+    <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Ogre Star Sword">
       <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
         <header className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center shadow-sm">
           <div>
-            <h1 className="text-xl font-bold text-slate-800">🇯🇵 AI Yamato タイピング防衛戦</h1>
-            <p className="text-xs text-slate-500 mt-0.5">VCE Japanese Typing Practice</p>
+            <h1 className="text-xl font-bold text-slate-800">⚔️ 鬼星の剣 〜タイピング防衛戦〜</h1>
+            <p className="text-xs text-slate-500 mt-0.5">Ogre Star Sword - VCE Japanese Typing Practice</p>
           </div>
           <Link
             to="/teacher-dashboard"
@@ -105,7 +105,7 @@ export default function StudentTowerDefensePage() {
         </header>
 
         {isAccessible ? (
-          <GameArena />
+          <OgreStarSwordArena />
         ) : (
           <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm">
             <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
@@ -141,7 +141,7 @@ export default function StudentTowerDefensePage() {
   );
 }
 
-function GameArena() {
+function OgreStarSwordArena() {
   const [score, setScore] = useState(0);
   const [defeatCount, setDefeatCount] = useState(0);
   const [hp, setHp] = useState(5);
@@ -330,7 +330,7 @@ function GameArena() {
         ) : (
           <>
             <div className="text-xs text-slate-500 tracking-wider flex justify-between">
-              <span>▼ 鬼のエリア ▼ (Lv.{speedMultiplier.toFixed(1)})</span>
+              <span>▼ 鬼星の領域 ▼ (Lv.{speedMultiplier.toFixed(1)})</span>
               <span className="text-indigo-400">← → キーで真下に合わせて撃て！</span>
             </div>
 
