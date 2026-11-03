@@ -265,12 +265,12 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-slate-900">
-      {/* ヘッダー */}
+      {/* ヘッダー（isTeacher を正しく渡すように修正） */}
       <Header 
         user={user} 
         credits={credits} 
         nickname={resolvedNickname} 
-        isTeacher={isTeacher} // 💡 Headerへ教師フラグを渡す
+        isTeacher={isTeacher} 
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={handleSignOut} 
       />
