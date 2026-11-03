@@ -1,166 +1,120 @@
 /**
  * @file games-content.ts
- * @description JP Tutor AI Yamato ゲームポータル仕様・マスターデータの取得＆エラーハンドリング
+ * @description Supabase GAMES_CONTENT キーからの動的データ取得モジュール
+ * 💡 静的フォールバックデータを撤去し、通信失敗・データ不在時は isError: true を返して PageLayout の DataErrorState で処理します。
  */
+
 import { useState, useEffect, useCallback } from 'react';
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-// =================================================================
-// 1. 型定義 (Type Definitions)
-// =================================================================
-
-export interface GameModule {
+export interface GameItem {
   id: string;
-  icon: string;
   name: string;
-  path: string;
-  badge: string;
-  category: string;
   description: string;
-  isComingSoon?: boolean;
-  accentColor?: string;
+  iconName?: string;
+  path: string;
+  category?: string;
   actionLabel?: string;
+  creditRequirement?: 'textAi' | 'imageAi';
+  isComingSoon?: boolean;
+  badge?: string;
 }
 
-export interface GamesHeader {
+export interface GamesContentSection {
+  title: string;
+  subtitle?: string;
+  games: GameItem[];
+}
+
+export interface GamesKnowledge {
   title: string;
   subtitle: string;
+  sections: GamesContentSection[];
+  rawText?: string;
+  updatedAt?: string;
 }
 
-export interface GamesContentData {
-  header: GamesHeader;
-  games: GameModule[];
-}
-
-export interface GamesContentResult {
-  data: GamesContentData | null;
-  isError: boolean;
-  errorMessage?: string;
-}
-
-// =================================================================
-// 2. デフォルトマスターデータ定数 (games.tsx への export)
-// =================================================================
-
-export const GAMES_CONTENT: GamesContentData = {
-  games: [
-    {
-      id: "tunnel-escape",
-      icon: "⛏️",
-      name: "Shawshank Tunnel Escape",
-      path: "/games/tunnel-escape",
-      badge: "New",
-      category: "Memory & Quiz",
-      description: "Memorise the correct sequence of Hiragana and Katakana, answer 4-choice quizzes, and carve your way through the tunnel to freedom.",
-      isComingSoon: false,
-      accentColor: "emerald",
-      actionLabel: "Play Game"
-    },
-    {
-      id: "tower-defense",
-      icon: "🎮",
-      name: "Kana & Kanji Tower Defense",
-      path: "/games/tower-defense",
-      badge: "Interactive",
-      category: "Typing Action",
-      description: "Defeat incoming monsters with Romaji typing! Ideal for solidifying foundational Japanese skills in a gamified environment.",
-      isComingSoon: false,
-      accentColor: "red",
-      actionLabel: "Play Game"
-    }
-  ],
-  header: {
-    title: "Japanese Learning Arcade",
-    subtitle: "Have fun mastering Hiragana, Katakana, and typing skills through interactive games!"
-  }
-};
-
-export default GAMES_CONTENT;
-
-// =================================================================
-// 3. Supabase 動的データ取得関数
-// =================================================================
-
-export const GAMES_KNOWLEDGE_KEY = 'GAMES_CONTENT';
-
-export async function fetchGamesContentData(supabaseClient: SupabaseClient): Promise<GamesContentResult> {
+/**
+ * Supabase から GAMES_CONTENT キーのデータを直接フェッチする関数
+ * 💡 フォールバックデータは存在せず、取得失敗時は null を返します。
+ */
+export async function fetchGamesContentData(
+  supabase: SupabaseClient
+): Promise<GamesKnowledge | null> {
   try {
-    const { data, error } = await supabaseClient
-      .from('app_knowledge')
-      .select('data')
-      .eq('key', GAMES_KNOWLEDGE_KEY)
-      .single();
+    const { data, error } = await supabase
+      .from('portal_content')
+      .select('content, raw_text, updated_at')
+      .eq('key', 'GAMES_CONTENT')
+      .maybeSingle();
 
     if (error) {
-      return {
-        data: null,
-        isError: true,
-        errorMessage: `Database query failed: ${error.message}`,
-      };
+      console.error('[fetchGamesContentData] Supabase Error:', error);
+      return null;
     }
 
-    if (!data?.data) {
-      return {
-        data: null,
-        isError: true,
-        errorMessage: `No content found for key '${GAMES_KNOWLEDGE_KEY}'.`,
-      };
+    if (!data || !data.content) {
+      console.warn('[fetchGamesContentData] No data found for key: GAMES_CONTENT');
+      return null;
     }
 
+    const content = typeof data.content === 'string' ? JSON.parse(data.content) : data.content;
+
     return {
-      data: data.data as GamesContentData,
-      isError: false,
+      title: content.title || 'Japanese Learning Games',
+      subtitle: content.subtitle || 'Interactive AI-powered games for Japanese practice.',
+      sections: content.sections || [],
+      rawText: data.raw_text,
+      updatedAt: data.updated_at,
     };
-  } catch (err: any) {
-    return {
-      data: null,
-      isError: true,
-      errorMessage: err?.message || 'Network error while fetching games content.',
-    };
+  } catch (err) {
+    console.error('[fetchGamesContentData] Unexpected Exception:', err);
+    return null;
   }
 }
 
-// =================================================================
-// 4. カスタムフック (オンライン自動復帰リスナー付き)
-// =================================================================
-
-export function useGamesContent(supabaseClient: SupabaseClient) {
-  const [gamesContent, setGamesContent] = useState<GamesContentData | null>(null);
+/**
+ * games.tsx 用のカスタムフック
+ * 💡 失敗時は gamesData: null かつ isError: true を返し、PageLayout 統合型 DataErrorState に引き継ぎます。
+ */
+export function useGamesContent(supabase: SupabaseClient) {
+  const [gamesData, setGamesData] = useState<GamesKnowledge | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
-    const result = await fetchGamesContentData(supabaseClient);
+    setIsError(false);
+    setErrorMessage('');
 
-    if (result.isError || !result.data) {
-      setGamesContent(null);
-      setErrorMessage(result.errorMessage || 'Failed to load Games configuration.');
-    } else {
-      setGamesContent(result.data);
-      setErrorMessage(null);
+    try {
+      const data = await fetchGamesContentData(supabase);
+      if (data && data.sections && data.sections.length > 0) {
+        setGamesData(data);
+      } else {
+        setGamesData(null);
+        setIsError(true);
+        setErrorMessage('Supabase から GAMES_CONTENT の取得に失敗しました。データが存在しないかキーが無効です。');
+      }
+    } catch (err: any) {
+      setGamesData(null);
+      setIsError(true);
+      setErrorMessage(`Supabase 接続エラー: ${err?.message || 'GAMES_CONTENT の読み込み中に予期せぬエラーが発生しました。'}`);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [supabaseClient]);
+  }, [supabase]);
 
   useEffect(() => {
     loadData();
-
-    const handleOnline = () => {
-      loadData();
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', handleOnline);
-      return () => window.removeEventListener('online', handleOnline);
-    }
   }, [loadData]);
 
   return {
-    gamesContent,
+    gamesData,
     isLoading,
-    isError: !isLoading && !gamesContent,
+    isError,
     errorMessage,
-    retry: loadData,
+    refetch: loadData,
   };
 }

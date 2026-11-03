@@ -1,19 +1,33 @@
 /**
  * @file ToolPageWrapper.tsx
- * @description すべてのツールページで共通のSEOメタタグ、JSON-LD構造化データ、レイアウトを自動統合するラッパーコンポーネント
+ * @description すべてのツールページで共通のSEOメタタグ、JSON-LD構造化データ、共通レイアウト（PageLayout）、およびエラーハンドリング（DataErrorState）を自動統合するラッパーコンポーネント
  */
 import React, { type RefObject } from 'react';
 import { useLoaderData } from '@remix-run/react';
 import PageLayout, { type PageLayoutRef } from './PageLayout';
+import { DataErrorState } from './DataErrorState';
 import { generatePageJsonLd } from '../utils/seoJsonLd';
 
-type ToolPageWrapperProps = {
+export type ToolPageWrapperProps = {
+  /** ツールページのメインコンテンツ */
   children: React.ReactNode;
-  // 💡 型エラー解消のため、null許容型も含めた柔軟なRefの型定義に修正
-  layoutRef?: RefObject<PageLayoutRef | null> | React.MutableRefObject<PageLayoutRef | null> | RefObject<PageLayoutRef>;
+  /** PageLayout の ref（認証モーダルの手動オープン等に使用） */
+  layoutRef?:
+    | RefObject<PageLayoutRef | null>
+    | React.MutableRefObject<PageLayoutRef | null>
+    | RefObject<PageLayoutRef>;
+  /** パンくずリストの末尾タイトル */
   breadcrumbTitle?: string;
+  /** 認証必須ページかどうかのフラグ */
   requireAuth?: boolean;
-  isDarkMode?: boolean;
+  /** データ取得・処理時のエラー発生フラグ */
+  hasError?: boolean;
+  /** エラー表示タイトル (DataErrorState) */
+  errorTitle?: string;
+  /** エラーメッセージの本文/詳細 (DataErrorState) */
+  errorMessage?: string;
+  /** 再試行ボタン押下時のコールバック関数 */
+  onRetry?: () => void;
 };
 
 export function ToolPageWrapper({
@@ -21,7 +35,10 @@ export function ToolPageWrapper({
   layoutRef,
   breadcrumbTitle,
   requireAuth,
-  isDarkMode = false
+  hasError = false,
+  errorTitle,
+  errorMessage,
+  onRetry,
 }: ToolPageWrapperProps) {
   // Remix の loader から共通で portalContent と currentPath を受け取る
   const loaderData = useLoaderData<any>() || {};
@@ -31,11 +48,10 @@ export function ToolPageWrapper({
   const jsonLdData = generatePageJsonLd(currentPath || "", portalContent);
 
   return (
-    <PageLayout 
-      ref={layoutRef as any} 
+    <PageLayout
+      ref={layoutRef as any}
       breadcrumbTitle={breadcrumbTitle}
       requireAuth={requireAuth}
-      isDarkMode={isDarkMode}
     >
       {/* 検索エンジン用の構造化データ（JSON-LD）を自動埋め込み */}
       <script
@@ -43,8 +59,19 @@ export function ToolPageWrapper({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
       />
 
-      {/* 各ツールの本体コンテンツ */}
-      {children}
+      {/* エラー判定: エラー発生時は DataErrorState、正常時は children を描画 */}
+      {hasError ? (
+        <DataErrorState
+          title={errorTitle}
+          message={errorMessage}
+          errorMessage={errorMessage}
+          onRetry={onRetry}
+        />
+      ) : (
+        children
+      )}
     </PageLayout>
   );
 }
+
+export default ToolPageWrapper;
