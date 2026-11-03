@@ -1,5 +1,5 @@
 /**
- * @file games.ogre-star-sword.tsx
+ * @file ogre-star-sword.tsx
  * @description 生徒用タイピング防衛戦 (手裏剣の垂直直線軌道対応版 / 鬼星の剣)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
