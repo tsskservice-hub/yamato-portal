@@ -34,18 +34,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 export default function Dashboard() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");

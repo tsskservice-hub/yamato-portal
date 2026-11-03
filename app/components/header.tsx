@@ -1,16 +1,17 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタンを追加版・Yamatoの枠を削除・ホーム画面のみ表示）
+ * @description ポータル共通ヘッダー（教師ダッシュボードボタンをニックネームの左隣に追加版）
  */
 import React from 'react';
 import { Link, useLocation } from '@remix-run/react';
-import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle } from 'lucide-react';
+import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle, GraduationCap } from 'lucide-react';
 
 type HeaderProps = {
   title?: string;
   user?: any;
   credits?: number;
-  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティ
+  nickname?: string;
+  isTeacher?: boolean; // 💡 教師フラグを受け取るプロパティ
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
 };
@@ -20,23 +21,21 @@ export default function Header({
   user, 
   credits = 10, 
   nickname = "",
+  isTeacher = false, // 💡 デフォルトは false
   onOpenAuth, 
   onSignOut 
 }: HeaderProps) {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
-  // 💡 ユーザーが入力中の文字（nickname）があればそれを最優先で表示し、
-  // 完全な未入力・空白のときのみ "Set Nickname" を表示する
   const trimmedNickname = nickname ? nickname.trim() : "";
   const displayNickname = trimmedNickname !== "" ? trimmedNickname : "Set Nickname";
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+    <header className="bg-white/80 border-slate-200 text-slate-900 backdrop-blur-md border-b sticky top-0 z-50 shadow-xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* 左側グループ：ロゴ ＆ クイックジャンプボタン */}
         <div className="flex items-center space-x-6">
-          {/* ロゴ・画像リンク（クリックでホームへ） */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-red-600">
               <img 
@@ -50,19 +49,18 @@ export default function Header({
             </span>
           </Link>
 
-          {/* 💡 クイックジャンプボタン（ロゴの右隣：ホーム画面でのみ表示） */}
           {isHome && (
             <div className="hidden md:flex items-center space-x-2">
               <a 
                 href="/#section-general" 
-                className="px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
               >
                 <span>🌐</span>
                 <span>General</span>
               </a>
               <a 
                 href="/#section-vce" 
-                className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 bg-red-500/10 text-red-600 hover:bg-red-500/20"
               >
                 <span>🇦🇺</span>
                 <span>VCE</span>
@@ -73,14 +71,26 @@ export default function Header({
 
         {/* 右側グループ：ユーザー情報、プラン、FAQ、My Account、認証ボタン */}
         <div className="flex items-center space-x-3">
+          {/* 💡 教師かつログイン中の場合のみ、ニックネームの左隣にダッシュボードボタンを表示 */}
+          {user && isTeacher && (
+            <Link 
+              to="/teacher/dashboard"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer shadow-xs bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+              title="Teacher Control Panel"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Teacher Panel</span>
+            </Link>
+          )}
+
           {/* 1. Nickname (ログイン時のみ表示) */}
           {user && (
             <Link 
               to="/my-account"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 transition-all cursor-pointer shadow-xs"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
               title="Click to change your nickname in Account Settings"
             >
-              <User className="w-3.5 h-3.5 text-blue-600" />
+              <User className="w-3.5 h-3.5 text-blue-500" />
               <span>{displayNickname}</span>
             </Link>
           )}
@@ -96,7 +106,7 @@ export default function Header({
           {/* 3. Pricing */}
           <Link 
             to="/prices" 
-            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all hidden sm:flex items-center space-x-1"
+            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hidden sm:flex items-center space-x-1 border-slate-200 hover:bg-slate-100 text-slate-700"
           >
             <span>Pricing</span>
           </Link>
@@ -104,18 +114,18 @@ export default function Header({
           {/* 4. FAQ */}
           <Link 
             to="/faq" 
-            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all hidden sm:flex items-center space-x-1"
+            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hidden sm:flex items-center space-x-1 border-slate-200 hover:bg-slate-100 text-slate-700"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-slate-500" />
+            <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
             <span>FAQ</span>
           </Link>
 
           {/* 5. My Account */}
           <Link 
             to="/my-account" 
-            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1"
+            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center space-x-1 border-slate-200 hover:bg-slate-100 text-slate-700"
           >
-            <User className="w-3.5 h-3.5 text-slate-500" />
+            <User className="w-3.5 h-3.5 text-slate-400" />
             <span>My Account</span>
           </Link>
 
@@ -123,7 +133,7 @@ export default function Header({
           {user ? (
             <button 
               onClick={onSignOut}
-              className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all flex items-center space-x-1 cursor-pointer"
+              className="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center space-x-1 cursor-pointer border-slate-200 hover:bg-slate-100 text-slate-700"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
@@ -132,7 +142,7 @@ export default function Header({
             <>
               <button 
                 onClick={() => onOpenAuth?.('signin')}
-                className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 text-slate-700 transition-all hidden sm:flex items-center space-x-1 cursor-pointer"
+                className="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all hidden sm:flex items-center space-x-1 cursor-pointer border-slate-200 hover:bg-slate-100 text-slate-700"
               >
                 <KeyRound className="w-3.5 h-3.5 text-blue-500" />
                 <span>Sign In</span>
