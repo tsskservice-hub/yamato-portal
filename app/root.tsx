@@ -1,6 +1,6 @@
 /**
  * @file root.tsx
- * @description アプリケーション大元レイアウト（グローバルローダー・learning_pace & is_teacher 一時スキップ対応 & ノーキャッシュ対応版）
+ * @description アプリケーション大元レイアウト（グローバルローダー・learning_pace & データベース連動 is_teacher 対応・ノーキャッシュ対応版）
  */
 import {
   Links,
@@ -44,7 +44,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let isTeacher = false; // 💡 初期値
 
   if (user) {
-    // 💡 profiles テーブルから nickname, credits, learning_pace を取得
+    // 💡 profiles テーブルから nickname, credits, learning_pace, is_teacher を取得
     const { data: profile, error } = await serverSupabase
       .from("profiles")
       .select("nickname, credits, learning_pace, is_teacher")
@@ -55,10 +55,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       nickname = (profile as any).nickname ?? "";
       credits = (profile as any).credits ?? 10;
       
-      // 🛠 【テスト段階のため一時的にスキップ】
-      // ログイン中のユーザーであれば誰でも教師パネルを表示できるように true に固定しています
-      // 本番運用に戻す際は `isTeacher = Boolean((profile as any).is_teacher);` に戻してください。
-      isTeacher = true; 
+      // 💡 データベースの is_teacher カラムの値を正しく反映させる
+      isTeacher = Boolean((profile as any).is_teacher); 
       
       // データベースの値が有効な形式であれば反映、そうでなければデフォルト
       const dbPace = (profile as any).learning_pace;
@@ -76,7 +74,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       credits,
       plan,
       learningPace,
-      isTeacher, // ★ここで教師判定フラグをルートデータとして全体に共有する
+      isTeacher, // ★ここでデータベース上の教師判定フラグをルートデータとして全体に共有する
     },
     {
       headers: {
