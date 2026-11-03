@@ -67,7 +67,7 @@ export default function Home() {
   // 💡 先生がログインしている場合、トップページを開いた瞬間に教師ダッシュボードへ自動リダイレクト
   useEffect(() => {
     if (user && isTeacher) {
-      navigate('/teacher/dashboard', { replace: true });
+      navigate('/teacher-dashboard', { replace: true });
     }
   }, [user, isTeacher, navigate]);
 
