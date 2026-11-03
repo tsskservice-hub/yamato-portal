@@ -18,6 +18,7 @@ import { DataErrorState } from '../components/DataErrorState';
 import { PortalModule, usePortalContent } from '../data/portal-content';
 import { PricePlansKnowledge, fetchPricePlansData } from '../data/price-plans';
 import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '../data/quizzes';
+import { PricingSection } from '../components/PricingSection';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -348,7 +349,7 @@ export default function Home() {
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       {portalContent && (
-        <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300 relative flex flex-col justify-between`}>
+        <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-950'} transition-colors duration-300 relative flex flex-col justify-between`}>
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
             
             {/* 1. Hero Section ＆ Auto Demo Chat */}
@@ -369,204 +370,13 @@ export default function Home() {
               portalContent={portalContent}
             />
 
-            {/* 2. Pricing & Credit Packs */}
-            <section id="pricing" className="space-y-12 text-center">
-              <div className="space-y-4 max-w-3xl mx-auto">
-                <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
-                <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Start for free with daily credits, or top up with prepaid charge packs for intensive study.
-                </p>
-              </div>
-
-              {isPriceLoading ? (
-                <div className="py-16 flex flex-col items-center justify-center space-y-3">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                  <p className="text-xs text-slate-400">Loading pricing plans...</p>
-                </div>
-              ) : isPriceError || !priceData?.pricePlans ? (
-                <div className="p-6 bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 rounded-2xl text-sm font-semibold">
-                  Failed to load pricing packages from Supabase.
-                  <button onClick={loadPricePlans} className="ml-3 underline text-blue-600 font-bold">Retry</button>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-                    {priceData?.pricePlans?.free && (
-                      <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                        <div className="space-y-4">
-                          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{priceData?.pricePlans?.free?.name}</span>
-                          <div>
-                            <span className="text-4xl font-black">{priceData?.pricePlans?.free?.price}</span>
-                            <span className="text-xs text-slate-500 ml-1">{priceData?.pricePlans?.free?.period}</span>
-                          </div>
-                          {priceData?.pricePlans?.free?.badge && (
-                            <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                              {priceData?.pricePlans?.free?.badge}
-                            </div>
-                          )}
-                          <p className="text-xs text-slate-500">{priceData?.pricePlans?.free?.description}</p>
-                          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                            {priceData?.pricePlans?.free?.features?.map((feat: string, idx: number) => (
-                              <li key={idx} className="flex items-center space-x-2">
-                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                                <span>{feat}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => handleOpenAuthModal('signup')}
-                          className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                        >
-                          {priceData?.pricePlans?.free?.ctaText || "Get Started Free"}
-                        </button>
-                      </div>
-                    )}
-
-                    {priceData?.pricePlans?.starter && (
-                      <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                        <div className="space-y-4">
-                          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData?.pricePlans?.starter?.name}</span>
-                          <div>
-                            <span className="text-4xl font-black">{priceData?.pricePlans?.starter?.price}</span>
-                            <span className="text-xs text-slate-500 ml-1">{priceData?.pricePlans?.starter?.period}</span>
-                          </div>
-                          {priceData?.pricePlans?.starter?.badge && (
-                            <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                              {priceData?.pricePlans?.starter?.badge}
-                            </div>
-                          )}
-                          <p className="text-xs text-slate-500">{priceData?.pricePlans?.starter?.description}</p>
-                          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                            {priceData?.pricePlans?.starter?.features?.map((feat: string, idx: number) => (
-                              <li key={idx} className="flex items-center space-x-2">
-                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                                <span>{feat}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="mt-6 space-y-3">
-                          <button 
-                            type="button"
-                            onClick={() => priceData?.pricePlans?.starter?.id && handleCheckout(priceData.pricePlans.starter.id)} 
-                            disabled={checkoutLoadingPriceId === priceData?.pricePlans?.starter?.id}
-                            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                          >
-                            {checkoutLoadingPriceId === priceData?.pricePlans?.starter?.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                            <span>{priceData?.pricePlans?.starter?.ctaText || "Buy Starter Pack"}</span>
-                          </button>
-                          <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {priceData?.pricePlans?.standard && (
-                      <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-                          Most Popular
-                        </div>
-                        <div className="space-y-4">
-                          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{priceData?.pricePlans?.standard?.name}</span>
-                          <div>
-                            <span className="text-4xl font-black">{priceData?.pricePlans?.standard?.price}</span>
-                            <span className="text-xs text-slate-500 ml-1">{priceData?.pricePlans?.standard?.period}</span>
-                          </div>
-                          {priceData?.pricePlans?.standard?.badge && (
-                            <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                              {priceData?.pricePlans?.standard?.badge}
-                            </div>
-                          )}
-                          <p className="text-xs text-slate-500">{priceData?.pricePlans?.standard?.description}</p>
-                          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                            {priceData?.pricePlans?.standard?.features?.map((feat: string, idx: number) => (
-                              <li key={idx} className="flex items-center space-x-2">
-                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                                <span>{feat}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="mt-6 space-y-3">
-                          <button 
-                            type="button"
-                            onClick={() => priceData?.pricePlans?.standard?.id && handleCheckout(priceData.pricePlans.standard.id)} 
-                            disabled={checkoutLoadingPriceId === priceData?.pricePlans?.standard?.id}
-                            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                          >
-                            {checkoutLoadingPriceId === priceData?.pricePlans?.standard?.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                            <span>{priceData?.pricePlans?.standard?.ctaText || "Buy Standard Pack"}</span>
-                          </button>
-                          <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {priceData?.pricePlans?.pro && (
-                      <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-                        <div className="space-y-4">
-                          <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{priceData?.pricePlans?.pro?.name}</span>
-                          <div>
-                            <span className="text-4xl font-black">{priceData?.pricePlans?.pro?.price}</span>
-                            <span className="text-xs text-slate-500 ml-1">{priceData?.pricePlans?.pro?.period}</span>
-                          </div>
-                          {priceData?.pricePlans?.pro?.badge && (
-                            <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                              {priceData?.pricePlans?.pro?.badge}
-                            </div>
-                          )}
-                          <p className="text-xs text-slate-500">{priceData?.pricePlans?.pro?.description}</p>
-                          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                            {priceData?.pricePlans?.pro?.features?.map((feat: string, idx: number) => (
-                              <li key={idx} className="flex items-center space-x-2">
-                                <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                                <span>{feat}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="mt-6 space-y-3">
-                          <button 
-                            type="button"
-                            onClick={() => priceData?.pricePlans?.pro?.id && handleCheckout(priceData.pricePlans.pro.id)} 
-                            disabled={checkoutLoadingPriceId === priceData?.pricePlans?.pro?.id}
-                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                          >
-                            {checkoutLoadingPriceId === priceData?.pricePlans?.pro?.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                            <span>{priceData?.pricePlans?.pro?.ctaText || "Buy Pro Pack"}</span>
-                          </button>
-                          <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                            By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {priceData?.creditConsumptionGuide && (
-                    <div id="pricing-credits-guide" className={`max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'} shadow-sm mt-8`}>
-                      <div className="flex items-center justify-center space-x-2 font-bold mb-3">
-                        <Coins className="w-4 h-4 text-amber-500" />
-                        <span>Credit Consumption Guide</span>
-                      </div>
-                      <div className="space-y-2 text-slate-500">
-                        {priceData.creditConsumptionGuide.map((row, idx) => (
-                          <div key={idx} className="flex justify-between border-b border-slate-500/10 pb-1.5 last:border-0 last:pb-0">
-                            <span>{row.item}</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">{row.cost}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </section>
+            {/* 2. Pricing & Credit Packs (PricingSection コンポーネントの適用) */}
+            <PricingSection
+              isDarkMode={isDarkMode}
+              checkoutLoadingPriceId={checkoutLoadingPriceId}
+              onCheckout={handleCheckout}
+              onOpenAuthModal={handleOpenAuthModal}
+            />
 
             {/* 3. Portal Pages & Modules */}
             <section className="space-y-12">
@@ -643,7 +453,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 💡 変更: ゲーム総合ポータル（games.tsx / /games）へのポータル誘導カード */}
+              {/* 💡 ゲーム総合ポータル（games.tsx / /games）へのポータル誘導カード */}
               <div className="space-y-4 pt-6">
                 <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
                   <span className="text-xl">🎮</span>
