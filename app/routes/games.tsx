@@ -23,7 +23,18 @@ export default function GamesPage() {
       case 'Flame': return <Flame className="w-6 h-6" />;
       case 'Zap': return <Zap className="w-6 h-6" />;
       case 'Target': return <Target className="w-6 h-6" />;
-      default: return <Sparkles className="w-6 h-6" />;
+      default: 
+        //もし iconName が絵文字やカスタム文字列の場合はそのままテキストとして描画、それ以外は Sparkles
+        if (iconName && iconName.length <= 2) {
+          return <span className="text-xl">{iconName}</span>;
+        }
+        return <Sparkles className="w-6 h-6" />;
+    }
+  };
+
+  const handleCardClick = (game: GameItem) => {
+    if (!game.isComingSoon && game.path) {
+      navigate(game.path);
     }
   };
 
@@ -71,21 +82,25 @@ export default function GamesPage() {
                   {section.games.map((game: GameItem) => (
                     <div
                       key={game.id}
-                      onClick={() => {
-                        if (!game.isComingSoon) {
-                          navigate(game.path);
+                      role="button"
+                      tabIndex={game.isComingSoon ? -1 : 0}
+                      onClick={() => handleCardClick(game)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleCardClick(game);
                         }
                       }}
-                      className={`p-6 rounded-3xl border bg-white shadow-sm transition-all duration-200 flex flex-col justify-between ${
+                      className={`p-6 rounded-3xl border bg-white shadow-sm transition-all duration-200 flex flex-col justify-between text-left select-none ${
                         game.isComingSoon
                           ? 'opacity-75 cursor-not-allowed border-slate-200'
-                          : 'hover:shadow-md hover:border-purple-400 cursor-pointer border-slate-200'
+                          : 'hover:shadow-md hover:border-purple-400 cursor-pointer border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500'
                       }`}
                     >
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-inner">
-                            {renderGameIcon(game.iconName)}
+                            {renderGameIcon(game.iconName || (game as any).icon)}
                           </div>
                           {game.badge && (
                             <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
@@ -110,13 +125,10 @@ export default function GamesPage() {
                       <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                         <span className="text-slate-400 font-medium">{game.category || 'Arcade'}</span>
                         {!game.isComingSoon ? (
-                          <button
-                            type="button"
-                            className="text-purple-600 font-bold flex items-center space-x-1 hover:underline cursor-pointer"
-                          >
+                          <span className="text-purple-600 font-bold flex items-center space-x-1 group-hover:underline">
                             <span>{game.actionLabel || 'Play Now'}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
+                          </span>
                         ) : (
                           <span className="text-slate-400 font-medium">Coming Soon</span>
                         )}
