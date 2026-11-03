@@ -1,6 +1,6 @@
 /**
  * @file tower-defense.tsx
- * @description 生徒用タイピング防衛戦 (軌道点線アニメーション・「〇人」撃破カウント対応版)
+ * @description 生徒用タイピング防衛戦 (真下ヒット判定・外れ軌道・音声対応討伐カウント版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -44,6 +44,7 @@ interface AttackEffect {
   startY: number;
   targetX: number;
   targetY: number;
+  isHit: boolean; // 当たったかどうか
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -142,16 +143,16 @@ export default function StudentTowerDefensePage() {
 
 function GameArena() {
   const [score, setScore] = useState(0);
-  const [defeatCount, setDefeatCount] = useState(0); // 撃破人数（一人、二人…）
+  const [defeatCount, setDefeatCount] = useState(0); // 討伐人数
   const [hp, setHp] = useState(5);
   const [enemies, setEnemies] = useState<ActiveEnemy[]>([]);
-  const [attacks, setAttacks] = useState<AttackEffect[]>([]); // 手裏剣の軌道・ヒット演出
+  const [attacks, setAttacks] = useState<AttackEffect[]>([]); // 手裏剣の軌道演出
   const [playerX, setPlayerX] = useState(50); // プレイヤーの横位置 (%)
   const [inputVal, setInputVal] = useState('');
   const [isGameOver, setIsGameOver] = useState(false);
   const [speedMultiplier, setSpeedMultiplier] = useState(1.0);
 
-  // 1. 15秒ごとにスピードを加速
+  // 1. 15秒ごとにスピード加速
   useEffect(() => {
     if (isGameOver) return;
     const speedTimer = setInterval(() => {
@@ -223,7 +224,19 @@ function GameArena() {
     }
   };
 
-  // 5. ローマ字入力時の判定（正面にいる鬼にだけ手裏剣の軌道が伸びる）
+  // 音声ファイルの再生ヘルパー関数（ElevenLabsの事前作成音源用）
+  const playVoiceCount = (count: number) => {
+    try {
+      // 例: public/audio/hit-1.mp3, hit-2.mp3 ... を配置すると再生されます
+      const audio = new Audio(`/audio/hit-${count}.mp3`);
+      audio.volume = 0.8;
+      audio.play().catch(() => {
+        // ファイルがない場合のブラウザエラーをサイレントで無視
+      });
+    } catch (e) {}
+  };
+
+  // 5. ローマ字入力時の判定（真下・真正面からの判定 ＆ 外れ軌道対応）
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isGameOver) return;
     const val = e.target.value.toLowerCase();
@@ -232,31 +245,52 @@ function GameArena() {
     const matchedEnemy = enemies.find((enemy) => enemy.romaji === val);
 
     if (matchedEnemy) {
-      // プレイヤーと鬼の横位置のズレが±15%以内なら正面と判定して命中
-      const isAligned = Math.abs(playerX - matchedEnemy.x) <= 15;
+      // 誤差±5%以内（真下・真正面）のときのみヒットとする
+      const isAligned = Math.abs(playerX - matchedEnemy.x) <= 5;
 
       if (isAligned) {
-        // 軌道演出データを追加
+        // 【命中】の軌道と手裏剣エフェクト
         const newAttack: AttackEffect = {
           id: Date.now() + Math.random(),
           startX: playerX,
           startY: 90,
           targetX: matchedEnemy.x,
           targetY: matchedEnemy.y,
+          isHit: true,
         };
         setAttacks((prev) => [...prev, newAttack]);
 
-        // 軌道が表示されたあと、鬼を消滅させてカウントを増やす
         setTimeout(() => {
           setEnemies((prev) => prev.filter((enemy) => enemy.id !== matchedEnemy.id));
           setAttacks((prev) => prev.filter((a) => a.id !== newAttack.id));
         }, 200);
 
+        const newCount = defeatCount + 1;
         setScore((s) => s + 100);
-        setDefeatCount((c) => c + 1); // 一人、二人…とカウントアップ
+        setDefeatCount(newCount);
         setInputVal('');
+
+        // 忍者が声を上げる（音声再生）
+        playVoiceCount(newCount);
       } else {
-        // 位置が合っていない場合は当たらない（カウントもスコアも増えない）
+        // 【外れ】の位置にいる場合：外れた軌道（赤色）を表示する
+        const missedAttack: AttackEffect = {
+          id: Date.now() + Math.random(),
+          startX: playerX,
+          startY: 90,
+          // 外れた場合は、現在のプレイヤー位置から真上（またはその鬼の高さ）に向かって軌道を逸らす
+          targetX: playerX + (matchedEnemy.x > playerX ? 15 : -15),
+          targetY: Math.max(10, matchedEnemy.y - 20),
+          isHit: false,
+        };
+        setAttacks((prev) => [...prev, missedAttack]);
+
+        setTimeout(() => {
+          setAttacks((prev) => prev.filter((a) => a.id !== missedAttack.id));
+        }, 300);
+
+        // 外れたのでカウントやスコアは増えないが、入力欄だけクリアして次へ
+        setInputVal('');
       }
     }
   };
@@ -273,7 +307,7 @@ function GameArena() {
     setIsGameOver(false);
   };
 
-  // 撃破人数を「一人」「二人」…と日本語表記に変換する関数
+  // 撃破人数を日本語表記に変換
   const getJapaneseCount = (num: number) => {
     const words = ['零人', '一人', '二人', '三人', '四人', '五人', '六人', '七人', '八人', '九人', '十人'];
     return num <= 10 ? words[num] : `${num}人`;
@@ -284,7 +318,7 @@ function GameArena() {
       {/* ステータスバー */}
       <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
         <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
-        <span className="text-indigo-300 font-bold">🥷 討伐: {getJapaneseCount(defeatCount)}</span>
+        <span className="text-indigo-300 font-bold animate-pulse">🗣️ 討伐: {getJapaneseCount(defeatCount)}</span>
         <span className="text-emerald-400 font-bold">SCORE: {score} pt</span>
       </div>
 
@@ -305,10 +339,10 @@ function GameArena() {
           <>
             <div className="text-xs text-slate-500 tracking-wider flex justify-between">
               <span>▼ 鬼のエリア ▼ (Lv.{speedMultiplier.toFixed(1)})</span>
-              <span className="text-indigo-400">← → キーで移動して正面から撃て！</span>
+              <span className="text-indigo-400">← → キーで「真下」に合わせて撃て！</span>
             </div>
 
-            {/* SVGを使った手裏剣の軌道（点線）を描画するレイヤー */}
+            {/* 手裏剣の軌道（SVG描画レイヤー） */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
               {attacks.map((atk) => (
                 <line
@@ -317,7 +351,7 @@ function GameArena() {
                   y1={`${atk.startY}%`}
                   x2={`${atk.targetX}%`}
                   y2={`${atk.targetY}%`}
-                  stroke="#38bdf8"
+                  stroke={atk.isHit ? '#38bdf8' : '#ef4444'} // 当たりは青・外れは赤
                   strokeWidth="3"
                   strokeDasharray="6,6"
                   className="animate-pulse"
@@ -328,7 +362,8 @@ function GameArena() {
             {/* 迫ってくる鬼たち */}
             <div className="absolute inset-0 pointer-events-none">
               {enemies.map((enemy) => {
-                const isCloseToPlayer = Math.abs(playerX - enemy.x) <= 15;
+                // 真正面（真下）にいるかどうか（±5%）
+                const isExactAligned = Math.abs(playerX - enemy.x) <= 5;
                 return (
                   <div
                     key={enemy.id}
@@ -336,7 +371,7 @@ function GameArena() {
                     style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}
                   >
                     <span className="text-3xl animate-bounce">👹</span>
-                    <div className={`px-2.5 py-0.5 rounded text-sm font-black text-white shadow-md ${isCloseToPlayer ? 'bg-emerald-600 border border-emerald-300 animate-pulse' : 'bg-red-600/90 border border-red-400'}`}>
+                    <div className={`px-2.5 py-0.5 rounded text-sm font-black text-white shadow-md ${isExactAligned ? 'bg-emerald-600 border-2 border-yellow-300 animate-pulse' : 'bg-red-600/90 border border-red-400'}`}>
                       {enemy.char}
                     </div>
                   </div>
@@ -344,7 +379,7 @@ function GameArena() {
               })}
 
               {/* 当たった瞬間の手裏剣エフェクト */}
-              {attacks.map((atk) => (
+              {attacks.filter(a => a.isHit).map((atk) => (
                 <div
                   key={`shuriken-${atk.id}`}
                   className="absolute text-2xl transition-all transform -translate-x-1/2 -translate-y-1/2 z-20 animate-spin"
