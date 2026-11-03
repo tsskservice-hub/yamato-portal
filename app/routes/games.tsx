@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { useNavigate, useRouteLoaderData } from '@remix-run/react';
+import { useNavigate } from '@remix-run/react';
 import { Gamepad2, Sparkles, Trophy, Flame, ArrowRight, Zap, Target } from 'lucide-react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
 import { supabase } from '../lib/supabaseClient';
@@ -13,12 +13,6 @@ import { useGamesContent, GameItem } from '../data/games-content';
 
 export default function GamesPage() {
   const navigate = useNavigate();
-
-  const rootData = useRouteLoaderData("root") as {
-    user?: any;
-    credits?: number;
-    nickname?: string;
-  } | undefined;
 
   const { gamesData, isLoading, isError, errorMessage, refetch } = useGamesContent(supabase);
 
@@ -37,8 +31,8 @@ export default function GamesPage() {
     <ToolPageWrapper
       breadcrumbTitle="Learning Games"
       hasError={isError || (!isLoading && !gamesData)}
-      errorTitle="データの読み込みエラー"
-      errorMessage={errorMessage || 'Supabase から GAMES_CONTENT の取得に失敗しました。'}
+      errorTitle="Data Loading Error"
+      errorMessage={errorMessage}
       onRetry={refetch}
     >
       {gamesData && (
