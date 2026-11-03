@@ -1,16 +1,17 @@
 /**
  * @file header.tsx
- * @description ポータル共通ヘッダー（ロゴの右隣にクイックジャンプボタン追加版・Yamatoの枠を削除・ホーム画面のみ表示・ダークモード廃止・常時ライトモード）
+ * @description ポータル共通ヘッダー（教師ダッシュボードボタンをニックネームの左隣に追加版）
  */
 import React from 'react';
 import { Link, useLocation } from '@remix-run/react';
-import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle } from 'lucide-react';
+import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle, GraduationCap } from 'lucide-react';
 
 type HeaderProps = {
   title?: string;
   user?: any;
   credits?: number;
-  nickname?: string; // 💡 ユーザーのニックネームを受け取るプロパティ
+  nickname?: string;
+  isTeacher?: boolean; // 💡 教師フラグを受け取るプロパティ
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
 };
@@ -20,14 +21,13 @@ export default function Header({
   user, 
   credits = 10, 
   nickname = "",
+  isTeacher = false, // 💡 デフォルトは false
   onOpenAuth, 
   onSignOut 
 }: HeaderProps) {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
-  // 💡 ユーザーが入力中の文字（nickname）があればそれを最優先で表示し、
-  // 完全な未入力・空白のときのみ "Set Nickname" を表示する
   const trimmedNickname = nickname ? nickname.trim() : "";
   const displayNickname = trimmedNickname !== "" ? trimmedNickname : "Set Nickname";
 
@@ -36,7 +36,6 @@ export default function Header({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* 左側グループ：ロゴ ＆ クイックジャンプボタン */}
         <div className="flex items-center space-x-6">
-          {/* ロゴ・画像リンク（クリックでホームへ） */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-red-600">
               <img 
@@ -50,7 +49,6 @@ export default function Header({
             </span>
           </Link>
 
-          {/* 💡 クイックジャンプボタン（ロゴの右隣：ホーム画面でのみ表示） */}
           {isHome && (
             <div className="hidden md:flex items-center space-x-2">
               <a 
@@ -73,6 +71,18 @@ export default function Header({
 
         {/* 右側グループ：ユーザー情報、プラン、FAQ、My Account、認証ボタン */}
         <div className="flex items-center space-x-3">
+          {/* 💡 教師かつログイン中の場合のみ、ニックネームの左隣にダッシュボードボタンを表示 */}
+          {user && isTeacher && (
+            <Link 
+              to="/teacher/dashboard"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer shadow-xs bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+              title="Teacher Control Panel"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Teacher Panel</span>
+            </Link>
+          )}
+
           {/* 1. Nickname (ログイン時のみ表示) */}
           {user && (
             <Link 

@@ -1,6 +1,6 @@
 /**
  * @file PageLayout.tsx
- * @description ポータル共通レイアウト（リアルタイムクレジット同期・英語無料登録ガード・認証モーダル・共通パンくず・Header連携統合版 / ダークモード廃止・常時ライトモード）
+ * @description ポータル共通レイアウト（リアルタイムクレジット同期・英語無料登録ガード・認証モーダル・共通パンくず・Header連携統合版 / isTeacher対応・常時ライトモード）
  */
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useRouteLoaderData, useLocation, Link } from "@remix-run/react";
@@ -70,6 +70,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     credits?: number;  
     nickname?: string;  
     learningPace?: "steady" | "normal" | "accelerated"; 
+    isTeacher?: boolean; // 💡 ルートデータからの教師フラグ
   } | undefined;
 
   const location = useLocation();
@@ -105,6 +106,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   const [user, setUser] = useState<any>(propUser !== undefined ? propUser : (rootData?.user ?? null));
   const [credits, setCredits] = useState<number>(propCredits !== undefined ? propCredits : (rootData?.credits ?? 10));
   const [nickname, setNickname] = useState<string>(propNickname !== undefined ? propNickname : (rootData?.nickname ?? ""));
+  const isTeacher = rootData?.isTeacher ?? false; // 💡 教師判定フラグの取得
 
   const rawLearningPace = propLearningPace !== undefined ? propLearningPace : rootData?.learningPace;
   const learningPace: "steady" | "normal" | "accelerated" = 
@@ -268,6 +270,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         user={user} 
         credits={credits} 
         nickname={resolvedNickname} 
+        isTeacher={isTeacher} // 💡 Headerへ教師フラグを渡す
         onOpenAuth={handleOpenAuthModal} 
         onSignOut={handleSignOut} 
       />
