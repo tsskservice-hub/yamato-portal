@@ -81,7 +81,7 @@ export default GAMES_CONTENT;
 // 3. Supabase 動的データ取得関数
 // =================================================================
 
-export const GAMES_KNOWLEDGE_KEY = 'GAME_CONTENT';
+export const GAMES_KNOWLEDGE_KEY = 'GAMES_CONTENT';
 
 export async function fetchGamesContentData(supabaseClient: SupabaseClient): Promise<GamesContentResult> {
   try {
