@@ -43,7 +43,7 @@ export async function fetchGamesContentData(
 ): Promise<GamesKnowledge | null> {
   try {
     const { data, error } = await supabase
-      .from('portal_content')
+      .from('games_content')
       .select('content, raw_text, updated_at')
       .eq('key', 'GAMES_CONTENT')
       .maybeSingle();
