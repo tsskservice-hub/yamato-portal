@@ -1,6 +1,6 @@
 /**
  * @file games-content.ts
- * @description Supabase GAMES_CONTENT キーからの動的データ取得モジュール
+ * @description Supabase app_knowledge (key: 'GAMES_CONTENT') からの動的データ取得モジュール
  * 💡 静的フォールバックデータを撤去し、通信失敗・データ不在時は isError: true を返して PageLayout の DataErrorState で処理します。
  */
 
@@ -34,18 +34,20 @@ export interface GamesKnowledge {
   updatedAt?: string;
 }
 
+const KNOWLEDGE_KEY = 'GAMES_CONTENT';
+
 /**
- * Supabase から GAMES_CONTENT キーのデータを直接フェッチする関数
- * 💡 フォールバックデータは存在せず、取得失敗時は null を返します。
+ * Supabase の app_knowledge テーブルから GAMES_CONTENT キーのデータを直接フェッチする関数
+ * 💡 app_knowledge の 'data' カラムからゲーム情報を取得します。
  */
 export async function fetchGamesContentData(
   supabase: SupabaseClient
 ): Promise<GamesKnowledge | null> {
   try {
-    const { data, error } = await supabase
+    const { data: row, error } = await supabase
       .from('app_knowledge')
-      .select('content, raw_text, updated_at')
-      .eq('key', 'GAMES_CONTENT')
+      .select('data, updated_at')
+      .eq('key', KNOWLEDGE_KEY)
       .maybeSingle();
 
     if (error) {
@@ -53,19 +55,18 @@ export async function fetchGamesContentData(
       return null;
     }
 
-    if (!data || !data.content) {
-      console.warn('[fetchGamesContentData] No data found for key: GAMES_CONTENT');
+    if (!row || !row.data) {
+      console.warn(`[fetchGamesContentData] No data found for key: ${KNOWLEDGE_KEY}`);
       return null;
     }
 
-    const content = typeof data.content === 'string' ? JSON.parse(data.content) : data.content;
+    const content = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
 
     return {
       title: content.title || 'Japanese Learning Games',
       subtitle: content.subtitle || 'Interactive AI-powered games for Japanese practice.',
       sections: content.sections || [],
-      rawText: data.raw_text,
-      updatedAt: data.updated_at,
+      updatedAt: row.updated_at,
     };
   } catch (err) {
     console.error('[fetchGamesContentData] Unexpected Exception:', err);
@@ -95,12 +96,12 @@ export function useGamesContent(supabase: SupabaseClient) {
       } else {
         setGamesData(null);
         setIsError(true);
-        setErrorMessage('Supabase から GAMES_CONTENT の取得に失敗しました。データが存在しないかキーが無効です。');
+        setErrorMessage('Failed to retrieve GAMES_CONTENT from Supabase. Data does not exist or the key is invalid.');
       }
     } catch (err: any) {
       setGamesData(null);
       setIsError(true);
-      setErrorMessage(`Supabase 接続エラー: ${err?.message || 'GAMES_CONTENT の読み込み中に予期せぬエラーが発生しました。'}`);
+      setErrorMessage(`Supabase connection error: ${err?.message || 'An unexpected error occurred while loading GAMES_CONTENT.'}`);
     } finally {
       setIsLoading(false);
     }
