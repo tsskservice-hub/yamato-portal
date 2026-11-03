@@ -1,6 +1,6 @@
 /**
  * @file tower-defense.tsx
- * @description 生徒用タイピング防衛戦 (自キャラ左右移動・手裏剣発射・時間経過スピードアップ対応版)
+ * @description 生徒用タイピング防衛戦 (軌道点線アニメーション・「〇人」撃破カウント対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -38,10 +38,11 @@ interface ActiveEnemy {
   y: number; // 迫ってくる距離 (0% = 遠く, 90% = 防衛ライン)
 }
 
-interface FlyingShuriken {
+interface AttackEffect {
   id: number;
-  x: number;
+  startX: number;
   startY: number;
+  targetX: number;
   targetY: number;
 }
 
@@ -141,25 +142,26 @@ export default function StudentTowerDefensePage() {
 
 function GameArena() {
   const [score, setScore] = useState(0);
+  const [defeatCount, setDefeatCount] = useState(0); // 撃破人数（一人、二人…）
   const [hp, setHp] = useState(5);
   const [enemies, setEnemies] = useState<ActiveEnemy[]>([]);
-  const [shurikens, setShurikens] = useState<FlyingShuriken[]>([]);
-  const [playerX, setPlayerX] = useState(50); // プレイヤーの横位置 (%) [10 〜 90]
+  const [attacks, setAttacks] = useState<AttackEffect[]>([]); // 手裏剣の軌道・ヒット演出
+  const [playerX, setPlayerX] = useState(50); // プレイヤーの横位置 (%)
   const [inputVal, setInputVal] = useState('');
   const [isGameOver, setIsGameOver] = useState(false);
-  const [speedMultiplier, setSpeedMultiplier] = useState(1.0); // スピード倍率
+  const [speedMultiplier, setSpeedMultiplier] = useState(1.0);
 
-  // 1. 15秒ごとにスピードを加速させるタイマー
+  // 1. 15秒ごとにスピードを加速
   useEffect(() => {
     if (isGameOver) return;
     const speedTimer = setInterval(() => {
-      setSpeedMultiplier((prev) => prev + 0.3); // 15秒ごとにスピードアップ
+      setSpeedMultiplier((prev) => prev + 0.3);
     }, 15000);
 
     return () => clearInterval(speedTimer);
   }, [isGameOver]);
 
-  // 2. 一定間隔で新しい鬼を出現させる
+  // 2. 一定間隔で新しい鬼を出現
   useEffect(() => {
     if (isGameOver) return;
 
@@ -169,7 +171,7 @@ function GameArena() {
         id: Date.now() + Math.random(),
         char: template.char,
         romaji: template.romaji,
-        x: Math.floor(Math.random() * 80) + 10, // 10%〜90%の横位置
+        x: Math.floor(Math.random() * 80) + 10,
         y: 0,
       };
       setEnemies((prev) => [...prev, newEnemy]);
@@ -178,7 +180,7 @@ function GameArena() {
     return () => clearInterval(spawnInterval);
   }, [isGameOver]);
 
-  // 3. 鬼を移動させる ＆ スピード倍率を反映
+  // 3. 鬼を移動
   useEffect(() => {
     if (isGameOver) return;
 
@@ -188,7 +190,7 @@ function GameArena() {
         let lostHp = 0;
 
         prev.forEach((enemy) => {
-          const nextY = enemy.y + 0.8 * speedMultiplier; // スピード倍率を掛ける
+          const nextY = enemy.y + 0.8 * speedMultiplier;
           if (nextY >= 90) {
             lostHp += 1;
           } else {
@@ -211,7 +213,7 @@ function GameArena() {
     return () => clearInterval(moveInterval);
   }, [isGameOver, speedMultiplier]);
 
-  // 4. 左右矢印キーでプレイヤーを移動させる
+  // 4. 左右矢印キーでプレイヤー移動
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isGameOver) return;
     if (e.key === 'ArrowLeft') {
@@ -221,52 +223,60 @@ function GameArena() {
     }
   };
 
-  // 5. ローマ字タイピング処理（正面の鬼にヒットするかチェック）
+  // 5. ローマ字入力時の判定（正面にいる鬼にだけ手裏剣の軌道が伸びる）
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isGameOver) return;
     const val = e.target.value.toLowerCase();
     setInputVal(val);
 
-    // 一致するローマ字の鬼を探す
     const matchedEnemy = enemies.find((enemy) => enemy.romaji === val);
 
     if (matchedEnemy) {
-      // プレイヤーと鬼の横位置のズレが近いかチェック（±15%以内なら正面とみなす）
+      // プレイヤーと鬼の横位置のズレが±15%以内なら正面と判定して命中
       const isAligned = Math.abs(playerX - matchedEnemy.x) <= 15;
 
       if (isAligned) {
-        // ヒット！手裏剣を自キャラの位置(playerX)から発射
-        const newShuriken: FlyingShuriken = {
+        // 軌道演出データを追加
+        const newAttack: AttackEffect = {
           id: Date.now() + Math.random(),
-          x: playerX,
+          startX: playerX,
           startY: 90,
+          targetX: matchedEnemy.x,
           targetY: matchedEnemy.y,
         };
-        setShurikens((prev) => [...prev, newShuriken]);
+        setAttacks((prev) => [...prev, newAttack]);
 
+        // 軌道が表示されたあと、鬼を消滅させてカウントを増やす
         setTimeout(() => {
           setEnemies((prev) => prev.filter((enemy) => enemy.id !== matchedEnemy.id));
-          setShurikens((prev) => prev.filter((s) => s.id !== newShuriken.id));
-        }, 150);
+          setAttacks((prev) => prev.filter((a) => a.id !== newAttack.id));
+        }, 200);
 
         setScore((s) => s + 100);
+        setDefeatCount((c) => c + 1); // 一人、二人…とカウントアップ
         setInputVal('');
       } else {
-        // 位置がずれている場合は、移動のヒントを出すか、そのまま残す
-        // （ここでは位置を合わせてね！という演出としてあえて外すことも可能ですが入力だけリセット）
+        // 位置が合っていない場合は当たらない（カウントもスコアも増えない）
       }
     }
   };
 
   const restartGame = () => {
     setScore(0);
+    setDefeatCount(0);
     setHp(5);
     setEnemies([]);
-    setShurikens([]);
+    setAttacks([]);
     setPlayerX(50);
     setInputVal('');
     setSpeedMultiplier(1.0);
     setIsGameOver(false);
+  };
+
+  // 撃破人数を「一人」「二人」…と日本語表記に変換する関数
+  const getJapaneseCount = (num: number) => {
+    const words = ['零人', '一人', '二人', '三人', '四人', '五人', '六人', '七人', '八人', '九人', '十人'];
+    return num <= 10 ? words[num] : `${num}人`;
   };
 
   return (
@@ -274,7 +284,7 @@ function GameArena() {
       {/* ステータスバー */}
       <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
         <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
-        <span className="text-amber-300 font-bold">⚡ スピードLv: {speedMultiplier.toFixed(1)}x</span>
+        <span className="text-indigo-300 font-bold">🥷 討伐: {getJapaneseCount(defeatCount)}</span>
         <span className="text-emerald-400 font-bold">SCORE: {score} pt</span>
       </div>
 
@@ -283,7 +293,7 @@ function GameArena() {
         {isGameOver ? (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-4 z-20">
             <h2 className="text-2xl font-black text-red-500">ゲームオーバー</h2>
-            <p className="text-sm text-slate-300">スコア: {score} pt</p>
+            <p className="text-sm text-slate-300">討伐数: {getJapaneseCount(defeatCount)} ({score} pt)</p>
             <button
               onClick={restartGame}
               className="bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
@@ -294,9 +304,26 @@ function GameArena() {
         ) : (
           <>
             <div className="text-xs text-slate-500 tracking-wider flex justify-between">
-              <span>▼ 鬼のエリア ▼</span>
-              <span className="text-indigo-400">← → キーで左右に移動できます</span>
+              <span>▼ 鬼のエリア ▼ (Lv.{speedMultiplier.toFixed(1)})</span>
+              <span className="text-indigo-400">← → キーで移動して正面から撃て！</span>
             </div>
+
+            {/* SVGを使った手裏剣の軌道（点線）を描画するレイヤー */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+              {attacks.map((atk) => (
+                <line
+                  key={atk.id}
+                  x1={`${atk.startX}%`}
+                  y1={`${atk.startY}%`}
+                  x2={`${atk.targetX}%`}
+                  y2={`${atk.targetY}%`}
+                  stroke="#38bdf8"
+                  strokeWidth="3"
+                  strokeDasharray="6,6"
+                  className="animate-pulse"
+                />
+              ))}
+            </svg>
 
             {/* 迫ってくる鬼たち */}
             <div className="absolute inset-0 pointer-events-none">
@@ -316,12 +343,12 @@ function GameArena() {
                 );
               })}
 
-              {/* 発射された手裏剣 */}
-              {shurikens.map((s) => (
+              {/* 当たった瞬間の手裏剣エフェクト */}
+              {attacks.map((atk) => (
                 <div
-                  key={s.id}
-                  className="absolute text-xl transition-all duration-150 transform -translate-x-1/2 -translate-y-1/2 animate-spin"
-                  style={{ left: `${s.x}%`, top: `${s.targetY}%` }}
+                  key={`shuriken-${atk.id}`}
+                  className="absolute text-2xl transition-all transform -translate-x-1/2 -translate-y-1/2 z-20 animate-spin"
+                  style={{ left: `${atk.targetX}%`, top: `${atk.targetY}%` }}
                 >
                   ✨
                 </div>
@@ -329,7 +356,7 @@ function GameArena() {
             </div>
 
             {/* 防衛ライン上のプレイヤー（忍者） */}
-            <div className="absolute bottom-6 transform -translate-x-1/2 transition-all duration-75 flex flex-col items-center" style={{ left: `${playerX}%` }}>
+            <div className="absolute bottom-6 transform -translate-x-1/2 transition-all duration-75 flex flex-col items-center z-20" style={{ left: `${playerX}%` }}>
               <span className="text-xs text-indigo-300 font-bold mb-0.5">あなた</span>
               <span className="text-3xl">🥷</span>
             </div>
