@@ -1,6 +1,6 @@
 /**
  * @file games.tsx
- * @description ゲーム総合ポータルページ（Supabase GAME_CONTENT 100%動的連動・ToolPageWrapper 統合型データエラーガード対応版）
+ * @description ゲーム総合ポータルページ（Supabase GAMES_CONTENT 100%動的連動・ToolPageWrapper 統合型データエラーガード対応版）
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
