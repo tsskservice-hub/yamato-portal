@@ -1,6 +1,6 @@
 /**
  * @file tower-defense.tsx
- * @description 生徒用タイピング防衛戦 (ToolPageWrapper 統合型・PageLayoutラップ対応版 / アクションゲーム化対応)
+ * @description 生徒用タイピング防衛戦 (ToolPageWrapper 統合型・PageLayoutラップ対応版 / 手裏剣発射・演出強化版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,16 +11,23 @@ import { generateModuleMeta } from '../utils/seoMeta';
 import { supabase } from '../lib/supabaseClient';
 
 const ENEMY_POOL = [
-  { char: 'あ', romaji: 'a', type: 'hiragana' },
-  { char: 'い', romaji: 'i', type: 'hiragana' },
-  { char: 'う', romaji: 'u', type: 'hiragana' },
-  { char: 'え', romaji: 'e', type: 'hiragana' },
-  { char: 'お', romaji: 'o', type: 'hiragana' },
-  { char: 'か', romaji: 'ka', type: 'hiragana' },
-  { char: 'き', romaji: 'ki', type: 'hiragana' },
-  { char: 'さ', romaji: 'sa', type: 'hiragana' },
-  { char: '日', romaji: 'nichi', type: 'kanji' },
-  { char: '本', romaji: 'hon', type: 'kanji' },
+  { char: 'あ', romaji: 'a' },
+  { char: 'い', romaji: 'i' },
+  { char: 'う', romaji: 'u' },
+  { char: 'え', romaji: 'e' },
+  { char: 'お', romaji: 'o' },
+  { char: 'か', romaji: 'ka' },
+  { char: 'き', romaji: 'ki' },
+  { char: 'く', romaji: 'ku' },
+  { char: 'け', romaji: 'ke' },
+  { char: 'こ', romaji: 'ko' },
+  { char: 'さ', romaji: 'sa' },
+  { char: 'し', romaji: 'shi' },
+  { char: 'す', romaji: 'su' },
+  { char: 'せ', romaji: 'se' },
+  { char: 'そ', romaji: 'so' },
+  { char: '日', romaji: 'nichi' },
+  { char: '本', romaji: 'hon' },
 ];
 
 interface ActiveEnemy {
@@ -29,6 +36,14 @@ interface ActiveEnemy {
   romaji: string;
   x: number; // 画面上の横位置 (%)
   y: number; // 迫ってくる距離 (0% = 遠く, 100% = 城の防衛ライン)
+}
+
+interface FlyingShuriken {
+  id: number;
+  startX: number;
+  startY: number;
+  targetX: number;
+  targetY: number;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -64,7 +79,7 @@ export default function StudentTowerDefensePage() {
 
   const handlePasscodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputPasscode === '8842') {
+    if (inputPasscode === '1111') {
       setIsCodeUnlocked(true);
       alert('✨ 認証成功！ゲームが一時的に解放されました。');
     } else {
@@ -129,6 +144,7 @@ function GameArena() {
   const [score, setScore] = useState(0);
   const [hp, setHp] = useState(5);
   const [enemies, setEnemies] = useState<ActiveEnemy[]>([]);
+  const [shurikens, setShurikens] = useState<FlyingShuriken[]>([]);
   const [inputVal, setInputVal] = useState('');
   const [isGameOver, setIsGameOver] = useState(false);
 
@@ -162,7 +178,7 @@ function GameArena() {
 
         prev.forEach((enemy) => {
           const nextY = enemy.y + 1.2; // 鬼の移動スピード
-          if (nextY >= 100) {
+          if (nextY >= 92) {
             lostHp += 1;
           } else {
             nextEnemies.push({ ...enemy, y: nextY });
@@ -184,19 +200,33 @@ function GameArena() {
     return () => clearInterval(moveInterval);
   }, [isGameOver]);
 
-  // 3. キー入力を監視して、一致する鬼がいたら即座に撃破する
+  // 3. キー入力を監視して、一致する鬼がいたら手裏剣を飛ばして撃破する
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isGameOver) return;
     const val = e.target.value.toLowerCase();
     setInputVal(val);
 
     // 画面上の鬼の中に、入力されたローマ字と一致するものがいるかチェック
-    const matchedIndex = enemies.findIndex((enemy) => enemy.romaji === val);
+    const matchedEnemy = enemies.find((enemy) => enemy.romaji === val);
 
-    if (matchedIndex !== -1) {
-      // 命中！スコア加算＆鬼を削除＆入力クリア
+    if (matchedEnemy) {
+      // 手裏剣発射アニメーションを追加（城の位置：x=50%, y=90% から 鬼の位置へ）
+      const newShuriken: FlyingShuriken = {
+        id: Date.now() + Math.random(),
+        startX: 50,
+        startY: 90,
+        targetX: matchedEnemy.x,
+        targetY: matchedEnemy.y,
+      };
+      setShurikens((prev) => [...prev, newShuriken]);
+
+      // 少しだけ遅れて（手裏剣が着弾したタイミングで）鬼を消滅させる
+      setTimeout(() => {
+        setEnemies((prev) => prev.filter((enemy) => enemy.id !== matchedEnemy.id));
+        setShurikens((prev) => prev.filter((s) => s.id !== newShuriken.id));
+      }, 150);
+
       setScore((s) => s + 100);
-      setEnemies((prev) => prev.filter((_, idx) => idx !== matchedIndex));
       setInputVal('');
     }
   };
@@ -205,6 +235,7 @@ function GameArena() {
     setScore(0);
     setHp(5);
     setEnemies([]);
+    setShurikens([]);
     setInputVal('');
     setIsGameOver(false);
   };
@@ -235,7 +266,7 @@ function GameArena() {
             {/* 奥（スタート地点） */}
             <div className="text-xs text-slate-500 tracking-wider">▼ 鬼のエリア ▼</div>
 
-            {/* 迫ってくる鬼たち */}
+            {/* 迫ってくる鬼たち（ヒントのローマ字を排除） */}
             <div className="absolute inset-0 pointer-events-none">
               {enemies.map((enemy) => (
                 <div
@@ -244,9 +275,20 @@ function GameArena() {
                   style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}
                 >
                   <span className="text-3xl animate-bounce">👹</span>
-                  <div className="bg-red-600/90 border border-red-400 px-2 py-0.5 rounded text-xs font-mono font-bold shadow-md">
-                    {enemy.char} <span className="text-yellow-300">({enemy.romaji})</span>
+                  <div className="bg-red-600/90 border border-red-400 px-2.5 py-0.5 rounded text-sm font-black text-white shadow-md">
+                    {enemy.char}
                   </div>
+                </div>
+              ))}
+
+              {/* 発射された手裏剣の描画 */}
+              {shurikens.map((s) => (
+                <div
+                  key={s.id}
+                  className="absolute text-xl transition-all duration-150 transform -translate-x-1/2 -translate-y-1/2 animate-spin"
+                  style={{ left: `${s.targetX}%`, top: `${s.targetY}%` }}
+                >
+                  ✨
                 </div>
               ))}
             </div>
@@ -268,11 +310,11 @@ function GameArena() {
           disabled={isGameOver}
           value={inputVal}
           onChange={handleInputChange}
-          placeholder="ここに入力して手裏剣を発射！"
+          placeholder="ローマ字を入力して手裏剣を発射！"
           className="bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
         />
         <p className="text-xs text-slate-400 mt-2">
-          画面上の鬼のローマ字を打つと自動で手裏剣が飛んで撃退します！
+          鬼に書いてある文字のローマ字を最後まで打つと、手裏剣が飛んで撃退します！
         </p>
       </div>
     </div>
