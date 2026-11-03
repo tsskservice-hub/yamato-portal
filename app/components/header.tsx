@@ -74,7 +74,7 @@ export default function Header({
           {/* 💡 教師かつログイン中の場合のみ、ニックネームの左隣にダッシュボードボタンを表示 */}
           {user && isTeacher && (
             <Link 
-              to="/teacher/dashboard"
+              to="/teacher-dashboard"
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer shadow-xs bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
               title="Teacher Control Panel"
             >

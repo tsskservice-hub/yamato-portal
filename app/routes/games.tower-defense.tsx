@@ -69,7 +69,7 @@ export default function StudentTowerDefensePage() {
             <p className="text-xs text-slate-500 mt-0.5">VCE Japanese Typing Practice</p>
           </div>
           <Link
-            to="/teacher/dashboard"
+            to="/teacher-dashboard"
             className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2 rounded-lg border border-indigo-200 transition no-underline inline-flex items-center"
           >
             教師用ダッシュボードへ ↗
