@@ -4,9 +4,9 @@
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useRef, useState } from 'react';
-import { Link } from '@remix-run/react';
+import { Link, useLoaderData } from '@remix-run/react';
 import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { supabase } from '../lib/supabaseClient';
+import { createServerSupabaseClient } from '../lib/supabase.server';
 
 const INITIAL_STUDENTS = [
   { id: 's1', name: 'Liam Smith', progress: 'Lesson 5 完了', isUnlocked: false },
@@ -15,22 +15,25 @@ const INITIAL_STUDENTS = [
   { id: 's4', name: 'Olivia Wilson', progress: 'Lesson 2 進行中', isUnlocked: false },
 ];
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  // 💡 サーバー側のSupabaseクライアント（Cookie対応）を使用する
+  const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
+  const { data: { user }, error: userError } = await serverSupabase.auth.getUser();
 
-  if (sessionError || !session) {
-    return redirect('/login');
+  // 💡 未ログインの場合は存在しない /login ではなくトップページへリダイレクト
+  if (userError || !user) {
+    return redirect('/');
   }
 
-  const user = session.user;
-
-  const { data: profile, error: profileError } = await supabase
+  // 💡 データベースの profiles テーブルから is_teacher カラムを検証
+  const { data: profile, error: profileError } = await serverSupabase
     .from('profiles')
-    .select('role')
+    .select('is_teacher')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (profileError || !profile || profile.role !== 'teacher') {
+  // 教師権限（is_teacher が true）がない場合はトップページへリダイレクト
+  if (profileError || !profile || !(profile as any).is_teacher) {
     return redirect('/');
   }
 
@@ -40,6 +43,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function TeacherDashboardPage() {
+  const data = useLoaderData<typeof loader>();
   const layoutRef = useRef<PageLayoutRef>(null);
   const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
   const [passcode, setPasscode] = useState('8842');
@@ -51,7 +55,7 @@ export default function TeacherDashboardPage() {
         <header className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center shadow-sm">
           <div>
             <h1 className="text-xl font-bold text-slate-800">👨‍🏫 教師用コントロールパネル</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Year 9 Japanese クラス管理</p>
+            <p className="text-xs text-slate-500 mt-0.5">Year 9 Japanese クラス管理 ({data.userEmail})</p>
           </div>
           <Link
             to="/games/tower-defense"
