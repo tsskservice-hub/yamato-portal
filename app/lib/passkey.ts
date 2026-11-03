@@ -1,3 +1,7 @@
+/**
+ * @file passkey.ts
+ * @description Passkey authentication helpers with server-side cookie sync
+ */
 import { supabase } from "./supabaseClient";
 
 // 💡 環境変数からパスキーが有効かどうかを判定するフラグ
@@ -5,7 +9,37 @@ import { supabase } from "./supabaseClient";
 const isPasskeyEnabled = import.meta.env.VITE_ENABLE_PASSKEY === "true";
 
 /**
- * 新規登録フロー：アカウント作成 ➔ パスキー登録 ➔ アカウント設定画面へリダイレクト
+ * 💡 ブラウザ側のSupabaseセッションをサーバーCookieに同期するヘルパー関数
+ */
+async function syncSessionToServer(): Promise<boolean> {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+      return false;
+    }
+
+    // サーバー側の同期用エンドポイント（/api/auth/callback）にトークンを送信
+    const response = await fetch("/api/auth/callback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accessToken: session.access_token,
+        refreshToken: session.refresh_token,
+      }),
+    });
+
+    const result = await response.json();
+    return response.ok && (result as any).success;
+  } catch (err) {
+    console.error("Failed to sync session to server:", err);
+    return false;
+  }
+}
+
+/**
+ * 新規登録フロー：アカウント作成 ➔ パスキー登録 ➔ サーバーCookie同期 ➔ アカウント設定画面へリダイレクト
  */
 export async function signUpAndRegisterPasskey(email: string): Promise<boolean> {
   const trimmedEmail = email.trim();
@@ -45,6 +79,7 @@ export async function signUpAndRegisterPasskey(email: string): Promise<boolean> 
   // 💡 パスキーが無効な環境（ローカルやプレビュー）では登録処理をスキップ
   if (!isPasskeyEnabled) {
     console.warn("Passkey registration is disabled in this environment.");
+    await syncSessionToServer();
     return true;
   }
 
@@ -52,11 +87,14 @@ export async function signUpAndRegisterPasskey(email: string): Promise<boolean> 
   const { error: registerError } = await supabase.auth.registerPasskey();
   if (registerError) throw registerError;
 
+  // 3. 💡 登録成功後、サーバー側のCookieへセッションを確実に同期
+  await syncSessionToServer();
+
   return true;
 }
 
 /**
- * パスキーログインフロー：生体認証によるインスタントログイン
+ * パスキーログインフロー：生体認証によるインスタントログイン ➔ サーバーCookie同期
  */
 export async function signInWithPasskey(): Promise<boolean> {
   // 💡 パスキーが無効な環境ではエラーをスロー（または必要に応じて別の処理に分岐）
@@ -66,6 +104,12 @@ export async function signInWithPasskey(): Promise<boolean> {
 
   const { error } = await supabase.auth.signInWithPasskey();
   if (error) throw error;
+
+  // 💡 ログイン成功後、サーバー側のCookieへセッションを確実に同期
+  const synced = await syncSessionToServer();
+  if (!synced) {
+    console.warn("Session established in browser, but failed to sync with server cookie.");
+  }
 
   return true;
 }
