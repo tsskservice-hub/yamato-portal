@@ -1,11 +1,11 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useRouteLoaderData } from "@remix-run/react";
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
-import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
-import { supabase } from "../lib/supabaseClient";
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { fetchLegalContentData, LegalDocument } from '~/data/legal-content';
+import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

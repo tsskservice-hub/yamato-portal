@@ -6,9 +6,9 @@
 import type { MetaFunction } from "@remix-run/react";
 import { Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
-import { YamatoChatCommon } from "../components/YamatoChatCommon";
-import { fetchYamatoConfigsData, YamatoConfigsData, AppType } from "../data/yamato-configs";
-import { supabase } from "../lib/supabaseClient";
+import { YamatoChatCommon } from '~/components/YamatoChatCommon';
+import { fetchYamatoConfigsData, YamatoConfigsData, AppType } from '~/data/yamato-configs';
+import { supabase } from '~/lib/supabaseClient';
 
 export const meta: MetaFunction = () => {
   return [

@@ -5,11 +5,11 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
-import { fetchTextTypesData, TextTypesData } from '../data/texttypes';
-import { supabase } from '../lib/supabaseClient';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { fetchTextTypesData, TextTypesData } from '~/data/texttypes';
+import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

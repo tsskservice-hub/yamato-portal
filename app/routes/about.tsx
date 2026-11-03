@@ -6,11 +6,11 @@ import React, { useRef } from 'react';
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import { useLoaderData, Link } from '@remix-run/react';
 import { Sparkles, BookOpen, Users, Heart, Cpu } from 'lucide-react';
-import { createServerSupabaseClient } from '../lib/supabase.server';
-import { generateModuleMeta } from '../utils/seoMeta';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-import ScrollTopButton from '../components/ScrollTopButton';
+import { createServerSupabaseClient } from '~/lib/supabase.server';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/PageLayout';
+import ScrollTopButton from '~/components/ScrollTopButton';
 
 // ① Supabase から PORTAL_CONTENT をサーバー側で取得
 export async function loader({ request, context }: LoaderFunctionArgs) {

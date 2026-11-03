@@ -3,7 +3,7 @@
  * @description クライアント側のセッションをサーバー側のCookieに同期させるエンドポイント
  */
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
-import { createServerSupabaseClient } from "../lib/supabase.server";
+import { createServerSupabaseClient } from '~/lib/supabase.server';
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {

@@ -1,15 +1,15 @@
 /**
- * @file privacy.tsx
- * @description プライバシーポリシーページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
+ * @file terms.tsx
+ * @description 利用規約ページ（Supabase LEGAL_CONTENTS 100%動的連動・PageLayout 統合型データエラーガード対応版）
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
-import { fetchLegalContentData, LegalDocument } from '../data/legal-content';
-import { supabase } from '../lib/supabaseClient';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { LegalDocument, fetchLegalContentData } from '~/data/legal-content';
+import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -29,11 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
-  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
-};
-
-export default function PrivacyPolicy() {
+export default function TermsOfService() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -50,8 +46,8 @@ export default function PrivacyPolicy() {
     setError(false);
     try {
       const legalData = await fetchLegalContentData(supabase);
-      if (legalData?.privacy) {
-        setDoc(legalData.privacy);
+      if (legalData?.terms) {
+        setDoc(legalData.terms);
       } else {
         setError(true);
       }
@@ -102,7 +98,7 @@ export default function PrivacyPolicy() {
 
                   {section.isContactLink && (
                     <p>
-                      If you have questions or comments about this Privacy Policy, please contact us through our{" "}
+                      If you have any questions about these Terms of Service, please reach out to us via our{" "}
                       <Link to="/contact" className="text-indigo-600 underline hover:text-indigo-500 font-medium">
                         Contact page
                       </Link>
@@ -118,3 +114,8 @@ export default function PrivacyPolicy() {
     </ToolPageWrapper>
   );
 }
+
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};

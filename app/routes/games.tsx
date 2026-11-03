@@ -7,9 +7,9 @@
 import React from 'react';
 import { useNavigate, Outlet, useLocation } from '@remix-run/react';
 import { Gamepad2, Sparkles, Trophy, Flame, ArrowRight, Zap, Target } from 'lucide-react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { supabase } from '../lib/supabaseClient';
-import { useGamesContent, GameItem } from '../data/games-content';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { supabase } from '~/lib/supabaseClient';
+import { useGamesContent, GameItem } from '~/data/games-content';
 
 export default function GamesPage() {
   const navigate = useNavigate();

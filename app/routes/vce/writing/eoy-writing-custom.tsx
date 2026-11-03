@@ -5,12 +5,12 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
-import { supabase } from '../lib/supabaseClient';
-import ChatYamatoEoyWritingCustom from '../components/ChatYamatoEoyWritingCustom';
-import GenkoyoshiModal from '../components/GenkoyoshiModal';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { supabase } from '~/lib/supabaseClient';
+import ChatYamatoEoyWritingCustom from '~/components/ChatYamatoEoyWritingCustom';
+import GenkoyoshiModal from '~/components/GenkoyoshiModal';
 
 interface UploadedImage {
   id: string;

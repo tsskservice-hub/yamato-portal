@@ -5,14 +5,14 @@
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useRef } from 'react';
 import { useLoaderData } from '@remix-run/react';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { createServerSupabaseClient } from '../lib/supabase.server';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { createServerSupabaseClient } from '~/lib/supabase.server';
 
 // 先頭に tdbd を付与したモジュールのインポート
-import { tdbdUseDashboard } from '../hooks/tdbd-use-dashboard';
-import TdbdGlobalSwitchCard from '../components/tdbd-global-switch-card';
-import TdbdPasscodeCard from '../components/tdbd-passcode-card';
-import TdbdStudentTable from '../components/tdbd-student-table';
+import { tdbdUseDashboard } from '~/hooks/tdbd-use-dashboard';
+import TdbdGlobalSwitchCard from '~/components/tdbd-global-switch-card';
+import TdbdPasscodeCard from '~/components/tdbd-passcode-card';
+import TdbdStudentTable from '~/components/tdbd-student-table';
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);

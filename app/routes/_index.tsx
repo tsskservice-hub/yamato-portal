@@ -6,19 +6,19 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
 import { ArrowRight, Check, Coins, FileText, Flame, Gamepad2, Grid, Loader2, Mic, Sparkles } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import { HeroDemoChat } from '../components/HeroDemoChat';
-import { DailyQuizModal } from '../components/DailyQuizModal';
-import { ChatYamatoConcierge } from '../components/ChatYamatoConcierge';
-import { DataErrorState } from '../components/DataErrorState';
-import { PortalModule, usePortalContent } from '../data/portal-content';
-import { PricePlansKnowledge, fetchPricePlansData } from '../data/price-plans';
-import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '../data/quizzes';
-import { PricingSection } from '../components/PricingSection';
+import { supabase } from '~/lib/supabaseClient';
+import { HeroDemoChat } from '~/components/HeroDemoChat';
+import { DailyQuizModal } from '~/components/DailyQuizModal';
+import { ChatYamatoConcierge } from '~/components/ChatYamatoConcierge';
+import { DataErrorState } from '~/components/DataErrorState';
+import { PortalModule, usePortalContent } from '~/data/portal-content';
+import { PricePlansKnowledge, fetchPricePlansData } from '~/data/price-plans';
+import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '~/data/quizzes';
+import { PricingSection } from '~/components/PricingSection';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

@@ -1,10 +1,10 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import React, { useState, useRef, useEffect } from "react";
-import { ToolPageWrapper } from "../components/ToolPageWrapper";
-import { type PageLayoutRef } from "../components/PageLayout";
-import PageLayout from "../components/PageLayout";
-import { generateModuleMeta } from "../utils/seoMeta";
-import { supabase } from "../lib/supabaseClient";
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/PageLayout';
+import PageLayout from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

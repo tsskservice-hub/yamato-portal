@@ -5,16 +5,16 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
-import TextTypeModal from '../components/TextTypeModal';
-import ChatYamatoEoyWriting from '../components/ChatYamatoEoyWriting';
-import GenkoyoshiModal from '../components/GenkoyoshiModal';
-import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from '../data/writing-exam-questions';
-import { TextTypesData, fetchTextTypesData } from '../data/texttypes';
-import { WritingStylesData, fetchWritingStylesData } from '../data/writing-styles';
-import { supabase } from '../lib/supabaseClient';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import TextTypeModal from '~/components/TextTypeModal';
+import ChatYamatoEoyWriting from '~/components/ChatYamatoEoyWriting';
+import GenkoyoshiModal from '~/components/GenkoyoshiModal';
+import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from '~/data/writing-exam-questions';
+import { TextTypesData, fetchTextTypesData } from '~/data/texttypes';
+import { WritingStylesData, fetchWritingStylesData } from '~/data/writing-styles';
+import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

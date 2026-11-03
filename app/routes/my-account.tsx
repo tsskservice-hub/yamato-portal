@@ -5,12 +5,12 @@
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
 import { ArrowDownRight, ArrowUpRight, Gauge, History, UserCheck } from 'lucide-react';
-import { createAdminSupabaseClient, createServerSupabaseClient } from '../lib/supabase.server';
-import { supabase } from '../lib/supabaseClient';
+import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
+import { supabase } from '~/lib/supabaseClient';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {

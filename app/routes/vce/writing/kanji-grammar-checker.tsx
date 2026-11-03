@@ -5,14 +5,14 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
 import { ArrowLeft, ArrowRight, Check, Coins, FileText, Flame, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
-import YamatoChatKanjiGrammarCheckerVce from '../components/ChatYamatoKanjiGrammarCheckerVce';
-import { VCE_KANJI_LIST } from '../data/kanji-list';
-import { VCE_GRAMMAR_LIST } from '../data/vce-grammar-list';
-import { supabase } from '../lib/supabaseClient';
+import YamatoChatKanjiGrammarCheckerVce from '~/components/ChatYamatoKanjiGrammarCheckerVce';
+import { VCE_KANJI_LIST } from '~/data/kanji-list';
+import { VCE_GRAMMAR_LIST } from '~/data/vce-grammar-list';
+import { supabase } from '~/lib/supabaseClient';
 
 // 💡 LoaderFunctionArgs は @remix-run/cloudflare からインポート
 

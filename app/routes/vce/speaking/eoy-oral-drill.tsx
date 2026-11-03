@@ -1,29 +1,29 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
-import { generateModuleMeta } from "../utils/seoMeta";
-import { ToolPageWrapper } from "../components/ToolPageWrapper";
-import { type PageLayoutRef } from "../components/PageLayout";
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/PageLayout';
 /**
  *  @file eoy-oral-drill.tsx
  *  @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import PageLayout from "../components/PageLayout";
-import { DataErrorState } from "../components/DataErrorState";
-import OralExaminerAvatar from "../components/OralExaminerAvatar";
-import ChatYamatoEoyOralDrill from "../components/ChatYamatoEoyOralDrill";
-import { supabase } from "../lib/supabaseClient";
+import PageLayout from '~/components/PageLayout';
+import { DataErrorState } from '~/components/DataErrorState';
+import OralExaminerAvatar from '~/components/OralExaminerAvatar';
+import ChatYamatoEoyOralDrill from '~/components/ChatYamatoEoyOralDrill';
+import { supabase } from '~/lib/supabaseClient';
 
 // 💡 Modular Oral components & hooks
-import OralCenterChatPractice from "../components/OralCenterChatPractice";
-import OralUserAnswerList, { QuestionItem } from "../components/OralUserAnswerList";
-import OralCustomQuestionForm from "../components/OralCustomQuestionForm";
-import OralDrillQuestionSelector from "../components/OralDrillQuestionSelector";
-import { useOralPracticeEngine, QuestionData } from "../hooks/OralPracticeHooks";
-import { useSupabaseUserAnswers } from "../hooks/OralUserAnswersHooks";
+import OralCenterChatPractice from '~/components/OralCenterChatPractice';
+import OralUserAnswerList, { QuestionItem } from '~/components/OralUserAnswerList';
+import OralCustomQuestionForm from '~/components/OralCustomQuestionForm';
+import OralDrillQuestionSelector from '~/components/OralDrillQuestionSelector';
+import { useOralPracticeEngine, QuestionData } from '~/hooks/OralPracticeHooks';
+import { useSupabaseUserAnswers } from '~/hooks/OralUserAnswersHooks';
 import {
   fetchOralExamQuestionsData,
   OralExamQuestionsData,
-} from "../data/oral-exam-questions";
+} from '~/data/oral-exam-questions';
 
 
 export async function loader({ request }: LoaderFunctionArgs) {

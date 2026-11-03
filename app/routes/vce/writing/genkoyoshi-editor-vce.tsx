@@ -20,15 +20,15 @@ import {
   AlignJustify
 } from "lucide-react";
 
-import { ToolPageWrapper } from "../components/ToolPageWrapper";
-import PageLayout, { type PageLayoutRef } from "../components/PageLayout";
-import ChatYamatoGenkoyoshiEditorVce from "../components/ChatYamatoGenkoyoshiEditorVce";
-import GenkoyoshiPreviewPane from "../components/GenkoyoshiPreviewPane";
-import GenkoyoshiModal from "../components/GenkoyoshiModal";
-import { generateGenkoyoshiPages, calculateCharCount } from "../utils/genkoyoshi-engine";
-import genkoStyles from "../styles/genkoyoshi.css?url";
-import { generateModuleMeta } from "../utils/seoMeta";
-import { supabase } from "../lib/supabaseClient";
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import ChatYamatoGenkoyoshiEditorVce from '~/components/ChatYamatoGenkoyoshiEditorVce';
+import GenkoyoshiPreviewPane from '~/components/GenkoyoshiPreviewPane';
+import GenkoyoshiModal from '~/components/GenkoyoshiModal';
+import { generateGenkoyoshiPages, calculateCharCount } from '~/utils/genkoyoshi-engine';
+import genkoStyles from '~/styles/genkoyoshi.css?url';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { supabase } from '~/lib/supabaseClient';
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: genkoStyles },
