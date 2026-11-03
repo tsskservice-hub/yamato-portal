@@ -1,23 +1,35 @@
 /**
  * @file tower-defense.tsx
- * @description 生徒用タイピング防衛戦 (ToolPageWrapper 統合型・PageLayoutラップ対応版)
+ * @description 生徒用タイピング防衛戦 (ToolPageWrapper 統合型・PageLayoutラップ対応版 / アクションゲーム化対応)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '../components/ToolPageWrapper';
 import type { PageLayoutRef } from '../components/PageLayout';
 import { generateModuleMeta } from '../utils/seoMeta';
 import { supabase } from '../lib/supabaseClient';
 
-const MOCK_CHARACTERS = [
-  { id: 1, char: 'あ', romaji: 'a', type: 'hiragana' },
-  { id: 2, char: 'い', romaji: 'i', type: 'hiragana' },
-  { id: 3, char: 'か', romaji: 'ka', type: 'hiragana' },
-  { id: 4, char: 'さ', romaji: 'sa', type: 'hiragana' },
-  { id: 5, char: '日', romaji: 'nichi', type: 'kanji' },
-  { id: 6, char: '本', romaji: 'hon', type: 'kanji' },
+const ENEMY_POOL = [
+  { char: 'あ', romaji: 'a', type: 'hiragana' },
+  { char: 'い', romaji: 'i', type: 'hiragana' },
+  { char: 'う', romaji: 'u', type: 'hiragana' },
+  { char: 'え', romaji: 'e', type: 'hiragana' },
+  { char: 'お', romaji: 'o', type: 'hiragana' },
+  { char: 'か', romaji: 'ka', type: 'hiragana' },
+  { char: 'き', romaji: 'ki', type: 'hiragana' },
+  { char: 'さ', romaji: 'sa', type: 'hiragana' },
+  { char: '日', romaji: 'nichi', type: 'kanji' },
+  { char: '本', romaji: 'hon', type: 'kanji' },
 ];
+
+interface ActiveEnemy {
+  id: number;
+  char: string;
+  romaji: string;
+  x: number; // 画面上の横位置 (%)
+  y: number; // 迫ってくる距離 (0% = 遠く, 100% = 城の防衛ライン)
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -115,49 +127,153 @@ export default function StudentTowerDefensePage() {
 
 function GameArena() {
   const [score, setScore] = useState(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [hp, setHp] = useState(5);
+  const [enemies, setEnemies] = useState<ActiveEnemy[]>([]);
   const [inputVal, setInputVal] = useState('');
-  const currentItem = MOCK_CHARACTERS[currentIndex];
+  const [isGameOver, setIsGameOver] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputVal.trim().toLowerCase() === currentItem.romaji) {
-      setScore(score + 100);
-      setInputVal('');
-      setCurrentIndex(Math.floor(Math.random() * MOCK_CHARACTERS.length));
-    } else {
+  // 1. 一定間隔で新しい鬼を上から出現させる
+  useEffect(() => {
+    if (isGameOver) return;
+
+    const spawnInterval = setInterval(() => {
+      const template = ENEMY_POOL[Math.floor(Math.random() * ENEMY_POOL.length)];
+      const newEnemy: ActiveEnemy = {
+        id: Date.now() + Math.random(),
+        char: template.char,
+        romaji: template.romaji,
+        x: Math.floor(Math.random() * 70) + 15, // 15%〜85%の横位置
+        y: 0, // 最奥からスタート
+      };
+      setEnemies((prev) => [...prev, newEnemy]);
+    }, 2500); // 2.5秒ごとに新しい鬼が出現
+
+    return () => clearInterval(spawnInterval);
+  }, [isGameOver]);
+
+  // 2. 鬼を少しずつ手前に歩かせる ＆ 城に到達したらHPを減らす
+  useEffect(() => {
+    if (isGameOver) return;
+
+    const moveInterval = setInterval(() => {
+      setEnemies((prev) => {
+        const nextEnemies: ActiveEnemy[] = [];
+        let lostHp = 0;
+
+        prev.forEach((enemy) => {
+          const nextY = enemy.y + 1.2; // 鬼の移動スピード
+          if (nextY >= 100) {
+            lostHp += 1;
+          } else {
+            nextEnemies.push({ ...enemy, y: nextY });
+          }
+        });
+
+        if (lostHp > 0) {
+          setHp((h) => {
+            const updated = h - lostHp;
+            if (updated <= 0) setIsGameOver(true);
+            return Math.max(0, updated);
+          });
+        }
+
+        return nextEnemies;
+      });
+    }, 100);
+
+    return () => clearInterval(moveInterval);
+  }, [isGameOver]);
+
+  // 3. キー入力を監視して、一致する鬼がいたら即座に撃破する
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isGameOver) return;
+    const val = e.target.value.toLowerCase();
+    setInputVal(val);
+
+    // 画面上の鬼の中に、入力されたローマ字と一致するものがいるかチェック
+    const matchedIndex = enemies.findIndex((enemy) => enemy.romaji === val);
+
+    if (matchedIndex !== -1) {
+      // 命中！スコア加算＆鬼を削除＆入力クリア
+      setScore((s) => s + 100);
+      setEnemies((prev) => prev.filter((_, idx) => idx !== matchedIndex));
       setInputVal('');
     }
   };
 
+  const restartGame = () => {
+    setScore(0);
+    setHp(5);
+    setEnemies([]);
+    setInputVal('');
+    setIsGameOver(false);
+  };
+
   return (
-    <div className="bg-white border border-emerald-200 rounded-2xl p-6 text-center space-y-6 shadow-sm">
-      <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200 text-sm">
-        <span className="text-emerald-700 font-bold">🟢 ステータス: プレイ可能</span>
-        <span className="font-bold text-amber-600">SCORE: {score} pt</span>
+    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white">
+      {/* ステータスバー */}
+      <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
+        <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
+        <span className="text-emerald-400 font-bold">SCORE: {score} pt</span>
       </div>
 
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 relative">
-        <div className="w-24 h-24 bg-red-50 border-2 border-red-200 rounded-2xl mx-auto flex flex-col items-center justify-center mb-6 shadow-xs animate-pulse">
-          <span className="text-4xl font-black text-red-600">{currentItem.char}</span>
-        </div>
+      {/* ゲームフィールド（防衛戦ステージ） */}
+      <div className="bg-slate-950 border border-slate-800 rounded-xl h-80 relative overflow-hidden flex flex-col justify-between p-4">
+        {isGameOver ? (
+          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-4 z-20">
+            <h2 className="text-2xl font-black text-red-500">ゲームオーバー</h2>
+            <p className="text-sm text-slate-300">スコア: {score} pt</p>
+            <button
+              onClick={restartGame}
+              className="bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
+            >
+              もう一度挑戦する
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* 奥（スタート地点） */}
+            <div className="text-xs text-slate-500 tracking-wider">▼ 鬼のエリア ▼</div>
 
-        <form onSubmit={handleSubmit} className="max-w-xs mx-auto flex gap-2">
-          <input
-            type="text"
-            autoFocus
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-            placeholder={`ローマ字 ("${currentItem.romaji}")`}
-            className="bg-white border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono text-slate-900 w-full focus:outline-none focus:border-emerald-500 shadow-2xs"
-          />
-          <button
-            type="submit"
-            className="bg-emerald-600 hover:bg-emerald-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
-          >
-            攻撃
-          </button>
-        </form>
+            {/* 迫ってくる鬼たち */}
+            <div className="absolute inset-0 pointer-events-none">
+              {enemies.map((enemy) => (
+                <div
+                  key={enemy.id}
+                  className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 flex flex-col items-center"
+                  style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}
+                >
+                  <span className="text-3xl animate-bounce">👹</span>
+                  <div className="bg-red-600/90 border border-red-400 px-2 py-0.5 rounded text-xs font-mono font-bold shadow-md">
+                    {enemy.char} <span className="text-yellow-300">({enemy.romaji})</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 手前（城・防衛ライン） */}
+            <div className="border-t-2 border-dashed border-indigo-500/50 pt-2 flex justify-between items-center text-xs text-indigo-300 font-bold">
+              <span>🏰 あなたの城</span>
+              <span>防衛ライン</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* キー入力欄 */}
+      <div className="max-w-xs mx-auto">
+        <input
+          type="text"
+          autoFocus
+          disabled={isGameOver}
+          value={inputVal}
+          onChange={handleInputChange}
+          placeholder="ここに入力して手裏剣を発射！"
+          className="bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
+        />
+        <p className="text-xs text-slate-400 mt-2">
+          画面上の鬼のローマ字を打つと自動で手裏剣が飛んで撃退します！
+        </p>
       </div>
     </div>
   );
