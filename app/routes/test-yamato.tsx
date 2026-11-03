@@ -46,7 +46,7 @@ export default function TestYamatoPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 💡 プレビュー用一発ログイン実行関数（汎用）
+  // 💡 プレビュー環境用一発ログイン実行関数（ログイン成功時にリロードを追加）
   const handleDirectLogin = async (email: string, pass: string) => {
     setDebugEmail(email);
     setDebugPassword(pass);
@@ -59,10 +59,15 @@ export default function TestYamatoPage() {
         password: pass,
       });
       if (error) throw error;
-      setDebugStatus(`✅ ログイン成功！ (${email})`);
+      setDebugStatus(`✅ ログイン成功！ (${email}) - セッションを反映するためページを更新します...`);
+      
+      // 💡 ログイン成功直後にページをリロードし、root.tsx のローダーに教師権限を確実に反映させる
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+
     } catch (err: any) {
       setDebugStatus(`❌ ログイン失敗: ${err.message}`);
-    } finally {
       setIsLoggingIn(false);
     }
   };
@@ -80,7 +85,10 @@ export default function TestYamatoPage() {
   // 💡 ログアウト実行関数
   const handleDebugLogout = async () => {
     await supabase.auth.signOut();
-    setDebugStatus("🔒 ログアウトしました。");
+    setDebugStatus("🔒 ログアウトしました。ページを更新します...");
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   // 💡 実行環境に応じて API のベースURLを自動切り替えし、スキーマと構成メタデータを同時に取得
