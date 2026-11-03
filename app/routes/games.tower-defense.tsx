@@ -1,6 +1,6 @@
 /**
  * @file tower-defense.tsx
- * @description 生徒用タイピング防衛戦 (ToolPageWrapper 統合型・PageLayoutラップ対応版 / 手裏剣発射・演出強化版)
+ * @description 生徒用タイピング防衛戦 (自キャラ左右移動・手裏剣発射・時間経過スピードアップ対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -34,15 +34,14 @@ interface ActiveEnemy {
   id: number;
   char: string;
   romaji: string;
-  x: number; // 画面上の横位置 (%)
-  y: number; // 迫ってくる距離 (0% = 遠く, 100% = 城の防衛ライン)
+  x: number; // 画面上の横位置 (%) [10% 〜 90%]
+  y: number; // 迫ってくる距離 (0% = 遠く, 90% = 防衛ライン)
 }
 
 interface FlyingShuriken {
   id: number;
-  startX: number;
+  x: number;
   startY: number;
-  targetX: number;
   targetY: number;
 }
 
@@ -145,10 +144,22 @@ function GameArena() {
   const [hp, setHp] = useState(5);
   const [enemies, setEnemies] = useState<ActiveEnemy[]>([]);
   const [shurikens, setShurikens] = useState<FlyingShuriken[]>([]);
+  const [playerX, setPlayerX] = useState(50); // プレイヤーの横位置 (%) [10 〜 90]
   const [inputVal, setInputVal] = useState('');
   const [isGameOver, setIsGameOver] = useState(false);
+  const [speedMultiplier, setSpeedMultiplier] = useState(1.0); // スピード倍率
 
-  // 1. 一定間隔で新しい鬼を上から出現させる
+  // 1. 15秒ごとにスピードを加速させるタイマー
+  useEffect(() => {
+    if (isGameOver) return;
+    const speedTimer = setInterval(() => {
+      setSpeedMultiplier((prev) => prev + 0.3); // 15秒ごとにスピードアップ
+    }, 15000);
+
+    return () => clearInterval(speedTimer);
+  }, [isGameOver]);
+
+  // 2. 一定間隔で新しい鬼を出現させる
   useEffect(() => {
     if (isGameOver) return;
 
@@ -158,16 +169,16 @@ function GameArena() {
         id: Date.now() + Math.random(),
         char: template.char,
         romaji: template.romaji,
-        x: Math.floor(Math.random() * 70) + 15, // 15%〜85%の横位置
-        y: 0, // 最奥からスタート
+        x: Math.floor(Math.random() * 80) + 10, // 10%〜90%の横位置
+        y: 0,
       };
       setEnemies((prev) => [...prev, newEnemy]);
-    }, 2500); // 2.5秒ごとに新しい鬼が出現
+    }, 2500);
 
     return () => clearInterval(spawnInterval);
   }, [isGameOver]);
 
-  // 2. 鬼を少しずつ手前に歩かせる ＆ 城に到達したらHPを減らす
+  // 3. 鬼を移動させる ＆ スピード倍率を反映
   useEffect(() => {
     if (isGameOver) return;
 
@@ -177,8 +188,8 @@ function GameArena() {
         let lostHp = 0;
 
         prev.forEach((enemy) => {
-          const nextY = enemy.y + 1.2; // 鬼の移動スピード
-          if (nextY >= 92) {
+          const nextY = enemy.y + 0.8 * speedMultiplier; // スピード倍率を掛ける
+          if (nextY >= 90) {
             lostHp += 1;
           } else {
             nextEnemies.push({ ...enemy, y: nextY });
@@ -198,36 +209,52 @@ function GameArena() {
     }, 100);
 
     return () => clearInterval(moveInterval);
-  }, [isGameOver]);
+  }, [isGameOver, speedMultiplier]);
 
-  // 3. キー入力を監視して、一致する鬼がいたら手裏剣を飛ばして撃破する
+  // 4. 左右矢印キーでプレイヤーを移動させる
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isGameOver) return;
+    if (e.key === 'ArrowLeft') {
+      setPlayerX((prev) => Math.max(10, prev - 6));
+    } else if (e.key === 'ArrowRight') {
+      setPlayerX((prev) => Math.min(90, prev + 6));
+    }
+  };
+
+  // 5. ローマ字タイピング処理（正面の鬼にヒットするかチェック）
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isGameOver) return;
     const val = e.target.value.toLowerCase();
     setInputVal(val);
 
-    // 画面上の鬼の中に、入力されたローマ字と一致するものがいるかチェック
+    // 一致するローマ字の鬼を探す
     const matchedEnemy = enemies.find((enemy) => enemy.romaji === val);
 
     if (matchedEnemy) {
-      // 手裏剣発射アニメーションを追加（城の位置：x=50%, y=90% から 鬼の位置へ）
-      const newShuriken: FlyingShuriken = {
-        id: Date.now() + Math.random(),
-        startX: 50,
-        startY: 90,
-        targetX: matchedEnemy.x,
-        targetY: matchedEnemy.y,
-      };
-      setShurikens((prev) => [...prev, newShuriken]);
+      // プレイヤーと鬼の横位置のズレが近いかチェック（±15%以内なら正面とみなす）
+      const isAligned = Math.abs(playerX - matchedEnemy.x) <= 15;
 
-      // 少しだけ遅れて（手裏剣が着弾したタイミングで）鬼を消滅させる
-      setTimeout(() => {
-        setEnemies((prev) => prev.filter((enemy) => enemy.id !== matchedEnemy.id));
-        setShurikens((prev) => prev.filter((s) => s.id !== newShuriken.id));
-      }, 150);
+      if (isAligned) {
+        // ヒット！手裏剣を自キャラの位置(playerX)から発射
+        const newShuriken: FlyingShuriken = {
+          id: Date.now() + Math.random(),
+          x: playerX,
+          startY: 90,
+          targetY: matchedEnemy.y,
+        };
+        setShurikens((prev) => [...prev, newShuriken]);
 
-      setScore((s) => s + 100);
-      setInputVal('');
+        setTimeout(() => {
+          setEnemies((prev) => prev.filter((enemy) => enemy.id !== matchedEnemy.id));
+          setShurikens((prev) => prev.filter((s) => s.id !== newShuriken.id));
+        }, 150);
+
+        setScore((s) => s + 100);
+        setInputVal('');
+      } else {
+        // 位置がずれている場合は、移動のヒントを出すか、そのまま残す
+        // （ここでは位置を合わせてね！という演出としてあえて外すことも可能ですが入力だけリセット）
+      }
     }
   };
 
@@ -236,19 +263,22 @@ function GameArena() {
     setHp(5);
     setEnemies([]);
     setShurikens([]);
+    setPlayerX(50);
     setInputVal('');
+    setSpeedMultiplier(1.0);
     setIsGameOver(false);
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white">
+    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white" tabIndex={0} onKeyDown={handleKeyDown}>
       {/* ステータスバー */}
       <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
         <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
+        <span className="text-amber-300 font-bold">⚡ スピードLv: {speedMultiplier.toFixed(1)}x</span>
         <span className="text-emerald-400 font-bold">SCORE: {score} pt</span>
       </div>
 
-      {/* ゲームフィールド（防衛戦ステージ） */}
+      {/* ゲームフィールド */}
       <div className="bg-slate-950 border border-slate-800 rounded-xl h-80 relative overflow-hidden flex flex-col justify-between p-4">
         {isGameOver ? (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-4 z-20">
@@ -263,59 +293,80 @@ function GameArena() {
           </div>
         ) : (
           <>
-            {/* 奥（スタート地点） */}
-            <div className="text-xs text-slate-500 tracking-wider">▼ 鬼のエリア ▼</div>
+            <div className="text-xs text-slate-500 tracking-wider flex justify-between">
+              <span>▼ 鬼のエリア ▼</span>
+              <span className="text-indigo-400">← → キーで左右に移動できます</span>
+            </div>
 
-            {/* 迫ってくる鬼たち（ヒントのローマ字を排除） */}
+            {/* 迫ってくる鬼たち */}
             <div className="absolute inset-0 pointer-events-none">
-              {enemies.map((enemy) => (
-                <div
-                  key={enemy.id}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 flex flex-col items-center"
-                  style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}
-                >
-                  <span className="text-3xl animate-bounce">👹</span>
-                  <div className="bg-red-600/90 border border-red-400 px-2.5 py-0.5 rounded text-sm font-black text-white shadow-md">
-                    {enemy.char}
+              {enemies.map((enemy) => {
+                const isCloseToPlayer = Math.abs(playerX - enemy.x) <= 15;
+                return (
+                  <div
+                    key={enemy.id}
+                    className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 flex flex-col items-center"
+                    style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}
+                  >
+                    <span className="text-3xl animate-bounce">👹</span>
+                    <div className={`px-2.5 py-0.5 rounded text-sm font-black text-white shadow-md ${isCloseToPlayer ? 'bg-emerald-600 border border-emerald-300 animate-pulse' : 'bg-red-600/90 border border-red-400'}`}>
+                      {enemy.char}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
-              {/* 発射された手裏剣の描画 */}
+              {/* 発射された手裏剣 */}
               {shurikens.map((s) => (
                 <div
                   key={s.id}
                   className="absolute text-xl transition-all duration-150 transform -translate-x-1/2 -translate-y-1/2 animate-spin"
-                  style={{ left: `${s.targetX}%`, top: `${s.targetY}%` }}
+                  style={{ left: `${s.x}%`, top: `${s.targetY}%` }}
                 >
                   ✨
                 </div>
               ))}
             </div>
 
-            {/* 手前（城・防衛ライン） */}
-            <div className="border-t-2 border-dashed border-indigo-500/50 pt-2 flex justify-between items-center text-xs text-indigo-300 font-bold">
-              <span>🏰 あなたの城</span>
-              <span>防衛ライン</span>
+            {/* 防衛ライン上のプレイヤー（忍者） */}
+            <div className="absolute bottom-6 transform -translate-x-1/2 transition-all duration-75 flex flex-col items-center" style={{ left: `${playerX}%` }}>
+              <span className="text-xs text-indigo-300 font-bold mb-0.5">あなた</span>
+              <span className="text-3xl">🥷</span>
+            </div>
+
+            {/* 防衛ライン */}
+            <div className="border-t-2 border-dashed border-indigo-500/50 pt-2 flex justify-between items-center text-xs text-indigo-300 font-bold mt-auto">
+              <span>🏰 防衛ライン</span>
             </div>
           </>
         )}
       </div>
 
       {/* キー入力欄 */}
-      <div className="max-w-xs mx-auto">
+      <div className="max-w-xs mx-auto space-y-2">
         <input
           type="text"
           autoFocus
           disabled={isGameOver}
           value={inputVal}
           onChange={handleInputChange}
-          placeholder="ローマ字を入力して手裏剣を発射！"
+          placeholder="矢印キーで移動 ＆ ローマ字入力"
           className="bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
         />
-        <p className="text-xs text-slate-400 mt-2">
-          鬼に書いてある文字のローマ字を最後まで打つと、手裏剣が飛んで撃退します！
-        </p>
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={() => setPlayerX((prev) => Math.max(10, prev - 10))}
+            className="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
+          >
+            ◀ 左へ移動
+          </button>
+          <button
+            onClick={() => setPlayerX((prev) => Math.min(90, prev + 10))}
+            className="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
+          >
+            右へ移動 ▶
+          </button>
+        </div>
       </div>
     </div>
   );
