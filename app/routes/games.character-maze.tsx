@@ -1,6 +1,6 @@
 /**
  * @file character-maze.tsx
- * @description 迷宮の文字探し 〜タイピング・アドベンチャー〜 (ヘびを避けながら文字を集めてローマ字入力)
+ * @description 迷宮の文字探し 〜タイピング・アドベンチャー〜 (本格迷路・蛇回避・ローマ字タイピング)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,7 +10,31 @@ import type { PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// 獲得対象の文字プール (ひらがな・カタカナ・漢字)
+// 11x11 の迷路マップ (1: 壁, 0: 通路)
+const MAZE_GRID = [
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+  [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+  [1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+  [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+];
+
+// 通路の座標リスト (アイテムやへびを置く候補地)
+const PATH_COORDS: { x: number; y: number }[] = [];
+MAZE_GRID.forEach((row, y) => {
+  row.forEach((cell, x) => {
+    if (cell === 0 && !(x === 1 && y === 1)) {
+      PATH_COORDS.push({ x, y });
+    }
+  });
+});
+
 const CHARACTER_POOL = [
   { char: 'あ', romaji: 'a' },
   { char: 'い', romaji: 'i' },
@@ -40,16 +64,14 @@ interface ItemNode {
   id: number;
   char: string;
   romaji: string;
-  x: number; // パーセント (%)
-  y: number; // パーセント (%)
+  x: number;
+  y: number;
 }
 
 interface SnakeNode {
   id: number;
   x: number;
   y: number;
-  dx: number;
-  dy: number;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -151,44 +173,45 @@ function CharacterMazeArena() {
   const [collectedCount, setCollectedCount] = useState(0);
   const [hp, setHp] = useState(5);
   
-  // プレイヤーの位置 (%)
-  const [playerX, setPlayerX] = useState(10);
-  const [playerY, setPlayerY] = useState(10);
+  const [playerX, setPlayerX] = useState(1);
+  const [playerY, setPlayerY] = useState(1);
 
-  // マップ上のアイテム（文字）一覧
   const [items, setItems] = useState<ItemNode[]>([]);
-  // マップ上のへび一覧
   const [snakes, setSnakes] = useState<SnakeNode[]>([]);
 
-  // クイズ（文字を獲得したとき）の状態
   const [activeQuizItem, setActiveQuizItem] = useState<ItemNode | null>(null);
   const [typingInput, setTypingInput] = useState('');
   const [quizFeedback, setQuizFeedback] = useState<string | null>(null);
 
-  // ゴール状態
   const [isGoalReached, setIsGoalReached] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
 
-  // 初期配置（アイテム5個、へび3匹、ゴール位置は右下固定 90%, 90%）
   const spawnInitialEntities = () => {
+    const shuffledPaths = [...PATH_COORDS].sort(() => 0.5 - Math.random());
+    
     const initialItems: ItemNode[] = [];
-    const shuffled = [...CHARACTER_POOL].sort(() => 0.5 - Math.random());
-    for (let i = 0; i < 5; i++) {
+    const charPoolShuffled = [...CHARACTER_POOL].sort(() => 0.5 - Math.random());
+    for (let i = 0; i < 5 && i < shuffledPaths.length; i++) {
+      const pos = shuffledPaths[i];
       initialItems.push({
         id: Date.now() + i,
-        char: shuffled[i].char,
-        romaji: shuffled[i].romaji,
-        x: Math.floor(Math.random() * 70) + 15,
-        y: Math.floor(Math.random() * 70) + 15,
+        char: charPoolShuffled[i].char,
+        romaji: charPoolShuffled[i].romaji,
+        x: pos.x,
+        y: pos.y,
       });
     }
     setItems(initialItems);
 
-    const initialSnakes: SnakeNode[] = [
-      { id: 1, x: 30, y: 30, dx: 0.8, dy: 0.5 },
-      { id: 2, x: 70, y: 20, dx: -0.6, dy: 0.7 },
-      { id: 3, x: 50, y: 70, dx: 0.7, dy: -0.6 },
-    ];
+    const initialSnakes: SnakeNode[] = [];
+    for (let i = 5; i < 8 && i < shuffledPaths.length; i++) {
+      const pos = shuffledPaths[i];
+      initialSnakes.push({
+        id: Date.now() + 100 + i,
+        x: pos.x,
+        y: pos.y,
+      });
+    }
     setSnakes(initialSnakes);
   };
 
@@ -196,80 +219,90 @@ function CharacterMazeArena() {
     spawnInitialEntities();
   }, []);
 
-  // へびの移動とプレイヤー衝突判定
   useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
-    const gameInterval = setInterval(() => {
-      // 1. へびを動かす
+    const snakeInterval = setInterval(() => {
       setSnakes((prevSnakes) =>
         prevSnakes.map((snake) => {
-          let nextX = snake.x + snake.dx;
-          let nextY = snake.y + snake.dy;
-          let nextDx = snake.dx;
-          let nextDy = snake.dy;
-
-          if (nextX <= 5 || nextX >= 95) nextDx *= -1;
-          if (nextY <= 5 || nextY >= 95) nextDy *= -1;
-
-          return { ...snake, x: nextX, y: nextY, dx: nextDx, dy: nextDy };
+          const directions = [
+            { dx: 0, dy: -1 },
+            { dx: 0, dy: 1 },
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+          ];
+          const validMoves = directions.filter(
+            (d) => MAZE_GRID[snake.y + d.dy]?.[snake.x + d.dx] === 0
+          );
+          if (validMoves.length > 0) {
+            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            return { ...snake, x: snake.x + move.dx, y: snake.y + move.dy };
+          }
+          return snake;
         })
       );
+    }, 1200);
 
-      // 2. プレイヤーとへびの当たり判定
-      setSnakes((prevSnakes) => {
-        prevSnakes.forEach((snake) => {
-          const dist = Math.hypot(playerX - snake.x, playerY - snake.y);
-          if (dist < 6) {
-            setHp((h) => {
-              const updated = h - 1;
-              if (updated <= 0) setIsGameOver(true);
-              return Math.max(0, updated);
-            });
-            setPlayerX((px) => Math.max(10, px - 10));
-            setPlayerY((py) => Math.max(10, py - 10));
-          }
-        });
-        return prevSnakes;
-      });
+    return () => clearInterval(snakeInterval);
+  }, [isGameOver, activeQuizItem, isGoalReached]);
 
-      // 3. プレイヤーとアイテムの接触判定
-      items.forEach((item) => {
-        const dist = Math.hypot(playerX - item.x, playerY - item.y);
-        if (dist < 6 && !activeQuizItem) {
-          setActiveQuizItem(item);
-          setTypingInput('');
-          setQuizFeedback(null);
-        }
-      });
-
-      // 4. ゴール到達判定（右下 90%, 90% 近辺かつ文字3つ以上）
-      const goalDist = Math.hypot(playerX - 90, playerY - 90);
-      if (goalDist < 8 && collectedCount >= 3) {
-        setIsGoalReached(true);
-      }
-    }, 100);
-
-    return () => clearInterval(gameInterval);
-  }, [playerX, playerY, items, activeQuizItem, isGameOver, isGoalReached, collectedCount]);
-
-  // 矢印キー・WASDキーによるプレイヤー移動
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
-    const step = 6;
-    if (e.key === 'ArrowLeft' || e.key === 'a') {
-      setPlayerX((prev) => Math.max(5, prev - step));
-    } else if (e.key === 'ArrowRight' || e.key === 'd') {
-      setPlayerX((prev) => Math.min(95, prev + step));
-    } else if (e.key === 'ArrowUp' || e.key === 'w') {
-      setPlayerY((prev) => Math.max(5, prev - step));
-    } else if (e.key === 'ArrowDown' || e.key === 's') {
-      setPlayerY((prev) => Math.min(95, prev + step));
-    }
-  };
+    snakes.forEach((snake) => {
+      if (snake.x === playerX && snake.y === playerY) {
+        setHp((h) => {
+          const updated = h - 1;
+          if (updated <= 0) setIsGameOver(true);
+          return Math.max(0, updated);
+        });
+        setPlayerX(1);
+        setPlayerY(1);
+      }
+    });
 
-  // クイズ回答時の処理
+    items.forEach((item) => {
+      if (item.x === playerX && item.y === playerY && !activeQuizItem) {
+        setActiveQuizItem(item);
+        setTypingInput('');
+        setQuizFeedback(null);
+      }
+    });
+
+    if (playerX === 9 && playerY === 9 && collectedCount >= 3) {
+      setIsGoalReached(true);
+    }
+  }, [playerX, playerY, snakes, items, activeQuizItem, isGameOver, isGoalReached, collectedCount]);
+
+  useEffect(() => {
+    const handleKeyDownGlobal = (e: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd'].includes(e.key)) {
+        e.preventDefault();
+      }
+
+      if (isGameOver || activeQuizItem || isGoalReached) return;
+
+      let dx = 0;
+      let dy = 0;
+      if (e.key === 'ArrowLeft' || e.key === 'a') dx = -1;
+      else if (e.key === 'ArrowRight' || e.key === 'd') dx = 1;
+      else if (e.key === 'ArrowUp' || e.key === 'w') dy = -1;
+      else if (e.key === 'ArrowDown' || e.key === 's') dy = 1;
+
+      if (dx !== 0 || dy !== 0) {
+        const nextX = playerX + dx;
+        const nextY = playerY + dy;
+        if (MAZE_GRID[nextY]?.[nextX] === 0) {
+          setPlayerX(nextX);
+          setPlayerY(nextY);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDownGlobal);
+    return () => window.removeEventListener('keydown', handleKeyDownGlobal);
+  }, [playerX, playerY, isGameOver, activeQuizItem, isGoalReached]);
+
   const handleQuizSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeQuizItem) return;
@@ -285,16 +318,13 @@ function CharacterMazeArena() {
         setQuizFeedback(null);
       }, 800);
     } else {
-      setQuizFeedback('ざんねん！不正解 🌀 文字が別の場所に逃げました…');
+      setQuizFeedback('ざんねん！不正解 🌀 文字が別の通路に逃げました…');
       setTimeout(() => {
+        const randomPath = PATH_COORDS[Math.floor(Math.random() * PATH_COORDS.length)];
         setItems((prev) =>
           prev.map((i) =>
             i.id === activeQuizItem.id
-              ? {
-                  ...i,
-                  x: Math.floor(Math.random() * 75) + 10,
-                  y: Math.floor(Math.random() * 75) + 10,
-                }
+              ? { ...i, x: randomPath.x, y: randomPath.y }
               : i
           )
         );
@@ -309,8 +339,8 @@ function CharacterMazeArena() {
     setScore(0);
     setCollectedCount(0);
     setHp(5);
-    setPlayerX(10);
-    setPlayerY(10);
+    setPlayerX(1);
+    setPlayerY(1);
     setIsGoalReached(false);
     setIsGameOver(false);
     setActiveQuizItem(null);
@@ -318,24 +348,18 @@ function CharacterMazeArena() {
   };
 
   return (
-    <div
-      className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white outline-none focus:ring-2 focus:ring-indigo-500"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-    >
-      {/* ステータスバー */}
+    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white">
       <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
         <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
-        <span className="text-amber-300 font-bold">🎒 獲得した文字: {collectedCount} / 3個以上でゴールへ！</span>
+        <span className="text-amber-300 font-bold">🎒 獲得文字: {collectedCount} / 3個以上でゴール！</span>
         <span className="text-emerald-400 font-bold">SCORE: {score} pt</span>
       </div>
 
-      {/* ゲームフィールド（迷路エリア） */}
-      <div className="bg-slate-950 border border-slate-800 rounded-xl h-96 relative overflow-hidden flex flex-col justify-between p-4 shadow-inner">
+      <div className="bg-slate-950 border border-slate-800 rounded-xl h-[420px] relative overflow-hidden flex items-center justify-center p-4 shadow-inner">
         {isGameOver ? (
           <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center space-y-4 z-30">
             <h2 className="text-2xl font-black text-red-500">ゲームオーバー</h2>
-            <p className="text-sm text-slate-300">へびの攻撃に耐えきれず倒れてしまいました…</p>
+            <p className="text-sm text-slate-300">へびの攻撃に倒れてしまいました…</p>
             <button
               onClick={restartGame}
               className="bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
@@ -355,123 +379,112 @@ function CharacterMazeArena() {
             </button>
           </div>
         ) : (
-          <>
-            <div className="text-xs text-slate-400 tracking-wider flex justify-between items-center">
-              <span>▼ 迷宮エリア (矢印キー or WASDで移動) ▼</span>
-              <span className={`px-2 py-0.5 rounded font-bold ${collectedCount >= 3 ? 'bg-emerald-600 text-white animate-pulse' : 'bg-slate-800 text-slate-300'}`}>
-                {collectedCount >= 3 ? '🚪 ゴールが開きました（右下へ！）' : '🚪 ゴール：右下 (文字3つ集めよう)'}
-              </span>
-            </div>
+          <div className="grid grid-cols-11 gap-1 w-80 h-80 bg-slate-900 p-2 rounded-lg border border-slate-700 relative">
+            {MAZE_GRID.map((row, y) =>
+              row.map((cell, x) => {
+                const isPlayer = playerX === x && playerY === y;
+                const isGoal = x === 9 && y === 9;
+                const item = items.find((i) => i.x === x && i.y === y);
+                const snake = snakes.find((s) => s.x === x && s.y === y);
 
-            {/* ゴール地点アイコン */}
-            <div
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10 ${collectedCount >= 3 ? 'animate-bounce' : 'opacity-40'}`}
-              style={{ left: '90%', top: '90%' }}
-            >
-              <span className="text-2xl">🏰</span>
-              <span className="text-[10px] font-bold text-amber-300 bg-black/60 px-1 rounded">ゴール</span>
-            </div>
+                return (
+                  <div
+                    key={`${x}-${y}`}
+                    className={`flex items-center justify-center rounded text-xs font-bold transition-all ${
+                      cell === 1
+                        ? 'bg-slate-800 border border-slate-700'
+                        : 'bg-slate-950'
+                    }`}
+                  >
+                    {isPlayer ? (
+                      <span className="text-xl animate-pulse">🧝</span>
+                    ) : isGoal ? (
+                      <span className={`text-xl ${collectedCount >= 3 ? 'animate-bounce' : 'opacity-40'}`}>🏰</span>
+                    ) : item ? (
+                      <span className="bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded font-black text-xs shadow">
+                        {item.char}
+                      </span>
+                    ) : snake ? (
+                      <span className="text-lg">🐍</span>
+                    ) : null}
+                  </div>
+                );
+              })
+            )}
 
-            {/* マップ上のアイテム（文字） */}
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10 animate-pulse"
-                style={{ left: `${item.x}%`, top: `${item.y}%` }}
-              >
-                <div className="bg-amber-500 text-slate-950 font-black text-lg px-2.5 py-1 rounded-lg border-2 border-yellow-200 shadow-lg">
-                  {item.char}
-                </div>
-              </div>
-            ))}
-
-            {/* へび */}
-            {snakes.map((snake) => (
-              <div
-                key={snake.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 text-2xl z-10 transition-all duration-100"
-                style={{ left: `${snake.x}%`, top: `${snake.y}%` }}
-              >
-                🐍
-              </div>
-            ))}
-
-            {/* プレイヤー（冒険者） */}
-            <div
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-20 transition-all duration-75"
-              style={{ left: `${playerX}%`, top: `${playerY}%` }}
-            >
-              <span className="text-xs text-indigo-300 font-bold bg-black/60 px-1 rounded">あなた</span>
-              <span className="text-3xl">🧝</span>
-            </div>
-
-            {/* クイズモーダル */}
             {activeQuizItem && (
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-40 space-y-4">
-                <div className="bg-slate-800 border-2 border-indigo-500 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
-                  <span className="text-xs bg-indigo-600 text-white px-2 py-1 rounded-full font-bold">文字をゲット！読み方を答えよう</span>
-                  <div className="text-6xl font-black text-amber-400 my-2 animate-bounce">
+              <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-40 space-y-3">
+                <div className="bg-slate-800 border-2 border-indigo-500 rounded-2xl p-5 max-w-xs w-full text-center space-y-3 shadow-2xl">
+                  <span className="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-bold">文字ゲット！読み方を答えよう</span>
+                  <div className="text-5xl font-black text-amber-400 my-1 animate-bounce">
                     {activeQuizItem.char}
                   </div>
-                  <p className="text-xs text-slate-300">この文字の読み方をローマ字で入力してね</p>
+                  <p className="text-xs text-slate-300">ローマ字で入力してね</p>
 
-                  <form onSubmit={handleQuizSubmit} className="space-y-3">
+                  <form onSubmit={handleQuizSubmit} className="space-y-2">
                     <input
                       type="text"
                       autoFocus
                       value={typingInput}
                       onChange={(e) => setTypingInput(e.target.value)}
-                      placeholder="例: a, shi, hon..."
-                      className="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-center text-xl font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
+                      placeholder="例: a, shi..."
+                      className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
                     />
                     <button
                       type="submit"
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2.5 rounded-lg text-white text-sm transition cursor-pointer shadow-sm"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2 rounded-lg text-white text-xs transition cursor-pointer"
                     >
                       回答する ↵
                     </button>
                   </form>
 
                   {quizFeedback && (
-                    <div className="text-sm font-bold text-amber-300 animate-pulse pt-2">
+                    <div className="text-xs font-bold text-amber-300 animate-pulse pt-1">
                       {quizFeedback}
                     </div>
                   )}
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
-      {/* 操作ボタン（スマホ・タブレットや補助用） */}
-      <div className="max-w-xs mx-auto space-y-2">
+      <div className="max-w-xs mx-auto space-y-1">
         <div className="flex justify-center">
           <button
-            onClick={() => setPlayerY((prev) => Math.max(5, prev - 8))}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-2 rounded-lg text-xs font-bold text-slate-200 cursor-pointer"
+            onClick={() => {
+              if (MAZE_GRID[playerY - 1]?.[playerX] === 0) setPlayerY((p) => p - 1);
+            }}
+            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
           >
             ▲ 上へ
           </button>
         </div>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-3">
           <button
-            onClick={() => setPlayerX((prev) => Math.max(5, prev - 8))}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-2 rounded-lg text-xs font-bold text-slate-200 cursor-pointer"
+            onClick={() => {
+              if (MAZE_GRID[playerY]?.[playerX - 1] === 0) setPlayerX((p) => p - 1);
+            }}
+            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
           >
             ◀ 左へ
           </button>
           <button
-            onClick={() => setPlayerX((prev) => Math.min(95, prev + 8))}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-2 rounded-lg text-xs font-bold text-slate-200 cursor-pointer"
+            onClick={() => {
+              if (MAZE_GRID[playerY]?.[playerX + 1] === 0) setPlayerX((p) => p + 1);
+            }}
+            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
           >
             右へ ▶
           </button>
         </div>
         <div className="flex justify-center">
           <button
-            onClick={() => setPlayerY((prev) => Math.min(95, prev + 8))}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-2 rounded-lg text-xs font-bold text-slate-200 cursor-pointer"
+            onClick={() => {
+              if (MAZE_GRID[playerY + 1]?.[playerX] === 0) setPlayerY((p) => p + 1);
+            }}
+            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
           >
             ▼ 下へ
           </button>
