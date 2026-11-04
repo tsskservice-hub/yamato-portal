@@ -1,6 +1,6 @@
 /**
  * @file character-maze.tsx
- * @description 地上の迷宮文字探し 〜タイピング・アドベンチャー〜 (等サイズグリッド・シームレスな壁と通路)
+ * @description 地上の迷宮文字探し 〜タイピング・アドベンチャー〜 (その場再開・滑らかな蛇の移動・1匹の蛇)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -176,7 +176,8 @@ function CharacterMazeArena() {
   const [playerY, setPlayerY] = useState(1);
 
   const [items, setItems] = useState<ItemNode[]>([]);
-  const [snakes, setSnakes] = useState<SnakeNode[]>([]);
+  // 蛇は1匹に絞る
+  const [snake, setSnake] = useState<SnakeNode>({ id: 1, x: 8, y: 8 });
 
   const [activeQuizItem, setActiveQuizItem] = useState<ItemNode | null>(null);
   const [typingInput, setTypingInput] = useState('');
@@ -202,46 +203,36 @@ function CharacterMazeArena() {
     }
     setItems(initialItems);
 
-    const initialSnakes: SnakeNode[] = [];
-    for (let i = 5; i < 8 && i < shuffledPaths.length; i++) {
-      const pos = shuffledPaths[i];
-      initialSnakes.push({
-        id: Date.now() + 100 + i,
-        x: pos.x,
-        y: pos.y,
-      });
-    }
-    setSnakes(initialSnakes);
+    // 蛇の初期位置（プレイヤーから離れた場所）
+    setSnake({ id: 1, x: shuffledPaths[5]?.x || 8, y: shuffledPaths[5]?.y || 8 });
   };
 
   useEffect(() => {
     spawnInitialEntities();
   }, []);
 
-  // へびのランダム移動
+  // 蛇が1マスずつ滑らかに連続して動くようにする（ワープ感を解消）
   useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
     const snakeInterval = setInterval(() => {
-      setSnakes((prevSnakes) =>
-        prevSnakes.map((snake) => {
-          const directions = [
-            { dx: 0, dy: -1 },
-            { dx: 0, dy: 1 },
-            { dx: -1, dy: 0 },
-            { dx: 1, dy: 0 },
-          ];
-          const validMoves = directions.filter(
-            (d) => MAZE_GRID[snake.y + d.dy]?.[snake.x + d.dx] === 0
-          );
-          if (validMoves.length > 0) {
-            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
-            return { ...snake, x: snake.x + move.dx, y: snake.y + move.dy };
-          }
-          return snake;
-        })
-      );
-    }, 1400);
+      setSnake((prev) => {
+        const directions = [
+          { dx: 0, dy: -1 },
+          { dx: 0, dy: 1 },
+          { dx: -1, dy: 0 },
+          { dx: 1, dy: 0 },
+        ];
+        const validMoves = directions.filter(
+          (d) => MAZE_GRID[prev.y + d.dy]?.[prev.x + d.dx] === 0
+        );
+        if (validMoves.length > 0) {
+          const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+          return { ...prev, x: prev.x + move.dx, y: prev.y + move.dy };
+        }
+        return prev;
+      });
+    }, 900); // 0.9秒ごとに1マス隣へ移動
 
     return () => clearInterval(snakeInterval);
   }, [isGameOver, activeQuizItem, isGoalReached]);
@@ -250,18 +241,18 @@ function CharacterMazeArena() {
   useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
-    snakes.forEach((snake) => {
-      if (snake.x === playerX && snake.y === playerY) {
-        setHp((h) => {
-          const updated = h - 1;
-          if (updated <= 0) setIsGameOver(true);
-          return Math.max(0, updated);
-        });
-        setPlayerX(1);
-        setPlayerY(1);
-      }
-    });
+    // 蛇とプレイヤーの接触
+    if (snake.x === playerX && snake.y === playerY) {
+      setHp((h) => {
+        const updated = h - 1;
+        if (updated <= 0) setIsGameOver(true);
+        return Math.max(0, updated);
+      });
+      setPlayerX(1);
+      setPlayerY(1);
+    }
 
+    // アイテムとプレイヤーの接触
     items.forEach((item) => {
       if (item.x === playerX && item.y === playerY && !activeQuizItem) {
         setActiveQuizItem(item);
@@ -273,7 +264,7 @@ function CharacterMazeArena() {
     if (playerX === 9 && playerY === 9 && collectedCount >= 3) {
       setIsGoalReached(true);
     }
-  }, [playerX, playerY, snakes, items, activeQuizItem, isGameOver, isGoalReached, collectedCount]);
+  }, [playerX, playerY, snake, items, activeQuizItem, isGameOver, isGoalReached, collectedCount]);
 
   // 矢印キー移動
   useEffect(() => {
@@ -312,10 +303,11 @@ function CharacterMazeArena() {
     if (!activeQuizItem) return;
 
     if (typingInput.toLowerCase().trim() === activeQuizItem.romaji) {
-      setQuizFeedback('正解！ 🎉');
+      setQuizFeedback('正解！ 🎉 その場から探索を続けます！');
       setTimeout(() => {
         setScore((s) => s + 200);
         setCollectedCount((c) => c + 1);
+        // 正解したアイテムを消去（プレイヤーの位置はその場を維持）
         setItems((prev) => prev.filter((i) => i.id !== activeQuizItem.id));
         setActiveQuizItem(null);
         setTypingInput('');
@@ -360,7 +352,7 @@ function CharacterMazeArena() {
         <span className="text-emerald-600 font-bold">SCORE: {score} pt</span>
       </div>
 
-      {/* ゲームフィールド（シームレスな大型迷路エリア） */}
+      {/* ゲームフィールド（迷路エリア） */}
       <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl h-[520px] relative overflow-hidden flex items-center justify-center p-6 shadow-inner">
         {isGameOver ? (
           <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30">
@@ -386,22 +378,22 @@ function CharacterMazeArena() {
           </div>
         ) : (
           <div className="relative w-[440px] h-[440px] bg-slate-700 p-2 rounded-xl border-4 border-slate-800 shadow-lg">
-            {/* シームレスな迷路グリッド（ギャップなしで壁と通路がつながる） */}
+            {/* 迷路グリッド */}
             <div className="w-full h-full grid grid-cols-11 grid-rows-11 bg-slate-700">
               {MAZE_GRID.map((row, y) =>
                 row.map((cell, x) => {
                   const isPlayer = playerX === x && playerY === y;
                   const isGoal = x === 9 && y === 9;
                   const item = items.find((i) => i.x === x && i.y === y);
-                  const snake = snakes.find((s) => s.x === x && s.y === y);
+                  const isSnake = snake.x === x && snake.y === y;
 
                   return (
                     <div
                       key={`${x}-${y}`}
                       className={`w-full h-full flex items-center justify-center text-sm font-bold select-none ${
                         cell === 1
-                          ? 'bg-slate-700 border border-slate-600/40' // 壁（ダークグレーで一体化）
-                          : 'bg-white' // 通路（完全な白でシームレスにつながる）
+                          ? 'bg-slate-700 border border-slate-600/40' // 壁
+                          : 'bg-white' // 通路
                       }`}
                     >
                       {isPlayer ? (
@@ -412,8 +404,8 @@ function CharacterMazeArena() {
                         <span className="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-black text-xs shadow-md border border-amber-200">
                           {item.char}
                         </span>
-                      ) : snake ? (
-                        <span className="text-xl">🐍</span>
+                      ) : isSnake ? (
+                        <span className="text-xl transition-all duration-300">🐍</span>
                       ) : null}
                     </div>
                   );
