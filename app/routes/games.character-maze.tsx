@@ -1,6 +1,6 @@
 /**
  * @file character-maze.tsx
- * @description 迷宮の文字探し 〜タイピング・アドベンチャー〜 (本格迷路・蛇回避・ローマ字タイピング)
+ * @description 迷宮の文字探し 〜タイピング・アドベンチャー〜 (明るい地上風・大型迷路・ローマ字タイピング修正)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,7 +10,7 @@ import type { PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// 11x11 の迷路マップ (1: 壁, 0: 通路)
+// 11x11 の迷路マップ (1: 高い壁、0: 明るい通路)
 const MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
@@ -25,7 +25,6 @@ const MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
-// 通路の座標リスト (アイテムやへびを置く候補地)
 const PATH_COORDS: { x: number; y: number }[] = [];
 MAZE_GRID.forEach((row, y) => {
   row.forEach((cell, x) => {
@@ -117,10 +116,10 @@ export default function CharacterMazePage() {
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="迷宮の文字探し">
-      <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         <header className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center shadow-sm">
           <div>
-            <h1 className="text-xl font-bold text-slate-800">🧭 迷宮の文字探し 〜タイピング・アドベンチャー〜</h1>
+            <h1 className="text-xl font-bold text-slate-800">🧭 地上の迷宮文字探し 〜タイピング・アドベンチャー〜</h1>
             <p className="text-xs text-slate-500 mt-0.5">Character Maze - VCE Japanese Practice</p>
           </div>
           <Link
@@ -219,6 +218,7 @@ function CharacterMazeArena() {
     spawnInitialEntities();
   }, []);
 
+  // へびのランダム移動
   useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
@@ -241,11 +241,12 @@ function CharacterMazeArena() {
           return snake;
         })
       );
-    }, 1200);
+    }, 1400);
 
     return () => clearInterval(snakeInterval);
   }, [isGameOver, activeQuizItem, isGoalReached]);
 
+  // 接触判定
   useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
@@ -274,13 +275,16 @@ function CharacterMazeArena() {
     }
   }, [playerX, playerY, snakes, items, activeQuizItem, isGameOver, isGoalReached, collectedCount]);
 
+  // 矢印キー移動（クイズ中は移動キーを無効化してタイピングに専念させる）
   useEffect(() => {
     const handleKeyDownGlobal = (e: KeyboardEvent) => {
+      if (activeQuizItem) return; // クイズ表示中は迷路の移動操作を受け付けない
+
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd'].includes(e.key)) {
         e.preventDefault();
       }
 
-      if (isGameOver || activeQuizItem || isGoalReached) return;
+      if (isGameOver || isGoalReached) return;
 
       let dx = 0;
       let dy = 0;
@@ -348,38 +352,40 @@ function CharacterMazeArena() {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white">
-      <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
-        <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
-        <span className="text-amber-300 font-bold">🎒 獲得文字: {collectedCount} / 3個以上でゴール！</span>
-        <span className="text-emerald-400 font-bold">SCORE: {score} pt</span>
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800">
+      {/* ステータスバー */}
+      <div className="flex justify-between items-center bg-slate-100 p-4 rounded-xl border border-slate-200 text-sm shadow-inner">
+        <span className="text-red-500 font-bold">❤️ ライフ: {'❤️'.repeat(hp)}</span>
+        <span className="text-indigo-600 font-bold">🎒 獲得文字: {collectedCount} / 3個以上でゴール！</span>
+        <span className="text-emerald-600 font-bold">SCORE: {score} pt</span>
       </div>
 
-      <div className="bg-slate-950 border border-slate-800 rounded-xl h-[420px] relative overflow-hidden flex items-center justify-center p-4 shadow-inner">
+      {/* ゲームフィールド（白基調・大型迷路エリア） */}
+      <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl h-[520px] relative overflow-hidden flex items-center justify-center p-6 shadow-inner">
         {isGameOver ? (
-          <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center space-y-4 z-30">
-            <h2 className="text-2xl font-black text-red-500">ゲームオーバー</h2>
-            <p className="text-sm text-slate-300">へびの攻撃に倒れてしまいました…</p>
+          <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30">
+            <h2 className="text-3xl font-black text-red-600">ゲームオーバー</h2>
+            <p className="text-sm text-slate-600">へびの攻撃に倒れてしまいました…</p>
             <button
               onClick={restartGame}
-              className="bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
+              className="bg-indigo-600 hover:bg-indigo-700 font-bold px-8 py-3 rounded-xl text-white text-base transition cursor-pointer shadow-md"
             >
               もう一度挑戦する
             </button>
           </div>
         ) : isGoalReached ? (
-          <div className="absolute inset-0 bg-indigo-950/90 flex flex-col items-center justify-center space-y-4 z-30">
-            <h2 className="text-2xl font-black text-amber-400">🎉 ゴール達成！大勝利！</h2>
-            <p className="text-sm text-slate-200">見事に迷宮を抜けて文字を集めました！ (スコア: {score} pt)</p>
+          <div className="absolute inset-0 bg-indigo-50/95 flex flex-col items-center justify-center space-y-4 z-30">
+            <h2 className="text-3xl font-black text-amber-600">🎉 ゴール達成！大勝利！</h2>
+            <p className="text-sm text-slate-700">見事に地上の迷宮を抜けて文字を集めました！ (スコア: {score} pt)</p>
             <button
               onClick={restartGame}
-              className="bg-emerald-600 hover:bg-emerald-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 font-bold px-8 py-3 rounded-xl text-white text-base transition cursor-pointer shadow-md"
             >
               もう一度遊ぶ
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-11 gap-1 w-80 h-80 bg-slate-900 p-2 rounded-lg border border-slate-700 relative">
+          <div className="grid grid-cols-11 gap-1.5 w-[440px] h-[440px] bg-slate-200 p-3 rounded-xl border-2 border-slate-300 relative shadow-md">
             {MAZE_GRID.map((row, y) =>
               row.map((cell, x) => {
                 const isPlayer = playerX === x && playerY === y;
@@ -390,56 +396,57 @@ function CharacterMazeArena() {
                 return (
                   <div
                     key={`${x}-${y}`}
-                    className={`flex items-center justify-center rounded text-xs font-bold transition-all ${
+                    className={`flex items-center justify-center rounded-lg text-sm font-bold transition-all ${
                       cell === 1
-                        ? 'bg-slate-800 border border-slate-700'
-                        : 'bg-slate-950'
+                        ? 'bg-slate-700 border border-slate-600 shadow-sm' // 高い壁（ダークグレーの立体的な壁）
+                        : 'bg-white border border-slate-100 shadow-inner' // 明るい地上通路（白）
                     }`}
                   >
                     {isPlayer ? (
-                      <span className="text-xl animate-pulse">🧝</span>
+                      <span className="text-2xl animate-pulse">🧝</span>
                     ) : isGoal ? (
-                      <span className={`text-xl ${collectedCount >= 3 ? 'animate-bounce' : 'opacity-40'}`}>🏰</span>
+                      <span className={`text-2xl ${collectedCount >= 3 ? 'animate-bounce' : 'opacity-40'}`}>🏰</span>
                     ) : item ? (
-                      <span className="bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded font-black text-xs shadow">
+                      <span className="bg-amber-400 text-slate-900 px-2 py-0.5 rounded font-black text-sm shadow-md border border-amber-200">
                         {item.char}
                       </span>
                     ) : snake ? (
-                      <span className="text-lg">🐍</span>
+                      <span className="text-xl">🐍</span>
                     ) : null}
                   </div>
                 );
               })
             )}
 
+            {/* クイズモーダル */}
             {activeQuizItem && (
-              <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-40 space-y-3">
-                <div className="bg-slate-800 border-2 border-indigo-500 rounded-2xl p-5 max-w-xs w-full text-center space-y-3 shadow-2xl">
-                  <span className="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-bold">文字ゲット！読み方を答えよう</span>
-                  <div className="text-5xl font-black text-amber-400 my-1 animate-bounce">
+              <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-40 space-y-4">
+                <div className="bg-white border-2 border-indigo-500 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
+                  <span className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-full font-bold">文字ゲット！読み方を答えよう</span>
+                  <div className="text-6xl font-black text-amber-500 my-2 animate-bounce">
                     {activeQuizItem.char}
                   </div>
-                  <p className="text-xs text-slate-300">ローマ字で入力してね</p>
+                  <p className="text-xs text-slate-600">ローマ字で正確に入力してね（例: ka, shi）</p>
 
-                  <form onSubmit={handleQuizSubmit} className="space-y-2">
+                  <form onSubmit={handleQuizSubmit} className="space-y-3">
                     <input
                       type="text"
                       autoFocus
                       value={typingInput}
                       onChange={(e) => setTypingInput(e.target.value)}
-                      placeholder="例: a, shi..."
-                      className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
+                      placeholder="ここに入力..."
+                      className="bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 text-center text-xl font-mono text-slate-900 w-full focus:outline-none focus:border-indigo-600 shadow-inner"
                     />
                     <button
                       type="submit"
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-2 rounded-lg text-white text-xs transition cursor-pointer"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-3 rounded-xl text-white text-sm transition cursor-pointer shadow-md"
                     >
                       回答する ↵
                     </button>
                   </form>
 
                   {quizFeedback && (
-                    <div className="text-xs font-bold text-amber-300 animate-pulse pt-1">
+                    <div className="text-sm font-bold text-amber-600 animate-pulse pt-2">
                       {quizFeedback}
                     </div>
                   )}
@@ -450,31 +457,35 @@ function CharacterMazeArena() {
         )}
       </div>
 
-      <div className="max-w-xs mx-auto space-y-1">
+      {/* 画面内操作ボタン（大きめ） */}
+      <div className="max-w-xs mx-auto space-y-2">
         <div className="flex justify-center">
           <button
             onClick={() => {
+              if (activeQuizItem || isGameOver || isGoalReached) return;
               if (MAZE_GRID[playerY - 1]?.[playerX] === 0) setPlayerY((p) => p - 1);
             }}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
+            className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
             ▲ 上へ
           </button>
         </div>
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-4">
           <button
             onClick={() => {
+              if (activeQuizItem || isGameOver || isGoalReached) return;
               if (MAZE_GRID[playerY]?.[playerX - 1] === 0) setPlayerX((p) => p - 1);
             }}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
+            className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
             ◀ 左へ
           </button>
           <button
             onClick={() => {
+              if (activeQuizItem || isGameOver || isGoalReached) return;
               if (MAZE_GRID[playerY]?.[playerX + 1] === 0) setPlayerX((p) => p + 1);
             }}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
+            className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
             右へ ▶
           </button>
@@ -482,9 +493,10 @@ function CharacterMazeArena() {
         <div className="flex justify-center">
           <button
             onClick={() => {
+              if (activeQuizItem || isGameOver || isGoalReached) return;
               if (MAZE_GRID[playerY + 1]?.[playerX] === 0) setPlayerY((p) => p + 1);
             }}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
+            className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
             ▼ 下へ
           </button>

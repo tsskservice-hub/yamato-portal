@@ -1,6 +1,6 @@
 /**
  * @file kanji-sudoku.tsx
- * @description 漢字数独（Kanji Sudoku）ページ（iframeによる埋め込み対応版）
+ * @description 漢字数独（Kanji Sudoku）ページ（ワイドレイアウト・iframe埋め込み対応版）
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useRef } from 'react';
@@ -47,8 +47,8 @@ function KanjiSudokuFrameView({ userId }: { userId: string | null }) {
           Challenge your kanji reading and logic skills with Kanji Sudoku!
         </p>
 
-        {/* Kanji Sudoku iframe (1-Column Centered View) */}
-        <div className="w-full max-w-3xl h-[650px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-indigo-800/40 p-2">
+        {/* Kanji Sudoku iframe (Wide Layout for Table & Number Pad side-by-side) */}
+        <div className="w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-indigo-800/40 p-2">
           <iframe
             src="/games/kanji_sudoku.html"
             title="Kanji Sudoku Puzzle"
@@ -115,7 +115,8 @@ export default function KanjiSudokuRoute() {
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16">
-        <main className="max-w-4xl mx-auto px-4 pt-8">
+        {/* Widened max-w-6xl container for spacious layout */}
+        <main className="max-w-6xl mx-auto px-4 pt-8">
           <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800">
             <KanjiSudokuFrameView userId={user?.id} />
           </div>
