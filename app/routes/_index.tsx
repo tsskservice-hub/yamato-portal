@@ -1,7 +1,7 @@
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
- * 💡 Supabase app_knowledge (CONTENT_GENERAL, CONTENT_VCE_SPEAKING, CONTENT_VCE_WRITING, CONTENT_REFERENCE, CONTENT_JUNIOR, CONTENT_GAMES) 完全動的連動・エラーハンドリング統合版
+ * 💡 Supabase app_knowledge (CONTENT_GENERAL, CONTENT_VCE_SPEAKING, CONTENT_VCE_WRITING, CONTENT_REFERENCE, CONTENT_JUNIOR, CONTENT_GAMES, CONTENT_OTHER) 完全動的連動・エラーハンドリング統合版
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -25,6 +25,7 @@ import { useVceWritingContent } from '~/data/content-vce-writing';
 import { useReferenceContent } from '~/data/content-reference';
 import { useJuniorContent } from '~/data/content-junior';
 import { useGamesContent } from '~/data/content-games';
+import { useOtherContent } from '~/data/content-other';
 
 import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '~/data/quizzes';
 import { fetchPricePlansData } from '~/data/price-plans';
@@ -62,13 +63,14 @@ export default function Home() {
   const learningPace = rootData?.learningPace ?? "normal";
   const isTeacher = rootData?.isTeacher ?? false;
 
-  // 💡 各分割コンテンツフックの呼び出し
+  // 💡 各分割コンテンツフックの呼び出し (CONTENT_OTHER を追加)
   const { generalData } = useGeneralContent(supabase);
   const { vceSpeakingData } = useVceSpeakingContent(supabase);
   const { vceWritingData } = useVceWritingContent(supabase);
   const { referenceData } = useReferenceContent(supabase);
   const { juniorData } = useJuniorContent(supabase);
   const { gamesData } = useGamesContent(supabase);
+  const { otherData } = useOtherContent(supabase);
 
   // 💡 先生がログインしている場合、トップページを開いた瞬間に教師ダッシュボードへ自動リダイレクト
   useEffect(() => {
@@ -310,7 +312,7 @@ export default function Home() {
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-950'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
           
-          {/* 1. Hero Section ＆ Auto Demo Chat */}
+          {/* 1. Hero Section ＆ Auto Demo Chat (CONTENT_OTHER の設定を渡す) */}
           <HeroDemoChat
             isDarkMode={isDarkMode}
             user={user}
@@ -325,7 +327,12 @@ export default function Home() {
               setIsQuizModalOpen(true);
             }}
             validateFeatureCredits={validateFeatureCredits}
-            portalContent={{ modulesSection: { header: { title: "Portal Pages & Modules" } } }}
+            portalContent={{ 
+              modulesSection: { header: { title: "Portal Pages & Modules" } },
+              hero: otherData?.hero,
+              aiDemoWidget: otherData?.aiDemoWidget,
+              dailyChallengeBanner: otherData?.dailyChallengeBanner
+            }}
           />
 
           {/* 2. Pricing & Credit Packs */}
@@ -372,7 +379,7 @@ export default function Home() {
           hasCompletedTodayQuiz={hasCompletedTodayQuiz}
           isQuizCorrect={isQuizCorrect}
           onAnswer={handleAnswerQuiz}
-          portalContent={null}
+          portalContent={otherData}
         />
       </div>
     </ToolPageWrapper>
