@@ -1,6 +1,6 @@
 /**
  * @file character-maze.tsx
- * @description 迷宮の文字探し 〜タイピング・アドベンチャー〜 (明るい地上風・大型迷路・ローマ字タイピング修正)
+ * @description 地上の迷宮文字探し 〜タイピング・アドベンチャー〜 (等サイズグリッド・シームレスな壁と通路)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,7 +10,7 @@ import type { PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// 11x11 の迷路マップ (1: 高い壁、0: 明るい通路)
+// 11x11 の迷路マップ (1: 壁、0: 通路)
 const MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
@@ -275,10 +275,10 @@ function CharacterMazeArena() {
     }
   }, [playerX, playerY, snakes, items, activeQuizItem, isGameOver, isGoalReached, collectedCount]);
 
-  // 矢印キー移動（クイズ中は移動キーを無効化してタイピングに専念させる）
+  // 矢印キー移動
   useEffect(() => {
     const handleKeyDownGlobal = (e: KeyboardEvent) => {
-      if (activeQuizItem) return; // クイズ表示中は迷路の移動操作を受け付けない
+      if (activeQuizItem) return;
 
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd'].includes(e.key)) {
         e.preventDefault();
@@ -360,7 +360,7 @@ function CharacterMazeArena() {
         <span className="text-emerald-600 font-bold">SCORE: {score} pt</span>
       </div>
 
-      {/* ゲームフィールド（白基調・大型迷路エリア） */}
+      {/* ゲームフィールド（シームレスな大型迷路エリア） */}
       <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl h-[520px] relative overflow-hidden flex items-center justify-center p-6 shadow-inner">
         {isGameOver ? (
           <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30">
@@ -385,42 +385,45 @@ function CharacterMazeArena() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-11 gap-1.5 w-[440px] h-[440px] bg-slate-200 p-3 rounded-xl border-2 border-slate-300 relative shadow-md">
-            {MAZE_GRID.map((row, y) =>
-              row.map((cell, x) => {
-                const isPlayer = playerX === x && playerY === y;
-                const isGoal = x === 9 && y === 9;
-                const item = items.find((i) => i.x === x && i.y === y);
-                const snake = snakes.find((s) => s.x === x && s.y === y);
+          <div className="relative w-[440px] h-[440px] bg-slate-700 p-2 rounded-xl border-4 border-slate-800 shadow-lg">
+            {/* シームレスな迷路グリッド（ギャップなしで壁と通路がつながる） */}
+            <div className="w-full h-full grid grid-cols-11 grid-rows-11 bg-slate-700">
+              {MAZE_GRID.map((row, y) =>
+                row.map((cell, x) => {
+                  const isPlayer = playerX === x && playerY === y;
+                  const isGoal = x === 9 && y === 9;
+                  const item = items.find((i) => i.x === x && i.y === y);
+                  const snake = snakes.find((s) => s.x === x && s.y === y);
 
-                return (
-                  <div
-                    key={`${x}-${y}`}
-                    className={`flex items-center justify-center rounded-lg text-sm font-bold transition-all ${
-                      cell === 1
-                        ? 'bg-slate-700 border border-slate-600 shadow-sm' // 高い壁（ダークグレーの立体的な壁）
-                        : 'bg-white border border-slate-100 shadow-inner' // 明るい地上通路（白）
-                    }`}
-                  >
-                    {isPlayer ? (
-                      <span className="text-2xl animate-pulse">🧝</span>
-                    ) : isGoal ? (
-                      <span className={`text-2xl ${collectedCount >= 3 ? 'animate-bounce' : 'opacity-40'}`}>🏰</span>
-                    ) : item ? (
-                      <span className="bg-amber-400 text-slate-900 px-2 py-0.5 rounded font-black text-sm shadow-md border border-amber-200">
-                        {item.char}
-                      </span>
-                    ) : snake ? (
-                      <span className="text-xl">🐍</span>
-                    ) : null}
-                  </div>
-                );
-              })
-            )}
+                  return (
+                    <div
+                      key={`${x}-${y}`}
+                      className={`w-full h-full flex items-center justify-center text-sm font-bold select-none ${
+                        cell === 1
+                          ? 'bg-slate-700 border border-slate-600/40' // 壁（ダークグレーで一体化）
+                          : 'bg-white' // 通路（完全な白でシームレスにつながる）
+                      }`}
+                    >
+                      {isPlayer ? (
+                        <span className="text-2xl animate-pulse">🧝</span>
+                      ) : isGoal ? (
+                        <span className={`text-2xl ${collectedCount >= 3 ? 'animate-bounce' : 'opacity-40'}`}>🏰</span>
+                      ) : item ? (
+                        <span className="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-black text-xs shadow-md border border-amber-200">
+                          {item.char}
+                        </span>
+                      ) : snake ? (
+                        <span className="text-xl">🐍</span>
+                      ) : null}
+                    </div>
+                  );
+                })
+              )}
+            </div>
 
             {/* クイズモーダル */}
             {activeQuizItem && (
-              <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-40 space-y-4">
+              <div className="absolute inset-0 bg-slate-900/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-40 space-y-4">
                 <div className="bg-white border-2 border-indigo-500 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
                   <span className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-full font-bold">文字ゲット！読み方を答えよう</span>
                   <div className="text-6xl font-black text-amber-500 my-2 animate-bounce">
@@ -457,7 +460,7 @@ function CharacterMazeArena() {
         )}
       </div>
 
-      {/* 画面内操作ボタン（大きめ） */}
+      {/* 画面内操作ボタン */}
       <div className="max-w-xs mx-auto space-y-2">
         <div className="flex justify-center">
           <button

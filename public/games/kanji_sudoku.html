@@ -347,7 +347,7 @@
         <aside class="panel">
           <div class="card">
             <h2>Number pad</h2>
-            <p class="hint-text">Tap a cell on the board first, then choose a kanji. The small number under each kanji is its Arabic value, and “left” shows how many are still to place.</p>
+            <p class="hint-text">Tap a cell on the board first, then choose a kanji. The romaji under each kanji is its Japanese reading — for example, 一 is “ichi” — and “left” shows how many are still to place.</p>
             <div class="pad" id="pad"></div>
           </div>
 
@@ -427,6 +427,7 @@
         "use strict";
         var KANJI = ["", "一","二","三","四","五","六","七","八","九"];
         var WORDS = ["", "One","Two","Three","Four","Five","Six","Seven","Eight","Nine"];
+        var ROMAJI = ["", "ichi","ni","san","yon","go","roku","nana","hachi","kyū"];
         var REMOVALS = { easy: 36, medium: 46, hard: 52, expert: 57 };
         var DIFF_LABEL = { easy:"Easy", medium:"Medium", hard:"Hard", expert:"Expert" };
 
@@ -550,8 +551,8 @@
             (function(n){
               var b=document.createElement("button");
               b.type="button"; b.className="pad-btn";
-              b.setAttribute("aria-label","Enter "+KANJI[n]+" ("+n+", "+WORDS[n]+")");
-              b.innerHTML='<span class="k">'+KANJI[n]+'</span><span class="a">'+n+" · "+WORDS[n]+'</span><span class="left"></span>';
+              b.setAttribute("aria-label","Enter "+KANJI[n]+" ("+n+", "+ROMAJI[n]+")");
+              b.innerHTML='<span class="k">'+KANJI[n]+'</span><span class="a">'+n+" · "+ROMAJI[n]+'</span><span class="left"></span>';
               b.addEventListener("click", function(){ enterNumber(n); });
               padEl.appendChild(b); padBtns.push(b);
             })(n);
