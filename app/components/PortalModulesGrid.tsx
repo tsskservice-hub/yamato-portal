@@ -180,7 +180,7 @@ export function PortalModulesGrid({
           </div>
         )}
 
-        {/* 6. 🎮 ゲームズ・アーケード総合ポータル誘導カード (一番最後に移動・他と形状を統一・英語化) */}
+        {/* 6. 🎮 ゲームズ・アーケード総合ポータル誘導カード */}
         <div className="space-y-4 pt-6">
           <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
             <span className="text-xl">🎮</span>
@@ -200,6 +200,7 @@ export function PortalModulesGrid({
                 actionLabel: 'View Arcade',
                 isComingSoon: false,
                 creditRequirement: null,
+                accentColor: 'red', // 💡 PortalModule型で必須の accentColor を追加
               },
               'red'
             )}
