@@ -1,6 +1,6 @@
 /**
  * @file igo.tsx
- * @description 9路 囲碁対局ページ（1カラムレイアウト・全英語化・クレジット非表示対応版）
+ * @description 9路 囲碁対局ページ（ワイドレイアウト・全英語化・クレジット非表示対応版）
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useRef } from 'react';
@@ -47,8 +47,8 @@ function IgoFrameView({ userId }: { userId: string | null }) {
           Enjoy your tactical Go match against Yamato-sensei!
         </p>
 
-        {/* Go Board iframe (1-Column Centered View) */}
-        <div className="w-full max-w-3xl h-[650px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-amber-800/40 p-2">
+        {/* Go Board iframe (Wide Layout Centered View) */}
+        <div className="w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-amber-800/40 p-2">
           <iframe
             src="/games/9by9go.html"
             title="9by9 Go Game"
@@ -115,7 +115,8 @@ export default function IgoRoute() {
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16">
-        <main className="max-w-4xl mx-auto px-4 pt-8">
+        {/* Widened max-w-6xl container */}
+        <main className="max-w-6xl mx-auto px-4 pt-8">
           <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800">
             <IgoFrameView userId={user?.id} />
           </div>

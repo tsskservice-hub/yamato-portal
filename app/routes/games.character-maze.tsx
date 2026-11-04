@@ -1,6 +1,6 @@
 /**
  * @file character-maze.tsx
- * @description 地上の迷宮文字探し 〜タイピング・アドベンチャー〜 (その場再開・滑らかな蛇の移動・1匹の蛇)
+ * @description Surface Labyrinth Character Search 〜Typing Adventure〜 (Straight Line Snake Movement)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,7 +10,7 @@ import type { PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// 11x11 の迷路マップ (1: 壁、0: 通路)
+// 11x11 Maze Map (1: Wall, 0: Path)
 const MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
@@ -71,6 +71,8 @@ interface SnakeNode {
   id: number;
   x: number;
   y: number;
+  dx: number;
+  dy: number;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -108,26 +110,18 @@ export default function CharacterMazePage() {
     e.preventDefault();
     if (inputPasscode === '1111') {
       setIsCodeUnlocked(true);
-      alert('✨ 認証成功！ゲームが一時的に解放されました。');
+      alert('✨ Authentication successful! The game has been temporarily unlocked.');
     } else {
-      alert('❌ パスコードが違います。');
+      alert('❌ Incorrect passcode.');
     }
   };
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="迷宮の文字探し">
+    <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Character Maze">
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        <header className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center shadow-sm">
-          <div>
-            <h1 className="text-xl font-bold text-slate-800">🧭 地上の迷宮文字探し 〜タイピング・アドベンチャー〜</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Character Maze - VCE Japanese Practice</p>
-          </div>
-          <Link
-            to="/teacher-dashboard"
-            className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2 rounded-lg border border-indigo-200 transition no-underline inline-flex items-center"
-          >
-            教師用ダッシュボードへ ↗
-          </Link>
+        <header className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
+          <h1 className="text-xl font-bold text-slate-800">🧭 Surface Labyrinth Character Search 〜Typing Adventure〜</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Character Maze - Hiragana and Katakana Practice</p>
         </header>
 
         {isAccessible ? (
@@ -138,9 +132,9 @@ export default function CharacterMazePage() {
               🔒
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">このエリアは現在ロックされています</h2>
+              <h2 className="text-xl font-bold text-slate-800 mb-2">This area is currently locked</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                授業の課題を終わらせるか、先生から伝えられたパスコードを入力してください。早く終わった生徒は先生が個別に解放してくれます！
+                Please complete your class assignment or enter the passcode provided by your teacher.
               </p>
             </div>
 
@@ -148,7 +142,7 @@ export default function CharacterMazePage() {
               <input
                 type="text"
                 maxLength={4}
-                placeholder="4桁コード"
+                placeholder="4-digit code"
                 value={inputPasscode}
                 onChange={(e) => setInputPasscode(e.target.value)}
                 className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
@@ -157,7 +151,7 @@ export default function CharacterMazePage() {
                 type="submit"
                 className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
               >
-                解除
+                Unlock
               </button>
             </form>
           </div>
@@ -176,8 +170,7 @@ function CharacterMazeArena() {
   const [playerY, setPlayerY] = useState(1);
 
   const [items, setItems] = useState<ItemNode[]>([]);
-  // 蛇は1匹に絞る
-  const [snake, setSnake] = useState<SnakeNode>({ id: 1, x: 8, y: 8 });
+  const [snake, setSnake] = useState<SnakeNode>({ id: 1, x: 8, y: 8, dx: 0, dy: -1 });
 
   const [activeQuizItem, setActiveQuizItem] = useState<ItemNode | null>(null);
   const [typingInput, setTypingInput] = useState('');
@@ -203,20 +196,28 @@ function CharacterMazeArena() {
     }
     setItems(initialItems);
 
-    // 蛇の初期位置（プレイヤーから離れた場所）
-    setSnake({ id: 1, x: shuffledPaths[5]?.x || 8, y: shuffledPaths[5]?.y || 8 });
+    setSnake({ id: 1, x: shuffledPaths[5]?.x || 8, y: shuffledPaths[5]?.y || 8, dx: 0, dy: -1 });
   };
 
   useEffect(() => {
     spawnInitialEntities();
   }, []);
 
-  // 蛇が1マスずつ滑らかに連続して動くようにする（ワープ感を解消）
+  // 壁にぶつかるまで同じ方向に直進し、ぶつかったら方向を変えて直進する
   useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
     const snakeInterval = setInterval(() => {
       setSnake((prev) => {
+        const nextX = prev.x + prev.dx;
+        const nextY = prev.y + prev.dy;
+
+        // 進行方向のマスが通路（0）ならそのまま直進
+        if (MAZE_GRID[nextY]?.[nextX] === 0) {
+          return { ...prev, x: nextX, y: nextY };
+        }
+
+        // 壁にぶつかった場合、今進んでいた方向以外の「進める方向」を探す
         const directions = [
           { dx: 0, dy: -1 },
           { dx: 0, dy: 1 },
@@ -226,22 +227,34 @@ function CharacterMazeArena() {
         const validMoves = directions.filter(
           (d) => MAZE_GRID[prev.y + d.dy]?.[prev.x + d.dx] === 0
         );
+
         if (validMoves.length > 0) {
-          const move = validMoves[Math.floor(Math.random() * validMoves.length)];
-          return { ...prev, x: prev.x + move.dx, y: prev.y + move.dy };
+          // もし可能なら、今の進行方向をそのまま維持できれば維持し、無理ならランダムに新しい方向へ直進を開始
+          const currentDirValid = validMoves.some((d) => d.dx === prev.dx && d.dy === prev.dy);
+          const chosenMove = currentDirValid
+            ? { dx: prev.dx, dy: prev.dy }
+            : validMoves[Math.floor(Math.random() * validMoves.length)];
+
+          return {
+            ...prev,
+            x: prev.x + chosenMove.dx,
+            y: prev.y + chosenMove.dy,
+            dx: chosenMove.dx,
+            dy: chosenMove.dy,
+          };
         }
+
         return prev;
       });
-    }, 900); // 0.9秒ごとに1マス隣へ移動
+    }, 900);
 
     return () => clearInterval(snakeInterval);
   }, [isGameOver, activeQuizItem, isGoalReached]);
 
-  // 接触判定
+  // Collision detection
   useEffect(() => {
     if (isGameOver || activeQuizItem || isGoalReached) return;
 
-    // 蛇とプレイヤーの接触
     if (snake.x === playerX && snake.y === playerY) {
       setHp((h) => {
         const updated = h - 1;
@@ -252,7 +265,6 @@ function CharacterMazeArena() {
       setPlayerY(1);
     }
 
-    // アイテムとプレイヤーの接触
     items.forEach((item) => {
       if (item.x === playerX && item.y === playerY && !activeQuizItem) {
         setActiveQuizItem(item);
@@ -266,7 +278,7 @@ function CharacterMazeArena() {
     }
   }, [playerX, playerY, snake, items, activeQuizItem, isGameOver, isGoalReached, collectedCount]);
 
-  // 矢印キー移動
+  // Arrow key movement
   useEffect(() => {
     const handleKeyDownGlobal = (e: KeyboardEvent) => {
       if (activeQuizItem) return;
@@ -303,18 +315,17 @@ function CharacterMazeArena() {
     if (!activeQuizItem) return;
 
     if (typingInput.toLowerCase().trim() === activeQuizItem.romaji) {
-      setQuizFeedback('正解！ 🎉 その場から探索を続けます！');
+      setQuizFeedback('Correct! 🎉 Continuing exploration from here!');
       setTimeout(() => {
         setScore((s) => s + 200);
         setCollectedCount((c) => c + 1);
-        // 正解したアイテムを消去（プレイヤーの位置はその場を維持）
         setItems((prev) => prev.filter((i) => i.id !== activeQuizItem.id));
         setActiveQuizItem(null);
         setTypingInput('');
         setQuizFeedback(null);
       }, 800);
     } else {
-      setQuizFeedback('ざんねん！不正解 🌀 文字が別の通路に逃げました…');
+      setQuizFeedback('Incorrect! 🌀 The character fled to another path...');
       setTimeout(() => {
         const randomPath = PATH_COORDS[Math.floor(Math.random() * PATH_COORDS.length)];
         setItems((prev) =>
@@ -345,40 +356,40 @@ function CharacterMazeArena() {
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800">
-      {/* ステータスバー */}
+      {/* Status Bar */}
       <div className="flex justify-between items-center bg-slate-100 p-4 rounded-xl border border-slate-200 text-sm shadow-inner">
-        <span className="text-red-500 font-bold">❤️ ライフ: {'❤️'.repeat(hp)}</span>
-        <span className="text-indigo-600 font-bold">🎒 獲得文字: {collectedCount} / 3個以上でゴール！</span>
+        <span className="text-red-500 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
+        <span className="text-indigo-600 font-bold">🎒 Collected: {collectedCount} / Reach goal with 3+!</span>
         <span className="text-emerald-600 font-bold">SCORE: {score} pt</span>
       </div>
 
-      {/* ゲームフィールド（迷路エリア） */}
+      {/* Game Field */}
       <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl h-[520px] relative overflow-hidden flex items-center justify-center p-6 shadow-inner">
         {isGameOver ? (
           <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30">
-            <h2 className="text-3xl font-black text-red-600">ゲームオーバー</h2>
-            <p className="text-sm text-slate-600">へびの攻撃に倒れてしまいました…</p>
+            <h2 className="text-3xl font-black text-red-600">Game Over</h2>
+            <p className="text-sm text-slate-600">You were defeated by the snake...</p>
             <button
               onClick={restartGame}
               className="bg-indigo-600 hover:bg-indigo-700 font-bold px-8 py-3 rounded-xl text-white text-base transition cursor-pointer shadow-md"
             >
-              もう一度挑戦する
+              Try Again
             </button>
           </div>
         ) : isGoalReached ? (
           <div className="absolute inset-0 bg-indigo-50/95 flex flex-col items-center justify-center space-y-4 z-30">
-            <h2 className="text-3xl font-black text-amber-600">🎉 ゴール達成！大勝利！</h2>
-            <p className="text-sm text-slate-700">見事に地上の迷宮を抜けて文字を集めました！ (スコア: {score} pt)</p>
+            <h2 className="text-3xl font-black text-amber-600">🎉 Goal Reached! Victory!</h2>
+            <p className="text-sm text-slate-700">You successfully navigated the labyrinth and collected the characters! (Score: {score} pt)</p>
             <button
               onClick={restartGame}
               className="bg-emerald-600 hover:bg-emerald-700 font-bold px-8 py-3 rounded-xl text-white text-base transition cursor-pointer shadow-md"
             >
-              もう一度遊ぶ
+              Play Again
             </button>
           </div>
         ) : (
           <div className="relative w-[440px] h-[440px] bg-slate-700 p-2 rounded-xl border-4 border-slate-800 shadow-lg">
-            {/* 迷路グリッド */}
+            {/* Maze Grid */}
             <div className="w-full h-full grid grid-cols-11 grid-rows-11 bg-slate-700">
               {MAZE_GRID.map((row, y) =>
                 row.map((cell, x) => {
@@ -392,8 +403,8 @@ function CharacterMazeArena() {
                       key={`${x}-${y}`}
                       className={`w-full h-full flex items-center justify-center text-sm font-bold select-none ${
                         cell === 1
-                          ? 'bg-slate-700 border border-slate-600/40' // 壁
-                          : 'bg-white' // 通路
+                          ? 'bg-slate-700 border border-slate-600/40' // Wall
+                          : 'bg-white' // Path
                       }`}
                     >
                       {isPlayer ? (
@@ -413,15 +424,15 @@ function CharacterMazeArena() {
               )}
             </div>
 
-            {/* クイズモーダル */}
+            {/* Quiz Modal */}
             {activeQuizItem && (
               <div className="absolute inset-0 bg-slate-900/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-40 space-y-4">
                 <div className="bg-white border-2 border-indigo-500 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
-                  <span className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-full font-bold">文字ゲット！読み方を答えよう</span>
+                  <span className="text-xs bg-indigo-600 text-white px-3 py-1 rounded-full font-bold">Character Found! Type the Romaji</span>
                   <div className="text-6xl font-black text-amber-500 my-2 animate-bounce">
                     {activeQuizItem.char}
                   </div>
-                  <p className="text-xs text-slate-600">ローマ字で正確に入力してね（例: ka, shi）</p>
+                  <p className="text-xs text-slate-600">Type the Romaji reading accurately (e.g. ka, shi)</p>
 
                   <form onSubmit={handleQuizSubmit} className="space-y-3">
                     <input
@@ -429,14 +440,14 @@ function CharacterMazeArena() {
                       autoFocus
                       value={typingInput}
                       onChange={(e) => setTypingInput(e.target.value)}
-                      placeholder="ここに入力..."
+                      placeholder="Type here..."
                       className="bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 text-center text-xl font-mono text-slate-900 w-full focus:outline-none focus:border-indigo-600 shadow-inner"
                     />
                     <button
                       type="submit"
                       className="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-3 rounded-xl text-white text-sm transition cursor-pointer shadow-md"
                     >
-                      回答する ↵
+                      Submit ↵
                     </button>
                   </form>
 
@@ -452,7 +463,7 @@ function CharacterMazeArena() {
         )}
       </div>
 
-      {/* 画面内操作ボタン */}
+      {/* On-screen Controls */}
       <div className="max-w-xs mx-auto space-y-2">
         <div className="flex justify-center">
           <button
@@ -462,7 +473,7 @@ function CharacterMazeArena() {
             }}
             className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
-            ▲ 上へ
+            ▲ Up
           </button>
         </div>
         <div className="flex justify-center gap-4">
@@ -473,7 +484,7 @@ function CharacterMazeArena() {
             }}
             className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
-            ◀ 左へ
+            ◀ Left
           </button>
           <button
             onClick={() => {
@@ -482,7 +493,7 @@ function CharacterMazeArena() {
             }}
             className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
-            右へ ▶
+            Right ▶
           </button>
         </div>
         <div className="flex justify-center">
@@ -493,7 +504,7 @@ function CharacterMazeArena() {
             }}
             className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
-            ▼ 下へ
+            ▼ Down
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 /**
- * @file games-content.ts
- * @description Supabase app_knowledge (key: 'GAMES_CONTENT') からの動的データ取得モジュール
+ * @file content-games.ts
+ * @description Supabase app_knowledge (key: 'CONTENT_GAMES') からの動的データ取得モジュール
  * 💡 静的フォールバックデータを撤去し、通信失敗・データ不在時は isError: true を返して PageLayout の DataErrorState で処理します。
  */
 
@@ -34,10 +34,10 @@ export interface GamesKnowledge {
   updatedAt?: string;
 }
 
-const KNOWLEDGE_KEY = 'GAMES_CONTENT';
+const KNOWLEDGE_KEY = 'CONTENT_GAMES';
 
 /**
- * Supabase の app_knowledge テーブルから GAMES_CONTENT キーのデータを直接フェッチする関数
+ * Supabase の app_knowledge テーブルから CONTENT_GAMES キーのデータを直接フェッチする関数
  * 💡 app_knowledge の 'data' カラムからゲーム情報を取得します。
  */
 export async function fetchGamesContentData(
@@ -96,12 +96,12 @@ export function useGamesContent(supabase: SupabaseClient) {
       } else {
         setGamesData(null);
         setIsError(true);
-        setErrorMessage('Failed to retrieve GAMES_CONTENT from Supabase. Data does not exist or the key is invalid.');
+        setErrorMessage('Failed to retrieve CONTENT_GAMES from Supabase. Data does not exist or the key is invalid.');
       }
     } catch (err: any) {
       setGamesData(null);
       setIsError(true);
-      setErrorMessage(`Supabase connection error: ${err?.message || 'An unexpected error occurred while loading GAMES_CONTENT.'}`);
+      setErrorMessage(`Supabase connection error: ${err?.message || 'An unexpected error occurred while loading CONTENT_GAMES.'}`);
     } finally {
       setIsLoading(false);
     }

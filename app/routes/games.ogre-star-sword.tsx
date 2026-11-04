@@ -1,6 +1,6 @@
 /**
  * @file ogre-star-sword.tsx
- * @description 生徒用タイピング防衛戦 (手裏剣の垂直直線軌道対応版 / 鬼星の剣)
+ * @description Student Typing Defense Game (Vertical Shuriken Trajectory / Ogre Star Sword - English UI)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -34,8 +34,8 @@ interface ActiveEnemy {
   id: number;
   char: string;
   romaji: string;
-  x: number; // 画面上の横位置 (%) [10% 〜 90%]
-  y: number; // 迫ってくる距離 (0% = 遠く, 90% = 防衛ライン)
+  x: number; // Horizontal position on screen (%) [10% - 90%]
+  y: number; // Distance approaching (0% = far, 90% = defense line)
 }
 
 interface AttackEffect {
@@ -82,26 +82,20 @@ export default function OgreStarSwordPage() {
     e.preventDefault();
     if (inputPasscode === '1111') {
       setIsCodeUnlocked(true);
-      alert('✨ 認証成功！ゲームが一時的に解放されました。');
+      alert('✨ Authentication successful! The game has been temporarily unlocked.');
     } else {
-      alert('❌ パスコードが違います。');
+      alert('❌ Incorrect passcode.');
     }
   };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Ogre Star Sword">
       <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
-        <header className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center shadow-sm">
+        <header className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
           <div>
-            <h1 className="text-xl font-bold text-slate-800">⚔️ 鬼星の剣 〜タイピング防衛戦〜</h1>
+            <h1 className="text-xl font-bold text-slate-800">⚔️ Ogre Star Sword 〜Typing Defense Game〜</h1>
             <p className="text-xs text-slate-500 mt-0.5">Ogre Star Sword - VCE Japanese Typing Practice</p>
           </div>
-          <Link
-            to="/teacher-dashboard"
-            className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2 rounded-lg border border-indigo-200 transition no-underline inline-flex items-center"
-          >
-            教師用ダッシュボードへ ↗
-          </Link>
         </header>
 
         {isAccessible ? (
@@ -112,9 +106,9 @@ export default function OgreStarSwordPage() {
               🔒
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">このエリアは現在ロックされています</h2>
+              <h2 className="text-xl font-bold text-slate-800 mb-2">This area is currently locked</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                授業の課題を終わらせるか、先生から伝えられたパスコードを入力してください。早く終わった生徒は先生が個別に解放してくれます！
+                Please complete your class assignment or enter the passcode provided by your teacher.
               </p>
             </div>
 
@@ -122,7 +116,7 @@ export default function OgreStarSwordPage() {
               <input
                 type="text"
                 maxLength={4}
-                placeholder="4桁コード"
+                placeholder="4-digit code"
                 value={inputPasscode}
                 onChange={(e) => setInputPasscode(e.target.value)}
                 className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
@@ -131,7 +125,7 @@ export default function OgreStarSwordPage() {
                 type="submit"
                 className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
               >
-                解除
+                Unlock
               </button>
             </form>
           </div>
@@ -152,7 +146,7 @@ function OgreStarSwordArena() {
   const [isGameOver, setIsGameOver] = useState(false);
   const [speedMultiplier, setSpeedMultiplier] = useState(1.0);
 
-  // 1. 15秒ごとにスピード加速
+  // 1. Speed up every 15 seconds
   useEffect(() => {
     if (isGameOver) return;
     const speedTimer = setInterval(() => {
@@ -162,7 +156,7 @@ function OgreStarSwordArena() {
     return () => clearInterval(speedTimer);
   }, [isGameOver]);
 
-  // 2. 一定間隔で新しい鬼を出現
+  // 2. Spawn new ogres at regular intervals
   useEffect(() => {
     if (isGameOver) return;
 
@@ -181,7 +175,7 @@ function OgreStarSwordArena() {
     return () => clearInterval(spawnInterval);
   }, [isGameOver]);
 
-  // 3. 鬼を移動
+  // 3. Move ogres
   useEffect(() => {
     if (isGameOver) return;
 
@@ -214,7 +208,7 @@ function OgreStarSwordArena() {
     return () => clearInterval(moveInterval);
   }, [isGameOver, speedMultiplier]);
 
-  // 4. 左右矢印キーでプレイヤー移動
+  // 4. Move player with left/right arrow keys
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isGameOver) return;
     if (e.key === 'ArrowLeft') {
@@ -224,7 +218,6 @@ function OgreStarSwordArena() {
     }
   };
 
-  // 音声ファイルの再生ヘルパー関数
   const playVoiceCount = (count: number) => {
     try {
       const audio = new Audio(`/audio/hit-${count}.mp3`);
@@ -233,7 +226,7 @@ function OgreStarSwordArena() {
     } catch (e) {}
   };
 
-  // 5. ローマ字入力時の判定（垂直直線軌道対応）
+  // 5. Romaji input handling
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isGameOver) return;
     const val = e.target.value.toLowerCase();
@@ -242,11 +235,9 @@ function OgreStarSwordArena() {
     const matchedEnemy = enemies.find((enemy) => enemy.romaji === val);
 
     if (matchedEnemy) {
-      // 誤差±5%以内（真下・真正面）のときのみヒットとする
       const isAligned = Math.abs(playerX - matchedEnemy.x) <= 5;
 
       if (isAligned) {
-        // 【命中】真上にまっすぐ伸びる軌道（鬼の高さまで）
         const newAttack: AttackEffect = {
           id: Date.now() + Math.random(),
           startX: playerX,
@@ -269,12 +260,11 @@ function OgreStarSwordArena() {
 
         playVoiceCount(newCount);
       } else {
-        // 【外れ】位置がズレている場合：忍者から真上へまっすぐ抜ける赤い軌道
         const missedAttack: AttackEffect = {
           id: Date.now() + Math.random(),
           startX: playerX,
           startY: 90,
-          targetY: 5, // 画面最上部までまっすぐ抜ける
+          targetY: 5,
           isHit: false,
         };
         setAttacks((prev) => [...prev, missedAttack]);
@@ -300,48 +290,43 @@ function OgreStarSwordArena() {
     setIsGameOver(false);
   };
 
-  const getJapaneseCount = (num: number) => {
-    const words = ['零人', '一人', '二人', '三人', '四人', '五人', '六人', '七人', '八人', '九人', '十人'];
-    return num <= 10 ? words[num] : `${num}人`;
-  };
-
   return (
     <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white" tabIndex={0} onKeyDown={handleKeyDown}>
-      {/* ステータスバー */}
+      {/* Status Bar */}
       <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
         <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
-        <span className="text-indigo-300 font-bold animate-pulse">🗣️ 討伐: {getJapaneseCount(defeatCount)}</span>
+        <span className="text-indigo-300 font-bold animate-pulse">🗣️ Defeated: {defeatCount}</span>
         <span className="text-emerald-400 font-bold">SCORE: {score} pt</span>
       </div>
 
-      {/* ゲームフィールド */}
+      {/* Game Field */}
       <div className="bg-slate-950 border border-slate-800 rounded-xl h-80 relative overflow-hidden flex flex-col justify-between p-4">
         {isGameOver ? (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-4 z-20">
-            <h2 className="text-2xl font-black text-red-500">ゲームオーバー</h2>
-            <p className="text-sm text-slate-300">討伐数: {getJapaneseCount(defeatCount)} ({score} pt)</p>
+            <h2 className="text-2xl font-black text-red-500">Game Over</h2>
+            <p className="text-sm text-slate-300">Defeated: {defeatCount} ({score} pt)</p>
             <button
               onClick={restartGame}
               className="bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
             >
-              もう一度挑戦する
+              Try Again
             </button>
           </div>
         ) : (
           <>
             <div className="text-xs text-slate-500 tracking-wider flex justify-between">
-              <span>▼ 鬼星の領域 ▼ (Lv.{speedMultiplier.toFixed(1)})</span>
-              <span className="text-indigo-400">← → キーで真下に合わせて撃て！</span>
+              <span>▼ Ogre Domain ▼ (Lv.{speedMultiplier.toFixed(1)})</span>
+              <span className="text-indigo-400">Use ← → keys to align and shoot!</span>
             </div>
 
-            {/* 手裏剣の垂直直線軌道（SVG描画レイヤー） */}
+            {/* Shuriken vertical trajectory SVG */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
               {attacks.map((atk) => (
                 <line
                   key={atk.id}
                   x1={`${atk.startX}%`}
                   y1={`${atk.startY}%`}
-                  x2={`${atk.startX}%`} // 終了位置のXも開始位置と同じにして完全に垂直にする
+                  x2={`${atk.startX}%`}
                   y2={`${atk.targetY}%`}
                   stroke={atk.isHit ? '#38bdf8' : '#ef4444'}
                   strokeWidth="3"
@@ -351,7 +336,7 @@ function OgreStarSwordArena() {
               ))}
             </svg>
 
-            {/* 迫ってくる鬼たち */}
+            {/* Approaching Ogres */}
             <div className="absolute inset-0 pointer-events-none">
               {enemies.map((enemy) => {
                 const isExactAligned = Math.abs(playerX - enemy.x) <= 5;
@@ -369,7 +354,7 @@ function OgreStarSwordArena() {
                 );
               })}
 
-              {/* 当たった瞬間の手裏剣エフェクト */}
+              {/* Hit effect */}
               {attacks.filter(a => a.isHit).map((atk) => (
                 <div
                   key={`shuriken-${atk.id}`}
@@ -381,21 +366,21 @@ function OgreStarSwordArena() {
               ))}
             </div>
 
-            {/* 防衛ライン上のプレイヤー（忍者） */}
+            {/* Player (Ninja) */}
             <div className="absolute bottom-6 transform -translate-x-1/2 transition-all duration-75 flex flex-col items-center z-20" style={{ left: `${playerX}%` }}>
-              <span className="text-xs text-indigo-300 font-bold mb-0.5">あなた</span>
+              <span className="text-xs text-indigo-300 font-bold mb-0.5">You</span>
               <span className="text-3xl">🥷</span>
             </div>
 
-            {/* 防衛ライン */}
+            {/* Defense Line */}
             <div className="border-t-2 border-dashed border-indigo-500/50 pt-2 flex justify-between items-center text-xs text-indigo-300 font-bold mt-auto">
-              <span>🏰 防衛ライン</span>
+              <span>🏰 Defense Line</span>
             </div>
           </>
         )}
       </div>
 
-      {/* キー入力欄 */}
+      {/* Key Input Section */}
       <div className="max-w-xs mx-auto space-y-2">
         <input
           type="text"
@@ -403,7 +388,7 @@ function OgreStarSwordArena() {
           disabled={isGameOver}
           value={inputVal}
           onChange={handleInputChange}
-          placeholder="矢印キーで移動 ＆ ローマ字入力"
+          placeholder="Move with arrows & type Romaji"
           className="bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
         />
         <div className="flex gap-2 justify-center">
@@ -411,13 +396,13 @@ function OgreStarSwordArena() {
             onClick={() => setPlayerX((prev) => Math.max(10, prev - 10))}
             className="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
           >
-            ◀ 左へ移動
+            ◀ Move Left
           </button>
           <button
             onClick={() => setPlayerX((prev) => Math.min(90, prev + 10))}
             className="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer"
           >
-            右へ移動 ▶
+            Move Right ▶
           </button>
         </div>
       </div>

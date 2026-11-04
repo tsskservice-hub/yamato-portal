@@ -70,6 +70,13 @@
       .layout-seg { flex: 0 1 430px; min-width: min(340px, 100%); background: var(--panel); }
       .layout-hint { flex: 1 1 220px; font-size: 12px; line-height: 1.5; color: var(--ink-soft); }
       .layout-hint code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+      .rules-btn { flex: 0 0 auto; margin-left: auto; white-space: nowrap; font-weight: 700; }
+      /* ---------- New Game (top of the game, below Layout) ---------- */
+      .new-game-card { margin-bottom: 16px; }
+      .new-game-fields { display: flex; gap: 14px 16px; align-items: flex-end; flex-wrap: wrap; }
+      .new-game-fields .field { flex: 1 1 250px; margin-bottom: 0; min-width: min(250px, 100%); }
+      .new-game-action { flex: 0 1 230px; min-width: min(230px, 100%); }
+      .new-game-action button { width: 100%; }
       /* ---------- Board + panel arrangement ---------- */
       .game-layout {
         display: flex;
@@ -245,10 +252,12 @@
       .field { margin-bottom: 12px; }
       .field:last-child { margin-bottom: 0; }
       .field label { display: block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 6px; font-weight: 500; }
-      details.rules { font-size: 13.5px; line-height: 1.75; color: var(--ink-soft); }
-      details.rules summary { cursor: pointer; font-weight: 700; color: var(--ink); font-size: 14px; }
-      details.rules ul { margin: 8px 0 0; padding-left: 18px; }
-      details.rules li { margin-bottom: 4px; }
+      .rules-content { font-size: 14px; line-height: 1.75; color: var(--ink-soft); text-align: left; }
+      .rules-content ul { margin: 0 0 20px; padding-left: 20px; }
+      .rules-content li { margin-bottom: 6px; }
+      .rules-content li:last-child { margin-bottom: 0; }
+      .dialog.rules-dialog { text-align: left; max-width: 520px; }
+      .dialog.rules-dialog .result-title { text-align: left; font-size: 24px; margin-bottom: 14px; }
       /* ---------- Result modal ---------- */
       .overlay {
         position: fixed; inset: 0; z-index: 20;
@@ -300,7 +309,30 @@
           <button type="button" data-layout="stacked">Board on top</button>
         </div>
         <span class="layout-hint">Auto puts the panel on the right when there is room, and below the board on narrow screens. In an iframe, force it with <code>?layout=side</code> or <code>?layout=stacked</code>.</span>
+        <button type="button" class="rules-btn" id="btnRules" aria-haspopup="dialog">How to Play &amp; Rules</button>
       </div>
+      <section class="card new-game-card">
+        <h2>New Game</h2>
+        <div class="new-game-fields">
+          <div class="field">
+            <label>Your stones</label>
+            <div class="seg" id="segColor">
+              <button type="button" data-color="1" class="on">Black (first)</button>
+              <button type="button" data-color="2">White (second)</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Computer strength</label>
+            <div class="seg" id="segLevel">
+              <button type="button" data-level="0">Beginner</button>
+              <button type="button" data-level="1" class="on">Normal</button>
+            </div>
+          </div>
+          <div class="btn-row new-game-action">
+            <button id="btnNew" type="button" class="primary">Start New Game</button>
+          </div>
+        </div>
+      </section>
       <div class="game-layout layout-auto" id="gameLayout">
       <div class="board-wrap">
         <div class="board" id="board" aria-label="9x9 Go board">
@@ -416,39 +448,6 @@
           </div>
         </section>
 
-        <section class="card">
-          <h2>New Game</h2>
-          <div class="field">
-            <label>Your stones</label>
-            <div class="seg" id="segColor">
-              <button type="button" data-color="1" class="on">Black (first)</button>
-              <button type="button" data-color="2">White (second)</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>Computer strength</label>
-            <div class="seg" id="segLevel">
-              <button type="button" data-level="0">Beginner</button>
-              <button type="button" data-level="1" class="on">Normal</button>
-            </div>
-          </div>
-          <div class="btn-row">
-            <button id="btnNew" type="button" class="primary">Start New Game</button>
-          </div>
-        </section>
-
-        <section class="card">
-          <details class="rules">
-            <summary>How to Play &amp; Rules</summary>
-            <ul>
-              <li>Tap (or click) an intersection to place a stone. You can capture opponent stones by completely surrounding them.</li>
-              <li>You cannot play a suicide move (a point where your own stones would be captured) or a move that violates the ko rule.</li>
-              <li>If you have no good move, choose Pass. If both players pass in a row, the game ends and territory is counted.</li>
-              <li>Scoring uses Chinese rules: stones on the board plus surrounded empty points count as score. White receives 6.5 points of komi.</li>
-              <li>Undo takes the game back to your previous turn.</li>
-            </ul>
-          </details>
-        </section>
       </div>
       </div>
     </main>
@@ -469,6 +468,24 @@
         <div class="btn-row">
           <button id="btnAgain" type="button" class="primary">Play Again</button>
           <button id="btnCloseResult" type="button">View Board</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="rulesOverlay">
+      <div class="dialog rules-dialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+        <p class="result-title" id="rulesTitle">How to Play &amp; Rules</p>
+        <div class="rules-content">
+          <ul>
+            <li>Tap (or click) an intersection to place a stone. You can capture opponent stones by completely surrounding them.</li>
+            <li>You cannot play a suicide move (a point where your own stones would be captured) or a move that violates the ko rule.</li>
+            <li>If you have no good move, choose Pass. If both players pass in a row, the game ends and territory is counted.</li>
+            <li>Scoring uses Chinese rules: stones on the board plus surrounded empty points count as score. White receives 6.5 points of komi.</li>
+            <li>Undo takes the game back to your previous turn.</li>
+          </ul>
+        </div>
+        <div class="btn-row">
+          <button id="btnCloseRules" type="button" class="primary">Close</button>
         </div>
       </div>
     </div>
@@ -698,7 +715,8 @@
        "moveCount","capBlack","capWhite","estBlack","estWhite","meterBlack","meterWhite","meterLabel",
        "btnPass","btnUndo","btnResign","resignConfirm","btnResignYes","btnResignNo","btnNew",
        "segColor","segLevel","segLayout","gameLayout","overlay","resultTitle","resultSub",
-       "rBS","rWS","rBT","rWT","rBTotal","rWTotal","btnAgain","btnCloseResult","gridLines","gridLabels"
+       "rBS","rWS","rBT","rWT","rBTotal","rWTotal","btnAgain","btnCloseResult","gridLines","gridLabels",
+       "btnRules","rulesOverlay","btnCloseRules"
       ].forEach(function (id) { el[id] = document.getElementById(id); });
 
       // Grid lines + labels ship as static SVG markup above (no JS needed to
@@ -1005,6 +1023,24 @@
       el.btnNew.addEventListener("click", newGame);
       el.btnAgain.addEventListener("click", function () { el.overlay.classList.remove("show"); newGame(); });
       el.btnCloseResult.addEventListener("click", function () { el.overlay.classList.remove("show"); });
+
+      /* ---------------- How to Play & Rules modal ---------------- */
+      function openRules() {
+        el.rulesOverlay.classList.add("show");
+        el.btnCloseRules.focus();
+      }
+      function closeRules() {
+        el.rulesOverlay.classList.remove("show");
+        el.btnRules.focus();
+      }
+      el.btnRules.addEventListener("click", openRules);
+      el.btnCloseRules.addEventListener("click", closeRules);
+      el.rulesOverlay.addEventListener("click", function (e) {
+        if (e.target === el.rulesOverlay) closeRules();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && el.rulesOverlay.classList.contains("show")) closeRules();
+      });
 
       newGame();
     </script>

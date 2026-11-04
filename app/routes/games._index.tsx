@@ -8,7 +8,7 @@ import React from 'react';
 import { Link, useLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { useGamesContent } from '~/data/games-content';
+import { useGamesContent } from '~/data/content-games';
 import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {

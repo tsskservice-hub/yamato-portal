@@ -73,17 +73,11 @@ export default function StudentTunnelEscapePage() {
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Shawshank Tunnel Escape">
       <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
-        <header className="bg-white border border-slate-200 p-5 rounded-xl flex justify-between items-center shadow-sm">
+        <header className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
           <div>
             <h1 className="text-xl font-bold text-slate-800">⛏️ ショーシャンクからの脱出</h1>
             <p className="text-xs text-slate-500 mt-0.5">ひらがな・カタカナ記憶＆四択トンネル掘削ゲーム</p>
           </div>
-          <Link
-            to="/teacher-dashboard"
-            className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2 rounded-lg border border-indigo-200 transition no-underline inline-flex items-center"
-          >
-            教師用ダッシュボードへ ↗
-          </Link>
         </header>
 
         {isAccessible ? (
