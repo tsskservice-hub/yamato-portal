@@ -1,5 +1,5 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/cloudflare"; // 修正
+import { json } from "@remix-run/cloudflare";                    // 修正
 import { nicknameSchema } from "~/validations/profile";
 import { createServerSupabaseClient } from "~/lib/supabase.server";
 
