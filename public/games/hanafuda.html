@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>花札　こいこい</title>
+    <style>
+      :root{
+        --bg:#f4efe4; --panel:#fffdf6; --ink:#2b2620; --ink-soft:#6b6257;
+        --line:#ddd3bd; --accent:#a33327; --accent-ink:#fff;
+        --felt:#33603f; --felt-dark:#274c31; --felt-line:#ffffff2b;
+        --gold:#c9a227; --chip:#efe6cf;
+        --card-w:58px; --card-h:87px;
+        --shadow:0 2px 10px rgba(60,45,20,.16);
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#191713; --panel:#24211b; --ink:#ece5d5; --ink-soft:#b3a98f;
+          --line:#453e30; --chip:#332e24; --shadow:0 2px 10px rgba(0,0,0,.5);
+          --felt:#2a5234; --felt-dark:#1f3f27;
+        }
+      }
+      *{box-sizing:border-box}
+      html,body{margin:0;padding:0}
+      body{
+        background:var(--bg); color:var(--ink);
+        font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic",system-ui,sans-serif;
+        line-height:1.55; -webkit-text-size-adjust:100%;
+      }
+      .wrap{max-width:1060px;margin:0 auto;padding:14px 14px 40px}
+      .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-bottom:10px}
+      .page-title{
+        margin:0;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+        font-size:1.65rem;font-weight:700;line-height:1.35;letter-spacing:.02em;
+      }
+      .page-title rt{font-size:.58rem;letter-spacing:.22em;color:var(--ink-soft);font-weight:400}
+      button{
+        font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);
+        background:var(--panel);color:var(--ink);padding:8px 16px;
+      }
+      button:hover{filter:brightness(1.04)}
+      button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+      button:disabled{opacity:.45;cursor:default}
+      select{
+        font:inherit;padding:7px 10px;border-radius:10px;border:1px solid var(--line);
+        background:var(--panel);color:var(--ink);
+      }
+      /* New game card */
+      .setup{
+        background:var(--panel);border:1px solid var(--line);border-radius:14px;
+        box-shadow:var(--shadow);padding:12px 16px;margin-bottom:14px;
+        display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;
+      }
+      .setup .group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .setup label{font-weight:700;font-size:.92rem}
+      .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+      .seg button{border:0;border-radius:0;padding:7px 14px;background:transparent}
+      .seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+      /* Score strip */
+      .scorebar{
+        display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-bottom:12px;
+      }
+      .scorecell{
+        background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:8px 14px;box-shadow:var(--shadow);min-width:104px;
+      }
+      .scorecell .k{font-size:.72rem;color:var(--ink-soft);letter-spacing:.04em}
+      .scorecell .v{font-size:1.25rem;font-weight:800;line-height:1.2}
+      .scorecell.turn{outline:2px solid var(--gold);outline-offset:-2px}
+      .status{
+        flex:1 1 240px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:8px 14px;box-shadow:var(--shadow);display:flex;align-items:center;min-height:52px;
+        font-weight:600;
+      }
+      .status .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);margin-right:9px;flex:none}
+      /* Table */
+      .table{
+        background:radial-gradient(120% 120% at 50% 0%,var(--felt) 0%,var(--felt-dark) 100%);
+        border-radius:18px;padding:14px 12px 16px;color:#f5efdd;
+        border:1px solid #00000033;box-shadow:var(--shadow);
+      }
+      .zone-label{font-size:.78rem;letter-spacing:.08em;color:#e8dfbe;opacity:.9;margin:2px 2px 6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+      .cpu-hand{display:flex;gap:5px;flex-wrap:wrap;min-height:var(--card-h);align-items:flex-start}
+      .field{
+        border:1.5px dashed var(--felt-line);border-radius:14px;padding:10px;
+        display:flex;flex-wrap:wrap;gap:7px;min-height:calc(var(--card-h) + 22px);
+        align-content:flex-start;margin:8px 0;position:relative;background:#00000014;
+      }
+      .stock-wrap{display:flex;gap:12px;align-items:flex-start}
+      .stock-pile{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}
+      .stock-pile .cnt{font-size:.75rem;color:#e8dfbe}
+      .field-cards{display:flex;flex-wrap:wrap;gap:7px;flex:1;align-content:flex-start}
+      .my-hand{display:flex;gap:6px;flex-wrap:wrap;min-height:var(--card-h);align-items:flex-start}
+      /* Cards */
+      .card{
+        width:var(--card-w);height:var(--card-h);border-radius:6px;flex:none;
+        background:#fdf9ee;border:1px solid #b9a888;position:relative;overflow:hidden;
+        box-shadow:0 2px 5px rgba(0,0,0,.35);user-select:none;
+      }
+      .card svg{position:absolute;inset:0;width:100%;height:100%}
+      .card .tag{
+        position:absolute;right:2px;bottom:2px;font-size:.56rem;font-weight:800;line-height:1;
+        background:rgba(253,249,238,.88);border:1px solid #b9a888;border-radius:4px;padding:2px 3px;color:#5c4a26;
+      }
+      .card.back{
+        background:repeating-linear-gradient(45deg,#a33327 0 6px,#8e2a20 6px 12px);
+        border-color:#6f1f16;
+      }
+      .card.back::after{
+        content:"";position:absolute;inset:5px;border:1.5px solid #f3d9a4;border-radius:4px;opacity:.85;
+      }
+      .card.small{width:40px;height:60px}
+      .card.small .tag{font-size:.48rem;padding:1px 2px}
+      .my-hand .card{cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
+      .my-hand .card:hover{transform:translateY(-6px)}
+      .my-hand .card.match-hint{box-shadow:0 0 0 2px var(--gold),0 4px 8px rgba(0,0,0,.4)}
+      .my-hand .card.dim{opacity:.55}
+      .field .card.pickable{cursor:pointer;box-shadow:0 0 0 3px var(--gold),0 4px 10px rgba(0,0,0,.45);animation:pulse 1s infinite}
+      @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+      .card.just{box-shadow:0 0 0 3px #ffd94d,0 4px 10px rgba(0,0,0,.45)}
+      .table.locked .my-hand .card{cursor:default}
+      .table.locked .my-hand .card:hover{transform:none}
+      /* Captured piles */
+      .captured{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+      .cap-group{display:flex;flex-direction:column;gap:3px}
+      .cap-group .cap-label{font-size:.68rem;color:#e8dfbe;opacity:.85}
+      .cap-row{display:flex;flex-wrap:wrap}
+      .cap-row .card{margin-right:-24px}
+      .cap-row .card:last-child{margin-right:0}
+      .cap-empty{font-size:.75rem;color:#e8dfbe;opacity:.6;padding:6px 2px}
+      .yaku-now{font-size:.8rem;color:#ffe9a8;min-height:1.2em}
+      /* Dialogs */
+      .overlay{
+        position:fixed;inset:0;background:rgba(20,16,8,.55);display:none;
+        align-items:center;justify-content:center;padding:16px;z-index:50;
+      }
+      .overlay.open{display:flex}
+      .dialog{
+        background:var(--panel);color:var(--ink);border-radius:16px;max-width:520px;width:100%;
+        max-height:86vh;overflow:auto;padding:22px 24px;box-shadow:0 12px 40px rgba(0,0,0,.4);
+      }
+      .dialog h2{margin:0 0 8px;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:1.35rem}
+      .dialog h3{margin:18px 0 6px;font-size:1rem}
+      .dialog p{margin:6px 0}
+      .dialog ul{margin:6px 0;padding-left:1.3em}
+      .dialog li{margin:3px 0}
+      .dialog .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+      .dialog .btns button{flex:1 1 140px;padding:12px}
+      .koikoi-score{font-size:1.6rem;font-weight:800;color:var(--accent)}
+      table.yaku{border-collapse:collapse;width:100%;font-size:.9rem}
+      table.yaku td,table.yaku th{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
+      table.yaku td:last-child,table.yaku th:last-child{text-align:right;white-space:nowrap}
+      .round-result-yaku{margin:8px 0}
+      .round-result-yaku div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 2px}
+      .muted{color:var(--ink-soft);font-size:.88rem}
+      .final-score{font-size:1.15rem;font-weight:700}
+      @media (max-width:640px){
+        :root{--card-w:46px;--card-h:69px}
+        .wrap{padding:10px 8px 32px}
+        .cap-row .card{margin-right:-18px}
+        .scorecell{min-width:88px;padding:6px 10px}
+      }
+      @media (prefers-reduced-motion: reduce){
+        .field .card.pickable{animation:none}
+        .my-hand .card{transition:none}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <h1 class="page-title"><ruby>花札<rt>はなふだ</rt></ruby>　こいこい</h1>
+        <button id="rulesBtn" type="button">How to Play &amp; Yaku List</button>
+      </div>
+
+      <section class="setup" aria-label="New match">
+        <div class="group">
+          <label>Match length</label>
+          <div class="seg" id="lengthSeg" role="group" aria-label="Match length">
+            <button type="button" data-len="3">3 months</button>
+            <button type="button" data-len="6">6 months</button>
+            <button type="button" data-len="12" class="on">12 months</button>
+          </div>
+        </div>
+        <div class="group">
+          <label>Computer strength</label>
+          <div class="seg" id="levelSeg" role="group" aria-label="Computer strength">
+            <button type="button" data-lv="1">Beginner</button>
+            <button type="button" data-lv="2" class="on">Normal</button>
+            <button type="button" data-lv="3">Strong</button>
+          </div>
+        </div>
+        <div class="group">
+          <button class="primary" id="startBtn" type="button">Start Match</button>
+        </div>
+      </section>
+
+      <div class="scorebar">
+        <div class="scorecell" id="roundCell">
+          <div class="k">Month (Round)</div><div class="v" id="roundVal">–</div>
+        </div>
+        <div class="scorecell" id="youCell">
+          <div class="k">You</div><div class="v"><span id="youScore">0</span> pts</div>
+        </div>
+        <div class="scorecell" id="cpuCell">
+          <div class="k">Computer</div><div class="v"><span id="cpuScore">0</span> pts</div>
+        </div>
+        <div class="status" role="status"><span class="dot"></span><span id="statusText">Press “Start Match” to begin. You are the dealer for the first month.</span></div>
+      </div>
+
+      <section class="table locked" id="tableEl" aria-label="Hanafuda table">
+        <div class="zone-label"><span>Computer's hand</span><span class="yaku-now" id="cpuYakuNow"></span></div>
+        <div class="cpu-hand" id="cpuHand"></div>
+        <div class="captured" id="cpuCaptured"></div>
+
+        <div class="zone-label" style="margin-top:12px"><span>Field cards</span><span id="fieldInfo"></span></div>
+        <div class="field">
+          <div class="stock-wrap">
+            <div class="stock-pile">
+              <div class="card back" id="stockPile" style="visibility:hidden" aria-label="Draw deck"></div>
+              <div class="cnt">Deck <span id="stockCount">0</span></div>
+            </div>
+            <div class="field-cards" id="fieldCards"></div>
+          </div>
+        </div>
+
+        <div class="captured" id="myCaptured"></div>
+        <div class="zone-label" style="margin-top:12px"><span>Your hand (tap a card to play it)</span><span class="yaku-now" id="myYakuNow"></span></div>
+        <div class="my-hand" id="myHand"></div>
+      </section>
+    </div>
+
+    <!-- こいこい／あがり選択 -->
+    <div class="overlay" id="koikoiOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="koikoiTitle">
+        <h2 id="koikoiTitle">You completed a yaku!</h2>
+        <div id="koikoiYaku"></div>
+        <p>Current score: <span class="koikoi-score" id="koikoiScore">0</span> pts</p>
+        <p class="muted">Choose “Finish” to lock in this month's points. Choose “Koi-Koi” to keep playing: if you complete another yaku, your score doubles — but if the computer finishes first, the computer's score doubles instead.</p>
+        <div class="btns">
+          <button type="button" id="agariBtn" class="primary">Finish (lock it in)</button>
+          <button type="button" id="koikoiBtn">Koi-Koi (keep going)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 月の結果 -->
+    <div class="overlay" id="roundOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="roundTitle">
+        <h2 id="roundTitle">Result</h2>
+        <div id="roundBody"></div>
+        <div class="btns">
+          <button type="button" id="nextRoundBtn" class="primary">Next Month</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 対局終了 -->
+    <div class="overlay" id="finalOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="finalTitle">
+        <h2 id="finalTitle">Match Over</h2>
+        <div id="finalBody"></div>
+        <div class="btns">
+          <button type="button" id="playAgainBtn" class="primary">Play Again</button>
+          <button type="button" id="closeFinalBtn">View Board</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ルール -->
+    <div class="overlay" id="rulesOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+        <h2 id="rulesTitle">How to Play &amp; Rules</h2>
+        <h3>How the game flows</h3>
+        <ul>
+          <li>The game uses all 48 hanafuda cards (12 months × 4 cards). Each player starts with 8 cards in hand and 8 cards on the field, and turns alternate starting with the dealer.</li>
+          <li>On your turn, first play one card from your hand. If a field card shares its month, you capture both; otherwise your card stays on the field. Then flip the top card of the deck and match it the same way.</li>
+          <li>If two field cards share the played card's month, you choose which one to take. If three are there, you take all four (a sweep).</li>
+          <li>When your captured cards complete a yaku (scoring combination), choose “Finish” to lock in the points or “Koi-Koi” to keep playing for more.</li>
+          <li>If both hands run out with no yaku completed, the month is a draw (nagare). The dealer alternates each month.</li>
+        </ul>
+        <h3>Koi-Koi and doubling</h3>
+        <ul>
+          <li>If a player who called “Koi-Koi” finishes next, their score doubles. If the opponent finishes first instead, the opponent's score doubles.</li>
+          <li>A finish whose yaku total 7 points or more also doubles the score. All doublings stack (for example, 7+ points with both players having called Koi-Koi is ×8).</li>
+          <li>If a player is dealt all four cards of one month, they win the month immediately for 6 points (a hand yaku). If all four cards of a month appear on the field, the month is redealt.</li>
+        </ul>
+        <h3>Card types</h3>
+        <ul>
+          <li><strong>Brights</strong> (tagged “Bright”): the Crane (Pine), Curtain (Cherry Blossom), Moon (Susuki Grass), Rain (Willow), and Phoenix (Paulownia) — 5 cards.</li>
+          <li><strong>Animals</strong> (tagged “Animal”): 10 cards, including birds, the butterfly, boar, deer, and the Sake Cup. The Chrysanthemum Sake Cup also counts as a Chaff card.</li>
+          <li><strong>Ribbons</strong> (tagged “Ribbon”): 10 cards. The ribbons of January–March (Pine, Plum Blossom, Cherry Blossom) form the Red Ribbons; those of June, September, and October (Peony, Chrysanthemum, Maple) form the Blue Ribbons.</li>
+          <li><strong>Chaff</strong> (tagged “Plain”): the remaining plain cards. Paulownia has three Chaff cards.</li>
+        </ul>
+        <h3>Yaku list</h3>
+        <table class="yaku">
+          <tr><th>Yaku</th><th>Cards needed</th><th>Points</th></tr>
+          <tr><td>Five Brights</td><td>All 5 Bright cards</td><td>10 pts</td></tr>
+          <tr><td>Four Brights</td><td>4 Brights (without the Rain card)</td><td>8 pts</td></tr>
+          <tr><td>Rainy Four Brights</td><td>4 Brights including the Willow Rain card</td><td>7 pts</td></tr>
+          <tr><td>Three Brights</td><td>3 Brights (without the Rain card)</td><td>5 pts</td></tr>
+          <tr><td>Boar, Deer &amp; Butterfly</td><td>Boar (Bush Clover), Deer (Maple), Butterfly (Peony)</td><td>5 pts + 1 per extra Animal</td></tr>
+          <tr><td>Red Ribbons</td><td>Ribbons of Pine, Plum Blossom &amp; Cherry Blossom</td><td>5 pts + 1 per extra Ribbon</td></tr>
+          <tr><td>Blue Ribbons</td><td>Ribbons of Peony, Chrysanthemum &amp; Maple</td><td>5 pts + 1 per extra Ribbon</td></tr>
+          <tr><td>Cherry Blossom Viewing</td><td>Cherry Blossom Bright + Sake Cup</td><td>3 pts</td></tr>
+          <tr><td>Moon Viewing</td><td>Susuki Grass Moon Bright + Sake Cup</td><td>3 pts</td></tr>
+          <tr><td>Animals</td><td>5 Animal cards</td><td>1 pt + 1 per card from the 6th</td></tr>
+          <tr><td>Ribbons</td><td>5 Ribbon cards</td><td>1 pt + 1 per card from the 6th</td></tr>
+          <tr><td>Chaff</td><td>10 Chaff cards (Sake Cup counts)</td><td>1 pt + 1 per card from the 11th</td></tr>
+        </table>
+        <div class="btns">
+          <button type="button" id="closeRulesBtn" class="primary">Close</button>
+        </div>
+      </div>
+    </div>
+
+<script>
+"use strict";
+/* ================= 札データ ================= */
+var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var MONTH_FLOWER = ["Pine","Plum Blossom","Cherry Blossom","Wisteria","Iris","Peony","Bush Clover","Susuki Grass","Chrysanthemum","Maple","Willow","Paulownia"];
+/* kind: hikari Bright / tane Animal / tanzaku Ribbon / kasu Chaff. n is the card's picture name */
+var MONTH_CARDS = [
+  [{k:"hikari",n:"Crane"},{k:"tanzaku",n:"Red Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Bush Warbler"},{k:"tanzaku",n:"Red Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"hikari",n:"Curtain"},{k:"tanzaku",n:"Red Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Cuckoo"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Bridge"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Butterfly"},{k:"tanzaku",n:"Blue Ribbon",r:"ao"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Boar"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"hikari",n:"Moon"},{k:"tane",n:"Wild Geese"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Sake Cup"},{k:"tanzaku",n:"Blue Ribbon",r:"ao"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Deer"},{k:"tanzaku",n:"Blue Ribbon",r:"ao"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"hikari",n:"Rain"},{k:"tane",n:"Swallow"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:"Lightning"}],
+  [{k:"hikari",n:"Phoenix"},{k:"kasu",n:""},{k:"kasu",n:""},{k:"kasu",n:""}]
+];
+var CARDS = [];
+MONTH_CARDS.forEach(function(list, mi){
+  list.forEach(function(c, ci){
+    CARDS.push({ id: mi*4+ci, month: mi+1, kind: c.k, name: c.n, ribbon: c.r || null });
+  });
+});
+function cardById(id){ return CARDS[id]; }
+function kindLabel(k){ return k==="hikari"?"Bright":k==="tane"?"Animal":k==="tanzaku"?"Ribbon":"Plain"; }
+function cardLabel(c){
+  return MONTH_NAMES[c.month-1]+" "+MONTH_FLOWER[c.month-1]+(c.name?" "+c.name:"")+" ("+kindLabel(c.kind)+")";
+}
+
+/* ================= 札の絵（SVG） ================= */
+function motif(month, kind){
+  var s = "";
+  switch(month){
+    case 1: /* 松 */
+      s = '<path d="M28 90 L31 46" stroke="#7a5230" stroke-width="5" fill="none"/>'
+        + '<path d="M30 58 L14 40 M30 52 L46 36 M30 66 L12 56 M30 62 L48 52" stroke="#7a5230" stroke-width="3" fill="none"/>'
+        + '<g fill="#2e6b34"><ellipse cx="13" cy="36" rx="10" ry="6"/><ellipse cx="47" cy="32" rx="10" ry="6"/><ellipse cx="11" cy="53" rx="9" ry="5"/><ellipse cx="49" cy="49" rx="9" ry="5"/><ellipse cx="30" cy="22" rx="11" ry="6"/></g>'
+        + '<g fill="#3f9150"><ellipse cx="18" cy="30" rx="7" ry="4"/><ellipse cx="42" cy="26" rx="7" ry="4"/><ellipse cx="30" cy="40" rx="8" ry="4"/></g>';
+      if(kind==="hikari") s += '<g><ellipse cx="24" cy="70" rx="12" ry="6" fill="#f7f3e8" stroke="#c9c2ae"/><path d="M34 66 Q44 56 42 46" stroke="#f7f3e8" stroke-width="4" fill="none"/><circle cx="42" cy="45" r="3.4" fill="#f7f3e8"/><circle cx="42" cy="43" r="1.6" fill="#c02b1e"/><path d="M45 45 L51 47 L45 48" fill="#e8a13a"/></g>';
+      break;
+    case 2: /* 梅 */
+      s = '<path d="M8 88 Q20 60 26 44 Q32 28 48 14" stroke="#6b4632" stroke-width="4" fill="none"/>'
+        + '<path d="M24 52 Q36 50 44 40 M18 70 Q28 68 34 60" stroke="#6b4632" stroke-width="3" fill="none"/>'
+        + '<g fill="#e77a9b"><circle cx="47" cy="14" r="6"/><circle cx="40" cy="20" r="5"/><circle cx="30" cy="34" r="5.4"/><circle cx="44" cy="40" r="4.6"/><circle cx="20" cy="56" r="5"/><circle cx="34" cy="60" r="4.4"/><circle cx="12" cy="72" r="4.4"/></g>'
+        + '<g fill="#f6c9d4"><circle cx="47" cy="14" r="2.6"/><circle cx="30" cy="34" r="2.4"/><circle cx="20" cy="56" r="2.2"/></g>'
+        + '<g fill="#f2b138"><circle cx="47" cy="14" r="1.2"/><circle cx="30" cy="34" r="1.1"/><circle cx="44" cy="40" r="1"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="18" cy="26" rx="8" ry="5" fill="#7fae4c" transform="rotate(-24 18 26)"/><circle cx="25" cy="21" r="3.4" fill="#7fae4c"/><path d="M28 21 L33 22 L28 23.6" fill="#444"/><path d="M12 30 Q18 34 24 30" stroke="#5b8436" stroke-width="2" fill="none"/></g>';
+      break;
+    case 3: /* 桜 */
+      var sakura = '<g fill="#ef9db8"><ellipse cx="16" cy="20" rx="14" ry="10"/><ellipse cx="34" cy="14" rx="15" ry="10"/><ellipse cx="47" cy="24" rx="11" ry="8"/><ellipse cx="26" cy="26" rx="13" ry="8"/></g>'
+        + '<g fill="#f7c3d3"><ellipse cx="22" cy="18" rx="8" ry="5"/><ellipse cx="40" cy="20" rx="7" ry="4"/></g>'
+        + '<path d="M30 34 Q28 58 30 88" stroke="#6b4632" stroke-width="5" fill="none"/>'
+        + '<g fill="#ef9db8"><path d="M14 52 l3 4 l-5 1 l1 -4 z"/><path d="M46 58 l3 4 l-5 1 l1 -4 z"/><path d="M24 70 l3 4 l-5 1 l1 -4 z"/><path d="M40 78 l3 4 l-5 1 l1 -4 z"/></g>';
+      if(kind==="hikari"){
+        s = '<rect x="0" y="0" width="60" height="24" fill="#b03024"/><rect x="0" y="22" width="60" height="3" fill="#8e2318"/><g fill="#f3d9a4"><rect x="8" y="3" width="3" height="13"/><rect x="28" y="3" width="3" height="13"/><rect x="48" y="3" width="3" height="13"/></g>'
+          + '<g transform="translate(1,26) scale(0.97,0.7)">' + sakura + "</g>";
+      } else {
+        s = sakura;
+      }
+      break;
+    case 4: /* 藤 */
+      s = '<path d="M4 10 H56" stroke="#6b4632" stroke-width="4"/>'
+        + '<g fill="#7c5cbf"><circle cx="14" cy="18" r="4"/><circle cx="14" cy="26" r="3.6"/><circle cx="14" cy="33" r="3.1"/><circle cx="14" cy="39" r="2.5"/><circle cx="30" cy="18" r="4.2"/><circle cx="30" cy="27" r="3.8"/><circle cx="30" cy="35" r="3.2"/><circle cx="30" cy="42" r="2.5"/><circle cx="46" cy="18" r="4"/><circle cx="46" cy="26" r="3.5"/><circle cx="46" cy="32" r="2.8"/></g>'
+        + '<g fill="#9a7fd4"><circle cx="12.6" cy="16.6" r="1.6"/><circle cx="28.6" cy="16.6" r="1.7"/><circle cx="44.6" cy="16.6" r="1.6"/></g>'
+        + '<g fill="#5d8f4e"><ellipse cx="10" cy="58" rx="8" ry="4" transform="rotate(-30 10 58)"/><ellipse cx="50" cy="62" rx="8" ry="4" transform="rotate(24 50 62)"/><ellipse cx="24" cy="72" rx="9" ry="4" transform="rotate(-14 24 72)"/><ellipse cx="42" cy="80" rx="8" ry="4" transform="rotate(12 42 80)"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="30" cy="56" rx="7" ry="4.4" fill="#8a6d4a"/><circle cx="36" cy="52" r="3" fill="#8a6d4a"/><path d="M38.6 52 L44 53 L38.6 54.4" fill="#e8a13a"/><path d="M24 60 Q18 66 20 72" stroke="#8a6d4a" stroke-width="2.4" fill="none"/></g>';
+      break;
+    case 5: /* 菖蒲 */
+      s = '<rect x="0" y="72" width="60" height="18" fill="#7fb0c9"/>'
+        + '<g stroke="#3d7a3a" stroke-width="2.6"><path d="M14 88 Q12 50 14 26"/><path d="M24 88 Q24 44 22 20"/><path d="M36 88 Q38 48 36 28"/><path d="M47 88 Q45 54 47 34"/></g>'
+        + '<g><path d="M22 20 q-7 -8 -3 -14 q4 4 3 8 q2 -6 6 -7 q1 7 -2 13 q-2 2 -4 0" fill="#6a5fb8"/><circle cx="22" cy="17" r="2" fill="#f2c138"/></g>'
+        + '<g><path d="M38 30 q-6 -7 -2 -12 q3 3 3 7 q1 -5 5 -6 q1 6 -2 11 q-2 2 -4 0" fill="#8378cc"/><circle cx="38" cy="27" r="1.8" fill="#f2c138"/></g>'
+        + '<g><path d="M13 28 q-5 -6 -2 -10 q3 3 2 6 q1 -4 4 -5 q1 5 -1 9 q-2 1 -3 0" fill="#6a5fb8"/><circle cx="13" cy="25" r="1.5" fill="#f2c138"/></g>';
+      if(kind==="tane") s += '<g stroke="#8a5a2b" stroke-width="3"><path d="M4 66 H56"/><path d="M8 66 V58 M20 66 V58 M32 66 V58 M44 66 V58 M52 66 V58" stroke-width="2.4"/></g>';
+      break;
+    case 6: /* 牡丹 */
+      s = '<g fill="#5d8f4e"><ellipse cx="14" cy="70" rx="10" ry="5" transform="rotate(-24 14 70)"/><ellipse cx="47" cy="74" rx="10" ry="5" transform="rotate(20 47 74)"/><ellipse cx="30" cy="82" rx="11" ry="5"/></g>'
+        + '<g fill="#d84f6d"><circle cx="30" cy="44" r="15"/><circle cx="19" cy="50" r="10"/><circle cx="41" cy="50" r="10"/></g>'
+        + '<g fill="#ef8296"><circle cx="30" cy="42" r="10"/><circle cx="24" cy="48" r="7"/><circle cx="37" cy="48" r="7"/></g>'
+        + '<circle cx="30" cy="45" r="4.6" fill="#f6d45e"/>';
+      if(kind==="tane") s += '<g><ellipse cx="16" cy="16" rx="7" ry="4.4" fill="#e8862e" transform="rotate(-28 16 16)"/><ellipse cx="16" cy="24" rx="7" ry="4.4" fill="#f2a54a" transform="rotate(28 16 24)"/><ellipse cx="46" cy="14" rx="6" ry="3.8" fill="#e8862e" transform="rotate(24 46 14)"/><ellipse cx="46" cy="21" rx="6" ry="3.8" fill="#f2a54a" transform="rotate(-24 46 21)"/><path d="M23 20 q7 -3 14 0" stroke="#5b4632" stroke-width="1.6" fill="none"/></g>';
+      break;
+    case 7: /* 萩 */
+      s = '<g stroke="#4d7a3e" stroke-width="2.4" fill="none"><path d="M14 90 Q16 50 10 22"/><path d="M28 90 Q28 46 30 16"/><path d="M44 90 Q42 52 50 26"/></g>'
+        + '<g fill="#c94f7c"><circle cx="10" cy="20" r="3.4"/><circle cx="14" cy="28" r="3"/><circle cx="9" cy="34" r="2.8"/><circle cx="30" cy="14" r="3.4"/><circle cx="34" cy="22" r="3"/><circle cx="29" cy="28" r="2.8"/><circle cx="50" cy="24" r="3.4"/><circle cx="46" cy="32" r="3"/><circle cx="51" cy="38" r="2.6"/></g>'
+        + '<g fill="#e58bab"><circle cx="10" cy="20" r="1.4"/><circle cx="30" cy="14" r="1.4"/><circle cx="50" cy="24" r="1.4"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="28" cy="66" rx="15" ry="9" fill="#7c5a3c"/><circle cx="42" cy="60" r="6" fill="#7c5a3c"/><ellipse cx="47" cy="62" rx="3.6" ry="2.8" fill="#a97d52"/><circle cx="40" cy="58" r="1.1" fill="#2b2620"/><path d="M16 62 l-4 -3 M44 52 l2 -4" stroke="#7c5a3c" stroke-width="2.4"/></g>';
+      break;
+    case 8: /* 芒 */
+      s = '<g stroke="#c8a86a" stroke-width="2.2" fill="none"><path d="M12 90 Q10 56 6 34"/><path d="M20 90 Q20 52 16 30"/><path d="M30 90 Q32 54 30 28"/><path d="M42 90 Q40 56 46 36"/><path d="M50 90 Q52 60 54 42"/></g>'
+        + '<g fill="#e6cf9a"><ellipse cx="6" cy="30" rx="3" ry="8" transform="rotate(-8 6 30)"/><ellipse cx="16" cy="26" rx="3" ry="9"/><ellipse cx="30" cy="24" rx="3" ry="9"/><ellipse cx="46" cy="32" rx="3" ry="8" transform="rotate(8 46 32)"/><ellipse cx="54" cy="38" rx="2.6" ry="7"/></g>';
+      if(kind==="hikari") s = '<circle cx="42" cy="20" r="13" fill="#d84f35"/><circle cx="42" cy="20" r="13" fill="none" stroke="#b23a24" stroke-width="1.4"/>' + s;
+      if(kind==="tane") s += '<g fill="#3c4652"><path d="M10 22 q5 -5 10 0 q-5 2 -10 0"/><path d="M24 14 q5 -5 10 0 q-5 2 -10 0"/><path d="M14 34 q4 -4 9 0 q-4.5 2 -9 0"/></g>';
+      break;
+    case 9: /* 菊 */
+      s = '<g stroke="#e8a91c" stroke-width="2.2"><path d="M30 46 L30 24 M30 46 L16 30 M30 46 L44 30 M30 46 L13 44 M30 46 L47 44 M30 46 L20 58 M30 46 L40 58 M30 46 L30 64"/></g>'
+        + '<g fill="#f2c138"><circle cx="30" cy="24" r="4"/><circle cx="16" cy="30" r="3.6"/><circle cx="44" cy="30" r="3.6"/><circle cx="13" cy="44" r="3.4"/><circle cx="47" cy="44" r="3.4"/><circle cx="20" cy="58" r="3.4"/><circle cx="40" cy="58" r="3.4"/><circle cx="30" cy="64" r="3.6"/></g>'
+        + '<circle cx="30" cy="45" r="6.4" fill="#e8862e"/>'
+        + '<g fill="#5d8f4e"><ellipse cx="16" cy="78" rx="9" ry="4" transform="rotate(-18 16 78)"/><ellipse cx="45" cy="78" rx="9" ry="4" transform="rotate(18 45 78)"/></g>';
+      if(kind==="tane") s += '<g><path d="M20 74 h20 l-3 10 h-14 z" fill="#f7f3e8" stroke="#b9a888"/><ellipse cx="30" cy="74" rx="10" ry="2.6" fill="#d84f35"/><text x="30" y="83" font-size="7" text-anchor="middle" fill="#a33327" font-weight="bold">寿</text></g>';
+      break;
+    case 10: /* 紅葉 */
+      s = '<path d="M30 88 Q28 60 34 40" stroke="#7a4a2a" stroke-width="4" fill="none"/>'
+        + '<g fill="#c9452c"><path d="M18 16 l3 6 6 -2 -3 6 6 2 -7 3 2 6 -7 -3 -3 6 -1 -7 -7 1 4 -5 -6 -3 7 -1 -1 -7 5 4 z"/><path d="M44 34 l2 5 5 -1 -2 5 5 2 -6 2 1 5 -5 -2 -3 5 -1 -6 -6 1 3 -4 -5 -3 6 -1 0 -6 4 4 z"/></g>'
+        + '<g fill="#e0682f"><path d="M14 48 l2 4 4 -1 -2 4 4 2 -5 2 1 4 -4 -2 -2 4 -1 -5 -5 1 3 -3 -4 -2 5 -1 0 -5 3 3 z"/><path d="M40 62 l2 4 4 -1 -2 4 4 2 -5 2 1 4 -4 -2 -2 4 -1 -5 -5 1 3 -3 -4 -2 5 -1 0 -5 3 3 z"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="26" cy="66" rx="13" ry="7.4" fill="#8a6238"/><circle cx="38" cy="59" r="5.4" fill="#8a6238"/><path d="M36 54 l-3 -6 M40 54 l1 -7 M34 55 l-6 -4" stroke="#8a6238" stroke-width="2"/><ellipse cx="42" cy="61" rx="3" ry="2.2" fill="#c39a63"/><path d="M16 72 v8 M34 72 v8" stroke="#8a6238" stroke-width="2.4"/></g>';
+      break;
+    case 11: /* 柳 */
+      s = '<g stroke="#4d8a46" stroke-width="2.4" fill="none"><path d="M10 0 Q8 34 12 62"/><path d="M22 0 Q20 38 24 70"/><path d="M34 0 Q34 36 30 64"/><path d="M46 0 Q48 32 44 58"/><path d="M54 0 Q52 26 54 46"/></g>'
+        + '<g stroke="#6fae62" stroke-width="1.6" fill="none"><path d="M16 0 Q14 30 18 54"/><path d="M28 0 Q27 32 29 58"/><path d="M40 0 Q41 30 38 52"/></g>';
+      if(kind==="hikari") s += '<g stroke="#7fb0c9" stroke-width="1.6"><path d="M6 30 l-3 8 M16 26 l-3 8 M50 30 l-3 8 M56 40 l-3 8"/></g><g><path d="M22 66 L38 66 L30 54 Z" fill="#e8c33a"/><rect x="27" y="66" width="6" height="9" fill="#3a6ea8"/><path d="M24 84 h12 l-2 -9 h-8 z" fill="#7a4a2a"/><path d="M38 62 q8 2 9 8" stroke="#3a6ea8" stroke-width="3" fill="none"/></g>';
+      if(kind==="tane") s += '<g fill="#2e3440"><path d="M14 60 q8 -8 16 -4 q-6 1 -8 4 q4 0 6 3 q-8 2 -14 -3"/><path d="M30 56 l8 -3 -4 5 z"/></g>';
+      if(kind==="kasu") s = '<path d="M34 8 L20 44 h9 L24 82 L46 36 h-10 L44 8 z" fill="#f2c138" stroke="#d89a17" stroke-width="1.6"/>';
+      break;
+    case 12: /* 桐 */
+      s = '<g fill="#b9c46a"><path d="M14 58 q-10 -14 2 -22 q10 8 4 20 q-2 4 -6 2"/><path d="M46 58 q10 -14 -2 -22 q-10 8 -4 20 q2 4 6 2"/><path d="M30 74 q-12 -12 -2 -24 q12 8 6 22 q-1 3 -4 2"/></g>'
+        + '<g fill="#8a79c4"><circle cx="20" cy="16" r="4"/><circle cx="28" cy="10" r="4.4"/><circle cx="36" cy="15" r="4"/><circle cx="24" cy="22" r="3.6"/><circle cx="33" cy="23" r="3.6"/></g>'
+        + '<g fill="#a893d8"><circle cx="28" cy="16" r="2"/><circle cx="20" cy="16" r="1.8"/></g>';
+      if(kind==="hikari") s += '<g><path d="M14 84 Q26 66 24 52 Q36 62 34 74 Q44 60 40 46 Q50 56 44 70 Q52 74 44 84 Q30 76 14 84" fill="#3f8f7a"/><circle cx="28" cy="50" r="5" fill="#d84f35"/><path d="M33 48 L42 45 L34 52" fill="#e8a13a"/><path d="M20 82 Q10 74 12 64 M40 84 Q50 78 48 68" stroke="#3f8f7a" stroke-width="2.6" fill="none"/></g>';
+      break;
+  }
+  return s;
+}
+function ribbonSVG(card){
+  if(card.kind !== "tanzaku") return "";
+  var col = card.ribbon === "ao" ? "#2456a6" : "#c0392b";
+  var txt = card.ribbon ? '<circle cx="30" cy="10" r="1.6" fill="#f7f3e8"/><circle cx="30" cy="17" r="1.6" fill="#f7f3e8"/><circle cx="30" cy="24" r="1.6" fill="#f7f3e8"/>' : "";
+  return '<rect x="22" y="0" width="16" height="46" fill="'+col+'"/><rect x="22" y="42" width="16" height="4" fill="'+col+'" opacity=".75"/>' + txt;
+}
+function cardFaceSVG(card){
+  return '<svg viewBox="0 0 60 90" aria-hidden="true">'
+    + '<rect x="0" y="0" width="60" height="90" fill="#fdf9ee"/>'
+    + motif(card.month, card.kind)
+    + ribbonSVG(card)
+    + "</svg>";
+}
+function cardEl(card, opts){
+  opts = opts || {};
+  var d = document.createElement("div");
+  d.className = "card" + (opts.small ? " small" : "");
+  d.dataset.id = card.id;
+  d.innerHTML = cardFaceSVG(card) + '<span class="tag">' + kindLabel(card.kind) + "</span>";
+  d.title = cardLabel(card);
+  return d;
+}
+function backEl(small){
+  var d = document.createElement("div");
+  d.className = "card back" + (small ? " small" : "");
+  return d;
+}
+
+/* ================= 役判定 ================= */
+function evalYaku(captured){
+  var byKind = { hikari:[], tane:[], tanzaku:[], kasu:[] };
+  captured.forEach(function(id){ var c = cardById(id); byKind[c.kind].push(c); });
+  var kasuCount = byKind.kasu.length + (byKind.tane.some(function(c){return c.month===9;}) ? 1 : 0); /* 盃はカス兼用 */
+  var hikariMonths = byKind.hikari.map(function(c){return c.month;});
+  var hasRain = hikariMonths.indexOf(11) >= 0;
+  var taneMonths = byKind.tane.map(function(c){return c.month;});
+  var tanMonths = byKind.tanzaku.map(function(c){return c.month;});
+  var list = [];
+  var hn = hikariMonths.length;
+  if(hn === 5) list.push({name:"Five Brights", pts:10});
+  else if(hn === 4 && hasRain) list.push({name:"Rainy Four Brights", pts:7});
+  else if(hn === 4) list.push({name:"Four Brights", pts:8});
+  else if(hn === 3 && !hasRain) list.push({name:"Three Brights", pts:5});
+  var ino = [7,10,6].every(function(m){ return taneMonths.indexOf(m) >= 0; });
+  if(ino) list.push({name:"Boar, Deer & Butterfly", pts: 5 + Math.max(0, byKind.tane.length - 3)});
+  var aka = [1,2,3].every(function(m){ return tanMonths.indexOf(m) >= 0; });
+  var ao = [6,9,10].every(function(m){ return tanMonths.indexOf(m) >= 0; });
+  if(aka) list.push({name:"Red Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
+  if(ao) list.push({name:"Blue Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
+  var hasSakura = hikariMonths.indexOf(3) >= 0, hasMoon = hikariMonths.indexOf(8) >= 0, hasCup = taneMonths.indexOf(9) >= 0;
+  if(hasSakura && hasCup) list.push({name:"Cherry Blossom Viewing", pts:3});
+  if(hasMoon && hasCup) list.push({name:"Moon Viewing", pts:3});
+  if(!ino && byKind.tane.length >= 5) list.push({name:"Animals", pts: 1 + (byKind.tane.length - 5)});
+  if(!aka && !ao && byKind.tanzaku.length >= 5) list.push({name:"Ribbons", pts: 1 + (byKind.tanzaku.length - 5)});
+  if(kasuCount >= 10) list.push({name:"Chaff", pts: 1 + (kasuCount - 10)});
+  var total = list.reduce(function(a,y){ return a + y.pts; }, 0);
+  return { list: list, total: total };
+}
+
+/* ================= ゲーム状態 ================= */
+var P = "you", C = "cpu";
+var G = null;
+var settings = { months: 12, level: 2 };
+
+function newMatch(){
+  G = {
+    round: 0, totalMonths: settings.months,
+    score: { you: 0, cpu: 0 },
+    oya: P, /* 1月はあなたが親 */
+    phase: "idle"
+  };
+  startRound();
+}
+function shuffledDeck(){
+  var d = CARDS.map(function(c){ return c.id; });
+  for(var i = d.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = d[i]; d[i] = d[j]; d[j] = t;
+  }
+  return d;
+}
+function monthOf4(ids){
+  var cnt = {};
+  for(var i = 0; i < ids.length; i++){ var m = cardById(ids[i]).month; cnt[m] = (cnt[m]||0)+1; if(cnt[m] === 4) return m; }
+  return 0;
+}
+function startRound(){
+  G.round++;
+  var deck, tries = 0;
+  while(true){
+    deck = shuffledDeck();
+    var field = deck.slice(16, 24);
+    if(!monthOf4(field)) break; /* 場に4枚同月は配り直し */
+    if(++tries > 50) break;
+  }
+  G.hand = { you: deck.slice(0, 8), cpu: deck.slice(8, 16) };
+  G.field = deck.slice(16, 24);
+  G.stock = deck.slice(24);
+  G.captured = { you: [], cpu: [] };
+  G.turn = G.oya;
+  G.koikoi = { you: false, cpu: false };
+  G.baseScore = { you: 0, cpu: 0 }; /* 前回判定時の役点（増えたら再判定） */
+  G.phase = "play";
+  render();
+  /* 手役チェック */
+  var youT = monthOf4(G.hand.you), cpuT = monthOf4(G.hand.cpu);
+  if(youT || cpuT){
+    var winner = youT ? P : C;
+    setStatus((winner===P ? "You were" : "The computer was") + " dealt all four " + MONTH_FLOWER[(youT||cpuT)-1] + " cards — a four-of-a-kind hand yaku.");
+    setTimeout(function(){ endRound(winner, [{name:"Hand Yaku (four of a month)", pts:6}], 6, false); }, 900);
+    G.phase = "over";
+    return;
+  }
+  setStatus(G.turn === P ? "Your turn. Choose a card from your hand." : "Computer's turn.");
+  if(G.turn === C){ lock(true); setTimeout(cpuTurn, 900); }
+  else lock(false);
+}
+
+/* ================= 進行 ================= */
+function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function matchesInField(month){
+  return G.field.filter(function(id){ return cardById(id).month === month; });
+}
+/* played カードと場のマッチを解決。choiceId は2枚マッチ時に取る場札（nullなら自動） */
+function applyMatch(who, cardId, choiceId){
+  var c = cardById(cardId);
+  var m = matchesInField(c.month);
+  var taken = [];
+  if(m.length === 1){ taken = [m[0]]; }
+  else if(m.length === 2){ taken = [choiceId != null ? choiceId : m[0]]; }
+  else if(m.length >= 3){ taken = m.slice(); }
+  if(taken.length){
+    taken.forEach(function(id){
+      G.field.splice(G.field.indexOf(id), 1);
+      G.captured[who].push(id);
+    });
+    G.captured[who].push(cardId);
+    return taken;
+  }
+  G.field.push(cardId);
+  return taken;
+}
+function removeFromHand(who, cardId){
+  var h = G.hand[who]; h.splice(h.indexOf(cardId), 1);
+}
+/* 1手番：手札→（山札）→役判定→交代。who が人の場合はクリック起点で呼ばれる */
+var busy = false;
+async function playFromHand(who, cardId, choiceId){
+  removeFromHand(who, cardId);
+  var taken = applyMatch(who, cardId, choiceId);
+  render(taken.concat([cardId]));
+  if(taken.length) setStatus((who===P?"You":"The computer") + " captured " + (taken.length+1) + " cards with " + cardLabel(cardById(cardId)) + ".");
+  await delay(650);
+  await drawPhase(who);
+  await afterTurn(who);
+}
+async function drawPhase(who){
+  if(!G.stock.length) return;
+  var cardId = G.stock.pop();
+  render([cardId]);
+  setStatus("Drew " + cardLabel(cardById(cardId)) + " from the deck.");
+  await delay(650);
+  var m = matchesInField(cardById(cardId).month);
+  var choice = null;
+  if(m.length === 2){
+    if(who === P){
+      choice = await askFieldChoice(cardId, m);
+    } else {
+      choice = cpuChooseFieldCard(m, G.captured.cpu);
+    }
+  }
+  var taken = applyMatch(who, cardId, choice);
+  render(taken.concat([cardId]));
+  if(taken.length) setStatus((who===P?"You":"The computer") + " captured " + (taken.length+1) + " cards with the drawn card.");
+  await delay(500);
+}
+/* 役が新しくできた／増えたら true を返し、必要なら選択を待つ */
+async function afterTurn(who){
+  var ev = evalYaku(G.captured[who]);
+  var improved = ev.total > G.baseScore[who];
+  if(improved && ev.total > 0){
+    G.baseScore[who] = ev.total;
+    var noMore = G.hand.you.length === 0 && G.hand.cpu.length === 0;
+    if(noMore){ endRoundWithScore(who, ev); return; }
+    var cont;
+    if(who === P){ cont = await askKoikoi(ev); }
+    else { cont = cpuDecideKoikoi(ev); await delay(400); }
+    if(!cont){ endRoundWithScore(who, ev); return; }
+    G.koikoi[who] = true;
+    setStatus((who===P?"You":"The computer") + " called “Koi-Koi”!");
+    render();
+    await delay(800);
+  }
+  if(G.hand.you.length === 0 && G.hand.cpu.length === 0){
+    endRoundDraw();
+    return;
+  }
+  G.turn = (who === P) ? C : P;
+  render();
+  if(G.turn === C){
+    lock(true);
+    setStatus("Computer's turn.");
+    await delay(500);
+    cpuTurn();
+  } else {
+    busy = false;
+    lock(false);
+    setStatus("Your turn. Choose a card from your hand.");
+  }
+}
+function scoreWithMultipliers(who, baseTotal){
+  var pts = baseTotal, mult = 1, notes = [];
+  if(baseTotal >= 7){ mult *= 2; notes.push("Doubled: 7 points or more"); }
+  var other = who === P ? C : P;
+  if(G.koikoi[who]){ mult *= 2; notes.push("Doubled: winner's Koi-Koi"); }
+  if(G.koikoi[other]){ mult *= 2; notes.push("Doubled: opponent's Koi-Koi"); }
+  return { pts: pts * mult, mult: mult, notes: notes };
+}
+function endRoundWithScore(who, ev){
+  var r = scoreWithMultipliers(who, ev.total);
+  endRound(who, ev.list, r.pts, r.notes);
+}
+function endRound(winner, yakuList, pts, notes){
+  G.phase = "over";
+  busy = false;
+  lock(true);
+  if(winner) G.score[winner] += pts;
+  render();
+  var body = document.getElementById("roundBody");
+  var html = "";
+  if(winner){
+    html += "<p><strong>" + (winner===P ? "You" : "The computer") + "</strong> win" + (winner===P ? "" : "s") + " this month.</p>";
+    html += '<div class="round-result-yaku">';
+    yakuList.forEach(function(y){ html += "<div><span>" + y.name + "</span><span>" + y.pts + " pts</span></div>"; });
+    html += "</div>";
+    if(notes && notes.length) html += '<p class="muted">' + notes.join(" / ") + "</p>";
+    html += '<p class="final-score">This month: ' + pts + ' pts</p>';
+  } else {
+    html += "<p>Neither player completed a yaku, so the month is a draw (nagare).</p>";
+  }
+  html += '<p class="muted">Totals — You: ' + G.score.you + " pts / Computer: " + G.score.cpu + " pts</p>";
+  body.innerHTML = html;
+  document.getElementById("roundTitle").textContent = "Month " + G.round + " Results";
+  var btn = document.getElementById("nextRoundBtn");
+  btn.textContent = G.round >= G.totalMonths ? "See Final Results" : "Next Month (Month " + (G.round+1) + ")";
+  openOverlay("roundOverlay");
+}
+function endRoundDraw(){ endRound(null, [], 0, []); }
+function nextStep(){
+  closeOverlay("roundOverlay");
+  if(G.round >= G.totalMonths){ showFinal(); return; }
+  G.oya = (G.oya === P) ? C : P;
+  startRound();
+}
+function showFinal(){
+  var b = document.getElementById("finalBody");
+  var diff = G.score.you - G.score.cpu;
+  var msg = diff > 0 ? "You win the match!" : diff < 0 ? "The computer wins the match." : "The match is a draw.";
+  b.innerHTML = '<p class="final-score">' + msg + "</p>"
+    + '<p>You: ' + G.score.you + " pts<br>Computer: " + G.score.cpu + " pts</p>"
+    + '<p class="muted">The ' + G.totalMonths + "-month match is over.</p>";
+  openOverlay("finalOverlay");
+  setStatus("Match over: " + msg + " (You " + G.score.you + " pts / Computer " + G.score.cpu + " pts)");
+}
+
+/* ================= あなたの操作 ================= */
+var pendingPick = null; /* {cardId, fromDraw, candidates, resolve} */
+function onHandCardClick(cardId){
+  if(!G || G.phase !== "play" || busy || G.turn !== P || pendingPick) return;
+  var c = cardById(cardId);
+  var m = matchesInField(c.month);
+  if(m.length === 2){
+    pendingPick = { cardId: cardId, candidates: m, fromDraw: false };
+    setStatus("There are two " + MONTH_FLOWER[c.month-1] + " cards on the field. Tap the one you want to take.");
+    render();
+    return;
+  }
+  busy = true; lock(true);
+  playFromHand(P, cardId, null);
+}
+function onFieldCardClick(cardId){
+  if(!pendingPick || pendingPick.candidates.indexOf(cardId) < 0) return;
+  var pick = pendingPick; pendingPick = null;
+  if(pick.fromDraw){ pick.resolve(cardId); render(); return; }
+  busy = true; lock(true);
+  playFromHand(P, pick.cardId, cardId);
+}
+function askFieldChoice(drawnId, candidates){
+  return new Promise(function(resolve){
+    pendingPick = { cardId: drawnId, candidates: candidates, fromDraw: true, resolve: resolve };
+    setStatus("The drawn card's month also has two cards on the field. Tap the one you want to take.");
+    render();
+  });
+}
+function askKoikoi(ev){
+  return new Promise(function(resolve){
+    var box = document.getElementById("koikoiYaku");
+    box.innerHTML = ev.list.map(function(y){ return "<div style='display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 2px'><span>" + y.name + "</span><span>" + y.pts + " pts</span></div>"; }).join("");
+    document.getElementById("koikoiScore").textContent = ev.total;
+    openOverlay("koikoiOverlay");
+    document.getElementById("agariBtn").onclick = function(){ closeOverlay("koikoiOverlay"); resolve(false); };
+    document.getElementById("koikoiBtn").onclick = function(){ closeOverlay("koikoiOverlay"); resolve(true); };
+  });
+}
+
+/* ================= コンピューター ================= */
+function cardValue(c){
+  return c.kind === "hikari" ? 20 : c.kind === "tane" ? 10 : c.kind === "tanzaku" ? 5 : 1;
+}
+/* 役への近さボーナス：取った後の役点をざっくり評価 */
+function captureGain(who, cardIds){
+  var sim = G.captured[who].concat(cardIds);
+  return evalYaku(sim).total * 30;
+}
+function potentialBonus(who, cardId){
+  /* 自分の取札と同月の札を持っている／役の材料になる札への寄せ */
+  var c = cardById(cardId), b = 0;
+  G.captured[who].forEach(function(id){ if(cardById(id).month === c.month) b += 2; });
+  if(c.kind === "hikari") b += 6;
+  if(c.kind === "tane" && [6,7,9,10].indexOf(c.month) >= 0) b += 4; /* 猪鹿蝶・盃 */
+  if(c.kind === "tanzaku" && [1,2,3,6,9,10].indexOf(c.month) >= 0) b += 4; /* 赤短青短 */
+  return b;
+}
+function cpuChooseFieldCard(candidates, capturedBy){
+  var best = candidates[0], bv = -1;
+  candidates.forEach(function(id){ var v = cardValue(cardById(id)); if(v > bv){ bv = v; best = id; } });
+  return best;
+}
+function cpuPickPlay(){
+  var hand = G.hand.cpu, best = null, bestScore = -1e9;
+  var rnd = settings.level === 1 ? 14 : settings.level === 2 ? 5 : 0;
+  hand.forEach(function(cardId){
+    var c = cardById(cardId);
+    var m = matchesInField(c.month);
+    var s = Math.random() * rnd;
+    if(m.length){
+      var take = m.length === 2 ? [cpuChooseFieldCard(m, G.captured.cpu)] : m;
+      s += take.reduce(function(a,id){ return a + cardValue(cardById(id)); }, 0) + cardValue(c);
+      s += captureGain(C, take.concat([cardId]));
+      if(m.length >= 3) s += 25; /* 引きは大きい */
+    } else {
+      /* 取れない手：価値の低い札から捨てる。ただし役の材料・場に同月が多い札は温存 */
+      s -= cardValue(c) * 0.6;
+      s += potentialBonus(C, cardId) * -1.5;
+      var sameOnField = 0;
+      s += sameOnField;
+    }
+    if(s > bestScore){ bestScore = s; best = { cardId: cardId, choice: m.length === 2 ? cpuChooseFieldCard(m, G.captured.cpu) : null }; }
+  });
+  return best;
+}
+function cpuDecideKoikoi(ev){
+  if(settings.level === 1) return ev.total <= 2 && Math.random() < 0.6;
+  var myLeft = G.hand.cpu.length;
+  var oppEv = evalYaku(G.captured.you).total;
+  if(ev.total >= 6) return false;
+  if(myLeft <= 1) return false;
+  if(oppEv >= 3 && ev.total >= 3) return false; /* 相手が育っているなら止める */
+  if(ev.total <= 2) return true;
+  return myLeft >= 4;
+}
+async function cpuTurn(){
+  if(!G || G.phase !== "play") return;
+  busy = true;
+  await delay(500);
+  var pick = cpuPickPlay();
+  var c = cardById(pick.cardId);
+  setStatus("The computer played " + cardLabel(c) + ".");
+  await playFromHand(C, pick.cardId, pick.choice);
+}
+
+/* ================= 描画 ================= */
+var el = {};
+["cpuHand","myHand","fieldCards","cpuCaptured","myCaptured","statusText","stockCount","roundVal","youScore","cpuScore","youCell","cpuCell","tableEl","myYakuNow","cpuYakuNow","fieldInfo"].forEach(function(id){ el[id] = document.getElementById(id); });
+function setStatus(t){ el.statusText.textContent = t; }
+function lock(on){ el.tableEl.classList.toggle("locked", !!on); }
+function renderCaptured(container, ids){
+  container.innerHTML = "";
+  if(!ids.length){ container.innerHTML = '<span class="cap-empty">No captured cards</span>'; return; }
+  var groups = [["hikari","Bright"],["tane","Animal"],["tanzaku","Ribbon"],["kasu","Plain"]];
+  groups.forEach(function(g){
+    var sub = ids.filter(function(id){ return cardById(id).kind === g[0]; });
+    if(!sub.length) return;
+    var wrap = document.createElement("div"); wrap.className = "cap-group";
+    var lab = document.createElement("div"); lab.className = "cap-label"; lab.textContent = g[1] + " (" + sub.length + ")";
+    var row = document.createElement("div"); row.className = "cap-row";
+    sub.forEach(function(id){ row.appendChild(cardEl(cardById(id), { small: true })); });
+    wrap.appendChild(lab); wrap.appendChild(row);
+    container.appendChild(wrap);
+  });
+}
+function yakuLine(who){
+  var ev = evalYaku(G.captured[who]);
+  if(!ev.list.length) return "";
+  return "Yaku: " + ev.list.map(function(y){ return y.name + " " + y.pts; }).join(", ") + (G.koikoi[who] ? " (Koi-Koi declared)" : "");
+}
+function render(justIds){
+  if(!G) return;
+  justIds = justIds || [];
+  el.roundVal.textContent = G.round ? (G.round + " of " + G.totalMonths) : "–";
+  el.youScore.textContent = G.score.you;
+  el.cpuScore.textContent = G.score.cpu;
+  el.youCell.classList.toggle("turn", G.turn === P && G.phase === "play");
+  el.cpuCell.classList.toggle("turn", G.turn === C && G.phase === "play");
+  el.stockCount.textContent = G.stock ? G.stock.length : 0;
+  document.getElementById("stockPile").style.visibility = G.stock && G.stock.length ? "visible" : "hidden";
+  /* CPU手札（裏向き） */
+  el.cpuHand.innerHTML = "";
+  (G.hand ? G.hand.cpu : []).forEach(function(){ el.cpuHand.appendChild(backEl(false)); });
+  /* 場札 */
+  el.fieldCards.innerHTML = "";
+  var pickCands = pendingPick ? pendingPick.candidates : [];
+  (G.field || []).forEach(function(id){
+    var c = cardEl(cardById(id));
+    if(pickCands.indexOf(id) >= 0){ c.classList.add("pickable"); c.addEventListener("click", function(){ onFieldCardClick(id); }); }
+    if(justIds.indexOf(id) >= 0) c.classList.add("just");
+    el.fieldCards.appendChild(c);
+  });
+  el.fieldInfo.textContent = G.field ? G.field.length + " cards" : "";
+  /* 取札 */
+  renderCaptured(el.cpuCaptured, G.captured ? G.captured.cpu : []);
+  renderCaptured(el.myCaptured, G.captured ? G.captured.you : []);
+  el.cpuYakuNow.textContent = G.captured ? yakuLine(C) : "";
+  el.myYakuNow.textContent = G.captured ? yakuLine(P) : "";
+  /* 自分の手札 */
+  el.myHand.innerHTML = "";
+  var sorted = (G.hand ? G.hand.you.slice() : []).sort(function(a,b){ return a - b; });
+  sorted.forEach(function(id){
+    var c = cardEl(cardById(id));
+    if(G.turn === P && G.phase === "play" && !busy && !pendingPick){
+      if(matchesInField(cardById(id).month).length) c.classList.add("match-hint");
+    }
+    c.addEventListener("click", function(){ onHandCardClick(id); });
+    el.myHand.appendChild(c);
+  });
+}
+
+/* ================= UI配線 ================= */
+function openOverlay(id){ document.getElementById(id).classList.add("open"); }
+function closeOverlay(id){ document.getElementById(id).classList.remove("open"); }
+function segWire(id, attr, apply){
+  var seg = document.getElementById(id);
+  seg.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    seg.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    apply(parseInt(b.dataset[attr], 10));
+  });
+}
+segWire("lengthSeg", "len", function(v){ settings.months = v; });
+segWire("levelSeg", "lv", function(v){ settings.level = v; });
+document.getElementById("startBtn").addEventListener("click", function(){
+  pendingPick = null; busy = false;
+  closeOverlay("roundOverlay"); closeOverlay("finalOverlay"); closeOverlay("koikoiOverlay");
+  newMatch();
+});
+document.getElementById("nextRoundBtn").addEventListener("click", nextStep);
+document.getElementById("playAgainBtn").addEventListener("click", function(){
+  closeOverlay("finalOverlay"); newMatch();
+});
+document.getElementById("closeFinalBtn").addEventListener("click", function(){ closeOverlay("finalOverlay"); });
+document.getElementById("rulesBtn").addEventListener("click", function(){ openOverlay("rulesOverlay"); });
+document.getElementById("closeRulesBtn").addEventListener("click", function(){ closeOverlay("rulesOverlay"); });
+document.getElementById("rulesOverlay").addEventListener("click", function(e){ if(e.target === this) closeOverlay("rulesOverlay"); });
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){ closeOverlay("rulesOverlay"); closeOverlay("finalOverlay"); }
+});
+render();
+</script>
+  </body>
+</html>

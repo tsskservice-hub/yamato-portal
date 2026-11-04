@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
-    <title>対戦型将棋</title>
+    <title>Shogi vs Computer</title>
     <style>
       :root {
         --bg: #f2ecdf;
@@ -57,7 +57,7 @@
       body {
         background: var(--bg);
         color: var(--ink);
-        font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
         -webkit-font-smoothing: antialiased;
       }
       .page { max-width: 1060px; margin: 0 auto; padding: 14px 14px 40px; }
@@ -231,63 +231,63 @@
   <body>
     <div class="page">
       <div class="topbar">
-        <button class="btn" id="rulesBtn" type="button">遊び方・ルール</button>
+        <button class="btn" id="rulesBtn" type="button">How to Play &amp; Rules</button>
       </div>
 
-      <section class="newgame" aria-label="新規対局">
+      <section class="newgame" aria-label="New game">
         <div class="field">
-          <label>あなたの手番</label>
+          <label>Your side</label>
           <div class="seg" id="colorSeg">
-            <button type="button" data-color="0" class="on">先手（☗）</button>
-            <button type="button" data-color="1">後手（☖）</button>
+            <button type="button" data-color="0" class="on">Sente ☗ (first)</button>
+            <button type="button" data-color="1">Gote ☖ (second)</button>
           </div>
         </div>
         <div class="field">
-          <label>コンピューターの強さ</label>
+          <label>Computer strength</label>
           <div class="seg" id="levelSeg">
-            <button type="button" data-level="1">入門</button>
-            <button type="button" data-level="2" class="on">普通</button>
-            <button type="button" data-level="3">強い</button>
+            <button type="button" data-level="1">Beginner</button>
+            <button type="button" data-level="2" class="on">Normal</button>
+            <button type="button" data-level="3">Strong</button>
           </div>
         </div>
         <div class="spacer"></div>
-        <button class="btn primary" id="startBtn" type="button">対局開始</button>
+        <button class="btn primary" id="startBtn" type="button">Start Game</button>
       </section>
 
       <div class="layout">
         <div class="board-col">
-          <div class="hand" id="handGote" aria-label="コンピューターの持ち駒"></div>
+          <div class="hand" id="handGote" aria-label="Opponent's pieces in hand"></div>
           <div class="board-frame">
             <div class="files" aria-hidden="true">
               <span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
             </div>
             <div class="board-row">
-              <div class="board" id="board" role="grid" aria-label="将棋盤"></div>
+              <div class="board" id="board" role="grid" aria-label="Shogi board"></div>
               <div class="ranks" aria-hidden="true">
-                <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span>
+                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
               </div>
             </div>
           </div>
-          <div class="hand mine" id="handSente" aria-label="あなたの持ち駒"></div>
-          <p class="thinking" id="thinking">コンピューターが考え中…</p>
+          <div class="hand mine" id="handSente" aria-label="Pieces in hand"></div>
+          <p class="thinking" id="thinking">The computer is thinking…</p>
         </div>
 
         <aside class="side">
           <div class="card">
-            <h2>手番</h2>
-            <div class="turn-big"><span class="mark" id="turnMark">☗</span><span id="turnText">あなたの番です</span><span class="check-badge" id="checkBadge">王手</span></div>
-            <p class="status-sub" id="statusSub">駒をタップすると、動けるマスが表示されます。</p>
+            <h2>Turn</h2>
+            <div class="turn-big"><span class="mark" id="turnMark">☗</span><span id="turnText">Your turn</span><span class="check-badge" id="checkBadge">Check</span></div>
+            <p class="status-sub" id="statusSub">Tap one of your pieces to see where it can move.</p>
           </div>
           <div class="card">
-            <h2>対局操作</h2>
+            <h2>Game Controls</h2>
             <div class="controls">
-              <button class="btn" id="undoBtn" type="button">待った</button>
-              <button class="btn" id="resignBtn" type="button">投了</button>
+              <button class="btn" id="undoBtn" type="button">Undo</button>
+              <button class="btn" id="resignBtn" type="button">Resign</button>
             </div>
           </div>
           <div class="card">
-            <h2>棋譜</h2>
-            <div class="kifu" id="kifu"><span class="empty">まだ指し手がありません。</span></div>
+            <h2>Move List</h2>
+            <div class="kifu" id="kifu"><span class="empty">No moves yet.</span></div>
           </div>
         </aside>
       </div>
@@ -296,11 +296,11 @@
     <!-- promotion choice -->
     <div class="overlay" id="promoOverlay">
       <div class="modal promo-modal" role="dialog" aria-modal="true" aria-labelledby="promoTitle">
-        <h2 id="promoTitle">成りますか？</h2>
-        <p id="promoText">この駒は成ることができます。</p>
+        <h2 id="promoTitle">Promote this piece?</h2>
+        <p id="promoText">This piece can promote.</p>
         <div class="choices">
-          <button class="btn primary" id="promoYes" type="button">成る</button>
-          <button class="btn" id="promoNo" type="button">成らない</button>
+          <button class="btn primary" id="promoYes" type="button">Promote</button>
+          <button class="btn" id="promoNo" type="button">Don't promote</button>
         </div>
       </div>
     </div>
@@ -308,12 +308,12 @@
     <!-- result -->
     <div class="overlay" id="resultOverlay">
       <div class="modal result-modal" role="dialog" aria-modal="true">
-        <h2>対局終了</h2>
-        <p class="result-big" id="resultText">あなたの勝ちです</p>
+        <h2>Game Over</h2>
+        <p class="result-big" id="resultText">You win!</p>
         <p id="resultSub"></p>
         <div class="close-row" style="justify-content:center;">
-          <button class="btn primary" id="againBtn" type="button">もう一局</button>
-          <button class="btn" id="resultClose" type="button">盤面を見る</button>
+          <button class="btn primary" id="againBtn" type="button">Play Again</button>
+          <button class="btn" id="resultClose" type="button">View Board</button>
         </div>
       </div>
     </div>
@@ -321,45 +321,45 @@
     <!-- rules -->
     <div class="overlay" id="rulesOverlay">
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
-        <h2 id="rulesTitle">遊び方・ルール</h2>
-        <h3>遊び方</h3>
+        <h2 id="rulesTitle">How to Play &amp; Rules</h2>
+        <h3>How to play</h3>
         <ul>
-          <li>動かしたい自分の駒をタップすると、動けるマスに印が表示されます。行き先をタップすると駒が動きます。</li>
-          <li>取った駒は「持ち駒」になります。下の持ち駒欄の駒をタップしてから、盤上の空いたマスをタップすると打てます。</li>
-          <li>敵陣（相手側の3段目まで）に出入りする動きでは、駒を「成る」か選べます。成ると裏側の強い駒になります。</li>
-          <li>「待った」は自分の指し手とコンピューターの応手を1手分戻します。「投了」は負けを認めて対局を終わります。</li>
+          <li>Tap one of your pieces and the squares it can move to are highlighted. Tap a highlighted square to move there.</li>
+          <li>Pieces you capture become your "pieces in hand". Tap a piece in your hand area, then tap an empty square on the board to drop it there.</li>
+          <li>When a move enters, leaves, or moves within the promotion zone (the opponent's three ranks), you can choose to promote the piece. A promoted piece gains the stronger movement shown on its reverse side.</li>
+          <li>"Undo" takes back your last move together with the computer's reply. "Resign" accepts defeat and ends the game.</li>
         </ul>
-        <h3>駒の動き</h3>
+        <h3>How the pieces move</h3>
         <ul>
-          <li><b>王将・玉将</b>：全方向に1マス。</li>
-          <li><b>飛車</b>：縦横に何マスでも。成ると<b>竜王</b>（斜め1マスも追加）。</li>
-          <li><b>角行</b>：斜めに何マスでも。成ると<b>竜馬</b>（縦横1マスも追加）。</li>
-          <li><b>金将</b>：前・横・斜め前・後ろに1マス（斜め後ろ以外）。</li>
-          <li><b>銀将</b>：前と斜めに1マス（横と後ろは不可）。</li>
-          <li><b>桂馬</b>：前方に2マス進み横に1マス（他の駒を飛び越えられます）。</li>
-          <li><b>香車</b>：前方に何マスでも。</li>
-          <li><b>歩兵</b>：前方に1マス。</li>
-          <li>歩・香・桂・銀が成ると、すべて金の動きになります（と金・成香・成桂・成銀）。</li>
+          <li><b>King (王将 / 玉将)</b>: one square in any direction.</li>
+          <li><b>Rook (飛車)</b>: any number of squares horizontally or vertically. Promotes to <b>Dragon King (竜王)</b>, which also moves one square diagonally.</li>
+          <li><b>Bishop (角行)</b>: any number of squares diagonally. Promotes to <b>Dragon Horse (竜馬)</b>, which also moves one square horizontally or vertically.</li>
+          <li><b>Gold General (金将)</b>: one square forward, sideways, diagonally forward, or straight back — everything except diagonally back.</li>
+          <li><b>Silver General (銀将)</b>: one square forward or diagonally — not sideways or straight back.</li>
+          <li><b>Knight (桂馬)</b>: jumps two squares forward and one square sideways; it is the only piece that can jump over other pieces.</li>
+          <li><b>Lance (香車)</b>: any number of squares straight forward.</li>
+          <li><b>Pawn (歩兵)</b>: one square forward.</li>
+          <li>When a Pawn, Lance, Knight, or Silver promotes, it moves exactly like a Gold General (と金, 成香, 成桂, 成銀).</li>
         </ul>
-        <h3>禁止手・勝敗</h3>
+        <h3>Illegal moves &amp; winning</h3>
         <ul>
-          <li>自分の王（玉）が取られる手は指せません。王手がかかっているときは、必ず受けなければなりません。</li>
-          <li>二歩（同じ筋に自分の歩を2枚打つこと）は禁止です。歩・香は一番奥の段、桂は奥から2段目以内には打てません。</li>
-          <li>打ち歩詰め（歩を打って相手を詰ませること）も禁止です。</li>
-          <li>相手の王を詰ませたら勝ちです。千日手（同じ局面が4回現れること）になった場合は引き分けです。</li>
+          <li>You cannot make a move that leaves your own king in check. If your king is in check, you must get out of check.</li>
+          <li>Nifu is illegal: you may not drop a pawn on a file where you already have an unpromoted pawn. A pawn or lance cannot be dropped on the farthest rank, and a knight cannot be dropped on the farthest two ranks, because it would have no move.</li>
+          <li>Uchifuzume is also illegal: you may not drop a pawn to deliver checkmate.</li>
+          <li>You win by checkmating the opponent's king. If the same position occurs four times (sennichite), the game is a draw.</li>
         </ul>
         <div class="close-row">
-          <button class="btn primary" id="rulesClose" type="button">閉じる</button>
+          <button class="btn primary" id="rulesClose" type="button">Close</button>
         </div>
       </div>
     </div>
 
     <script>
       "use strict";
-      /* ================= 将棋エンジン ================= */
-      // 盤面: idx = row*9+col, row 0 = 一段目(後手側), row 8 = 九段目(先手側)
-      // col 0 = 9筋, col 8 = 1筋. 先手 owner=0 (下), 後手 owner=1 (上).
-      // 駒: { t: 'K'|'R'|'B'|'G'|'S'|'N'|'L'|'P', o: 0|1, pr: bool }
+      /* ================= Shogi engine ================= */
+      // Board: idx = row*9+col, row 0 = rank 1 (Gote side), row 8 = rank 9 (Sente side)
+      // col 0 = file 9, col 8 = file 1. Sente owner=0 (bottom), Gote owner=1 (top).
+      // Piece: { t: 'K'|'R'|'B'|'G'|'S'|'N'|'L'|'P', o: 0|1, pr: bool }
 
       var VAL = { P: 100, L: 330, N: 350, S: 540, G: 580, B: 920, R: 1080, K: 100000 };
       var VAL_PR = { P: 600, L: 620, N: 630, S: 640, B: 1180, R: 1380 };
@@ -367,7 +367,8 @@
       var NAMES = { K: "玉", R: "飛", B: "角", G: "金", S: "銀", N: "桂", L: "香", P: "歩" };
       var NAMES_FULL = { K: ["王将", "玉将"], R: "飛車", B: "角行", G: "金将", S: "銀将", N: "桂馬", L: "香車", P: "歩兵" };
       var NAMES_PR = { R: "竜王", B: "竜馬", S: "成銀", N: "成桂", L: "成香", P: "と金" };
-      var KANJI_NUM = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
+      var NAMES_EN = { K: "King", R: "Rook", B: "Bishop", G: "Gold", S: "Silver", N: "Knight", L: "Lance", P: "Pawn" };
+      var NAMES_PR_EN = { R: "Dragon King", B: "Dragon Horse", S: "Promoted Silver", N: "Promoted Knight", L: "Promoted Lance", P: "Tokin" };
       var HAND_ORDER = ["R", "B", "G", "S", "N", "L", "P"];
 
       function rc(idx) { return [Math.floor(idx / 9), idx % 9]; }
@@ -377,16 +378,16 @@
         var b = new Array(81).fill(null);
         var back = ["L", "N", "S", "G", "K", "G", "S", "N", "L"];
         for (var c = 0; c < 9; c++) {
-          b[c] = { t: back[c], o: 1, pr: false };              // 一段目 後手
-          b[18 + c] = { t: "P", o: 1, pr: false };              // 三段目 後手歩
-          b[54 + c] = { t: "P", o: 0, pr: false };              // 七段目 先手歩
-          b[72 + c] = { t: back[c], o: 0, pr: false };          // 九段目 先手
+          b[c] = { t: back[c], o: 1, pr: false };              // rank 1, Gote
+          b[18 + c] = { t: "P", o: 1, pr: false };              // rank 3, Gote pawns
+          b[54 + c] = { t: "P", o: 0, pr: false };              // rank 7, Sente pawns
+          b[72 + c] = { t: back[c], o: 0, pr: false };          // rank 9, Sente
         }
-        b[10] = { t: "R", o: 1, pr: false };  // 8二 飛 (後手)
-        b[16] = { t: "B", o: 1, pr: false };  // 2二 角 (後手)
-        b[64] = { t: "B", o: 0, pr: false };  // 8八 角 (先手)
-        b[70] = { t: "R", o: 0, pr: false };  // 2八 飛 (先手)
-        // 先手の玉は王将表記にしたいので目印: owner 0 の K は王将として表示
+        b[10] = { t: "R", o: 1, pr: false };  // 8-2 Rook (Gote)
+        b[16] = { t: "B", o: 1, pr: false };  // 2-2 Bishop (Gote)
+        b[64] = { t: "B", o: 0, pr: false };  // 8-8 Bishop (Sente)
+        b[70] = { t: "R", o: 0, pr: false };  // 2-8 Rook (Sente)
+        // Note: the K of owner 0 is displayed as the "Osho" king (see pieceLabel).
         return {
           board: b,
           hands: [{}, {}],   // hands[owner][type] = count
@@ -400,7 +401,7 @@
         return { board: b, hands: h, turn: st.turn };
       }
 
-      // 駒の移動先 (攻撃範囲も兼ねる)。盤上の移動のみ。
+      // Destination squares of a piece (doubles as its attack range). Board moves only.
       function pieceMoves(board, idx) {
         var p = board[idx];
         if (!p) return [];
@@ -474,7 +475,7 @@
         return owner === 0 ? row <= 2 : row >= 6;
       }
       function deadRank(type, row, owner) {
-        // その段に動けなくなる駒かどうか (歩・香: 最終段, 桂: 最終2段)
+        // Whether a piece would have no move on that rank (P/L: last rank, N: last two ranks)
         var last = owner === 0 ? 0 : 8;
         var second = owner === 0 ? 1 : 7;
         if (type === "P" || type === "L") return row === last;
@@ -482,7 +483,7 @@
         return false;
       }
 
-      // 指し手: { from: idx|-1(drop), to, promote, drop: type|null }
+      // Move: { from: idx|-1(drop), to, promote, drop: type|null }
       function genPseudo(st, side) {
         var moves = [];
         var b = st.board;
@@ -502,7 +503,7 @@
             } else moves.push({ from: i, to: to, promote: false, drop: null });
           }
         }
-        // 打ち駒
+        // Drops
         var hand = st.hands[side];
         for (var ti = 0; ti < HAND_ORDER.length; ti++) {
           var t = HAND_ORDER[ti];
@@ -512,7 +513,7 @@
             var r = Math.floor(sq / 9), c = sq % 9;
             if (deadRank(t, r, side)) continue;
             if (t === "P") {
-              // 二歩チェック
+              // Nifu check
               var nifu = false;
               for (var rr = 0; rr < 9; rr++) {
                 var q = b[rr * 9 + c];
@@ -542,7 +543,7 @@
         return ns;
       }
 
-      // 合法手。王が取られる手は除外。skipUchifu=true のとき打ち歩詰め判定を省略(再帰防止)
+      // Legal moves: moves that leave the king captured are excluded. skipUchifu=true skips the uchifuzume test (recursion guard).
       function legalMoves(st, side, skipUchifu) {
         var pseudo = genPseudo(st, side);
         var out = [];
@@ -551,7 +552,7 @@
           var ns = applyMove(st, mv);
           if (inCheck(ns, side)) continue;
           if (!skipUchifu && mv.drop === "P") {
-            // 打ち歩詰め: 歩打ちで王手がかかり、相手に合法手が一切なければ禁止
+            // Uchifuzume: a pawn drop that gives check is illegal if the opponent then has no legal move at all
             if (inCheck(ns, 1 - side)) {
               var replies = legalMoves(ns, 1 - side, true);
               if (replies.length === 0) continue;
@@ -579,13 +580,13 @@
 
       /* ================= AI ================= */
       function evaluate(st) {
-        // 先手視点の評価値
+        // Evaluation score from Sente's point of view
         var score = 0;
         for (var i = 0; i < 81; i++) {
           var p = st.board[i];
           if (!p) continue;
           var v = p.pr && VAL_PR[p.t] ? VAL_PR[p.t] : VAL[p.t];
-          // 前進ボーナス (敵陣に近い駒を少し優遇)
+          // Advancement bonus (slightly favors pieces closer to the enemy camp)
           var row = Math.floor(i / 9);
           var adv = p.o === 0 ? (8 - row) : row;
           if (p.t !== "K") v += adv * 4;
@@ -623,7 +624,7 @@
         var side = st.turn;
         if (depth === 0) return (side === 0 ? 1 : -1) * evaluate(st);
         var moves = legalMoves(st, side, false);
-        if (moves.length === 0) return -MATE + ply * 100; // 詰み(または手詰まり)は負け
+        if (moves.length === 0) return -MATE + ply * 100; // checkmate (or stalemate) loses
         orderMoves(st, moves);
         var best = -Infinity;
         for (var i = 0; i < moves.length; i++) {
@@ -656,20 +657,25 @@
         return bestMoves[Math.floor(Math.random() * bestMoves.length)];
       }
 
-      /* ================= 棋譜表記 ================= */
+      /* ================= Move notation ================= */
+      function pieceNameEn(p) {
+        if (p.pr && NAMES_PR_EN[p.t]) return NAMES_PR_EN[p.t];
+        return NAMES_EN[p.t];
+      }
+
       function moveNotation(st, mv, num) {
         var mark = st.turn === 0 ? "☗" : "☖";
         var toR = Math.floor(mv.to / 9), toC = mv.to % 9;
         var file = 9 - toC;
-        var dest = file + KANJI_NUM[toR];
+        var dest = file + "-" + (toR + 1);
         var name;
-        if (mv.drop) name = NAMES[mv.drop] + "打";
+        if (mv.drop) name = NAMES_EN[mv.drop] + " drop " + dest;
         else {
           var p = st.board[mv.from];
-          name = p.pr ? NAMES_PR[p.t] : NAMES[p.t];
-          if (mv.promote) name += "成";
+          name = pieceNameEn(p) + " to " + dest;
+          if (mv.promote) name += " +promotes";
         }
-        return mark + " " + dest + name;
+        return mark + " " + name;
       }
 
       function pieceLabel(p) {
@@ -768,16 +774,16 @@
       function onCellClick(idx) {
         if (!isPlayerTurn() || pendingPromo) return;
         var st = game.state;
-        // 行き先として選択中か
+        // Is this square a destination of the current selection?
         if (selected) {
           var cands = movesFrom(selected).filter(function (mv) { return mv.to === idx; });
           if (cands.length === 1) { doPlayerMove(cands[0]); return; }
           if (cands.length > 1) {
-            // 成る/成らない の選択
+            // Promote / don't promote choice
             pendingPromo = cands;
             var pc = st.board[selected.idx];
             document.getElementById("promoText").textContent =
-              pieceLabel(pc) + "を成ることができます。";
+              "Your " + pieceNameEn(pc) + " can promote. Promoting changes how it moves.";
             document.getElementById("promoOverlay").classList.add("show");
             return;
           }
@@ -823,7 +829,7 @@
         setTimeout(function () {
           var mv = aiChooseMove(game.state, game.level);
           thinkingEl.classList.remove("show");
-          if (!mv) { endGame(game.playerColor, "コンピューターに指し手がありません。あなたの勝ちです。"); render(); return; }
+          if (!mv) { endGame(game.playerColor, "The computer has no legal moves left."); render(); return; }
           pushMove(mv);
           render();
         }, 350);
@@ -836,22 +842,22 @@
         game.kifuList.push(notation);
         game.state = applyMove(st, mv);
         playKnock();
-        // 千日手チェック
+        // Sennichite (fourfold repetition) check
         var key = stateKey(game.state);
         game.rep[key] = (game.rep[key] || 0) + 1;
         refreshLegal();
         if (game.rep[key] >= 4) {
           game.over = true;
-          endGame(null, "同じ局面が4回現れました（千日手）。引き分けです。");
+          endGame(null, "The same position occurred four times (sennichite), so the game is drawn.");
           return;
         }
         if (legalCache.length === 0) {
           game.over = true;
           var loser = game.state.turn;
           if (inCheck(game.state, loser)) {
-            endGame(1 - loser, "詰みです。" + (loser === game.playerColor ? "コンピューターの勝ちです。" : "あなたの勝ちです。"));
+            endGame(1 - loser, "Checkmate.");
           } else {
-            endGame(1 - loser, "指し手がありません。" + (loser === game.playerColor ? "コンピューターの勝ちです。" : "あなたの勝ちです。"));
+            endGame(1 - loser, "No legal moves remain.");
           }
         }
       }
@@ -859,9 +865,9 @@
       function endGame(winner, sub) {
         game.over = true;
         var txt;
-        if (winner === null) txt = "引き分けです";
-        else if (winner === game.playerColor) txt = "あなたの勝ちです";
-        else txt = "コンピューターの勝ちです";
+        if (winner === null) txt = "It's a draw";
+        else if (winner === game.playerColor) txt = "You win!";
+        else txt = "The computer wins";
         document.getElementById("resultText").textContent = txt;
         document.getElementById("resultSub").textContent = sub || "";
         setTimeout(function () { document.getElementById("resultOverlay").classList.add("show"); }, 450);
@@ -869,7 +875,7 @@
 
       undoBtn.addEventListener("click", function () {
         if (!game || game.history.length === 0 || thinkingEl.classList.contains("show")) return;
-        // 自分の手番に戻るまで最大2手戻す
+        // Take back up to two plies, until it is the player's turn again
         var steps = 0;
         while (game.history.length > 0 && steps < 2) {
           var h = game.history.pop();
@@ -880,7 +886,7 @@
         }
         game.over = false;
         document.getElementById("resultOverlay").classList.remove("show");
-        // 千日手カウントを再構築
+        // Rebuild the repetition counter
         game.rep = {};
         game.rep[stateKey(game.state)] = 1;
         game.lastTo = -1;
@@ -894,11 +900,11 @@
         if (!game || game.over) return;
         game.over = true;
         refreshLegal();
-        endGame(1 - game.playerColor, "投了しました。");
+        endGame(1 - game.playerColor, "You resigned.");
         render();
       });
 
-      /* ---------- 効果音 (木の打つ音) ---------- */
+      /* ---------- Sound effect (wooden piece knock) ---------- */
       var audioCtx = null;
       function playKnock() {
         try {
@@ -914,10 +920,10 @@
           gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
           osc.connect(gain); gain.connect(audioCtx.destination);
           osc.start(t); osc.stop(t + 0.1);
-        } catch (e) { /* 音が出なくても対局は続行 */ }
+        } catch (e) { /* the game continues even if sound fails */ }
       }
 
-      /* ---------- 描画 ---------- */
+      /* ---------- Rendering ---------- */
       function render() {
         if (!game) return;
         var st = game.state;
@@ -925,7 +931,7 @@
         var destSet = {};
         dests.forEach(function (mv) { destSet[mv.to] = true; });
         var lastTo = -1;
-        // 直前の着手先は棋譜からは分からないので history の差分ではなく、保持した値を使う
+        // Use the stored last-move square (it cannot be derived from the move list)
         lastTo = game.lastTo != null ? game.lastTo : -1;
 
         for (var i = 0; i < 81; i++) {
@@ -950,29 +956,29 @@
           cell.innerHTML = html;
         }
 
-        renderHand(handGoteEl, 1, "☖ 後手" + (game.playerColor === 1 ? "（あなた）" : "（コンピューター）") + "の持ち駒");
-        renderHand(handSenteEl, 0, "☗ 先手" + (game.playerColor === 0 ? "（あなた）" : "（コンピューター）") + "の持ち駒");
+        renderHand(handGoteEl, 1, "☖ Gote (" + (game.playerColor === 1 ? "you" : "computer") + ") in hand:");
+        renderHand(handSenteEl, 0, "☗ Sente (" + (game.playerColor === 0 ? "you" : "computer") + ") in hand:");
         handSenteEl.classList.toggle("active", game.playerColor === 0);
         handGoteEl.classList.toggle("active", game.playerColor === 1);
 
-        // 手番表示
+        // Turn indicator
         var mine = st.turn === game.playerColor;
         turnMark.textContent = st.turn === 0 ? "☗" : "☖";
-        if (game.over) turnText.textContent = "対局終了";
-        else turnText.textContent = mine ? "あなたの番です" : "コンピューターの番です";
+        if (game.over) turnText.textContent = "Game over";
+        else turnText.textContent = mine ? "Your turn" : "Computer's turn";
         var chk = !game.over && inCheck(st, st.turn);
         checkBadge.classList.toggle("show", chk);
-        if (game.over) statusSub.textContent = "おつかれさまでした。「対局開始」からもう一局できます。";
-        else if (chk) statusSub.textContent = mine ? "王手がかかっています。玉を守ってください。" : "コンピューターに王手がかかっています。";
-        else if (mine) statusSub.textContent = selected ? "行き先のマスをタップしてください。" : "駒をタップすると、動けるマスが表示されます。";
-        else statusSub.textContent = "コンピューターが考えています。";
+        if (game.over) statusSub.textContent = "Thanks for playing. Press \"Start Game\" above to play another game.";
+        else if (chk) statusSub.textContent = mine ? "Your king is in check — you must protect it." : "The computer's king is in check.";
+        else if (mine) statusSub.textContent = selected ? "Tap a highlighted square to move there." : "Tap one of your pieces to see where it can move.";
+        else statusSub.textContent = "The computer is thinking.";
 
         undoBtn.disabled = !game.history.length || thinkingEl.classList.contains("show");
         resignBtn.disabled = game.over;
 
-        // 棋譜
+        // Move list
         if (game.kifuList.length === 0) {
-          kifuEl.innerHTML = '<span class="empty">まだ指し手がありません。</span>';
+          kifuEl.innerHTML = '<span class="empty">No moves yet.</span>';
         } else {
           var rows = "";
           for (var n = 0; n < game.kifuList.length; n += 2) {
@@ -1001,7 +1007,7 @@
             '" data-owner="' + owner + '" data-type="' + t + '"><span class="shape">' + NAMES[t] + "</span>" +
             (n > 1 ? '<span class="cnt">' + n + "</span>" : "") + "</button>";
         }
-        if (!any) html += '<span class="none">なし</span>';
+        if (!any) html += '<span class="none">None</span>';
         el.innerHTML = html;
         var btns = el.querySelectorAll(".hand-piece");
         for (var j = 0; j < btns.length; j++) {
@@ -1017,11 +1023,11 @@
         return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       }
 
-      // 直前の着手先を記録するため pushMove をラップ
+      // Wrap pushMove to record the last move's destination square
       var origPush = pushMove;
       pushMove = function (mv) { game.lastTo = mv.to; origPush(mv); };
 
-      /* ---------- ルールモーダル ---------- */
+      /* ---------- Rules modal ---------- */
       var rulesOverlay = document.getElementById("rulesOverlay");
       document.getElementById("rulesBtn").addEventListener("click", function () { rulesOverlay.classList.add("show"); });
       document.getElementById("rulesClose").addEventListener("click", function () { rulesOverlay.classList.remove("show"); });
@@ -1030,7 +1036,7 @@
         if (e.key === "Escape") rulesOverlay.classList.remove("show");
       });
 
-      /* ---------- 初期化 ---------- */
+      /* ---------- Init ---------- */
       startGame(0, 2);
     </script>
   </body>

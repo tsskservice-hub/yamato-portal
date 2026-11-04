@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クレジット残高・履歴・NGワードバリデーション対応版）
+ * @description アカウント設定画面（クレジット残高・履歴・NGワードバリデーション対応版・クライアント更新対応）
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -56,7 +56,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   });
 }
 
-// Action: プロフィール更新（NGワード・Zodチェック付き） および アカウント削除処理
+// Action: アカウント削除処理のみをサーバー側で安全に処理
 export async function action({ request, context }: LoaderFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -68,36 +68,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
   }
 
-  // 1. プロフィール更新処理
-  if (intent === "update-profile") {
-    const nickname = formData.get("nickname")?.toString() || "";
-    const learningPace = formData.get("learningPace")?.toString() || "normal";
-
-    // Zodによるバリデーション（NGワード・文字数チェック）
-    const result = nicknameSchema.safeParse(nickname);
-    if (!result.success) {
-      const errorMessage = result.error.errors[0].message;
-      return json({ error: errorMessage, success: false }, { status: 400 });
-    }
-
-    const validatedNickname = result.data;
-
-    const { error: updateError } = await serverSupabase
-      .from("profiles")
-      .update({
-        nickname: validatedNickname,
-        learning_pace: learningPace,
-      })
-      .eq("id", user.id);
-
-    if (updateError) {
-      return json({ error: "Failed to update profile: " + updateError.message, success: false }, { status: 500 });
-    }
-
-    return json({ success: true, error: null, message: "Preferences updated successfully." }, { headers });
-  }
-
-  // 2. アカウント削除処理
+  // アカウント削除処理
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
     if (confirmText !== "DELETE") {
@@ -128,7 +99,7 @@ export default function AccountSettingsRoute() {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
 
-  // 💡 Remix の useFetcher を利用して action を安全に呼び出す
+  // アカウント削除等のfetcher（アカウント削除モーダル用）
   const fetcher = useFetcher<{ success?: boolean; error?: string; message?: string }>();
 
   const rootData = useRouteLoaderData("root") as {
@@ -156,14 +127,14 @@ export default function AccountSettingsRoute() {
   const [user, setUser] = useState<any>(rootData?.user ?? initialData.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
 
+  // プロフィール保存専用のステート
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+
   // クレジット履歴ステート
   const [transactions, setTransactions] = useState<Array<any>>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
-
-  // fetcher の状態からローディング・エラー・成功状態を連動
-  const isSaving = fetcher.state === "submitting" || fetcher.state === "loading";
-  const saveError = fetcher.data?.error || null;
-  const showSavedIndicator = fetcher.data?.success === true;
 
   // クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
   useEffect(() => {
@@ -223,12 +194,44 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
-  // 保存成功時にリバデーションを実行
-  useEffect(() => {
-    if (fetcher.data?.success) {
-      revalidator.revalidate();
+  // クライアント側でのプロフィール更新処理（Zodバリデーション ＋ supabase直接更新）
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveError(null);
+    setShowSavedIndicator(false);
+
+    // 1. Zodによるクライアントサイド・バリデーション
+    const result = nicknameSchema.safeParse(nicknameInput);
+    if (!result.success) {
+      setSaveError(result.error.errors[0].message);
+      return;
     }
-  }, [fetcher.data]);
+
+    setIsSaving(true);
+    try {
+      if (!user?.id) throw new Error("User not authenticated.");
+
+      // 2. Supabaseクライアントで直接プロフィールを更新
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          nickname: result.data,
+          learning_pace: paceInput,
+        })
+        .eq("id", user.id);
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+
+      setShowSavedIndicator(true);
+      revalidator.revalidate(); // Remixのローダーを再検証してデータを最新に同期
+    } catch (err: any) {
+      setSaveError("Failed to update profile: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
@@ -246,10 +249,8 @@ export default function AccountSettingsRoute() {
             <UserCheck className="w-5 h-5 text-blue-600" /> AI Tutor Preferences & Profile
           </h2>
 
-          {/* 💡 fetcher.Form を使用することで、安全にサーバーの action へPOSTされ Zod が機能します */}
-          <fetcher.Form method="post" className="space-y-6">
-            <input type="hidden" name="intent" value="update-profile" />
-
+          {/* クライアント側の関数で安全に更新処理を実行 */}
+          <form onSubmit={handleUpdateProfile} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -306,7 +307,7 @@ export default function AccountSettingsRoute() {
                 {isSaving ? "Saving..." : "Save Preferences"}
               </button>
             </div>
-          </fetcher.Form>
+          </form>
         </div>
 
         {/* 2. 総合的なアカウント情報セクション */}
@@ -433,7 +434,7 @@ export default function AccountSettingsRoute() {
                 To confirm, please type <span className="font-semibold text-gray-900">「DELETE」</span> in the field below.
               </p>
 
-              <form method="post" className="space-y-4">
+              <fetcher.Form method="post" className="space-y-4">
                 <input type="hidden" name="intent" value="delete-account" />
                 <input
                   type="text"
@@ -460,7 +461,7 @@ export default function AccountSettingsRoute() {
                     Permanently Delete
                   </button>
                 </div>
-              </form>
+              </fetcher.Form>
             </div>
           </div>
         )}
