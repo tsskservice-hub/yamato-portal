@@ -38,7 +38,7 @@ function IgoFrameView({ userId }: { userId: string | null }) {
     <div className="space-y-6">
       <div className="flex flex-col items-center">
         <div className="flex items-center space-x-2 mb-2">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">9x9 & 5x5 Go Board Arena</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">9x9 Go Board Arena</h2>
           <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold">
             ⚔️ Go Board Game
           </span>
