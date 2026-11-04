@@ -1,6 +1,6 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クレジット残高・履歴のクライアント同期対応版）
+ * @description アカウント設定画面（クレジット残高・履歴・NGワードバリデーション対応版）
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,6 +11,7 @@ import { generateModuleMeta } from '~/utils/seoMeta';
 import { ArrowDownRight, ArrowUpRight, Gauge, History, UserCheck } from 'lucide-react';
 import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
 import { supabase } from '~/lib/supabaseClient';
+import { nicknameSchema } from '~/validations/profile';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -21,7 +22,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .select('content')
     .eq('key', 'PORTAL_CONTENT')
     .single();
-const { data: { user } } = await serverSupabase.auth.getUser();
+  const { data: { user } } = await serverSupabase.auth.getUser();
 
   let initialNickname = "";
   let initialPace = "normal";
@@ -50,10 +51,12 @@ const { data: { user } } = await serverSupabase.auth.getUser();
     nickname: initialNickname,
     learningPace: initialPace,
     createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
+    portalContent: portalData?.content ?? null,
+    currentPath: url.pathname,
   });
 }
 
-// Action: アカウント削除処理
+// Action: プロフィール更新（NGワード・Zodチェック付き） および アカウント削除処理
 export async function action({ request, context }: LoaderFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -65,6 +68,36 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
   }
 
+  // 1. プロフィール更新処理
+  if (intent === "update-profile") {
+    const nickname = formData.get("nickname")?.toString() || "";
+    const learningPace = formData.get("learningPace")?.toString() || "normal";
+
+    // Zodによるバリデーション（NGワード・文字数チェック）
+    const result = nicknameSchema.safeParse(nickname);
+    if (!result.success) {
+      const errorMessage = result.error.errors[0].message;
+      return json({ error: errorMessage, success: false }, { status: 400 });
+    }
+
+    const validatedNickname = result.data;
+
+    const { error: updateError } = await serverSupabase
+      .from("profiles")
+      .update({
+        nickname: validatedNickname,
+        learning_pace: learningPace,
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      return json({ error: "Failed to update profile: " + updateError.message, success: false }, { status: 500 });
+    }
+
+    return json({ success: true, error: null, message: "Preferences updated successfully." }, { headers });
+  }
+
+  // 2. アカウント削除処理
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
     if (confirmText !== "DELETE") {
@@ -86,7 +119,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     });
   }
 
-  return json({ success: true, error: null });
+  return json({ error: "Invalid intent.", success: false }, { status: 400 });
 }
 
 export default function AccountSettingsRoute() {
@@ -128,7 +161,7 @@ export default function AccountSettingsRoute() {
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // 💡 クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
+  // クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
   useEffect(() => {
     const fetchUserDataAndTransactions = async () => {
       try {
@@ -142,7 +175,6 @@ export default function AccountSettingsRoute() {
             setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
           }
 
-          // 1. profiles から最新の正確なクレジット残高を取得
           const { data: profileData } = await supabase
             .from("profiles")
             .select("credits")
@@ -153,7 +185,6 @@ export default function AccountSettingsRoute() {
             setCredits(profileData.credits);
           }
 
-          // 2. credit_transactions から履歴を取得
           const { data: txData, error: txError } = await supabase
             .from("credit_transactions")
             .select("id, amount, feature_used, description, created_at, expires_at")
@@ -188,37 +219,28 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  // プロフィール更新フォーム送信（サーバーの action を経由するように修正）
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    let activeUser = user;
-    if (!activeUser) {
-      const { data: { session } } = await supabase.auth.getSession();
-      activeUser = session?.user ?? null;
-    }
-
-    if (!activeUser) {
-      alert("Please sign in to update your preferences.");
-      return;
-    }
-
     setIsSaving(true);
     setSaveError(null);
 
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          nickname: nicknameInput.trim(),
-          learning_pace: paceInput,
-        })
-        .eq("id", activeUser.id);
+    const formData = new FormData(e.currentTarget);
+    formData.append("intent", "update-profile");
 
-      if (error) {
-        throw error;
+    try {
+      const response = await fetch(window.location.pathname, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = (await response.json()) as { success?: boolean; error?: string };
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Failed to save preferences.");
       }
 
-      validatorRevalidate();
+      revalidator.revalidate();
       setShowSavedIndicator(true);
       setTimeout(() => {
         setShowSavedIndicator(false);
@@ -229,10 +251,6 @@ export default function AccountSettingsRoute() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const validatorRevalidate = () => {
-    revalidator.revalidate();
   };
 
   return (
@@ -259,6 +277,7 @@ export default function AccountSettingsRoute() {
                 </label>
                 <input
                   type="text"
+                  name="nickname"
                   value={nicknameInput}
                   onChange={(e) => setNicknameInput(e.target.value)}
                   placeholder="e.g. Kenji"
@@ -274,6 +293,7 @@ export default function AccountSettingsRoute() {
                   <Gauge className="w-4 h-4 text-blue-600" /> Default Learning Pace
                 </label>
                 <select
+                  name="learningPace"
                   value={paceInput}
                   onChange={(e) => setPaceInput(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -433,7 +453,7 @@ export default function AccountSettingsRoute() {
                 To confirm, please type <span className="font-semibold text-gray-900">「DELETE」</span> in the field below.
               </p>
 
-              <form method="post" onSubmit={() => {}} className="space-y-4">
+              <form method="post" className="space-y-4">
                 <input type="hidden" name="intent" value="delete-account" />
                 <input
                   type="text"
