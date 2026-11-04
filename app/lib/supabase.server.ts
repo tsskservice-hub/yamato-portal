@@ -2,7 +2,7 @@
  * @file supabase.server.ts
  * @description Server-side Supabase clients for Remix / Cloudflare Workers
  */
-import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
+import { createServerClient as createSsrSupabaseClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 // Cloudflare環境およびビルド・ランタイムでのフォールバック用定数（機密情報は含めない）
@@ -32,7 +32,7 @@ export function createServerSupabaseClient(request: Request, context?: any) {
   const url = getEnv("SUPABASE_URL", context) || getEnv("VITE_SUPABASE_URL", context) || DEFAULT_URL;
   const anonKey = getEnv("SUPABASE_ANON_KEY", context) || getEnv("VITE_SUPABASE_ANON_KEY", context) || DEFAULT_ANON_KEY;
 
-  const supabase = createServerClient(url, anonKey, {
+  const supabase = createSsrSupabaseClient(url, anonKey, {
     cookies: {
       getAll() {
         return parseCookieHeader(request.headers.get("Cookie") ?? "");
