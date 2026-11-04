@@ -119,48 +119,6 @@ export function PortalModulesGrid({
         </div>
       )}
 
-      {/* 💡 ゲームズ・アーケード総合ポータル誘導カード (CONTENT_GAMES 連動) */}
-      <div className="space-y-4 pt-6">
-        <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-          <span className="text-xl">🎮</span>
-          <h3 className="font-extrabold text-lg text-red-600 dark:text-red-400">
-            {gamesData?.title || "Learn with Games & Practice Arcade"}
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div
-            onClick={onNavigateGames}
-            className={`p-6 rounded-3xl border flex flex-col justify-between hover:border-red-500/50 cursor-pointer ${
-              isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-            } shadow-sm transition-colors group`}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 flex items-center justify-center">
-                  <Gamepad2 className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 border border-red-500/20">
-                  Arcade Portal
-                </span>
-              </div>
-              <h4 className="font-bold text-base group-hover:text-red-500 transition-colors">
-                {gamesData?.subtitle ? "日本語学習ゲーム・アーケード" : "日本語学習ゲーム・アーケード"}
-              </h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                ショーシャンク脱出ゲームやタイピング防衛戦など、楽しく遊んでひらがな・カタカナ・ローマ字をマスターできるゲーム一覧はこちら！
-              </p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-500/10 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Explore Games</span>
-              <span className="text-red-600 font-bold flex items-center space-x-1 group-hover:translate-x-1 transition-transform">
-                <span>View Arcade</span>
-                <ArrowRight className="w-3 h-3" />
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* VCE セクション全体のラッパー */}
       <div id="section-vce" className="space-y-8 pt-6">
         <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -221,6 +179,33 @@ export function PortalModulesGrid({
             </div>
           </div>
         )}
+
+        {/* 6. 🎮 ゲームズ・アーケード総合ポータル誘導カード (一番最後に移動・他と形状を統一・英語化) */}
+        <div className="space-y-4 pt-6">
+          <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+            <span className="text-xl">🎮</span>
+            <h4 className="font-extrabold text-base text-red-600 dark:text-red-400">
+              Interactive Learning Arcade & Games
+            </h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {renderCard(
+              {
+                id: 'games-arcade',
+                name: gamesData?.subtitle || 'Japanese Learning Arcade',
+                description: 'Have fun mastering Hiragana, Katakana, and Romaji through interactive games like the Shawshank Tunnel Escape and Typing Defense battles!',
+                path: '/games',
+                category: 'Arcade Portal',
+                iconName: 'Gamepad2',
+                actionLabel: 'View Arcade',
+                isComingSoon: false,
+                creditRequirement: null,
+              },
+              'red'
+            )}
+          </div>
+        </div>
+
       </div>
     </section>
   );
