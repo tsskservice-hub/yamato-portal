@@ -61,17 +61,13 @@
         container-type: inline-size;
         container-name: game;
       }
-      /* ---------- Layout switcher (also handy inside an iframe) ---------- */
-      .layout-bar {
-        display: flex; align-items: center; gap: 10px 12px;
-        flex-wrap: wrap; margin-bottom: 16px;
+      /* ---------- Top actions ---------- */
+      .top-bar {
+        display: flex; align-items: center; justify-content: flex-end;
+        margin-bottom: 12px;
       }
-      .layout-label { font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-soft); }
-      .layout-seg { flex: 0 1 430px; min-width: min(340px, 100%); background: var(--panel); }
-      .layout-hint { flex: 1 1 220px; font-size: 12px; line-height: 1.5; color: var(--ink-soft); }
-      .layout-hint code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
-      .rules-btn { flex: 0 0 auto; margin-left: auto; white-space: nowrap; font-weight: 700; }
-      /* ---------- New Game (top of the game, below Layout) ---------- */
+      .rules-btn { flex: 0 0 auto; white-space: nowrap; font-weight: 700; }
+      /* ---------- New Game (top of the game) ---------- */
       .new-game-card { margin-bottom: 16px; }
       .new-game-fields { display: flex; gap: 14px 16px; align-items: flex-end; flex-wrap: wrap; }
       .new-game-fields .field { flex: 1 1 250px; margin-bottom: 0; min-width: min(250px, 100%); }
@@ -101,7 +97,7 @@
       .board {
         position: relative;
         width: 100%;
-        max-width: 640px;
+        max-width: 560px;
         margin: 0 auto;
         aspect-ratio: 1 / 1;
         border-radius: 10px;
@@ -291,7 +287,7 @@
            Forced Side / Board on top choices are left untouched. */
         .game-layout.layout-auto { flex-direction: column; }
         .game-layout.layout-auto .panel { flex: none; width: 100%; }
-        .board { max-width: 560px; }
+        .board { max-width: 500px; }
         .game-layout.layout-side { gap: 12px; }
         .game-layout.layout-side .panel { flex-basis: 248px; }
         .game-layout.layout-side .btn-row { flex-wrap: wrap; }
@@ -301,14 +297,7 @@
   <body>
     <h1 class="sr-only">9x9 Go — Play Against the Computer</h1>
     <main>
-      <div class="layout-bar">
-        <span class="layout-label" id="layoutLabel">Layout</span>
-        <div class="seg layout-seg" id="segLayout" role="group" aria-labelledby="layoutLabel">
-          <button type="button" data-layout="auto" class="on">Auto</button>
-          <button type="button" data-layout="side">Side by side</button>
-          <button type="button" data-layout="stacked">Board on top</button>
-        </div>
-        <span class="layout-hint">Auto puts the panel on the right when there is room, and below the board on narrow screens. In an iframe, force it with <code>?layout=side</code> or <code>?layout=stacked</code>.</span>
+      <div class="top-bar">
         <button type="button" class="rules-btn" id="btnRules" aria-haspopup="dialog">How to Play &amp; Rules</button>
       </div>
       <section class="card new-game-card">
@@ -999,15 +988,19 @@
         if (!LAYOUTS[mode]) mode = "auto";
         el.gameLayout.classList.remove("layout-auto", "layout-side", "layout-stacked");
         el.gameLayout.classList.add(LAYOUTS[mode]);
-        var btns = el.segLayout.querySelectorAll("button");
-        for (var i = 0; i < btns.length; i++) {
-          btns[i].classList.toggle("on", btns[i].getAttribute("data-layout") === mode);
+        if (el.segLayout) {
+          var btns = el.segLayout.querySelectorAll("button");
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.toggle("on", btns[i].getAttribute("data-layout") === mode);
+          }
         }
       }
-      el.segLayout.addEventListener("click", function (e) {
-        var b = e.target.closest("button"); if (!b) return;
-        setLayout(b.getAttribute("data-layout"));
-      });
+      if (el.segLayout) {
+        el.segLayout.addEventListener("click", function (e) {
+          var b = e.target.closest("button"); if (!b) return;
+          setLayout(b.getAttribute("data-layout"));
+        });
+      }
       window.addEventListener("message", function (e) {
         if (e.data && e.data.type === "go-layout") setLayout(e.data.layout);
       });
