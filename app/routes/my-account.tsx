@@ -4,7 +4,7 @@
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
-import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from '@remix-run/react';
+import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData, useFetcher } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
@@ -128,6 +128,9 @@ export default function AccountSettingsRoute() {
   const navigate = useNavigate();
   const revalidator = useRevalidator();
 
+  // 💡 Remix の useFetcher を利用して action を安全に呼び出す
+  const fetcher = useFetcher<{ success?: boolean; error?: string; message?: string }>();
+
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
@@ -157,9 +160,10 @@ export default function AccountSettingsRoute() {
   const [transactions, setTransactions] = useState<Array<any>>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  // fetcher の状態からローディング・エラー・成功状態を連動
+  const isSaving = fetcher.state === "submitting" || fetcher.state === "loading";
+  const saveError = fetcher.data?.error || null;
+  const showSavedIndicator = fetcher.data?.success === true;
 
   // クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
   useEffect(() => {
@@ -219,39 +223,12 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
-  // プロフィール更新フォーム送信（サーバーの action を経由するように修正）
-  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setSaveError(null);
-
-    const formData = new FormData(e.currentTarget);
-    formData.append("intent", "update-profile");
-
-    try {
-      const response = await fetch(window.location.pathname, {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = (await response.json()) as { success?: boolean; error?: string };
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || "Failed to save preferences.");
-      }
-
+  // 保存成功時にリバデーションを実行
+  useEffect(() => {
+    if (fetcher.data?.success) {
       revalidator.revalidate();
-      setShowSavedIndicator(true);
-      setTimeout(() => {
-        setShowSavedIndicator(false);
-      }, 3000);
-    } catch (err: any) {
-      console.error("Failed to update profile:", err);
-      setSaveError(err.message || "Failed to save preferences.");
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }, [fetcher.data]);
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
@@ -269,7 +246,10 @@ export default function AccountSettingsRoute() {
             <UserCheck className="w-5 h-5 text-blue-600" /> AI Tutor Preferences & Profile
           </h2>
 
-          <form onSubmit={handleUpdateProfile} className="space-y-6">
+          {/* 💡 fetcher.Form を使用することで、安全にサーバーの action へPOSTされ Zod が機能します */}
+          <fetcher.Form method="post" className="space-y-6">
+            <input type="hidden" name="intent" value="update-profile" />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -309,7 +289,7 @@ export default function AccountSettingsRoute() {
             </div>
 
             {saveError && (
-              <p className="text-xs text-red-600">{saveError}</p>
+              <p className="text-xs text-red-600 font-medium">{saveError}</p>
             )}
 
             <div className="flex items-center justify-end space-x-3">
@@ -326,7 +306,7 @@ export default function AccountSettingsRoute() {
                 {isSaving ? "Saving..." : "Save Preferences"}
               </button>
             </div>
-          </form>
+          </fetcher.Form>
         </div>
 
         {/* 2. 総合的なアカウント情報セクション */}
