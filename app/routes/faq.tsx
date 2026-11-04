@@ -6,13 +6,13 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/clo
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useLocation } from '@remix-run/react';
 import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import { type PageLayoutRef } from '../components/PageLayout';
-import PageLayout from '../components/PageLayout';
-import ScrollTopButton from '../components/ScrollTopButton';
-import { generateModuleMeta } from '../utils/seoMeta';
-import { fetchFaqData, FaqItem } from '../data/faq-database';
-import { supabase } from '../lib/supabaseClient';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/PageLayout';
+import PageLayout from '~/components/PageLayout';
+import ScrollTopButton from '~/components/ScrollTopButton';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { fetchFaqData, FaqItem } from '~/data/faq-database';
+import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

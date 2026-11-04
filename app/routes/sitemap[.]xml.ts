@@ -1,7 +1,7 @@
 // app/routes/sitemap[.]xml.ts
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 // 自動生成されたルート一覧をインポート
-import { generatedRoutes } from "../routes.generated";
+import { generatedRoutes } from '~/routes.generated';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const baseUrl = "https://jptutoraiyamato.com";

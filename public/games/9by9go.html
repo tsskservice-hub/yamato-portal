@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>9x9 Go Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #e9e6de;
+        --panel: #fbfaf6;
+        --panel-border: #d8d2c4;
+        --ink: #23211c;
+        --ink-soft: #5c574c;
+        --accent: #2e4a68;
+        --accent-ink: #ffffff;
+        --accent-soft: #dde5ee;
+        --danger: #b03a2e;
+        --danger-soft: #f6e3e0;
+        --board-hi: #eac87e;
+        --board-lo: #dda94f;
+        --board-line: #4a3517;
+        --marker: #c23b2a;
+        --shadow: 0 10px 30px rgba(50, 40, 15, 0.18);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #16181b;
+          --panel: #22252a;
+          --panel-border: #3a3e45;
+          --ink: #ece9e2;
+          --ink-soft: #a9a499;
+          --accent: #7fa6cf;
+          --accent-ink: #10151c;
+          --accent-soft: #2b3644;
+          --danger: #e08a7f;
+          --danger-soft: #42302c;
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap;
+      }
+      main {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 20px 16px 40px;
+        container-type: inline-size;
+        container-name: game;
+      }
+      /* ---------- Top actions ---------- */
+      .top-bar {
+        display: flex; align-items: center; justify-content: flex-end;
+        margin-bottom: 12px;
+      }
+      .rules-btn { flex: 0 0 auto; white-space: nowrap; font-weight: 700; }
+      /* ---------- New Game (top of the game) ---------- */
+      .new-game-card { margin-bottom: 16px; }
+      .new-game-fields { display: flex; gap: 14px 16px; align-items: flex-end; flex-wrap: wrap; }
+      .new-game-fields .field { flex: 1 1 250px; margin-bottom: 0; min-width: min(250px, 100%); }
+      .new-game-action { flex: 0 1 230px; min-width: min(230px, 100%); }
+      .new-game-action button { width: 100%; }
+      /* ---------- Board + panel arrangement ---------- */
+      .game-layout {
+        display: flex;
+        gap: 22px;
+        align-items: flex-start;
+      }
+      .game-layout.layout-side { flex-direction: row; }
+      .game-layout.layout-side .panel { flex: 0 1 308px; }
+      .game-layout.layout-stacked { flex-direction: column; }
+      .game-layout.layout-stacked .board-wrap { width: 100%; }
+      .game-layout.layout-stacked .panel { flex: none; width: 100%; }
+      .game-layout.layout-auto { flex-direction: row; }
+      /* Auto follows the width actually available to the game — the iframe
+         or column it is embedded in — not just the device screen. */
+      @container game (max-width: 680px) {
+        .game-layout.layout-auto { flex-direction: column; }
+        .game-layout.layout-auto .board-wrap { width: 100%; }
+        .game-layout.layout-auto .panel { flex: none; width: 100%; }
+      }
+      /* ---------- Board ---------- */
+      .board-wrap { flex: 1 1 auto; min-width: 0; width: 100%; }
+      .board {
+        position: relative;
+        width: 100%;
+        max-width: 560px;
+        margin: 0 auto;
+        aspect-ratio: 1 / 1;
+        border-radius: 10px;
+        background:
+          repeating-linear-gradient(93deg, rgba(120, 84, 20, 0.05) 0 3px, transparent 3px 11px),
+          linear-gradient(145deg, var(--board-hi), var(--board-lo) 70%, #d29f42);
+        box-shadow: var(--shadow), inset 0 0 0 2px rgba(90, 62, 18, 0.35), inset 0 2px 10px rgba(255, 240, 200, 0.5);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .board svg.grid { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .board.locked { pointer-events: none; }
+      .hit {
+        position: absolute;
+        width: 10.5%; height: 10.5%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 3;
+      }
+      .hit:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      .stone {
+        position: absolute;
+        width: 10%; height: 10%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .stone.black {
+        background: radial-gradient(circle at 35% 32%, #6b6b6b 0%, #2c2c2c 45%, #060606 100%);
+        box-shadow: 0 3px 5px rgba(40, 26, 4, 0.45), inset 0 -2px 4px rgba(0,0,0,0.6);
+      }
+      .stone.white {
+        background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f1efe8 55%, #c9c7bd 100%);
+        box-shadow: 0 3px 5px rgba(40, 26, 4, 0.4), inset 0 -2px 4px rgba(120, 115, 100, 0.35);
+      }
+      .stone .last-dot {
+        position: absolute; left: 50%; top: 50%;
+        width: 26%; height: 26%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: var(--marker);
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+      }
+      .ghost {
+        position: absolute;
+        width: 10%; height: 10%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.08s;
+      }
+      .ghost.black { background: radial-gradient(circle at 35% 32%, #6b6b6b, #060606); }
+      .ghost.white { background: radial-gradient(circle at 35% 30%, #ffffff, #c9c7bd); }
+      .ghost.show { opacity: 0.45; }
+      .terr {
+        position: absolute;
+        width: 4.6%; height: 4.6%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 1;
+      }
+      .terr.black { background: rgba(10, 10, 10, 0.75); }
+      .terr.white { background: rgba(255, 255, 255, 0.85); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); }
+      @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+      .board.shake { animation: shake 0.18s ease-in-out 2; }
+      /* ---------- Panel ---------- */
+      .panel {
+        flex: 0 1 308px;
+        width: 308px;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .status {
+        display: flex; align-items: center; gap: 10px;
+        font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", serif;
+        font-size: 20px; font-weight: 700; line-height: 1.35;
+      }
+      .status .dot {
+        flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+      }
+      .status .dot.black { background: radial-gradient(circle at 35% 32%, #6b6b6b, #060606); box-shadow: 0 2px 3px rgba(0,0,0,0.35); }
+      .status .dot.white { background: radial-gradient(circle at 35% 30%, #ffffff, #c9c7bd); box-shadow: 0 2px 3px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(0,0,0,0.12); }
+      .status .dot.none { background: transparent; box-shadow: inset 0 0 0 2px var(--panel-border); }
+      .message {
+        margin-top: 8px; min-height: 1.5em;
+        font-size: 13.5px; color: var(--ink-soft); line-height: 1.55;
+      }
+      .message.warn { color: var(--danger); font-weight: 500; }
+      .score-rows { display: flex; flex-direction: column; gap: 8px; }
+      .score-row { display: flex; align-items: center; gap: 9px; font-size: 14.5px; }
+      .score-row .mini {
+        flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%;
+      }
+      .mini.black { background: radial-gradient(circle at 35% 32%, #6b6b6b, #060606); }
+      .mini.white { background: radial-gradient(circle at 35% 30%, #ffffff, #c9c7bd); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18); }
+      .score-row .who { font-weight: 500; }
+      .score-row .pts { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+      .score-row .sub { font-size: 12px; color: var(--ink-soft); font-weight: 400; }
+      .meter {
+        margin-top: 12px; height: 9px; border-radius: 99px; overflow: hidden;
+        display: flex; background: #e8e4da;
+      }
+      @media (prefers-color-scheme: dark) { .meter { background: #101114; } }
+      .meter .mb { background: #26241f; transition: width 0.35s ease; }
+      .meter .mw { background: #f4f2ec; transition: width 0.35s ease; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+      .meter-label { margin-top: 6px; font-size: 12px; color: var(--ink-soft); text-align: center; }
+      .cap-row { display: flex; gap: 16px; margin-top: 12px; font-size: 13.5px; color: var(--ink-soft); }
+      .cap-row b { color: var(--ink); font-variant-numeric: tabular-nums; }
+      .card h2 {
+        margin: 0 0 10px; font-size: 13px; letter-spacing: 0.08em;
+        color: var(--ink-soft); font-weight: 700;
+      }
+      .btn-row { display: flex; gap: 8px; }
+      button {
+        font-family: inherit; font-size: 14.5px; font-weight: 500;
+        border-radius: 9px; border: 1px solid var(--panel-border);
+        background: var(--panel); color: var(--ink);
+        padding: 10px 12px; cursor: pointer;
+        transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+      }
+      button:hover:not(:disabled) { border-color: var(--accent); }
+      button:disabled { opacity: 0.45; cursor: default; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); flex: 1; }
+      button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+      button.danger { color: var(--danger); }
+      button.danger:hover:not(:disabled) { border-color: var(--danger); background: var(--danger-soft); }
+      .btn-row button { flex: 1; }
+      .confirm-row { display: none; gap: 8px; margin-top: 8px; align-items: center; }
+      .confirm-row.show { display: flex; }
+      .confirm-row span { font-size: 13.5px; flex: 1; }
+      .seg { display: flex; border: 1px solid var(--panel-border); border-radius: 9px; overflow: hidden; }
+      .seg button { flex: 1; border: none; border-radius: 0; padding: 9px 6px; font-size: 14px; background: transparent; }
+      .seg button + button { border-left: 1px solid var(--panel-border); }
+      .seg button.on { background: var(--accent-soft); font-weight: 700; color: var(--ink); }
+      .field { margin-bottom: 12px; }
+      .field:last-child { margin-bottom: 0; }
+      .field label { display: block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 6px; font-weight: 500; }
+      .rules-content { font-size: 14px; line-height: 1.75; color: var(--ink-soft); text-align: left; }
+      .rules-content ul { margin: 0 0 20px; padding-left: 20px; }
+      .rules-content li { margin-bottom: 6px; }
+      .rules-content li:last-child { margin-bottom: 0; }
+      .dialog.rules-dialog { text-align: left; max-width: 520px; }
+      .dialog.rules-dialog .result-title { text-align: left; font-size: 24px; margin-bottom: 14px; }
+      /* ---------- Result modal ---------- */
+      .overlay {
+        position: fixed; inset: 0; z-index: 20;
+        background: rgba(18, 16, 10, 0.55);
+        display: none; align-items: center; justify-content: center;
+        padding: 18px;
+      }
+      .overlay.show { display: flex; }
+      .dialog {
+        background: var(--panel); color: var(--ink);
+        border-radius: 14px; padding: 26px 24px;
+        width: 100%; max-width: 400px;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+      .dialog .result-title {
+        font-family: "Shippori Mincho B1", serif;
+        font-size: 27px; font-weight: 700; margin: 0 0 4px;
+      }
+      .dialog .result-sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 18px; }
+      .dialog table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin-bottom: 20px; }
+      .dialog th, .dialog td { padding: 8px 6px; text-align: right; font-variant-numeric: tabular-nums; }
+      .dialog th:first-child, .dialog td:first-child { text-align: left; }
+      .dialog thead th { border-bottom: 2px solid var(--panel-border); font-weight: 700; }
+      .dialog tbody td { border-bottom: 1px solid var(--panel-border); }
+      .dialog tfoot td { font-weight: 700; font-size: 16px; }
+      .dialog .btn-row { margin-top: 4px; }
+      @media (max-width: 680px) {
+        main { padding: 14px 12px 32px; }
+        /* Fallback for browsers without container queries: Auto stacks.
+           Forced Side / Board on top choices are left untouched. */
+        .game-layout.layout-auto { flex-direction: column; }
+        .game-layout.layout-auto .panel { flex: none; width: 100%; }
+        .board { max-width: 500px; }
+        .game-layout.layout-side { gap: 12px; }
+        .game-layout.layout-side .panel { flex-basis: 248px; }
+        .game-layout.layout-side .btn-row { flex-wrap: wrap; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="sr-only">9x9 Go — Play Against the Computer</h1>
+    <main>
+      <div class="top-bar">
+        <button type="button" class="rules-btn" id="btnRules" aria-haspopup="dialog">How to Play &amp; Rules</button>
+      </div>
+      <section class="card new-game-card">
+        <h2>New Game</h2>
+        <div class="new-game-fields">
+          <div class="field">
+            <label>Your stones</label>
+            <div class="seg" id="segColor">
+              <button type="button" data-color="1" class="on">Black (first)</button>
+              <button type="button" data-color="2">White (second)</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Computer strength</label>
+            <div class="seg" id="segLevel">
+              <button type="button" data-level="0">Beginner</button>
+              <button type="button" data-level="1" class="on">Normal</button>
+            </div>
+          </div>
+          <div class="btn-row new-game-action">
+            <button id="btnNew" type="button" class="primary">Start New Game</button>
+          </div>
+        </div>
+      </section>
+      <div class="game-layout layout-auto" id="gameLayout">
+      <div class="board-wrap">
+        <div class="board" id="board" aria-label="9x9 Go board">
+          <svg class="grid" viewBox="0 0 200 200" aria-hidden="true">
+            <g id="gridLines">
+              <g stroke="#4a3517" stroke-width="0.6">
+                <line x1="16" y1="16" x2="16" y2="184"/>
+                <line x1="16" y1="16" x2="184" y2="16"/>
+                <line x1="37" y1="16" x2="37" y2="184"/>
+                <line x1="16" y1="37" x2="184" y2="37"/>
+                <line x1="58" y1="16" x2="58" y2="184"/>
+                <line x1="16" y1="58" x2="184" y2="58"/>
+                <line x1="79" y1="16" x2="79" y2="184"/>
+                <line x1="16" y1="79" x2="184" y2="79"/>
+                <line x1="100" y1="16" x2="100" y2="184"/>
+                <line x1="16" y1="100" x2="184" y2="100"/>
+                <line x1="121" y1="16" x2="121" y2="184"/>
+                <line x1="16" y1="121" x2="184" y2="121"/>
+                <line x1="142" y1="16" x2="142" y2="184"/>
+                <line x1="16" y1="142" x2="184" y2="142"/>
+                <line x1="163" y1="16" x2="163" y2="184"/>
+                <line x1="16" y1="163" x2="184" y2="163"/>
+                <line x1="184" y1="16" x2="184" y2="184"/>
+                <line x1="16" y1="184" x2="184" y2="184"/>
+              </g>
+              <rect x="16" y="16" width="168" height="168" fill="none" stroke="#4a3517" stroke-width="1.4"/>
+              <g fill="#4a3517">
+                <circle cx="58" cy="58" r="1.9"/>
+                <circle cx="142" cy="58" r="1.9"/>
+                <circle cx="58" cy="142" r="1.9"/>
+                <circle cx="142" cy="142" r="1.9"/>
+                <circle cx="100" cy="100" r="1.9"/>
+              </g>
+            </g>
+            <g id="gridLabels" font-family="Noto Sans JP, sans-serif" font-size="6.5" fill="#5d451a" text-anchor="middle">
+              <text x="16" y="8.5">A</text>
+              <text x="16" y="196">A</text>
+              <text x="7" y="18.2">9</text>
+              <text x="193" y="18.2">9</text>
+              <text x="37" y="8.5">B</text>
+              <text x="37" y="196">B</text>
+              <text x="7" y="39.2">8</text>
+              <text x="193" y="39.2">8</text>
+              <text x="58" y="8.5">C</text>
+              <text x="58" y="196">C</text>
+              <text x="7" y="60.2">7</text>
+              <text x="193" y="60.2">7</text>
+              <text x="79" y="8.5">D</text>
+              <text x="79" y="196">D</text>
+              <text x="7" y="81.2">6</text>
+              <text x="193" y="81.2">6</text>
+              <text x="100" y="8.5">E</text>
+              <text x="100" y="196">E</text>
+              <text x="7" y="102.2">5</text>
+              <text x="193" y="102.2">5</text>
+              <text x="121" y="8.5">F</text>
+              <text x="121" y="196">F</text>
+              <text x="7" y="123.2">4</text>
+              <text x="193" y="123.2">4</text>
+              <text x="142" y="8.5">G</text>
+              <text x="142" y="196">G</text>
+              <text x="7" y="144.2">3</text>
+              <text x="193" y="144.2">3</text>
+              <text x="163" y="8.5">H</text>
+              <text x="163" y="196">H</text>
+              <text x="7" y="165.2">2</text>
+              <text x="193" y="165.2">2</text>
+              <text x="184" y="8.5">J</text>
+              <text x="184" y="196">J</text>
+              <text x="7" y="186.2">1</text>
+              <text x="193" y="186.2">1</text>
+            </g>
+          </svg>
+          <div id="terrLayer"></div>
+          <div id="stoneLayer"></div>
+          <div class="ghost" id="ghost"></div>
+          <div id="hitLayer"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <section class="card" aria-live="polite">
+          <div class="status"><span class="dot black" id="statusDot"></span><span id="statusText">Your turn</span></div>
+          <p class="message" id="message">Black plays first. Tap (or click) an intersection to place a stone.</p>
+          <div class="cap-row">
+            <span>Moves <b id="moveCount">0</b></span>
+            <span>Black captures <b id="capBlack">0</b></span>
+            <span>White captures <b id="capWhite">0</b></span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Position Estimate</h2>
+          <div class="score-rows">
+            <div class="score-row"><span class="mini black"></span><span class="who">Black</span><span class="pts" id="estBlack">0.0</span></div>
+            <div class="score-row"><span class="mini white"></span><span class="who">White <span class="sub">incl. 6.5 komi</span></span><span class="pts" id="estWhite">6.5</span></div>
+          </div>
+          <div class="meter" aria-hidden="true"><div class="mb" id="meterBlack" style="width:50%"></div><div class="mw" id="meterWhite" style="width:50%"></div></div>
+          <p class="meter-label" id="meterLabel">Even</p>
+        </section>
+
+        <section class="card">
+          <h2>Game Controls</h2>
+          <div class="btn-row">
+            <button id="btnPass" type="button">Pass</button>
+            <button id="btnUndo" type="button">Undo</button>
+            <button id="btnResign" type="button" class="danger">Resign</button>
+          </div>
+          <div class="confirm-row" id="resignConfirm">
+            <span>Are you sure you want to resign?</span>
+            <button id="btnResignYes" type="button" class="danger">Resign</button>
+            <button id="btnResignNo" type="button">Cancel</button>
+          </div>
+        </section>
+
+      </div>
+      </div>
+    </main>
+
+    <div class="overlay" id="overlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <p class="result-title" id="resultTitle">Black wins</p>
+        <p class="result-sub" id="resultSub"></p>
+        <table id="resultTable">
+          <thead><tr><th></th><th>Black</th><th>White</th></tr></thead>
+          <tbody>
+            <tr><td>Stones on board</td><td id="rBS">0</td><td id="rWS">0</td></tr>
+            <tr><td>Territory</td><td id="rBT">0</td><td id="rWT">0</td></tr>
+            <tr><td>Komi</td><td>—</td><td>6.5</td></tr>
+          </tbody>
+          <tfoot><tr><td>Total</td><td id="rBTotal">0</td><td id="rWTotal">0</td></tr></tfoot>
+        </table>
+        <div class="btn-row">
+          <button id="btnAgain" type="button" class="primary">Play Again</button>
+          <button id="btnCloseResult" type="button">View Board</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="rulesOverlay">
+      <div class="dialog rules-dialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+        <p class="result-title" id="rulesTitle">How to Play &amp; Rules</p>
+        <div class="rules-content">
+          <ul>
+            <li>Tap (or click) an intersection to place a stone. You can capture opponent stones by completely surrounding them.</li>
+            <li>You cannot play a suicide move (a point where your own stones would be captured) or a move that violates the ko rule.</li>
+            <li>If you have no good move, choose Pass. If both players pass in a row, the game ends and territory is counted.</li>
+            <li>Scoring uses Chinese rules: stones on the board plus surrounded empty points count as score. White receives 6.5 points of komi.</li>
+            <li>Undo takes the game back to your previous turn.</li>
+          </ul>
+        </div>
+        <div class="btn-row">
+          <button id="btnCloseRules" type="button" class="primary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+      var SIZE = 9, N = 81, KOMI = 6.5;
+      var EMPTY = 0, BLACK = 1, WHITE = 2;
+      var COLS = ["A","B","C","D","E","F","G","H","J"];
+
+      function idx(x, y) { return y * SIZE + x; }
+      function xy(i) { return [i % SIZE, Math.floor(i / SIZE)]; }
+      function nbrs(i) {
+        var x = i % SIZE, y = Math.floor(i / SIZE), out = [];
+        if (x > 0) out.push(i - 1);
+        if (x < SIZE - 1) out.push(i + 1);
+        if (y > 0) out.push(i - SIZE);
+        if (y < SIZE - 1) out.push(i + SIZE);
+        return out;
+      }
+      function hashOf(bd) { return bd.join(""); }
+
+      function groupInfo(bd, start) {
+        var color = bd[start], stones = [], libs = {}, seen = {};
+        var stack = [start]; seen[start] = true;
+        while (stack.length) {
+          var i = stack.pop(); stones.push(i);
+          var ns = nbrs(i);
+          for (var k = 0; k < ns.length; k++) {
+            var n = ns[k];
+            if (bd[n] === EMPTY) libs[n] = true;
+            else if (bd[n] === color && !seen[n]) { seen[n] = true; stack.push(n); }
+          }
+        }
+        return { stones: stones, liberties: Object.keys(libs).length, libSet: libs };
+      }
+
+      // Returns {board, captured} or null if illegal (occupied / suicide). Ko checked by caller.
+      function simulate(bd, color, i) {
+        if (bd[i] !== EMPTY) return null;
+        var nb = bd.slice(); nb[i] = color;
+        var opp = color === BLACK ? WHITE : BLACK, captured = 0;
+        var checked = {}, ns = nbrs(i), k, n, g, s;
+        for (k = 0; k < ns.length; k++) {
+          n = ns[k];
+          if (nb[n] === opp && !checked[n]) {
+            g = groupInfo(nb, n);
+            for (s = 0; s < g.stones.length; s++) checked[g.stones[s]] = true;
+            if (g.liberties === 0) {
+              for (s = 0; s < g.stones.length; s++) nb[g.stones[s]] = EMPTY;
+              captured += g.stones.length;
+            }
+          }
+        }
+        if (groupInfo(nb, i).liberties === 0) return null;
+        return { board: nb, captured: captured };
+      }
+
+      function scoreBoard(bd, estimate) {
+        var seen = new Array(N).fill(false), terrMap = new Array(N).fill(0);
+        var bS = 0, wS = 0, bT = 0, wT = 0, i;
+        for (i = 0; i < N; i++) { if (bd[i] === BLACK) bS++; else if (bd[i] === WHITE) wS++; }
+        for (i = 0; i < N; i++) {
+          if (bd[i] !== EMPTY || seen[i]) continue;
+          var region = [], borders = {}, stack = [i]; seen[i] = true;
+          while (stack.length) {
+            var c = stack.pop(); region.push(c);
+            var ns = nbrs(c);
+            for (var k = 0; k < ns.length; k++) {
+              var n = ns[k];
+              if (bd[n] === EMPTY) { if (!seen[n]) { seen[n] = true; stack.push(n); } }
+              else borders[bd[n]] = true;
+            }
+          }
+          var keys = Object.keys(borders);
+          if (keys.length === 1 && !(estimate && region.length > 18)) {
+            var owner = parseInt(keys[0], 10);
+            for (var r = 0; r < region.length; r++) terrMap[region[r]] = owner;
+            if (owner === BLACK) bT += region.length; else wT += region.length;
+          }
+        }
+        return { bS: bS, wS: wS, bT: bT, wT: wT, terrMap: terrMap,
+                 black: bS + bT, white: wS + wT + KOMI };
+      }
+
+      /* ---------------- AI ---------------- */
+      function aiChooseMove(bd, color, level, lastMove, moveCount, pastHashes) {
+        var opp = color === BLACK ? WHITE : BLACK;
+        var moves = [], i, sim;
+        for (i = 0; i < N; i++) {
+          if (bd[i] !== EMPTY) continue;
+          sim = simulate(bd, color, i);
+          if (!sim) continue;
+          if (pastHashes[hashOf(sim.board)]) continue;
+          moves.push({ i: i, sim: sim });
+        }
+        if (!moves.length) return -1;
+
+        var best = null, bestScore = -Infinity;
+        for (var m = 0; m < moves.length; m++) {
+          var mv = moves[m], p = mv.i, nb = mv.sim.board;
+          var pt = xy(p), x = pt[0], y = pt[1];
+          var s = 0;
+          // capture
+          s += mv.sim.captured * 11 + (mv.sim.captured > 0 ? 4 : 0);
+          // resulting own group safety
+          var own = groupInfo(nb, p);
+          if (own.liberties === 1 && mv.sim.captured === 0) s -= 13;
+          else if (own.liberties === 2) s += 0.6;
+          // pre-move analysis of neighbours
+          var ns = nbrs(p), friendlyAtariSave = false, allFriendly = ns.length > 0;
+          var seenG = {};
+          for (var k = 0; k < ns.length; k++) {
+            var n = ns[k];
+            if (bd[n] === EMPTY) { allFriendly = false; s += 0.35; continue; }
+            if (bd[n] !== color) allFriendly = false;
+            if (seenG[n]) continue;
+            var g0 = groupInfo(bd, n);
+            for (var q = 0; q < g0.stones.length; q++) seenG[g0.stones[q]] = true;
+            if (bd[n] === color) {
+              s += 1.2; // connection / extension
+              if (g0.liberties === 1) { friendlyAtariSave = true; s += 7 + g0.stones.length * 2.5; }
+            } else {
+              s += 1.4; // contact with enemy
+              var gAfter = groupInfo(nb, n);
+              if (gAfter.liberties === 1) s += 5 + g0.stones.length * 2;
+              else if (g0.liberties === 2) s += 2.5; // reducing to atari threat
+            }
+          }
+          // filling own eye
+          if (allFriendly && mv.sim.captured === 0 && !friendlyAtariSave) s -= 9;
+          // stay near the action
+          if (lastMove >= 0) {
+            var lp = xy(lastMove);
+            var d = Math.max(Math.abs(lp[0] - x), Math.abs(lp[1] - y));
+            if (d <= 2) s += 2.6 - d * 0.6;
+          }
+          // opening preferences on 9x9
+          var line = Math.min(x, SIZE - 1 - x, y, SIZE - 1 - y);
+          if (moveCount < 18) {
+            if (line === 0) s -= 3.2;
+            else if (line === 1) s += 0.8;
+            if ((x === 2 || x === 6) && (y === 2 || y === 6)) s += 1.2;
+            if (x === 4 && y === 4) s += 0.7;
+          } else if (line === 0) s -= 0.8;
+          // jitter by level
+          s += Math.random() * (level === 0 ? 5.5 : 1.1);
+          mv.score = s;
+          if (s > bestScore) { bestScore = s; best = mv; }
+        }
+        if (level === 0) {
+          // beginner: sometimes pick from the top handful
+          moves.sort(function (a, b) { return b.score - a.score; });
+          var top = moves.slice(0, Math.min(5, moves.length));
+          if (Math.random() < 0.35) best = top[Math.floor(Math.random() * top.length)];
+        }
+        // pass when nothing meaningful remains
+        if (bestScore < 2.0 && moveCount > 34) return -1;
+        if (bestScore < -2) return -1;
+        return best.i;
+      }
+
+      /* ---------------- Game state ---------------- */
+      var playerColor = BLACK, aiLevel = 1;
+      var gameLog = []; // snapshots: {board, toMove, capB, capW, lastMove, passes, hash}
+      var thinking = false, gameOver = false, overReason = "";
+
+      function cur() { return gameLog[gameLog.length - 1]; }
+      function emptyBoard() { return new Array(N).fill(0); }
+
+      function newGame() {
+        gameLog = [{ board: emptyBoard(), toMove: BLACK, capB: 0, capW: 0, lastMove: -2, passes: 0, hash: hashOf(emptyBoard()) }];
+        gameOver = false; overReason = ""; thinking = false;
+        hideResignConfirm();
+        el.overlay.classList.remove("show");
+        setMessage(playerColor === BLACK
+          ? "Black plays first. Tap (or click) an intersection to place a stone."
+          : "You are White. The computer (Black) will play first.", false);
+        render();
+        maybeAiTurn();
+      }
+
+      function pastHashes() {
+        var map = {};
+        for (var i = 0; i < gameLog.length - 1; i++) map[gameLog[i].hash] = true;
+        return map;
+      }
+
+      function pushMove(color, i) {
+        var s = cur();
+        if (i === -1) {
+          gameLog.push({ board: s.board.slice(), toMove: color === BLACK ? WHITE : BLACK,
+            capB: s.capB, capW: s.capW, lastMove: -1, passes: s.passes + 1, hash: s.hash });
+          return { captured: 0 };
+        }
+        var sim = simulate(s.board, color, i);
+        gameLog.push({ board: sim.board, toMove: color === BLACK ? WHITE : BLACK,
+          capB: s.capB + (color === BLACK ? sim.captured : 0),
+          capW: s.capW + (color === WHITE ? sim.captured : 0),
+          lastMove: i, passes: 0, hash: hashOf(sim.board) });
+        return sim;
+      }
+
+      function moveCount() { return gameLog.length - 1; }
+
+      /* ---------------- Sound ---------------- */
+      var audioCtx = null;
+      function stoneSound() {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          var t = audioCtx.currentTime;
+          var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          o.type = "triangle";
+          o.frequency.setValueAtTime(1500, t);
+          o.frequency.exponentialRampToValueAtTime(280, t + 0.035);
+          g.gain.setValueAtTime(0.12, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(t); o.stop(t + 0.06);
+        } catch (e) { /* sound is optional */ }
+      }
+
+      /* ---------------- DOM ---------------- */
+      var el = {};
+      ["board","stoneLayer","terrLayer","hitLayer","ghost","statusDot","statusText","message",
+       "moveCount","capBlack","capWhite","estBlack","estWhite","meterBlack","meterWhite","meterLabel",
+       "btnPass","btnUndo","btnResign","resignConfirm","btnResignYes","btnResignNo","btnNew",
+       "segColor","segLevel","segLayout","gameLayout","overlay","resultTitle","resultSub",
+       "rBS","rWS","rBT","rWT","rBTotal","rWTotal","btnAgain","btnCloseResult","gridLines","gridLabels",
+       "btnRules","rulesOverlay","btnCloseRules"
+      ].forEach(function (id) { el[id] = document.getElementById(id); });
+
+      // Grid lines + labels ship as static SVG markup above (no JS needed to
+      // render the intersections). This only rebuilds them — using
+      // createElementNS, never innerHTML on SVG nodes — if they are missing.
+      (function buildGrid() {
+        if (!el.gridLines || el.gridLines.childNodes.length > 0) return;
+        var NS = "http://www.w3.org/2000/svg", i, p;
+        function mk(tag, attrs, parent) {
+          var n = document.createElementNS(NS, tag);
+          for (var k in attrs) n.setAttribute(k, attrs[k]);
+          (parent || el.gridLines).appendChild(n);
+          return n;
+        }
+        for (i = 0; i < SIZE; i++) {
+          p = 16 + i * 21;
+          mk("line", { x1: p, y1: 16, x2: p, y2: 184, stroke: "#4a3517", "stroke-width": 0.6 });
+          mk("line", { x1: 16, y1: p, x2: 184, y2: p, stroke: "#4a3517", "stroke-width": 0.6 });
+        }
+        mk("rect", { x: 16, y: 16, width: 168, height: 168, fill: "none", stroke: "#4a3517", "stroke-width": 1.4 });
+        [[2,2],[6,2],[2,6],[6,6],[4,4]].forEach(function (h) {
+          mk("circle", { cx: 16 + h[0] * 21, cy: 16 + h[1] * 21, r: 1.9, fill: "#4a3517" });
+        });
+        if (el.gridLabels && el.gridLabels.childNodes.length === 0) {
+          for (i = 0; i < SIZE; i++) {
+            p = 16 + i * 21;
+            [["text", { x: p, y: 8.5 }, COLS[i]],
+             ["text", { x: p, y: 196 }, COLS[i]],
+             ["text", { x: 7, y: p + 2.2 }, String(SIZE - i)],
+             ["text", { x: 193, y: p + 2.2 }, String(SIZE - i)]].forEach(function (spec) {
+              var t = mk(spec[0], spec[1], el.gridLabels);
+              t.textContent = spec[2];
+            });
+          }
+        }
+      })();
+
+      function pct(i) { var p = xy(i); return [8 + p[0] * 10.5, 8 + p[1] * 10.5]; }
+
+      // Hit areas
+      (function buildHits() {
+        for (var i = 0; i < N; i++) {
+          (function (i) {
+            var d = document.createElement("div");
+            d.className = "hit"; d.setAttribute("role", "button");
+            var pos = pct(i);
+            d.style.left = pos[0] + "%"; d.style.top = pos[1] + "%";
+            d.setAttribute("aria-label", "Play at " + COLS[i % SIZE] + (SIZE - Math.floor(i / SIZE)));
+            d.addEventListener("click", function () { onPoint(i); });
+            d.addEventListener("mouseenter", function () { showGhost(i); });
+            d.addEventListener("mouseleave", function () { el.ghost.classList.remove("show"); });
+            el.hitLayer.appendChild(d);
+          })(i);
+        }
+      })();
+
+      function showGhost(i) {
+        if (gameOver || thinking) return;
+        var s = cur();
+        if (s.toMove !== playerColor || s.board[i] !== EMPTY) { el.ghost.classList.remove("show"); return; }
+        var pos = pct(i);
+        el.ghost.style.left = pos[0] + "%"; el.ghost.style.top = pos[1] + "%";
+        el.ghost.className = "ghost show " + (playerColor === BLACK ? "black" : "white");
+      }
+
+      function setMessage(text, warn) {
+        el.message.textContent = text;
+        el.message.className = "message" + (warn ? " warn" : "");
+      }
+
+      function render() {
+        var s = cur();
+        // stones
+        var html = "";
+        for (var i = 0; i < N; i++) {
+          if (s.board[i] === EMPTY) continue;
+          var pos = pct(i);
+          html += '<div class="stone ' + (s.board[i] === BLACK ? "black" : "white") + '" style="left:' + pos[0] + '%;top:' + pos[1] + '%">'
+            + (s.lastMove === i ? '<span class="last-dot"></span>' : "") + "</div>";
+        }
+        el.stoneLayer.innerHTML = html;
+        // territory markers only when finished by double pass
+        var thtml = "";
+        if (gameOver && overReason === "score") {
+          var sc = scoreBoard(s.board);
+          for (var j = 0; j < N; j++) {
+            if (sc.terrMap[j] !== 0) {
+              var tp = pct(j);
+              thtml += '<div class="terr ' + (sc.terrMap[j] === BLACK ? "black" : "white") + '" style="left:' + tp[0] + '%;top:' + tp[1] + '%"></div>';
+            }
+          }
+        }
+        el.terrLayer.innerHTML = thtml;
+        // status
+        var mine = playerColor === BLACK ? "Black" : "White";
+        if (gameOver) {
+          el.statusDot.className = "dot none";
+          el.statusText.textContent = "Game over";
+        } else if (thinking) {
+          el.statusDot.className = "dot " + (playerColor === BLACK ? "white" : "black");
+          el.statusText.textContent = "Computer is thinking…";
+        } else if (s.toMove === playerColor) {
+          el.statusDot.className = "dot " + (playerColor === BLACK ? "black" : "white");
+          el.statusText.textContent = "Your turn (" + mine + ")";
+        } else {
+          el.statusDot.className = "dot " + (playerColor === BLACK ? "white" : "black");
+          el.statusText.textContent = "Computer's turn";
+        }
+        el.moveCount.textContent = moveCount();
+        el.capBlack.textContent = s.capB;
+        el.capWhite.textContent = s.capW;
+        // estimate
+        var est = scoreBoard(s.board, true);
+        el.estBlack.textContent = est.black.toFixed(1);
+        el.estWhite.textContent = est.white.toFixed(1);
+        var total = est.black + est.white;
+        var bw = total > 0 ? (est.black / total) * 100 : 50;
+        el.meterBlack.style.width = bw + "%";
+        el.meterWhite.style.width = (100 - bw) + "%";
+        var diff = est.black - est.white;
+        el.meterLabel.textContent = Math.abs(diff) < 1.5 ? "Even"
+          : (diff > 0 ? "Black leads by about " + diff.toFixed(1) + " points" : "White leads by about " + Math.abs(diff).toFixed(1) + " points");
+        // controls
+        var myTurn = !gameOver && !thinking && s.toMove === playerColor;
+        el.btnPass.disabled = !myTurn;
+        el.btnResign.disabled = gameOver;
+        el.btnUndo.disabled = thinking || gameOver || gameLog.length <= 1 || (playerColor === WHITE && gameLog.length <= 2);
+        el.board.classList.toggle("locked", !myTurn);
+      }
+
+      /* ---------------- Flow ---------------- */
+      function onPoint(i) {
+        if (gameOver || thinking) return;
+        var s = cur();
+        if (s.toMove !== playerColor) return;
+        var sim = simulate(s.board, playerColor, i);
+        if (!sim) {
+          el.board.classList.remove("shake"); void el.board.offsetWidth; el.board.classList.add("shake");
+          setMessage("You can't play there (suicide move or already occupied).", true);
+          return;
+        }
+        if (pastHashes()[hashOf(sim.board)]) {
+          el.board.classList.remove("shake"); void el.board.offsetWidth; el.board.classList.add("shake");
+          setMessage("Ko — you can't play a move that repeats the same position.", true);
+          return;
+        }
+        pushMove(playerColor, i);
+        stoneSound();
+        el.ghost.classList.remove("show");
+        var cap = sim.captured;
+        setMessage(cap > 0 ? "You captured " + cap + (cap > 1 ? " stones." : " stone.") : "Move played. Waiting for the computer's move.", false);
+        render();
+        maybeAiTurn();
+      }
+
+      function maybeAiTurn() {
+        var s = cur();
+        if (gameOver || s.toMove === playerColor) { render(); return; }
+        thinking = true; render();
+        var aiColor = s.toMove;
+        var delay = 380 + Math.random() * 420;
+        setTimeout(function () {
+          thinking = false;
+          if (gameOver) { render(); return; }
+          // AI resigns when hopelessly behind late in the game
+          var est = scoreBoard(cur().board);
+          var aiScore = aiColor === BLACK ? est.black : est.white;
+          var plScore = aiColor === BLACK ? est.white : est.black;
+          if (moveCount() > 55 && plScore - aiScore > 28) {
+            finishByResign(aiColor);
+            return;
+          }
+          var mv = aiChooseMove(cur().board, aiColor, aiLevel, cur().lastMove, moveCount(), pastHashes());
+          if (mv === -1) {
+            pushMove(aiColor, -1);
+            if (cur().passes >= 2) { finishByScore(); return; }
+            setMessage("The computer passed. If you pass as well, the game will end and territory will be counted.", false);
+          } else {
+            var r = pushMove(aiColor, mv);
+            stoneSound();
+            var pos = xy(mv);
+            var coord = COLS[pos[0]] + (SIZE - pos[1]);
+            setMessage(r.captured > 0
+              ? "The computer played " + coord + " and captured " + r.captured + " of your stones."
+
+              : "The computer played " + coord + ". Your turn.", false);
+          }
+          render();
+        }, delay);
+      }
+
+      function finishByScore() {
+        gameOver = true; overReason = "score";
+        var sc = scoreBoard(cur().board);
+        var blackWin = sc.black > sc.white;
+        var diff = Math.abs(sc.black - sc.white).toFixed(1);
+        showResult(blackWin ? "Black wins" : "White wins",
+          (blackWin ? "Black" : "White") + " wins by " + diff + " points (both players passed).", sc);
+        render();
+      }
+
+      function finishByResign(resigner) {
+        gameOver = true; overReason = "resign";
+        var winner = resigner === BLACK ? WHITE : BLACK;
+        var sc = scoreBoard(cur().board);
+        showResult((winner === BLACK ? "Black" : "White") + " wins",
+          (resigner === playerColor ? "You resigned" : "The computer resigned") + ", so " + (winner === BLACK ? "Black" : "White") + " wins.", sc);
+        render();
+      }
+
+      function showResult(title, sub, sc) {
+        el.resultTitle.textContent = title;
+        el.resultSub.textContent = sub;
+        el.rBS.textContent = sc.bS; el.rWS.textContent = sc.wS;
+        el.rBT.textContent = sc.bT; el.rWT.textContent = sc.wT;
+        el.rBTotal.textContent = sc.black.toFixed(1);
+        el.rWTotal.textContent = sc.white.toFixed(1);
+        el.overlay.classList.add("show");
+      }
+
+      el.btnPass.addEventListener("click", function () {
+        if (gameOver || thinking) return;
+        var s = cur();
+        if (s.toMove !== playerColor) return;
+        hideResignConfirm();
+        pushMove(playerColor, -1);
+        if (cur().passes >= 2) { finishByScore(); return; }
+        setMessage("You passed. It's the computer's turn.", false);
+        render();
+        maybeAiTurn();
+      });
+
+      el.btnUndo.addEventListener("click", function () {
+        if (thinking || gameOver) return;
+        var popped = 0;
+        while (gameLog.length > 1) {
+          gameLog.pop(); popped++;
+          if (cur().toMove === playerColor && popped >= 2) break;
+        }
+        if (cur().toMove !== playerColor && gameLog.length > 1) {
+          // fall back: pop until player's turn or start
+          while (gameLog.length > 1 && cur().toMove !== playerColor) gameLog.pop();
+        }
+        hideResignConfirm();
+        setMessage("Move undone. Your turn.", false);
+        render();
+      });
+
+      function hideResignConfirm() { el.resignConfirm.classList.remove("show"); }
+      el.btnResign.addEventListener("click", function () {
+        if (gameOver) return;
+        el.resignConfirm.classList.add("show");
+      });
+      el.btnResignNo.addEventListener("click", hideResignConfirm);
+      el.btnResignYes.addEventListener("click", function () {
+        hideResignConfirm();
+        finishByResign(playerColor);
+      });
+
+      function segWire(segEl, attr, fn) {
+        segEl.addEventListener("click", function (e) {
+          var b = e.target.closest("button"); if (!b) return;
+          var btns = segEl.querySelectorAll("button");
+          for (var i = 0; i < btns.length; i++) btns[i].classList.remove("on");
+          b.classList.add("on");
+          fn(parseInt(b.getAttribute(attr), 10));
+        });
+      }
+      segWire(el.segColor, "data-color", function (v) { playerColor = v; });
+      segWire(el.segLevel, "data-level", function (v) { aiLevel = v; });
+
+      /* ---------------- Layout: Auto / Side / Stacked ----------------
+         Auto follows the width available to the game itself (container
+         queries in CSS), so it works the same standalone or in an iframe.
+         A portal can also force it from the iframe URL, e.g.
+         go.html?layout=side or go.html?layout=stacked, or later from the
+         parent page with postMessage({ type: "go-layout", layout: "side" }). */
+      var LAYOUTS = { auto: "layout-auto", side: "layout-side", stacked: "layout-stacked" };
+      function setLayout(mode) {
+        if (!LAYOUTS[mode]) mode = "auto";
+        el.gameLayout.classList.remove("layout-auto", "layout-side", "layout-stacked");
+        el.gameLayout.classList.add(LAYOUTS[mode]);
+        if (el.segLayout) {
+          var btns = el.segLayout.querySelectorAll("button");
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.toggle("on", btns[i].getAttribute("data-layout") === mode);
+          }
+        }
+      }
+      if (el.segLayout) {
+        el.segLayout.addEventListener("click", function (e) {
+          var b = e.target.closest("button"); if (!b) return;
+          setLayout(b.getAttribute("data-layout"));
+        });
+      }
+      window.addEventListener("message", function (e) {
+        if (e.data && e.data.type === "go-layout") setLayout(e.data.layout);
+      });
+      (function initLayout() {
+        var mode = "auto";
+        try {
+          var p = new URLSearchParams(window.location.search).get("layout");
+          if (p && LAYOUTS[p]) mode = p;
+        } catch (err) { /* keep Auto */ }
+        setLayout(mode);
+      })();
+
+      el.btnNew.addEventListener("click", newGame);
+      el.btnAgain.addEventListener("click", function () { el.overlay.classList.remove("show"); newGame(); });
+      el.btnCloseResult.addEventListener("click", function () { el.overlay.classList.remove("show"); });
+
+      /* ---------------- How to Play & Rules modal ---------------- */
+      function openRules() {
+        el.rulesOverlay.classList.add("show");
+        el.btnCloseRules.focus();
+      }
+      function closeRules() {
+        el.rulesOverlay.classList.remove("show");
+        el.btnRules.focus();
+      }
+      el.btnRules.addEventListener("click", openRules);
+      el.btnCloseRules.addEventListener("click", closeRules);
+      el.rulesOverlay.addEventListener("click", function (e) {
+        if (e.target === el.rulesOverlay) closeRules();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && el.rulesOverlay.classList.contains("show")) closeRules();
+      });
+
+      newGame();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Kanji Sudoku — 漢数字数独</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#f4f1ea;
+        --bg-2:#ece7da;
+        --surface:#fffdf8;
+        --surface-2:#f8f4ea;
+        --ink:#1c1a16;
+        --ink-soft:#55504a;
+        --ink-faint:#8a847b;
+        --line:#d8d1c1;
+        --line-strong:#2b2822;
+        --cell-line:#cfc8b6;
+        --accent:#b3352b;
+        --accent-ink:#ffffff;
+        --accent-soft:#f6e3df;
+        --user:#1f4e8c;
+        --user-soft:#e2ebf7;
+        --given-bg:transparent;
+        --selected:#f3c969;
+        --selected-soft:#fdf0cd;
+        --related:#efe9da;
+        --same:#fbe3ae;
+        --error:#c62f22;
+        --error-bg:#fbe3de;
+        --good:#2e7d43;
+        --shadow:0 18px 44px rgba(40,32,18,.14);
+        --board-shadow:0 10px 30px rgba(40,32,18,.12);
+        color-scheme:light;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#141311;
+          --bg-2:#1b1a17;
+          --surface:#211f1b;
+          --surface-2:#28251f;
+          --ink:#f0ead9;
+          --ink-soft:#c9c2b0;
+          --ink-faint:#97907f;
+          --line:#3a362d;
+          --line-strong:#e8e1cd;
+          --cell-line:#3f3b32;
+          --accent:#e0574a;
+          --accent-ink:#ffffff;
+          --accent-soft:#40241f;
+          --user:#8db8f2;
+          --user-soft:#24344d;
+          --selected:#8a6d1f;
+          --selected-soft:#4a3d18;
+          --related:#2a2822;
+          --same:#54451d;
+          --error:#ff8a7a;
+          --error-bg:#472420;
+          --good:#7cc78f;
+          --shadow:0 18px 44px rgba(0,0,0,.5);
+          --board-shadow:0 10px 30px rgba(0,0,0,.45);
+          color-scheme:dark;
+        }
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0;
+        background:
+          radial-gradient(900px 480px at 85% -80px, var(--bg-2), transparent 70%),
+          var(--bg);
+        color:var(--ink);
+        font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+        line-height:1.5;
+      }
+      .kanji-font{font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif}
+      .wrap{max-width:1120px;margin:0 auto;padding:22px 18px 56px}
+      /* ---------- Header ---------- */
+      header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px}
+      .title-block h1{
+        margin:0;font-size:clamp(30px,4.6vw,44px);line-height:1.08;font-weight:700;letter-spacing:-.01em;
+        display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+      }
+      .title-block h1 .jp{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-weight:900;font-size:.82em;color:var(--accent)}
+      .title-block p{margin:8px 0 0;color:var(--ink-soft);font-size:15.5px;max-width:56ch}
+      .title-block p .kanji-font{font-weight:700;color:var(--ink)}
+      .seal{
+        flex:none;width:58px;height:58px;border-radius:10px;background:var(--accent);color:#fff;
+        display:flex;align-items:center;justify-content:center;
+        font-family:"Noto Serif JP",serif;font-weight:900;font-size:27px;line-height:1;
+        box-shadow:0 6px 16px rgba(0,0,0,.18);transform:rotate(3deg);
+      }
+      .head-row{display:flex;align-items:center;gap:14px}
+      /* ---------- Stats strip ---------- */
+      .stats{
+        display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-bottom:16px;
+      }
+      .stat{
+        background:var(--surface);border:1px solid var(--line);border-radius:12px;
+        padding:8px 14px;min-width:104px;
+      }
+      .stat .label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+      .stat .value{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.25}
+      .stat .value.bad{color:var(--error)}
+      .difficulty-bar{
+        display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+        border-radius:12px;padding:6px;flex-wrap:wrap;
+      }
+      .difficulty-bar .label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);padding:0 6px}
+      .diff-btn{
+        appearance:none;border:1px solid transparent;background:transparent;color:var(--ink-soft);
+        font:inherit;font-size:14px;font-weight:600;padding:7px 13px;border-radius:8px;cursor:pointer;
+      }
+      .diff-btn:hover{color:var(--ink);background:var(--surface-2)}
+      .diff-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      .diff-btn:focus-visible,.layout-btn:focus-visible,.tool-btn:focus-visible,.pad-btn:focus-visible,.primary-btn:focus-visible,.ghost-btn:focus-visible{outline:3px solid var(--selected);outline-offset:2px}
+      /* layout switcher (for iframe embedding) */
+      .layout-bar{
+        display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+        border-radius:12px;padding:6px;flex-wrap:wrap;
+      }
+      .layout-bar .label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);padding:0 6px}
+      .layout-btn{
+        appearance:none;border:1px solid transparent;background:transparent;color:var(--ink-soft);
+        font:inherit;font-size:14px;font-weight:600;padding:7px 13px;border-radius:8px;cursor:pointer;
+      }
+      .layout-btn:hover{color:var(--ink);background:var(--surface-2)}
+      .layout-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      /* ---------- Layout ---------- */
+      .layout{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+      body[data-layout-effective="side"] .layout{grid-template-columns:minmax(0,600px) minmax(0,1fr)}
+      body[data-layout-effective="stacked"] .board-card{width:100%;max-width:660px}
+      /* ---------- Board ---------- */
+      .board-card{
+        background:var(--surface);border:1px solid var(--line);border-radius:16px;
+        padding:clamp(10px,2.4vw,18px);box-shadow:var(--board-shadow);position:relative;
+      }
+      .board{
+        display:grid;grid-template-columns:repeat(9,1fr);
+        border:3px solid var(--line-strong);border-radius:6px;overflow:hidden;
+        aspect-ratio:1/1;background:var(--surface);touch-action:manipulation;user-select:none;-webkit-user-select:none;
+      }
+      .cell{
+        appearance:none;border:0;margin:0;padding:0;background:transparent;color:var(--ink);
+        border-right:1px solid var(--cell-line);border-bottom:1px solid var(--cell-line);
+        position:relative;cursor:pointer;font-family:inherit;
+        display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;min-width:0;
+      }
+      .cell:nth-child(9n){border-right:0}
+      .cell:nth-child(n+73){border-bottom:0}
+      .cell.br{border-right:2.5px solid var(--line-strong)}
+      .cell.bb{border-bottom:2.5px solid var(--line-strong)}
+      .cell .big{
+        font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;
+        font-size:clamp(19px,5.4vw,34px);font-weight:700;line-height:1;pointer-events:none;
+      }
+      @media (min-width:920px){.cell .big{font-size:36px}}
+      .cell .tiny{
+        position:absolute;right:3px;bottom:2px;font-size:9.5px;font-weight:600;color:var(--ink-faint);
+        font-variant-numeric:tabular-nums;pointer-events:none;line-height:1;
+      }
+      .cell.given .big{color:var(--ink);font-weight:900}
+      .cell.user .big{color:var(--user)}
+      .cell.hinted .big{color:var(--good)}
+      .cell.error{background:var(--error-bg)}
+      .cell.error .big{color:var(--error)}
+      .cell.related{background:var(--related)}
+      .cell.same{background:var(--same)}
+      .cell.selected{background:var(--selected)}
+      .cell.selected .big{color:var(--ink)}
+      .cell .notes{
+        display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+        width:88%;height:88%;pointer-events:none;
+      }
+      .cell .notes span{
+        font-family:"Noto Serif JP",serif;font-size:clamp(8px,1.8vw,12px);font-weight:500;color:var(--ink-soft);
+        display:flex;align-items:center;justify-content:center;line-height:1;
+      }
+      .board.paused .cell{visibility:hidden}
+      .pause-cover{
+        position:absolute;inset:0;border-radius:16px;display:none;align-items:center;justify-content:center;
+        flex-direction:column;gap:10px;text-align:center;padding:20px;
+      }
+      .board-card.is-paused .pause-cover{display:flex}
+      .pause-cover .kanji-font{font-size:40px;font-weight:900;color:var(--accent)}
+      .pause-cover p{margin:0;color:var(--ink-soft)}
+      .progress-row{display:flex;align-items:center;gap:12px;margin-top:14px}
+      .progress-track{flex:1;height:8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+      .progress-fill{height:100%;width:0%;background:var(--accent);border-radius:99px;transition:width .3s ease}
+      .progress-text{font-size:13px;font-weight:600;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+      .status-msg{
+        margin:12px 2px 0;font-size:14.5px;min-height:22px;color:var(--ink-soft);
+      }
+      .status-msg strong{color:var(--ink)}
+      .status-msg.err{color:var(--error)}
+      .status-msg.ok{color:var(--good)}
+      /* ---------- Side panel ---------- */
+      .panel{display:flex;flex-direction:column;gap:16px}
+      .card{
+        background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;
+        box-shadow:var(--shadow);
+      }
+      .card h2{margin:0 0 4px;font-size:16px;font-weight:700}
+      .card .hint-text{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft)}
+      /* number pad */
+      .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+      body[data-layout-effective="side"] .pad{grid-template-columns:repeat(3,1fr);gap:8px}
+      .pad-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);
+        border-radius:12px;cursor:pointer;padding:8px 2px 6px;display:flex;flex-direction:column;
+        align-items:center;gap:0;line-height:1.1;font-family:inherit;position:relative;
+      }
+      .pad-btn:hover{border-color:var(--ink-faint)}
+      .pad-btn .k{font-family:"Noto Serif JP",serif;font-weight:900;font-size:clamp(20px,4.6vw,30px);line-height:1.15}
+      .pad-btn .a{font-size:11px;font-weight:600;color:var(--ink-soft)}
+      .pad-btn .left{font-size:10px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+      .pad-btn.done{opacity:.38;pointer-events:none}
+      .pad-btn.flash{border-color:var(--accent);background:var(--accent-soft)}
+      /* tools */
+      .tools{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+      .tool-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);
+        border-radius:12px;cursor:pointer;padding:10px 4px 8px;font-family:inherit;
+        display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12.5px;font-weight:600;
+      }
+      .tool-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      .tool-btn:hover{border-color:var(--ink-faint)}
+      .tool-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      .tool-btn .badge{
+        font-size:10px;font-weight:700;background:var(--accent);color:#fff;border-radius:99px;padding:0 6px;line-height:1.5;
+      }
+      .tool-btn[aria-pressed="true"] .badge{background:var(--accent)}
+      .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+      .primary-btn{
+        appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;
+        font-size:15px;padding:13px 14px;border-radius:12px;cursor:pointer;
+      }
+      .primary-btn:hover{filter:brightness(1.07)}
+      .ghost-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:600;
+        font-size:15px;padding:13px 14px;border-radius:12px;cursor:pointer;
+      }
+      .ghost-btn:hover{border-color:var(--ink-faint)}
+      .toggle-row{display:flex;gap:8px;flex-wrap:wrap}
+      .toggle-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);
+        font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:99px;cursor:pointer;
+      }
+      .toggle-btn[aria-pressed="true"]{background:var(--user-soft);border-color:var(--user);color:var(--user)}
+      /* reference */
+      .ref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+      .ref-cell{
+        border:1px solid var(--line);border-radius:10px;background:var(--surface-2);
+        padding:8px 4px;text-align:center;cursor:pointer;appearance:none;font-family:inherit;color:var(--ink);
+      }
+      .ref-cell:hover{border-color:var(--accent)}
+      .ref-cell .k{display:block;font-family:"Noto Serif JP",serif;font-weight:900;font-size:24px;line-height:1.2}
+      .ref-cell .w{display:block;font-size:12px;color:var(--ink-soft);font-weight:600}
+      .ref-cell .n{display:block;font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+      /* how to play */
+      .howto{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+      .howto h2{margin:0 0 10px;font-size:18px}
+      .howto ol{margin:0;padding-left:20px;color:var(--ink-soft);font-size:14.5px;display:grid;gap:6px}
+      .howto ol strong{color:var(--ink)}
+      .howto .kanji-font{font-weight:700;color:var(--ink)}
+      kbd{
+        font-family:inherit;font-size:12px;font-weight:600;border:1px solid var(--line);border-bottom-width:2px;
+        border-radius:6px;padding:1px 6px;background:var(--surface-2);color:var(--ink);
+      }
+      /* win overlay */
+      .overlay{
+        position:fixed;inset:0;background:rgba(12,10,6,.55);display:none;align-items:center;justify-content:center;
+        padding:18px;z-index:50;
+      }
+      .overlay.show{display:flex}
+      .dialog{
+        background:var(--surface);color:var(--ink);border-radius:18px;max-width:430px;width:100%;
+        padding:28px 24px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--line);
+      }
+      .dialog .big-kanji{font-family:"Noto Serif JP",serif;font-weight:900;font-size:52px;color:var(--accent);line-height:1.1}
+      .dialog h2{margin:8px 0 6px;font-size:24px}
+      .dialog p{margin:0 0 16px;color:var(--ink-soft);font-size:14.5px}
+      .dialog .results{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+      .dialog .results div{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 4px}
+      .dialog .results .v{display:block;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+      .dialog .results .l{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
+      .dialog .row{display:flex;gap:8px}
+      .dialog .row button{flex:1}
+      @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+      .cell.shake{animation:shake .35s ease}
+      @media (prefers-reduced-motion: reduce){
+        .cell.shake{animation:none}
+        .progress-fill{transition:none}
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="top">
+        <div class="title-block">
+          <h1>Kanji Sudoku <span class="jp">漢数字数独</span></h1>
+          <p>The classic 9×9 Sudoku, played entirely with Japanese kanji numerals — from <span class="kanji-font">一</span> (one) to <span class="kanji-font">九</span> (nine). Fill every row, column, and 3×3 box with all nine kanji, with no repeats.</p>
+        </div>
+        <div class="seal" aria-hidden="true">数独</div>
+      </header>
+
+      <div class="stats" role="group" aria-label="Game status and difficulty">
+        <div class="difficulty-bar" role="group" aria-label="Difficulty">
+          <span class="label">Difficulty</span>
+          <button type="button" class="diff-btn" data-diff="easy" aria-pressed="true">Easy</button>
+          <button type="button" class="diff-btn" data-diff="medium" aria-pressed="false">Medium</button>
+          <button type="button" class="diff-btn" data-diff="hard" aria-pressed="false">Hard</button>
+          <button type="button" class="diff-btn" data-diff="expert" aria-pressed="false">Expert</button>
+        </div>
+        <div class="layout-bar" role="group" aria-label="Layout">
+          <span class="label">Layout</span>
+          <button type="button" class="layout-btn" data-layout="auto" aria-pressed="true">Auto</button>
+          <button type="button" class="layout-btn" data-layout="side" aria-pressed="false">Side by side</button>
+          <button type="button" class="layout-btn" data-layout="stacked" aria-pressed="false">Board on top</button>
+        </div>
+        <div class="stat"><span class="label">Time</span><div class="value" id="stat-time">00:00</div></div>
+        <div class="stat"><span class="label">Mistakes</span><div class="value" id="stat-mistakes">0</div></div>
+        <div class="stat"><span class="label">Hints used</span><div class="value" id="stat-hints">0</div></div>
+        <div class="stat"><span class="label">Filled</span><div class="value" id="stat-filled">0 / 81</div></div>
+      </div>
+
+      <div class="layout">
+        <section class="board-card" id="board-card" aria-label="Sudoku board">
+          <div class="board" id="board" role="grid" aria-label="9 by 9 Sudoku grid"></div>
+          <div class="pause-cover">
+            <div class="kanji-font">一時停止</div>
+            <p>The game is paused. The board is hidden so you can take a clean break.</p>
+            <button type="button" class="primary-btn" id="resume-btn">Resume game</button>
+          </div>
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">0% complete</div>
+          </div>
+          <p class="status-msg" id="status-msg" role="status" aria-live="polite">Pick a cell, then tap a kanji — or type 1–9 on your keyboard.</p>
+        </section>
+
+        <aside class="panel">
+          <div class="card">
+            <h2>Number pad</h2>
+            <p class="hint-text">Tap a cell on the board first, then choose a kanji. The romaji under each kanji is its Japanese reading — for example, 一 is “ichi” — and “left” shows how many are still to place.</p>
+            <div class="pad" id="pad"></div>
+          </div>
+
+          <div class="card">
+            <h2>Tools</h2>
+            <p class="hint-text">Notes mode lets you pencil in small candidate kanji before you commit.</p>
+            <div class="tools">
+              <button type="button" class="tool-btn" id="btn-notes" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                Notes <span class="badge" id="notes-state">OFF</span>
+              </button>
+              <button type="button" class="tool-btn" id="btn-erase">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+                Erase
+              </button>
+              <button type="button" class="tool-btn" id="btn-undo">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+                Undo
+              </button>
+              <button type="button" class="tool-btn" id="btn-hint">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2Z"/></svg>
+                Hint
+              </button>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button type="button" class="primary-btn" id="btn-new">New game</button>
+              <button type="button" class="ghost-btn" id="btn-pause" aria-pressed="false">Pause</button>
+            </div>
+            <div class="toggle-row" style="margin-top:12px">
+              <button type="button" class="toggle-btn" id="toggle-helper" aria-pressed="true">Small Arabic numbers: On</button>
+              <button type="button" class="toggle-btn" id="toggle-highlight" aria-pressed="true">Highlight matching kanji: On</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Kanji numeral reference</h2>
+            <p class="hint-text">New to kanji numerals? Use this chart any time. Tap a card to highlight every matching cell on the board.</p>
+            <div class="ref-grid" id="ref-grid"></div>
+          </div>
+        </aside>
+      </div>
+
+      <section class="howto">
+        <h2>How to play</h2>
+        <ol>
+          <li><strong>The goal:</strong> fill the grid so that every row, every column, and every 3×3 box contains each of the nine kanji — <span class="kanji-font">一 二 三 四 五 六 七 八 九</span> — exactly once.</li>
+          <li><strong>Placing a kanji:</strong> tap any empty cell to select it, then tap a kanji on the number pad, or press <kbd>1</kbd>–<kbd>9</kbd> on a keyboard. Use the arrow keys to move around the board.</li>
+          <li><strong>Given clues</strong> are printed in bold black and cannot be changed. Your entries appear in blue; a hint-filled cell appears in green.</li>
+          <li><strong>Mistakes</strong> are checked instantly: a wrong kanji turns red and the mistake counter goes up. Fix it with Erase or by entering the right kanji.</li>
+          <li><strong>Notes mode</strong> (pencil icon, or press <kbd>N</kbd>) lets you jot down small candidate kanji in an empty cell. Press <kbd>Backspace</kbd> to erase, <kbd>Ctrl</kbd>+<kbd>Z</kbd> to undo, and <kbd>H</kbd> for a hint.</li>
+          <li><strong>Learning the kanji:</strong> keep “Small Arabic numbers” on while you learn — a tiny 1–9 appears in the corner of each filled cell. Turn it off for a real challenge once the kanji feel familiar.</li>
+          <li><strong>Winning:</strong> the puzzle is complete when all 81 cells are filled correctly. Every puzzle here has exactly one solution.</li>
+          <li><strong>Layout:</strong> use the Layout switch at the top to choose <strong>Side by side</strong> (board on the left, number pad and tools on the right) or <strong>Board on top</strong> (board above the controls). <strong>Auto</strong> follows the width the game is given — handy when the game is embedded in a page with an iframe: wide frames get the side-by-side layout, narrow frames stack. A page embedding the game can also force a layout with <kbd>?layout=side</kbd> or <kbd>?layout=stacked</kbd> in the frame URL, or by sending a <kbd>postMessage</kbd> of <kbd>{type: "sudoku-layout", layout: "side"}</kbd>.</li>
+        </ol>
+      </section>
+    </main>
+
+    <div class="overlay" id="win-overlay" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <div class="dialog">
+        <div class="big-kanji">完成</div>
+        <h2 id="win-title">Puzzle complete!</h2>
+        <p id="win-sub">You filled the whole grid with kanji numerals. Well played.</p>
+        <div class="results">
+          <div><span class="v" id="win-time">00:00</span><span class="l">Time</span></div>
+          <div><span class="v" id="win-mistakes">0</span><span class="l">Mistakes</span></div>
+          <div><span class="v" id="win-hints">0</span><span class="l">Hints</span></div>
+        </div>
+        <div class="row">
+          <button type="button" class="ghost-btn" id="win-close">Keep looking</button>
+          <button type="button" class="primary-btn" id="win-again">Play again</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        "use strict";
+        var KANJI = ["", "一","二","三","四","五","六","七","八","九"];
+        var WORDS = ["", "One","Two","Three","Four","Five","Six","Seven","Eight","Nine"];
+        var ROMAJI = ["", "ichi","ni","san","yon","go","roku","nana","hachi","kyū"];
+        var REMOVALS = { easy: 36, medium: 46, hard: 52, expert: 57 };
+        var DIFF_LABEL = { easy:"Easy", medium:"Medium", hard:"Hard", expert:"Expert" };
+
+        /* ---------- Solver / generator ---------- */
+        function shuffled(arr){
+          var a = arr.slice();
+          for (var i=a.length-1;i>0;i--){
+            var j = Math.floor(Math.random()*(i+1));
+            var t=a[i]; a[i]=a[j]; a[j]=t;
+          }
+          return a;
+        }
+        function peersOf(i){
+          var r = Math.floor(i/9), c = i%9, out = [];
+          for (var k=0;k<9;k++){ out.push(r*9+k); out.push(k*9+c); }
+          var br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+          for (var dr=0;dr<3;dr++) for (var dc=0;dc<3;dc++) out.push((br+dr)*9+(bc+dc));
+          return out;
+        }
+        function candidates(grid, i){
+          if (grid[i] !== 0) return [];
+          var used = {};
+          var ps = peersOf(i);
+          for (var k=0;k<ps.length;k++) used[grid[ps[k]]] = true;
+          var out = [];
+          for (var n=1;n<=9;n++) if (!used[n]) out.push(n);
+          return out;
+        }
+        function pickCell(grid){
+          var best=-1, bestC=null;
+          for (var i=0;i<81;i++){
+            if (grid[i]===0){
+              var cs = candidates(grid,i);
+              if (cs.length===0) return {i:i, cs:cs};
+              if (bestC===null || cs.length<bestC.length){ best=i; bestC=cs; if (cs.length===1) break; }
+            }
+          }
+          return best===-1 ? null : {i:best, cs:bestC};
+        }
+        function solveRandom(grid){
+          var pick = pickCell(grid);
+          if (!pick) return true;
+          if (pick.cs.length===0) return false;
+          var order = shuffled(pick.cs);
+          for (var k=0;k<order.length;k++){
+            grid[pick.i]=order[k];
+            if (solveRandom(grid)) return true;
+            grid[pick.i]=0;
+          }
+          return false;
+        }
+        function countSolutions(grid, limit){
+          var pick = pickCell(grid);
+          if (!pick) return 1;
+          if (pick.cs.length===0) return 0;
+          var total = 0;
+          for (var k=0;k<pick.cs.length;k++){
+            grid[pick.i]=pick.cs[k];
+            total += countSolutions(grid, limit-total);
+            grid[pick.i]=0;
+            if (total>=limit) break;
+          }
+          return total;
+        }
+        function generatePuzzle(removalsTarget){
+          var solution = new Array(81).fill(0);
+          solveRandom(solution);
+          var puzzle = solution.slice();
+          var order = shuffled(Array.from({length:81}, function(_,i){return i;}));
+          var removed = 0;
+          for (var k=0;k<order.length && removed<removalsTarget;k++){
+            var i = order[k];
+            if (puzzle[i]===0) continue;
+            var backup = puzzle[i];
+            puzzle[i]=0;
+            var test = puzzle.slice();
+            if (countSolutions(test,2)===1){ removed++; }
+            else { puzzle[i]=backup; }
+          }
+          return { solution:solution, puzzle:puzzle };
+        }
+
+        /* ---------- State ---------- */
+        var state = {
+          difficulty:"easy",
+          solution:[], puzzle:[], board:[], given:[], hinted:[],
+          notes:[], errors:{},
+          selected:0, notesMode:false,
+          mistakes:0, hints:0, seconds:0,
+          timer:null, paused:false, finished:false,
+          helper:true, highlightSame:true,
+          history:[]
+        };
+
+        /* ---------- DOM ---------- */
+        var boardEl = document.getElementById("board");
+        var boardCard = document.getElementById("board-card");
+        var padEl = document.getElementById("pad");
+        var statusEl = document.getElementById("status-msg");
+        var cellEls = [];
+        var padBtns = [];
+
+        function buildBoard(){
+          boardEl.innerHTML=""; cellEls=[];
+          for (var i=0;i<81;i++){
+            (function(i){
+              var b=document.createElement("button");
+              b.type="button"; b.className="cell";
+              b.setAttribute("role","gridcell");
+              var c=i%9, r=Math.floor(i/9);
+              if (c===2||c===5) b.classList.add("br");
+              if (r===2||r===5) b.classList.add("bb");
+              b.addEventListener("click", function(){ selectCell(i); });
+              boardEl.appendChild(b); cellEls.push(b);
+            })(i);
+          }
+        }
+        function buildPad(){
+          padEl.innerHTML=""; padBtns=[];
+          for (var n=1;n<=9;n++){
+            (function(n){
+              var b=document.createElement("button");
+              b.type="button"; b.className="pad-btn";
+              b.setAttribute("aria-label","Enter "+KANJI[n]+" ("+n+", "+ROMAJI[n]+")");
+              b.innerHTML='<span class="k">'+KANJI[n]+'</span><span class="a">'+n+" · "+ROMAJI[n]+'</span><span class="left"></span>';
+              b.addEventListener("click", function(){ enterNumber(n); });
+              padEl.appendChild(b); padBtns.push(b);
+            })(n);
+          }
+        }
+        function buildRef(){
+          var grid=document.getElementById("ref-grid");
+          for (var n=1;n<=9;n++){
+            (function(n){
+              var b=document.createElement("button");
+              b.type="button"; b.className="ref-cell";
+              b.setAttribute("aria-label","Highlight all "+KANJI[n]+" cells");
+              b.innerHTML='<span class="k">'+KANJI[n]+'</span><span class="w">'+WORDS[n]+'</span><span class="n">value '+n+'</span>';
+              b.addEventListener("click", function(){
+                for (var i=0;i<81;i++){ if (state.board[i]===n){ selectCell(i); return; } }
+                setStatus("There is no <strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") on the board yet. Place one from the number pad.","");
+              });
+              grid.appendChild(b);
+            })(n);
+          }
+        }
+
+        /* ---------- Rendering ---------- */
+        function render(){
+          var sel = state.selected;
+          var selVal = sel>=0 ? state.board[sel] : 0;
+          var selR = Math.floor(sel/9), selC = sel%9;
+          for (var i=0;i<81;i++){
+            var el = cellEls[i];
+            var v = state.board[i];
+            var r = Math.floor(i/9), c = i%9;
+            el.className = "cell"
+              + ((c===2||c===5) ? " br":"") + ((r===2||r===5) ? " bb":"")
+              + (state.given[i] ? " given" : (state.hinted[i] ? " hinted" : " user"))
+              + (state.errors[i] ? " error":"");
+            if (sel>=0){
+              var sameBox = Math.floor(r/3)===Math.floor(selR/3) && Math.floor(c/3)===Math.floor(selC/3);
+              if (i===sel) el.classList.add("selected");
+              else if (r===selR || c===selC || sameBox) el.classList.add("related");
+              if (state.highlightSame && selVal!==0 && v===selVal && i!==sel) el.classList.add("same");
+            }
+            if (v!==0){
+              el.innerHTML = '<span class="big">'+KANJI[v]+'</span>' + (state.helper ? '<span class="tiny">'+v+'</span>' : '');
+              el.setAttribute("aria-label","Row "+(r+1)+", column "+(c+1)+": "+KANJI[v]+" ("+WORDS[v]+")"+(state.given[i]?", given clue":(state.errors[i]?", incorrect":"")));
+            } else if (state.notes[i] && state.notes[i].size>0){
+              var html='<span class="notes">';
+              for (var n=1;n<=9;n++) html += "<span>"+(state.notes[i].has(n)?KANJI[n]:"")+"</span>";
+              html+="</span>";
+              el.innerHTML=html;
+              el.setAttribute("aria-label","Row "+(r+1)+", column "+(c+1)+": empty, with notes");
+            } else {
+              el.innerHTML="";
+              el.setAttribute("aria-label","Row "+(r+1)+", column "+(c+1)+": empty");
+            }
+          }
+          /* pad remaining counts */
+          for (var n2=1;n2<=9;n2++){
+            var count=0;
+            for (var j=0;j<81;j++) if (state.board[j]===n2 && !state.errors[j]) count++;
+            var left = 9-count;
+            var btn = padBtns[n2-1];
+            btn.querySelector(".left").textContent = left>0 ? left+" left" : "done";
+            btn.classList.toggle("done", left<=0);
+          }
+          /* stats */
+          document.getElementById("stat-mistakes").textContent = state.mistakes;
+          document.getElementById("stat-mistakes").classList.toggle("bad", state.mistakes>0);
+          document.getElementById("stat-hints").textContent = state.hints;
+          var filled=0;
+          for (var k=0;k<81;k++) if (state.board[k]!==0 && !state.errors[k]) filled++;
+          document.getElementById("stat-filled").textContent = filled+" / 81";
+          var pct = Math.round(filled/81*100);
+          document.getElementById("progress-fill").style.width = pct+"%";
+          document.getElementById("progress-text").textContent = pct+"% complete";
+        }
+        function setStatus(html, kind){
+          statusEl.innerHTML = html;
+          statusEl.className = "status-msg" + (kind ? " "+kind : "");
+        }
+        function fmt(sec){
+          var m=Math.floor(sec/60), s=sec%60;
+          return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+        }
+        function startTimer(){
+          stopTimer();
+          state.timer=setInterval(function(){
+            if (!state.paused && !state.finished){
+              state.seconds++;
+              document.getElementById("stat-time").textContent = fmt(state.seconds);
+            }
+          },1000);
+        }
+        function stopTimer(){ if (state.timer){ clearInterval(state.timer); state.timer=null; } }
+
+        /* ---------- History ---------- */
+        function snapshot(){
+          state.history.push({
+            board: state.board.slice(),
+            hinted: state.hinted.slice(),
+            errors: Object.assign({}, state.errors),
+            notes: state.notes.map(function(s){ return new Set(s); }),
+            mistakes: state.mistakes
+          });
+          if (state.history.length>200) state.history.shift();
+        }
+        function undo(){
+          if (state.finished || state.paused) return;
+          var s = state.history.pop();
+          if (!s){ setStatus("Nothing to undo yet.",""); return; }
+          state.board=s.board; state.hinted=s.hinted; state.errors=s.errors; state.notes=s.notes; state.mistakes=s.mistakes;
+          render();
+          setStatus("Undid your last move.","");
+        }
+
+        /* ---------- Game flow ---------- */
+        function newGame(diff){
+          state.difficulty = diff || state.difficulty;
+          document.querySelectorAll(".diff-btn").forEach(function(b){
+            b.setAttribute("aria-pressed", b.getAttribute("data-diff")===state.difficulty ? "true":"false");
+          });
+          setStatus("Generating a fresh "+DIFF_LABEL[state.difficulty]+" puzzle…","");
+          setTimeout(function(){
+            var g = generatePuzzle(REMOVALS[state.difficulty]);
+            state.solution=g.solution; state.puzzle=g.puzzle;
+            state.board=g.puzzle.slice();
+            state.given=g.puzzle.map(function(v){ return v!==0; });
+            state.hinted=new Array(81).fill(false);
+            state.notes=Array.from({length:81}, function(){ return new Set(); });
+            state.errors={}; state.history=[];
+            state.mistakes=0; state.hints=0; state.seconds=0; state.finished=false;
+            state.paused=false;
+            boardCard.classList.remove("is-paused"); boardEl.classList.remove("paused");
+            document.getElementById("btn-pause").textContent="Pause";
+            document.getElementById("btn-pause").setAttribute("aria-pressed","false");
+            document.getElementById("stat-time").textContent="00:00";
+            /* select first empty cell */
+            state.selected = state.board.indexOf(0);
+            if (state.selected<0) state.selected=0;
+            document.getElementById("win-overlay").classList.remove("show");
+            render(); startTimer();
+            var clues = state.given.filter(Boolean).length;
+            setStatus("<strong>"+DIFF_LABEL[state.difficulty]+" game started.</strong> "+clues+" clues are given. Pick an empty cell and enter a kanji.","");
+          }, 30);
+        }
+        function selectCell(i){
+          if (state.paused || state.finished) return;
+          state.selected=i;
+          render();
+        }
+        function cleanNotesAround(i, n){
+          var ps = peersOf(i);
+          for (var k=0;k<ps.length;k++){
+            if (state.notes[ps[k]]) state.notes[ps[k]].delete(n);
+          }
+        }
+        function enterNumber(n){
+          if (state.paused || state.finished) return;
+          var i = state.selected;
+          if (i<0) return;
+          if (state.given[i] || state.hinted[i]){ setStatus("That cell is a fixed clue — it cannot be changed. Pick an empty cell.",""); return; }
+          if (state.notesMode){
+            if (state.board[i]!==0){ setStatus("Notes go in empty cells. Erase this cell first if you want to change it.",""); return; }
+            snapshot();
+            if (state.notes[i].has(n)) state.notes[i].delete(n); else state.notes[i].add(n);
+            render(); return;
+          }
+          if (state.board[i]===n && !state.errors[i]) return;
+          snapshot();
+          state.board[i]=n;
+          state.notes[i].clear();
+          if (n !== state.solution[i]){
+            state.errors[i]=true;
+            state.mistakes++;
+            render();
+            var el=cellEls[i]; el.classList.add("shake");
+            setTimeout(function(){ el.classList.remove("shake"); }, 400);
+            setStatus("<strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") does not belong there — it breaks a row, column, or box rule. Try another kanji, or erase it.","err");
+          } else {
+            delete state.errors[i];
+            cleanNotesAround(i,n);
+            render();
+            setStatus("<strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") placed correctly.","ok");
+            checkWin();
+          }
+        }
+        function eraseCell(){
+          if (state.paused || state.finished) return;
+          var i=state.selected;
+          if (i<0) return;
+          if (state.given[i] || state.hinted[i]){ setStatus("Fixed clues cannot be erased.",""); return; }
+          if (state.board[i]===0 && state.notes[i].size===0) return;
+          snapshot();
+          state.board[i]=0; delete state.errors[i]; state.notes[i].clear();
+          render();
+          setStatus("Cell cleared.","");
+        }
+        function useHint(){
+          if (state.paused || state.finished) return;
+          var empties=[];
+          for (var i=0;i<81;i++) if (state.board[i]!==state.solution[i]) empties.push(i);
+          if (empties.length===0) return;
+          var target = (state.selected>=0 && state.board[state.selected]!==state.solution[state.selected] && !state.given[state.selected])
+            ? state.selected
+            : empties[Math.floor(Math.random()*empties.length)];
+          snapshot();
+          state.board[target]=state.solution[target];
+          state.hinted[target]=true;
+          delete state.errors[target];
+          state.notes[target].clear();
+          cleanNotesAround(target, state.solution[target]);
+          state.hints++;
+          state.selected=target;
+          render();
+          var v=state.solution[target];
+          setStatus("Hint: this cell is <strong>"+KANJI[v]+"</strong> ("+WORDS[v].toLowerCase()+", "+v+").","ok");
+          checkWin();
+        }
+        function checkWin(){
+          for (var i=0;i<81;i++) if (state.board[i]!==state.solution[i]) return;
+          state.finished=true; stopTimer();
+          document.getElementById("win-time").textContent=fmt(state.seconds);
+          document.getElementById("win-mistakes").textContent=state.mistakes;
+          document.getElementById("win-hints").textContent=state.hints;
+          document.getElementById("win-sub").textContent =
+            "You solved the "+DIFF_LABEL[state.difficulty]+" puzzle in "+fmt(state.seconds)+
+            " with "+state.mistakes+(state.mistakes===1?" mistake":" mistakes")+
+            " and "+state.hints+(state.hints===1?" hint":" hints")+". Every row, column, and box now holds 一 through 九 exactly once.";
+          setStatus("<strong>Puzzle complete!</strong> The whole grid is filled correctly.","ok");
+          setTimeout(function(){ document.getElementById("win-overlay").classList.add("show"); }, 350);
+        }
+        function togglePause(){
+          if (state.finished) return;
+          state.paused=!state.paused;
+          boardCard.classList.toggle("is-paused", state.paused);
+          boardEl.classList.toggle("paused", state.paused);
+          var btn=document.getElementById("btn-pause");
+          btn.textContent = state.paused ? "Resume" : "Pause";
+          btn.setAttribute("aria-pressed", state.paused?"true":"false");
+          setStatus(state.paused ? "Game paused. Press Resume when you are ready." : "Welcome back — game resumed.","");
+        }
+
+        /* ---------- Layout switching (iframe embedding) ---------- */
+        var SIDE_MIN_WIDTH = 820;
+        var layoutMode = "auto";
+        var lastLayoutSent = "";
+        function normalizeLayout(v){
+          if (typeof v !== "string") return null;
+          v = v.toLowerCase();
+          if (v==="auto") return "auto";
+          if (v==="side" || v==="side-by-side" || v==="side_by_side" || v==="horizontal" || v==="row") return "side";
+          if (v==="stacked" || v==="top" || v==="board-on-top" || v==="board_on_top" || v==="vertical" || v==="column") return "stacked";
+          return null;
+        }
+        function effectiveLayout(){
+          if (layoutMode !== "auto") return layoutMode;
+          var wrap = document.querySelector(".wrap");
+          var w = wrap ? wrap.clientWidth : window.innerWidth;
+          return w >= SIDE_MIN_WIDTH ? "side" : "stacked";
+        }
+        function applyLayout(){
+          var eff = effectiveLayout();
+          document.body.setAttribute("data-layout-mode", layoutMode);
+          document.body.setAttribute("data-layout-effective", eff);
+          document.querySelectorAll(".layout-btn").forEach(function(b){
+            b.setAttribute("aria-pressed", b.getAttribute("data-layout")===layoutMode ? "true":"false");
+          });
+          var key = layoutMode+"/"+eff;
+          if (key !== lastLayoutSent){
+            lastLayoutSent = key;
+            if (window.parent && window.parent !== window){
+              try { window.parent.postMessage({ type:"sudoku-layout-changed", layout:layoutMode, effective:eff }, "*"); } catch(e){}
+            }
+          }
+        }
+        function setLayoutMode(v){
+          var n = normalizeLayout(v);
+          if (!n) return;
+          layoutMode = n;
+          applyLayout();
+        }
+        (function initLayout(){
+          var param = null;
+          try { param = new URLSearchParams(window.location.search).get("layout"); } catch(e){}
+          if (param) setLayoutMode(param); else applyLayout();
+          document.querySelectorAll(".layout-btn").forEach(function(b){
+            b.addEventListener("click", function(){ setLayoutMode(b.getAttribute("data-layout")); });
+          });
+          window.addEventListener("message", function(e){
+            var d = e && e.data;
+            if (!d || typeof d !== "object") return;
+            if (d.type && ["sudoku-layout","go-layout","layout","set-layout"].indexOf(d.type)===-1) return;
+            if (d.layout) setLayoutMode(d.layout);
+          });
+          var wrap = document.querySelector(".wrap");
+          if (window.ResizeObserver && wrap){
+            new ResizeObserver(function(){ if (layoutMode==="auto") applyLayout(); }).observe(wrap);
+          }
+          window.addEventListener("resize", function(){ if (layoutMode==="auto") applyLayout(); });
+        })();
+
+        /* ---------- Wiring ---------- */
+        buildBoard(); buildPad(); buildRef();
+        document.querySelectorAll(".diff-btn").forEach(function(b){
+          b.addEventListener("click", function(){ newGame(b.getAttribute("data-diff")); });
+        });
+        document.getElementById("btn-new").addEventListener("click", function(){ newGame(state.difficulty); });
+        document.getElementById("btn-erase").addEventListener("click", eraseCell);
+        document.getElementById("btn-undo").addEventListener("click", undo);
+        document.getElementById("btn-hint").addEventListener("click", useHint);
+        document.getElementById("btn-pause").addEventListener("click", togglePause);
+        document.getElementById("resume-btn").addEventListener("click", togglePause);
+        document.getElementById("btn-notes").addEventListener("click", function(){
+          state.notesMode=!state.notesMode;
+          this.setAttribute("aria-pressed", state.notesMode?"true":"false");
+          document.getElementById("notes-state").textContent = state.notesMode?"ON":"OFF";
+          setStatus(state.notesMode ? "<strong>Notes mode is on.</strong> Numbers you enter now become small pencil notes." : "<strong>Notes mode is off.</strong> Numbers you enter now are placed for real.","");
+        });
+        document.getElementById("toggle-helper").addEventListener("click", function(){
+          state.helper=!state.helper;
+          this.setAttribute("aria-pressed", state.helper?"true":"false");
+          this.textContent="Small Arabic numbers: "+(state.helper?"On":"Off");
+          render();
+        });
+        document.getElementById("toggle-highlight").addEventListener("click", function(){
+          state.highlightSame=!state.highlightSame;
+          this.setAttribute("aria-pressed", state.highlightSame?"true":"false");
+          this.textContent="Highlight matching kanji: "+(state.highlightSame?"On":"Off");
+          render();
+        });
+        document.getElementById("win-again").addEventListener("click", function(){ newGame(state.difficulty); });
+        document.getElementById("win-close").addEventListener("click", function(){
+          document.getElementById("win-overlay").classList.remove("show");
+        });
+        document.addEventListener("keydown", function(e){
+          if (state.paused || state.finished){
+            if (state.paused && (e.key==="Enter"||e.key===" ")) { /* let buttons work */ }
+            return;
+          }
+          var sel=state.selected;
+          if (e.key>="1" && e.key<="9"){ enterNumber(parseInt(e.key,10)); }
+          else if (e.key==="Backspace" || e.key==="Delete"){ e.preventDefault(); eraseCell(); }
+          else if (e.key==="n" || e.key==="N"){ document.getElementById("btn-notes").click(); }
+          else if (e.key==="h" || e.key==="H"){ useHint(); }
+          else if ((e.ctrlKey||e.metaKey) && (e.key==="z"||e.key==="Z")){ e.preventDefault(); undo(); }
+          else if (e.key==="ArrowRight" && sel>=0){ e.preventDefault(); selectCell(sel%9===8?sel:sel+1); }
+          else if (e.key==="ArrowLeft" && sel>=0){ e.preventDefault(); selectCell(sel%9===0?sel:sel-1); }
+          else if (e.key==="ArrowDown" && sel>=0){ e.preventDefault(); selectCell(sel+9>80?sel:sel+9); }
+          else if (e.key==="ArrowUp" && sel>=0){ e.preventDefault(); selectCell(sel-9<0?sel:sel-9); }
+        });
+
+        newGame("easy");
+      })();
+    </script>
+  </body>
+</html>

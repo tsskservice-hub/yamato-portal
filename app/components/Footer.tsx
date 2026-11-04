@@ -74,19 +74,19 @@ export default function Footer({}: FooterProps) {
                 About Us
               </Link>
               <Link
-                to="/terms"
+                to="/legal/terms"
                 className="hover:text-indigo-600 transition-colors"
               >
                 Terms of Service
               </Link>
               <Link
-                to="/privacy"
+                to="/legal/privacy"
                 className="hover:text-indigo-600 transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
-                to="/disclaimer"
+                to="/legal/disclaimer"
                 className="hover:text-indigo-600 transition-colors"
               >
                 Disclaimer

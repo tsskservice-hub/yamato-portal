@@ -5,10 +5,10 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import { Link, useRouteLoaderData } from '@remix-run/react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
-import { supabase } from '../lib/supabaseClient';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { supabase } from '~/lib/supabaseClient';
 import { 
   ShieldCheck, 
   Check, 
@@ -18,7 +18,7 @@ import {
   ChevronUp, 
   SlidersHorizontal 
 } from 'lucide-react';
-import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
+import { fetchPricePlansData, PricePlansKnowledge } from '~/data/price-plans';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

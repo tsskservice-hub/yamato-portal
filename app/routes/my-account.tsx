@@ -1,16 +1,17 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クレジット残高・履歴のクライアント同期対応版）
+ * @description アカウント設定画面（クレジット残高・履歴・NGワードバリデーション対応版）
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
-import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '../components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '../components/PageLayout';
-import { generateModuleMeta } from '../utils/seoMeta';
+import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData, useFetcher } from '@remix-run/react';
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
 import { ArrowDownRight, ArrowUpRight, Gauge, History, UserCheck } from 'lucide-react';
-import { createAdminSupabaseClient, createServerSupabaseClient } from '../lib/supabase.server';
-import { supabase } from '../lib/supabaseClient';
+import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
+import { supabase } from '~/lib/supabaseClient';
+import { nicknameSchema } from '~/validations/profile';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -21,7 +22,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .select('content')
     .eq('key', 'PORTAL_CONTENT')
     .single();
-const { data: { user } } = await serverSupabase.auth.getUser();
+  const { data: { user } } = await serverSupabase.auth.getUser();
 
   let initialNickname = "";
   let initialPace = "normal";
@@ -50,10 +51,12 @@ const { data: { user } } = await serverSupabase.auth.getUser();
     nickname: initialNickname,
     learningPace: initialPace,
     createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
+    portalContent: portalData?.content ?? null,
+    currentPath: url.pathname,
   });
 }
 
-// Action: アカウント削除処理
+// Action: プロフィール更新（NGワード・Zodチェック付き） および アカウント削除処理
 export async function action({ request, context }: LoaderFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -65,6 +68,36 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     return json({ error: "Authentication error occurred.", success: false }, { status: 401 });
   }
 
+  // 1. プロフィール更新処理
+  if (intent === "update-profile") {
+    const nickname = formData.get("nickname")?.toString() || "";
+    const learningPace = formData.get("learningPace")?.toString() || "normal";
+
+    // Zodによるバリデーション（NGワード・文字数チェック）
+    const result = nicknameSchema.safeParse(nickname);
+    if (!result.success) {
+      const errorMessage = result.error.errors[0].message;
+      return json({ error: errorMessage, success: false }, { status: 400 });
+    }
+
+    const validatedNickname = result.data;
+
+    const { error: updateError } = await serverSupabase
+      .from("profiles")
+      .update({
+        nickname: validatedNickname,
+        learning_pace: learningPace,
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      return json({ error: "Failed to update profile: " + updateError.message, success: false }, { status: 500 });
+    }
+
+    return json({ success: true, error: null, message: "Preferences updated successfully." }, { headers });
+  }
+
+  // 2. アカウント削除処理
   if (intent === "delete-account") {
     const confirmText = formData.get("confirmText");
     if (confirmText !== "DELETE") {
@@ -86,7 +119,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     });
   }
 
-  return json({ success: true, error: null });
+  return json({ error: "Invalid intent.", success: false }, { status: 400 });
 }
 
 export default function AccountSettingsRoute() {
@@ -94,6 +127,9 @@ export default function AccountSettingsRoute() {
   const initialData = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
+
+  // 💡 Remix の useFetcher を利用して action を安全に呼び出す
+  const fetcher = useFetcher<{ success?: boolean; error?: string; message?: string }>();
 
   const rootData = useRouteLoaderData("root") as {
     user?: any;
@@ -124,11 +160,12 @@ export default function AccountSettingsRoute() {
   const [transactions, setTransactions] = useState<Array<any>>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  // fetcher の状態からローディング・エラー・成功状態を連動
+  const isSaving = fetcher.state === "submitting" || fetcher.state === "loading";
+  const saveError = fetcher.data?.error || null;
+  const showSavedIndicator = fetcher.data?.success === true;
 
-  // 💡 クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
+  // クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
   useEffect(() => {
     const fetchUserDataAndTransactions = async () => {
       try {
@@ -142,7 +179,6 @@ export default function AccountSettingsRoute() {
             setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
           }
 
-          // 1. profiles から最新の正確なクレジット残高を取得
           const { data: profileData } = await supabase
             .from("profiles")
             .select("credits")
@@ -153,7 +189,6 @@ export default function AccountSettingsRoute() {
             setCredits(profileData.credits);
           }
 
-          // 2. credit_transactions から履歴を取得
           const { data: txData, error: txError } = await supabase
             .from("credit_transactions")
             .select("id, amount, feature_used, description, created_at, expires_at")
@@ -188,52 +223,12 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    let activeUser = user;
-    if (!activeUser) {
-      const { data: { session } } = await supabase.auth.getSession();
-      activeUser = session?.user ?? null;
+  // 保存成功時にリバデーションを実行
+  useEffect(() => {
+    if (fetcher.data?.success) {
+      revalidator.revalidate();
     }
-
-    if (!activeUser) {
-      alert("Please sign in to update your preferences.");
-      return;
-    }
-
-    setIsSaving(true);
-    setSaveError(null);
-
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          nickname: nicknameInput.trim(),
-          learning_pace: paceInput,
-        })
-        .eq("id", activeUser.id);
-
-      if (error) {
-        throw error;
-      }
-
-      validatorRevalidate();
-      setShowSavedIndicator(true);
-      setTimeout(() => {
-        setShowSavedIndicator(false);
-      }, 3000);
-    } catch (err: any) {
-      console.error("Failed to update profile:", err);
-      setSaveError(err.message || "Failed to save preferences.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const validatorRevalidate = () => {
-    revalidator.revalidate();
-  };
+  }, [fetcher.data]);
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
@@ -251,7 +246,10 @@ export default function AccountSettingsRoute() {
             <UserCheck className="w-5 h-5 text-blue-600" /> AI Tutor Preferences & Profile
           </h2>
 
-          <form onSubmit={handleUpdateProfile} className="space-y-6">
+          {/* 💡 fetcher.Form を使用することで、安全にサーバーの action へPOSTされ Zod が機能します */}
+          <fetcher.Form method="post" className="space-y-6">
+            <input type="hidden" name="intent" value="update-profile" />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -259,6 +257,7 @@ export default function AccountSettingsRoute() {
                 </label>
                 <input
                   type="text"
+                  name="nickname"
                   value={nicknameInput}
                   onChange={(e) => setNicknameInput(e.target.value)}
                   placeholder="e.g. Kenji"
@@ -274,6 +273,7 @@ export default function AccountSettingsRoute() {
                   <Gauge className="w-4 h-4 text-blue-600" /> Default Learning Pace
                 </label>
                 <select
+                  name="learningPace"
                   value={paceInput}
                   onChange={(e) => setPaceInput(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -289,7 +289,7 @@ export default function AccountSettingsRoute() {
             </div>
 
             {saveError && (
-              <p className="text-xs text-red-600">{saveError}</p>
+              <p className="text-xs text-red-600 font-medium">{saveError}</p>
             )}
 
             <div className="flex items-center justify-end space-x-3">
@@ -306,7 +306,7 @@ export default function AccountSettingsRoute() {
                 {isSaving ? "Saving..." : "Save Preferences"}
               </button>
             </div>
-          </form>
+          </fetcher.Form>
         </div>
 
         {/* 2. 総合的なアカウント情報セクション */}
@@ -433,7 +433,7 @@ export default function AccountSettingsRoute() {
                 To confirm, please type <span className="font-semibold text-gray-900">「DELETE」</span> in the field below.
               </p>
 
-              <form method="post" onSubmit={() => {}} className="space-y-4">
+              <form method="post" className="space-y-4">
                 <input type="hidden" name="intent" value="delete-account" />
                 <input
                   type="text"

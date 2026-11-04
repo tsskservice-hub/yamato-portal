@@ -6,11 +6,11 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { json, type MetaFunction, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Link, useActionData, useNavigation, useRouteLoaderData } from "@remix-run/react";
-import { ToolPageWrapper } from "../components/ToolPageWrapper";
-import { type PageLayoutRef } from "../components/PageLayout";
-import { generateModuleMeta } from "../utils/seoMeta";
-import { fetchLegalContentData, LegalDocument } from "../data/legal-content";
-import { supabase } from "../lib/supabaseClient";
+import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/PageLayout';
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { fetchLegalContentData, LegalDocument } from '~/data/legal-content';
+import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
