@@ -104,27 +104,12 @@ export function PortalModulesGrid({
         </p>
       </div>
 
-      {/* 1. 一般セクション (CONTENT_GENERAL) */}
-      {generalModules.length > 0 && (
-        <div className="space-y-4 pt-4">
-          <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-            <span className="text-xl">🌍</span>
-            <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
-              Section 1: Global & General Japanese Learners
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {generalModules.map((mod) => renderCard(mod, 'blue'))}
-          </div>
-        </div>
-      )}
-
       {/* VCE セクション全体のラッパー */}
       <div id="section-vce" className="space-y-8 pt-6">
         <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
           <span className="text-xl">🇦🇺🐨🦘</span>
           <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
-            Section 2: Victorian Curriculum & VCE Students (Australia)
+            Victorian Curriculum & VCE Students (Australia)
           </h3>
         </div>
 
@@ -200,7 +185,7 @@ export function PortalModulesGrid({
                 actionLabel: 'View Arcade',
                 isComingSoon: false,
                 creditRequirement: null,
-                accentColor: 'red', // 💡 PortalModule型で必須の accentColor を追加
+                accentColor: 'red',
               },
               'red'
             )}
@@ -208,6 +193,21 @@ export function PortalModulesGrid({
         </div>
 
       </div>
+
+      {/* 1. 一般セクション (CONTENT_GENERAL) - ゲームズ・アーケードの下に移動 */}
+      {generalModules.length > 0 && (
+        <div className="space-y-4 pt-6">
+          <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+            <span className="text-xl">🌍</span>
+            <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
+              Global & General Japanese Learners
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {generalModules.map((mod) => renderCard(mod, 'blue'))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
