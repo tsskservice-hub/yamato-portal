@@ -55,21 +55,20 @@ export async function signUpAndRegisterPasskey(email: string): Promise<boolean> 
   });
 
   if (signUpError) throw signUpError;
-
   if (!signUpData.session || !signUpData.user) {
     throw new Error(
       "Account created successfully, but auth session failed to initialize. Please sign in again."
     );
   }
 
-  // 💡 profiles テーブルにユーザーの ID, email と学習ペースの初期値を保存する
+  // 💡 DBトリガー等により作成済みの profiles 行に対して update で email と学習ペースを更新保存する
   const { error: profileError } = await supabase
     .from('profiles')
-    .upsert({
-      id: signUpData.user.id,
+    .update({
       email: trimmedEmail,
       learning_pace: 'normal', // 初期値として normal を設定
-    });
+    })
+    .eq('id', signUpData.user.id);
 
   if (profileError) {
     console.error("Failed to save profile:", profileError);
