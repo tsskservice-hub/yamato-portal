@@ -1,6 +1,6 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (全カラム詳細表示対応版)
+ * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー別グループ化対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -10,7 +10,7 @@ import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// 正しいカラム名に合わせた型定義
+// kl_character テーブルの全カラムに合わせた型定義（category を追加）
 export interface KanjiCharacter {
   id: string;
   character: string;        // 漢字
@@ -26,8 +26,27 @@ export interface KanjiCharacter {
   radical?: string;         // 部首
   char_type: string;        // 文字種 ('kanji' 等)
   grade_level?: number;     // 学年レベル
+  category?: string;        // カテゴリー
   created_at?: string;
 }
+
+// VCE公式のカテゴリー表示順序
+const CATEGORY_ORDER = [
+  'Numbers',
+  'Counters',
+  'Seasons/time',
+  'Parts of the body',
+  'Positions/directions',
+  'School life',
+  'People/family',
+  'Adjectives/adverbs',
+  'Verbs',
+  'Animals/nature',
+  'Geography/travel',
+  'Colours',
+  'Repeat sign',
+  'Miscellaneous'
+];
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -88,6 +107,12 @@ export default function Kanji200Component() {
     loadKanjiData();
   }, [loadKanjiData]);
 
+  // データベースの category カラムを元にカテゴリーごとにグループ化
+  const groupedKanji = CATEGORY_ORDER.reduce((acc, cat) => {
+    acc[cat] = kanjiList.filter(item => (item.category || 'Miscellaneous') === cat);
+    return acc;
+  }, {} as Record<string, KanjiCharacter[]>);
+
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -100,7 +125,7 @@ export default function Kanji200Component() {
                 200 Essential Kanji / 必修漢字200字
               </h1>
               <p className="text-sm text-slate-600 max-w-2xl">
-                Master the core 200 kanji required for VCE Japanese.
+                Master the core 200 kanji required for VCE Japanese by categories.
               </p>
             </div>
             <Link
@@ -124,77 +149,100 @@ export default function Kanji200Component() {
               No kanji records found in the kl_character table.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {kanjiList.map((item, index) => (
-                <div
-                  key={item.id || index}
-                  className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
-                >
-                  <div>
-                    {/* グレードレベルタグを右上に配置 */}
-                    <div className="flex items-center justify-end mb-2 min-h-[1.5rem]">
-                      {item.grade_level !== undefined && item.grade_level !== null && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-                          Grade {item.grade_level}
-                        </span>
-                      )}
-                    </div>
+            <div className="space-y-12">
+              {CATEGORY_ORDER.map(categoryName => {
+                const items = groupedKanji[categoryName] || [];
+                if (items.length === 0) return null;
 
-                    {/* 漢字メイン表示 */}
-                    <div className="text-center my-2">
-                      <span className="text-6xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                        {item.character || '—'}
+                return (
+                  <div key={categoryName} className="space-y-4">
+                    {/* カテゴリー見出し */}
+                    <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                      <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        <span className="w-2 h-6 bg-indigo-600 rounded-full inline-block"></span>
+                        {categoryName}
+                      </h2>
+                      <span className="text-xs font-semibold text-slate-500 bg-slate-200/70 px-2.5 py-1 rounded-full">
+                        {items.length} kanji
                       </span>
                     </div>
 
-                    {/* 意味 */}
-                    <div className="text-center text-sm font-semibold text-slate-800 mb-4 min-h-[2rem] flex items-center justify-center">
-                      {item.meaning || '—'}
-                    </div>
+                    {/* 漢字カードグリッド */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                      {items.map((item, index) => (
+                        <div
+                          key={item.id || index}
+                          className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
+                        >
+                          <div>
+                            {/* グレードレベルタグを右上に配置 */}
+                            <div className="flex items-center justify-end mb-2 min-h-[1.5rem]">
+                              {item.grade_level !== undefined && item.grade_level !== null && (
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
+                                  Grade {item.grade_level}
+                                </span>
+                              )}
+                            </div>
 
-                    {/* 詳細情報（音読み・訓読み・ローマ字・部首・画数を網羅） */}
-                    <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600">
-                      
-                      {/* 音読み関連 */}
-                      {(item.on_display || item.on_romaji) && (
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-slate-500">Onyomi:</span>
-                          <span className="text-right font-medium">
-                            {item.on_display} {item.on_romaji ? `(${item.on_romaji})` : ''}
-                          </span>
+                            {/* 漢字メイン表示 */}
+                            <div className="text-center my-2">
+                              <span className="text-6xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                {item.character || '—'}
+                              </span>
+                            </div>
+
+                            {/* 意味 */}
+                            <div className="text-center text-sm font-semibold text-slate-800 mb-4 min-h-[2rem] flex items-center justify-center">
+                              {item.meaning || '—'}
+                            </div>
+
+                            {/* 詳細情報（音読み・訓読み・ローマ字・部首・画数を網羅） */}
+                            <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600">
+                              
+                              {/* 音読み関連 */}
+                              {(item.on_display || item.on_romaji) && (
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-slate-500">Onyomi:</span>
+                                  <span className="text-right font-medium">
+                                    {item.on_display} {item.on_romaji ? `(${item.on_romaji})` : ''}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* 訓読み関連 */}
+                              {(item.kun_display || item.kun_reading || item.kun_romaji) && (
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-slate-500">Kunyomi:</span>
+                                  <span className="text-right font-medium">
+                                    {[item.kun_display, item.kun_reading ? `[${item.kun_reading}]` : '', item.kun_romaji ? `(${item.kun_romaji})` : '']
+                                      .filter(Boolean)
+                                      .join(' ')}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* 部首 */}
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold text-slate-500">Radical:</span>
+                                <span className="text-right font-medium">{item.radical || '—'}</span>
+                              </div>
+
+                              {/* 画数 */}
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold text-slate-500">Strokes:</span>
+                                <span className="text-right font-medium">
+                                  {item.stroke_count !== undefined && item.stroke_count !== null ? `${item.stroke_count}画` : '—'}
+                                </span>
+                              </div>
+
+                            </div>
+                          </div>
                         </div>
-                      )}
-
-                      {/* 訓読み関連 */}
-                      {(item.kun_display || item.kun_reading || item.kun_romaji) && (
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-slate-500">Kunyomi:</span>
-                          <span className="text-right font-medium">
-                            {[item.kun_display, item.kun_reading ? `[${item.kun_reading}]` : '', item.kun_romaji ? `(${item.kun_romaji})` : '']
-                              .filter(Boolean)
-                              .join(' ')}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* 部首 */}
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-slate-500">Radical:</span>
-                        <span className="text-right font-medium">{item.radical || '—'}</span>
-                      </div>
-
-                      {/* 画数 */}
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-slate-500">Strokes:</span>
-                        <span className="text-right font-medium">
-                          {item.stroke_count !== undefined && item.stroke_count !== null ? `${item.stroke_count}画` : '—'}
-                        </span>
-                      </div>
-
+                      ))}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
