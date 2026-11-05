@@ -1,6 +1,6 @@
 /**
  * @file app/routes/vce.speaking._index.tsx
- * @description VCE Speaking セクションのハブページ（kl_app テーブル・CONTENT_VCE_SPEAKING 対応版）
+ * @description VCE Speaking セクションのハブページ（Supabase動的コンテンツ連携版）
  */
 
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
@@ -16,7 +16,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let portalContent = null;
   
   try {
-    // ポータル全体の共通設定を kl_app または portal_settings から取得
     const { data: portalData } = await supabase
       .from('kl_app')
       .select('content')
@@ -32,11 +31,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function VceSpeakingIndex() {
-  // kl_app テーブルの CONTENT_VCE_SPEAKING に対応するカスタムフックからのデータ取得
   const { vceSpeakingData, isLoading, isError, errorMessage, refetch } = useVceSpeakingContent(supabase);
 
-  // 安全にプロパティへアクセスするためのanyキャスト
-  const dataAny = vceSpeakingData as any;
+  // vceSpeakingData.modules から直接モジュール配列を取得
+  const modules = vceSpeakingData?.modules || [];
 
   return (
     <ToolPageWrapper 
@@ -52,78 +50,79 @@ export default function VceSpeakingIndex() {
           {isLoading && !vceSpeakingData ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-4"></div>
-              <p className="text-slate-600 font-medium">Loading VCE speaking modules from kl_app...</p>
+              <p className="text-slate-600 font-medium">Loading VCE speaking modules...</p>
             </div>
           ) : (
             <>
               {/* ヘッダーセクション */}
               <div className="text-center mb-12">
                 <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl mb-4">
-                  {dataAny?.title || "VCE Speaking Assessment Hub"}
+                  VCE Speaking Assessment Hub
                 </h1>
                 <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                  {dataAny?.subtitle || "Master your VCE Japanese oral examinations through realistic simulated drills, AI dialogue partners, and structured pronunciation practice."}
+                  Master your VCE Japanese oral examinations through realistic simulated drills, AI dialogue partners, and structured pronunciation practice.
                 </p>
               </div>
 
-              {/* セクションおよびカード一覧 */}
-              {(dataAny?.sections || []).map((section: any, sIdx: number) => (
-                <div key={sIdx} className="mb-12">
-                  <div className="mb-6 border-b border-slate-200 pb-3">
-                    <h2 className="text-2xl font-bold text-slate-900">{section.title}</h2>
-                    {section.subtitle && (
-                      <p className="text-sm text-slate-500 mt-1">{section.subtitle}</p>
-                    )}
-                  </div>
+              {/* モジュールカード一覧 */}
+              <div className="mb-12">
+                <div className="mb-6 border-b border-slate-200 pb-3">
+                  <h2 className="text-2xl font-bold text-slate-900">Oral Practice Modules & Reference</h2>
+                  <p className="text-sm text-slate-500 mt-1">Select an oral practice module to begin your session</p>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {(section.modules || []).map((drill: any) => (
-                      <div 
-                        key={drill.id} 
-                        className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between mb-4">
-                            {drill.category && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                                {drill.category}
-                              </span>
-                            )}
-                            {drill.badge && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
-                                {drill.badge}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                            {drill.name}
-                          </h3>
-                          
-                          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-                            {drill.description}
-                          </p>
-                        </div>
-
-                        <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {modules.map((drill: any) => (
+                    <div 
+                      key={drill.id} 
+                      className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          {drill.category && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                              {drill.category}
+                            </span>
+                          )}
+                          {/* isComingSoon に応じたバッジ表示 */}
                           {drill.isComingSoon ? (
-                            <span className="inline-block w-full text-center py-2.5 px-4 bg-slate-100 text-slate-400 font-medium rounded-xl cursor-not-allowed">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
                               Coming Soon
                             </span>
                           ) : (
-                            <Link
-                              to={drill.path}
-                              className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
-                            >
-                              {drill.actionLabel || "Launch"}
-                            </Link>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                              Active
+                            </span>
                           )}
                         </div>
+                        
+                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                          {drill.name}
+                        </h3>
+                        
+                        <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                          {drill.description}
+                        </p>
                       </div>
-                    ))}
-                  </div>
+
+                      <div>
+                        {drill.isComingSoon ? (
+                          <span className="inline-block w-full text-center py-2.5 px-4 bg-slate-100 text-slate-400 font-medium rounded-xl cursor-not-allowed">
+                            Coming Soon
+                          </span>
+                        ) : (
+                          <Link
+                            to={drill.path}
+                            className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+                          >
+                            {drill.actionLabel || "Launch"}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </>
           )}
         </div>
