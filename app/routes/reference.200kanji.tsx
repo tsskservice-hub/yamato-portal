@@ -1,6 +1,6 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー分割・データベースソート対応版)
+ * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー細分化・データベースソート対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -30,7 +30,7 @@ export interface KanjiCharacter {
   created_at?: string;
 }
 
-// 分割後の新しいカテゴリー表示順序
+// 新しいカテゴリー表示順序（細分化・追加されたカテゴリーを反映）
 const CATEGORY_ORDER = [
   'Numbers',
   'Counters',
@@ -44,10 +44,16 @@ const CATEGORY_ORDER = [
   'School life',
   'People/family',
   'Adjectives/adverbs',
-  'Verbs',
+  'Verbs (Movement)',
+  'Verbs (Body/Senses)',
+  'Verbs (Lifestyle)',
+  'Verbs (Activity)',
+  'Country/city',
+  'Place',
+  'Travel/transport',
+  'Food',
   'Nature',
   'Animals',
-  'Geography/travel',
   'Colours',
   'Repeat sign',
   'Miscellaneous'
