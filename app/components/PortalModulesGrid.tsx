@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { ArrowRight, FileText, Gamepad2, Grid, Mic, Sparkles } from 'lucide-react';
-import type { PortalModule } from '~/data/portal-content';
+import type { PortalModule } from '~/data/content-other';
 
 interface PortalModulesGridProps {
   generalModules: PortalModule[];
