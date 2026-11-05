@@ -1,5 +1,5 @@
 {
-  "words": [
+  "admin_system": [
     "admin",
     "administrator",
     "root",
@@ -15,6 +15,14 @@
     "helpdesk",
     "bot",
     "api",
+    "management",
+    "manager",
+    "webmaster",
+    "developer",
+    "support-team",
+    "security"
+  ],
+  "money_scam": [
     "kikin",
     "boshu",
     "syunyu",
@@ -29,6 +37,49 @@
     "ad",
     "promo",
     "discount",
+    "investment",
+    "profit",
+    "guarantee",
+    "millionaire",
+    "get-rich-quick",
+    "airdrop",
+    "token",
+    "nft",
+    "100%"
+  ],
+  "politics": [
+    "nazi",
+    "hitler",
+    "fascist",
+    "communism",
+    "right-wing",
+    "left-wing",
+    "propaganda",
+    "extremist",
+    "terrorism",
+    "terrorist"
+  ],
+  "race_discrimination": [
+    "racist",
+    "supremacy",
+    "discriminator"
+  ],
+  "violence": [
+    "kill",
+    "suicide",
+    "die",
+    "murder",
+    "attack",
+    "shoot",
+    "stab",
+    "harm",
+    "cut",
+    "hang",
+    "blood",
+    "death",
+    "violence"
+  ],
+  "sexual": [
     "fuck",
     "shit",
     "bitch",
@@ -39,9 +90,35 @@
     "penis",
     "vagina",
     "sex",
-    "nazi",
-    "kill",
-    "suicide",
-    "die"
+    "porn",
+    "porno",
+    "nude",
+    "naked",
+    "orgasm",
+    "slut",
+    "whore"
+  ],
+  "japanese_slang": [
+    "hentai",
+    "seikou",
+    "seikoo",
+    "seiko",
+    "chinchin",
+    "bokki",
+    "oppai",
+    "kyonyu",
+    "yakuza",
+    "teppou",
+    "chikubi",
+    "shine",
+    "korosu",
+    "kisama",
+    "teme",
+    "yarou",
+    "baka",
+    "aho",
+    "busu",
+    "chinko",
+    "manko"
   ]
 }
