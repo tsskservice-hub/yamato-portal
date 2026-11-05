@@ -1,6 +1,6 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200漢字 リファレンス＆検索ページ (Supabase連携・多条件フィルター対応版)
+ * @description VCE 200 Kanji Reference 一覧ページ (PageLayout 統合型データエラーガード対応版・多条件検索対応)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
@@ -10,7 +10,7 @@ import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// kl_character テーブルの型定義（実際のカラム名に合わせて適宜調整してください）
+// kl_character テーブルの型定義
 export interface KanjiCharacter {
   id: number;
   kanji: string;
@@ -44,7 +44,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
 };
 
-export default function Kanji200ReferenceComponent() {
+export default function Kanji200Component() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const [kanjiList, setKanjiList] = useState<KanjiCharacter[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -67,7 +67,7 @@ export default function Kanji200ReferenceComponent() {
 
       if (error) throw error;
 
-      if (data && Array.isArray(data)) {
+      if (data && Array.isArray(data) && data.length > 0) {
         setKanjiList(data);
       } else {
         setError(true);
@@ -84,7 +84,7 @@ export default function Kanji200ReferenceComponent() {
     loadKanjiData();
   }, [loadKanjiData]);
 
-  // カテゴ1・画数のセレクトボックス用の選択肢を動的抽出
+  // カテゴリーの選択肢を動的に抽出
   const categories = useMemo(() => {
     const set = new Set<string>();
     kanjiList.forEach(item => {
@@ -93,12 +93,11 @@ export default function Kanji200ReferenceComponent() {
     return Array.from(set);
   }, [kanjiList]);
 
-  // 検索・フィルター処理（画数、部首、意味、カテゴリー、音読み、訓読み、および漢字・IDに対応）
+  // 検索・フィルターロジック（画数、部首、意味、カテゴリー、音読み、訓読み、漢字、IDに対応）
   const filteredKanji = useMemo(() => {
     return kanjiList.filter(item => {
       const query = searchQuery.toLowerCase().trim();
       
-      // キーワードマッチ（漢字、音読み、訓読み、意味、部首、ID、画数）
       const matchesQuery = query === '' || 
         item.kanji?.toLowerCase().includes(query) ||
         item.onyomi?.toLowerCase().includes(query) ||
@@ -108,10 +107,7 @@ export default function Kanji200ReferenceComponent() {
         item.id?.toString().includes(query) ||
         item.strokes?.toString().includes(query);
 
-      // カテゴリーフィルター
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-
-      // 画数フィルター
       const matchesStrokes = selectedStrokes === 'all' || item.strokes?.toString() === selectedStrokes;
 
       return matchesQuery && matchesCategory && matchesStrokes;
@@ -127,10 +123,10 @@ export default function Kanji200ReferenceComponent() {
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-                VCE 200 Kanji Reference / 漢字200字一覧
+                200 Essential Kanji / 必修漢字200字
               </h1>
               <p className="text-sm text-slate-600 max-w-2xl">
-                Search and master the 200 essential VCE Japanese kanji. Filter by readings, meanings, radicals, stroke count, or categories.
+                Master the core 200 kanji required for VCE Japanese. Search by readings, meanings, radicals, stroke count, or filter by categories.
               </p>
             </div>
             <Link
@@ -142,10 +138,10 @@ export default function Kanji200ReferenceComponent() {
             </Link>
           </div>
 
-          {/* 検索・フィルターコントロールバー */}
+          {/* 検索・フィルター コントロールバー */}
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-6 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
             
-            {/* テキスト検索（漢字、音読み、訓読み、意味、部首、ID対応） */}
+            {/* キーワード検索 */}
             <div className="w-full md:w-1/2">
               <label htmlFor="search" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                 Keyword Search / キーワード検索
@@ -153,7 +149,7 @@ export default function Kanji200ReferenceComponent() {
               <input
                 id="search"
                 type="text"
-                placeholder="Search by kanji, reading, meaning, radical..."
+                placeholder="Search by kanji, reading, meaning, radical, strokes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
@@ -190,7 +186,7 @@ export default function Kanji200ReferenceComponent() {
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
               >
                 <option value="all">All Strokes</option>
-                {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+                {Array.from({ length: 25 }, (_, i) => i + 1).map((num) => (
                   <option key={num} value={num.toString()}>{num} strokes</option>
                 ))}
               </select>
@@ -198,14 +194,14 @@ export default function Kanji200ReferenceComponent() {
 
           </div>
 
-          {/* ローディング・エラー・結果表示 */}
+          {/* コンテンツ表示エリア */}
           {loading ? (
             <div className="text-center py-20 text-slate-500 text-sm">Loading kanji data from Supabase...</div>
           ) : error ? (
-            <div className="text-center py-20 text-red-500 text-sm font-bold">Failed to load kanji records. Please try again later.</div>
+            <div className="text-center py-20 text-red-500 text-sm font-bold">Failed to load kanji records. Please verify your kl_character table.</div>
           ) : filteredKanji.length === 0 ? (
             <div className="text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm">
-              No matching kanji found. Try adjusting your search or filters.
+              No matching kanji found. Try adjusting your search query or filters.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -215,7 +211,7 @@ export default function Kanji200ReferenceComponent() {
                   className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
                 >
                   <div>
-                    {/* 上部タグ（ID & カテゴリー） */}
+                    {/* 上部（ID & カテゴリー） */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-bold text-slate-400">
                         #{item.id}
@@ -239,7 +235,7 @@ export default function Kanji200ReferenceComponent() {
                       {item.meaning || '—'}
                     </div>
 
-                    {/* 詳細データ（音読み・訓読み・部首・画数） */}
+                    {/* 詳細情報（音読み・訓読み・部首・画数） */}
                     <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600">
                       <div className="flex justify-between">
                         <span className="font-bold text-slate-500">Onyomi:</span>
@@ -255,7 +251,7 @@ export default function Kanji200ReferenceComponent() {
                       </div>
                       <div className="flex justify-between">
                         <span className="font-bold text-slate-500">Strokes:</span>
-                        <span className="text-right font-medium">{item.strokes ? `${item.strokes}画` : '—'}</span>
+                        <span className="text-right font-medium">{item.strokes ? `${item.strokes}` : '—'}</span>
                       </div>
                     </div>
                   </div>
