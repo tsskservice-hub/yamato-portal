@@ -1,6 +1,6 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー細分化・データベースソート対応版)
+ * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー細分化・ページ内遷移修正版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -30,7 +30,7 @@ export interface KanjiCharacter {
   created_at?: string;
 }
 
-// 新しいカテゴリー表示順序（細分化・追加されたカテゴリーを反映）
+// 新しいカテゴリー表示順序
 const CATEGORY_ORDER = [
   'Numbers',
   'Counters',
@@ -58,6 +58,11 @@ const CATEGORY_ORDER = [
   'Repeat sign',
   'Miscellaneous'
 ];
+
+// カテゴリー名から安全なアンカーIDを生成するヘルパー関数
+const getAnchorId = (cat: string) => {
+  return `cat-${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -157,7 +162,7 @@ export default function Kanji200Component() {
                 {CATEGORY_ORDER.map(cat => {
                   const count = (groupedKanji[cat] || []).length;
                   if (count === 0) return null;
-                  const anchorId = `cat-${cat.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                  const anchorId = getAnchorId(cat);
                   return (
                     <a
                       key={cat}
@@ -188,7 +193,7 @@ export default function Kanji200Component() {
               {CATEGORY_ORDER.map(categoryName => {
                 const items = groupedKanji[categoryName] || [];
                 if (items.length === 0) return null;
-                const anchorId = `cat-${categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                const anchorId = getAnchorId(categoryName);
 
                 return (
                   <div key={categoryName} id={anchorId} className="space-y-4 scroll-mt-24">
