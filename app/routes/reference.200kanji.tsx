@@ -1,6 +1,6 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (PageLayout 統合型データエラーガード対応版・多条件検索対応)
+ * @description VCE 200 Kanji Reference 一覧ページ (Supabase実際のカラム構造対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
@@ -10,16 +10,17 @@ import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// kl_character テーブルの型定義
+// kl_character テーブルの実際のカラム構造に合わせた型定義
 export interface KanjiCharacter {
-  id: number;
-  kanji: string;
-  onyomi?: string;
-  kunyomi?: string;
-  meaning?: string;
-  strokes?: number;
-  radical?: string;
-  category?: string;
+  id: string;
+  character: string;       // 漢字本体
+  on_display?: string;     // 音読み
+  kun_displ?: string;      // 訓読み
+  meaning?: string;        // 意味
+  stroke_count?: number;   // 画数
+  radical_t?: string;      // 部首
+  category?: string;       // カテゴリー
+  char_type?: string;      // 文字種 (kanji, hiragana, katakana 等)
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -55,7 +56,7 @@ export default function Kanji200Component() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStrokes, setSelectedStrokes] = useState<string>('all');
 
-  // Supabase から kl_character のデータを取得
+  // Supabase から kl_character（kanji のみ）のデータを取得
   const loadKanjiData = useCallback(async () => {
     setLoading(true);
     setError(false);
@@ -63,7 +64,8 @@ export default function Kanji200Component() {
       const { data, error } = await supabase
         .from('kl_character')
         .select('*')
-        .order('id', { ascending: true });
+        .eq('char_type', 'kanji') // 漢字のみを抽出し、ひらがな・カタカナを除外
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
 
@@ -93,22 +95,21 @@ export default function Kanji200Component() {
     return Array.from(set);
   }, [kanjiList]);
 
-  // 検索・フィルターロジック（画数、部首、意味、カテゴリー、音読み、訓読み、漢字、IDに対応）
+  // 検索・フィルターロジック（実際のカラム名を対象に検索）
   const filteredKanji = useMemo(() => {
     return kanjiList.filter(item => {
       const query = searchQuery.toLowerCase().trim();
       
       const matchesQuery = query === '' || 
-        item.kanji?.toLowerCase().includes(query) ||
-        item.onyomi?.toLowerCase().includes(query) ||
-        item.kunyomi?.toLowerCase().includes(query) ||
+        item.character?.toLowerCase().includes(query) ||
+        item.on_display?.toLowerCase().includes(query) ||
+        item.kun_displ?.toLowerCase().includes(query) ||
         item.meaning?.toLowerCase().includes(query) ||
-        item.radical?.toLowerCase().includes(query) ||
-        item.id?.toString().includes(query) ||
-        item.strokes?.toString().includes(query);
+        item.radical_t?.toLowerCase().includes(query) ||
+        item.stroke_count?.toString().includes(query);
 
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-      const matchesStrokes = selectedStrokes === 'all' || item.strokes?.toString() === selectedStrokes;
+      const matchesStrokes = selectedStrokes === 'all' || item.stroke_count?.toString() === selectedStrokes;
 
       return matchesQuery && matchesCategory && matchesStrokes;
     });
@@ -211,10 +212,10 @@ export default function Kanji200Component() {
                   className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
                 >
                   <div>
-                    {/* 上部（ID & カテゴリー） */}
+                    {/* 上部（IDの最初の一部 & カテゴリー） */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-bold text-slate-400">
-                        #{item.id}
+                        #{item.id.slice(0, 8)}
                       </span>
                       {item.category && (
                         <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
@@ -223,10 +224,10 @@ export default function Kanji200Component() {
                       )}
                     </div>
 
-                    {/* 漢字メイン表示 */}
+                    {/* 漢字メイン表示（item.character を使用） */}
                     <div className="text-center my-3">
                       <span className="text-6xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                        {item.kanji}
+                        {item.character}
                       </span>
                     </div>
 
@@ -239,19 +240,19 @@ export default function Kanji200Component() {
                     <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600">
                       <div className="flex justify-between">
                         <span className="font-bold text-slate-500">Onyomi:</span>
-                        <span className="text-right font-medium">{item.onyomi || '—'}</span>
+                        <span className="text-right font-medium">{item.on_display || '—'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-bold text-slate-500">Kunyomi:</span>
-                        <span className="text-right font-medium">{item.kunyomi || '—'}</span>
+                        <span className="text-right font-medium">{item.kun_displ || '—'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-bold text-slate-500">Radical:</span>
-                        <span className="text-right font-medium">{item.radical || '—'}</span>
+                        <span className="text-right font-medium">{item.radical_t || '—'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-bold text-slate-500">Strokes:</span>
-                        <span className="text-right font-medium">{item.strokes ? `${item.strokes}` : '—'}</span>
+                        <span className="text-right font-medium">{item.stroke_count ? `${item.stroke_count}` : '—'}</span>
                       </div>
                     </div>
                   </div>
