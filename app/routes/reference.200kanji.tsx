@@ -1,14 +1,16 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー細分化・ページ内遷移修正版)
+ * @description VCE 200 Kanji Reference 一覧ページ (ScrollTopButton統合・scrollUtils共通化対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import ScrollTopButton from '~/components/ScrollTopButton'; // ページトップへ戻るボタンをインポート
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
+import { handleScrollToSection, getAnchorId } from '~/utils/scrollUtils'; // 共通のスクロール関数をインポート
 
 export interface KanjiCharacter {
   id: string;
@@ -58,11 +60,6 @@ const CATEGORY_ORDER = [
   'Repeat sign',
   'Miscellaneous'
 ];
-
-// カテゴリー名から安全なアンカーIDを生成するヘルパー関数
-const getAnchorId = (cat: string) => {
-  return `cat-${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
-};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -130,7 +127,7 @@ export default function Kanji200Component() {
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
-      <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8 relative pb-16">
         <div className="max-w-6xl mx-auto">
           
           {/* ヘッダーセクション */}
@@ -152,27 +149,37 @@ export default function Kanji200Component() {
             </Link>
           </div>
 
-          {/* クイックジャンプ目次 */}
+          {/* クイックジャンプ目次 ＆ 音読みに関する注記 */}
           {!loading && !error && kanjiList.length > 0 && (
-            <div className="mb-10 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                Quick Jump to Categories
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {CATEGORY_ORDER.map(cat => {
-                  const count = (groupedKanji[cat] || []).length;
-                  if (count === 0) return null;
-                  const anchorId = getAnchorId(cat);
-                  return (
-                    <a
-                      key={cat}
-                      href={`#${anchorId}`}
-                      className="text-xs bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition-colors border border-slate-200/60"
-                    >
-                      {cat} <span className="text-slate-400 ml-1">({count})</span>
-                    </a>
-                  );
-                })}
+            <div className="mb-10 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                  Quick Jump to Categories
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORY_ORDER.map(cat => {
+                    const count = (groupedKanji[cat] || []).length;
+                    if (count === 0) return null;
+                    const anchorId = getAnchorId(cat);
+                    return (
+                      <a
+                        key={cat}
+                        href={`#${anchorId}`}
+                        onClick={(e) => handleScrollToSection(e, anchorId)}
+                        className="text-xs bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition-colors border border-slate-200/60 cursor-pointer"
+                      >
+                        {cat} <span className="text-slate-400 ml-1">({count})</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 音読みに関する英語の注記 */}
+              <div className="border-t border-slate-100 pt-3">
+                <p className="text-xs text-slate-500 italic">
+                  * Note: While some kanji have multiple readings, only the representative Onyomi is displayed here.
+                </p>
               </div>
             </div>
           )}
@@ -276,6 +283,9 @@ export default function Kanji200Component() {
           )}
 
         </div>
+
+        {/* ページトップへ戻るボタン */}
+        <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" />
       </div>
     </ToolPageWrapper>
   );
