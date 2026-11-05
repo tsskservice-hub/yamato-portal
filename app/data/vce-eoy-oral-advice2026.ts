@@ -1,7 +1,7 @@
 /**
  * @file vce-eoy-oral-advice2026.ts
  * @description Decoupled TypeScript logic & Supabase client integration for 2026 VCE Languages Oral Examination Advice.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-eoy-oral-advice2026'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-eoy-oral-advice2026'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -43,11 +43,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_ADVICE2026';
 
 /**
- * Fetch 2026 VCE Languages Oral Examination Advice data from Supabase 'app_knowledge' table.
+ * Fetch 2026 VCE Languages Oral Examination Advice data from Supabase 'kl_app' table.
  */
 export async function fetchOralExamAdvice2026(supabaseClient: SupabaseClient): Promise<OralExamAdvice2026 | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -61,7 +61,7 @@ export async function fetchOralExamAdvice2026(supabaseClient: SupabaseClient): P
 }
 
 /**
- * Upsert 2026 VCE Languages Oral Examination Advice data to Supabase 'app_knowledge' table.
+ * Upsert 2026 VCE Languages Oral Examination Advice data to Supabase 'kl_app' table.
  */
 export async function upsertOralExamAdvice2026(
   supabaseClient: SupabaseClient,
@@ -69,7 +69,7 @@ export async function upsertOralExamAdvice2026(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: '2026 VCE Languages Oral Examination Advice',

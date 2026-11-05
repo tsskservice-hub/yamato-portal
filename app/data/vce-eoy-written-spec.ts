@@ -1,7 +1,7 @@
 /**
  * @file vce-eoy-written-spec.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Written Examination Specification.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-eoy-written-spec'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-eoy-written-spec'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -63,11 +63,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_EOY_WRITTEN_SPEC';
 
 /**
- * Fetch VCE Written Examination Specification data from Supabase 'app_knowledge' table.
+ * Fetch VCE Written Examination Specification data from Supabase 'kl_app' table.
  */
 export async function fetchWrittenSpecification(supabaseClient: SupabaseClient): Promise<WrittenSpecification | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -81,7 +81,7 @@ export async function fetchWrittenSpecification(supabaseClient: SupabaseClient):
 }
 
 /**
- * Upsert VCE Written Examination Specification data to Supabase 'app_knowledge' table.
+ * Upsert VCE Written Examination Specification data to Supabase 'kl_app' table.
  */
 export async function upsertWrittenSpecification(
   supabaseClient: SupabaseClient,
@@ -89,7 +89,7 @@ export async function upsertWrittenSpecification(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Written Examination Specification',

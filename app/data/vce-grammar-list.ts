@@ -1,7 +1,7 @@
 /**
  * @file vce-grammar-list.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Grammar List Categories.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-grammar-list'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-grammar-list'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -41,11 +41,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_GRAMMAR_LIST';
 
 /**
- * Fetch VCE Grammar List Categories data from Supabase 'app_knowledge' table.
+ * Fetch VCE Grammar List Categories data from Supabase 'kl_app' table.
  */
 export async function fetchGrammarCategoriesData(supabaseClient: SupabaseClient): Promise<GrammarCategoriesData | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -59,7 +59,7 @@ export async function fetchGrammarCategoriesData(supabaseClient: SupabaseClient)
 }
 
 /**
- * Upsert VCE Grammar List Categories data to Supabase 'app_knowledge' table.
+ * Upsert VCE Grammar List Categories data to Supabase 'kl_app' table.
  */
 export async function upsertGrammarCategoriesData(
   supabaseClient: SupabaseClient,
@@ -67,7 +67,7 @@ export async function upsertGrammarCategoriesData(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Grammar List Categories',

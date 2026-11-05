@@ -1,6 +1,6 @@
 /**
  * @file content-games.ts
- * @description Supabase app_knowledge (key: 'CONTENT_GAMES') からの動的データ取得モジュール
+ * @description Supabase kl_app (key: 'CONTENT_GAMES') からの動的データ取得モジュール
  * 💡 静的フォールバックデータを撤去し、通信失敗・データ不在時は isError: true を返して PageLayout の DataErrorState で処理します。
  */
 
@@ -37,15 +37,15 @@ export interface GamesKnowledge {
 const KNOWLEDGE_KEY = 'CONTENT_GAMES';
 
 /**
- * Supabase の app_knowledge テーブルから CONTENT_GAMES キーのデータを直接フェッチする関数
- * 💡 app_knowledge の 'data' カラムからゲーム情報を取得します。
+ * Supabase の kl_app テーブルから CONTENT_GAMES キーのデータを直接フェッチする関数
+ * 💡 kl_app の 'data' カラムからゲーム情報を取得します。
  */
 export async function fetchGamesContentData(
   supabase: SupabaseClient
 ): Promise<GamesKnowledge | null> {
   try {
     const { data: row, error } = await supabase
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data, updated_at')
       .eq('key', KNOWLEDGE_KEY)
       .maybeSingle();

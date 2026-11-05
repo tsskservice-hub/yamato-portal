@@ -1,7 +1,7 @@
 /**
  * @file writing-styles.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Writing Styles Guide.
- * Stores data in Supabase 'app_knowledge' table under key: 'WRITING_STYLES'.
+ * Stores data in Supabase 'kl_app' table under key: 'WRITING_STYLES'.
  * 
  * 💡 設計方針 (legal-content.ts 準拠):
  * 1. 静的オブジェクトではなく、非同期取得関数 (fetchWritingStylesData) を提供。
@@ -39,23 +39,23 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-// 💡 Supabase app_knowledge の key（大文字の 'WRITING_STYLES'）
+// 💡 Supabase kl_app の key（大文字の 'WRITING_STYLES'）
 const KNOWLEDGE_KEY = 'WRITING_STYLES';
 
 /**
- * Supabase 'app_knowledge' テーブルから WRITING_STYLES データを取得
+ * Supabase 'kl_app' テーブルから WRITING_STYLES データを取得
  * 取得失敗・レコード不在時は null を返し、UI側で DataErrorState を表示させます
  */
 export async function fetchWritingStylesData(supabaseClient: SupabaseClient): Promise<WritingStylesData | null> {
   try {
     const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data')
       .eq('key', KNOWLEDGE_KEY)
       .single();
 
     if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase app_knowledge:`, error?.message);
+      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase kl_app:`, error?.message);
       return null;
     }
 
@@ -72,7 +72,7 @@ export async function fetchWritingStylesData(supabaseClient: SupabaseClient): Pr
 }
 
 /**
- * Upsert VCE Writing Styles Guide data to Supabase 'app_knowledge' table.
+ * Upsert VCE Writing Styles Guide data to Supabase 'kl_app' table.
  */
 export async function upsertWritingStylesData(
   supabaseClient: SupabaseClient,
@@ -80,7 +80,7 @@ export async function upsertWritingStylesData(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Writing Styles Guide',

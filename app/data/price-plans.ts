@@ -1,7 +1,7 @@
 /**
  * @file price-plans.ts
  * @description Type definitions, Supabase client integration, and helper functions for pricing plans (Yamato Portal)
- * Stores data in Supabase 'app_knowledge' table under key: 'PRICE_PLANS'.
+ * Stores data in Supabase 'kl_app' table under key: 'PRICE_PLANS'.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -64,11 +64,11 @@ export const CAMPAIGN_NOTICE: CampaignNotice = {
   rawText: "Limited-Time Campaign (Until October 29): Paid packs include bonus credits valid until October 29! (Bonus credits expire on Oct 29; standard base credits are unexpired.)"
 };
 
-// Supabase app_knowledge のキー名
+// Supabase kl_app のキー名
 const KNOWLEDGE_KEY = 'PRICE_PLANS';
 
 /**
- * Supabase 'app_knowledge' テーブルから PRICE_PLANS データを取得します。
+ * Supabase 'kl_app' テーブルから PRICE_PLANS データを取得します。
  * 取得失敗・データ不在時は null を返し、PageLayout 経由で DataErrorState を表示させます。
  */
 export async function fetchPricePlansData(
@@ -76,14 +76,14 @@ export async function fetchPricePlansData(
 ): Promise<PricePlansKnowledge | null> {
   try {
     const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data')
       .eq('key', KNOWLEDGE_KEY)
       .single();
 
     if (error || !row) {
       console.error(
-        `[${KNOWLEDGE_KEY}] Supabase app_knowledge からのデータ取得に失敗しました:`,
+        `[${KNOWLEDGE_KEY}] Supabase kl_app からのデータ取得に失敗しました:`,
         error?.message
       );
       return null;

@@ -1,7 +1,7 @@
 /**
  * @file oral-exam-questions.ts
  * @description Decoupled TypeScript logic & Supabase client integration for Oral Exam Questions Database.
- * Stores data in Supabase 'app_knowledge' table under key: 'ORAL_EXAM_QUESTIONS'.
+ * Stores data in Supabase 'kl_app' table under key: 'ORAL_EXAM_QUESTIONS'.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -46,13 +46,13 @@ export default ORAL_EXAM_QUESTIONS_DATA;
 const KNOWLEDGE_KEY = 'ORAL_EXAM_QUESTIONS';
 
 /**
- * Fetch Oral Exam Questions Database data from Supabase 'app_knowledge' table.
+ * Fetch Oral Exam Questions Database data from Supabase 'kl_app' table.
  * Returns null when fetch fails or data is empty, triggering DataErrorState.tsx in UI.
  */
 export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient): Promise<OralExamQuestionsData | null> {
   try {
     const { data: rows, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('key, data')
       .eq('key', KNOWLEDGE_KEY);
 
@@ -85,14 +85,14 @@ export async function fetchOralExamQuestionsData(supabaseClient: SupabaseClient)
 }
 
 /**
- * Upsert Oral Exam Questions Database data to Supabase 'app_knowledge' table.
+ * Upsert Oral Exam Questions Database data to Supabase 'kl_app' table.
  */
 export async function upsertOralExamQuestionsData(
   supabaseClient: SupabaseClient,
   content: OralExamQuestionsData
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       data: content,

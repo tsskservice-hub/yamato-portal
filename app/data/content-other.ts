@@ -1,6 +1,6 @@
 /**
  * @file content-other.ts
- * @description Supabase app_knowledge (key: 'CONTENT_OTHER') からLP全体の設定・メタデータ・ウィジェット情報を動的取得するモジュール
+ * @description Supabase kl_app (key: 'CONTENT_OTHER') からLP全体の設定・メタデータ・ウィジェット情報を動的取得するモジュール
  * 💡 静的フォールバックデータを撤去し、通信失敗・データ不在時は isError: true を返します。
  */
 
@@ -109,14 +109,14 @@ export interface OtherContentKnowledge {
 const KNOWLEDGE_KEY = 'CONTENT_OTHER';
 
 /**
- * Supabase の app_knowledge テーブルから CONTENT_OTHER キーのデータを直接フェッチする関数
+ * Supabase の kl_app テーブルから CONTENT_OTHER キーのデータを直接フェッチする関数
  */
 export async function fetchOtherContentData(
   supabase: SupabaseClient
 ): Promise<OtherContentKnowledge | null> {
   try {
     const { data: row, error } = await supabase
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data, updated_at')
       .eq('key', KNOWLEDGE_KEY)
       .maybeSingle();

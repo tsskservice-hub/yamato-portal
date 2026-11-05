@@ -1,7 +1,7 @@
 /**
  * @file vce-oral-criteria.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Oral Assessment Criteria.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-oral-criteria'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-oral-criteria'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -42,11 +42,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_ORAL_CRITERIA';
 
 /**
- * Fetch VCE Oral Assessment Criteria data from Supabase 'app_knowledge' table.
+ * Fetch VCE Oral Assessment Criteria data from Supabase 'kl_app' table.
  */
 export async function fetchOralCriteriaMap(supabaseClient: SupabaseClient): Promise<OralCriteriaMap | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -60,7 +60,7 @@ export async function fetchOralCriteriaMap(supabaseClient: SupabaseClient): Prom
 }
 
 /**
- * Upsert VCE Oral Assessment Criteria data to Supabase 'app_knowledge' table.
+ * Upsert VCE Oral Assessment Criteria data to Supabase 'kl_app' table.
  */
 export async function upsertOralCriteriaMap(
   supabaseClient: SupabaseClient,
@@ -68,7 +68,7 @@ export async function upsertOralCriteriaMap(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Oral Assessment Criteria',

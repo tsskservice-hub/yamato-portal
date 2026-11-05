@@ -100,7 +100,7 @@ export default function TestYamatoPage() {
         const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
         const apiBaseUrl = isLocal ? "http://localhost:8787" : "https://api.jptutoraiyamato.com";
 
-        // 1. Supabase の app_knowledge テーブルから YAMATO_CONFIGS を非同期取得
+        // 1. Supabase の kl_app テーブルから YAMATO_CONFIGS を非同期取得
         const remoteConfigs = await fetchYamatoConfigsData(supabase);
         if (remoteConfigs) {
           setYamatoConfigs(remoteConfigs);

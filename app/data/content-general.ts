@@ -1,6 +1,6 @@
 /**
  * @file content-general.ts
- * @description Supabase app_knowledge (key: 'CONTENT_GENERAL') からの動的データ取得モジュール
+ * @description Supabase kl_app (key: 'CONTENT_GENERAL') からの動的データ取得モジュール
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -19,7 +19,7 @@ export async function fetchGeneralContentData(
 ): Promise<GeneralContentKnowledge | null> {
   try {
     const { data: row, error } = await supabase
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data, updated_at')
       .eq('key', KNOWLEDGE_KEY)
       .maybeSingle();

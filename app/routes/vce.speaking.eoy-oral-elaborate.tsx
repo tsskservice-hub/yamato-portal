@@ -499,7 +499,7 @@ export default function EoyOralElaboratePage() {
           <DataErrorState
             title="Oral Exam Database Unavailable"
             message="Unable to load Oral Exam Questions from Supabase. Please reload or report this error."
-            errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+            errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from kl_app table in Supabase."
           />
         </div>
       </ToolPageWrapper>

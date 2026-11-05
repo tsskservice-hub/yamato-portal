@@ -1,7 +1,7 @@
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
- * 💡 Supabase app_knowledge (CONTENT_GENERAL, CONTENT_VCE_SPEAKING, CONTENT_VCE_WRITING, CONTENT_REFERENCE, CONTENT_JUNIOR, CONTENT_GAMES, CONTENT_OTHER) 完全動的連動・エラーハンドリング統合版
+ * 💡 Supabase kl_app (CONTENT_GENERAL, CONTENT_VCE_SPEAKING, CONTENT_VCE_WRITING, CONTENT_REFERENCE, CONTENT_JUNIOR, CONTENT_GAMES, CONTENT_OTHER) 完全動的連動・エラーハンドリング統合版
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -97,7 +97,7 @@ export default function Home() {
     async function fetchDailyQuizFromSupabase() {
       try {
         const { data, error } = await supabase
-          .from('app_knowledge')
+          .from('kl_app')
           .select('data')
           .eq('key', 'DAILY_QUIZZES')
           .single();

@@ -374,7 +374,7 @@ export const PORTAL_KNOWLEDGE_KEY = 'PORTAL_CONTENT';
 export async function fetchPortalContentData(supabaseClient: SupabaseClient): Promise<PortalContentResult> {
   try {
     const { data, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data')
       .eq('key', PORTAL_KNOWLEDGE_KEY)
       .single();
