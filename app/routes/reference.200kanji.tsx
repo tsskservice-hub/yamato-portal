@@ -1,6 +1,6 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー別グループ化対応版)
+ * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー別グループ化・ページ内遷移対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -10,7 +10,7 @@ import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// kl_character テーブルの全カラムに合わせた型定義（category を追加）
+// kl_character テーブルの全カラムに合わせた型定義
 export interface KanjiCharacter {
   id: string;
   character: string;        // 漢字
@@ -30,11 +30,14 @@ export interface KanjiCharacter {
   created_at?: string;
 }
 
-// VCE公式のカテゴリー表示順序
+// 新しいカテゴリー表示順序
 const CATEGORY_ORDER = [
   'Numbers',
   'Counters',
-  'Seasons/time',
+  'Season',
+  'Days of the week',
+  'Day',
+  'Time',
   'Parts of the body',
   'Positions/directions',
   'School life',
@@ -81,7 +84,6 @@ export default function Kanji200Component() {
     setLoading(true);
     setError(false);
     try {
-      // char_type が 'kanji' のデータだけを正確に取得する
       const { data, error } = await supabase
         .from('kl_character')
         .select('*')
@@ -137,6 +139,31 @@ export default function Kanji200Component() {
             </Link>
           </div>
 
+          {/* 各カテゴリーへのページ内遷移目次ナビゲーション */}
+          {!loading && !error && kanjiList.length > 0 && (
+            <div className="mb-10 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                Quick Jump to Categories
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORY_ORDER.map(cat => {
+                  const count = (groupedKanji[cat] || []).length;
+                  if (count === 0) return null;
+                  const anchorId = `cat-${cat.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                  return (
+                    <a
+                      key={cat}
+                      href={`#${anchorId}`}
+                      className="text-xs bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition-colors border border-slate-200/60"
+                    >
+                      {cat} <span className="text-slate-400 ml-1">({count})</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* ステータス・データ表示 */}
           {loading ? (
             <div className="text-center py-20 text-slate-500 text-sm">Loading kanji data from Supabase...</div>
@@ -153,9 +180,10 @@ export default function Kanji200Component() {
               {CATEGORY_ORDER.map(categoryName => {
                 const items = groupedKanji[categoryName] || [];
                 if (items.length === 0) return null;
+                const anchorId = `cat-${categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
                 return (
-                  <div key={categoryName} className="space-y-4">
+                  <div key={categoryName} id={anchorId} className="space-y-4 scroll-mt-24">
                     {/* カテゴリー見出し */}
                     <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
                       <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
