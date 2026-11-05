@@ -1,7 +1,6 @@
 /**
  * @file content-other.ts
  * @description Supabase kl_app (key: 'CONTENT_OTHER') からLP全体の設定・メタデータ・ウィジェット情報を動的取得するモジュール
- * 💡 静的フォールバックデータを撤去し、通信失敗・データ不在時は isError: true を返します。
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -96,17 +95,19 @@ export interface FooterConfig {
 }
 
 /**
- * 💡 エラーの原因となっていた PortalModule 型の定義およびエクスポート
- * PortalModulesGrid.tsx で使用されているプロパティ構造に合わせて調整してください
+ * 💡 PortalModulesGrid.tsx で使用されているプロパティをすべて網羅した PortalModule 型定義
  */
 export interface PortalModule {
   id: string;
-  title: string;
+  name: string;
   description?: string;
   path?: string;
-  icon?: string;
-  badge?: string;
-  enabled?: boolean;
+  category?: string;
+  iconName: string;
+  actionLabel: string;
+  isComingSoon?: boolean;
+  creditRequirement?: number | null;
+  accentColor?: string;
 }
 
 export interface OtherContentKnowledge {
@@ -117,7 +118,7 @@ export interface OtherContentKnowledge {
   dailyChallengeBanner: DailyChallengeBannerConfig;
   systemRules: SystemRulesConfig;
   footer: FooterConfig;
-  portalModules?: PortalModule[]; // 必要に応じて追加
+  portalModules?: PortalModule[];
   updatedAt?: string;
 }
 
@@ -167,7 +168,6 @@ export async function fetchOtherContentData(
 
 /**
  * ページ用のカスタムフック
- * 💡 失敗時は otherData: null かつ isError: true を返し、エラーハンドリングに引き継ぎます。
  */
 export function useOtherContent(supabase: SupabaseClient) {
   const [otherData, setOtherData] = useState<OtherContentKnowledge | null>(null);
@@ -187,12 +187,12 @@ export function useOtherContent(supabase: SupabaseClient) {
       } else {
         setOtherData(null);
         setIsError(true);
-        setErrorMessage('Failed to retrieve CONTENT_OTHER from Supabase. Data does not exist or the key is invalid.');
+        setErrorMessage('Failed to retrieve CONTENT_OTHER from Supabase.');
       }
     } catch (err: any) {
       setOtherData(null);
       setIsError(true);
-      setErrorMessage(`Supabase connection error: ${err?.message || 'An unexpected error occurred while loading CONTENT_OTHER.'}`);
+      setErrorMessage(`Supabase connection error: ${err?.message || 'An unexpected error occurred.'}`);
     } finally {
       setIsLoading(false);
     }
