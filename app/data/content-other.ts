@@ -95,6 +95,20 @@ export interface FooterConfig {
   links: FooterLink[];
 }
 
+/**
+ * 💡 エラーの原因となっていた PortalModule 型の定義およびエクスポート
+ * PortalModulesGrid.tsx で使用されているプロパティ構造に合わせて調整してください
+ */
+export interface PortalModule {
+  id: string;
+  title: string;
+  description?: string;
+  path?: string;
+  icon?: string;
+  badge?: string;
+  enabled?: boolean;
+}
+
 export interface OtherContentKnowledge {
   hero: HeroConfig;
   header: HeaderConfig;
@@ -103,6 +117,7 @@ export interface OtherContentKnowledge {
   dailyChallengeBanner: DailyChallengeBannerConfig;
   systemRules: SystemRulesConfig;
   footer: FooterConfig;
+  portalModules?: PortalModule[]; // 必要に応じて追加
   updatedAt?: string;
 }
 
@@ -141,6 +156,7 @@ export async function fetchOtherContentData(
       dailyChallengeBanner: content.dailyChallengeBanner || {},
       systemRules: content.systemRules || {},
       footer: content.footer || {},
+      portalModules: content.portalModules || [],
       updatedAt: row.updated_at,
     };
   } catch (err) {
