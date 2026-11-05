@@ -1,14 +1,14 @@
 /**
  * @file app/routes/vce.speaking._index.tsx
- * @description VCE Speaking セクションのハブページ（Supabase動的コンテンツ連携版）
+ * @description VCE Speaking セクションのハブページ（kl_app テーブル・CONTENT_VCE_SPEAKING 対応版）
  */
 
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React from 'react';
-import { Link, useLoaderData } from '@remix-run/react';
+import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { useVceSpeakingContent } from '~/data/content-vce-speaking'; // 正しい関数名に変更
+import { useVceSpeakingContent } from '~/data/content-vce-speaking';
 import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -16,8 +16,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let portalContent = null;
   
   try {
+    // ポータル全体の共通設定を kl_app または portal_settings から取得
     const { data: portalData } = await supabase
-      .from('portal_settings')
+      .from('kl_app')
       .select('content')
       .eq('key', 'PORTAL_CONTENT')
       .single();
@@ -31,7 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function VceSpeakingIndex() {
-  // 正しいフック名 useVceSpeakingContent を利用
+  // kl_app テーブルの CONTENT_VCE_SPEAKING に対応するカスタムフックからのデータ取得
   const { vceSpeakingData, isLoading, isError, errorMessage, refetch } = useVceSpeakingContent(supabase);
 
   // 安全にプロパティへアクセスするためのanyキャスト
@@ -42,7 +43,7 @@ export default function VceSpeakingIndex() {
       breadcrumbTitle="VCE Speaking"
       hasError={isError}
       errorTitle="Failed to Load Speaking Content"
-      errorMessage={errorMessage || "Could not retrieve VCE speaking modules content. Please check your connection and try again."}
+      errorMessage={errorMessage || "Could not retrieve VCE speaking modules content from kl_app. Please check your connection and try again."}
       onRetry={refetch}
     >
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -51,7 +52,7 @@ export default function VceSpeakingIndex() {
           {isLoading && !vceSpeakingData ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-4"></div>
-              <p className="text-slate-600 font-medium">Loading VCE speaking modules...</p>
+              <p className="text-slate-600 font-medium">Loading VCE speaking modules from kl_app...</p>
             </div>
           ) : (
             <>
