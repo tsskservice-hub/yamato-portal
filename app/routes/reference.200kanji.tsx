@@ -10,23 +10,23 @@ import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// kl_character テーブルの全カラムに合わせた型定義
+// 正しいカラム名に合わせた型定義
 export interface KanjiCharacter {
   id: string;
-  character: string;       // 漢字
-  kun_displ?: string;      // 訓読み（表示用）
-  kun_readi?: string;      // 訓読み（かな等）
-  kun_romaji?: string;     // 訓読み（ローマ字）
-  on_display?: string;     // 音読み（表示用）
-  on_romaji?: string;      // 音読み（ローマ字）
-  reading_k?: string;
-  romaji_t?: string;
-  meaning?: string;        // 意味
-  stroke_count?: number;   // 画数
-  radical_t?: string;      // 部首
-  char_type?: string;      // 文字種 (kanji等)
-  grade_lev?: string;
-  category?: string;       // カテゴリー
+  character: string;        // 漢字
+  kun_display?: string;     // 訓読み（表示用）
+  kun_reading?: string;     // 訓読み（かな等）
+  kun_romaji?: string;      // 訓読み（ローマ字）
+  on_display?: string;      // 音読み（表示用）
+  on_romaji?: string;       // 音読み（ローマ字）
+  reading_kana?: string;
+  romaji?: string;
+  meaning?: string;         // 意味
+  stroke_count?: number;    // 画数
+  radical?: string;         // 部首
+  char_type: string;        // 文字種 ('kanji' 等)
+  grade_level?: number;     // 学年レベル
+  created_at?: string;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -62,18 +62,18 @@ export default function Kanji200Component() {
     setLoading(true);
     setError(false);
     try {
+      // char_type が 'kanji' のデータだけを正確に取得する
       const { data, error } = await supabase
         .from('kl_character')
-        .select('*');
+        .select('*')
+        .eq('char_type', 'kanji');
 
       if (error) throw error;
 
       if (data && Array.isArray(data)) {
-        // char_type が kanji のもの、または未設定のものを抽出
-        const kanjiOnly = data.filter(item => !item.char_type || item.char_type === 'kanji');
-        setKanjiList(kanjiOnly.length > 0 ? kanjiOnly : data);
+        setKanjiList(data);
       } else {
-        setError(true);
+        setKanjiList([]);
       }
     } catch (err: any) {
       console.error("Failed to load kl_character data:", err);
@@ -131,11 +131,11 @@ export default function Kanji200Component() {
                   className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
                 >
                   <div>
-                    {/* カテゴリータグのみ右上に配置 */}
+                    {/* グレードレベルタグを右上に配置 */}
                     <div className="flex items-center justify-end mb-2 min-h-[1.5rem]">
-                      {item.category && (
+                      {item.grade_level !== undefined && item.grade_level !== null && (
                         <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-                          {item.category}
+                          Grade {item.grade_level}
                         </span>
                       )}
                     </div>
@@ -166,11 +166,11 @@ export default function Kanji200Component() {
                       )}
 
                       {/* 訓読み関連 */}
-                      {(item.kun_displ || item.kun_readi || item.kun_romaji) && (
+                      {(item.kun_display || item.kun_reading || item.kun_romaji) && (
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-slate-500">Kunyomi:</span>
                           <span className="text-right font-medium">
-                            {[item.kun_displ, item.kun_readi ? `[${item.kun_readi}]` : '', item.kun_romaji ? `(${item.kun_romaji})` : '']
+                            {[item.kun_display, item.kun_reading ? `[${item.kun_reading}]` : '', item.kun_romaji ? `(${item.kun_romaji})` : '']
                               .filter(Boolean)
                               .join(' ')}
                           </span>
@@ -180,7 +180,7 @@ export default function Kanji200Component() {
                       {/* 部首 */}
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-slate-500">Radical:</span>
-                        <span className="text-right font-medium">{item.radical_t || '—'}</span>
+                        <span className="text-right font-medium">{item.radical || '—'}</span>
                       </div>
 
                       {/* 画数 */}
