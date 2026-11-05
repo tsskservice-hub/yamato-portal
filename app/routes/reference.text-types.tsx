@@ -1,22 +1,23 @@
 /**
- * @file text-types.tsx
- * @description VCE Japanese Text Types 一覧ページ (PageLayout 統合型データエラーガード対応版)
+ * @file app/routes/reference._index.tsx
+ * @description Reference セクションのハブページ（リンクパス修正版）
  */
+
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React from 'react';
 import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { fetchTextTypesData, TextTypesData } from '~/data/texttypes';
+import { useReferenceContent } from '~/data/content-reference';
 import { supabase } from '~/lib/supabaseClient';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   let portalContent = null;
+  
   try {
     const { data: portalData } = await supabase
-      .from('portal_settings')
+      .from('kl_app')
       .select('content')
       .eq('key', 'PORTAL_CONTENT')
       .single();
@@ -29,118 +30,141 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
-  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
-};
+export default function ReferenceIndex() {
+  const { referenceData, isLoading, isError, errorMessage, refetch } = useReferenceContent ? useReferenceContent(supabase) : {
+    referenceData: {
+      modules: [
+        {
+          id: "text-types",
+          name: "Text Types",
+          category: "Framework",
+          badge: "Essential",
+          description: "Explore structural guidelines, formats, and conventions for various Japanese text types required in assessments and writing exams.",
+          path: "/reference/text-types", // 絶対パスを明示
+          actionLabel: "View Text Types",
+          isComingSoon: false,
+        },
+        {
+          id: "writing-styles",
+          name: "Writing Styles",
+          category: "Framework",
+          badge: "Essential",
+          description: "Master the five core writing styles (informative, evaluative, persuasive, personal, and imaginative) with stylistic examples and phrasing guides.",
+          path: "/reference/writing-styles", // 絶対パスを明示
+          actionLabel: "View Writing Styles",
+          isComingSoon: false,
+        }
+      ]
+    },
+    isLoading: false,
+    isError: false,
+    errorMessage: '',
+    refetch: () => {}
+  };
 
-export default function TextTypesComponent() {
-  const layoutRef = useRef<PageLayoutRef>(null);
-  const [data, setData] = useState<TextTypesData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const result = await fetchTextTypesData(supabase);
-      if (result && typeof result === 'object' && Object.keys(result).length > 0) {
-        setData(result);
-      } else {
-        setError(true);
-      }
-    } catch (err) {
-      console.error("Failed to load text types data:", err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const textTypeEntries = data ? Object.entries(data) : [];
+  const dataAny = referenceData as any;
+  const modules = dataAny?.modules || [];
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
-      {data && textTypeEntries.length > 0 && (
-        <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-                  Text Types / 文章の種類
+    <ToolPageWrapper 
+      breadcrumbTitle="Reference Guide"
+      hasError={isError}
+      errorTitle="Failed to Load Reference Content"
+      errorMessage={errorMessage || "Could not retrieve reference modules content from kl_app. Please check your connection and try again."}
+      onRetry={refetch}
+    >
+      <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          {/* ローディング中の表示 */}
+          {isLoading && !referenceData ? (
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-4"></div>
+              <p className="text-slate-600 font-medium">Loading reference guides...</p>
+            </div>
+          ) : (
+            <>
+              {/* ヘッダーセクション */}
+              <div className="text-center mb-12">
+                <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl mb-4">
+                  Reference & Style Guides
                 </h1>
-                <p className="text-sm text-slate-600 max-w-2xl">
-                  While there are various text types in VCE Japanese, these 8 essential formats frequently appear in external exams. Master these core structures first!
+                <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                  Comprehensive reference materials for Japanese text types, structural formats, and stylistic writing conventions.
                 </p>
               </div>
-              <Link
-                to="/faq#category-Text%20Types%20and%20Styles"
-                className="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition-colors self-start sm:self-auto shadow-xs whitespace-nowrap gap-1.5"
-              >
-                <span>View FAQ: Text Types & Styles</span>
-                <span>↗</span>
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {textTypeEntries.map(([typeName, item]) => (
-                <div
-                  key={typeName}
-                  className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex flex-col justify-between hover:border-slate-300 transition-colors"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md">
-                        {typeName}
-                      </span>
-                      {item.sampleImage && (
-                        <span className="text-xs text-slate-400">Sample Guide Available</span>
-                      )}
-                    </div>
-
-                    <h2 className="text-xl font-bold text-slate-900 mb-2">
-                      {item.title}
-                    </h2>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                      {item.purpose}
-                    </p>
-
-                    {item.structure && item.structure.length > 0 && (
-                      <div className="mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2 flex items-center gap-1.5">
-                          <span>📌</span> Structure & Key Elements
-                        </h3>
-                        <ul className="list-disc list-inside text-sm text-slate-600 space-y-1.5">
-                          {item.structure.map((struct, idx) => (
-                            <li key={idx} className="leading-relaxed">{struct}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {item.sampleImage && (
-                    <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end items-center text-xs">
-                      <a
-                        href={item.sampleImage.startsWith('/') ? item.sampleImage : `/${item.sampleImage}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors inline-flex items-center gap-1"
-                      >
-                        View Sample PDF ↗
-                      </a>
-                    </div>
-                  )}
+              {/* モジュールカード一覧 */}
+              <div className="mb-12">
+                <div className="mb-6 border-b border-slate-200 pb-3">
+                  <h2 className="text-2xl font-bold text-slate-900">Reference Categories</h2>
+                  <p className="text-sm text-slate-500 mt-1">Select a guide to review structural rules and formatting requirements</p>
                 </div>
-              ))}
-            </div>
-          </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {modules.map((module: any) => {
+                    // パスが重複しないよう、先頭に必ずスラッシュを入れる絶対パス形式に補正
+                    let rawPath = module.path || "#";
+                    if (!rawPath.startsWith("http") && !rawPath.startsWith("/")) {
+                      rawPath = "/" + rawPath;
+                    }
+                    // 万が一データ側に 'reference/text-types' のように重複が含まれている場合の保険処理
+                    const cleanPath = rawPath.replace(/^\/reference\/reference\//, '/reference/');
+
+                    return (
+                      <div 
+                        key={module.id} 
+                        className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            {module.category && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                                {module.category}
+                              </span>
+                            )}
+                            {module.badge && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                                {module.badge}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                            {module.name}
+                          </h3>
+                          
+                          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                            {module.description}
+                          </p>
+                        </div>
+
+                        <div>
+                          {module.isComingSoon ? (
+                            <span className="inline-block w-full text-center py-2.5 px-4 bg-slate-100 text-slate-400 font-medium rounded-xl cursor-not-allowed">
+                              Coming Soon
+                            </span>
+                          ) : (
+                            <Link
+                              to={cleanPath}
+                              className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+                            >
+                              {module.actionLabel || "View"}
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </ToolPageWrapper>
   );
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta((data as any)?.portalContent || null, (data as any)?.currentPath || "");
+};
