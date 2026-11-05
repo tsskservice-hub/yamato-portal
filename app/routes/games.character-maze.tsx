@@ -10,19 +10,23 @@ import type { PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// 11x11 Maze Map (1: Wall, 0: Path)
+// 15x15 Expanded Maze Map (1: Wall, 0: Path)
 const MAZE_GRID = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-  [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1],
-  [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
-  [1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
-  [1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-  [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1],
-  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+  [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+  [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+  [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+  [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
+  [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
 const PATH_COORDS: { x: number; y: number }[] = [];
@@ -51,6 +55,11 @@ const CHARACTER_POOLS = {
     { char: 'す', romaji: 'su' },
     { char: 'せ', romaji: 'se' },
     { char: 'そ', romaji: 'so' },
+    { char: 'た', romaji: 'ta' },
+    { char: 'ち', romaji: 'chi' },
+    { char: 'つ', romaji: 'tsu' },
+    { char: 'て', romaji: 'te' },
+    { char: 'と', romaji: 'to' },
   ],
   katakana: [
     { char: 'ア', romaji: 'a' },
@@ -68,6 +77,11 @@ const CHARACTER_POOLS = {
     { char: 'ス', romaji: 'su' },
     { char: 'セ', romaji: 'se' },
     { char: 'ソ', romaji: 'so' },
+    { char: 'タ', romaji: 'ta' },
+    { char: 'チ', romaji: 'chi' },
+    { char: 'ツ', romaji: 'tsu' },
+    { char: 'テ', romaji: 'te' },
+    { char: 'ト', romaji: 'to' },
   ],
   kanji: [
     { char: '日', romaji: 'nichi' },
@@ -85,6 +99,11 @@ const CHARACTER_POOLS = {
     { char: '車', romaji: 'kuruma' },
     { char: '門', romaji: 'mon' },
     { char: '空', romaji: 'sora' },
+    { char: '学校', romaji: 'gakkou' },
+    { char: '先生', romaji: 'sensei' },
+    { char: '友達', romaji: 'tomodachi' },
+    { char: '日本語', romaji: 'nihongo' },
+    { char: '桜', romaji: 'sakura' },
   ],
 };
 
@@ -149,7 +168,7 @@ export default function CharacterMazePage() {
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Character Maze">
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <header className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
           <h1 className="text-xl font-bold text-slate-800">🧭 地表の迷宮 キャラクターサーチ 〜タイピングアドベンチャー〜</h1>
           <p className="text-xs text-slate-500 mt-0.5">迷宮文字集め・ひらがな/カタカナ/漢字タイピング練習</p>
@@ -204,7 +223,7 @@ function CharacterMazeArena() {
   const [playerY, setPlayerY] = useState(1);
 
   const [items, setItems] = useState<ItemNode[]>([]);
-  const [snake, setSnake] = useState<SnakeNode>({ id: 1, x: 8, y: 8, dx: 0, dy: -1 });
+  const [snakes, setSnakes] = useState<SnakeNode[]>([]);
 
   const [activeQuizItem, setActiveQuizItem] = useState<ItemNode | null>(null);
   const [typingInput, setTypingInput] = useState('');
@@ -218,7 +237,6 @@ function CharacterMazeArena() {
     const pool = CHARACTER_POOLS[mode];
     const shuffledPaths = [...PATH_COORDS].sort(() => 0.5 - Math.random());
     
-    // すべての通路に文字を配置（パスの数またはプールの最大数）
     const spawnCount = Math.min(pool.length, shuffledPaths.length);
     setTotalItemsCount(spawnCount);
 
@@ -242,50 +260,60 @@ function CharacterMazeArena() {
     setPlayerY(1);
     setIsGoalReached(false);
     setIsGameOver(false);
-    setSnake({ id: 1, x: shuffledPaths[spawnCount]?.x || 8, y: shuffledPaths[spawnCount]?.y || 8, dx: 0, dy: -1 });
+
+    // 2匹のヘビを離れた場所（右上と左下付近）からスタートさせる
+    const snake1Pos = shuffledPaths[Math.floor(shuffledPaths.length * 0.2)] || { x: 13, y: 1 };
+    const snake2Pos = shuffledPaths[Math.floor(shuffledPaths.length * 0.8)] || { x: 1, y: 13 };
+    
+    setSnakes([
+      { id: 1, x: snake1Pos.x, y: snake1Pos.y, dx: 0, dy: 1 },
+      { id: 2, x: snake2Pos.x, y: snake2Pos.y, dx: -1, dy: 0 },
+    ]);
   };
 
-  // 蛇の移動ロジック
+  // 2匹の蛇の移動ロジック
   useEffect(() => {
     if (!selectedMode || isGameOver || activeQuizItem || isGoalReached) return;
 
     const snakeInterval = setInterval(() => {
-      setSnake((prev) => {
-        const nextX = prev.x + prev.dx;
-        const nextY = prev.y + prev.dy;
+      setSnakes((prevSnakes) =>
+        prevSnakes.map((snake) => {
+          const nextX = snake.x + snake.dx;
+          const nextY = snake.y + snake.dy;
 
-        if (MAZE_GRID[nextY]?.[nextX] === 0) {
-          return { ...prev, x: nextX, y: nextY };
-        }
+          if (MAZE_GRID[nextY]?.[nextX] === 0) {
+            return { ...snake, x: nextX, y: nextY };
+          }
 
-        const directions = [
-          { dx: 0, dy: -1 },
-          { dx: 0, dy: 1 },
-          { dx: -1, dy: 0 },
-          { dx: 1, dy: 0 },
-        ];
-        const validMoves = directions.filter(
-          (d) => MAZE_GRID[prev.y + d.dy]?.[prev.x + d.dx] === 0
-        );
+          const directions = [
+            { dx: 0, dy: -1 },
+            { dx: 0, dy: 1 },
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+          ];
+          const validMoves = directions.filter(
+            (d) => MAZE_GRID[snake.y + d.dy]?.[snake.x + d.dx] === 0
+          );
 
-        if (validMoves.length > 0) {
-          const currentDirValid = validMoves.some((d) => d.dx === prev.dx && d.dy === prev.dy);
-          const chosenMove = currentDirValid
-            ? { dx: prev.dx, dy: prev.dy }
-            : validMoves[Math.floor(Math.random() * validMoves.length)];
+          if (validMoves.length > 0) {
+            const currentDirValid = validMoves.some((d) => d.dx === snake.dx && d.dy === snake.dy);
+            const chosenMove = currentDirValid
+              ? { dx: snake.dx, dy: snake.dy }
+              : validMoves[Math.floor(Math.random() * validMoves.length)];
 
-          return {
-            ...prev,
-            x: prev.x + chosenMove.dx,
-            y: prev.y + chosenMove.dy,
-            dx: chosenMove.dx,
-            dy: chosenMove.dy,
-          };
-        }
+            return {
+              ...snake,
+              x: snake.x + chosenMove.dx,
+              y: snake.y + chosenMove.dy,
+              dx: chosenMove.dx,
+              dy: chosenMove.dy,
+            };
+          }
 
-        return prev;
-      });
-    }, 900);
+          return snake;
+        })
+      );
+    }, 850);
 
     return () => clearInterval(snakeInterval);
   }, [selectedMode, isGameOver, activeQuizItem, isGoalReached]);
@@ -294,7 +322,9 @@ function CharacterMazeArena() {
   useEffect(() => {
     if (!selectedMode || isGameOver || activeQuizItem || isGoalReached) return;
 
-    if (snake.x === playerX && snake.y === playerY) {
+    // プレイヤーがどちらかの蛇にぶつかったか
+    const hitSnake = snakes.some((snake) => snake.x === playerX && snake.y === playerY);
+    if (hitSnake) {
       setHp((h) => {
         const updated = h - 1;
         if (updated <= 0) setIsGameOver(true);
@@ -312,11 +342,11 @@ function CharacterMazeArena() {
       }
     });
 
-    // すべての文字を回収した場合のみゴール判定を有効にする
-    if (playerX === 9 && playerY === 9 && totalItemsCount > 0 && collectedCount >= totalItemsCount) {
+    // ゴール位置は右下 (13, 13)
+    if (playerX === 13 && playerY === 13 && totalItemsCount > 0 && collectedCount >= totalItemsCount) {
       setIsGoalReached(true);
     }
-  }, [playerX, playerY, snake, items, activeQuizItem, isGameOver, isGoalReached, collectedCount, totalItemsCount, selectedMode]);
+  }, [playerX, playerY, snakes, items, activeQuizItem, isGameOver, isGoalReached, collectedCount, totalItemsCount, selectedMode]);
 
   // キーボード操作
   useEffect(() => {
@@ -439,8 +469,8 @@ function CharacterMazeArena() {
         </button>
       </div>
 
-      {/* Game Field */}
-      <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl h-[520px] relative overflow-hidden flex items-center justify-center p-6 shadow-inner">
+      {/* Game Field (Enlarged) */}
+      <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl h-[620px] relative overflow-hidden flex items-center justify-center p-4 shadow-inner">
         {isGameOver ? (
           <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30">
             <h2 className="text-3xl font-black text-red-600">ゲームオーバー</h2>
@@ -464,36 +494,36 @@ function CharacterMazeArena() {
             </button>
           </div>
         ) : (
-          <div className="relative w-[440px] h-[440px] bg-slate-700 p-2 rounded-xl border-4 border-slate-800 shadow-lg">
-            {/* Maze Grid */}
-            <div className="w-full h-full grid grid-cols-11 grid-rows-11 bg-slate-700">
+          <div className="relative w-[540px] h-[540px] bg-slate-700 p-2 rounded-xl border-4 border-slate-800 shadow-lg">
+            {/* Maze Grid (15x15) */}
+            <div className="w-full h-full grid grid-cols-15 grid-rows-15 bg-slate-700">
               {MAZE_GRID.map((row, y) =>
                 row.map((cell, x) => {
                   const isPlayer = playerX === x && playerY === y;
-                  const isGoal = x === 9 && y === 9;
+                  const isGoal = x === 13 && y === 13;
                   const item = items.find((i) => i.x === x && i.y === y);
-                  const isSnake = snake.x === x && snake.y === y;
+                  const matchedSnake = snakes.find((s) => s.x === x && s.y === y);
                   const canGoal = collectedCount >= totalItemsCount;
 
                   return (
                     <div
                       key={`${x}-${y}`}
-                      className={`w-full h-full flex items-center justify-center text-sm font-bold select-none ${
+                      className={`w-full h-full flex items-center justify-center text-xs font-bold select-none ${
                         cell === 1
                           ? 'bg-slate-700 border border-slate-600/40' // Wall
                           : 'bg-white' // Path
                       }`}
                     >
                       {isPlayer ? (
-                        <span className="text-2xl animate-pulse">🧝</span>
+                        <span className="text-xl animate-pulse">🧝</span>
                       ) : isGoal ? (
-                        <span className={`text-2xl ${canGoal ? 'animate-bounce' : 'opacity-40'}`}>🏰</span>
+                        <span className={`text-xl ${canGoal ? 'animate-bounce' : 'opacity-40'}`}>🏰</span>
                       ) : item ? (
-                        <span className="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-black text-xs shadow-md border border-amber-200">
+                        <span className="bg-amber-400 text-slate-900 px-1 py-0.5 rounded font-black text-[10px] shadow-md border border-amber-200">
                           {item.char}
                         </span>
-                      ) : isSnake ? (
-                        <span className="text-xl transition-all duration-300">🐍</span>
+                      ) : matchedSnake ? (
+                        <span className="text-base transition-all duration-300">🐍</span>
                       ) : null}
                     </div>
                   );
@@ -566,7 +596,7 @@ function CharacterMazeArena() {
           <button
             onClick={() => {
               if (activeQuizItem || isGameOver || isGoalReached) return;
-              if (MAZE_GRID[playerY]?.[playerX + 1] === 0) setPlayerX((p) => p + 1);
+              if (MAZE_GRID[playerY]?.[playerX + 1] === 0) setPlayerX((p) => p - 1);
             }}
             className="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition"
           >
