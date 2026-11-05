@@ -1,27 +1,22 @@
 import { z } from "zod";
+// Import inappropriate words list from JSON file in the app/data directory
+import unsuitableWordsData from "../data/unsuitable-words.json";
 
-// 例としてのNGワードリスト（実際は環境や要件に合わせて定数ファイルに分離）
-const NG_WORDS = [
-  "admin", 
-  "root",
-  "pussy",
-  "penis", 
-  "moderator", 
-  // その他の不適切な言葉やスラングをここに記述
-];
+// Retrieve the list of unsuitable words from the JSON data
+const UNSUITABLE_NICKNAMES: string[] = unsuitableWordsData.words;
 
 export const nicknameSchema = z
   .string()
-  .min(2, "ニックネームは2文字以上で入力してください。")
-  .max(20, "ニックネームは20文字以内で入力してください。")
-  .regex(/^[^\s]+(\s+[^\s]+)*$/, "前後に不要なスペースを含めないでください。")
+  .min(2, "Nickname must be at least 2 characters long.")
+  .max(20, "Nickname must be 20 characters or less.")
+  .regex(/^[^\s]+(\s+[^\s]+)*$/, "Do not include unnecessary spaces at the beginning or end.")
   .refine(
     (val) => {
       const lowerVal = val.toLowerCase();
-      // NGワードが含まれていないかチェック
-      return !NG_WORDS.some((word) => lowerVal.includes(word));
+      // Check if the input contains any unsuitable words
+      return !UNSUITABLE_NICKNAMES.some((word) => lowerVal.includes(word));
     },
     {
-      message: "このニックネームは使用できません。",
+      message: "This nickname cannot be used.",
     }
   );
