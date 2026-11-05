@@ -1,6 +1,6 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー別グループ化・ページ内遷移対応版)
+ * @description VCE 200 Kanji Reference 一覧ページ (カテゴリー分割・データベースソート対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -10,7 +10,6 @@ import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// kl_character テーブルの全カラムに合わせた型定義
 export interface KanjiCharacter {
   id: string;
   character: string;        // 漢字
@@ -27,10 +26,11 @@ export interface KanjiCharacter {
   char_type: string;        // 文字種 ('kanji' 等)
   grade_level?: number;     // 学年レベル
   category?: string;        // カテゴリー
+  sort_order?: number;      // 表示順
   created_at?: string;
 }
 
-// 新しいカテゴリー表示順序
+// 分割後の新しいカテゴリー表示順序
 const CATEGORY_ORDER = [
   'Numbers',
   'Counters',
@@ -39,12 +39,14 @@ const CATEGORY_ORDER = [
   'Day',
   'Time',
   'Parts of the body',
-  'Positions/directions',
+  'Positions',
+  'Directions',
   'School life',
   'People/family',
   'Adjectives/adverbs',
   'Verbs',
-  'Animals/nature',
+  'Nature',
+  'Animals',
   'Geography/travel',
   'Colours',
   'Repeat sign',
@@ -87,7 +89,8 @@ export default function Kanji200Component() {
       const { data, error } = await supabase
         .from('kl_character')
         .select('*')
-        .eq('char_type', 'kanji');
+        .eq('char_type', 'kanji')
+        .order('sort_order', { ascending: true });
 
       if (error) throw error;
 
@@ -109,7 +112,6 @@ export default function Kanji200Component() {
     loadKanjiData();
   }, [loadKanjiData]);
 
-  // データベースの category カラムを元にカテゴリーごとにグループ化
   const groupedKanji = CATEGORY_ORDER.reduce((acc, cat) => {
     acc[cat] = kanjiList.filter(item => (item.category || 'Miscellaneous') === cat);
     return acc;
@@ -139,7 +141,7 @@ export default function Kanji200Component() {
             </Link>
           </div>
 
-          {/* 各カテゴリーへのページ内遷移目次ナビゲーション */}
+          {/* クイックジャンプ目次 */}
           {!loading && !error && kanjiList.length > 0 && (
             <div className="mb-10 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
@@ -184,7 +186,6 @@ export default function Kanji200Component() {
 
                 return (
                   <div key={categoryName} id={anchorId} className="space-y-4 scroll-mt-24">
-                    {/* カテゴリー見出し */}
                     <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
                       <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                         <span className="w-2 h-6 bg-indigo-600 rounded-full inline-block"></span>
@@ -195,7 +196,6 @@ export default function Kanji200Component() {
                       </span>
                     </div>
 
-                    {/* 漢字カードグリッド */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                       {items.map((item, index) => (
                         <div
@@ -203,7 +203,6 @@ export default function Kanji200Component() {
                           className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
                         >
                           <div>
-                            {/* グレードレベルタグを右上に配置 */}
                             <div className="flex items-center justify-end mb-2 min-h-[1.5rem]">
                               {item.grade_level !== undefined && item.grade_level !== null && (
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
@@ -212,22 +211,17 @@ export default function Kanji200Component() {
                               )}
                             </div>
 
-                            {/* 漢字メイン表示 */}
                             <div className="text-center my-2">
                               <span className="text-6xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                                 {item.character || '—'}
                               </span>
                             </div>
 
-                            {/* 意味 */}
                             <div className="text-center text-sm font-semibold text-slate-800 mb-4 min-h-[2rem] flex items-center justify-center">
                               {item.meaning || '—'}
                             </div>
 
-                            {/* 詳細情報（音読み・訓読み・ローマ字・部首・画数を網羅） */}
                             <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600">
-                              
-                              {/* 音読み関連 */}
                               {(item.on_display || item.on_romaji) && (
                                 <div className="flex justify-between items-center">
                                   <span className="font-bold text-slate-500">Onyomi:</span>
@@ -237,7 +231,6 @@ export default function Kanji200Component() {
                                 </div>
                               )}
 
-                              {/* 訓読み関連 */}
                               {(item.kun_display || item.kun_reading || item.kun_romaji) && (
                                 <div className="flex justify-between items-center">
                                   <span className="font-bold text-slate-500">Kunyomi:</span>
@@ -249,20 +242,17 @@ export default function Kanji200Component() {
                                 </div>
                               )}
 
-                              {/* 部首 */}
                               <div className="flex justify-between items-center">
                                 <span className="font-bold text-slate-500">Radical:</span>
                                 <span className="text-right font-medium">{item.radical || '—'}</span>
                               </div>
 
-                              {/* 画数 */}
                               <div className="flex justify-between items-center">
                                 <span className="font-bold text-slate-500">Strokes:</span>
                                 <span className="text-right font-medium">
                                   {item.stroke_count !== undefined && item.stroke_count !== null ? `${item.stroke_count}画` : '—'}
                                 </span>
                               </div>
-
                             </div>
                           </div>
                         </div>
