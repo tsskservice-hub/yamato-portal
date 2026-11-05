@@ -1,26 +1,25 @@
 /**
  * @file reference.200kanji.tsx
- * @description VCE 200 Kanji Reference 一覧ページ (Supabase実際のカラム構造対応版)
+ * @description VCE 200 Kanji Reference 一覧ページ (シンプル表示・デバッグ対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// kl_character テーブルの実際のカラム構造に合わせた型定義
 export interface KanjiCharacter {
   id: string;
-  character: string;       // 漢字本体
-  on_display?: string;     // 音読み
-  kun_displ?: string;      // 訓読み
-  meaning?: string;        // 意味
-  stroke_count?: number;   // 画数
-  radical_t?: string;      // 部首
-  category?: string;       // カテゴリー
-  char_type?: string;      // 文字種 (kanji, hiragana, katakana 等)
+  character: string;
+  on_display?: string;
+  kun_displ?: string;
+  meaning?: string;
+  stroke_count?: number;
+  radical_t?: string;
+  category?: string;
+  char_type?: string;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -50,33 +49,34 @@ export default function Kanji200Component() {
   const [kanjiList, setKanjiList] = useState<KanjiCharacter[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // 検索・フィルター用のステート
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedStrokes, setSelectedStrokes] = useState<string>('all');
-
-  // Supabase から kl_character（kanji のみ）のデータを取得
   const loadKanjiData = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
+      // どのようなデータが返ってくるか確認するため、条件を絞らずに全件取得してみます
       const { data, error } = await supabase
         .from('kl_character')
-        .select('*')
-        .eq('char_type', 'kanji') // 漢字のみを抽出し、ひらがな・カタカナを除外
-        .order('created_at', { ascending: true });
+        .select('*');
+
+      console.log("Supabase fetched data:", data); // ブラウザのコンソールで確認できます
+      console.log("Supabase error:", error);
 
       if (error) throw error;
 
-      if (data && Array.isArray(data) && data.length > 0) {
-        setKanjiList(data);
+      if (data && Array.isArray(data)) {
+        // char_type が kanji のもの、あるいは char_type が null/undefined のものも含めて格納
+        // （もしテーブル内で char_type カラムのデータ構造が異なっていてもここで拾えるようにします）
+        const kanjiOnly = data.filter(item => !item.char_type || item.char_type === 'kanji');
+        setKanjiList(kanjiOnly.length > 0 ? kanjiOnly : data);
       } else {
         setError(true);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load kl_character data:", err);
       setError(true);
+      setErrorMessage(err?.message || 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -85,35 +85,6 @@ export default function Kanji200Component() {
   useEffect(() => {
     loadKanjiData();
   }, [loadKanjiData]);
-
-  // カテゴリーの選択肢を動的に抽出
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    kanjiList.forEach(item => {
-      if (item.category) set.add(item.category);
-    });
-    return Array.from(set);
-  }, [kanjiList]);
-
-  // 検索・フィルターロジック（実際のカラム名を対象に検索）
-  const filteredKanji = useMemo(() => {
-    return kanjiList.filter(item => {
-      const query = searchQuery.toLowerCase().trim();
-      
-      const matchesQuery = query === '' || 
-        item.character?.toLowerCase().includes(query) ||
-        item.on_display?.toLowerCase().includes(query) ||
-        item.kun_displ?.toLowerCase().includes(query) ||
-        item.meaning?.toLowerCase().includes(query) ||
-        item.radical_t?.toLowerCase().includes(query) ||
-        item.stroke_count?.toString().includes(query);
-
-      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-      const matchesStrokes = selectedStrokes === 'all' || item.stroke_count?.toString() === selectedStrokes;
-
-      return matchesQuery && matchesCategory && matchesStrokes;
-    });
-  }, [kanjiList, searchQuery, selectedCategory, selectedStrokes]);
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
@@ -127,7 +98,7 @@ export default function Kanji200Component() {
                 200 Essential Kanji / 必修漢字200字
               </h1>
               <p className="text-sm text-slate-600 max-w-2xl">
-                Master the core 200 kanji required for VCE Japanese. Search by readings, meanings, radicals, stroke count, or filter by categories.
+                Master the core 200 kanji required for VCE Japanese.
               </p>
             </div>
             <Link
@@ -139,83 +110,29 @@ export default function Kanji200Component() {
             </Link>
           </div>
 
-          {/* 検索・フィルター コントロールバー */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-6 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-            
-            {/* キーワード検索 */}
-            <div className="w-full md:w-1/2">
-              <label htmlFor="search" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Keyword Search / キーワード検索
-              </label>
-              <input
-                id="search"
-                type="text"
-                placeholder="Search by kanji, reading, meaning, radical, strokes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
-              />
-            </div>
-
-            {/* カテゴリーフィルター */}
-            <div className="w-full sm:w-auto min-w-[180px]">
-              <label htmlFor="category" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Category / カテゴリー
-              </label>
-              <select
-                id="category"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
-              >
-                <option value="all">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* 画数フィルター */}
-            <div className="w-full sm:w-auto min-w-[140px]">
-              <label htmlFor="strokes" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Strokes / 画数
-              </label>
-              <select
-                id="strokes"
-                value={selectedStrokes}
-                onChange={(e) => setSelectedStrokes(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
-              >
-                <option value="all">All Strokes</option>
-                {Array.from({ length: 25 }, (_, i) => i + 1).map((num) => (
-                  <option key={num} value={num.toString()}>{num} strokes</option>
-                ))}
-              </select>
-            </div>
-
-          </div>
-
-          {/* コンテンツ表示エリア */}
+          {/* ステータス・データ表示 */}
           {loading ? (
             <div className="text-center py-20 text-slate-500 text-sm">Loading kanji data from Supabase...</div>
           ) : error ? (
-            <div className="text-center py-20 text-red-500 text-sm font-bold">Failed to load kanji records. Please verify your kl_character table.</div>
-          ) : filteredKanji.length === 0 ? (
+            <div className="text-center py-20 text-red-500 text-sm font-bold">
+              Failed to load kanji records: {errorMessage}
+            </div>
+          ) : kanjiList.length === 0 ? (
             <div className="text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm">
-              No matching kanji found. Try adjusting your search query or filters.
+              No kanji records found in the kl_character table.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredKanji.map((item) => (
+              {kanjiList.map((item, index) => (
                 <div
-                  key={item.id}
+                  key={item.id || index}
                   className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
                 >
                   <div>
-                    {/* 上部（IDの最初の一部 & カテゴリー） */}
+                    {/* 上部（ID & カテゴリー） */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-bold text-slate-400">
-                        #{item.id.slice(0, 8)}
+                        #{item.id ? item.id.slice(0, 8) : index + 1}
                       </span>
                       {item.category && (
                         <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
@@ -224,10 +141,10 @@ export default function Kanji200Component() {
                       )}
                     </div>
 
-                    {/* 漢字メイン表示（item.character を使用） */}
+                    {/* 漢字メイン表示 */}
                     <div className="text-center my-3">
                       <span className="text-6xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                        {item.character}
+                        {item.character || '—'}
                       </span>
                     </div>
 
@@ -252,7 +169,7 @@ export default function Kanji200Component() {
                       </div>
                       <div className="flex justify-between">
                         <span className="font-bold text-slate-500">Strokes:</span>
-                        <span className="text-right font-medium">{item.stroke_count ? `${item.stroke_count}` : '—'}</span>
+                        <span className="text-right font-medium">{item.stroke_count !== undefined && item.stroke_count !== null ? item.stroke_count : '—'}</span>
                       </div>
                     </div>
                   </div>
