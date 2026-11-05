@@ -38,7 +38,7 @@ function HanafudaFrameView({ userId }: { userId: string | null }) {
     <div className="space-y-6">
       <div className="flex flex-col items-center">
         <div className="flex items-center space-x-2 mb-2">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Hanafuda Koi-Koi Arena</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Hanafuda Koi-Koi</h2>
           <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold">
             ✨ Hanafuda Card Game
           </span>
@@ -105,7 +105,7 @@ export default function HanafudaRoute() {
       <ToolPageWrapper layoutRef={layoutRef}>
         <div className="flex justify-center items-center h-screen bg-[#f4f1ea] font-sans">
           <h3 className="text-xl font-semibold text-slate-700 animate-pulse">
-            Loading Hanafuda Koi-Koi Arena... 🎴
+            Loading Hanafuda Koi-Koi... 🎴
           </h3>
         </div>
       </ToolPageWrapper>
