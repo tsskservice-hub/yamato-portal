@@ -2,8 +2,16 @@ import { z } from "zod";
 // Import inappropriate words list from JSON file in the app/data directory
 import unsuitableWordsData from "../data/unsuitable-words.json";
 
-// Retrieve the list of unsuitable words from the JSON data
-const UNSUITABLE_NICKNAMES: string[] = unsuitableWordsData.words;
+// Retrieve and flatten the list of unsuitable words from the categorized JSON data
+const UNSUITABLE_NICKNAMES: string[] = [
+  ...unsuitableWordsData.admin_system,
+  ...unsuitableWordsData.money_scam,
+  ...unsuitableWordsData.politics,
+  ...unsuitableWordsData.race_discrimination,
+  ...unsuitableWordsData.violence,
+  ...unsuitableWordsData.sexual,
+  ...unsuitableWordsData.japanese_slang,
+];
 
 export const nicknameSchema = z
   .string()
