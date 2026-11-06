@@ -1,6 +1,6 @@
 /**
  * @file root.tsx
- * @description アプリケーション大元レイアウト（グローバルローダー・learning_pace & データベース連動 is_teacher 対応・ノーキャッシュ対応版）
+ * @description アプリケーション大元レイアウト（グローバルローダー・Realtimeクレジット同期・learning_pace & データベース連動 is_teacher 対応・ノーキャッシュ対応版）
  */
 import {
   Links,
@@ -8,10 +8,14 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
+  useRevalidator,
 } from "@remix-run/react";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { json } from "@remix-run/cloudflare";
+import React, { useEffect } from "react";
 import { createServerSupabaseClient } from "./lib/supabase.server";
+import { supabase } from "./lib/supabaseClient";
 
 // Vite の URL インポート機能を使用して Tailwind CSS を確実に読み込む
 import stylesheet from "./tailwind.css?url";
@@ -103,5 +107,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const data = useLoaderData<typeof loader>();
+  const revalidator = useRevalidator();
+
+  // 🔄 アプリ全体（どのページにいても）で Supabase Realtime を用いて profiles テーブルの変更を監視し、自動同期する
+  useEffect(() => {
+    if (!data.user?.id) return;
+
+    const channel = supabase
+      .channel(`public:global_profiles:${data.user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${data.user.id}`,
+        },
+        () => {
+          // データベース上の残高やプロフィールに変動があった場合、自動的にローダーを再実行して全体を同期
+          revalidator.revalidate();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [data.user?.id, revalidator]);
+
   return <Outlet />;
 }

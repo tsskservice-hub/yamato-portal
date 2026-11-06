@@ -1,9 +1,9 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（モジュール分割・クレジット残高・履歴・クライアント更新対応版）
+ * @description アカウント設定画面（モジュール分割・クレジット残高・履歴・リアルタイム同期対応版）
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/PageLayout';
@@ -128,54 +128,108 @@ export default function AccountSettingsRoute() {
   const [transactions, setTransactions] = useState<Array<any>>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
 
-  // クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
-  useEffect(() => {
-    const fetchUserDataAndTransactions = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const activeUser = session?.user ?? rootData?.user ?? initialData.user;
+  // 🔄 ユーザーデータとクレジット履歴を最新化する共通関数
+  const fetchUserDataAndTransactions = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const activeUser = session?.user ?? rootData?.user ?? initialData.user;
 
-        if (activeUser) {
-          setUser(activeUser);
-          setUserEmail(activeUser.email ?? "");
-          if (activeUser.created_at) {
-            setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
+      if (activeUser) {
+        setUser(activeUser);
+        setUserEmail(activeUser.email ?? "");
+        if (activeUser.created_at) {
+          setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
+        }
+
+        // プロファイル（残高・ニックネーム）の取得
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("credits, nickname")
+          .eq("id", activeUser.id)
+          .maybeSingle();
+
+        if (profileData) {
+          if (profileData.credits !== undefined) {
+            setCredits(profileData.credits);
           }
-
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("credits, nickname")
-            .eq("id", activeUser.id)
-            .maybeSingle();
-
-          if (profileData) {
-            if (profileData.credits !== undefined) {
-              setCredits(profileData.credits);
-            }
-            if (profileData.nickname) {
-              setNicknameInput(profileData.nickname);
-            }
-          }
-
-          const { data: txData, error: txError } = await supabase
-            .from("credit_transactions")
-            .select("id, amount, feature_used, description, created_at, expires_at")
-            .eq("user_id", activeUser.id)
-            .order("created_at", { ascending: false });
-
-          if (!txError && txData) {
-            setTransactions(txData);
+          if (profileData.nickname) {
+            setNicknameInput(profileData.nickname);
           }
         }
-      } catch (err) {
-        console.error("Failed to fetch user data on client:", err);
-      } finally {
-        setIsLoadingTransactions(false);
+
+        // クレジット履歴（加算・減算両方）の取得
+        const { data: txData, error: txError } = await supabase
+          .from("credit_transactions")
+          .select("id, amount, feature_used, description, created_at, expires_at")
+          .eq("user_id", activeUser.id)
+          .order("created_at", { ascending: false });
+
+        if (!txError && txData) {
+          setTransactions(txData);
+        }
       }
+    } catch (err) {
+      console.error("Failed to fetch user data on client:", err);
+    } finally {
+      setIsLoadingTransactions(false);
+    }
+  }, [rootData, initialData]);
+
+  // 初回マウント時および rootData 変更時にデータ取得を実行
+  useEffect(() => {
+    fetchUserDataAndTransactions();
+  }, [fetchUserDataAndTransactions]);
+
+  // リアルタイムリスナー（Supabase Realtime）の設定：クレジット加算や減算時に自動で再取得
+  useEffect(() => {
+    let channel: any = null;
+
+    const setupRealtimeSync = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const activeUser = session?.user ?? rootData?.user ?? initialData.user;
+
+      if (!activeUser?.id) return;
+
+      // profiles テーブルまたは credit_transactions テーブルの変更を監視
+      channel = supabase
+        .channel(`public:user_credits:${activeUser.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${activeUser.id}`,
+          },
+          () => {
+            // 残高が変動した際に即座にデータを再取得
+            fetchUserDataAndTransactions();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'credit_transactions',
+            filter: `user_id=eq.${activeUser.id}`,
+          },
+          () => {
+            // 新しいトランザクション（加算・減算履歴）が追加された際に即座に再取得
+            fetchUserDataAndTransactions();
+          }
+        )
+        .subscribe();
     };
 
-    fetchUserDataAndTransactions();
-  }, [rootData]);
+    setupRealtimeSync();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [rootData, initialData, fetchUserDataAndTransactions]);
 
   useEffect(() => {
     if (rootData) {
