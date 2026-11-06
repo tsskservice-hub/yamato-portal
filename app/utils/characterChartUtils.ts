@@ -39,7 +39,36 @@ const DA_ROW = new Set([
   "だ", "ぢ", "づ", "で", "ど",
   "ダ", "ヂ", "ヅ", "デ", "ド",
 ]);
-const NO_CATEGORY = "Other";
+const DEFAULT_CATEGORY = "Miscellaneous";
+
+// reference.200kanji.tsx と完全に同期させたカテゴリー表示順序
+export const CATEGORY_ORDER = [
+  "Numbers",
+  "Counters",
+  "Season",
+  "Days of the week",
+  "Day",
+  "Time",
+  "Parts of the body",
+  "Positions",
+  "Directions",
+  "School life",
+  "People/family",
+  "Adjectives/adverbs",
+  "Verbs (Movement)",
+  "Verbs (Body/Senses)",
+  "Verbs (Lifestyle)",
+  "Verbs (Activity)",
+  "Country/city",
+  "Place",
+  "Travel/transport",
+  "Food",
+  "Nature",
+  "Animals",
+  "Colours",
+  "Repeat sign",
+  "Miscellaneous",
+];
 
 export function bySortOrder(
   a: { sortOrder?: number | null; front: string },
@@ -93,7 +122,15 @@ export function buildKanaGroups(pool: PairSource[]): PairSource[][] {
 
 export function kanjiCategoryLabel(category?: string): string {
   const c = (category ?? "").trim();
-  if (!c) return NO_CATEGORY;
+  if (!c) return DEFAULT_CATEGORY;
+  
+  // CATEGORY_ORDER に完全一致するものがあれば、そのままのケース（大文字小文字など）で返す
+  const matched = CATEGORY_ORDER.find(
+    (cat) => cat.toLowerCase() === c.toLowerCase()
+  );
+  if (matched) return matched;
+
+  if (c.toLowerCase() === "other" || c.toLowerCase() === "others") return DEFAULT_CATEGORY;
   return c.charAt(0).toUpperCase() + c.slice(1);
 }
 
@@ -129,22 +166,42 @@ export function buildKanjiGroups(
 
   const groupsByKey = new Map<string, KanjiCategoryGroup>();
   for (const item of byId.values()) {
-    const key = (item.category ?? "").trim();
+    const rawCategory = (item.category ?? "").trim();
+    const label = kanjiCategoryLabel(rawCategory);
+    // グループ化のキーとしてラベルをそのまま利用（大小文字を統一して扱う）
+    const key = label.toLowerCase();
+    
     let g = groupsByKey.get(key);
     if (!g) {
-      g = { key, label: kanjiCategoryLabel(key), items: [] };
+      g = { key, label, items: [] };
       groupsByKey.set(key, g);
     }
     g.items.push(item);
   }
+
   const groups = [...groupsByKey.values()];
   for (const g of groups) g.items.sort(bySortOrder);
+
+  // CATEGORY_ORDER の配列順序に従ってグループを厳密にソートする
   groups.sort((a, b) => {
-    if (a.key === "" && b.key !== "") return 1;
-    if (a.key !== "" && b.key === "") return -1;
-    return a.key.localeCompare(b.key, "en", {
-      sensitivity: "base",
-    });
+    const indexA = CATEGORY_ORDER.findIndex(
+      (cat) => cat.toLowerCase() === a.label.toLowerCase()
+    );
+    const indexB = CATEGORY_ORDER.findIndex(
+      (cat) => cat.toLowerCase() === b.label.toLowerCase()
+    );
+
+    // 両方とも CATEGORY_ORDER に存在する場合はその定義順に従う
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+    // 片方だけ存在しない場合のフォールバック（存在する方を優先）
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+
+    // どちらも定義外の場合はアルファベット順
+    return a.label.localeCompare(b.label, "en", { sensitivity: "base" });
   });
+
   return groups;
 }
