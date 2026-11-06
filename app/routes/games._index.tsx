@@ -81,7 +81,7 @@ export default function GamesHubIndex() {
                   {gamesData?.title || "Japanese Learning Arcade"}
                 </h1>
                 <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                  {gamesData?.subtitle || "Have fun mastering Hiragana, Katakana, and typing skills through interactive games!"}
+                  {gamesData?.subtitle || "Have fun mastering Hiragana, Katakana, and cognitive skills through interactive games!"}
                 </p>
               </div>
 

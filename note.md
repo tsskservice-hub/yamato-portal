@@ -11,3 +11,6 @@ git checkout bp
 git merge main
 git push origin bp
 git checkout main
+
+
+ToolPageWrapper.tsx でつつまれたページはDataErrorState.tsxも有効になる。　20261106
