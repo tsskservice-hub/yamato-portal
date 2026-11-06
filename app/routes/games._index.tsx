@@ -10,6 +10,7 @@ import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { useGamesContent } from '~/data/content-games';
 import { supabase } from '~/lib/supabaseClient';
+import { Brain, Gamepad2, Compass, Target, Swords, Sparkles, Grid } from 'lucide-react';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -28,6 +29,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
     portalContent,
     currentPath: url.pathname,
   });
+}
+
+// Helper function to render dynamic icons based on iconName string
+function renderGameIcon(iconName?: string) {
+  switch (iconName) {
+    case 'Brain':
+      return <Brain className="w-5 h-5 text-indigo-600" />;
+    case 'Gamepad2':
+      return <Gamepad2 className="w-5 h-5 text-indigo-600" />;
+    case 'Compass':
+      return <Compass className="w-5 h-5 text-indigo-600" />;
+    case 'Target':
+      return <Target className="w-5 h-5 text-indigo-600" />;
+    case 'Swords':
+      return <Swords className="w-5 h-5 text-indigo-600" />;
+    case 'Sparkles':
+      return <Sparkles className="w-5 h-5 text-indigo-600" />;
+    case 'Grid':
+      return <Grid className="w-5 h-5 text-indigo-600" />;
+    default:
+      return <Gamepad2 className="w-5 h-5 text-indigo-600" />;
+  }
 }
 
 export default function GamesHubIndex() {
@@ -80,11 +103,14 @@ export default function GamesHubIndex() {
                       >
                         <div>
                           <div className="flex items-center justify-between mb-4">
-                            {game.category && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                                {game.category}
-                              </span>
-                            )}
+                            <div className="flex items-center space-x-2">
+                              {renderGameIcon(game.iconName)}
+                              {game.category && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                                  {game.category}
+                                </span>
+                              )}
+                            </div>
                             {game.badge && (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
                                 {game.badge}
