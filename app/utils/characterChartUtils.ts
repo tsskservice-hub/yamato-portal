@@ -41,7 +41,7 @@ const DA_ROW = new Set([
 ]);
 const DEFAULT_CATEGORY = "Miscellaneous";
 
-// reference.200kanji.tsx と完全に同期させたカテゴリー表示順序
+// データベースの実際の登録内容（スクリーンショット結果）をすべて網羅・同期させたカテゴリー表示順序
 export const CATEGORY_ORDER = [
   "Numbers",
   "Counters",
@@ -55,6 +55,7 @@ export const CATEGORY_ORDER = [
   "School life",
   "People/family",
   "Adjectives/adverbs",
+  "Verbs", // ← スクリーンショットの結果に基づき追加
   "Verbs (Movement)",
   "Verbs (Body/Senses)",
   "Verbs (Lifestyle)",
@@ -120,12 +121,12 @@ export function buildKanaGroups(pool: PairSource[]): PairSource[][] {
   return groups;
 }
 
-export function kanjiCategoryLabel(category?: string): string {
+export function kanjiCategoryLabel(category?: string, orderList: string[] = CATEGORY_ORDER): string {
   const c = (category ?? "").trim();
   if (!c) return DEFAULT_CATEGORY;
   
-  // CATEGORY_ORDER に完全一致するものがあれば、そのままのケース（大文字小文字など）で返す
-  const matched = CATEGORY_ORDER.find(
+  // orderList の中から大文字小文字を無視して完全一致するものを探す
+  const matched = orderList.find(
     (cat) => cat.toLowerCase() === c.toLowerCase()
   );
   if (matched) return matched;
@@ -137,7 +138,12 @@ export function kanjiCategoryLabel(category?: string): string {
 export function buildKanjiGroups(
   readingPool: PairSource[],
   meaningPool: PairSource[],
+  customCategoryOrder?: string[]
 ): KanjiCategoryGroup[] {
+  const activeOrder = customCategoryOrder && customCategoryOrder.length > 0 
+    ? customCategoryOrder 
+    : CATEGORY_ORDER;
+
   const byId = new Map<string, KanjiChartItem>();
   const merge = (p: PairSource, isMeaning: boolean) => {
     let item = byId.get(p.id);
@@ -167,8 +173,7 @@ export function buildKanjiGroups(
   const groupsByKey = new Map<string, KanjiCategoryGroup>();
   for (const item of byId.values()) {
     const rawCategory = (item.category ?? "").trim();
-    const label = kanjiCategoryLabel(rawCategory);
-    // グループ化のキーとしてラベルをそのまま利用（大小文字を統一して扱う）
+    const label = kanjiCategoryLabel(rawCategory, activeOrder);
     const key = label.toLowerCase();
     
     let g = groupsByKey.get(key);
@@ -182,24 +187,21 @@ export function buildKanjiGroups(
   const groups = [...groupsByKey.values()];
   for (const g of groups) g.items.sort(bySortOrder);
 
-  // CATEGORY_ORDER の配列順序に従ってグループを厳密にソートする
+  // activeOrder の配列順序に従ってグループを厳密にソートする
   groups.sort((a, b) => {
-    const indexA = CATEGORY_ORDER.findIndex(
+    const indexA = activeOrder.findIndex(
       (cat) => cat.toLowerCase() === a.label.toLowerCase()
     );
-    const indexB = CATEGORY_ORDER.findIndex(
+    const indexB = activeOrder.findIndex(
       (cat) => cat.toLowerCase() === b.label.toLowerCase()
     );
 
-    // 両方とも CATEGORY_ORDER に存在する場合はその定義順に従う
     if (indexA !== -1 && indexB !== -1) {
       return indexA - indexB;
     }
-    // 片方だけ存在しない場合のフォールバック（存在する方を優先）
     if (indexA !== -1) return -1;
     if (indexB !== -1) return 1;
 
-    // どちらも定義外の場合はアルファベット順
     return a.label.localeCompare(b.label, "en", { sensitivity: "base" });
   });
 
