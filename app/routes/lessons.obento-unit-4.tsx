@@ -1,6 +1,6 @@
 /**
- * @file app/routes/lessons.obento-u4.tsx
- * @description Obento Deluxe Unit 4 (Family and Pets) の学習レッスンページ（やまと先生メインステージ常設版）
+ * @file app/routes/lessons.obento-unit-4.tsx
+ * @description Obento Deluxe Unit 4 (Family and Pets) の学習レッスンページ（edu_lessons データベース完全連動版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -29,29 +29,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let vocabData: any[] = [];
 
   try {
+    // 1. Obento Unit 4 のトピックデータを取得[cite: 3]
     const { data: topic } = await supabase
       .from("edu_topics")
       .select("*")
-      .ilike("slug", "%obento-u4%")
+      .ilike("slug", "%obento-unit-4%")
       .single();
 
     topicData = topic || null;
 
     if (topicData) {
+      // 2. 紐づくレッスンを edu_lessons から lesson_order 順に取得[cite: 3]
       const { data: lessons } = await supabase
         .from("edu_lessons")
         .select("*")
         .eq("topic_id", topicData.id)
-        .order("sort_order", { ascending: true });
+        .order("lesson_order", { ascending: true });
       lessonsData = lessons || [];
     }
 
+    // フォールバック（もしtopic_idで結ばれていない場合のslug検索）[cite: 3]
     if (lessonsData.length === 0) {
       const { data: fallbackLessons } = await supabase
         .from("edu_lessons")
         .select("*")
-        .ilike("slug", "obento-u4-%")
-        .order("sort_order", { ascending: true });
+        .ilike("slug", "obento-unit-4-%")
+        .order("lesson_order", { ascending: true });
       lessonsData = fallbackLessons || [];
     }
 
@@ -65,7 +68,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       vocabData = vocabs || [];
     }
   } catch (err) {
-    console.warn("⚠️ [Loader] Failed to fetch Obento U4 data from Supabase:", err);
+    console.warn("⚠️ [Loader] Failed to fetch Obento Unit 4 data from Supabase:", err);
   }
 
   return json({
@@ -81,7 +84,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
-export default function LessonsObentoU4Page() {
+export default function LessonsObentoUnit4Page() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const themeColor = "#f97316"; // Obento U4 Warm Orange theme
 
@@ -191,9 +194,14 @@ export default function LessonsObentoU4Page() {
               <span>•</span>
               <span>Unit 4</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold mb-3">
-              {topic?.title || "家族とペット (Family and Pets)"}
+            <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">
+              {topic?.title_en || "Obento Unit 4: Family and Pets"}
             </h1>
+            {topic?.title_jp && (
+              <p className="text-orange-200 font-semibold text-sm mb-3">
+                {topic.title_jp}
+              </p>
+            )}
             <p className="text-orange-100 text-sm sm:text-base leading-relaxed max-w-2xl">
               {topic?.description || "Learn how to introduce your family members, count people correctly using Japanese counters, and talk about your pets!"}
             </p>
@@ -204,7 +212,7 @@ export default function LessonsObentoU4Page() {
             <YamatoChatCommon2
               characterName="Yamato Sensei"
               initialGreeting="Hello, my friend! 🌟 Welcome to Obento Unit 4 (Family & Pets). Let's practise talking about your family members, counting people (一人、二人...), and discussing your pets together! What would you like to start with?"
-              appType="obento-u4"
+              appType="obento-unit-4"
               themeColor={themeColor}
               userId={user?.id}
               userNickname={nickname}
@@ -227,19 +235,66 @@ export default function LessonsObentoU4Page() {
                 ) : (
                   <div className="space-y-4">
                     {lessons.map((lesson: any, index: number) => (
-                      <div key={lesson.id || index} className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 transition hover:shadow-md">
-                        <div className="flex items-center justify-between mb-2">
+                      <div key={lesson.id || index} className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 transition hover:shadow-md space-y-3">
+                        
+                        {/* レッスン番号と教科書参照ページ */}
+                        <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-900 px-2.5 py-0.5 rounded-full">
-                            Lesson {index + 1}
+                            Lesson {lesson.lesson_order || index + 1}
                           </span>
-                          <span className="text-xs text-slate-400 font-mono">{lesson.slug}</span>
+                          {lesson.obento_page_ref && (
+                            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+                              📚 {lesson.obento_page_ref}
+                            </span>
+                          )}
                         </div>
-                        <h3 className="font-bold text-base text-slate-800 dark:text-slate-200 mb-1">{lesson.title}</h3>
+
+                        {/* 英語および日本語のレッスンタイトル[cite: 3] */}
+                        <div>
+                          <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">
+                            {lesson.title_en}
+                          </h3>
+                          {lesson.title_jp && (
+                            <p className="text-xs font-medium text-orange-600 dark:text-orange-400 mt-0.5">
+                              {lesson.title_jp}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* 学習意図（Learning Intention）[cite: 3] */}
                         {lesson.learning_intention && (
-                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">
-                            <strong className="text-slate-700 dark:text-slate-300">Learning Intention:</strong> {lesson.learning_intention}
-                          </p>
+                          <div className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <strong className="text-slate-700 dark:text-slate-300 block mb-0.5">Learning Intention:</strong>
+                            {lesson.learning_intention}
+                          </div>
                         )}
+
+                        {/* 成功基準（Success Criteria）[cite: 3] */}
+                        {lesson.success_criteria && (
+                          <div className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <strong className="text-slate-700 dark:text-slate-300 block mb-0.5">Success Criteria:</strong>
+                            <span>{Array.isArray(lesson.success_criteria) ? lesson.success_criteria.join(", ") : lesson.success_criteria}</span>
+                          </div>
+                        )}
+
+                        {/* ターゲット文法・キー表現があれば表示 */}
+                        {(lesson.target_grammar || lesson.key_expressions) && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+                            {lesson.target_grammar && (
+                              <div className="bg-orange-50/50 dark:bg-orange-950/20 p-2.5 rounded-xl border border-orange-100 dark:border-orange-900/40 text-orange-800 dark:text-orange-300">
+                                <strong className="block font-bold mb-0.5">Grammar:</strong>
+                                {JSON.stringify(lesson.target_grammar)}
+                              </div>
+                            )}
+                            {lesson.key_expressions && (
+                              <div className="bg-amber-50/50 dark:bg-amber-950/20 p-2.5 rounded-xl border border-amber-100 dark:border-amber-900/40 text-amber-800 dark:text-amber-300">
+                                <strong className="block font-bold mb-0.5">Expressions:</strong>
+                                {JSON.stringify(lesson.key_expressions)}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                       </div>
                     ))}
                   </div>
