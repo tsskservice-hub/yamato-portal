@@ -9,33 +9,23 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/cloudflare";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLoaderData } from "@remix-run/react";
 import { ToolPageWrapper } from "~/components/ToolPageWrapper";
 import type { PageLayoutRef } from "~/components/PageLayout";
 import { generateModuleMeta } from "~/utils/seoMeta";
 import { supabase } from "~/lib/supabaseClient";
 
+import {
+  type PairSource,
+  bySortOrder,
+} from "~/utils/characterChartUtils";
+import { ReferenceChartKana } from "~/components/ReferenceChartKana";
+import { ReferenceChartKanji } from "~/components/ReferenceChartKanji";
+
 type GameMode = "hiragana" | "katakana" | "kanji";
 type KanjiPairMode = "reading" | "meaning";
 type Difficulty = "easy" | "medium" | "hard";
-
-interface PairSource {
-  id: string;
-  /** Text on the character card, e.g. あ / ア / 川 */
-  front: string;
-  /** Text on the partner card, e.g. a / かわ / river */
-  back: string;
-  /** Optional smaller line under `back`, e.g. romaji for a reading. */
-  backSub?: string;
-  /** kl_character.sort_order — gojuon order for kana charts. */
-  sortOrder?: number | null;
-  /** Kanji extras from kl_character, shown in the reference list. */
-  strokeCount?: number | null;
-  radical?: string;
-  gradeLevel?: string | number | null;
-  category?: string;
-}
 
 interface LoaderDataShape {
   portalContent: unknown;
@@ -78,140 +68,6 @@ type KlRow = {
 
 const clean = (v: string | null | undefined) =>
   (v ?? "").trim();
-
-function bySortOrder(
-  a: { sortOrder?: number | null; front: string },
-  b: { sortOrder?: number | null; front: string },
-): number {
-  const ao = a.sortOrder ?? null;
-  const bo = b.sortOrder ?? null;
-  if (ao !== null && bo !== null && ao !== bo) return ao - bo;
-  if (ao !== null && bo === null) return -1;
-  if (ao === null && bo !== null) return 1;
-  return a.front.localeCompare(b.front, "ja");
-}
-
-const SMALL_Y = ["ゃ", "ゅ", "ょ", "ャ", "ュ", "ョ"];
-const DA_ROW = new Set([
-  "だ", "ぢ", "づ", "で", "ど",
-  "ダ", "ヂ", "ヅ", "デ", "ド",
-]);
-function kanaGroupKey(p: PairSource): string {
-  const chars = Array.from(p.front);
-  const romaji = p.back.toLowerCase().trim();
-  if (chars[0] === "ん" || chars[0] === "ン" || romaji === "n")
-    return "row-w";
-  if (chars[0] === "を" || chars[0] === "ヲ") return "row-w";
-  if (chars.length >= 2 && SMALL_Y.includes(chars[1])) {
-    if (chars[0] === "ぢ" || chars[0] === "ヂ") return "yoon-dy";
-    return `yoon-${romaji.replace(/[auo]$/, "")}`;
-  }
-  if (chars.length === 1 && DA_ROW.has(chars[0])) return "row-d";
-  if (/^[aiueo]$/.test(romaji)) return "row-a";
-  const base = romaji.replace(/[aiueo]$/, "");
-  const rowOf: Record<string, string> = {
-    k: "k", g: "g", s: "s", sh: "s", z: "z", j: "z",
-    t: "t", ch: "t", ts: "t", d: "d", n: "n", h: "h",
-    f: "h", m: "m", y: "y", r: "r", w: "w", b: "b", p: "p",
-  };
-  return `row-${rowOf[base] ?? base}`;
-}
-
-function buildKanaGroups(pool: PairSource[]): PairSource[][] {
-  const sorted = [...pool].sort(bySortOrder);
-  const groups: PairSource[][] = [];
-  const byKey = new Map<string, PairSource[]>();
-  for (const p of sorted) {
-    const key = kanaGroupKey(p);
-    let g = byKey.get(key);
-    if (!g) {
-      g = [];
-      byKey.set(key, g);
-      groups.push(g);
-    }
-    g.push(p);
-  }
-  return groups;
-}
-
-interface KanjiChartItem {
-  id: string;
-  front: string;
-  reading?: string;
-  readingRomaji?: string;
-  meaning?: string;
-  sortOrder?: number | null;
-  strokeCount?: number | null;
-  radical?: string;
-  gradeLevel?: string | number | null;
-  category?: string;
-}
-
-interface KanjiCategoryGroup {
-  key: string;
-  label: string;
-  items: KanjiChartItem[];
-}
-
-const NO_CATEGORY = "Other";
-
-function kanjiCategoryLabel(category?: string): string {
-  const c = (category ?? "").trim();
-  if (!c) return NO_CATEGORY;
-  return c.charAt(0).toUpperCase() + c.slice(1);
-}
-
-function buildKanjiGroups(
-  readingPool: PairSource[],
-  meaningPool: PairSource[],
-): KanjiCategoryGroup[] {
-  const byId = new Map<string, KanjiChartItem>();
-  const merge = (p: PairSource, isMeaning: boolean) => {
-    let item = byId.get(p.id);
-    if (!item) {
-      item = {
-        id: p.id,
-        front: p.front,
-        sortOrder: p.sortOrder ?? null,
-        strokeCount: p.strokeCount ?? null,
-        radical: p.radical,
-        gradeLevel: p.gradeLevel ?? null,
-        category: p.category,
-      };
-      byId.set(p.id, item);
-    }
-    if (isMeaning) {
-      item.meaning = p.back;
-      if (!item.reading && p.backSub) item.reading = p.backSub;
-    } else {
-      item.reading = p.back;
-      if (p.backSub) item.readingRomaji = p.backSub;
-    }
-  };
-  for (const p of readingPool) merge(p, false);
-  for (const p of meaningPool) merge(p, true);
-
-  const groupsByKey = new Map<string, KanjiCategoryGroup>();
-  for (const item of byId.values()) {
-    const key = (item.category ?? "").trim();
-    let g = groupsByKey.get(key);
-    if (!g) {
-      g = { key, label: kanjiCategoryLabel(key), items: [] };
-      groupsByKey.set(key, g);
-    }
-    g.items.push(item);
-  }
-  const groups = [...groupsByKey.values()];
-  for (const g of groups) g.items.sort(bySortOrder);
-  groups.sort((a, b) => {
-    if (a.key === "" && b.key !== "") return 1;
-    if (a.key !== "" && b.key === "") return -1;
-    return a.key.localeCompare(b.key, "en", {
-      sensitivity: "base",
-    });
-  });
-  return groups;
-}
 
 function byCategoryThenSortOrder(
   a: PairSource,
@@ -913,109 +769,17 @@ function MemoryMatchGame({
         </div>
       )}
 
-      {/* Reference chart */}
+      {/* Reference charts */}
       {pool.length > 0 && mode !== "kanji" && (
-        <section className="mx-auto mt-8 max-w-xl">
-          <h2 className="mb-1 text-center text-sm font-black tracking-wide text-slate-700 dark:text-slate-200">
-            {modeLabel} Reference Chart
-          </h2>
-          <p className="mb-3 text-center text-xs text-slate-400">
-            In character-table order: basic sounds first, then
-            voiced, semi-voiced and combined sounds. Characters
-            are grouped by sound row — two groups per row.
-          </p>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-            {buildKanaGroups(pool).map((group) => (
-              <div
-                key={group.map((p) => p.id).join("-")}
-                className="flex gap-1"
-              >
-                {group.map((p) => (
-                  <div
-                    key={p.id}
-                    className="min-w-0 flex-1 rounded-lg bg-slate-100 px-0.5 py-1.5 text-center dark:bg-white/5"
-                  >
-                    <p className="truncate text-base font-bold leading-tight text-slate-800 dark:text-white">
-                      {p.front}
-                    </p>
-                    <p className="truncate text-[10px] font-medium text-slate-400">
-                      {p.back}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </section>
+        <ReferenceChartKana pool={pool} modeLabel={modeLabel} />
       )}
 
-      {mode === "kanji" &&
-        (pools.kanji.length > 0 ||
-          pools.kanjiMeaning.length > 0) && (
-        <section className="mx-auto mt-8 max-w-xl">
-          <h2 className="mb-1 text-center text-sm font-black tracking-wide text-slate-700 dark:text-slate-200">
-            Kanji Chart
-          </h2>
-          <p className="mb-3 text-center text-xs text-slate-400">
-            Grouped by category. Within each category, kanji are
-            shown in the order set in the character table.
-          </p>
-          {buildKanjiGroups(pools.kanji, pools.kanjiMeaning).map(
-            (group) => (
-              <div key={group.key || "__other__"} className="mb-5">
-                <h3 className="mb-2 flex items-baseline gap-2 text-left text-xs font-black tracking-wide text-slate-600 dark:text-slate-300">
-                  <span>{group.label}</span>
-                  <span className="text-[10px] font-bold text-slate-400">
-                    ({group.items.length})
-                  </span>
-                </h3>
-                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-                  {group.items.map((p) => (
-                    <div
-                      key={p.id}
-                      className="flex items-center gap-2.5 rounded-lg bg-slate-100 px-2.5 py-1.5 dark:bg-white/5"
-                    >
-                      <span className="text-xl font-bold text-slate-800 dark:text-white">
-                        {p.front}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-xs font-bold text-slate-600 dark:text-slate-300">
-                          {p.reading
-                            ? `${p.reading}${
-                                p.readingRomaji
-                                  ? ` · ${p.readingRomaji}`
-                                  : ""
-                              }`
-                            : "—"}
-                        </span>
-                        <span className="block truncate text-[11px] text-slate-400">
-                          {p.meaning ?? ""}
-                        </span>
-                        {(() => {
-                          const meta: string[] = [];
-                          if (p.strokeCount != null)
-                            meta.push(`${p.strokeCount} strokes`);
-                          if (p.radical)
-                            meta.push(`radical ${p.radical}`);
-                          if (
-                            p.gradeLevel != null &&
-                            p.gradeLevel !== ""
-                          )
-                            meta.push(`grade ${p.gradeLevel}`);
-                          return meta.length > 0 ? (
-                            <span className="block truncate text-[10px] text-slate-400">
-                              {meta.join(" · ")}
-                            </span>
-                          ) : null;
-                        })()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ),
-          )}
-        </section>
+      {mode === "kanji" && (
+        <ReferenceChartKanji
+          kanjiPool={pools.kanji}
+          kanjiMeaningPool={pools.kanjiMeaning}
+          mode={mode}
+        />
       )}
 
       {/* How to Play modal */}
