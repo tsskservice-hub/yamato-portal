@@ -1,9 +1,9 @@
 /**
  * @file PortalModulesGrid.tsx
- * @description Supabase の各 content モジュール（General, Speaking, Writing, Reference, Junior）および Games を統合して描画するグリッドコンポーネント
+ * @description Supabase の各 content モジュール（General, Speaking, Writing, Reference, Lessons, Junior）および Games を統合して描画するグリッドコンポーネント
  */
 import React from 'react';
-import { ArrowRight, FileText, Gamepad2, Grid, Mic, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, FileText, Gamepad2, Grid, Mic, Sparkles } from 'lucide-react';
 import type { PortalModule } from '~/data/content-other';
 
 interface PortalModulesGridProps {
@@ -37,6 +37,7 @@ export function PortalModulesGrid({
       case "Mic": return <Mic className={className} />;
       case "FileText": return <FileText className={className} />;
       case "Gamepad2": return <Gamepad2 className={className} />;
+      case "BookOpen": return <BookOpen className={className} />;
       default: return <FileText className={className} />;
     }
   };
@@ -45,11 +46,13 @@ export function PortalModulesGrid({
     const hoverBorderClass = accentColor === 'red' ? 'hover:border-red-500/50' : 
                              accentColor === 'indigo' ? 'hover:border-indigo-500/50' : 
                              accentColor === 'emerald' ? 'hover:border-emerald-500/50' : 
+                             accentColor === 'orange' ? 'hover:border-orange-500/50' : 
                              'hover:border-blue-500/50';
 
     const textHoverClass = accentColor === 'red' ? 'group-hover:text-red-500' : 
                            accentColor === 'indigo' ? 'group-hover:text-indigo-500' : 
                            accentColor === 'emerald' ? 'group-hover:text-emerald-500' : 
+                           accentColor === 'orange' ? 'group-hover:text-orange-500' : 
                            'group-hover:text-blue-500';
 
     return (
@@ -151,6 +154,31 @@ export function PortalModulesGrid({
             </div>
           </div>
         )}
+
+        {/* 🌟 4.5. Lessons & Interactive Units (lessons._index.tsxへの誘導カード) */}
+        <div className="space-y-4 pt-4">
+          <div className="flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400">
+            <span>🍱</span>
+            <h4>Japanese Lessons & Textbook Hub</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {renderCard(
+              {
+                id: 'lessons-hub',
+                name: 'Textbook Lessons & Units',
+                description: 'Explore interactive lessons such as Obento Deluxe Unit 4 (Family & Pets), vocabulary lists, and AI Yamato sensei guidance.',
+                path: '/lessons',
+                category: 'Curriculum Hub',
+                iconName: 'BookOpen',
+                actionLabel: 'Explore Lessons',
+                isComingSoon: false,
+                creditRequirement: null,
+                accentColor: 'orange',
+              },
+              'orange'
+            )}
+          </div>
+        </div>
 
         {/* 5. Years 7–10 Japanese (CONTENT_JUNIOR) */}
         {juniorModules.length > 0 && (
