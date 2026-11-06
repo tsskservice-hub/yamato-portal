@@ -138,7 +138,7 @@
 
       /* ---------- Board ---------- */
       .board-wrap{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:clamp(10px,2.4vw,20px)}
-      .board{display:grid;gap:clamp(7px,1.6vw,12px);grid-template-columns:repeat(var(--cols,4),1fr)}
+      .board{display:grid;gap:clamp(7px,1.6vw,12px);grid-template-columns:repeat(var(--cols,4),1fr);container-type:inline-size;margin:0 auto}
       .card{
         appearance:none;border:0;background:transparent;padding:0;cursor:pointer;aspect-ratio:3/4;perspective:700px;
         font:inherit;-webkit-tap-highlight-color:transparent;
@@ -165,7 +165,7 @@
       }
       .face.back::after{
         content:"あ";font-family:"Noto Sans JP",sans-serif;font-weight:900;color:rgba(255,255,255,.9);
-        font-size:clamp(17px,3.4vw,26px);width:1.9em;height:1.9em;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;
+        font-size:clamp(13px,5.2cqw,26px);width:1.9em;height:1.9em;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;
         display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);line-height:1;
       }
       .card:not(.flipped):not(.matched):hover .card-inner{transform:rotateY(14deg)}
@@ -174,9 +174,9 @@
       }
       .face.front .tag{font-size:clamp(8px,1.5vw,10px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
       .face.front .glyph{font-weight:900;line-height:1.1;color:var(--ink)}
-      .face.front.kana .glyph{font-family:"Noto Sans JP",sans-serif;font-size:clamp(30px,7.2vw,54px)}
+      .face.front.kana .glyph{font-family:"Noto Sans JP",sans-serif;font-size:clamp(20px,9.5cqw,54px)}
       .face.front.romaji{background:var(--indigo-soft)}
-      .face.front.romaji .glyph{font-size:clamp(21px,5vw,38px);letter-spacing:.01em;text-transform:lowercase}
+      .face.front.romaji .glyph{font-size:clamp(15px,6.8cqw,38px);letter-spacing:.01em;text-transform:lowercase}
       .card.matched{cursor:default}
       .card.matched .face.front{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 0 0 2px var(--gold-soft), var(--shadow-sm)}
       .card.matched .face.front .glyph{color:var(--ink)}
@@ -253,6 +253,25 @@
       .mini-card.romaji{background:var(--indigo-soft)} .mini-card.romaji .g{font-size:20px}
       .mini-card .t{font-size:7.5px;font-weight:700;letter-spacing:.13em;color:var(--ink-3);text-transform:uppercase}
       .modal .actions{display:flex;justify-content:flex-end;margin-top:20px}
+
+      /* ---------- Compact fit on landscape laptop/desktop screens ----------
+         Tighten the chrome and let the board size itself to the viewport
+         height (see fitBoard in the script) so a whole game is playable
+         without scrolling. */
+      @media (min-width:641px) and (orientation:landscape){
+        .wrap{padding-top:10px;padding-bottom:24px}
+        .topbar{margin-bottom:9px}
+        .title-block h1{font-size:clamp(23px,3vw,30px)}
+        .title-block p{margin-top:4px;font-size:13px;line-height:1.4}
+        .setup{padding:9px 13px}
+        .status{gap:8px;margin:9px 0 7px}
+        .stat{padding:7px 12px}
+        .stat .v{font-size:19px}
+        .progress{margin-bottom:9px}
+        .message{min-height:22px;font-size:14px;margin-bottom:8px}
+        .board-wrap{padding:12px}
+        .board{gap:9px}
+      }
 
       @media (max-width:640px){
         .status{grid-template-columns:repeat(2,1fr)}
@@ -457,6 +476,28 @@
         return cols;
       }
 
+      // On wide landscape screens, shrink the board so the whole grid fits
+      // between its top edge and the bottom of the viewport — no scrolling
+      // needed while playing. On narrow/portrait screens the board simply
+      // takes the full width as before.
+      function fitBoard(){
+        var isLandscapeDesktop = window.innerWidth > 640 && window.innerWidth >= window.innerHeight;
+        if (!isLandscapeDesktop || !deck.length){
+          boardEl.style.maxWidth = '';
+          return;
+        }
+        var cols = colsForViewport(DIFFS[difficulty].cols);
+        var rows = Math.ceil(deck.length / cols);
+        var gap = 9; // matches the landscape .board gap
+        var availH = window.innerHeight - boardEl.getBoundingClientRect().top - 26; // 26px breathing room below
+        if (availH < 200){ boardEl.style.maxWidth = ''; return; }
+        // Card height = card width * 4/3 (aspect-ratio 3/4).
+        // Solve board width W: rows * ((W - (cols-1)*gap)/cols) * 4/3 + (rows-1)*gap = availH
+        var w = ((availH - (rows - 1) * gap) * 3 / 4) * cols / rows + (cols - 1) * gap;
+        w = Math.min(w, 760); // don't let cards balloon on very tall screens
+        boardEl.style.maxWidth = Math.max(w, 300) + 'px';
+      }
+
       function newGame(){
         stopTimer();
         elapsed = 0; moves = 0; matchedCount = 0;
@@ -497,6 +538,7 @@
 
         updateStats();
         setMessage('Pick any card to start. The timer starts on your first flip.');
+        requestAnimationFrame(fitBoard);
       }
 
       function flipCard(btn, card, label, pos){
@@ -588,6 +630,7 @@
       });
       window.addEventListener('resize', function(){
         boardEl.style.setProperty('--cols', colsForViewport(DIFFS[difficulty].cols));
+        fitBoard();
       });
 
       // ---- Reference chart ----
