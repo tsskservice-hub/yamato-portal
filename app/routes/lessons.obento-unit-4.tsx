@@ -1,15 +1,14 @@
 /**
  * @file app/routes/lessons.obento-unit-4.tsx
- * @description Obento Deluxe Unit 4 (Family and Pets) の学習レッスンページ（edu_lessons データベース完全連動版）
+ * @description Obento Deluxe Unit 4 (Family and Pets) の学習ハブページ（edu_lessons データベース完全連動版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, Link } from "@remix-run/react";
 import { generateModuleMeta } from "~/utils/seoMeta";
 import ToolPageWrapper from "~/components/ToolPageWrapper";
 import { type PageLayoutRef } from "~/components/PageLayout";
-import { YamatoChatCommon2 } from "~/components/YamatoChatCommon2";
 import { supabase } from "~/lib/supabaseClient";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -29,7 +28,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let vocabData: any[] = [];
 
   try {
-    // 1. Obento Unit 4 のトピックデータを取得[cite: 3]
+    // 1. Obento Unit 4 のトピックデータを取得
     const { data: topic } = await supabase
       .from("edu_topics")
       .select("*")
@@ -39,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     topicData = topic || null;
 
     if (topicData) {
-      // 2. 紐づくレッスンを edu_lessons から lesson_order 順に取得[cite: 3]
+      // 2. 紐づくレッスンを edu_lessons から lesson_order 順に取得
       const { data: lessons } = await supabase
         .from("edu_lessons")
         .select("*")
@@ -48,7 +47,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       lessonsData = lessons || [];
     }
 
-    // フォールバック（もしtopic_idで結ばれていない場合のslug検索）[cite: 3]
+    // フォールバック（もしtopic_idで結ばれていない場合のslug検索）
     if (lessonsData.length === 0) {
       const { data: fallbackLessons } = await supabase
         .from("edu_lessons")
@@ -86,12 +85,9 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
 
 export default function LessonsObentoUnit4Page() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const themeColor = "#f97316"; // Obento U4 Warm Orange theme
 
   const [user, setUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
-  const [credits, setCredits] = useState<number>(10);
-  const [nickname, setNickname] = useState<string>("VCE Student");
 
   const loaderData = useLoaderData<typeof loader>() || {};
   const { topic, lessons = [], vocabulary = [] } = loaderData;
@@ -110,7 +106,6 @@ export default function LessonsObentoUnit4Page() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setIsAuthLoading(false);
-      if (session?.user) fetchProfile(session.user.id);
     });
 
     const {
@@ -118,35 +113,17 @@ export default function LessonsObentoUnit4Page() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setIsAuthLoading(false);
-      if (session?.user) fetchProfile(session.user.id);
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("credits, nickname")
-        .eq("id", userId)
-        .single();
-
-      if (data && !error) {
-        if (typeof data.credits === "number") setCredits(data.credits);
-        if (data.nickname) setNickname(data.nickname);
-      }
-    } catch (err) {
-      console.error("Fetch profile error:", err);
-    }
-  };
 
   if (isAuthLoading) {
     return (
       <ToolPageWrapper layoutRef={layoutRef}>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
-            Loading Obento Unit 4...
+            Loading Obento Unit 4 Hub...
           </div>
         </div>
       </ToolPageWrapper>
@@ -166,7 +143,7 @@ export default function LessonsObentoUnit4Page() {
                 Sign In Required
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Obento Deluxe Unit 4 lessons and AI Yamato tutoring require you to sign in. Please sign in to access interactive lessons.
+                Obento Deluxe Unit 4 lessons require you to sign in. Please sign in to access the learning materials.
               </p>
             </div>
             <button
@@ -192,7 +169,7 @@ export default function LessonsObentoUnit4Page() {
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-white/20 w-fit px-3 py-1 rounded-full mb-3">
               <span>Obento Deluxe</span>
               <span>•</span>
-              <span>Unit 4</span>
+              <span>Unit 4 Hub</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">
               {topic?.title_en || "Obento Unit 4: Family and Pets"}
@@ -207,21 +184,6 @@ export default function LessonsObentoUnit4Page() {
             </p>
           </div>
 
-          {/* 👩‍🏫 やまと先生メインステージ（授業スタート画面 & ライブチャットルーム） */}
-          <section aria-label="Yamato Sensei Live Lesson">
-            <YamatoChatCommon2
-              characterName="Yamato Sensei"
-              initialGreeting="Hello, my friend! 🌟 Welcome to Obento Unit 4 (Family & Pets). Let's practise talking about your family members, counting people (一人、二人...), and discussing your pets together! What would you like to start with?"
-              appType="obento-unit-4"
-              themeColor={themeColor}
-              userId={user?.id}
-              userNickname={nickname}
-              credits={credits}
-              onOpenAuth={handleOpenAuth}
-              assignedQuestion="Obento Deluxe Unit 4: Family and Pets Practice"
-            />
-          </section>
-
           {/* メインコンテンツ & 語彙リストグリッド */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
@@ -234,69 +196,68 @@ export default function LessonsObentoUnit4Page() {
                   <p className="text-sm text-slate-500 italic">No lessons registered yet for this unit.</p>
                 ) : (
                   <div className="space-y-4">
-                    {lessons.map((lesson: any, index: number) => (
-                      <div key={lesson.id || index} className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 transition hover:shadow-md space-y-3">
-                        
-                        {/* レッスン番号と教科書参照ページ */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-900 px-2.5 py-0.5 rounded-full">
-                            Lesson {lesson.lesson_order || index + 1}
-                          </span>
-                          {lesson.obento_page_ref && (
-                            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
-                              📚 {lesson.obento_page_ref}
+                    {lessons.map((lesson: any, index: number) => {
+                      // レッスンごとの個別ページパスを生成（例: /lessons/obento-unit-4-lesson-1 など）
+                      const lessonSlug = lesson.slug || `obento-unit-4-lesson-${lesson.lesson_order || index + 1}`;
+                      const lessonPath = `/lessons/${lessonSlug}`;
+
+                      return (
+                        <div key={lesson.id || index} className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 transition hover:shadow-md space-y-3">
+                          
+                          {/* レッスン番号と教科書参照ページ */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-900 px-2.5 py-0.5 rounded-full">
+                              Lesson {lesson.lesson_order || index + 1}
                             </span>
-                          )}
-                        </div>
-
-                        {/* 英語および日本語のレッスンタイトル[cite: 3] */}
-                        <div>
-                          <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">
-                            {lesson.title_en}
-                          </h3>
-                          {lesson.title_jp && (
-                            <p className="text-xs font-medium text-orange-600 dark:text-orange-400 mt-0.5">
-                              {lesson.title_jp}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* 学習意図（Learning Intention）[cite: 3] */}
-                        {lesson.learning_intention && (
-                          <div className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                            <strong className="text-slate-700 dark:text-slate-300 block mb-0.5">Learning Intention:</strong>
-                            {lesson.learning_intention}
-                          </div>
-                        )}
-
-                        {/* 成功基準（Success Criteria）[cite: 3] */}
-                        {lesson.success_criteria && (
-                          <div className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                            <strong className="text-slate-700 dark:text-slate-300 block mb-0.5">Success Criteria:</strong>
-                            <span>{Array.isArray(lesson.success_criteria) ? lesson.success_criteria.join(", ") : lesson.success_criteria}</span>
-                          </div>
-                        )}
-
-                        {/* ターゲット文法・キー表現があれば表示 */}
-                        {(lesson.target_grammar || lesson.key_expressions) && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
-                            {lesson.target_grammar && (
-                              <div className="bg-orange-50/50 dark:bg-orange-950/20 p-2.5 rounded-xl border border-orange-100 dark:border-orange-900/40 text-orange-800 dark:text-orange-300">
-                                <strong className="block font-bold mb-0.5">Grammar:</strong>
-                                {JSON.stringify(lesson.target_grammar)}
-                              </div>
-                            )}
-                            {lesson.key_expressions && (
-                              <div className="bg-amber-50/50 dark:bg-amber-950/20 p-2.5 rounded-xl border border-amber-100 dark:border-amber-900/40 text-amber-800 dark:text-amber-300">
-                                <strong className="block font-bold mb-0.5">Expressions:</strong>
-                                {JSON.stringify(lesson.key_expressions)}
-                              </div>
+                            {lesson.obento_page_ref && (
+                              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+                                📚 {lesson.obento_page_ref}
+                              </span>
                             )}
                           </div>
-                        )}
 
-                      </div>
-                    ))}
+                          {/* 英語および日本語のレッスンタイトル */}
+                          <div>
+                            <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">
+                              {lesson.title_en}
+                            </h3>
+                            {lesson.title_jp && (
+                              <p className="text-xs font-medium text-orange-600 dark:text-orange-400 mt-0.5">
+                                {lesson.title_jp}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* 学習意図（Learning Intention） */}
+                          {lesson.learning_intention && (
+                            <div className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                              <strong className="text-slate-700 dark:text-slate-300 block mb-0.5">Learning Intention:</strong>
+                              {lesson.learning_intention}
+                            </div>
+                          )}
+
+                          {/* 成功基準（Success Criteria） */}
+                          {lesson.success_criteria && (
+                            <div className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                              <strong className="text-slate-700 dark:text-slate-300 block mb-0.5">Success Criteria:</strong>
+                              <span>{Array.isArray(lesson.success_criteria) ? lesson.success_criteria.join(", ") : lesson.success_criteria}</span>
+                            </div>
+                          )}
+
+                          {/* 個別レッスンページへのリンクボタン */}
+                          <div className="pt-2 flex justify-end">
+                            <Link
+                              to={lessonPath}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm"
+                            >
+                              <span>Start This Lesson</span>
+                              <span>→</span>
+                            </Link>
+                          </div>
+
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
