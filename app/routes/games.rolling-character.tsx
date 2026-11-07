@@ -389,7 +389,7 @@ function RollingCharacterArena() {
         });
       }
 
-      // Ring physics with robust fence bouncing and hole dropping
+      // Ring physics with clean fence bouncing and hole dropping
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
         r.vy += 0.35; // Gravity
@@ -413,29 +413,26 @@ function RollingCharacterArena() {
               r.vy = slope * r.vx;
               r.vRot = r.vx * 0.05;
 
-              // 穴（開口部）の判定（端の一定範囲内なら下へ落下）
-              let isAtHole = false;
+              // 1. 穴（開口部）に到達した場合の落下判定
               if (p.openSide === 'right' && r.x >= maxX - 25) {
-                isAtHole = true;
                 r.vx = 2.5;
                 r.vy = 2.0;
+                continue;
               } else if (p.openSide === 'left' && r.x <= minX + 25) {
-                isAtHole = true;
                 r.vx = -2.5;
                 r.vy = 2.0;
+                continue;
               }
 
-              // 穴ではない方（フェンス側）の端に到達した場合は確実に反転＆押し戻す
-              if (!isAtHole) {
-                if (p.openSide === 'left' && r.x >= maxX - 28) {
-                  r.vx = -Math.abs(r.vx) - 1.0; // しっかり逆向きの初速を与える
-                  r.x = maxX - 30;              // めり込み防止の押し戻し
-                  r.vRot = -r.vRot;
-                } else if (p.openSide === 'right' && r.x <= minX + 28) {
-                  r.vx = Math.abs(r.vx) + 1.0;  // しっかり逆向きの初速を与える
-                  r.x = minX + 30;              // めり込み防止の押し戻し
-                  r.vRot = -r.vRot;
-                }
+              // 2. フェンス（柵）に到達した場合の強力な跳ね返り＆スタック防止
+              if (p.openSide === 'left' && r.x >= maxX - 32) {
+                r.vx = -3.5; // しっかり左向きの脱出速度を与える
+                r.x = maxX - 35; // 完全に柵の内側へ押し戻してスタックを防ぐ
+                r.vRot = -0.15;
+              } else if (p.openSide === 'right' && r.x <= minX + 32) {
+                r.vx = 3.5;  // しっかり右向きの脱出速度を与える
+                r.x = minX + 35; // 完全に柵の内側へ押し戻してスタックを防ぐ
+                r.vRot = 0.15;
               }
             }
           }
