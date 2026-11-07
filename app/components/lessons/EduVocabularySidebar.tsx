@@ -1,21 +1,38 @@
 /**
  * @file app/components/lessons/EduVocabularySidebar.tsx
- * @description レッスン内の語彙リスト表示用サイドバーコンポーネント（文字サイズ・視認性改善版）
+ * @description レッスン内の語彙リスト表示用サイドバーコンポーネント（文字サイズ・視認性改善・ドリル起動ボタン対応版）
  */
 
 import React from "react";
 
 interface EduVocabularySidebarProps {
   vocabulary: any[];
+  onStartDrill?: () => void; // 👈 追加
 }
 
-export const EduVocabularySidebar: React.FC<EduVocabularySidebarProps> = ({ vocabulary = [] }) => {
+export const EduVocabularySidebar: React.FC<EduVocabularySidebarProps> = ({ 
+  vocabulary = [], 
+  onStartDrill 
+}) => {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-      <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-        <span>📝</span>
-        <span>Lesson Vocabulary ({vocabulary.length})</span>
-      </h2>
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <span>📝</span>
+          <span>Lesson Vocabulary ({vocabulary.length})</span>
+        </h2>
+        {vocabulary.length > 0 && onStartDrill && (
+          <button
+            type="button"
+            onClick={onStartDrill}
+            className="px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>🚀</span>
+            <span>Vocab Drill</span>
+          </button>
+        )}
+      </div>
+
       {vocabulary.length === 0 ? (
         <p className="text-xs text-slate-500 italic">No vocabulary items registered for this lesson.</p>
       ) : (

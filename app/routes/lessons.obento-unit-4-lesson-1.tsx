@@ -1,6 +1,6 @@
 /**
  * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（タスク位置変更版）
+ * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリルモーダル連携版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -17,6 +17,7 @@ import { EduLessonHeader } from "~/components/lessons/EduLessonHeader";
 import { EduLessonDetailsCard } from "~/components/lessons/EduLessonDetailsCard";
 import { EduVocabularySidebar } from "~/components/lessons/EduVocabularySidebar";
 import { EduLessonTaskManager } from "~/components/lessons/EduLessonTaskManager";
+import { EduVocabularyDrillModal } from "~/components/lessons/EduVocabularyDrillModal"; // 👈 語彙ドリルモーダルのインポート
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -95,6 +96,10 @@ function LessonsObentoUnit4Lesson1Page() {
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
+
+  // 👈 語彙ドリルモーダルの開閉状態と達成状態の管理
+  const [isDrillOpen, setIsDrillOpen] = useState(false);
+  const [vocabTaskCompleted, setVocabTaskCompleted] = useState(false);
 
   const loaderData = useLoaderData<typeof loader>() || {};
   const { lesson, topic, vocabulary = [] } = loaderData;
@@ -211,18 +216,34 @@ function LessonsObentoUnit4Lesson1Page() {
               <EduLessonDetailsCard lesson={lesson} />
             </div>
             <div className="space-y-6">
-              <EduVocabularySidebar vocabulary={vocabulary} />
+              {/* 👈 語彙サイドバーに onStartDrill を渡してボタンを表示 */}
+              <EduVocabularySidebar 
+                vocabulary={vocabulary} 
+                onStartDrill={() => setIsDrillOpen(true)}
+              />
             </div>
           </div>
 
-          {/* 4. 下部：自習タスクセクション (Details & Vocabulary の下に移動) */}
+          {/* 4. 下部：自習タスクセクション (Task 1 からのドリル起動および完了状態の同期) */}
           <EduLessonTaskManager 
             lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
-            userId={user?.id} 
+            userId={user?.id}
+            onStartVocabularyDrill={() => setIsDrillOpen(true)}
+            externalTaskStatus={{
+              vocabulary: vocabTaskCompleted,
+            }}
           />
 
         </main>
       </div>
+
+      {/* 👈 5. フルスクリーン対応 語彙ドリルモーダル */}
+      <EduVocabularyDrillModal
+        vocabulary={vocabulary}
+        isOpen={isDrillOpen}
+        onClose={() => setIsDrillOpen(false)}
+        onCompleted={() => setVocabTaskCompleted(true)}
+      />
     </ToolPageWrapper>
   );
 }
