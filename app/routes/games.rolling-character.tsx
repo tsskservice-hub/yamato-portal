@@ -245,12 +245,12 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義（傾き：x1,y1 から x2,y2、端の開口部：openSide）
+    // 各段の定義（openSide: 穴が開いている方、反対側にフェンスを設置）
     const platforms = [
       { x1: 50, y1: 520, x2: 750, y2: 520, openSide: 'none', isGoal: false }, // 最下段（床）
-      { x1: 100, y1: 410, x2: 700, y2: 380, openSide: 'left', isGoal: false },  // 3段目 (左端が開く)
-      { x1: 100, y1: 290, x2: 700, y2: 320, openSide: 'right', isGoal: false }, // 2段目 (右端が開く)
-      { x1: 100, y1: 190, x2: 700, y2: 160, openSide: 'left', isGoal: false },  // 1段目 (左端が開く)
+      { x1: 100, y1: 410, x2: 700, y2: 380, openSide: 'left', isGoal: false },  // 3段目 (左に穴、右にフェンス)
+      { x1: 100, y1: 290, x2: 700, y2: 320, openSide: 'right', isGoal: false }, // 2段目 (右に穴、左にフェンス)
+      { x1: 100, y1: 190, x2: 700, y2: 160, openSide: 'left', isGoal: false },  // 1段目 (左に穴、右にフェンス)
       { x1: 250, y1: 90, x2: 550, y2: 90, openSide: 'none', isGoal: true }     // 最上段 (ゴール)
     ];
 
@@ -343,7 +343,7 @@ function RollingCharacterArena() {
       if (player.x < 30) player.x = 30;
       if (player.x > 750) player.x = 750;
 
-      // Platform collisions for player (slanted surface calculation)
+      // Platform collisions for player
       player.isGrounded = false;
       for (let p of platforms) {
         let minX = Math.min(p.x1, p.x2);
@@ -389,7 +389,7 @@ function RollingCharacterArena() {
         });
       }
 
-      // Ring physics along slopes and falling through gaps
+      // Ring physics with fence bouncing and hole dropping
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
         r.vy += 0.35; // Gravity
@@ -413,10 +413,20 @@ function RollingCharacterArena() {
               r.vy = slope * r.vx;
               r.vRot = r.vx * 0.05;
 
-              if (p.openSide === 'right' && r.x >= maxX - 25) {
+              // フェンス（柵）に当たった時の跳ね返り処理（穴の反対側）
+              if (p.openSide === 'left' && r.x >= maxX - 20) {
+                r.vx = -Math.abs(r.vx) * 0.8; // 逆方向に跳ね返る
+                r.vRot = -r.vRot;
+              } else if (p.openSide === 'right' && r.x <= minX + 20) {
+                r.vx = Math.abs(r.vx) * 0.8;  // 逆方向に跳ね返る
+                r.vRot = -r.vRot;
+              }
+
+              // 穴（開口部）に到達したら下の段へ落下
+              if (p.openSide === 'right' && r.x >= maxX - 15) {
                 r.vx = 2.5;
                 r.vy = 2.0;
-              } else if (p.openSide === 'left' && r.x <= minX + 25) {
+              } else if (p.openSide === 'left' && r.x <= minX + 15) {
                 r.vx = -2.5;
                 r.vy = 2.0;
               }
@@ -429,6 +439,7 @@ function RollingCharacterArena() {
           continue;
         }
 
+        // Collision with player
         let distX = Math.abs(player.x + player.w/2 - r.x);
         let distY = Math.abs(player.y + player.h/2 - r.y);
         let hitDist = Math.sqrt(distX * distX + distY * distY);
@@ -469,7 +480,7 @@ function RollingCharacterArena() {
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      // Draw Slanted Platforms
+      // Draw Slanted Platforms and Fences (柵の描画)
       platforms.forEach((p, idx) => {
         ctx.strokeStyle = idx === 4 ? '#cc9900' : '#d9534f';
         ctx.lineWidth = 16;
@@ -484,6 +495,17 @@ function RollingCharacterArena() {
           let rx = p.x1 + t * (p.x2 - p.x1);
           let ry = p.y1 + t * (p.y2 - p.y1);
           ctx.fillRect(rx - 2, ry - 2, 4, 4);
+        }
+
+        // 穴とは反対側の端にフェンス（柵）を描画
+        if (p.openSide === 'left') {
+          // 右端にフェンス
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(p.x2 - 6, p.y2 - 25, 6, 25);
+        } else if (p.openSide === 'right') {
+          // 左端にフェンス
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(p.x1, p.y1 - 25, 6, 25);
         }
       });
 
@@ -600,7 +622,7 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Watch the rings roll down the alternating slopes from top to bottom!<br />
+              Watch the rings roll down, bounce off fences, and drop through gaps from top to bottom!<br />
               If the Kana and Romaji **match, collect them for points**. If they **don't match, touching them reduces HP**!<br />
               Climb the ladders (↑ key) to reach AI Yamato at the top!
             </p>
@@ -635,7 +657,7 @@ function RollingCharacterArena() {
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-[#ffcc00]">STAGE CLEAR!</h2>
             <p className="text-sm text-[#ccc]">
-              {stage < 3 ? `Stage ${stage} Cleared! Great job!` : `All Stages Completed! Congratulations! (Final Score: {score} pts)`}
+              {stage < 3 ? `Stage ${stage} Cleared! Great job!` : `All Stages Completed! Congratulations! (Final Score: ${score} pts)`}
             </p>
             <button
               onClick={() => {
