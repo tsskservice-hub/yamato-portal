@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js"; // Supabase クライアント用
+import { supabase } from "~/lib/supabaseClient"; // 💡 共通の安全なクライアントをインポート
 
 export interface EduLessonTaskManagerProps {
   lessonId: string; // どのレッスンかを識別するためのID
@@ -22,11 +22,6 @@ export function EduLessonTaskManager({ lessonId, userId, onAllCompletedChange }:
   });
 
   const [isLoading, setIsLoading] = useState(false);
-
-  // Supabaseクライアントの初期化（環境変数に合わせて適宜調整してください）
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
   // マウント時に Supabase から現在の進捗状況をロードする
   useEffect(() => {
@@ -102,7 +97,6 @@ export function EduLessonTaskManager({ lessonId, userId, onAllCompletedChange }:
 
         if (error) {
           console.error("Failed to update task progress in Supabase:", error.message);
-          // エラー時はロールバックするかトースト表示などを行えます
         }
       } catch (err) {
         console.error("Exception during progress upsert:", err);
