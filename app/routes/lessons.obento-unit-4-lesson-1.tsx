@@ -1,6 +1,6 @@
 /**
  * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（上下分割・タスクモジュール化対応版）
+ * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（枠の重複修正版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -35,7 +35,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let topicData = null;
 
   try {
-    // 1. edu_lessons から Unit 4 の Lesson 1 データを取得 (slug または lesson_order = 1 でマッチング)
     const { data: lessons } = await supabase
       .from("edu_lessons")
       .select("*")
@@ -46,7 +45,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     if (lessons && lessons.length > 0) {
       lessonData = lessons[0];
     } else {
-      // フォールバック: 単に lesson_order が 1 のもの、または slug が一致するもの
       const { data: fallbackLesson } = await supabase
         .from("edu_lessons")
         .select("*")
@@ -56,7 +54,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
 
     if (lessonData) {
-      // 2. 紐づくトピック情報を取得
       if (lessonData.topic_id) {
         const { data: topic } = await supabase
           .from("edu_topics")
@@ -66,7 +63,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
         topicData = topic || null;
       }
 
-      // 3. このレッスンに紐づく語彙データを取得
       const { data: vocabs } = await supabase
         .from("edu_vocabulary")
         .select("*")
@@ -93,7 +89,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
 
 function LessonsObentoUnit4Lesson1Page() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const themeColor = "#f97316"; // Obento U4 Warm Orange theme
+  const themeColor = "#f97316";
 
   const [user, setUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
@@ -197,40 +193,19 @@ function LessonsObentoUnit4Lesson1Page() {
           {/* 1. ヘッダーカードモジュール */}
           <EduLessonHeader lesson={lesson} topic={topic} />
 
-          {/* 2. 上部：常設ヤマト・AIチューター スクリーン（質問・添削・会話の相談窓口） */}
-          <section aria-label="Yamato Sensei Live Tutor" className="bg-white dark:bg-slate-900 border-2 border-orange-500/40 rounded-3xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-xl shadow-md">
-                  👩‍🏫
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
-                    Yamato Sensei - Live Tutor & Consultation
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Need help with tasks, writing corrections, or speaking practice? Ask Yamato anytime!
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs font-bold px-3 py-1 bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 rounded-full">
-                Ready to Help
-              </span>
-            </div>
+          {/* 2. 上部：常設ヤマト・AIチューター（二重の枠を取り除き、内側のYamatoChatCommon2に統一） */}
+          <YamatoChatCommon2
+            characterName="Yamato Sensei"
+            appType="obento-unit-4-lesson-1"
+            themeColor={themeColor}
+            userId={user?.id}
+            userNickname={nickname}
+            credits={credits}
+            onOpenAuth={handleOpenAuth}
+            assignedQuestion={`Obento Deluxe Unit 4 Lesson 1: ${lesson?.title_en || "Family and Pets"}`}
+          />
 
-            <YamatoChatCommon2
-              characterName="Yamato Sensei"
-              appType="obento-unit-4-lesson-1"
-              themeColor={themeColor}
-              userId={user?.id}
-              userNickname={nickname}
-              credits={credits}
-              onOpenAuth={handleOpenAuth}
-              assignedQuestion={`Obento Deluxe Unit 4 Lesson 1: ${lesson?.title_en || "Family and Pets"}`}
-            />
-          </section>
-
-          {/* 3. 下部：自習タスクセクション（lessonId と userId を渡すよう修正） */}
+          {/* 3. 下部：自習タスクセクション */}
           <EduLessonTaskManager 
             lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
             userId={user?.id} 
