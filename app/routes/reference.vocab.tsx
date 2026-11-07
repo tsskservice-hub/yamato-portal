@@ -1,6 +1,6 @@
 /**
- * @file vocab.tsx
- * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Schema Matched Version)
+ * @file reference.vocab.tsx
+ * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Standalone Version)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
@@ -10,11 +10,6 @@ import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 
-interface TextbookMapping {
-  book: string;
-  ref: string;
-}
-
 interface Vocabulary {
   id: string;
   jp_text: string;
@@ -22,7 +17,6 @@ interface Vocabulary {
   english_text: string;
   category: string;
   year_levels?: number[];
-  textbook_mappings?: TextbookMapping[];
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -52,48 +46,20 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
-  // 実際のテーブル構造（jp_text, english_text）に合わせてセレクト
+  // edu_vocabulary テーブルから単体データを安全に取得
   const { data: vocabularies, error } = await supabase
     .from("edu_vocabulary")
-    .select(`
-      id,
-      jp_text,
-      romaji,
-      english_text,
-      category,
-      year_levels,
-      textbook_mappings (
-        book,
-        ref
-      )
-    `)
+    .select("id, jp_text, romaji, english_text, category, year_levels")
     .order("order_index", { ascending: true });
 
   if (error) {
     console.warn("Supabase fetch error from edu_vocabulary:", error.message);
   }
 
-  let vocabList: Vocabulary[] = (vocabularies as any) || [];
-  if (vocabList.length === 0) {
-    const { data: fallbackVocabs } = await supabase
-      .from("edu_vocabulary")
-      .select("id, jp_text, romaji, english_text, category, year_levels")
-      .order("order_index", { ascending: true });
-
-    if (fallbackVocabs) {
-      vocabList = fallbackVocabs as Vocabulary[];
-    }
-  }
-
-  const uniqueBooks = Array.from(
-    new Set(
-      vocabList.flatMap((v) => v.textbook_mappings?.map((m: TextbookMapping) => m.book) || [])
-    )
-  ).filter((book): book is string => Boolean(book)).sort();
+  const vocabList: Vocabulary[] = (vocabularies as Vocabulary[]) || [];
 
   return json({
     vocabularies: vocabList,
-    availableBooks: uniqueBooks,
     isTeacher,
     portalContent,
     currentPath: url.pathname,
@@ -108,12 +74,10 @@ export default function VocabIndexPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const data = useLoaderData<typeof loader>();
   const vocabularies = (data.vocabularies || []) as Vocabulary[];
-  const availableBooks = (data.availableBooks || []) as string[];
   const isTeacher = data.isTeacher;
   const navigate = useNavigate();
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBook, setSelectedBook] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -126,17 +90,13 @@ export default function VocabIndexPage() {
         (item.english_text && item.english_text.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.romaji && item.romaji.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesBook =
-        selectedBook === "all" ||
-        item.textbook_mappings?.some((m: TextbookMapping) => m.book === selectedBook);
-
       const matchesYear =
         selectedYear === "all" ||
         item.year_levels?.includes(Number(selectedYear));
 
-      return matchesSearch && matchesBook && matchesYear;
+      return matchesSearch && matchesYear;
     });
-  }, [vocabularies, searchQuery, selectedBook, selectedYear]);
+  }, [vocabularies, searchQuery, selectedYear]);
 
   const toggleSelect = (id: string) => {
     if (selectedIds.includes(id)) {
@@ -202,7 +162,7 @@ export default function VocabIndexPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                 Keyword Search (Japanese / English / Romaji)
@@ -214,24 +174,6 @@ export default function VocabIndexPage() {
                 placeholder="e.g. smelly, kusai, くさい..."
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                Textbook / Material
-              </label>
-              <select
-                value={selectedBook}
-                onChange={(e) => setSelectedBook(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200"
-              >
-                <option value="all">All Textbooks</option>
-                {availableBooks.map((bookName: string) => (
-                  <option key={bookName} value={bookName}>
-                    {bookName}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <div>
@@ -311,14 +253,7 @@ export default function VocabIndexPage() {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-between items-center text-xs text-slate-500 dark:text-slate-400 gap-2 pl-7">
-                    <div className="flex flex-wrap gap-1">
-                      {item.textbook_mappings?.map((m: TextbookMapping, idx: number) => (
-                        <span key={idx} className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">
-                          {m.book} ({m.ref})
-                        </span>
-                      ))}
-                    </div>
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-end items-center text-xs text-slate-500 dark:text-slate-400 gap-2 pl-7">
                     <div className="flex gap-1">
                       {item.year_levels?.map((yr: number) => (
                         <span key={yr} className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded font-bold">
@@ -334,7 +269,7 @@ export default function VocabIndexPage() {
 
           {filteredVocabularies.length === 0 && (
             <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found. Please verify data in Supabase (`edu_vocabulary`).</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found. Please check data in `edu_vocabulary` table.</p>
             </div>
           )}
 
