@@ -54,8 +54,11 @@ function renderGameIcon(iconName?: string) {
 }
 
 export default function GamesHubIndex() {
-  // ご提示いただいたカスタムフックを利用して Supabase からデータを安全に取得
   const { gamesData, isLoading, isError, errorMessage, refetch } = useGamesContent(supabase);
+
+  // Supabase等の外部データ（gamesData）にハードコード分を動的に結合、または直接ここにカード情報を追加・マージすることも可能です。
+  // ここでは確実に1つ目のセクションにカードが表示されるよう、ローカルの配列定義や動的マージに対応するよう拡張できますが、
+  // もし `gamesData` が Supabase 側から取得される場合は、以下の通りインラインで追加カードを差し込むこともできます。
 
   return (
     <ToolPageWrapper 
@@ -67,7 +70,6 @@ export default function GamesHubIndex() {
     >
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          {/* ローディング中の表示（オプションでスケルトンやシンプル表示に切り替え可能） */}
           {isLoading && !gamesData ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-4"></div>
@@ -96,6 +98,42 @@ export default function GamesHubIndex() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* 1つ目のセクションの先頭、または既存リストの最後に「ローリング・カナ」のカードを差し込む */}
+                    {sIdx === 0 && (
+                      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group border-indigo-200 bg-gradient-to-br from-white to-indigo-50/30">
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-2">
+                              <Gamepad2 className="w-5 h-5 text-indigo-600" />
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                                アクション
+                              </span>
+                            </div>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                              NEW!
+                            </span>
+                          </div>
+                          
+                          <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                            ローリング・カナ
+                          </h3>
+                          
+                          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                            上から転がってくる文字の輪をチェック！仮名とローマ字を照らし合わせながらハシゴを登るレトロアクションゲーム。
+                          </p>
+                        </div>
+
+                        <div>
+                          <Link
+                            to="/games/rolling-character"
+                            className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+                          >
+                            Play Now
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+
                     {section.games.map((game) => (
                       <div 
                         key={game.id} 
