@@ -124,8 +124,8 @@ const SOUNDS: Record<Sound, [OscillatorType, number[], number, number]> = {
 };
 
 // Platforms: [x1, y1, x2, y2, isGoal]. Ladders: [x, y, height].
-const PLATS = [[50, 520, 750, 512, 0], [50, 410, 750, 418, 0], [50, 300, 750, 292, 0], [50, 190, 750, 198, 0], [250, 90, 550, 90, 1]];
-const LADDERS = [[680, 410, 110], [120, 300, 110], [680, 190, 110], [400, 90, 100]];
+const PLATS = [[50, 620, 750, 612, 0], [50, 490, 750, 498, 0], [50, 360, 750, 352, 0], [50, 230, 750, 238, 0], [250, 100, 550, 100, 1]];
+const LADDERS = [[680, 490, 130], [120, 360, 130], [680, 230, 130], [400, 100, 130]];
 const KEYMAP: Record<string, string> = {
   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', Space: 'space',
@@ -187,7 +187,7 @@ function RollingCharacterArena() {
     window.addEventListener('keyup', handleKeyUp);
 
     const player = {
-      x: 100, y: 498, w: 24, h: 18, vx: 0, vy: 0, speed: 3.5,
+      x: 100, y: 598, w: 24, h: 18, vx: 0, vy: 0, speed: 3.5,
       jumpPower: -9.5, gravity: 0.5, isGrounded: false, isOnLadder: false, facing: 1,
     };
     let rings: RingNode[] = [];
@@ -199,7 +199,7 @@ function RollingCharacterArena() {
       if (st === 1) setScore(0);
       setLives(3);
       rings = []; spawnTimer = 0;
-      Object.assign(player, { x: 100, y: 498, vx: 0, vy: 0 });
+      Object.assign(player, { x: 100, y: 598, vx: 0, vy: 0 });
       setTargetKanaList(generateRandomKanaProblem(st));
       setInputAnswers(['', '', '']);
       setGameState('PLAYING');
@@ -290,7 +290,7 @@ function RollingCharacterArena() {
             r.x = fromRight ? 740 : 60; r.vx = fromRight ? -2.0 : 2.0; r.vRot = fromRight ? -0.1 : 0.1;
           } else { rings.splice(i, 1); continue; }
         }
-        if (r.y > 620 || r.y < 0) { rings.splice(i, 1); continue; }
+        if (r.y > 720 || r.y < 0) { rings.splice(i, 1); continue; }
 
         const dist = Math.hypot(player.x + player.w / 2 - r.x, player.y + player.h / 2 - r.y);
         if (dist < r.radius + 14) {
@@ -315,7 +315,7 @@ function RollingCharacterArena() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#222233';
-      ctx.fillRect(50, 50, 700, 500);
+      ctx.fillRect(50, 50, 700, 600);
 
       PLATS.forEach(([x1, y1, x2, y2, isGoal]) => {
         ctx.strokeStyle = isGoal ? '#cc9900' : '#d9534f';
@@ -397,8 +397,8 @@ function RollingCharacterArena() {
         <span className="text-emerald-600 font-bold">Score: {score} pt</span>
       </div>
 
-      <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl h-[600px] relative overflow-hidden flex items-center justify-center p-2 shadow-inner">
-        <canvas ref={canvasRef} width={800} height={600} className="block bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg" />
+      <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl h-[700px] relative overflow-hidden flex items-center justify-center p-2 shadow-inner">
+        <canvas ref={canvasRef} width={800} height={700} className="block bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg" />
 
         {gameState === 'START' && (
           <Overlay>
