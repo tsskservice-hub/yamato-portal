@@ -200,17 +200,13 @@ export default function LessonsObentoUnit4Lesson1Page() {
           <section aria-label="Yamato Sensei Live Lesson">
             <YamatoChatCommon2
               characterName="Yamato Sensei"
-              initialGreeting={`Awesome! Let's dive right into today's Japanese lesson! ✨
-Today, we are going to learn how to talk about our family members and pets nicely in "${lesson?.title_en || "Family and Pets"}". 
-
-Let's check our Learning Intention and Success Criteria together, and then we'll start with our vocabulary introduction. Are you ready? Let's go!`}
               appType="obento-unit-4-lesson-1"
               themeColor={themeColor}
               userId={user?.id}
               userNickname={nickname}
               credits={credits}
               onOpenAuth={handleOpenAuth}
-              assignedQuestion={`Obento Deluxe Unit 4 Lesson 1: ${lesson?.title_en || "Practice"}`}
+              assignedQuestion={`Obento Deluxe Unit 4 Lesson 1: ${lesson?.title_en || "Family and Pets"}`}
             />
           </section>
 

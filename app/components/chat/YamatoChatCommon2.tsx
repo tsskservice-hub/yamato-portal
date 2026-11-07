@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon2.tsx
- * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（ニックネームモジュール連携・全画面常設・自動スタート対応版）
+ * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（ニックネームモジュール連携・全画面常設・自動スタート・挨拶自動生成対応版）
  */
 import React, { useState, useEffect, useRef } from "react";
 import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
@@ -20,20 +20,24 @@ export interface YamatoChatCommon2MetaType {
 
 export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
   componentName: "YamatoChatCommon2",
-  version: "1.1.0",
-  role: "教科書準拠レッスン専用メインクラスルーム・チャット（ニックネームモジュール連携版）",
+  version: "1.3.0",
+  role: "教科書準拠レッスン専用メインクラスルーム・チャット（挨拶自動生成・動的オプションボタン対応版）",
   features: [
     {
       featureName: "Nickname Module Integration",
       description: "app/utils/nickname.ts を用いて、やまと先生の授業開始時の挨拶やクレジット不足時の呼びかけをユーザーのニックネームにパーソナライズ",
     },
     {
-      featureName: "Always Open Main Stage",
-      description: "右下の常駐ボタンを廃止し、ページのメインコンテンツとして広く常時表示",
+      featureName: "Automatic Greeting Generation",
+      description: "assignedQuestion やレッスン情報を元に、個別ページで挨拶をハードコードしなくても自動で最適なウェルカムメッセージを生成",
     },
     {
-      featureName: "Lesson Start Trigger",
-      description: "生徒が「Start Lesson」ボタンを押した瞬間にやまと先生が自動で挨拶と授業を開始",
+      featureName: "Dynamic Option Buttons (Method B)",
+      description: "APIから返却される options 配列を検知して、チャット内に美しいクリック可能な選択肢ボタンを動的レンダリング",
+    },
+    {
+      featureName: "Always Open Main Stage",
+      description: "右下の常駐ボタンを廃止し、ページのメインコンテンツとして広く常時表示",
     },
   ],
   supportedThemes: [
@@ -51,10 +55,17 @@ export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
   learningPaces: ["steady", "normal", "accelerated"],
 };
 
+// 💡 選択肢（オプション）の型定義
+type ChatOption = {
+  label: string;
+  value: string;
+};
+
 type ChatMessage = {
   role: "assistant" | "user";
   content: string;
   imageUrl?: string;
+  options?: ChatOption[]; // 💡 APIから受け取る選択肢データ
 };
 
 const FEATURE_COSTS = {
@@ -93,7 +104,7 @@ function sanitizeAiOutput(text: string): string {
 
 export function YamatoChatCommon2({
   characterName = "Yamato Sensei",
-  initialGreeting = "Hello, my friend! 🌟 Welcome to today's lesson. Let's begin learning together!",
+  initialGreeting,
   systemPrompt = "",
   appType = "general",
   themeColor = "#f97316",
@@ -188,7 +199,7 @@ export function YamatoChatCommon2({
     }
   };
 
-  // 💡 授業開始時に personaliseGreeting モジュールを使って挨拶をパーソナライズ
+  // 💡 授業開始時に initialGreeting が未指定の場合、assignedQuestion を使って自動生成する
   const handleStartLesson = async () => {
     if (!activeUserId) {
       alert("レッスンを始めるには、無料サインアップまたはログインが必要です！");
@@ -197,19 +208,41 @@ export function YamatoChatCommon2({
     }
 
     setIsLessonStarted(true);
+
+    // 挨拶文が渡されていない場合の自動生成ロジック
+    const rawGreeting =
+      initialGreeting ||
+      `Awesome! Let's dive right into today's Japanese lesson! ✨\nToday, we are going to learn about "${assignedQuestion || 'Japanese'}".\n\nHow would you like to start? Please choose an option below:`;
+
     // モジュールを使用して挨拶内の "my friend" をユーザーのニックネームに置換
-    const greetingMsg = personaliseGreeting(initialGreeting, currentNickname);
+    const greetingMsg = personaliseGreeting(rawGreeting, currentNickname);
     
+    // 初期挨拶のメッセージとRPG風の二者択一オプションを設定
     const initialMsgList: ChatMessage[] = [
-      { role: "assistant", content: greetingMsg }
+      { 
+        role: "assistant", 
+        content: greetingMsg,
+        options: [
+          { label: "🚀 I already know the Learning Intention and Success Criteria! Let's jump into vocabulary and practice!", value: "1" },
+          { label: "📖 I want to check the Learning Intention and Success Criteria first!", value: "2" }
+        ]
+      }
     ];
     setTutorMessages(initialMsgList);
+  };
+
+  // 💡 選択肢ボタンがクリックされたときに自動でメッセージとして送信するハンドラー
+  const handleSelectOption = async (optionValue: string, optionLabel: string) => {
+    await executeSendMessage(optionLabel);
   };
 
   const handleSendTutorMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
+    await executeSendMessage(tutorInput.trim());
+  };
 
+  const executeSendMessage = async (textToSend: string) => {
     if (!activeUserId) {
       alert("お話しするには、無料サインアップまたはログインが必要です！");
       handleTriggerAuth("signup");
@@ -222,7 +255,7 @@ export function YamatoChatCommon2({
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() },
+        { role: "user", content: textToSend },
         {
           role: "assistant",
           content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! It looks like your credit balance has reached zero. To continue our lesson together, please top up your credits! 📚✨`,
@@ -248,7 +281,7 @@ export function YamatoChatCommon2({
     if (currentCredits < requiredCredits) {
       setTutorMessages((prev) => [
         ...prev,
-        { role: "user", content: tutorInput.trim() },
+        { role: "user", content: textToSend },
         {
           role: "assistant",
           content: `⚠️ **[Insufficient Credits]**\n\n${callName}, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCredits} credits). Please top up! 🪙`,
@@ -258,8 +291,7 @@ export function YamatoChatCommon2({
       return;
     }
 
-    const userMsg =
-      tutorInput.trim() || (activeImagePreview ? "Please check this answer image." : "Hello Yamato Sensei!");
+    const userMsg = textToSend || (activeImagePreview ? "Please check this answer image." : "Hello Yamato Sensei!");
     const needsVisual = requestVisualAid;
     const imageBase64ToSend = activeImagePreview;
 
@@ -344,12 +376,18 @@ export function YamatoChatCommon2({
 
       const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
       const imageUrl = data.imageUrl;
+      const apiOptions = data.options; // 💡 APIから返された選択肢配列
       const sanitizedReply = sanitizeAiOutput(replyText);
 
       setIsTutorLoading(false);
       setTutorMessages([
         ...newMessages,
-        { role: "assistant", content: sanitizedReply, imageUrl: imageUrl },
+        { 
+          role: "assistant", 
+          content: sanitizedReply, 
+          imageUrl: imageUrl,
+          options: Array.isArray(apiOptions) ? apiOptions : undefined 
+        },
       ]);
 
       deductCredits(requiredCredits);
@@ -524,6 +562,27 @@ export function YamatoChatCommon2({
                   ) : (
                     <div className="space-y-3">
                       <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                      
+                      {/* 💡 選択肢（オプション）が渡されている場合にボタンとして動的レンダリング */}
+                      {msg.options && msg.options.length > 0 && (
+                        <div className="flex flex-col gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                          <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Please choose an option:</p>
+                          <div className="flex flex-col gap-2">
+                            {msg.options.map((opt, optIdx) => (
+                              <button
+                                key={optIdx}
+                                type="button"
+                                disabled={isTutorLoading}
+                                onClick={() => handleSelectOption(opt.value, opt.label)}
+                                className="text-left px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-500 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-bold transition border border-orange-200 dark:border-orange-900/60 shadow-sm cursor-pointer disabled:opacity-50"
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {msg.imageUrl && (
                         <div className="mt-2">
                           <img
