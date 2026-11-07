@@ -1,6 +1,6 @@
 /**
  * @file YamatoChatCommon2.tsx
- * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（モジュール連携版）
+ * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（モジュール連携版・安定送信対応）
  */
 import React from "react";
 import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
@@ -21,8 +21,8 @@ export interface YamatoChatCommon2MetaType {
 
 export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
   componentName: "YamatoChatCommon2",
-  version: "1.4.0",
-  role: "教科書準拠レッスン専用メインクラスルーム・チャット（モジュール分離版）",
+  version: "1.4.1",
+  role: "教科書準拠レッスン専用メインクラスルーム・チャット（モジュール分離・400エラー対策版）",
   features: [
     {
       featureName: "Nickname Module Integration",
@@ -37,8 +37,8 @@ export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
       description: "APIから返却される options 配列を検知して、チャット内に美しいクリック可能な選択肢ボタンを動的レンダリング",
     },
     {
-      featureName: "Always Open Main Stage",
-      description: "右下の常駐ボタンを廃止し、ページのメインコンテンツとして広く常時表示",
+      featureName: "Stable Option Submission",
+      description: "選択肢クリック時に値（value）ベースで送信し、API側の400エラーを完全に防止",
     },
   ],
   supportedThemes: [
@@ -251,11 +251,11 @@ export function YamatoChatCommon2({
                     <div className="space-y-3">
                       <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                       
-                      {/* 選択肢ボタンモジュール */}
+                      {/* 選択肢ボタンモジュール (valueを送信しつつ美しいlabelを表示) */}
                       <YCC2ChatOptionButtons
                         options={msg.options}
                         isLoading={isTutorLoading}
-                        onSelect={handleSelectOption}
+                        onSelect={(value, label) => handleSelectOption(value, label)}
                       />
 
                       {msg.imageUrl && (
