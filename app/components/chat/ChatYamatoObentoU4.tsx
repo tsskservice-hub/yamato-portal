@@ -44,7 +44,12 @@ export function ChatYamatoObentoU4({
   return (
     <YamatoChatCommon
       characterName="Obento U4 Yamato"
-      initialGreeting="Hello, my friend! 🌟 Welcome to Obento Unit 4 (Family & Pets). Let's practise talking about your family members, counting people (一人、二人...), and discussing your pets together! What would you like to start with?"
+      initialGreeting="Let's start today's Japanese lesson! ✨
+Today, we will learn how to talk about our family members nicely.
+
+Are you ready? Please choose an option below:
+1. Let's start! 🚀
+2. Well, I'd rather rest right now... ☕"
       systemPrompt=""
       appType="obento-u4"
       defaultOpen={defaultOpen}
