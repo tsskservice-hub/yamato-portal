@@ -1,6 +1,6 @@
 /**
  * @file app/routes/games/_index.tsx
- * @description Japanese Learning Arcade のハブページ（useGamesContent & ToolPageWrapper 統合版）
+ * @description Japanese Learning Arcade Hub Page (useGamesContent & ToolPageWrapper integrated version)
  */
 
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
@@ -56,9 +56,8 @@ function renderGameIcon(iconName?: string) {
 export default function GamesHubIndex() {
   const { gamesData, isLoading, isError, errorMessage, refetch } = useGamesContent(supabase);
 
-  // Supabase等の外部データ（gamesData）にハードコード分を動的に結合、または直接ここにカード情報を追加・マージすることも可能です。
-  // ここでは確実に1つ目のセクションにカードが表示されるよう、ローカルの配列定義や動的マージに対応するよう拡張できますが、
-  // もし `gamesData` が Supabase 側から取得される場合は、以下の通りインラインで追加カードを差し込むこともできます。
+  // External data from Supabase (gamesData) can be dynamically combined with hardcoded entries,
+  // or additional card info can be directly merged/added here.
 
   return (
     <ToolPageWrapper 
@@ -77,7 +76,7 @@ export default function GamesHubIndex() {
             </div>
           ) : (
             <>
-              {/* ヘッダーセクション */}
+              {/* Header Section */}
               <div className="text-center mb-12">
                 <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl mb-4">
                   {gamesData?.title || "Japanese Learning Arcade"}
@@ -87,7 +86,7 @@ export default function GamesHubIndex() {
                 </p>
               </div>
 
-              {/* セクションおよびゲームカード一覧 */}
+              {/* Sections and Game Card Listings */}
               {gamesData?.sections.map((section, sIdx) => (
                 <div key={sIdx} className="mb-12">
                   <div className="mb-6 border-b border-slate-200 pb-3">
@@ -98,7 +97,7 @@ export default function GamesHubIndex() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* 1つ目のセクションの先頭、または既存リストの最後に「ローリング・カナ」のカードを差し込む */}
+                    {/* Insert the "Rolling Kana" card at the beginning of the first section */}
                     {sIdx === 0 && (
                       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group border-indigo-200 bg-gradient-to-br from-white to-indigo-50/30">
                         <div>
@@ -106,86 +105,86 @@ export default function GamesHubIndex() {
                             <div className="flex items-center space-x-2">
                               <Gamepad2 className="w-5 h-5 text-indigo-600" />
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                                アクション
-                              </span>
+                                Action
+                            </span>
                             </div>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
                               NEW!
                             </span>
-                          </div>
-                          
-                          <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                            ローリング・カナ
-                          </h3>
-                          
-                          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-                            上から転がってくる文字の輪をチェック！仮名とローマ字を照らし合わせながらハシゴを登るレトロアクションゲーム。
-                          </p>
                         </div>
-
-                        <div>
-                          <Link
-                            to="/games/rolling-character"
-                            className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
-                          >
-                            Play Now
-                          </Link>
-                        </div>
+                        
+                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                          Rolling Kana
+                        </h3>
+                        
+                        <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                          Catch the rolling character rings from above! A retro action game where you climb ladders while matching Kana and Romaji.
+                        </p>
                       </div>
-                    )}
 
-                    {section.games.map((game) => (
-                      <div 
-                        key={game.id} 
-                        className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group"
-                      >
+                      <div>
+                        <Link
+                          to="/games/rolling-character"
+                          className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+                        >
+                          Play Now
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {section.games.map((game) => (
+                    <div 
+                      key={game.id} 
+                      className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
                         <div>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center space-x-2">
-                              {renderGameIcon(game.iconName)}
-                              {game.category && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                                  {game.category}
-                                </span>
-                              )}
-                            </div>
-                            {game.badge && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
-                                {game.badge}
+                            {renderGameIcon(game.iconName)}
+                            {game.category && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 ml-2">
+                                {game.category}
                               </span>
                             )}
                           </div>
-                          
-                          <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                            {game.name}
-                          </h3>
-                          
-                          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-                            {game.description}
-                          </p>
-                        </div>
-
-                        <div>
-                          {game.isComingSoon ? (
-                            <span className="inline-block w-full text-center py-2.5 px-4 bg-slate-100 text-slate-400 font-medium rounded-xl cursor-not-allowed">
-                              Coming Soon
-                            </span>
-                          ) : (
-                            <Link
-                              to={game.path}
-                              className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
-                            >
-                              {game.actionLabel || "Play Now"}
-                            </Link>
-                          )}
-                        </div>
+                          {game.badge && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                            {game.badge}
+                          </span>
+                        )}
                       </div>
-                    ))}
+                      
+                      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                        {game.name}
+                      </h3>
+                      
+                      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                        {game.description}
+                      </p>
+                    </div>
+
+                      <div>
+                        {game.isComingSoon ? (
+                          <span className="inline-block w-full text-center py-2.5 px-4 bg-slate-100 text-slate-400 font-medium rounded-xl cursor-not-allowed">
+                          Coming Soon
+                        </span>
+                      ) : (
+                        <Link
+                          to={game.path}
+                          className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+                      >
+                        {game.actionLabel || "Play Now"}
+                      </Link>
+                    )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </>
-          )}
+                ))}
+              </div>
+            </div>
+          ))}
+          </>
+        )}
         </div>
       </div>
     </ToolPageWrapper>
