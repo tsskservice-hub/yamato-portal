@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduVocabularyDrillModal.tsx
- * @description 4つのモード（日→英タイピング、音声→英タイピング、英→日タイピング、英→日発声）を網羅した本格語彙ドリル（フルスクリーン対応版）
+ * @description 4つのモード（日→英タイピング、音声→英タイピング、英→日タイピング、英→日発声）を網羅した本格語彙ドリル（フルスクリーン・表記ゆれ対応版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -77,21 +77,48 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     }
   };
 
+  // 表記ゆれや数字・句読点を正規化するヘルパー関数
+  const normalizeAnswer = (str: string): string => {
+    if (!str) return "";
+    let s = str.trim().toLowerCase();
+    
+    // 末尾の句読点（? . ! ,）を取り除く
+    s = s.replace(/[?.!,]+$/, "");
+    
+    // 数字とスペルの相互変換対応（1 ⇔ one など）
+    s = s.replace(/\b1\b/g, "one");
+    s = s.replace(/\bone\b/g, "1");
+    s = s.replace(/\b2\b/g, "two");
+    s = s.replace(/\btwo\b/g, "2");
+    s = s.replace(/\b3\b/g, "three");
+    s = s.replace(/\bthree\b/g, "3");
+    s = s.replace(/\b4\b/g, "four");
+    s = s.replace(/\bfour\b/g, "4");
+    s = s.replace(/\b5\b/g, "five");
+    s = s.replace(/\bfive\b/g, "5");
+    
+    // 連続する空白を1つにまとめる
+    s = s.replace(/\s+/g, " ");
+    
+    return s;
+  };
+
   // タイピング回答の判定
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
 
     let isCorrect = false;
-    const cleanInput = userInput.trim().toLowerCase();
+    const cleanInput = normalizeAnswer(userInput);
 
     if (currentMode === "jp_to_en" || currentMode === "audio_to_en") {
-      const correctEn = (currentItem.english_text || "").trim().toLowerCase();
+      const correctEn = normalizeAnswer(currentItem.english_text || "");
       isCorrect = cleanInput === correctEn;
     } else if (currentMode === "en_to_jp") {
       const correctJp = (currentItem.jp_text || "").trim();
       const correctRomaji = (currentItem.romaji || "").trim().toLowerCase();
-      isCorrect = cleanInput === correctJp || cleanInput === correctRomaji;
+      const cleanUserJp = userInput.trim();
+      isCorrect = cleanUserJp === correctJp || cleanUserJp.toLowerCase() === correctRomaji;
     }
 
     if (isCorrect) {
@@ -271,7 +298,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
               </span>
             </div>
 
-            {/* 問題提示エリア（フルスクリーン時はより大きく迫力ある表示に） */}
+            {/* 問題提示エリア */}
             <div className={`bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-4 ${isFullscreen ? "py-16" : ""}`}>
               {currentMode === "jp_to_en" && (
                 <>
