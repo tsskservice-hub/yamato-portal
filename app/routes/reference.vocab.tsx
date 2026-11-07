@@ -1,6 +1,6 @@
 /**
  * @file vocab.tsx
- * @description AI Yamato Japanese Hub - 語彙検索・選択ページ（生徒・教師共通・型エラー解消版）
+ * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Schema Matched Version)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
@@ -17,10 +17,9 @@ interface TextbookMapping {
 
 interface Vocabulary {
   id: string;
-  japanese: string;
-  kana: string;
+  jp_text: string;
   romaji: string;
-  english: string;
+  english_text: string;
   category: string;
   year_levels?: number[];
   textbook_mappings?: TextbookMapping[];
@@ -53,14 +52,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
+  // 実際のテーブル構造（jp_text, english_text）に合わせてセレクト
   const { data: vocabularies, error } = await supabase
     .from("edu_vocabulary")
     .select(`
       id,
-      japanese,
-      kana,
+      jp_text,
       romaji,
-      english,
+      english_text,
       category,
       year_levels,
       textbook_mappings (
@@ -72,21 +71,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   if (error) {
     console.warn("Supabase fetch error from edu_vocabulary:", error.message);
-    const { data: fallbackVocabs } = await supabase
-      .from("edu_vocabulary")
-      .select("id, japanese, kana, romaji, english, category")
-      .order("id", { ascending: true });
-
-    return json({
-      vocabularies: (fallbackVocabs as Vocabulary[]) || [],
-      availableBooks: [] as string[],
-      isTeacher,
-      portalContent,
-      currentPath: url.pathname,
-    });
   }
 
-  const vocabList: Vocabulary[] = (vocabularies as any) || [];
+  let vocabList: Vocabulary[] = (vocabularies as any) || [];
+  if (vocabList.length === 0) {
+    const { data: fallbackVocabs } = await supabase
+      .from("edu_vocabulary")
+      .select("id, jp_text, romaji, english_text, category, year_levels")
+      .order("order_index", { ascending: true });
+
+    if (fallbackVocabs) {
+      vocabList = fallbackVocabs as Vocabulary[];
+    }
+  }
 
   const uniqueBooks = Array.from(
     new Set(
@@ -125,9 +122,8 @@ export default function VocabIndexPage() {
   const filteredVocabularies = useMemo(() => {
     return vocabularies.filter((item: Vocabulary) => {
       const matchesSearch =
-        (item.japanese && item.japanese.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.kana && item.kana.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.english && item.english.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.jp_text && item.jp_text.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.english_text && item.english_text.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.romaji && item.romaji.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesBook =
@@ -176,15 +172,15 @@ export default function VocabIndexPage() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-                📚 日本語 語彙データベース・検索
+                📚 Japanese Vocabulary Database & Reference
               </h1>
               <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                語彙を検索してリファレンスとして活用したり、気になる単語を選んで自分だけの復習用ドリルを作成できます！
+                Search curriculum vocabulary for reference, or select items to create your own personalized review drill!
               </p>
             </div>
 
             <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 px-2">表示サイズ:</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 px-2">Font Size:</span>
               <button
                 type="button"
                 onClick={() => setIsLargeFont(false)}
@@ -192,7 +188,7 @@ export default function VocabIndexPage() {
                   !isLargeFont ? "bg-orange-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
                 }`}
               >
-                小
+                Small
               </button>
               <button
                 type="button"
@@ -201,7 +197,7 @@ export default function VocabIndexPage() {
                   isLargeFont ? "bg-orange-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
                 }`}
               >
-                大
+                Large
               </button>
             </div>
           </div>
@@ -209,27 +205,27 @@ export default function VocabIndexPage() {
           <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                キーワード検索 (英語 / かな / 漢字)
+                Keyword Search (Japanese / English / Romaji)
               </label>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="例: friend, ひとり, 友達..."
+                placeholder="e.g. smelly, kusai, くさい..."
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                教科書・教材
+                Textbook / Material
               </label>
               <select
                 value={selectedBook}
                 onChange={(e) => setSelectedBook(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200"
               >
-                <option value="all">すべての教科書</option>
+                <option value="all">All Textbooks</option>
                 {availableBooks.map((bookName: string) => (
                   <option key={bookName} value={bookName}>
                     {bookName}
@@ -240,14 +236,14 @@ export default function VocabIndexPage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                対象学年
+                Year Level
               </label>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200"
               >
-                <option value="all">すべての学年</option>
+                <option value="all">All Year Levels</option>
                 <option value="7">Year 7</option>
                 <option value="8">Year 8</option>
                 <option value="9">Year 9</option>
@@ -260,15 +256,15 @@ export default function VocabIndexPage() {
 
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-1 gap-2">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              検索結果: <span className="font-bold text-slate-900 dark:text-slate-100">{filteredVocabularies.length}</span> 語
-              <span className="ml-3 text-orange-600 dark:text-orange-400 font-semibold">（選択中: {selectedIds.length} 語）</span>
+              Results: <span className="font-bold text-slate-900 dark:text-slate-100">{filteredVocabularies.length}</span> terms
+              <span className="ml-3 text-orange-600 dark:text-orange-400 font-semibold">（Selected: {selectedIds.length} terms）</span>
             </p>
             <button
               type="button"
               onClick={toggleSelectAllVisible}
               className="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 px-3 py-2 rounded-xl font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
             >
-              表示中の単語をすべて選択/解除
+              Select / Deselect All Visible
             </button>
           </div>
 
@@ -295,7 +291,7 @@ export default function VocabIndexPage() {
                           className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
                         />
                         <div className={`font-bold text-slate-900 dark:text-slate-100 ${isLargeFont ? "text-3xl" : "text-xl"}`}>
-                          {item.japanese}
+                          {item.jp_text}
                         </div>
                       </div>
                       {item.category && (
@@ -306,12 +302,12 @@ export default function VocabIndexPage() {
                     </div>
 
                     <div className={`text-slate-600 dark:text-slate-400 mb-2 pl-7 ${isLargeFont ? "text-lg" : "text-sm"}`}>
-                      <span className="text-slate-400 mr-2">読み:</span>
-                      {item.kana} <span className="text-slate-400 text-xs ml-1">({item.romaji})</span>
+                      <span className="text-slate-400 mr-2">Romaji:</span>
+                      {item.romaji}
                     </div>
 
                     <div className={`text-slate-800 dark:text-slate-200 font-medium mb-3 pl-7 ${isLargeFont ? "text-xl" : "text-base"}`}>
-                      {item.english}
+                      {item.english_text}
                     </div>
                   </div>
 
@@ -338,7 +334,7 @@ export default function VocabIndexPage() {
 
           {filteredVocabularies.length === 0 && (
             <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">条件に一致する語彙が見つかりませんでした。</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found. Please verify data in Supabase (`edu_vocabulary`).</p>
             </div>
           )}
 
@@ -348,14 +344,14 @@ export default function VocabIndexPage() {
           <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 py-4 px-6 shadow-lg z-50 animate-slide-up">
             <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
               <div className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                🎯 <span className="text-orange-600 dark:text-orange-400">{selectedIds.length} 語</span> の単語が選択されています
+                🎯 <span className="text-orange-600 dark:text-orange-400">{selectedIds.length} terms</span> selected for practice
               </div>
               <button
                 type="button"
                 onClick={handleCreateDrillWithSelected}
                 className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-6 rounded-xl shadow transition-colors text-xs uppercase tracking-wider cursor-pointer"
               >
-                この選択した単語で復習ドリルを作成する →
+                Create Review Drill with Selected →
               </button>
             </div>
           </div>
