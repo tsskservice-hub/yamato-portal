@@ -1,17 +1,17 @@
 /**
- * @file ChatYamatoEoyOralMock.tsx
- * @description Supabase YAMATO_CONFIGS から設定を動的取得する VCE EOY Oral Mock Exam 専用AIチャットコンポーネント（ラッパー方式）
+ * @file ChatYamatoOralExamQuestions.tsx
+ * @description Supabase YAMATO_CONFIGS から設定を動的取得する Oral Exam Questions 専用AIチャットコンポーネント（ラッパー方式）
  * 💡 特徴：
  *   1. YamatoChatCommon をベースにした完全ラッパー方式
- *   2. Supabase の "eoy-oral-mock" 設定（テーマカラー #ef4444、ボタンスタイル等）を動的反映
+ *   2. Supabase の "oral-exam-questions" 設定（テーマカラー #22c55e、ボタンスタイル等）を動的反映
  *   3. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
  */
 import React, { useState, useEffect } from "react";
-import YamatoChatCommon from "./YamatoChatCommon";
-import { fetchYamatoConfigsData, BotConfig } from "../data/yamato-configs";
-import { supabase } from "../lib/supabaseClient";
+import YamatoChatCommon from "../YamatoChatCommon";
+import { fetchYamatoConfigsData, BotConfig } from "../../data/yamato-configs";
+import { supabase } from "../../lib/supabaseClient";
 
-export interface ChatYamatoEoyOralMockProps {
+export interface ChatYamatoOralExamQuestionsProps {
   systemPrompt?: string;
   defaultOpen?: boolean;
   userId?: string;
@@ -24,12 +24,12 @@ export interface ChatYamatoEoyOralMockProps {
   assignedQuestion?: string;
 }
 
-export const ChatYamatoEoyOralMock: React.FC<ChatYamatoEoyOralMockProps> = ({
+export const ChatYamatoOralExamQuestions: React.FC<ChatYamatoOralExamQuestionsProps> = ({
   systemPrompt = "",
   defaultOpen = false,
   ...restProps
 }) => {
-  const appType = "eoy-oral-mock";
+  const appType = "oral-exam-questions";
   const [config, setConfig] = useState<BotConfig | null>(null);
 
   useEffect(() => {
@@ -40,15 +40,15 @@ export const ChatYamatoEoyOralMock: React.FC<ChatYamatoEoyOralMockProps> = ({
           setConfig(configsData[appType]);
         }
       } catch (err) {
-        console.error("Failed to load eoy-oral-mock config from Supabase:", err);
+        console.error("Failed to load oral-exam-questions config from Supabase:", err);
       }
     }
     loadConfig();
   }, [appType]);
 
   const defaultButtonStyle = {
-    background: "#ef4444",
-    border: "2px solid #fca5a5",
+    background: "#22c55e",
+    border: "2px solid #86efac",
     color: "#ffffff"
   };
 
@@ -56,12 +56,12 @@ export const ChatYamatoEoyOralMock: React.FC<ChatYamatoEoyOralMockProps> = ({
     <YamatoChatCommon
       appType={appType}
       systemPrompt={systemPrompt}
-      characterName={config?.name || "EOY Oral Mock Exam"}
+      characterName={config?.name || "Oral Exam Qs"}
       initialGreeting={
         config?.greeting ||
-        "Hello, my friend! 🌟 Welcome to your EOY Oral Mock Exam. Ready to simulate the real exam experience?"
+        "Hello, my friend! 🌟 Welcome to the Oral Exam Questions page. You can listen to expected examiner questions, train your ear, and practice shadowing to prepare for your oral exam!"
       }
-      themeColor={config?.themeColor || "#ef4444"}
+      themeColor={config?.themeColor || "#22c55e"}
       buttonStyle={config?.floatingButtonStyle || config?.buttonStyle || defaultButtonStyle}
       defaultOpen={defaultOpen}
       enableImageUpload={true} // 💡 写真アップロードボタン（Upload Photo）を表示
@@ -70,4 +70,4 @@ export const ChatYamatoEoyOralMock: React.FC<ChatYamatoEoyOralMockProps> = ({
   );
 };
 
-export default ChatYamatoEoyOralMock;
+export default ChatYamatoOralExamQuestions;

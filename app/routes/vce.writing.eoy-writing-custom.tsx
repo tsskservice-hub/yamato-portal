@@ -9,7 +9,7 @@ import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
-import ChatYamatoEoyWritingCustom from '~/components/ChatYamatoEoyWritingCustom';
+import ChatYamatoEoyWritingCustom from '~/components/chat/ChatYamatoEoyWritingCustom';
 import GenkoyoshiModal from '~/components/GenkoyoshiModal';
 
 interface UploadedImage {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { OralExamQuestionItem } from "../data/oral-exam-questions";
+import { OralExamQuestionItem } from "../../data/oral-exam-questions";
 import useOralAudioRecorder from "./OralAudioRecorder";
 import OralDrillFeedbackCard, { FeedbackData } from "./OralDrillFeedbackCard";
 

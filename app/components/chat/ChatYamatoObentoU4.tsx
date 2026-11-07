@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { YamatoChatCommon } from "./YamatoChatCommon";
+import { YamatoChatCommon } from "../YamatoChatCommon";
 
 export interface ChatYamatoObentoU4Props {
   /** ユーザーID */

@@ -3,9 +3,9 @@
  * @description 添付画像の設定（kanji-grammar-checker）に完全に合わせた漢字文法チェッカー専用ヤマトコンポーネント
  */
 import React, { useState, useEffect } from "react";
-import YamatoChatCommon from "./YamatoChatCommon";
-import { fetchYamatoConfigsData, BotConfig } from "../data/yamato-configs";
-import { supabase } from "../lib/supabaseClient";
+import YamatoChatCommon from "../YamatoChatCommon";
+import { fetchYamatoConfigsData, BotConfig } from "../../data/yamato-configs";
+import { supabase } from "../../lib/supabaseClient";
 
 export interface ChatYamatoKanjiGrammarCheckerVceProps {
   defaultOpen?: boolean;

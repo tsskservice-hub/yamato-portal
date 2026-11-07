@@ -4,7 +4,7 @@
  */
 import React from "react";
 import { Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
-import { validateSentence } from "../utils/oralValidation";
+import { validateSentence } from "../../utils/oralValidation";
 
 export interface OralSentenceInputGroupProps {
   questionId: string;

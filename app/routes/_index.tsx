@@ -15,7 +15,7 @@ import { supabase } from '~/lib/supabaseClient';
 // コンポーネントおよびフックのインポート
 import { HeroDemoChat } from '~/components/HeroDemoChat';
 import { DailyQuizModal } from '~/components/DailyQuizModal';
-import { ChatYamatoConcierge } from '~/components/ChatYamatoConcierge';
+import { ChatYamatoConcierge } from '~/components/chat/ChatYamatoConcierge';
 import { PricingSection } from '~/components/PricingSection';
 import { PortalModulesGrid } from '~/components/PortalModulesGrid';
 

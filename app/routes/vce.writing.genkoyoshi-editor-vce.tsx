@@ -22,7 +22,7 @@ import {
 
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
-import ChatYamatoGenkoyoshiEditorVce from '~/components/ChatYamatoGenkoyoshiEditorVce';
+import ChatYamatoGenkoyoshiEditorVce from '~/components/chat/ChatYamatoGenkoyoshiEditorVce';
 import GenkoyoshiPreviewPane from '~/components/GenkoyoshiPreviewPane';
 import GenkoyoshiModal from '~/components/GenkoyoshiModal';
 import { generateGenkoyoshiPages, calculateCharCount } from '~/utils/genkoyoshi-engine';

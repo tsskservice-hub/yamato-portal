@@ -10,14 +10,14 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 
 import PageLayout from '~/components/PageLayout';
 import { DataErrorState } from '~/components/DataErrorState';
-import OralExaminerAvatar from '~/components/OralExaminerAvatar';
-import ChatYamatoEoyOralElaborate from '~/components/ChatYamatoEoyOralElaborate';
+import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
+import ChatYamatoEoyOralElaborate from '~/components/chat/ChatYamatoEoyOralElaborate';
 import { supabase } from '~/lib/supabaseClient';
 
 // Modular Oral components & hooks
-import OralCenterChatPractice from '~/components/OralCenterChatPractice';
-import OralCustomQuestionForm from '~/components/OralCustomQuestionForm';
-import OralDrillQuestionSelector from '~/components/OralDrillQuestionSelector';
+import OralCenterChatPractice from '~/components/oral/OralCenterChatPractice';
+import OralCustomQuestionForm from '~/components/oral/OralCustomQuestionForm';
+import OralDrillQuestionSelector from '~/components/oral/OralDrillQuestionSelector';
 import { useOralPracticeEngine, QuestionData } from '~/hooks/OralPracticeHooks';
 import { useSupabaseUserAnswers } from '~/hooks/OralUserAnswersHooks';
 import {

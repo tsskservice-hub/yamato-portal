@@ -4,7 +4,7 @@ import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import { type PageLayoutRef } from '~/components/PageLayout';
 import PageLayout from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import ChatYamatoOralExamQuestions from '~/components/ChatYamatoOralExamQuestions';
+import ChatYamatoOralExamQuestions from '~/components/chat/ChatYamatoOralExamQuestions';
 import { fetchOralExamQuestionsData, OralExamQuestionsData, OralExamQuestionItem } from '~/data/oral-exam-questions';
 import { supabase } from '~/lib/supabaseClient';
 

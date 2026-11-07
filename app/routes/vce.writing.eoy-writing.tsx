@@ -9,7 +9,7 @@ import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import TextTypeModal from '~/components/TextTypeModal';
-import ChatYamatoEoyWriting from '~/components/ChatYamatoEoyWriting';
+import ChatYamatoEoyWriting from '~/components/chat/ChatYamatoEoyWriting';
 import GenkoyoshiModal from '~/components/GenkoyoshiModal';
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from '~/data/writing-exam-questions';
 import { TextTypesData, fetchTextTypesData } from '~/data/texttypes';
