@@ -1,11 +1,12 @@
 /**
  * @file reference.vocab.tsx
- * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Standalone Version)
+ * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Client-side Fetch Version)
  */
+
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
-import React, { useState, useMemo, useRef } from "react";
-import { createServerSupabaseClient } from '~/lib/supabase.server';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { supabase } from '~/lib/supabaseClient';
 import { ToolPageWrapper } from '~/components/ToolPageWrapper';
 import { type PageLayoutRef } from '~/components/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
@@ -17,12 +18,11 @@ interface Vocabulary {
   english_text: string;
   category: string;
   year_levels?: number[];
+  order_index?: number;
 }
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const { supabase } = createServerSupabaseClient(request, context);
-
   let portalContent = null;
   try {
     const { data: portalData } = await supabase
@@ -33,34 +33,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     portalContent = portalData?.content || null;
   } catch (e) {}
 
-  let isTeacher = false;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_teacher')
-      .eq('id', user.id)
-      .maybeSingle();
-    if (profile && (profile as any).is_teacher) {
-      isTeacher = true;
-    }
-  }
-
-  // edu_vocabulary テーブルから単体データを安全に取得
-  const { data: vocabularies, error } = await supabase
-    .from("edu_vocabulary")
-    .select("id, jp_text, romaji, english_text, category, year_levels")
-    .order("order_index", { ascending: true });
-
-  if (error) {
-    console.warn("Supabase fetch error from edu_vocabulary:", error.message);
-  }
-
-  const vocabList: Vocabulary[] = (vocabularies as Vocabulary[]) || [];
-
   return json({
-    vocabularies: vocabList,
-    isTeacher,
     portalContent,
     currentPath: url.pathname,
   });
@@ -72,16 +45,47 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
 
 export default function VocabIndexPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const data = useLoaderData<typeof loader>();
-  const vocabularies = (data.vocabularies || []) as Vocabulary[];
-  const isTeacher = data.isTeacher;
   const navigate = useNavigate();
-  
+
+  const [vocabularies, setVocabularies] = useState<Vocabulary[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("all");
-
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLargeFont, setIsLargeFont] = useState(false);
+
+  // 漢字ページと同じく、クライアントサイドで確実にデータを取得
+  const loadVocabData = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const { data, error } = await supabase
+        .from("edu_vocabulary")
+        .select("id, jp_text, romaji, english_text, category, year_levels, order_index")
+        .order("order_index", { ascending: true });
+
+      if (error) throw error;
+
+      if (data && Array.isArray(data)) {
+        setVocabularies(data);
+      } else {
+        setVocabularies([]);
+      }
+    } catch (err: any) {
+      console.error("Failed to load edu_vocabulary data:", err);
+      setError(true);
+      setErrorMessage(err?.message || 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadVocabData();
+  }, [loadVocabData]);
 
   const filteredVocabularies = useMemo(() => {
     return vocabularies.filter((item: Vocabulary) => {
@@ -210,66 +214,72 @@ export default function VocabIndexPage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredVocabularies.map((item: Vocabulary) => {
-              const isSelected = selectedIds.includes(item.id);
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => toggleSelect(item.id)}
-                  className={`p-5 rounded-3xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
-                    isSelected
-                      ? "bg-orange-50/70 dark:bg-orange-950/40 border-orange-500 shadow-md"
-                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 shadow-sm"
-                  }`}
-                >
-                  <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => {}}
-                          className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
-                        />
-                        <div className={`font-bold text-slate-900 dark:text-slate-100 ${isLargeFont ? "text-3xl" : "text-xl"}`}>
-                          {item.jp_text}
-                        </div>
-                      </div>
-                      {item.category && (
-                        <span className="bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300 text-xs font-semibold px-2.5 py-1 rounded-lg uppercase tracking-wide">
-                          {item.category}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className={`text-slate-600 dark:text-slate-400 mb-2 pl-7 ${isLargeFont ? "text-lg" : "text-sm"}`}>
-                      <span className="text-slate-400 mr-2">Romaji:</span>
-                      {item.romaji}
-                    </div>
-
-                    <div className={`text-slate-800 dark:text-slate-200 font-medium mb-3 pl-7 ${isLargeFont ? "text-xl" : "text-base"}`}>
-                      {item.english_text}
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-end items-center text-xs text-slate-500 dark:text-slate-400 gap-2 pl-7">
-                    <div className="flex gap-1">
-                      {item.year_levels?.map((yr: number) => (
-                        <span key={yr} className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded font-bold">
-                          Y{yr}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {filteredVocabularies.length === 0 && (
+          {loading ? (
+            <div className="text-center py-20 text-slate-500 text-sm">Loading vocabulary data from Supabase...</div>
+          ) : error ? (
+            <div className="text-center py-20 text-red-500 text-sm font-bold">
+              Failed to load vocabulary records: {errorMessage}
+            </div>
+          ) : filteredVocabularies.length === 0 ? (
             <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found. Please check data in `edu_vocabulary` table.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found in the `edu_vocabulary` table.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredVocabularies.map((item: Vocabulary) => {
+                const isSelected = selectedIds.includes(item.id);
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => toggleSelect(item.id)}
+                    className={`p-5 rounded-3xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
+                      isSelected
+                        ? "bg-orange-50/70 dark:bg-orange-950/40 border-orange-500 shadow-md"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 shadow-sm"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
+                          />
+                          <div className={`font-bold text-slate-900 dark:text-slate-100 ${isLargeFont ? "text-3xl" : "text-xl"}`}>
+                            {item.jp_text}
+                          </div>
+                        </div>
+                        {item.category && (
+                          <span className="bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300 text-xs font-semibold px-2.5 py-1 rounded-lg uppercase tracking-wide">
+                            {item.category}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className={`text-slate-600 dark:text-slate-400 mb-2 pl-7 ${isLargeFont ? "text-lg" : "text-sm"}`}>
+                        <span className="text-slate-400 mr-2">Romaji:</span>
+                        {item.romaji}
+                      </div>
+
+                      <div className={`text-slate-800 dark:text-slate-200 font-medium mb-3 pl-7 ${isLargeFont ? "text-xl" : "text-base"}`}>
+                        {item.english_text}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-end items-center text-xs text-slate-500 dark:text-slate-400 gap-2 pl-7">
+                      <div className="flex gap-1">
+                        {item.year_levels?.map((yr: number) => (
+                          <span key={yr} className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded font-bold">
+                            Y{yr}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
