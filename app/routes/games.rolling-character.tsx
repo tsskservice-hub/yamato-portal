@@ -9,9 +9,9 @@ import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// 文字データ（ステージ別）
+// Character Data Sets by Stage
 const KANA_DATA_SETS = {
-  1: [ // 初級：あ行、か行
+  1: [ // Beginner: A-row, Ka-row
     { kana: 'あ', romaji: 'a', correct: true },
     { kana: 'い', romaji: 'i', correct: true },
     { kana: 'う', romaji: 'u', correct: true },
@@ -19,10 +19,10 @@ const KANA_DATA_SETS = {
     { kana: 'お', romaji: 'o', correct: true },
     { kana: 'か', romaji: 'ka', correct: true },
     { kana: 'き', romaji: 'ki', correct: true },
-    { kana: 'あ', romaji: 'o', correct: false }, // 引っかけ
+    { kana: 'あ', romaji: 'o', correct: false }, // Trick
     { kana: 'い', romaji: 'a', correct: false }
   ],
-  2: [ // 中級：さ行、た行、な行
+  2: [ // Intermediate: Sa-row, Ta-row, Na-row
     { kana: 'さ', romaji: 'sa', correct: true },
     { kana: 'し', romaji: 'shi', correct: true },
     { kana: 'す', romaji: 'su', correct: true },
@@ -33,7 +33,7 @@ const KANA_DATA_SETS = {
     { kana: 'し', romaji: 'su', correct: false },
     { kana: 'た', romaji: 'na', correct: false }
   ],
-  3: [ // 上級：は行、ま行、ら行、濁音など
+  3: [ // Advanced: Ha-row, Ma-row, Ra-row, Dakuten
     { kana: 'は', romaji: 'ha', correct: true },
     { kana: 'ひ', romaji: 'hi', correct: true },
     { kana: 'ま', romaji: 'ma', correct: true },
@@ -92,9 +92,9 @@ export default function RollingCharacterPage() {
     e.preventDefault();
     if (inputPasscode === '1111') {
       setIsCodeUnlocked(true);
-      alert('✨ 認証に成功しました！ゲームが一時的にロック解除されました。');
+      alert('✨ Authentication successful! The game has been temporarily unlocked.');
     } else {
-      alert('❌ パスコードが違います。');
+      alert('❌ Incorrect passcode.');
     }
   };
 
@@ -102,8 +102,8 @@ export default function RollingCharacterPage() {
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Rolling Character">
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <header className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
-          <h1 className="text-xl font-bold text-slate-800">🏔️ ローリング・カナ 〜AIヤマトと文字の山を登れ！〜</h1>
-          <p className="text-xs text-slate-500 mt-0.5">日本語文字学習アクション・レトロアーケード風ゲーム</p>
+          <h1 className="text-xl font-bold text-slate-800">🏔️ Rolling Kana ~Climb the Mountain with AI Yamato!~</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Japanese Character Learning Retro Arcade Game</p>
         </header>
 
         {isAccessible ? (
@@ -114,9 +114,9 @@ export default function RollingCharacterPage() {
               🔒
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">このエリアは現在ロックされています</h2>
+              <h2 className="text-xl font-bold text-slate-800 mb-2">This area is currently locked</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                課題を完了するか、先生から提供されたパスコードを入力してください。
+                Complete the lessons or enter the passcode provided by your teacher.
               </p>
             </div>
 
@@ -124,7 +124,7 @@ export default function RollingCharacterPage() {
               <input
                 type="text"
                 maxLength={4}
-                placeholder="4桁のコード"
+                placeholder="4-digit code"
                 value={inputPasscode}
                 onChange={(e) => setInputPasscode(e.target.value)}
                 className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
@@ -133,7 +133,7 @@ export default function RollingCharacterPage() {
                 type="submit"
                 className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
               >
-                解除
+                Unlock
               </button>
             </form>
           </div>
@@ -150,9 +150,8 @@ function RollingCharacterArena() {
   const [score, setScore] = useState(0);
   const [stage, setStage] = useState(1);
   const [lives, setLives] = useState(3);
-  const [yamatoSpeech, setYamatoSpeech] = useState('ようこそ！ハシゴを登って最上階のゴールを目指そう！正しいローマ字の輪を獲得してね！');
+  const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb the ladders to reach the top goal! Collect correct Romaji rings!');
 
-  // ゲームループ用のRef（再レンダリングをまたいで最新値を保持）
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
 
@@ -171,7 +170,6 @@ function RollingCharacterArena() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // 音声合成 (Web Audio API)
     let audioCtx: AudioContext | null = null;
     const initAudio = () => {
       if (!audioCtx) {
@@ -225,7 +223,6 @@ function RollingCharacterArena() {
       } catch (e) {}
     };
 
-    // キー入力管理
     const keys = { left: false, right: false, up: false, down: false, space: false };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'w', 'a', 's', 'd'].includes(e.code) || e.key === ' ') {
@@ -249,7 +246,6 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // ステージ構造
     const platforms = [
       { x: 50, y: 520, w: 700, h: 16 },
       { x: 100, y: 410, w: 600, h: 16 },
@@ -273,8 +269,8 @@ function RollingCharacterArena() {
       vx: 0,
       vy: 0,
       speed: 3.5,
-      jumpPower: -9.5,
-      gravity: 0.45,
+      jumpPower: -10.5,
+      gravity: 0.5,
       isGrounded: false,
       isOnLadder: false,
       facing: 1
@@ -285,7 +281,6 @@ function RollingCharacterArena() {
     let invincibilityTimer = 0;
     let spacePressedLastFrame = false;
 
-    // 外部からのゲームスタート用メソッドをWindowに紐づけまたはクロージャーで制御
     (window as any).__startRollingGame = (st = 1) => {
       initAudio();
       setStage(st);
@@ -298,7 +293,7 @@ function RollingCharacterArena() {
       player.vx = 0;
       player.vy = 0;
       setGameState('PLAYING');
-      setYamatoSpeech(`ステージ ${st} スタート！最上階のゴールを目指して登ろう！`);
+      setYamatoSpeech(`Stage ${st} Start! Climb up to the top goal!`);
     };
 
     let animationFrameId: number;
@@ -308,7 +303,7 @@ function RollingCharacterArena() {
 
       if (invincibilityTimer > 0) invincibilityTimer--;
 
-      // ハシゴ判定
+      // Ladder detection
       let touchingLadder = false;
       for (let l of ladders) {
         if (player.x + player.w/2 >= l.x - 12 && player.x + player.w/2 <= l.x + 12 &&
@@ -319,7 +314,7 @@ function RollingCharacterArena() {
       }
       player.isOnLadder = touchingLadder;
 
-      // 移動
+      // Movement
       player.vx = 0;
       if (keys.left) { player.vx = -player.speed; player.facing = -1; }
       if (keys.right) { player.vx = player.speed; player.facing = 1; }
@@ -348,19 +343,19 @@ function RollingCharacterArena() {
       if (player.x < 30) player.x = 30;
       if (player.x > 750) player.x = 750;
 
-      // 足場との衝突
+      // Platform collisions & landing
       player.isGrounded = false;
       for (let p of platforms) {
         if (player.vy >= 0 &&
             player.x + player.w > p.x && player.x < p.x + p.w &&
-            player.y + player.h >= p.y && player.y + player.h <= p.y + p.h + 10) {
+            player.y + player.h >= p.y && player.y + player.h <= p.y + p.h + 12) {
           player.y = p.y - player.h;
           player.vy = 0;
           player.isGrounded = true;
         }
       }
 
-      // ゴール判定
+      // Goal detection
       let goalP = platforms[4];
       if (player.y + player.h <= goalP.y + 10 &&
           player.x >= goalP.x && player.x + player.w <= goalP.x + goalP.w) {
@@ -369,7 +364,7 @@ function RollingCharacterArena() {
         return;
       }
 
-      // 輪の生成
+      // Spawn rings from upper platforms (Fixed spawning from top)
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = Math.max(90 - (currentStage * 15), 50);
@@ -377,16 +372,18 @@ function RollingCharacterArena() {
         spawnTimer = 0;
         const dataset = KANA_DATA_SETS[currentStage as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
         const data = dataset[Math.floor(Math.random() * dataset.length)];
-        const startP = platforms[3];
-        const startX = Math.random() > 0.5 ? startP.x + 30 : startP.x + startP.w - 30;
+        
+        // Spawn from upper platforms (Index 3 or Index 2) so they drop down reliably
+        const spawnPlatform = Math.random() > 0.5 ? platforms[3] : platforms[2];
+        const startX = Math.random() > 0.5 ? spawnPlatform.x + 30 : spawnPlatform.x + spawnPlatform.w - 30;
         const dir = startX < 400 ? 1 : -1;
 
         rings.push({
           x: startX,
-          y: startP.y - 22,
+          y: spawnPlatform.y - 25,
           radius: 22,
           vx: dir * (2 + currentStage * 0.4),
-          vy: 2,
+          vy: 1.5,
           dir: dir,
           rotation: 0,
           vRot: dir * 0.08,
@@ -394,16 +391,17 @@ function RollingCharacterArena() {
         });
       }
 
-      // 輪の更新と判定
+      // Ring updates & physics
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
+        r.vy += 0.3; // Gravity for rings
         r.x += r.vx;
         r.y += r.vy;
         r.rotation += r.vRot;
 
         for (let p of platforms) {
           if (r.x > p.x && r.x < p.x + p.w && Math.abs((r.y + r.radius) - p.y) < 6 && r.vy >= 0) {
-            r.vy = 0;
+            r.vy = -r.vy * 0.4; // Small bounce on platforms
             r.y = p.y - r.radius;
             if (r.dir === 1 && r.x >= p.x + p.w - 30) r.dir = -1;
             if (r.dir === -1 && r.x <= p.x + 30) r.dir = 1;
@@ -428,7 +426,7 @@ function RollingCharacterArena() {
               return newS;
             });
             playSound('correct');
-            setYamatoSpeech(`正解！「${r.data.kana}」は「${r.data.romaji}」だね！ (+100pt)`);
+            setYamatoSpeech(`Correct! "${r.data.kana}" is "${r.data.romaji}"! (+100pt)`);
             rings.splice(i, 1);
           } else {
             if (invincibilityTimer === 0) {
@@ -442,7 +440,7 @@ function RollingCharacterArena() {
               });
               invincibilityTimer = 60;
               playSound('damage');
-              setYamatoSpeech(`惜しい！それは間違い。「${r.data.kana}」のローマ字は違うよ！`);
+              setYamatoSpeech(`Oops! Incorrect. "${r.data.kana}" does not match that Romaji!`);
             }
           }
         }
@@ -452,11 +450,11 @@ function RollingCharacterArena() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 背景
+      // Background
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      // プラットフォーム
+      // Platforms
       platforms.forEach((p, idx) => {
         ctx.fillStyle = idx === 4 ? '#cc9900' : '#d9534f';
         ctx.fillRect(p.x, p.y, p.w, p.h);
@@ -466,7 +464,7 @@ function RollingCharacterArena() {
         }
       });
 
-      // ハシゴ
+      // Ladders
       ladders.forEach(l => {
         ctx.fillStyle = '#3399ff';
         let rw = 24;
@@ -478,7 +476,7 @@ function RollingCharacterArena() {
         }
       });
 
-      // ゴールアイコン
+      // Goal Icon
       let gp = platforms[4];
       ctx.fillStyle = '#ffcc00';
       ctx.beginPath();
@@ -492,12 +490,13 @@ function RollingCharacterArena() {
       ctx.textAlign = 'center';
       ctx.fillText('AI', gp.x + gp.w/2, gp.y - 16);
 
-      // 輪の描画
+      // Rings (with rolling visual pattern/spokes)
       rings.forEach(r => {
         ctx.save();
         ctx.translate(r.x, r.y);
         ctx.rotate(r.rotation);
 
+        // Outer Ring
         ctx.beginPath();
         ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
         ctx.fillStyle = '#ff7700';
@@ -506,21 +505,30 @@ function RollingCharacterArena() {
         ctx.strokeStyle = '#ffffff';
         ctx.stroke();
 
+        // Inner hole
         ctx.beginPath();
-        ctx.arc(0, 0, r.radius - 6, 0, Math.PI * 2);
+        ctx.arc(0, 0, r.radius - 7, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
 
-        ctx.save();
-        ctx.rotate(-r.rotation);
+        // Cross spokes to show rolling rotation
+        ctx.strokeStyle = '#ff7700';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-(r.radius - 7), 0);
+        ctx.lineTo(r.radius - 7, 0);
+        ctx.moveTo(0, -(r.radius - 7));
+        ctx.lineTo(0, r.radius - 7);
+        ctx.stroke();
+
+        ctx.restore();
+
+        // Text upright
         ctx.fillStyle = '#111122';
         ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(r.data.kana, 0, 1);
-        ctx.restore();
-
-        ctx.restore();
+        ctx.fillText(r.data.kana, r.x, r.y + 1);
 
         ctx.fillStyle = '#ffff00';
         ctx.font = 'bold 13px monospace';
@@ -528,7 +536,7 @@ function RollingCharacterArena() {
         ctx.fillText(r.data.romaji, r.x, r.y - r.radius - 8);
       });
 
-      // プレイヤー描画
+      // Player
       if (invincibilityTimer % 4 < 2) {
         ctx.fillStyle = '#00ffcc';
         ctx.fillRect(player.x, player.y, player.w, player.h);
@@ -558,8 +566,8 @@ function RollingCharacterArena() {
       {/* Status Bar */}
       <div className="flex flex-wrap justify-between items-center bg-slate-100 p-4 rounded-xl border border-slate-200 text-sm shadow-inner gap-2">
         <span className="text-red-500 font-bold">❤️ HP: {'❤️'.repeat(lives)}</span>
-        <span className="text-indigo-600 font-bold">ステージ: {stage} / 3</span>
-        <span className="text-emerald-600 font-bold">スコア: {score} pt</span>
+        <span className="text-indigo-600 font-bold">Stage: {stage} / 3</span>
+        <span className="text-emerald-600 font-bold">Score: {score} pt</span>
       </div>
 
       {/* Game Field */}
@@ -569,21 +577,21 @@ function RollingCharacterArena() {
         {/* Start Screen */}
         {gameState === 'START' && (
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
-            <h1 className="text-3xl font-black text-[#ffcc00]">ローリング・カナ</h1>
+            <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
-              〜 AIヤマトと文字の山を登れ！ 〜<br /><br />
-              上から転がってくる文字の輪をチェックしよう！<br />
-              仮名とローマ字が**一致していれば獲得（ポイント）**、**違っていれば接触するとライフ減少**！<br />
-              ハシゴ（↑キー）を登って最上階のAIヤマトの元へ急げ！
+              ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
+              Check the rolling character rings from above!<br />
+              If the Kana and Romaji **match, collect them for points**. If they **don't match, touching them reduces HP**!<br />
+              Climb the ladders (↑ key) to reach AI Yamato at the top!
             </p>
             <button
               onClick={() => (window as any).__startRollingGame(1)}
               className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg cursor-pointer transition"
             >
-              ゲームスタート
+              Start Game
             </button>
             <div className="text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-xs">
-              [← / →] 移動 ｜ [↑ / ↓] ハシゴ ｜ [SPACE] ジャンプ
+              [← / →] Move ｜ [↑ / ↓] Ladder ｜ [SPACE] Jump
             </div>
           </div>
         )}
@@ -592,12 +600,12 @@ function RollingCharacterArena() {
         {gameState === 'GAMEOVER' && (
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-red-500">GAME OVER</h2>
-            <p className="text-sm text-[#ccc]">スコア: {score}点。しっかり文字とローマ字を確認しながら再挑戦しよう！</p>
+            <p className="text-sm text-[#ccc]">Score: {score} pts. Try again while carefully checking Kana and Romaji!</p>
             <button
               onClick={() => (window as any).__startRollingGame(1)}
               className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
             >
-              もう一度プレイ
+              Play Again
             </button>
           </div>
         )}
@@ -607,7 +615,7 @@ function RollingCharacterArena() {
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-[#ffcc00]">STAGE CLEAR!</h2>
             <p className="text-sm text-[#ccc]">
-              {stage < 3 ? `ステージ ${stage} クリア！おめでとう！` : `全ステージ完全クリア！おめでとう！ (最終スコア: ${score}点)`}
+              {stage < 3 ? `Stage ${stage} Cleared! Great job!` : `All Stages Completed! Congratulations! (Final Score: ${score} pts)`}
             </p>
             <button
               onClick={() => {
@@ -619,7 +627,7 @@ function RollingCharacterArena() {
               }}
               className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
             >
-              {stage < 3 ? '次のステージへ進む' : '最初からもう一度遊ぶ'}
+              {stage < 3 ? 'Proceed to Next Stage' : 'Play Again from Beginning'}
             </button>
           </div>
         )}
