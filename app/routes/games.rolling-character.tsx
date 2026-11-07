@@ -93,7 +93,7 @@ interface RingNode {
   y: number;
   radius: number;
   vx: number;
-  floorIndex: number;
+  floorIndex: number; // 0: 最下段, 1: 2段目, 2: 3段目, 3: 一番上の段
   rotation: number;
   vRot: number;
   data: { kana: string; romaji: string; correct: boolean };
@@ -210,10 +210,8 @@ function RollingCharacterArena() {
   const livesRef = useRef(lives);
   livesRef.current = lives;
 
-  // 共通のサウンド再生ヘルパー
   const playSoundRef = useRef<((type: 'jump' | 'correct' | 'damage' | 'victory' | 'type') => void) | null>(null);
 
-  // ランダムに3つの仮名問題を作成するヘルパー
   const generateRandomKanaProblem = (st: number) => {
     const list = KANA_DATA_SETS[st as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
     const shuffled = [...list].sort(() => 0.5 - Math.random());
@@ -455,46 +453,29 @@ function RollingCharacterArena() {
         return;
       }
 
-      // Spawn rings (~3秒に1回 = 180フレーム)
+      // Spawn rings (~2秒に1回 = 120フレーム)
       spawnTimer++;
       let currentStage = stageRef.current;
-      let spawnInterval = 180;
+      let spawnInterval = 120;
       if (spawnTimer >= spawnInterval) {
         spawnTimer = 0;
         const allSets = KANA_ALL_SETS[currentStage as keyof typeof KANA_ALL_SETS] || KANA_ALL_SETS[1];
         const data = allSets[Math.floor(Math.random() * allSets.length)];
         
-        const floorIdx = Math.floor(Math.random() * 4);
-        let startX = 60;
-        let startVx = 2.0;
-
-        if (floorIdx === 0) {
-          startX = 740;
-          startVx = -2.0;
-        } else {
-          const fromRight = Math.random() < 0.5;
-          if (fromRight) {
-            startX = 740;
-            startVx = -2.0;
-          } else {
-            startX = 60;
-            startVx = 2.0;
-          }
-        }
-
+        // 一番上の段の左側から右方向へスタート
         rings.push({
-          x: startX,
-          y: platforms[floorIdx].y1 - 25,
+          x: 60,
+          y: platforms[3].y1 - 25,
           radius: 22,
-          vx: startVx,
-          floorIndex: floorIdx,
+          vx: 2.0,
+          floorIndex: 3,
           rotation: 0,
-          vRot: startVx > 0 ? 0.1 : -0.1,
+          vRot: 0.1,
           data: data
         });
       }
 
-      // Ring physics and screen edge deletion
+      // Ring physics and zigzag continuation down to the bottom
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
         let p = platforms[r.floorIndex];
@@ -507,15 +488,44 @@ function RollingCharacterArena() {
         surfaceY = p.y1 + t * (p.y2 - p.y1);
         r.y = surfaceY - r.radius;
 
-        let minX = 40;
-        let maxX = 760;
+        let minX = 50;
+        let maxX = 750;
 
+        // 端に達したら下の段へジグザグにリレー落下
         if (r.vx > 0 && r.x > maxX) {
-          rings.splice(i, 1);
-          continue;
+          if (r.floorIndex > 0) {
+            r.floorIndex--;
+            let nextP = platforms[r.floorIndex];
+            if (r.floorIndex === 2 || r.floorIndex === 0) {
+              r.x = nextP.x2 - 10;
+              r.vx = -2.0;
+              r.vRot = -0.1;
+            } else {
+              r.x = nextP.x1 + 10;
+              r.vx = 2.0;
+              r.vRot = 0.1;
+            }
+          } else {
+            rings.splice(i, 1);
+            continue;
+          }
         } else if (r.vx < 0 && r.x < minX) {
-          rings.splice(i, 1);
-          continue;
+          if (r.floorIndex > 0) {
+            r.floorIndex--;
+            let nextP = platforms[r.floorIndex];
+            if (r.floorIndex === 2 || r.floorIndex === 0) {
+              r.x = nextP.x2 - 10;
+              r.vx = -2.0;
+              r.vRot = -0.1;
+            } else {
+              r.x = nextP.x1 + 10;
+              r.vx = 2.0;
+              r.vRot = 0.1;
+            }
+          } else {
+            rings.splice(i, 1);
+            continue;
+          }
         }
 
         if (r.y > 620 || r.y < 0) {
@@ -704,7 +714,7 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll from both sides of every floor.<br />
+              Rings roll from the top-left every 2 seconds, zigzagging down to the bottom.<br />
               Open the treasure chest at the top by inputting the correct romaji for 3 random kana!<br />
               [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump
             </p>
