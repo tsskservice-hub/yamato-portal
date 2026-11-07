@@ -9,7 +9,7 @@ import { useLoaderData } from "@remix-run/react";
 import { generateModuleMeta } from "~/utils/seoMeta";
 import ToolPageWrapper from "~/components/ToolPageWrapper";
 import { type PageLayoutRef } from "~/components/PageLayout";
-import { YamatoChatCommon2 } from "~/components/YamatoChatCommon2";
+import { YamatoChatCommon2 } from "~/components/chat/YamatoChatCommon2";
 import { supabase } from "~/lib/supabaseClient";
 
 // モジュール化したコンポーネントのインポート

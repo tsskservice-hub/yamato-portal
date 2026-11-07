@@ -1,14 +1,15 @@
 /**
  * @file YamatoChatCommon.tsx
- * @description ポータル共通AIチャットウィジェット（プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）
+ * @description ポータル共通AIチャットウィジェット（ニックネームモジュール連携・プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）
  */
 import React, { useState, useEffect, useRef } from "react";
-import { themeStyles, type ThemeColorKey } from "../styles/chatThemes";
-import { ScrollTopButton } from "./ScrollTopButton";
-import { ImageModal } from "./ImageModal";
-import { CreditCostFooter } from "./CreditCostFooter";
-import { useChatResize } from "../hooks/useChatResize";
-import { useYamatoAccount, getSafeString } from "../hooks/useYamatoAccount";
+import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
+import { ScrollTopButton } from "../ScrollTopButton";
+import { ImageModal } from "../ImageModal";
+import { CreditCostFooter } from "../CreditCostFooter";
+import { useChatResize } from "../../hooks/useChatResize";
+import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
+import { personaliseGreeting, resolveDisplayName } from "../../utils/nickname"; // 💡 ニックネームモジュールのインポート
 
 export interface YamatoChatCommonMetaType {
   componentName: string;
@@ -21,9 +22,13 @@ export interface YamatoChatCommonMetaType {
 
 export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
   componentName: "YamatoChatCommon",
-  version: "4.12.1",
-  role: "ポータル共通AIチャットウィジェット（プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）",
+  version: "4.13.0",
+  role: "ポータル共通AIチャットウィジェット（ニックネームモジュール連携版）",
   features: [
+    {
+      featureName: "Nickname Module Integration",
+      description: "app/utils/nickname.tsの personaliseGreeting および resolveDisplayName を用いて挨拶や呼び名を安全に管理",
+    },
     {
       featureName: "Unregistered Prompt Error Handling",
       description: "index.tsからの UNREGISTERED_APP_PROMPT エラーを検知しシンプルな英語エラーを表示",
@@ -39,14 +44,6 @@ export const YAMATO_CHAT_COMMON_META: YamatoChatCommonMetaType = {
     {
       featureName: "Dynamic Credit Cost Calculation",
       description: "calculateCreditCost や各種画像クレジットプロパティにより柔軟なコスト計算に対応",
-    },
-    {
-      featureName: "Unified Slate Learning Pace Style",
-      description: "Learning Paceの背景をFont Sizeと同じ薄い灰色に統一",
-    },
-    {
-      featureName: "Credit Balance Header with Amber Theme",
-      description: "アカウント表示をCredit Balanceに変更し共通の黄色い背景色を適用",
     },
     {
       featureName: "Uniform 4px Border Width",
@@ -214,13 +211,15 @@ export function YamatoChatCommon({
 
   const boxBorderInlineStyle = isHexColor ? { borderColor: themeColor } : undefined;
 
+  // 💡 初期挨拶文の構築（モジュール化された personaliseGreeting を適用）
   const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: initialGreeting,
+      content: personaliseGreeting(initialGreeting, currentNickname),
     },
   ]);
 
+  // 💡 ニックネームが後からロード・更新された場合に最初の挨拶文をパーソナライズ
   useEffect(() => {
     const validNick = getSafeString(currentNickname);
     if (validNick && typeof initialGreeting === "string") {
@@ -228,7 +227,7 @@ export function YamatoChatCommon({
         if (prev.length > 0 && prev[0]?.role === "assistant") {
           const updatedFirstMsg: ChatMessage = {
             ...prev[0],
-            content: initialGreeting.replace(/my friend/gi, validNick),
+            content: personaliseGreeting(initialGreeting, validNick),
           };
           return [updatedFirstMsg, ...prev.slice(1)];
         }
@@ -312,7 +311,8 @@ export function YamatoChatCommon({
       return;
     }
 
-    const callName = getSafeString(currentNickname) || "my friend";
+    // 💡 resolveDisplayName モジュールを利用して安全な呼び名を取得
+    const callName = resolveDisplayName(currentNickname, "my friend");
 
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
@@ -383,7 +383,7 @@ export function YamatoChatCommon({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      const sendingNickname = getSafeString(currentNickname) || "My friend";
+      const sendingNickname = resolveDisplayName(currentNickname, "My friend");
 
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",

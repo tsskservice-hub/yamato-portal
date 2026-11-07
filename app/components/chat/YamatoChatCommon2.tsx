@@ -1,12 +1,13 @@
 /**
  * @file YamatoChatCommon2.tsx
- * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（全画面常設・自動スタート対応版）
+ * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（ニックネームモジュール連携・全画面常設・自動スタート対応版）
  */
 import React, { useState, useEffect, useRef } from "react";
-import { themeStyles, type ThemeColorKey } from "../styles/chatThemes";
-import { ImageModal } from "./ImageModal";
-import { CreditCostFooter } from "./CreditCostFooter";
-import { useYamatoAccount, getSafeString } from "../hooks/useYamatoAccount";
+import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
+import { ImageModal } from "../ImageModal";
+import { CreditCostFooter } from "../CreditCostFooter";
+import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
+import { personaliseGreeting, resolveDisplayName } from "../../utils/nickname"; // 💡 ニックネームモジュールのインポート
 
 export interface YamatoChatCommon2MetaType {
   componentName: string;
@@ -19,9 +20,13 @@ export interface YamatoChatCommon2MetaType {
 
 export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
   componentName: "YamatoChatCommon2",
-  version: "1.0.0",
-  role: "教科書準拠レッスン専用メインクラスルーム・チャット（最初から画面中央に開き、やまと先生が授業をリードする専用コンポーネント）",
+  version: "1.1.0",
+  role: "教科書準拠レッスン専用メインクラスルーム・チャット（ニックネームモジュール連携版）",
   features: [
+    {
+      featureName: "Nickname Module Integration",
+      description: "app/utils/nickname.ts を用いて、やまと先生の授業開始時の挨拶やクレジット不足時の呼びかけをユーザーのニックネームにパーソナライズ",
+    },
     {
       featureName: "Always Open Main Stage",
       description: "右下の常駐ボタンを廃止し、ページのメインコンテンツとして広く常時表示",
@@ -29,10 +34,6 @@ export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
     {
       featureName: "Lesson Start Trigger",
       description: "生徒が「Start Lesson」ボタンを押した瞬間にやまと先生が自動で挨拶と授業を開始",
-    },
-    {
-      featureName: "Full Credit & API Integration",
-      description: "YamatoChatCommonの強力なバックエンド通信・クレジット減算ロジックを完全継承",
     },
   ],
   supportedThemes: [
@@ -187,7 +188,7 @@ export function YamatoChatCommon2({
     }
   };
 
-  // 💡 レッスン開始ボタンを押したときに授業（AIとのやり取り）をキックする関数
+  // 💡 授業開始時に personaliseGreeting モジュールを使って挨拶をパーソナライズ
   const handleStartLesson = async () => {
     if (!activeUserId) {
       alert("レッスンを始めるには、無料サインアップまたはログインが必要です！");
@@ -196,9 +197,9 @@ export function YamatoChatCommon2({
     }
 
     setIsLessonStarted(true);
-    const greetingMsg = initialGreeting;
+    // モジュールを使用して挨拶内の "my friend" をユーザーのニックネームに置換
+    const greetingMsg = personaliseGreeting(initialGreeting, currentNickname);
     
-    // 初期メッセージをセット
     const initialMsgList: ChatMessage[] = [
       { role: "assistant", content: greetingMsg }
     ];
@@ -215,7 +216,8 @@ export function YamatoChatCommon2({
       return;
     }
 
-    const callName = getSafeString(currentNickname) || "my friend";
+    // 💡 resolveDisplayName モジュールを利用して安全な呼び名を取得
+    const callName = resolveDisplayName(currentNickname, "my friend");
 
     if (currentCredits <= 0) {
       setTutorMessages((prev) => [
@@ -283,7 +285,7 @@ export function YamatoChatCommon2({
         ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
         : undefined;
 
-      const sendingNickname = getSafeString(currentNickname) || "My friend";
+      const sendingNickname = resolveDisplayName(currentNickname, "My friend");
 
       const response = await fetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",

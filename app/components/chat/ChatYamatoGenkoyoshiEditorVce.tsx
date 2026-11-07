@@ -3,7 +3,7 @@
  * @description Supabase YAMATO_CONFIGS から設定を動的取得するVCE原稿用紙エディタ専用チャットコンポーネント（YamatoChatCommon ラッパー版）
  */
 import React, { useState, useEffect } from "react";
-import YamatoChatCommon from "../YamatoChatCommon";
+import YamatoChatCommon from "./YamatoChatCommon";
 import { fetchYamatoConfigsData, BotConfig, YAMATO_BOT_CONFIGS } from "../../data/yamato-configs";
 import { supabase } from "../../lib/supabaseClient";
 

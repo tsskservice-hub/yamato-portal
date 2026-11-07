@@ -8,7 +8,7 @@
  *   4. 写真アップロードボタン（Upload Photo）を有効化（enableImageUpload={true}）
  */
 import React, { useState, useEffect } from "react";
-import YamatoChatCommon from "../YamatoChatCommon";
+import YamatoChatCommon from "./YamatoChatCommon";
 import { fetchYamatoConfigsData, BotConfig } from "../../data/yamato-configs";
 import { supabase } from "../../lib/supabaseClient";
 

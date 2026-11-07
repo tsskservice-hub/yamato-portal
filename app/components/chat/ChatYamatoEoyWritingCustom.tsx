@@ -8,7 +8,7 @@
  * 4. 添削結果の先生用編集・備考付きPDF印刷機能として FeedbackPdfModal.tsx をインポート＆連携
  */
 import React, { useState, useEffect } from "react";
-import YamatoChatCommon from "../YamatoChatCommon";
+import YamatoChatCommon from "./YamatoChatCommon";
 import { FeedbackPdfModal } from "../FeedbackPdfModal";
 import { fetchYamatoConfigsData, BotConfig } from "../../data/yamato-configs";
 import { supabase } from "../../lib/supabaseClient";
