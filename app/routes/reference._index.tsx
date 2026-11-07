@@ -1,6 +1,6 @@
 /**
  * @file app/routes/reference._index.tsx
- * @description Reference セクションのハブページ（kl_app テーブル・配列直接格納対応版）
+ * @description Reference セクションのハブページ（kl_app テーブル・配列直接格納対応版 / 語彙専用カードに修正済み）
  */
 
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
@@ -53,6 +53,16 @@ export default function ReferenceIndex() {
           path: "/reference/writing-styles",
           actionLabel: "View Writing Styles",
           isComingSoon: false,
+        },
+        {
+          id: "vocabulary-reference",
+          name: "Vocabulary Reference",
+          category: "Reference",
+          badge: "VCE Core",
+          description: "Access comprehensive curriculum vocabulary lists, readings, and textbook mappings for effective study and drill practice.",
+          path: "/reference/vocab",
+          actionLabel: "View Vocabulary",
+          isComingSoon: false,
         }
       ]
     },
@@ -63,8 +73,38 @@ export default function ReferenceIndex() {
   };
 
   const dataAny = referenceData as any;
-  // セクション分割ではなく、modules 配列を直接取得して展開
-  const modules = dataAny?.modules || [];
+  const modules = dataAny?.modules || [
+    {
+      id: "text-types",
+      name: "Text Types",
+      category: "Framework",
+      badge: "Essential",
+      description: "Explore structural guidelines, formats, and conventions for various Japanese text types required in assessments and writing exams.",
+      path: "/reference/text-types",
+      actionLabel: "View Text Types",
+      isComingSoon: false,
+    },
+    {
+      id: "writing-styles",
+      name: "Writing Styles",
+      category: "Framework",
+      badge: "Essential",
+      description: "Master the five core writing styles (informative, evaluative, persuasive, personal, and imaginative) with stylistic examples and phrasing guides.",
+      path: "/reference/writing-styles",
+      actionLabel: "View Writing Styles",
+      isComingSoon: false,
+    },
+    {
+      id: "vocabulary-reference",
+      name: "Vocabulary Reference",
+      category: "Reference",
+      badge: "VCE Core",
+      description: "Access comprehensive curriculum vocabulary lists, readings, and textbook mappings for effective study and drill practice.",
+      path: "/reference/vocab",
+      actionLabel: "View Vocabulary",
+      isComingSoon: false,
+    }
+  ];
 
   return (
     <ToolPageWrapper 
@@ -76,7 +116,6 @@ export default function ReferenceIndex() {
     >
       <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          {/* ローディング中の表示 */}
           {isLoading && !referenceData ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-4"></div>
@@ -84,7 +123,6 @@ export default function ReferenceIndex() {
             </div>
           ) : (
             <>
-              {/* ヘッダーセクション */}
               <div className="text-center mb-12">
                 <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl mb-4">
                   Reference & Style Guides
@@ -94,7 +132,6 @@ export default function ReferenceIndex() {
                 </p>
               </div>
 
-              {/* モジュールカード一覧（配列を直接マップ） */}
               <div className="mb-12">
                 <div className="mb-6 border-b border-slate-200 pb-3">
                   <h2 className="text-2xl font-bold text-slate-900">Reference Categories</h2>

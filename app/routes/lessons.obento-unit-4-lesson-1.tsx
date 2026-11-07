@@ -1,6 +1,6 @@
 /**
  * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（edu_lessons データベース連動版・モジュール化対応）
+ * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（上下分割・タスクモジュール化対応版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -16,6 +16,7 @@ import { supabase } from "~/lib/supabaseClient";
 import { EduLessonHeader } from "~/components/lessons/EduLessonHeader";
 import { EduLessonDetailsCard } from "~/components/lessons/EduLessonDetailsCard";
 import { EduVocabularySidebar } from "~/components/lessons/EduVocabularySidebar";
+import { EduLessonTaskManager } from "~/components/lessons/EduLessonTaskManager";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -90,7 +91,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
-export default function LessonsObentoUnit4Lesson1Page() {
+function LessonsObentoUnit4Lesson1Page() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const themeColor = "#f97316"; // Obento U4 Warm Orange theme
 
@@ -193,11 +194,30 @@ export default function LessonsObentoUnit4Lesson1Page() {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-5xl mx-auto space-y-8">
           
-          {/* ヘッダーカードモジュール */}
+          {/* 1. ヘッダーカードモジュール */}
           <EduLessonHeader lesson={lesson} topic={topic} />
 
-          {/* 👩‍🏫 やまと先生メインステージ（授業スタート画面 & ライブチャットルーム） */}
-          <section aria-label="Yamato Sensei Live Lesson">
+          {/* 2. 上部：常設ヤマト・AIチューター スクリーン（質問・添削・会話の相談窓口） */}
+          <section aria-label="Yamato Sensei Live Tutor" className="bg-white dark:bg-slate-900 border-2 border-orange-500/40 rounded-3xl p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-xl shadow-md">
+                  👩‍🏫
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
+                    Yamato Sensei - Live Tutor & Consultation
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Need help with tasks, writing corrections, or speaking practice? Ask Yamato anytime!
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-bold px-3 py-1 bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 rounded-full">
+                Ready to Help
+              </span>
+            </div>
+
             <YamatoChatCommon2
               characterName="Yamato Sensei"
               appType="obento-unit-4-lesson-1"
@@ -210,14 +230,17 @@ export default function LessonsObentoUnit4Lesson1Page() {
             />
           </section>
 
-          {/* メインコンテンツ & 語彙リストグリッド */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 3. 下部：自習タスクセクション（lessonId と userId を渡すよう修正） */}
+          <EduLessonTaskManager 
+            lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
+            userId={user?.id} 
+          />
+
+          {/* 4. メインコンテンツ & 語彙リストグリッド */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
             <div className="md:col-span-2 space-y-6">
-              {/* レッスン詳細カードモジュール */}
               <EduLessonDetailsCard lesson={lesson} />
             </div>
-
-            {/* サイドバー: 語彙リストモジュール */}
             <div className="space-y-6">
               <EduVocabularySidebar vocabulary={vocabulary} />
             </div>
@@ -228,3 +251,5 @@ export default function LessonsObentoUnit4Lesson1Page() {
     </ToolPageWrapper>
   );
 }
+
+export default LessonsObentoUnit4Lesson1Page;

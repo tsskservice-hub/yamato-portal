@@ -44,10 +44,10 @@ export function PortalModulesGrid({
 
   const renderCard = (mod: PortalModule, accentColor: string = 'blue') => {
     const hoverBorderClass = accentColor === 'red' ? 'hover:border-red-500/50' : 
-                             accentColor === 'indigo' ? 'hover:border-indigo-500/50' : 
-                             accentColor === 'emerald' ? 'hover:border-emerald-500/50' : 
-                             accentColor === 'orange' ? 'hover:border-orange-500/50' : 
-                             'hover:border-blue-500/50';
+                            accentColor === 'indigo' ? 'hover:border-indigo-500/50' : 
+                            accentColor === 'emerald' ? 'hover:border-emerald-500/50' : 
+                            accentColor === 'orange' ? 'hover:border-orange-500/50' : 
+                            'hover:border-blue-500/50';
 
     const textHoverClass = accentColor === 'red' ? 'group-hover:text-red-500' : 
                            accentColor === 'indigo' ? 'group-hover:text-indigo-500' : 
@@ -142,7 +142,7 @@ export function PortalModulesGrid({
           </div>
         )}
 
-        {/* 4. VCE References & Guides (CONTENT_REFERENCE) */}
+        {/* 4. VCE References & Guides (CONTENT_REFERENCE) - 語彙リストカードが Supabase から読み込まれてここに自動展開されます */}
         {referenceModules.length > 0 && (
           <div className="space-y-4 pt-4">
             <div className="flex items-center space-x-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">

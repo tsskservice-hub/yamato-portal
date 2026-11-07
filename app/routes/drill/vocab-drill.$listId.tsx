@@ -1,3 +1,7 @@
+/**
+ * @file app/routes/vocab-drill/$listId.tsx
+ * @description AI Yamato Japanese Hub - 語彙クイズ・ドリル受講セッション画面（edu_student_submissions 対応版）
+ */
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { useState, useMemo, useEffect } from "react";
@@ -28,9 +32,9 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const { listId } = params;
   const { supabase } = createServerSupabaseClient(request, context);
 
-  // 1. リストのメタ情報取得 (drill_mode も含む)
+  // 1. リストのメタ情報取得 (edu_vocab_lists から取得)
   const { data: listMeta, error: metaError } = await supabase
-    .from("vocab_lists")
+    .from("edu_vocab_lists")
     .select("*")
     .eq("id", listId)
     .single();
@@ -39,9 +43,9 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     throw new Response("Drill list not found", { status: 404 });
   }
 
-  // 2. このリストに紐づくタスク（tasks）のIDとブロック設定を取得
+  // 2. このリストに紐づくタスク（edu_tasks）のIDとブロック設定を取得
   const { data: taskData } = await supabase
-    .from("tasks")
+    .from("edu_tasks")
     .select("id, block_school_hours")
     .eq("content_id", listId)
     .eq("content_type", "vocab")
@@ -51,10 +55,9 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   if (taskData?.block_school_hours) {
     const now = new Date();
 
-    // オーストラリア（メルボルンなど）の現地時間を正確に取得
     const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Australia/Melbourne', // 必要に応じて地域のタイムゾーンに変更してください
-      weekday: 'short', // 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+      timeZone: 'Australia/Melbourne',
+      weekday: 'short',
       hour: 'numeric',
       minute: 'numeric',
       hour12: false,
@@ -74,15 +77,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     const isWeekday = weekdays.includes(weekday);
     const currentTimeMinutes = hour * 60 + minute;
-    const isSchoolHours = currentTimeMinutes >= 540 && currentTimeMinutes <= 930; // 9:00 (540分) 〜 15:30 (930分)
-
-    // デバッグ用ログ（ターミナルに表示されます）
-    console.log("=== 授業中アクセスブロック判定 ===");
-    console.log("判定基準タイムゾーン: Australia/Melbourne");
-    console.log(`曜日: ${weekday} (平日か: ${isWeekday})`);
-    console.log(`時刻: ${hour}:${minute} (${currentTimeMinutes}分)`);
-    console.log(`学校時間内(9:00〜15:30)か: ${isSchoolHours}`);
-    console.log(`ブロック発動するか: ${isWeekday && isSchoolHours}`);
+    const isSchoolHours = currentTimeMinutes >= 540 && currentTimeMinutes <= 930; // 9:00 〜 15:30
 
     if (isWeekday && isSchoolHours) {
       throw new Response(
@@ -92,11 +87,11 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     }
   }
 
-  // 3. リストに紐づく単語を取得
+  // 3. リストに紐づく単語を取得 (edu_vocab_list_items と edu_vocabulary を結合)
   const { data: listItems, error: itemsError } = await supabase
-    .from("vocab_list_items")
+    .from("edu_vocab_list_items")
     .select(`
-      vocabularies (
+      edu_vocabulary (
         id,
         japanese,
         kana,
@@ -112,7 +107,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   }
 
   const vocabularies: Vocabulary[] = listItems
-    .map((item: any) => item.vocabularies)
+    .map((item: any) => item.edu_vocabulary)
     .filter(Boolean);
 
   return json({ listMeta, taskId: taskData?.id || null, vocabularies });
@@ -135,8 +130,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ success: true });
   }
 
+  // edu_student_submissions テーブルへ成績をアップサート保存
   const { error: submitError } = await supabase
-    .from("task_submissions")
+    .from("edu_student_submissions")
     .upsert({
       task_id: taskId,
       student_id: user.id,
@@ -148,7 +144,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
 
   if (submitError) {
-    console.error("task_submissions save error:", submitError);
+    console.error("edu_student_submissions save error:", submitError);
     return json({ error: "成績の保存に失敗しました。" }, { status: 500 });
   }
 
@@ -209,9 +205,9 @@ export default function DrillSessionPage() {
 
   if (vocabularies.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-          <p className="text-gray-600">このリストには有効な単語が登録されていません。</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 text-center">
+          <p className="text-slate-600 dark:text-slate-400 text-sm">このリストには有効な単語が登録されていません。</p>
         </div>
       </div>
     );
@@ -285,26 +281,26 @@ export default function DrillSessionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-xl mx-auto">
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200">
+        <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800">
           
-          <div className="flex justify-between items-center mb-6 pb-4 border-b">
+          <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <h1 className="text-lg sm:text-xl font-extrabold text-gray-900">
+              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100">
                 {listMeta.title}
               </h1>
               <div className="flex items-center gap-2 mt-1">
                 {listMeta.creator_name && (
-                  <span className="text-xs text-gray-500">作成者: {listMeta.creator_name}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">作成者: {listMeta.creator_name}</span>
                 )}
-                <span className="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded">
+                <span className="text-xs bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 font-semibold px-2 py-0.5 rounded border border-orange-200 dark:border-orange-800">
                   {getModeLabel(mode)}
                 </span>
               </div>
             </div>
             {!isFinished && (
-              <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full whitespace-nowrap">
+              <span className="text-sm font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-3 py-1 rounded-xl border border-orange-200 dark:border-orange-800 whitespace-nowrap">
                 {currentIndex + 1} / {vocabularies.length} 問
               </span>
             )}
@@ -315,24 +311,24 @@ export default function DrillSessionPage() {
               {mode === "mcq" && (
                 <div>
                   <div className="text-center my-6">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest block mb-1">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-1">
                       この単語の意味は？
                     </span>
-                    <div className="text-3xl sm:text-4xl font-extrabold text-indigo-600">
+                    <div className="text-3xl sm:text-4xl font-extrabold text-orange-600 dark:text-orange-400">
                       {currentItem.english}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-3 mb-6">
                     {options.map((opt, idx) => {
-                      let btnStyle = "bg-white border-gray-200 hover:bg-gray-50 text-gray-800";
+                      let btnStyle = "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200";
                       if (selectedAnswer !== null) {
                         if (opt === currentItem.japanese) {
-                          btnStyle = "bg-emerald-100 border-emerald-500 text-emerald-800 font-bold";
+                          btnStyle = "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-800 dark:text-emerald-300 font-bold";
                         } else if (opt === selectedAnswer) {
-                          btnStyle = "bg-rose-100 border-rose-500 text-rose-800";
+                          btnStyle = "bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-800 dark:text-rose-300";
                         } else {
-                          btnStyle = "bg-gray-50 border-gray-200 text-gray-400 opacity-60";
+                          btnStyle = "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 opacity-60";
                         }
                       }
                       return (
@@ -340,7 +336,7 @@ export default function DrillSessionPage() {
                           key={idx}
                           onClick={() => handleSelectOption(opt)}
                           disabled={selectedAnswer !== null}
-                          className={`p-4 rounded-xl border-2 text-lg font-medium transition-all text-left shadow-sm ${btnStyle}`}
+                          className={`p-4 rounded-2xl border-2 text-lg font-medium transition-all text-left shadow-sm cursor-pointer ${btnStyle}`}
                         >
                           {opt}
                         </button>
@@ -349,13 +345,13 @@ export default function DrillSessionPage() {
                   </div>
 
                   {selectedAnswer !== null && (
-                    <div className="text-center animate-fade-in">
-                      <p className={`text-lg font-bold mb-4 ${isCorrect ? "text-emerald-600" : "text-rose-600"}`}>
+                    <div className="text-center animate-fade-in space-y-4">
+                      <p className={`text-lg font-bold ${isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                         {isCorrect ? "正解！ 🎉" : `不正解... (正解: ${currentItem.japanese})`}
                       </p>
                       <button
                         onClick={handleNext}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors cursor-pointer"
                       >
                         {currentIndex + 1 < vocabularies.length ? "次の問題へ" : "結果を見る"}
                       </button>
@@ -369,13 +365,13 @@ export default function DrillSessionPage() {
                   <div className="text-center my-6">
                     {mode === "audio_en_typing" && (
                       <div>
-                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest block mb-2">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-2">
                           音声を聞いて英語をタイプしてください
                         </span>
                         <button
                           type="button"
                           onClick={() => speakJapanese(currentItem.japanese)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-full shadow inline-flex items-center gap-2 text-sm transition-transform active:scale-95"
+                          className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-5 py-2.5 rounded-full shadow inline-flex items-center gap-2 text-sm transition-transform active:scale-95 cursor-pointer"
                         >
                           🔊 音声を再生する
                         </button>
@@ -384,22 +380,22 @@ export default function DrillSessionPage() {
 
                     {mode === "jp_en_typing" && (
                       <div>
-                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest block mb-1">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-1">
                           この日本語の英単語は？
                         </span>
-                        <div className="text-3xl sm:text-4xl font-extrabold text-indigo-600">
+                        <div className="text-3xl sm:text-4xl font-extrabold text-orange-600 dark:text-orange-400">
                           {currentItem.japanese}
                         </div>
-                        <div className="text-sm text-gray-500 mt-1">読み: {currentItem.kana}</div>
+                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">読み: {currentItem.kana}</div>
                       </div>
                     )}
 
                     {mode === "en_jp_typing" && (
                       <div>
-                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest block mb-1">
+                        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block mb-1">
                           この英語の日本語（かな・ローマ字）は？
                         </span>
-                        <div className="text-3xl sm:text-4xl font-extrabold text-indigo-600">
+                        <div className="text-3xl sm:text-4xl font-extrabold text-orange-600 dark:text-orange-400">
                           {currentItem.english}
                         </div>
                       </div>
@@ -420,12 +416,12 @@ export default function DrillSessionPage() {
                         }
                         autoFocus
                         autoComplete="off"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-lg focus:border-indigo-600 focus:outline-none"
+                        className="w-full px-4 py-3 border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-2xl text-lg focus:border-orange-500 focus:outline-none"
                       />
                       <button
                         type="submit"
                         disabled={isAnswered || !inputText.trim()}
-                        className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-bold px-6 rounded-xl transition-colors whitespace-nowrap"
+                        className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white font-bold px-6 rounded-2xl transition-colors whitespace-nowrap cursor-pointer"
                       >
                         解答
                       </button>
@@ -433,20 +429,20 @@ export default function DrillSessionPage() {
                   </form>
 
                   {isAnswered && (
-                    <div className="text-center animate-fade-in">
-                      <p className={`text-lg font-bold mb-4 ${isCorrect ? "text-emerald-600" : "text-rose-600"}`}>
+                    <div className="text-center animate-fade-in space-y-4">
+                      <p className={`text-lg font-bold ${isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                         {isCorrect ? "正解！ 🎉" : `不正解...`}
                       </p>
                       {!isCorrect && (
-                        <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-700 mb-4">
-                          正解の答え: <strong className="text-indigo-600">
+                        <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl text-sm text-slate-700 dark:text-slate-300">
+                          正解の答え: <strong className="text-orange-600 dark:text-orange-400">
                             {mode === "en_jp_typing" ? `${currentItem.japanese} (${currentItem.kana})` : currentItem.english}
                           </strong>
                         </div>
                       )}
                       <button
                         onClick={handleNext}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors cursor-pointer"
                       >
                         {currentIndex + 1 < vocabularies.length ? "次の問題へ" : "結果を見る"}
                       </button>
@@ -457,26 +453,26 @@ export default function DrillSessionPage() {
 
             </div>
           ) : (
-            <div className="text-center py-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">ドリル終了！お疲れ様でした</h2>
-              <p className="text-gray-600 mb-2">
-                正解数: <strong className="text-2xl text-indigo-600">{score}</strong> / {vocabularies.length} 問
+            <div className="text-center py-8 space-y-4">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">ドリル終了！お疲れ様でした</h2>
+              <p className="text-slate-600 dark:text-slate-400">
+                正解数: <strong className="text-2xl text-orange-600 dark:text-orange-400">{score}</strong> / {vocabularies.length} 問
               </p>
               {taskId && (
-                <p className="text-xs text-emerald-600 font-semibold mb-6">
-                  {submitFetcher.state === "submitting" ? "成績を保存中..." : "✓ 成績が教師に送信されました"}
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                  {submitFetcher.state === "submitting" ? "成績を保存中..." : "✓ 成績が教師ダッシュボードに送信されました"}
                 </p>
               )}
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-3 justify-center pt-2">
                 <button
                   onClick={restartDrill}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors text-sm"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors text-sm cursor-pointer"
                 >
                   もう一度挑戦する
                 </button>
                 <a
                   href="/vocab"
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm inline-flex items-center"
+                  className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm inline-flex items-center"
                 >
                   検索トップに戻る
                 </a>
