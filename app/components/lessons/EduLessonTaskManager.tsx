@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduLessonTaskManager.tsx
- * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（システム連動・自動完了対応版）
+ * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（ドリル起動ボタン連携版）
  */
 
 import React, { useState, useEffect } from "react";
@@ -10,7 +10,7 @@ export interface EduLessonTaskManagerProps {
   lessonId: string; // レッスンID
   userId?: string;  // ユーザーID
   onAllCompletedChange?: (completed: boolean) => void;
-  // 各タスクの外部からの完了ステータス（クイズの合格やAI判定結果などを受け取る用）
+  onStartVocabularyDrill?: () => void; // 👈 語彙ドリルモーダルを開くためのコールバックを追加
   externalTaskStatus?: {
     vocabulary?: boolean;
     listening?: boolean;
@@ -24,6 +24,7 @@ export function EduLessonTaskManager({
   lessonId, 
   userId, 
   onAllCompletedChange,
+  onStartVocabularyDrill,
   externalTaskStatus = {}
 }: EduLessonTaskManagerProps) {
   const [taskProgress, setTaskProgress] = useState({
@@ -36,7 +37,6 @@ export function EduLessonTaskManager({
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. マウント時に Supabase からデータベース上の進捗状況をロード
   useEffect(() => {
     async function fetchProgress() {
       if (!userId) return;
@@ -62,7 +62,6 @@ export function EduLessonTaskManager({
             }
           });
 
-          // 外部から渡されたステータスがあればそれを優先・統合
           const merged = {
             ...loadedProgress,
             ...externalTaskStatus,
@@ -82,7 +81,6 @@ export function EduLessonTaskManager({
     fetchProgress();
   }, [lessonId, userId, externalTaskStatus]);
 
-  // タスクの状態を自動で保存するヘルパー（システム側やクイズ合格時に呼び出す想定）
   const updateTaskStatus = async (taskKey: keyof typeof taskProgress, isCompleted: boolean) => {
     const updated = {
       ...taskProgress,
@@ -146,10 +144,9 @@ export function EduLessonTaskManager({
         </div>
       </div>
 
-      {/* タスクカード群（各タスクの達成条件・ステータス表示） */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* Task 1: 語彙ドリル */}
+        {/* Task 1: 語彙ドリル（ここにドリル起動ボタンを配置） */}
         <div className={`p-6 rounded-3xl border transition ${taskProgress.vocabulary ? 'bg-emerald-50/50 border-emerald-300 dark:bg-emerald-950/20 dark:border-emerald-800' : 'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 rounded-lg">
@@ -163,16 +160,28 @@ export function EduLessonTaskManager({
             📖 Vocabulary Drill (語彙確認)
           </h4>
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-            語彙リストの確認および単語フラッシュカードテストを全問クリアすると自動で完了になります。
+            4つのモード（日→英、音声→英、英→日、発声練習）の語彙ドリルをクリアすると自動で完了になります。
           </p>
-          {/* テスト用トリガーボタン（実運用ではクイズコンポーネント側から updateTaskStatus("vocabulary", true) を呼び出します） */}
-          <button
-            type="button"
-            onClick={() => updateTaskStatus("vocabulary", !taskProgress.vocabulary)}
-            className="text-[11px] text-orange-600 dark:text-orange-400 font-bold hover:underline"
-          >
-            [開発・テスト用] 状態を切り替える
-          </button>
+
+          <div className="flex flex-wrap items-center gap-4">
+            {onStartVocabularyDrill && (
+              <button
+                type="button"
+                onClick={onStartVocabularyDrill}
+                className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-sm transition flex items-center gap-2 cursor-pointer"
+              >
+                <span>🚀</span>
+                <span>Start Vocab Drill (ドリル開始)</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => updateTaskStatus("vocabulary", !taskProgress.vocabulary)}
+              className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline"
+            >
+              [開発用] 状態切替
+            </button>
+          </div>
         </div>
 
         {/* Task 2: リスニングタスク */}
@@ -252,7 +261,7 @@ export function EduLessonTaskManager({
 
       </div>
 
-      {/* Task 5: ライティングタスク（ワイド表示） */}
+      {/* Task 5: ライティングタスク */}
       <div className={`p-6 rounded-3xl border transition ${taskProgress.writing ? 'bg-emerald-50/50 border-emerald-300 dark:bg-emerald-950/20 dark:border-emerald-800' : 'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-lg">
