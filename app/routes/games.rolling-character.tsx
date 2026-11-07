@@ -45,12 +45,13 @@ const KANA_DATA_SETS = {
   ]
 };
 
+// 3文字のランダムタイピングワード
 const TYPING_WORDS = [
-  { word: 'yamato', hint: 'やまと (Yamato)' },
-  { word: 'nihon', hint: 'にほん (Japan)' },
-  { word: 'arigatou', hint: 'ありがとう (Thank you)' },
-  { word: 'sakura', hint: 'さくら (Cherry blossom)' },
-  { word: 'kore ga', hint: 'これがいちばん (This is the best)' }
+  { word: 'cat', hint: 'ねこ (cat)' },
+  { word: 'dog', hint: 'いぬ (dog)' },
+  { word: 'sun', hint: 'ひ (sun)' },
+  { word: 'sky', hint: 'そら (sky)' },
+  { word: 'tea', hint: 'おちゃ (tea)' }
 ];
 
 interface RingNode {
@@ -157,9 +158,9 @@ function RollingCharacterArena() {
   const [score, setScore] = useState(0);
   const [stage, setStage] = useState(1);
   const [lives, setLives] = useState(3);
-  const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb to the top treasure chest and type the secret word to win!');
+  const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb to the top treasure chest and type the 3-letter word to win!');
   
-  // Typing Challenge State
+  // Typing Challenge State (3文字)
   const [targetWordObj, setTargetWordObj] = useState(TYPING_WORDS[0]);
   const [typedIndex, setTypedIndex] = useState(0);
 
@@ -273,12 +274,12 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義
+    // 各段の定義（傾斜を「ほぼ平ら、少しだけ傾斜」に調整）
     const platforms = [
-      { x1: 50, y1: 520, x2: 750, y2: 500, direction: 1, isGoal: false },  // 最下段（右向き）
-      { x1: 50, y1: 410, x2: 750, y2: 430, direction: -1, isGoal: false }, // 3段目（左向き）
-      { x1: 50, y1: 300, x2: 750, y2: 280, direction: 1, isGoal: false },  // 2段目（右向き）
-      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 一番上の段（左向き）
+      { x1: 50, y1: 520, x2: 750, y2: 512, direction: 1, isGoal: false },  // 最下段
+      { x1: 50, y1: 410, x2: 750, y2: 418, direction: -1, isGoal: false }, // 3段目
+      { x1: 50, y1: 300, x2: 750, y2: 292, direction: 1, isGoal: false },  // 2段目
+      { x1: 50, y1: 190, x2: 750, y2: 198, direction: -1, isGoal: false }, // 一番上の段
       { x1: 250, y1: 90, x2: 550, y2: 90, direction: 0, isGoal: true }     // 最上段ゴールエリア
     ];
 
@@ -289,7 +290,6 @@ function RollingCharacterArena() {
       { x: 400, y: 90, h: 100 }
     ];
 
-    // プレイヤーの高さ（h）を今の半分（18px）に設定
     let player = {
       x: 100,
       y: 498,
@@ -335,7 +335,7 @@ function RollingCharacterArena() {
 
       if (invincibilityTimer > 0) invincibilityTimer--;
 
-      // Ladder detection (昇り降り両対応)
+      // Ladder detection
       let touchingLadder = false;
       for (let l of ladders) {
         if (player.x + player.w/2 >= l.x - 12 && player.x + player.w/2 <= l.x + 12 &&
@@ -359,7 +359,7 @@ function RollingCharacterArena() {
           player.vy = player.speed * 0.8;
           player.isGrounded = false;
         } else {
-          player.vy = 0; // 梯子上でキーを離したときは静止
+          player.vy = 0;
         }
       }
 
@@ -381,7 +381,7 @@ function RollingCharacterArena() {
       if (player.x < 30) player.x = 30;
       if (player.x > 750) player.x = 750;
 
-      // Platform collisions for player (下から突き抜けて上の段に乗らないように落下中のみ判定)
+      // Platform collisions for player (天井衝突・すり抜け防止 ＆ 着地判定)
       player.isGrounded = false;
       for (let p of platforms) {
         if (p.isGoal) {
@@ -396,7 +396,14 @@ function RollingCharacterArena() {
           if (player.x + player.w > minX && player.x < maxX) {
             let t = (player.x + player.w/2 - p.x1) / (p.x2 - p.x1);
             let surfaceY = p.y1 + t * (p.y2 - p.y1);
-            // 落下中（vy >= 0）かつ足元が床の高さに一致した場合のみ着地
+
+            // 1. 下からジャンプして上の段の天井（下面）にぶつかった場合
+            if (player.vy < 0 && player.y <= surfaceY + 16 && player.y >= surfaceY && player.y + player.h > surfaceY) {
+              player.y = surfaceY;
+              player.vy = 0; // 天井にぶつかって落下に転じる
+            }
+
+            // 2. 落下中または着地時（vy >= 0）に足元が床の高さに一致した場合
             if (player.vy >= 0 && player.y + player.h >= surfaceY - 4 && player.y + player.h <= surfaceY + 10) {
               player.y = surfaceY - player.h;
               player.vy = 0;
@@ -413,11 +420,11 @@ function RollingCharacterArena() {
         setGameState('TYPING');
         setTypedIndex(0);
         playSound('victory');
-        setYamatoSpeech(`Treasure chest opened! Type "${targetWordObj.hint}" correctly to win!`);
+        setYamatoSpeech(`Treasure chest opened! Type "${targetWordObj.hint}" (3 letters) correctly to win!`);
         return;
       }
 
-      // Spawn rings (約5秒に1回 = 60fps * 5 = 300フレームに1回)
+      // Spawn rings (~5秒に1回 = 300フレーム)
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = 300;
@@ -660,9 +667,9 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll down gently every 5 seconds. Climb ladders using [↑ / ↓] keys!<br />
-              Reach the treasure chest at the top and type the secret word to win!<br />
-              [← / →] Move ｜ [SPACE] Jump
+              Rings roll gently across nearly flat slopes every 5 seconds.<br />
+              Reach the treasure chest at the top and type the **3-letter word** to win!<br />
+              [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump
             </p>
             <button
               onClick={() => (window as any).__startRollingGame(1)}
@@ -676,11 +683,11 @@ function RollingCharacterArena() {
           </div>
         )}
 
-        {/* Typing Challenge Screen */}
+        {/* Typing Challenge Screen (3文字) */}
         {gameState === 'TYPING' && (
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-2xl font-black text-[#ffcc00]">🎁 Treasure Chest Opened!</h2>
-            <p className="text-sm text-[#ccc]">Type the following word correctly to complete your climb:</p>
+            <p className="text-sm text-[#ccc]">Type the following 3-letter word correctly to complete your climb:</p>
             <div className="text-lg font-bold text-[#38bdf8]">{targetWordObj.hint}</div>
             <div className="text-3xl font-mono tracking-widest bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl">
               <span className="text-emerald-400">{targetWordObj.word.slice(0, typedIndex)}</span>
