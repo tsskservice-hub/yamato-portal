@@ -1,6 +1,6 @@
 /**
  * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（枠の重複修正版）
+ * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（タスク位置変更版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -193,7 +193,7 @@ function LessonsObentoUnit4Lesson1Page() {
           {/* 1. ヘッダーカードモジュール */}
           <EduLessonHeader lesson={lesson} topic={topic} />
 
-          {/* 2. 上部：常設ヤマト・AIチューター（二重の枠を取り除き、内側のYamatoChatCommon2に統一） */}
+          {/* 2. 上部：常設ヤマト・AIチューター */}
           <YamatoChatCommon2
             characterName="Yamato Sensei"
             appType="obento-unit-4-lesson-1"
@@ -205,13 +205,7 @@ function LessonsObentoUnit4Lesson1Page() {
             assignedQuestion={`Obento Deluxe Unit 4 Lesson 1: ${lesson?.title_en || "Family and Pets"}`}
           />
 
-          {/* 3. 下部：自習タスクセクション */}
-          <EduLessonTaskManager 
-            lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
-            userId={user?.id} 
-          />
-
-          {/* 4. メインコンテンツ & 語彙リストグリッド */}
+          {/* 3. メインコンテンツ & 語彙リストグリッド (Lesson Details & Vocabulary) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
             <div className="md:col-span-2 space-y-6">
               <EduLessonDetailsCard lesson={lesson} />
@@ -220,6 +214,12 @@ function LessonsObentoUnit4Lesson1Page() {
               <EduVocabularySidebar vocabulary={vocabulary} />
             </div>
           </div>
+
+          {/* 4. 下部：自習タスクセクション (Details & Vocabulary の下に移動) */}
+          <EduLessonTaskManager 
+            lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
+            userId={user?.id} 
+          />
 
         </main>
       </div>
