@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduVocabularyDrillModal.tsx
- * @description 4つのモード（日→英タイピング、音声→英タイピング、英→日タイピング、英→日発声）を網羅した本格語彙ドリル（フルスクリーン・表記ゆれ対応版）
+ * @description 4つのモード（日→英タイピング、音声→英タイピング、英→日タイピング、英→日発声）を網羅した本格語彙ドリル（ランダム出題・表記ゆれ対応版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -20,6 +20,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
   onClose,
   onCompleted,
 }) => {
+  const [shuffledVocab, setShuffledVocab] = useState<any[]>([]);
   const [currentMode, setCurrentMode] = useState<DrillMode>("jp_to_en");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState("");
@@ -36,8 +37,11 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
   // 目標スコア（vocabulary の数×2、または最低5問）
   const targetScore = Math.max(vocabulary.length * 2, 5);
 
+  // モーダルが開いた時、または vocabulary が変わった時にランダムにシャッフルする
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && vocabulary.length > 0) {
+      const shuffled = [...vocabulary].sort(() => Math.random() - 0.5);
+      setShuffledVocab(shuffled);
       setCurrentIndex(0);
       setScore(0);
       setUserInput("");
@@ -45,17 +49,17 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       setIsFinished(false);
       setCurrentMode("jp_to_en");
     }
-  }, [isOpen]);
+  }, [isOpen, vocabulary]);
 
   useEffect(() => {
-    if (isOpen && currentMode === "audio_to_en" && vocabulary.length > 0) {
-      playJapaneseAudio(vocabulary[currentIndex % vocabulary.length]?.jp_text);
+    if (isOpen && currentMode === "audio_to_en" && shuffledVocab.length > 0) {
+      playJapaneseAudio(shuffledVocab[currentIndex % shuffledVocab.length]?.jp_text);
     }
-  }, [currentMode, currentIndex, isOpen, vocabulary]);
+  }, [currentMode, currentIndex, isOpen, shuffledVocab]);
 
-  if (!isOpen || vocabulary.length === 0) return null;
+  if (!isOpen || shuffledVocab.length === 0) return null;
 
-  const currentItem = vocabulary[currentIndex % vocabulary.length];
+  const currentItem = shuffledVocab[currentIndex % shuffledVocab.length];
 
   // 日本語の音声をブラウザ標準機能で読み上げる
   const playJapaneseAudio = (text: string) => {
@@ -67,7 +71,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     window.speechSynthesis.speak(utterance);
   };
 
-  // モード切替時に音声を自動再生またはフォーカス調整
+  // モード切替時に音声を自動再生または初期化
   const handleModeChange = (mode: DrillMode) => {
     setCurrentMode(mode);
     setUserInput("");
@@ -134,14 +138,19 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
           onCompleted();
         } else {
           const nextIdx = currentIndex + 1;
-          setCurrentIndex(nextIdx);
-          // モードを循環させる
-          if (nextIdx % vocabulary.length === 0) {
+          // リストの最後まで行ったら、再度シャッフルし直してランダム性を維持する
+          if (nextIdx % shuffledVocab.length === 0) {
+            const reShuffled = [...vocabulary].sort(() => Math.random() - 0.5);
+            setShuffledVocab(reShuffled);
+            setCurrentIndex(0);
             const modes: DrillMode[] = ["jp_to_en", "audio_to_en", "en_to_jp", "en_to_voice"];
             const nextModeIdx = (modes.indexOf(currentMode) + 1) % modes.length;
             handleModeChange(modes[nextModeIdx]);
-          } else if (currentMode === "audio_to_en") {
-            playJapaneseAudio(vocabulary[nextIdx % vocabulary.length]?.jp_text);
+          } else {
+            setCurrentIndex(nextIdx);
+            if (currentMode === "audio_to_en") {
+              playJapaneseAudio(shuffledVocab[nextIdx % shuffledVocab.length]?.jp_text);
+            }
           }
         }
       }, 1000);
