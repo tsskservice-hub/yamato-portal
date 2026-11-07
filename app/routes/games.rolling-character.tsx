@@ -2,6 +2,9 @@
  * @file games.rolling-character.tsx
  * @description Rolling Kana 〜AI Yamato & Character Mountain Climbing〜 (Retro Arcade Learning Game)
  * Shortened version: same game, same data, same screens and rules.
+ * Framework repair: the useLive helper and Overlay component added in the
+ * first shortening pass are removed again; ref sync and the four screens
+ * are written out exactly as in the supplied original file.
  * Main savings: kana tables as [kana, romaji] pairs (ring pools are derived
  * from them instead of duplicated), one sound table, one key handler,
  * one synced-ref helper, one overlay/button style, and the duplicated
@@ -45,13 +48,6 @@ interface RingNode {
   x: number; y: number; radius: number; vx: number;
   floorIndex: number; // 0: bottom, 1: 2nd, 2: 3rd, 3: top
   rotation: number; vRot: number; data: RingData;
-}
-
-// Keep a ref in sync with a state value, for use inside the game loop.
-function useLive<T>(value: T) {
-  const ref = useRef(value);
-  ref.current = value;
-  return ref;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -130,13 +126,6 @@ const KEYMAP: Record<string, string> = {
   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', Space: 'space',
 };
-const OVERLAY = 'absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center';
-const BTN = 'bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl shadow-lg cursor-pointer transition';
-
-function Overlay({ children }: { children: React.ReactNode }) {
-  return <div className={OVERLAY}>{children}</div>;
-}
-
 function RollingCharacterArena() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'TYPING' | 'GAMEOVER' | 'VICTORY'>('START');
@@ -147,8 +136,11 @@ function RollingCharacterArena() {
   const [targetKanaList, setTargetKanaList] = useState<Kana[]>([]);
   const [inputAnswers, setInputAnswers] = useState<string[]>(['', '', '']);
 
-  const gameStateRef = useLive(gameState);
-  const stageRef = useLive(stage);
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
+
+  const stageRef = useRef(stage);
+  stageRef.current = stage;
   const playSoundRef = useRef<((type: Sound) => void) | null>(null);
 
   const generateRandomKanaProblem = (st: number) =>
@@ -391,17 +383,17 @@ function RollingCharacterArena() {
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800">
-      <div className="flex flex-wrap justify-between items-center bg-slate-100 p-4 rounded-xl border border-slate-200 text-sm shadow-inner gap-2">
-        <span className="text-red-500 font-bold">❤️ HP: {'❤️'.repeat(lives)}</span>
-        <span className="text-indigo-600 font-bold">Stage: {stage} / 3</span>
-        <span className="text-emerald-600 font-bold">Score: {score} pt</span>
-      </div>
-
       <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl h-[700px] relative overflow-hidden flex items-center justify-center p-2 shadow-inner">
+        {/* Status bar inside the game frame, at the top */}
+        <div className="absolute top-2 left-2 right-2 z-20 flex flex-wrap justify-between items-center bg-black/50 rounded-lg px-4 py-2 text-sm gap-2">
+          <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(lives)}</span>
+          <span className="text-indigo-300 font-bold">Stage: {stage} / 3</span>
+          <span className="text-emerald-300 font-bold">Score: {score} pt</span>
+        </div>
         <canvas ref={canvasRef} width={800} height={700} className="block bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg" />
 
         {gameState === 'START' && (
-          <Overlay>
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
@@ -409,13 +401,13 @@ function RollingCharacterArena() {
               Open the treasure chest at the top by inputting the correct romaji for 3 random kana!<br />
               [← / →] Move ｜ [↑ / ↓] Ladders (Climb & Descend) ｜ [SPACE] Jump
             </p>
-            <button onClick={() => (window as any).__startRollingGame(1)} className={BTN}>Start Game</button>
+            <button onClick={() => (window as any).__startRollingGame(1)} className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg cursor-pointer transition">Start Game</button>
             <div className="text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-xs">[← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump</div>
-          </Overlay>
+          </div>
         )}
 
         {gameState === 'TYPING' && (
-          <Overlay>
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-5 z-30 p-6 text-center">
             <h2 className="text-2xl font-black text-[#ffcc00]">🎁 宝箱が開きました！</h2>
             <p className="text-sm text-[#ccc]">次の仮名のローマ字を、それぞれの仮名の下にあるスペースに正しく入力してね</p>
             <form onSubmit={handlePasswordSubmit} className="space-y-6">
@@ -435,30 +427,30 @@ function RollingCharacterArena() {
               <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">答え合わせして鍵を開ける！ (Enter)</button>
             </form>
             <div className="text-xs text-[#ff5555]">※1つでも間違えると「振り出しに戻る」になるので気をつけて！</div>
-          </Overlay>
+          </div>
         )}
 
         {gameState === 'GAMEOVER' && (
-          <Overlay>
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-red-500">GAME OVER</h2>
             <p className="text-sm text-[#ccc]">Score: {score} pts. Try again!</p>
-            <button onClick={() => (window as any).__startRollingGame(1)} className={BTN}>Play Again</button>
-          </Overlay>
+            <button onClick={() => (window as any).__startRollingGame(1)} className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">Play Again</button>
+          </div>
         )}
 
         {gameState === 'VICTORY' && (
-          <Overlay>
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-[#ffcc00]">CONGRATULATIONS!</h2>
             <p className="text-sm text-[#ccc]">
               {stage < 3 ? `Stage ${stage} Cleared! Excellent kana typing & climbing!` : `All Stages Completed! Master of Japanese Kana! (Final Score: ${score} pts)`}
             </p>
             <button
               onClick={() => (window as any).__startRollingGame(stage < 3 ? stage + 1 : 1)}
-              className={BTN}
+              className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
             >
               {stage < 3 ? 'Proceed to Next Stage' : 'Play Again from Beginning'}
             </button>
-          </Overlay>
+          </div>
         )}
       </div>
 
