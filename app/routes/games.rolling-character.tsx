@@ -273,13 +273,12 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義 (index 0: 最下段, 1: 2段目, 2: 3段目, 3: 一番上の段)
-    // direction: 1 = 左から右へ転がる, -1 = 右から左へ転がる
+    // 各段の定義
     const platforms = [
       { x1: 50, y1: 520, x2: 750, y2: 500, direction: 1, isGoal: false },  // 最下段（右向き）
       { x1: 50, y1: 410, x2: 750, y2: 430, direction: -1, isGoal: false }, // 3段目（左向き）
       { x1: 50, y1: 300, x2: 750, y2: 280, direction: 1, isGoal: false },  // 2段目（右向き）
-      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 一番上の段（左向きにスタート？※ご指示により「一番上の段の左側から右へ」転がるため、生成時はvx>0）
+      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 一番上の段（左向き）
       { x1: 250, y1: 90, x2: 550, y2: 90, direction: 0, isGoal: true }     // 最上段ゴールエリア
     ];
 
@@ -290,15 +289,16 @@ function RollingCharacterArena() {
       { x: 400, y: 90, h: 100 }
     ];
 
+    // プレイヤーの高さ（h）を今の半分（18px）に設定
     let player = {
       x: 100,
-      y: 480,
+      y: 498,
       w: 24,
-      h: 36,
+      h: 18,
       vx: 0,
       vy: 0,
       speed: 3.5,
-      jumpPower: -10.5,
+      jumpPower: -9.5,
       gravity: 0.5,
       isGrounded: false,
       isOnLadder: false,
@@ -318,7 +318,7 @@ function RollingCharacterArena() {
       rings = [];
       spawnTimer = 0;
       player.x = 100;
-      player.y = 480;
+      player.y = 498;
       player.vx = 0;
       player.vy = 0;
       setTypedIndex(0);
@@ -335,7 +335,7 @@ function RollingCharacterArena() {
 
       if (invincibilityTimer > 0) invincibilityTimer--;
 
-      // Ladder detection
+      // Ladder detection (昇り降り両対応)
       let touchingLadder = false;
       for (let l of ladders) {
         if (player.x + player.w/2 >= l.x - 12 && player.x + player.w/2 <= l.x + 12 &&
@@ -352,9 +352,15 @@ function RollingCharacterArena() {
       if (keys.right) { player.vx = player.speed; player.facing = 1; }
 
       if (player.isOnLadder) {
-        if (keys.up) { player.vy = -player.speed * 0.8; player.isGrounded = false; }
-        else if (keys.down) { player.vy = player.speed * 0.8; player.isGrounded = false; }
-        else { if (!player.isGrounded) player.vy = 0; }
+        if (keys.up) {
+          player.vy = -player.speed * 0.8;
+          player.isGrounded = false;
+        } else if (keys.down) {
+          player.vy = player.speed * 0.8;
+          player.isGrounded = false;
+        } else {
+          player.vy = 0; // 梯子上でキーを離したときは静止
+        }
       }
 
       let spacePressedNow = keys.space;
@@ -375,11 +381,11 @@ function RollingCharacterArena() {
       if (player.x < 30) player.x = 30;
       if (player.x > 750) player.x = 750;
 
-      // Platform collisions for player
+      // Platform collisions for player (下から突き抜けて上の段に乗らないように落下中のみ判定)
       player.isGrounded = false;
       for (let p of platforms) {
         if (p.isGoal) {
-          if (player.x + player.w > p.x1 && player.x < p.x2 && player.y + player.h >= p.y1 - 6 && player.y + player.h <= p.y1 + 14 && player.vy >= 0) {
+          if (player.x + player.w > p.x1 && player.x < p.x2 && player.y + player.h >= p.y1 - 4 && player.y + player.h <= p.y1 + 10 && player.vy >= 0) {
             player.y = p.y1 - player.h;
             player.vy = 0;
             player.isGrounded = true;
@@ -390,7 +396,8 @@ function RollingCharacterArena() {
           if (player.x + player.w > minX && player.x < maxX) {
             let t = (player.x + player.w/2 - p.x1) / (p.x2 - p.x1);
             let surfaceY = p.y1 + t * (p.y2 - p.y1);
-            if (player.vy >= 0 && player.y + player.h >= surfaceY - 6 && player.y + player.h <= surfaceY + 14) {
+            // 落下中（vy >= 0）かつ足元が床の高さに一致した場合のみ着地
+            if (player.vy >= 0 && player.y + player.h >= surfaceY - 4 && player.y + player.h <= surfaceY + 10) {
               player.y = surfaceY - player.h;
               player.vy = 0;
               player.isGrounded = true;
@@ -410,10 +417,10 @@ function RollingCharacterArena() {
         return;
       }
 
-      // Spawn rings: 一番上の段（floorIndex = 3）の左側から右へスタート
+      // Spawn rings (約5秒に1回 = 60fps * 5 = 300フレームに1回)
       spawnTimer++;
       let currentStage = stageRef.current;
-      let spawnInterval = Math.max(90 - (currentStage * 15), 50);
+      let spawnInterval = 300;
       if (spawnTimer >= spawnInterval) {
         spawnTimer = 0;
         const dataset = KANA_DATA_SETS[currentStage as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
@@ -423,7 +430,7 @@ function RollingCharacterArena() {
           x: 60,
           y: platforms[3].y1 - 25,
           radius: 22,
-          vx: 2.0, // 一番上の段は左から右へ転がる (+vx)
+          vx: 2.0,
           floorIndex: 3,
           rotation: 0,
           vRot: 0.1,
@@ -447,22 +454,15 @@ function RollingCharacterArena() {
         let minX = 50;
         let maxX = 750;
 
-        // 画面外に達したときの処理（ジグザグ降下）
-        // floorIndex 3 (一番上, 左から右へ進む) -> 右端(maxX)を過ぎたら -> floorIndex 2 (3段目) の右側から左へ (-vx)
-        // floorIndex 2 (3段目, 右から左へ進む) -> 左端(minX)を過ぎたら -> floorIndex 1 (2段目) の左側から右へ (+vx)
-        // floorIndex 1 (2段目, 左から右へ進む) -> 右端(maxX)を過ぎたら -> floorIndex 0 (最下段) の右側から左へ (-vx)
-        // floorIndex 0 (最下段, 右から左へ進む) -> 左端(minX)を過ぎたら -> 消去
         if (r.vx > 0 && r.x > maxX) {
           if (r.floorIndex > 0) {
             r.floorIndex--;
             let nextP = platforms[r.floorIndex];
             if (r.floorIndex === 2 || r.floorIndex === 0) {
-              // 3段目(idx=2)や最下段(idx=0)は右側からスタートして左へ転がる
               r.x = nextP.x2 - 10;
               r.vx = -2.0;
               r.vRot = -0.1;
             } else {
-              // 2段目(idx=1)は左側からスタートして右へ転がる
               r.x = nextP.x1 + 10;
               r.vx = 2.0;
               r.vRot = 0.1;
@@ -602,16 +602,18 @@ function RollingCharacterArena() {
 
         ctx.restore();
 
+        // 内部のひらがな
         ctx.fillStyle = '#111122';
-        ctx.font = 'bold 16px sans-serif';
+        ctx.font = 'bold 15px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(r.data.kana, r.x, r.y + 1);
 
+        // 輪の上のローマ字（大きく表示）
         ctx.fillStyle = '#ffff00';
-        ctx.font = 'bold 13px monospace';
+        ctx.font = 'bold 18px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(r.data.romaji, r.x, r.y - r.radius - 8);
+        ctx.fillText(r.data.romaji, r.x, r.y - r.radius - 10);
       });
 
       // Player
@@ -620,7 +622,7 @@ function RollingCharacterArena() {
         ctx.fillRect(player.x, player.y, player.w, player.h);
         ctx.fillStyle = '#111';
         let eyeX = player.facing === 1 ? player.x + 15 : player.x + 5;
-        ctx.fillRect(eyeX, player.y + 8, 4, 4);
+        ctx.fillRect(eyeX, player.y + 5, 4, 3);
       }
     };
 
@@ -658,9 +660,9 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll from the top-left, zigzagging down across each floor until they disappear at the bottom!<br />
-              Reach the treasure chest at the top flat goal and type the secret word to win!<br />
-              Climb the ladders (↑ key) to reach the top!
+              Rings roll down gently every 5 seconds. Climb ladders using [↑ / ↓] keys!<br />
+              Reach the treasure chest at the top and type the secret word to win!<br />
+              [← / →] Move ｜ [SPACE] Jump
             </p>
             <button
               onClick={() => (window as any).__startRollingGame(1)}
@@ -669,7 +671,7 @@ function RollingCharacterArena() {
               Start Game
             </button>
             <div className="text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-xs">
-              [← / →] Move ｜ [↑ / ↓] Ladder ｜ [SPACE] Jump
+              [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump
             </div>
           </div>
         )}
