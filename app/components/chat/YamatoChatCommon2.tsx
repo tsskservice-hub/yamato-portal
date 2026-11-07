@@ -1,13 +1,14 @@
 /**
  * @file YamatoChatCommon2.tsx
- * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（ニックネームモジュール連携・全画面常設・自動スタート・挨拶自動生成対応版）
+ * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（モジュール連携版）
  */
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
 import { ImageModal } from "../ImageModal";
 import { CreditCostFooter } from "../CreditCostFooter";
-import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
-import { personaliseGreeting, resolveDisplayName } from "../../utils/nickname"; // 💡 ニックネームモジュールのインポート
+import { useYamatoChat2Logic } from "../../hooks/useYamatoChat2Logic";
+import { YCC2ChatHeaderControls } from "./YCC2ChatHeaderControls";
+import { YCC2ChatOptionButtons } from "./YCC2ChatOptionButtons";
 
 export interface YamatoChatCommon2MetaType {
   componentName: string;
@@ -20,8 +21,8 @@ export interface YamatoChatCommon2MetaType {
 
 export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
   componentName: "YamatoChatCommon2",
-  version: "1.3.0",
-  role: "教科書準拠レッスン専用メインクラスルーム・チャット（挨拶自動生成・動的オプションボタン対応版）",
+  version: "1.4.0",
+  role: "教科書準拠レッスン専用メインクラスルーム・チャット（モジュール分離版）",
   features: [
     {
       featureName: "Nickname Module Integration",
@@ -55,24 +56,6 @@ export const YAMATO_CHAT_COMMON_2_META: YamatoChatCommon2MetaType = {
   learningPaces: ["steady", "normal", "accelerated"],
 };
 
-// 💡 選択肢（オプション）の型定義
-type ChatOption = {
-  label: string;
-  value: string;
-};
-
-type ChatMessage = {
-  role: "assistant" | "user";
-  content: string;
-  imageUrl?: string;
-  options?: ChatOption[]; // 💡 APIから受け取る選択肢データ
-};
-
-const FEATURE_COSTS = {
-  textAi: 2,
-  imageAi: 4,
-};
-
 export type YamatoChatCommon2Props = {
   characterName?: string;
   initialGreeting?: string;
@@ -97,18 +80,13 @@ export type YamatoChatCommon2Props = {
   image2To4CreditCost?: number;
 };
 
-function sanitizeAiOutput(text: string): string {
-  if (!text) return "";
-  return text.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "");
-}
-
 export function YamatoChatCommon2({
   characterName = "Yamato Sensei",
   initialGreeting,
   systemPrompt = "",
   appType = "general",
   themeColor = "#f97316",
-  initialLearningPace: propLearningPace,
+  initialLearningPace,
   userId: propUserId,
   userNickname: propNickname,
   credits: propCredits,
@@ -125,52 +103,54 @@ export function YamatoChatCommon2({
   image1CreditCost = 4,
   image2To4CreditCost = 6,
 }: YamatoChatCommon2Props) {
-  // アカウント同期フック
+  // チャットロジックをカスタムフックから取得
   const {
     activeUserId,
     currentCredits,
-    currentNickname,
-    learningPace: tutorLevel,
-    refreshUserData: refreshUserCredits,
-    deductCredits,
-    updateLearningPace: handlePaceChange,
-  } = useYamatoAccount({
-    propUserId,
-    propCredits,
-    propNickname,
-    propLearningPace,
+    tutorLevel,
+    chatFontSize,
+    setChatFontSize,
+    tutorMessages,
+    isLessonStarted,
+    tutorInput,
+    setTutorInput,
+    isTutorLoading,
+    requestVisualAid,
+    setRequestVisualAid,
+    modalImageSrc,
+    setModalImageSrc,
+    activeImagePreview,
+    fileInputRef,
+    handlePaceChange,
+    handleImageChange,
+    handleStartLesson,
+    handleSelectOption,
+    handleSendTutorMessage,
+    clearSelectedImage,
+  } = useYamatoChat2Logic({
+    initialGreeting,
+    systemPrompt,
+    appType,
+    initialLearningPace,
+    userId: propUserId,
+    userNickname: propNickname,
+    credits: propCredits,
+    onOpenAuth,
+    externalImageFile,
+    externalImagePreview,
+    onClearExternalImage,
+    assignedQuestion,
+    calculateCreditCost,
+    baseCreditCost,
+    image1CreditCost,
+    image2To4CreditCost,
   });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleTriggerAuth = (mode: "signin" | "signup" = "signup") => {
-    if (onOpenAuth) {
-      onOpenAuth(mode);
-    } else {
-      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode } }));
-    }
-  };
-
-  const [chatFontSize, setChatFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
-
-  const activeImagePreview = selectedImagePreview || externalImagePreview || null;
 
   const isHexColor = themeColor.startsWith("#");
   const currentTheme =
     !isHexColor && themeStyles[themeColor as ThemeColorKey]
       ? themeStyles[themeColor as ThemeColorKey]
       : themeStyles.orange;
-
-  const boxBorderInlineStyle = isHexColor ? { borderColor: themeColor } : undefined;
-
-  const [tutorMessages, setTutorMessages] = useState<ChatMessage[]>([]);
-  const [isLessonStarted, setIsLessonStarted] = useState<boolean>(false);
-  const [tutorInput, setTutorInput] = useState<string>("");
-  const [isTutorLoading, setIsTutorLoading] = useState<boolean>(false);
-  const [requestVisualAid, setRequestVisualAid] = useState<boolean>(false);
-  const [modalImageSrc, setModalImageSrc] = useState<string | null>(null);
 
   const getFontSizeClass = () => {
     switch (chatFontSize) {
@@ -187,312 +167,20 @@ export function YamatoChatCommon2({
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // 💡 授業開始時に initialGreeting が未指定の場合、assignedQuestion を使って自動生成する
-  const handleStartLesson = async () => {
-    if (!activeUserId) {
-      alert("レッスンを始めるには、無料サインアップまたはログインが必要です！");
-      handleTriggerAuth("signup");
-      return;
-    }
-
-    setIsLessonStarted(true);
-
-    // 挨拶文が渡されていない場合の自動生成ロジック
-    const rawGreeting =
-      initialGreeting ||
-      `Awesome! Let's dive right into today's Japanese lesson! ✨\nToday, we are going to learn about "${assignedQuestion || 'Japanese'}".\n\nHow would you like to start? Please choose an option below:`;
-
-    // モジュールを使用して挨拶内の "my friend" をユーザーのニックネームに置換
-    const greetingMsg = personaliseGreeting(rawGreeting, currentNickname);
-    
-    // 初期挨拶のメッセージとRPG風の二者択一オプションを設定
-    const initialMsgList: ChatMessage[] = [
-      { 
-        role: "assistant", 
-        content: greetingMsg,
-        options: [
-          { label: "🚀 I already know the Learning Intention and Success Criteria! Let's jump into vocabulary and practice!", value: "1" },
-          { label: "📖 I want to check the Learning Intention and Success Criteria first!", value: "2" }
-        ]
-      }
-    ];
-    setTutorMessages(initialMsgList);
-  };
-
-  // 💡 選択肢ボタンがクリックされたときに自動でメッセージとして送信するハンドラー
-  const handleSelectOption = async (optionValue: string, optionLabel: string) => {
-    await executeSendMessage(optionLabel);
-  };
-
-  const handleSendTutorMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if ((!tutorInput.trim() && !activeImagePreview) || isTutorLoading) return;
-    await executeSendMessage(tutorInput.trim());
-  };
-
-  const executeSendMessage = async (textToSend: string) => {
-    if (!activeUserId) {
-      alert("お話しするには、無料サインアップまたはログインが必要です！");
-      handleTriggerAuth("signup");
-      return;
-    }
-
-    // 💡 resolveDisplayName モジュールを利用して安全な呼び名を取得
-    const callName = resolveDisplayName(currentNickname, "my friend");
-
-    if (currentCredits <= 0) {
-      setTutorMessages((prev) => [
-        ...prev,
-        { role: "user", content: textToSend },
-        {
-          role: "assistant",
-          content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! It looks like your credit balance has reached zero. To continue our lesson together, please top up your credits! 📚✨`,
-        },
-      ]);
-      setTutorInput("");
-      return;
-    }
-
-    const imageCount = activeImagePreview ? 1 : 0;
-    let requiredCredits = baseCreditCost;
-    if (calculateCreditCost) {
-      requiredCredits = calculateCreditCost(imageCount);
-    } else if (imageCount === 1 && image1CreditCost !== undefined) {
-      requiredCredits = image1CreditCost;
-    } else if (imageCount >= 2 && imageCount <= 4 && image2To4CreditCost !== undefined) {
-      requiredCredits = image2To4CreditCost;
-    } else {
-      requiredCredits =
-        requestVisualAid || Boolean(activeImagePreview) ? 4 : baseCreditCost;
-    }
-
-    if (currentCredits < requiredCredits) {
-      setTutorMessages((prev) => [
-        ...prev,
-        { role: "user", content: textToSend },
-        {
-          role: "assistant",
-          content: `⚠️ **[Insufficient Credits]**\n\n${callName}, your current balance (${currentCredits} credits) is not enough for this request (requires ${requiredCredits} credits). Please top up! 🪙`,
-        },
-      ]);
-      setTutorInput("");
-      return;
-    }
-
-    const userMsg = textToSend || (activeImagePreview ? "Please check this answer image." : "Hello Yamato Sensei!");
-    const needsVisual = requestVisualAid;
-    const imageBase64ToSend = activeImagePreview;
-
-    setTutorInput("");
-    setSelectedImage(null);
-    setSelectedImagePreview(null);
-    setRequestVisualAid(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-
-    if (onClearExternalImage) {
-      onClearExternalImage();
-    }
-
-    const newMessages: ChatMessage[] = [
-      ...tutorMessages,
-      { role: "user", content: userMsg, imageUrl: imageBase64ToSend || undefined },
-    ];
-    setTutorMessages(newMessages);
-    setIsTutorLoading(true);
-
-    try {
-      const visualPrompt = needsVisual
-        ? `Educational instructional diagram and visual aid explaining: ${userMsg}. Clean layout, high quality, professional illustration style.`
-        : undefined;
-
-      const sendingNickname = resolveDisplayName(currentNickname, "My friend");
-
-      const response = await fetch("https://api.jptutoraiyamato.com/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMsg,
-          history: tutorMessages.map((m) => ({ role: m.role, content: m.content })),
-          learningPace: tutorLevel,
-          userNickname: sendingNickname,
-          appType: appType,
-          systemPrompt: systemPrompt,
-          assignedQuestion: assignedQuestion,
-          visualPrompt: visualPrompt,
-          requestVisualAid: needsVisual,
-          imageBase64: imageBase64ToSend,
-          userId: activeUserId,
-        }),
-      });
-
-      const responseText = await response.text();
-      let data: any;
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        throw new Error(`サーバーからの応答がJSONではありません: ${responseText.slice(0, 100)}`);
-      }
-
-      if (!response.ok) {
-        if (response.status === 402) {
-          setIsTutorLoading(false);
-          setTutorMessages([
-            ...newMessages,
-            {
-              role: "assistant",
-              content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! Please top up your credits to continue!`,
-            },
-          ]);
-          await refreshUserCredits();
-          return;
-        }
-
-        if (data?.error === "UNREGISTERED_APP_PROMPT") {
-          setIsTutorLoading(false);
-          setTutorMessages([
-            ...newMessages,
-            {
-              role: "assistant",
-              content: `⚠️ An error occurred while processing your request. Please try again or contact support.`,
-            },
-          ]);
-          return;
-        }
-
-        throw new Error(data?.error || `APIエラー (${response.status})`);
-      }
-
-      const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
-      const imageUrl = data.imageUrl;
-      const apiOptions = data.options; // 💡 APIから返された選択肢配列
-      const sanitizedReply = sanitizeAiOutput(replyText);
-
-      setIsTutorLoading(false);
-      setTutorMessages([
-        ...newMessages,
-        { 
-          role: "assistant", 
-          content: sanitizedReply, 
-          imageUrl: imageUrl,
-          options: Array.isArray(apiOptions) ? apiOptions : undefined 
-        },
-      ]);
-
-      deductCredits(requiredCredits);
-      await refreshUserCredits();
-    } catch (err: any) {
-      console.error(err);
-      setIsTutorLoading(false);
-      setTutorMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: `Sorry, an error occurred: ${err.message || "Communication error"}`,
-        },
-      ]);
-    }
-  };
-
   return (
     <div className="w-full bg-white dark:bg-slate-900 border-4 border-orange-500 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col font-sans">
       
-      {/* 授業ヘッダー */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-4 gap-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 flex items-center justify-center text-2xl font-black shadow-inner">
-            👩‍🏫
-          </div>
-          <div>
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <span>{characterName}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 font-bold">
-                Live Lesson Room
-              </span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Your primary Japanese teacher guiding you step by step.
-            </p>
-          </div>
-        </div>
-
-        {/* コントロール群 (クレジット・ペース・フォントサイズ) */}
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-          {/* Credit Balance */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 flex items-center gap-2">
-            <span className="text-xs font-bold text-amber-800">Credits:</span>
-            {activeUserId ? (
-              <span className="text-xs font-bold text-amber-900">🪙 {currentCredits}</span>
-            ) : (
-              <span className="text-xs font-bold text-slate-500">🔒 Guest</span>
-            )}
-          </div>
-
-          {/* 学習ペース選択 */}
-          <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 flex items-center">
-            {(["steady", "normal", "accelerated"] as const).map((level) => (
-              <button
-                key={level}
-                type="button"
-                onClick={() => handlePaceChange(level)}
-                style={
-                  tutorLevel === level && isHexColor
-                    ? { backgroundColor: themeColor, color: "#ffffff" }
-                    : undefined
-                }
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold capitalize transition ${
-                  tutorLevel === level
-                    ? currentTheme.buttonActive
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                }`}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-
-          {/* フォントサイズ */}
-          <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 flex items-center">
-            {(
-              [
-                { key: "sm", label: "小" },
-                { key: "base", label: "中" },
-                { key: "lg", label: "大" },
-                { key: "xl", label: "特大" },
-              ] as const
-            ).map((size) => (
-              <button
-                key={size.key}
-                type="button"
-                onClick={() => setChatFontSize(size.key)}
-                style={
-                  chatFontSize === size.key && isHexColor
-                    ? { backgroundColor: themeColor, color: "#ffffff" }
-                    : undefined
-                }
-                className={`px-2 py-1 rounded-lg text-[11px] font-bold transition ${
-                  chatFontSize === size.key
-                    ? currentTheme.buttonActive
-                    : "text-slate-600 dark:text-slate-400"
-                }`}
-              >
-                {size.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* ヘッダーコントロールモジュール */}
+      <YCC2ChatHeaderControls
+        characterName={characterName}
+        activeUserId={activeUserId}
+        currentCredits={currentCredits}
+        tutorLevel={tutorLevel}
+        chatFontSize={chatFontSize}
+        themeColor={themeColor}
+        onPaceChange={handlePaceChange}
+        onFontSizeChange={setChatFontSize}
+      />
 
       {/* カスタムウィジェットエリア */}
       {customWidget && <div className="mb-4 shrink-0">{customWidget}</div>}
@@ -508,7 +196,7 @@ export function YamatoChatCommon2({
               Ready to Start Your Lesson with {characterName}?
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Yamato Sensei is ready in the classroom to guide you through this unit step by step using interactive questions and personalized feedback.
+              Yamato Sensei is ready in the classroom to guide you through this unit step by step using interactive questions and personalised feedback.
             </p>
           </div>
           <button
@@ -522,7 +210,7 @@ export function YamatoChatCommon2({
       ) : (
         <div className="flex flex-col flex-grow space-y-4">
           
-          {/* 授業チャット履歴エリア（広々としたメインステージ） */}
+          {/* 授業チャット履歴エリア */}
           <div
             className={`bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 overflow-y-auto space-y-3 min-h-[400px] max-h-[600px] flex-grow ${getFontSizeClass()}`}
           >
@@ -563,25 +251,12 @@ export function YamatoChatCommon2({
                     <div className="space-y-3">
                       <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                       
-                      {/* 💡 選択肢（オプション）が渡されている場合にボタンとして動的レンダリング */}
-                      {msg.options && msg.options.length > 0 && (
-                        <div className="flex flex-col gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-                          <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Please choose an option:</p>
-                          <div className="flex flex-col gap-2">
-                            {msg.options.map((opt, optIdx) => (
-                              <button
-                                key={optIdx}
-                                type="button"
-                                disabled={isTutorLoading}
-                                onClick={() => handleSelectOption(opt.value, opt.label)}
-                                className="text-left px-4 py-3 rounded-xl bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-500 hover:text-white text-slate-800 dark:text-slate-200 text-xs font-bold transition border border-orange-200 dark:border-orange-900/60 shadow-sm cursor-pointer disabled:opacity-50"
-                              >
-                                {opt.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      {/* 選択肢ボタンモジュール */}
+                      <YCC2ChatOptionButtons
+                        options={msg.options}
+                        isLoading={isTutorLoading}
+                        onSelect={handleSelectOption}
+                      />
 
                       {msg.imageUrl && (
                         <div className="mt-2">
@@ -634,12 +309,7 @@ export function YamatoChatCommon2({
               </span>
               <button
                 type="button"
-                onClick={() => {
-                  setSelectedImage(null);
-                  setSelectedImagePreview(null);
-                  if (fileInputRef.current) fileInputRef.current.value = "";
-                  if (onClearExternalImage) onClearExternalImage();
-                }}
+                onClick={clearSelectedImage}
                 className="text-red-600 hover:text-red-800 font-bold px-2 py-1 cursor-pointer"
                 title="Remove photo"
               >
@@ -666,7 +336,7 @@ export function YamatoChatCommon2({
                     className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-300 dark:border-slate-700"
                   >
                     <span>📷</span>
-                    <span>{selectedImagePreview ? "Change Worksheet Photo" : "Upload Worksheet / Answer Photo"}</span>
+                    <span>{activeImagePreview ? "Change Worksheet Photo" : "Upload Worksheet / Answer Photo"}</span>
                   </button>
                 </>
               ) : (
