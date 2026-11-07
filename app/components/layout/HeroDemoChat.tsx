@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowRight, ArrowDown, Send } from 'lucide-react';
-import { PORTAL_CONTENT as DEFAULT_PORTAL_CONTENT } from '../data/portal-content';
+import { PORTAL_CONTENT as DEFAULT_PORTAL_CONTENT } from '../../data/portal-content';
 
 export interface HeroDemoChatProps {
   isDarkMode: boolean;

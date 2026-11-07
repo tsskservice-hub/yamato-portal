@@ -6,14 +6,14 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import type { PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '~/lib/supabaseClient';
 
 // コンポーネントおよびフックのインポート
-import { HeroDemoChat } from '~/components/HeroDemoChat';
+import { HeroDemoChat } from '~/components/layout/HeroDemoChat';
 import { DailyQuizModal } from '~/components/DailyQuizModal';
 import { ChatYamatoConcierge } from '~/components/chat/ChatYamatoConcierge';
 import { PricingSection } from '~/components/PricingSection';

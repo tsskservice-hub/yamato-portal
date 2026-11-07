@@ -6,7 +6,7 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React from 'react';
 import { Link } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { useVceSpeakingContent } from '~/data/content-vce-speaking';
 import { supabase } from '~/lib/supabaseClient';

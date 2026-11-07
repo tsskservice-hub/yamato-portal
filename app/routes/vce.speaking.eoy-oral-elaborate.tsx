@@ -1,14 +1,14 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
 /**
  * @file eoy-oral-elaborate.tsx
  * @description VCE Japanese - EOY Oral Elaborate Practice & Custom QA Bank
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
-import PageLayout from '~/components/PageLayout';
+import PageLayout from '~/components/layout/PageLayout';
 import { DataErrorState } from '~/components/DataErrorState';
 import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
 import ChatYamatoEoyOralElaborate from '~/components/chat/ChatYamatoEoyOralElaborate';
@@ -26,7 +26,7 @@ import {
 } from '~/data/oral-exam-questions';
 
 import { Download, Plus, Trash2, Play, Lightbulb } from "lucide-react";
-import ElaborateHintModal from '~/components/ElaborateHintModal';
+import ElaborateHintModal from '~/components/oral/ElaborateHintModal';
 
 export interface QuestionItem {
   id: string;

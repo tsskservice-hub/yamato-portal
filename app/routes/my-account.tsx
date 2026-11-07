@@ -5,8 +5,8 @@
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import type { PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
 import { supabase } from '~/lib/supabaseClient';

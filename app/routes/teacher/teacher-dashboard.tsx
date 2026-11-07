@@ -5,7 +5,7 @@
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useRef } from 'react';
 import { useLoaderData } from '@remix-run/react';
-import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { createServerSupabaseClient } from '~/lib/supabase.server';
 
 // 先頭に tdbd を付与したモジュールのインポート

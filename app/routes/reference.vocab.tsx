@@ -6,8 +6,8 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/clo
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from '~/lib/supabaseClient';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 
 interface Vocabulary {

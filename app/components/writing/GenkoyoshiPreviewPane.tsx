@@ -3,7 +3,7 @@
  * @description Genkoyoshi layout preview component supporting vertical and horizontal writing modes.
  */
 import React from 'react';
-import { Item } from '../utils/genkoyoshi-engine';
+import { Item } from '../../utils/genkoyoshi-engine';
 
 export interface GenkoyoshiPreviewPaneProps {
   pages: Item[][][];

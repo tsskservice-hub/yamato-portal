@@ -5,9 +5,9 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
-import ScrollTopButton from '~/components/ScrollTopButton'; // ページトップへ戻るボタンをインポート
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
+import ScrollTopButton from '~/components/layout/ScrollTopButton'; // ページトップへ戻るボタンをインポート
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 import { handleScrollToSection, getAnchorId } from '~/utils/scrollUtils'; // 共通のスクロール関数をインポート

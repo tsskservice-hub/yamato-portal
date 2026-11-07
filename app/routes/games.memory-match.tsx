@@ -11,8 +11,8 @@ import {
 } from "@remix-run/cloudflare";
 import React, { useEffect, useState, useRef } from "react";
 import { useLoaderData } from "@remix-run/react";
-import { ToolPageWrapper } from "~/components/ToolPageWrapper";
-import type { PageLayoutRef } from "~/components/PageLayout";
+import { ToolPageWrapper } from "~/components/layout/ToolPageWrapper";
+import type { PageLayoutRef } from "~/components/layout/PageLayout";
 import { generateModuleMeta } from "~/utils/seoMeta";
 import { supabase } from "~/lib/supabaseClient";
 

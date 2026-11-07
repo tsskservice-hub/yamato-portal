@@ -6,8 +6,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { json, type MetaFunction, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Link, useActionData, useNavigation, useRouteLoaderData } from "@remix-run/react";
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { fetchLegalContentData, LegalDocument } from '~/data/legal-content';
 import { supabase } from '~/lib/supabaseClient';

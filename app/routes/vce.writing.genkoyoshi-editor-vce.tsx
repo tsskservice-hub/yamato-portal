@@ -20,11 +20,11 @@ import {
   AlignJustify
 } from "lucide-react";
 
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
 import ChatYamatoGenkoyoshiEditorVce from '~/components/chat/ChatYamatoGenkoyoshiEditorVce';
-import GenkoyoshiPreviewPane from '~/components/GenkoyoshiPreviewPane';
-import GenkoyoshiModal from '~/components/GenkoyoshiModal';
+import GenkoyoshiPreviewPane from '~/components/writing/GenkoyoshiPreviewPane';
+import GenkoyoshiModal from '~/components/writing/GenkoyoshiModal';
 import { generateGenkoyoshiPages, calculateCharCount } from '~/utils/genkoyoshi-engine';
 import genkoStyles from '~/styles/genkoyoshi.css?url';
 import { generateModuleMeta } from '~/utils/seoMeta';

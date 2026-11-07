@@ -8,9 +8,9 @@ import { useLoaderData, Link } from '@remix-run/react';
 import { Sparkles, BookOpen, Users, Heart, Cpu } from 'lucide-react';
 import { createServerSupabaseClient } from '~/lib/supabase.server';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
-import ScrollTopButton from '~/components/ScrollTopButton';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
+import ScrollTopButton from '~/components/layout/ScrollTopButton';
 
 // ① Supabase から PORTAL_CONTENT をサーバー側で取得
 export async function loader({ request, context }: LoaderFunctionArgs) {

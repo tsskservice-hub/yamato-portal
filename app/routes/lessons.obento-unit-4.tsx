@@ -7,8 +7,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
 import { generateModuleMeta } from "~/utils/seoMeta";
-import ToolPageWrapper from "~/components/ToolPageWrapper";
-import { type PageLayoutRef } from "~/components/PageLayout";
+import ToolPageWrapper from "~/components/layout/ToolPageWrapper";
+import { type PageLayoutRef } from "~/components/layout/PageLayout";
 import { supabase } from "~/lib/supabaseClient";
 
 export async function loader({ request }: LoaderFunctionArgs) {

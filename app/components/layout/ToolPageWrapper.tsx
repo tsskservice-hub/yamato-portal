@@ -5,8 +5,8 @@
 import React, { type RefObject } from 'react';
 import { useLoaderData } from '@remix-run/react';
 import PageLayout, { type PageLayoutRef } from './PageLayout';
-import { DataErrorState } from './DataErrorState';
-import { generatePageJsonLd } from '../utils/seoJsonLd';
+import { DataErrorState } from '../DataErrorState';
+import { generatePageJsonLd } from '../../utils/seoJsonLd';
 
 /**
  * 日本語のエラータイトルやシステム文字列を標準的な英語表記へ変換・フォーマットする関数

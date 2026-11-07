@@ -21,8 +21,8 @@ import {
 import Header from "./header";
 import Footer from "./Footer";
 import { Breadcrumbs } from "./Breadcrumbs"; // 💡 切り出したパンくずモジュールのインポート
-import { supabase } from "../lib/supabaseClient";
-import { signUpAndRegisterPasskey, signInWithPasskey } from "../lib/passkey";
+import { supabase } from "../../lib/supabaseClient";
+import { signUpAndRegisterPasskey, signInWithPasskey } from "../../lib/passkey";
 
 /**
  * 💡 リアルタイムクレジット更新通知ヘルパー関数

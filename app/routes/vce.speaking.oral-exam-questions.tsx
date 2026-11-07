@@ -1,8 +1,8 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
-import PageLayout from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
+import PageLayout from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import ChatYamatoOralExamQuestions from '~/components/chat/ChatYamatoOralExamQuestions';
 import { fetchOralExamQuestionsData, OralExamQuestionsData, OralExamQuestionItem } from '~/data/oral-exam-questions';

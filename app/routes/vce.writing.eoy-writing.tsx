@@ -5,12 +5,12 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useRouteLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import TextTypeModal from '~/components/TextTypeModal';
+import TextTypeModal from '~/components/writing/TextTypeModal';
 import ChatYamatoEoyWriting from '~/components/chat/ChatYamatoEoyWriting';
-import GenkoyoshiModal from '~/components/GenkoyoshiModal';
+import GenkoyoshiModal from '~/components/writing/GenkoyoshiModal';
 import { WRITING_EXAM_QUESTIONS_FALLBACK, fetchWritingExamQuestionsData } from '~/data/writing-exam-questions';
 import { TextTypesData, fetchTextTypesData } from '~/data/texttypes';
 import { WritingStylesData, fetchWritingStylesData } from '~/data/writing-styles';

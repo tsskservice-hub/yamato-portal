@@ -6,7 +6,7 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React from 'react';
 import { Link, useLoaderData } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { useGamesContent } from '~/data/content-games';
 import { supabase } from '~/lib/supabaseClient';

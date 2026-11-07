@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useRef } from "react";
 import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
-import { ScrollTopButton } from "../ScrollTopButton";
+import { ScrollTopButton } from "../layout/ScrollTopButton";
 import { ImageModal } from "../ImageModal";
 import { CreditCostFooter } from "../CreditCostFooter";
 import { useChatResize } from "../../hooks/useChatResize";
