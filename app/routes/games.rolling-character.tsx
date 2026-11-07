@@ -50,7 +50,7 @@ interface RingNode {
   y: number;
   radius: number;
   vx: number;
-  vy: number;
+  floorIndex: number; // 現在どの段（0〜4）にいるか
   rotation: number;
   vRot: number;
   data: { kana: string; romaji: string; correct: boolean };
@@ -245,13 +245,14 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義
+    // 段の定義 (index 0: 最下段, 1: 3段目, 2: 2段目, 3: 1段目, 4: 最上段ゴール)
+    // openSide: 'left'なら左端に穴(管)、'right'なら右端に穴(管)
     const platforms = [
-      { x1: 50, y1: 520, x2: 750, y2: 520, openSide: 'none', isGoal: false }, // 最下段（床）
-      { x1: 100, y1: 410, x2: 700, y2: 380, openSide: 'left', isGoal: false },  // 3段目 (左に穴、右にフェンス)
-      { x1: 100, y1: 290, x2: 700, y2: 320, openSide: 'right', isGoal: false }, // 2段目 (右に穴、左にフェンス)
-      { x1: 100, y1: 190, x2: 700, y2: 160, openSide: 'left', isGoal: false },  // 1段目 (左に穴、右にフェンス)
-      { x1: 250, y1: 90, x2: 550, y2: 90, openSide: 'none', isGoal: true }     // 最上段 (ゴール)
+      { x1: 50, y1: 520, x2: 750, y2: 520, openSide: 'none', isGoal: false }, // 床
+      { x1: 100, y1: 410, x2: 700, y2: 380, openSide: 'left', isGoal: false },  // 3段目 (左に穴)
+      { x1: 100, y1: 290, x2: 700, y2: 320, openSide: 'right', isGoal: false }, // 2段目 (右に穴)
+      { x1: 100, y1: 190, x2: 700, y2: 160, openSide: 'left', isGoal: false },  // 1段目 (左に穴)
+      { x1: 250, y1: 90, x2: 550, y2: 90, openSide: 'none', isGoal: true }     // 最上段
     ];
 
     const ladders = [
@@ -368,7 +369,7 @@ function RollingCharacterArena() {
         return;
       }
 
-      // Spawn rings from top platform area
+      // Spawn rings at the top stage (floorIndex = 3)
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = Math.max(90 - (currentStage * 15), 50);
@@ -378,72 +379,78 @@ function RollingCharacterArena() {
         const data = dataset[Math.floor(Math.random() * dataset.length)];
         
         rings.push({
-          x: 350 + Math.random() * 100,
-          y: 60,
+          x: 400,
+          y: platforms[3].y1 - 25,
           radius: 22,
-          vx: 1.5,
-          vy: 1,
+          vx: 2.0, // 1段目は右へ転がる
+          floorIndex: 3, // 最上段のすぐ下（1段目）からスタート
           rotation: 0,
-          vRot: 0.08,
+          vRot: 0.1,
           data: data
         });
       }
 
-      // Ring physics with clean fence bouncing and hole dropping
+      // 管を通るスムーズな往復リレー移動
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
-        r.vy += 0.35; // Gravity
+        let p = platforms[r.floorIndex];
+
+        // 傾斜に沿った移動
         r.x += r.vx;
-        r.y += r.vy;
         r.rotation += r.vRot;
 
-        for (let p of platforms) {
-          let minX = Math.min(p.x1, p.x2);
-          let maxX = Math.max(p.x1, p.x2);
+        // 現在のx座標における床のY高さを計算
+        let t = (r.x - p.x1) / (p.x2 - p.x1);
+        r.y = (p.y1 + t * (p.y2 - p.y1)) - r.radius;
 
-          if (r.x >= minX && r.x <= maxX) {
-            let t = (r.x - p.x1) / (p.x2 - p.x1);
-            let surfaceY = p.y1 + t * (p.y2 - p.y1);
+        let minX = Math.min(p.x1, p.x2) + 15;
+        let maxX = Math.max(p.x1, p.x2) - 15;
 
-            if (r.y + r.radius >= surfaceY && r.y + r.radius <= surfaceY + 12 && r.vy >= 0) {
-              r.y = surfaceY - r.radius;
-              
-              let slope = (p.y2 - p.y1) / (p.x2 - p.x1);
-              r.vx = -slope * 4.5 + (p.x2 > p.x1 ? 1.5 : -1.5);
-              r.vy = slope * r.vx;
-              r.vRot = r.vx * 0.05;
+        // 1. 端（フェンス側）にぶつかったら反対へ折り返す
+        if (p.openSide === 'left' && r.x >= maxX) {
+          r.vx = -Math.abs(r.vx);
+          r.x = maxX;
+          r.vRot = -r.vRot;
+        } else if (p.openSide === 'right' && r.x <= minX) {
+          r.vx = Math.abs(r.vx);
+          r.x = minX;
+          r.vRot = -r.vRot;
+        }
 
-              // 1. 穴（開口部）に到達した場合の落下判定
-              if (p.openSide === 'right' && r.x >= maxX - 25) {
-                r.vx = 2.5;
-                r.vy = 2.0;
-                continue;
-              } else if (p.openSide === 'left' && r.x <= minX + 25) {
-                r.vx = -2.5;
-                r.vy = 2.0;
-                continue;
-              }
+        // 2. 穴（開口部・管の入口）に到達したら下の段へワープ落下
+        let reachedHole = false;
+        if (p.openSide === 'left' && r.x <= minX) {
+          reachedHole = true;
+        } else if (p.openSide === 'right' && r.x >= maxX) {
+          reachedHole = true;
+        }
 
-              // 2. フェンス（柵）に到達した場合の強力な跳ね返り＆スタック防止
-              if (p.openSide === 'left' && r.x >= maxX - 32) {
-                r.vx = -3.5; // しっかり左向きの脱出速度を与える
-                r.x = maxX - 35; // 完全に柵の内側へ押し戻してスタックを防ぐ
-                r.vRot = -0.15;
-              } else if (p.openSide === 'right' && r.x <= minX + 32) {
-                r.vx = 3.5;  // しっかり右向きの脱出速度を与える
-                r.x = minX + 35; // 完全に柵の内側へ押し戻してスタックを防ぐ
-                r.vRot = 0.15;
-              }
+        if (reachedHole) {
+          if (r.floorIndex > 0) {
+            // 下の段へ移動（管を通る演出として床の反対側から出現）
+            r.floorIndex--;
+            let nextP = platforms[r.floorIndex];
+            if (nextP.openSide === 'left') {
+              r.x = Math.max(nextP.x1, nextP.x2) - 30; // 右側から登場して左へ転がる
+              r.vx = -2.0;
+            } else {
+              r.x = Math.min(nextP.x1, nextP.x2) + 30; // 左側から登場して右へ転がる
+              r.vx = 2.0;
             }
+          } else {
+            // 最下段の端に達したら消去
+            rings.splice(i, 1);
+            continue;
           }
         }
 
+        // 画面外セーフティ
         if (r.y > 620 || r.x < -50 || r.x > 850) {
           rings.splice(i, 1);
           continue;
         }
 
-        // Collision with player
+        // プレイヤーとの接触判定
         let distX = Math.abs(player.x + player.w/2 - r.x);
         let distY = Math.abs(player.y + player.h/2 - r.y);
         let hitDist = Math.sqrt(distX * distX + distY * distY);
@@ -484,7 +491,7 @@ function RollingCharacterArena() {
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      // Draw Slanted Platforms and Fences
+      // Draw Slanted Platforms and Pipe Tunnels (管の表現)
       platforms.forEach((p, idx) => {
         ctx.strokeStyle = idx === 4 ? '#cc9900' : '#d9534f';
         ctx.lineWidth = 16;
@@ -501,11 +508,19 @@ function RollingCharacterArena() {
           ctx.fillRect(rx - 2, ry - 2, 4, 4);
         }
 
-        // 柵（フェンス）の描画
+        // 管（穴の部分）とフェンスの描画
         if (p.openSide === 'left') {
+          // 左端に管（穴）
+          ctx.fillStyle = '#3399ff';
+          ctx.fillRect(p.x1 - 4, p.y1 - 10, 12, 20);
+          // 右端にフェンス
           ctx.fillStyle = '#f59e0b';
           ctx.fillRect(p.x2 - 6, p.y2 - 25, 6, 25);
         } else if (p.openSide === 'right') {
+          // 右端に管（穴）
+          ctx.fillStyle = '#3399ff';
+          ctx.fillRect(p.x2 - 8, p.y2 - 10, 12, 20);
+          // 左端にフェンス
           ctx.fillStyle = '#f59e0b';
           ctx.fillRect(p.x1, p.y1 - 25, 6, 25);
         }
@@ -624,7 +639,7 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Watch the rings roll down, bounce cleanly off fences, and drop through gaps!<br />
+              Watch the rings roll along slopes, bounce off fences, and drop through pipe tunnels to the lower floors!<br />
               If the Kana and Romaji **match, collect them for points**. If they **don't match, touching them reduces HP**!<br />
               Climb the ladders (↑ key) to reach AI Yamato at the top!
             </p>
