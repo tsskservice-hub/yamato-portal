@@ -58,7 +58,7 @@ interface RingNode {
   y: number;
   radius: number;
   vx: number;
-  floorIndex: number; // 0: 最下段, 1: 2段目, 2: 3段目, 3: 4段目(最上段の下)
+  floorIndex: number; // 0: 最下段, 1: 2段目, 2: 3段目, 3: 4段目(一番上の段)
   rotation: number;
   vRot: number;
   data: { kana: string; romaji: string; correct: boolean };
@@ -278,7 +278,7 @@ function RollingCharacterArena() {
       { x1: 50, y1: 520, x2: 750, y2: 500, direction: 1, isGoal: false },  // 最下段（右向き）
       { x1: 50, y1: 410, x2: 750, y2: 430, direction: -1, isGoal: false }, // 2段目（左向き）
       { x1: 50, y1: 300, x2: 750, y2: 280, direction: 1, isGoal: false },  // 3段目（右向き）
-      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 4段目（1段目・左向き）
+      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 4段目（一番上の段・左向き）
       { x1: 250, y1: 90, x2: 550, y2: 90, direction: 0, isGoal: true }     // 最上段（フラットなゴールエリア）
     ];
 
@@ -409,7 +409,7 @@ function RollingCharacterArena() {
         return;
       }
 
-      // Spawn rings at 2段目の右側 (floorIndex = 1 の右端)
+      // Spawn rings at 一番上の段の左側 (floorIndex = 3 の左端から右向きにスタート)
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = Math.max(90 - (currentStage * 15), 50);
@@ -419,13 +419,13 @@ function RollingCharacterArena() {
         const data = dataset[Math.floor(Math.random() * dataset.length)];
         
         rings.push({
-          x: 720,
-          y: platforms[1].y2 - 25,
+          x: 80,
+          y: platforms[3].y1 - 25,
           radius: 22,
-          vx: -2.0,
-          floorIndex: 1,
+          vx: 2.0, // 一番上の段の左側から右へ転がる
+          floorIndex: 3,
           rotation: 0,
-          vRot: -0.1,
+          vRot: 0.1,
           data: data
         });
       }
@@ -448,7 +448,7 @@ function RollingCharacterArena() {
         let minX = 50;
         let maxX = 750;
 
-        // 画面外へ達したら次の下の段へスライドイン（directionがundefinedの場合は1をフォールバック）
+        // 画面外へ達したら次の下の段へスライドイン
         if (r.x > maxX && r.vx > 0) {
           if (r.floorIndex > 0) {
             r.floorIndex--;
@@ -641,7 +641,7 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll smoothly across wide slopes and drop down to lower floors!<br />
+              Rings roll from the top-left across slopes and cascade down to lower floors!<br />
               Reach the treasure chest at the top flat goal and type the secret word to win!<br />
               Climb the ladders (↑ key) to reach the top!
             </p>
