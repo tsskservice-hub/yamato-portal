@@ -9,7 +9,7 @@ import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// Character Data Sets by Stage
+// Character Data Sets by Stage (正解と不正解のトリックが必ず含まれるデータ)
 const KANA_DATA_SETS = {
   1: [ // Beginner: A-row, Ka-row
     { kana: 'あ', romaji: 'a', correct: true },
@@ -20,7 +20,8 @@ const KANA_DATA_SETS = {
     { kana: 'か', romaji: 'ka', correct: true },
     { kana: 'き', romaji: 'ki', correct: true },
     { kana: 'あ', romaji: 'o', correct: false }, // Trick
-    { kana: 'い', romaji: 'a', correct: false }
+    { kana: 'い', romaji: 'a', correct: false },  // Trick
+    { kana: 'う', romaji: 'e', correct: false }   // Trick
   ],
   2: [ // Intermediate: Sa-row, Ta-row, Na-row
     { kana: 'さ', romaji: 'sa', correct: true },
@@ -30,8 +31,9 @@ const KANA_DATA_SETS = {
     { kana: 'ち', romaji: 'chi', correct: true },
     { kana: 'な', romaji: 'na', correct: true },
     { kana: 'に', romaji: 'ni', correct: true },
-    { kana: 'し', romaji: 'su', correct: false },
-    { kana: 'た', romaji: 'na', correct: false }
+    { kana: 'し', romaji: 'su', correct: false }, // Trick
+    { kana: 'た', romaji: 'na', correct: false }, // Trick
+    { kana: 'な', romaji: 'shi', correct: false }// Trick
   ],
   3: [ // Advanced: Ha-row, Ma-row, Ra-row, Dakuten
     { kana: 'は', romaji: 'ha', correct: true },
@@ -40,12 +42,13 @@ const KANA_DATA_SETS = {
     { kana: 'ら', romaji: 'ra', correct: true },
     { kana: 'が', romaji: 'ga', correct: true },
     { kana: 'ざ', romaji: 'za', correct: true },
-    { kana: 'は', romaji: 'ma', correct: false },
-    { kana: 'ら', romaji: 'ta', correct: false }
+    { kana: 'は', romaji: 'ma', correct: false }, // Trick
+    { kana: 'ら', romaji: 'ta', correct: false }, // Trick
+    { kana: 'が', romaji: 'da', correct: false }  // Trick
   ]
 };
 
-// 3文字のランダムタイピングワード
+// 3文字のタイピングチャレンジ問題
 const TYPING_WORDS = [
   { word: 'cat', hint: 'ねこ (cat)' },
   { word: 'dog', hint: 'いぬ (dog)' },
@@ -249,6 +252,14 @@ function RollingCharacterArena() {
             playSound('victory');
             setYamatoSpeech('Fantastic! You opened the treasure chest and completed the typing challenge!');
           }
+        } else {
+          // 間違えた場合は「振り出しに戻る」
+          playSound('damage');
+          setGameState('PLAYING');
+          setTypedIndex(0);
+          player.x = 100;
+          player.y = 498;
+          setYamatoSpeech('Oops! Incorrect key! 振り出しに戻る (Back to start)!');
         }
         return;
       }
@@ -274,7 +285,7 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義（傾斜を「ほぼ平ら、少しだけ傾斜」に調整）
+    // 各段の定義
     const platforms = [
       { x1: 50, y1: 520, x2: 750, y2: 512, direction: 1, isGoal: false },  // 最下段
       { x1: 50, y1: 410, x2: 750, y2: 418, direction: -1, isGoal: false }, // 3段目
@@ -381,7 +392,7 @@ function RollingCharacterArena() {
       if (player.x < 30) player.x = 30;
       if (player.x > 750) player.x = 750;
 
-      // Platform collisions for player (天井衝突・すり抜け防止 ＆ 着地判定)
+      // Platform collisions for player
       player.isGrounded = false;
       for (let p of platforms) {
         if (p.isGoal) {
@@ -397,13 +408,11 @@ function RollingCharacterArena() {
             let t = (player.x + player.w/2 - p.x1) / (p.x2 - p.x1);
             let surfaceY = p.y1 + t * (p.y2 - p.y1);
 
-            // 1. 下からジャンプして上の段の天井（下面）にぶつかった場合
             if (player.vy < 0 && player.y <= surfaceY + 16 && player.y >= surfaceY && player.y + player.h > surfaceY) {
               player.y = surfaceY;
-              player.vy = 0; // 天井にぶつかって落下に転じる
+              player.vy = 0;
             }
 
-            // 2. 落下中または着地時（vy >= 0）に足元が床の高さに一致した場合
             if (player.vy >= 0 && player.y + player.h >= surfaceY - 4 && player.y + player.h <= surfaceY + 10) {
               player.y = surfaceY - player.h;
               player.vy = 0;
@@ -420,14 +429,14 @@ function RollingCharacterArena() {
         setGameState('TYPING');
         setTypedIndex(0);
         playSound('victory');
-        setYamatoSpeech(`Treasure chest opened! Type "${targetWordObj.hint}" (3 letters) correctly to win!`);
+        setYamatoSpeech('Treasure chest opened! Type the roman characters below correctly to win!');
         return;
       }
 
-      // Spawn rings (~5秒に1回 = 300フレーム)
+      // Spawn rings (~3秒に1回 = 180フレームに1回)
       spawnTimer++;
       let currentStage = stageRef.current;
-      let spawnInterval = 300;
+      let spawnInterval = 180;
       if (spawnTimer >= spawnInterval) {
         spawnTimer = 0;
         const dataset = KANA_DATA_SETS[currentStage as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
@@ -667,8 +676,8 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll gently across nearly flat slopes every 5 seconds.<br />
-              Reach the treasure chest at the top and type the **3-letter word** to win!<br />
+              Rings roll down every 3 seconds. Collect correct Romaji rings!<br />
+              Open the treasure chest at the top and type the correct Romaji words (mistakes mean back to start!).<br />
               [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump
             </p>
             <button
@@ -683,17 +692,17 @@ function RollingCharacterArena() {
           </div>
         )}
 
-        {/* Typing Challenge Screen (3文字) */}
+        {/* Typing Challenge Screen */}
         {gameState === 'TYPING' && (
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
-            <h2 className="text-2xl font-black text-[#ffcc00]">🎁 Treasure Chest Opened!</h2>
-            <p className="text-sm text-[#ccc]">Type the following 3-letter word correctly to complete your climb:</p>
-            <div className="text-lg font-bold text-[#38bdf8]">{targetWordObj.hint}</div>
+            <h2 className="text-2xl font-black text-[#ffcc00]">🎁 宝箱が開きました！</h2>
+            <p className="text-sm text-[#ccc]">次の仮名のローマ字を、それぞれの仮名の下にあるスペースに正しく入力してね</p>
+            <div className="text-lg font-bold text-[#38bdf8]">問題: {targetWordObj.hint}</div>
             <div className="text-3xl font-mono tracking-widest bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl">
               <span className="text-emerald-400">{targetWordObj.word.slice(0, typedIndex)}</span>
               <span className="text-white underline">{targetWordObj.word.slice(typedIndex)}</span>
             </div>
-            <div className="text-xs text-[#888]">Type using your keyboard!</div>
+            <div className="text-xs text-[#ff5555]">※間違えると「振り出しに戻る」になるので気をつけて！</div>
           </div>
         )}
 
