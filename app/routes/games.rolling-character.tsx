@@ -9,9 +9,49 @@ import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// Character Data Sets by Stage (正解と不正解のトリックが必ず含まれるデータ)
+// Character Data Sets by Stage
 const KANA_DATA_SETS = {
-  1: [ // Beginner: A-row, Ka-row
+  1: [
+    { kana: 'あ', romaji: 'a' },
+    { kana: 'い', romaji: 'i' },
+    { kana: 'う', romaji: 'u' },
+    { kana: 'え', romaji: 'e' },
+    { kana: 'お', romaji: 'o' },
+    { kana: 'か', romaji: 'ka' },
+    { kana: 'き', romaji: 'ki' },
+    { kana: 'く', romaji: 'ku' },
+    { kana: 'け', romaji: 'ke' },
+    { kana: 'こ', romaji: 'ko' }
+  ],
+  2: [
+    { kana: 'さ', romaji: 'sa' },
+    { kana: 'し', romaji: 'shi' },
+    { kana: 'す', romaji: 'su' },
+    { kana: 'せ', romaji: 'se' },
+    { kana: 'そ', romaji: 'so' },
+    { kana: 'た', romaji: 'ta' },
+    { kana: 'ち', romaji: 'chi' },
+    { kana: 'つ', romaji: 'tsu' },
+    { kana: 'な', romaji: 'na' },
+    { kana: 'に', romaji: 'ni' }
+  ],
+  3: [
+    { kana: 'は', romaji: 'ha' },
+    { kana: 'ひ', romaji: 'hi' },
+    { kana: 'ふ', romaji: 'fu' },
+    { kana: 'ま', romaji: 'ma' },
+    { kana: 'み', romaji: 'mi' },
+    { kana: 'ら', romaji: 'ra' },
+    { kana: 'り', romaji: 'ri' },
+    { kana: 'が', romaji: 'ga' },
+    { kana: 'ざ', romaji: 'za' },
+    { kana: 'だ', romaji: 'da' }
+  ]
+};
+
+// トリック用のダミー判定を含む全データ（輪が転がる用）
+const KANA_ALL_SETS = {
+  1: [
     { kana: 'あ', romaji: 'a', correct: true },
     { kana: 'い', romaji: 'i', correct: true },
     { kana: 'う', romaji: 'u', correct: true },
@@ -19,11 +59,11 @@ const KANA_DATA_SETS = {
     { kana: 'お', romaji: 'o', correct: true },
     { kana: 'か', romaji: 'ka', correct: true },
     { kana: 'き', romaji: 'ki', correct: true },
-    { kana: 'あ', romaji: 'o', correct: false }, // Trick
-    { kana: 'い', romaji: 'a', correct: false },  // Trick
-    { kana: 'う', romaji: 'e', correct: false }   // Trick
+    { kana: 'あ', romaji: 'o', correct: false },
+    { kana: 'い', romaji: 'a', correct: false },
+    { kana: 'う', romaji: 'e', correct: false }
   ],
-  2: [ // Intermediate: Sa-row, Ta-row, Na-row
+  2: [
     { kana: 'さ', romaji: 'sa', correct: true },
     { kana: 'し', romaji: 'shi', correct: true },
     { kana: 'す', romaji: 'su', correct: true },
@@ -31,38 +71,29 @@ const KANA_DATA_SETS = {
     { kana: 'ち', romaji: 'chi', correct: true },
     { kana: 'な', romaji: 'na', correct: true },
     { kana: 'に', romaji: 'ni', correct: true },
-    { kana: 'し', romaji: 'su', correct: false }, // Trick
-    { kana: 'た', romaji: 'na', correct: false }, // Trick
-    { kana: 'な', romaji: 'shi', correct: false }// Trick
+    { kana: 'し', romaji: 'su', correct: false },
+    { kana: 'た', romaji: 'na', correct: false },
+    { kana: 'な', romaji: 'shi', correct: false }
   ],
-  3: [ // Advanced: Ha-row, Ma-row, Ra-row, Dakuten
+  3: [
     { kana: 'は', romaji: 'ha', correct: true },
     { kana: 'ひ', romaji: 'hi', correct: true },
     { kana: 'ま', romaji: 'ma', correct: true },
     { kana: 'ら', romaji: 'ra', correct: true },
     { kana: 'が', romaji: 'ga', correct: true },
     { kana: 'ざ', romaji: 'za', correct: true },
-    { kana: 'は', romaji: 'ma', correct: false }, // Trick
-    { kana: 'ら', romaji: 'ta', correct: false }, // Trick
-    { kana: 'が', romaji: 'da', correct: false }  // Trick
+    { kana: 'は', romaji: 'ma', correct: false },
+    { kana: 'ら', romaji: 'ta', correct: false },
+    { kana: 'が', romaji: 'da', correct: false }
   ]
 };
-
-// 3文字のタイピングチャレンジ問題
-const TYPING_WORDS = [
-  { word: 'cat', hint: 'ねこ (cat)' },
-  { word: 'dog', hint: 'いぬ (dog)' },
-  { word: 'sun', hint: 'ひ (sun)' },
-  { word: 'sky', hint: 'そら (sky)' },
-  { word: 'tea', hint: 'おちゃ (tea)' }
-];
 
 interface RingNode {
   x: number;
   y: number;
   radius: number;
   vx: number;
-  floorIndex: number; // 3: 一番上の段, 2: 3段目, 1: 2段目, 0: 最下段
+  floorIndex: number;
   rotation: number;
   vRot: number;
   data: { kana: string; romaji: string; correct: boolean };
@@ -161,11 +192,11 @@ function RollingCharacterArena() {
   const [score, setScore] = useState(0);
   const [stage, setStage] = useState(1);
   const [lives, setLives] = useState(3);
-  const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb to the top treasure chest and type the 3-letter word to win!');
+  const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb to the top treasure chest and input the 3 kana passwords to win!');
   
-  // Typing Challenge State (3文字)
-  const [targetWordObj, setTargetWordObj] = useState(TYPING_WORDS[0]);
-  const [typedIndex, setTypedIndex] = useState(0);
+  // 宝箱の鍵（ランダム3文字のひらがな問題と入力欄）
+  const [targetKanaList, setTargetKanaList] = useState<{ kana: string; romaji: string }[]>([]);
+  const [inputAnswers, setInputAnswers] = useState<string[]>(['', '', '']);
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
@@ -178,6 +209,16 @@ function RollingCharacterArena() {
 
   const livesRef = useRef(lives);
   livesRef.current = lives;
+
+  // 共通のサウンド再生ヘルパー
+  const playSoundRef = useRef<((type: 'jump' | 'correct' | 'damage' | 'victory' | 'type') => void) | null>(null);
+
+  // ランダムに3つの仮名問題を作成するヘルパー
+  const generateRandomKanaProblem = (st: number) => {
+    const list = KANA_DATA_SETS[st as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
+    const shuffled = [...list].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -238,31 +279,11 @@ function RollingCharacterArena() {
       } catch (e) {}
     };
 
+    playSoundRef.current = playSound;
+
     const keys = { left: false, right: false, up: false, down: false, space: false };
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameStateRef.current === 'TYPING') {
-        e.preventDefault();
-        const expectedChar = targetWordObj.word[typedIndex];
-        if (e.key.toLowerCase() === expectedChar.toLowerCase()) {
-          playSound('type');
-          const nextIdx = typedIndex + 1;
-          setTypedIndex(nextIdx);
-          if (nextIdx >= targetWordObj.word.length) {
-            setGameState('VICTORY');
-            playSound('victory');
-            setYamatoSpeech('Fantastic! You opened the treasure chest and completed the typing challenge!');
-          }
-        } else {
-          // 間違えた場合は「振り出しに戻る」
-          playSound('damage');
-          setGameState('PLAYING');
-          setTypedIndex(0);
-          player.x = 100;
-          player.y = 498;
-          setYamatoSpeech('Oops! Incorrect key! 振り出しに戻る (Back to start)!');
-        }
-        return;
-      }
+      if (gameStateRef.current === 'TYPING') return;
 
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'w', 'a', 's', 'd'].includes(e.code) || e.key === ' ') {
         e.preventDefault();
@@ -275,6 +296,8 @@ function RollingCharacterArena() {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      if (gameStateRef.current === 'TYPING') return;
+
       if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
       if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
       if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
@@ -287,11 +310,11 @@ function RollingCharacterArena() {
 
     // 各段の定義
     const platforms = [
-      { x1: 50, y1: 520, x2: 750, y2: 512, direction: 1, isGoal: false },  // 最下段
-      { x1: 50, y1: 410, x2: 750, y2: 418, direction: -1, isGoal: false }, // 3段目
-      { x1: 50, y1: 300, x2: 750, y2: 292, direction: 1, isGoal: false },  // 2段目
-      { x1: 50, y1: 190, x2: 750, y2: 198, direction: -1, isGoal: false }, // 一番上の段
-      { x1: 250, y1: 90, x2: 550, y2: 90, direction: 0, isGoal: true }     // 最上段ゴールエリア
+      { x1: 50, y1: 520, x2: 750, y2: 512, isGoal: false },  // 最下段 (0)
+      { x1: 50, y1: 410, x2: 750, y2: 418, isGoal: false }, // 2段目 (1)
+      { x1: 50, y1: 300, x2: 750, y2: 292, isGoal: false },  // 3段目 (2)
+      { x1: 50, y1: 190, x2: 750, y2: 198, isGoal: false }, // 一番上の段 (3)
+      { x1: 250, y1: 90, x2: 550, y2: 90, isGoal: true }     // 最上段ゴールエリア
     ];
 
     const ladders = [
@@ -332,11 +355,10 @@ function RollingCharacterArena() {
       player.y = 498;
       player.vx = 0;
       player.vy = 0;
-      setTypedIndex(0);
-      const randomWord = TYPING_WORDS[Math.floor(Math.random() * TYPING_WORDS.length)];
-      setTargetWordObj(randomWord);
+      setTargetKanaList(generateRandomKanaProblem(st));
+      setInputAnswers(['', '', '']);
       setGameState('PLAYING');
-      setYamatoSpeech(`Stage ${st} Start! Climb to the top and open the treasure chest!`);
+      setYamatoSpeech(`Stage ${st} Start! Climb to the top and input the 3 kana passwords!`);
     };
 
     let animationFrameId: number;
@@ -422,39 +444,57 @@ function RollingCharacterArena() {
         }
       }
 
-      // Goal detection
+      // Goal detection -> 宝箱に到着したら入力画面（TYPING）へ
       let goalP = platforms[4];
       if (player.y + player.h <= goalP.y1 + 10 &&
           player.x >= goalP.x1 + 40 && player.x + player.w <= goalP.x2 - 40) {
         setGameState('TYPING');
-        setTypedIndex(0);
+        setInputAnswers(['', '', '']);
         playSound('victory');
-        setYamatoSpeech('Treasure chest opened! Type the roman characters below correctly to win!');
+        setYamatoSpeech('Treasure chest reached! Input the correct romaji for each kana below!');
         return;
       }
 
-      // Spawn rings (~3秒に1回 = 180フレームに1回)
+      // Spawn rings (~3秒に1回 = 180フレーム)
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = 180;
       if (spawnTimer >= spawnInterval) {
         spawnTimer = 0;
-        const dataset = KANA_DATA_SETS[currentStage as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
-        const data = dataset[Math.floor(Math.random() * dataset.length)];
+        const allSets = KANA_ALL_SETS[currentStage as keyof typeof KANA_ALL_SETS] || KANA_ALL_SETS[1];
+        const data = allSets[Math.floor(Math.random() * allSets.length)];
         
+        const floorIdx = Math.floor(Math.random() * 4);
+        let startX = 60;
+        let startVx = 2.0;
+
+        if (floorIdx === 0) {
+          startX = 740;
+          startVx = -2.0;
+        } else {
+          const fromRight = Math.random() < 0.5;
+          if (fromRight) {
+            startX = 740;
+            startVx = -2.0;
+          } else {
+            startX = 60;
+            startVx = 2.0;
+          }
+        }
+
         rings.push({
-          x: 60,
-          y: platforms[3].y1 - 25,
+          x: startX,
+          y: platforms[floorIdx].y1 - 25,
           radius: 22,
-          vx: 2.0,
-          floorIndex: 3,
+          vx: startVx,
+          floorIndex: floorIdx,
           rotation: 0,
-          vRot: 0.1,
+          vRot: startVx > 0 ? 0.1 : -0.1,
           data: data
         });
       }
 
-      // Ring physics and zigzag continuation down to the bottom
+      // Ring physics and screen edge deletion
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
         let p = platforms[r.floorIndex];
@@ -467,43 +507,15 @@ function RollingCharacterArena() {
         surfaceY = p.y1 + t * (p.y2 - p.y1);
         r.y = surfaceY - r.radius;
 
-        let minX = 50;
-        let maxX = 750;
+        let minX = 40;
+        let maxX = 760;
 
         if (r.vx > 0 && r.x > maxX) {
-          if (r.floorIndex > 0) {
-            r.floorIndex--;
-            let nextP = platforms[r.floorIndex];
-            if (r.floorIndex === 2 || r.floorIndex === 0) {
-              r.x = nextP.x2 - 10;
-              r.vx = -2.0;
-              r.vRot = -0.1;
-            } else {
-              r.x = nextP.x1 + 10;
-              r.vx = 2.0;
-              r.vRot = 0.1;
-            }
-          } else {
-            rings.splice(i, 1);
-            continue;
-          }
+          rings.splice(i, 1);
+          continue;
         } else if (r.vx < 0 && r.x < minX) {
-          if (r.floorIndex > 0) {
-            r.floorIndex--;
-            let nextP = platforms[r.floorIndex];
-            if (r.floorIndex === 2 || r.floorIndex === 0) {
-              r.x = nextP.x2 - 10;
-              r.vx = -2.0;
-              r.vRot = -0.1;
-            } else {
-              r.x = nextP.x1 + 10;
-              r.vx = 2.0;
-              r.vRot = 0.1;
-            }
-          } else {
-            rings.splice(i, 1);
-            continue;
-          }
+          rings.splice(i, 1);
+          continue;
         }
 
         if (r.y > 620 || r.y < 0) {
@@ -551,7 +563,6 @@ function RollingCharacterArena() {
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      // Draw Slanted Platforms
       platforms.forEach((p) => {
         ctx.strokeStyle = p.isGoal ? '#cc9900' : '#d9534f';
         ctx.lineWidth = 16;
@@ -569,7 +580,6 @@ function RollingCharacterArena() {
         }
       });
 
-      // Ladders
       ladders.forEach(l => {
         ctx.fillStyle = '#3399ff';
         let rw = 24;
@@ -581,14 +591,12 @@ function RollingCharacterArena() {
         }
       });
 
-      // Treasure Chest on Top Platform
       let gp = platforms[4];
       ctx.fillStyle = '#854d0e';
       ctx.fillRect((gp.x1 + gp.x2)/2 - 20, gp.y1 - 28, 40, 24);
       ctx.fillStyle = '#facc15';
       ctx.fillRect((gp.x1 + gp.x2)/2 - 6, gp.y1 - 20, 12, 10);
 
-      // Rings
       rings.forEach(r => {
         ctx.save();
         ctx.translate(r.x, r.y);
@@ -618,21 +626,18 @@ function RollingCharacterArena() {
 
         ctx.restore();
 
-        // 内部のひらがな
         ctx.fillStyle = '#111122';
         ctx.font = 'bold 15px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(r.data.kana, r.x, r.y + 1);
 
-        // 輪の上のローマ字（大きく表示）
         ctx.fillStyle = '#ffff00';
         ctx.font = 'bold 18px monospace';
         ctx.textAlign = 'center';
         ctx.fillText(r.data.romaji, r.x, r.y - r.radius - 10);
       });
 
-      // Player
       if (invincibilityTimer % 4 < 2) {
         ctx.fillStyle = '#00ffcc';
         ctx.fillRect(player.x, player.y, player.w, player.h);
@@ -657,6 +662,29 @@ function RollingCharacterArena() {
     };
   }, []);
 
+  // 宝箱の鍵パスワード送信処理
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    let allCorrect = true;
+    for (let i = 0; i < targetKanaList.length; i++) {
+      if (inputAnswers[i].trim().toLowerCase() !== targetKanaList[i].romaji.toLowerCase()) {
+        allCorrect = false;
+        break;
+      }
+    }
+
+    if (allCorrect) {
+      if (playSoundRef.current) playSoundRef.current('victory');
+      setGameState('VICTORY');
+      setYamatoSpeech('Fantastic! All romaji answers are correct! You opened the treasure chest!');
+    } else {
+      if (playSoundRef.current) playSoundRef.current('damage');
+      setGameState('PLAYING');
+      setInputAnswers(['', '', '']);
+      setYamatoSpeech('Incorrect romaji! 振り出しに戻る (Back to start)!');
+    }
+  };
+
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800">
       {/* Status Bar */}
@@ -676,8 +704,8 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll down every 3 seconds. Collect correct Romaji rings!<br />
-              Open the treasure chest at the top and type the correct Romaji words (mistakes mean back to start!).<br />
+              Rings roll from both sides of every floor.<br />
+              Open the treasure chest at the top by inputting the correct romaji for 3 random kana!<br />
               [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump
             </p>
             <button
@@ -694,15 +722,42 @@ function RollingCharacterArena() {
 
         {/* Typing Challenge Screen */}
         {gameState === 'TYPING' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-5 z-30 p-6 text-center">
             <h2 className="text-2xl font-black text-[#ffcc00]">🎁 宝箱が開きました！</h2>
             <p className="text-sm text-[#ccc]">次の仮名のローマ字を、それぞれの仮名の下にあるスペースに正しく入力してね</p>
-            <div className="text-lg font-bold text-[#38bdf8]">問題: {targetWordObj.hint}</div>
-            <div className="text-3xl font-mono tracking-widest bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl">
-              <span className="text-emerald-400">{targetWordObj.word.slice(0, typedIndex)}</span>
-              <span className="text-white underline">{targetWordObj.word.slice(typedIndex)}</span>
-            </div>
-            <div className="text-xs text-[#ff5555]">※間違えると「振り出しに戻る」になるので気をつけて！</div>
+
+            <form onSubmit={handlePasswordSubmit} className="space-y-6">
+              <div className="flex justify-center gap-6">
+                {targetKanaList.map((item, idx) => (
+                  <div key={idx} className="flex flex-col items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-inner">
+                    <span className="text-4xl font-bold text-white mb-3">{item.kana}</span>
+                    <input
+                      type="text"
+                      maxLength={4}
+                      autoFocus={idx === 0}
+                      value={inputAnswers[idx]}
+                      onChange={(e) => {
+                        const newAnswers = [...inputAnswers];
+                        newAnswers[idx] = e.target.value;
+                        setInputAnswers(newAnswers);
+                      }}
+                      placeholder="romaji"
+                      className="bg-slate-900 border-2 border-[#ffcc00] rounded-lg px-3 py-2 text-center text-xl font-mono tracking-widest text-white focus:outline-none focus:border-emerald-400 w-24"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
+                >
+                  答え合わせして鍵を開ける！ (Enter)
+                </button>
+              </div>
+            </form>
+            <div className="text-xs text-[#ff5555]">※1つでも間違えると「振り出しに戻る」になるので気をつけて！</div>
           </div>
         )}
 
@@ -725,7 +780,7 @@ function RollingCharacterArena() {
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-[#ffcc00]">CONGRATULATIONS!</h2>
             <p className="text-sm text-[#ccc]">
-              {stage < 3 ? `Stage ${stage} Cleared! Excellent typing & climbing!` : `All Stages Completed! Master of Japanese Kana! (Final Score: ${score} pts)`}
+              {stage < 3 ? `Stage ${stage} Cleared! Excellent kana typing & climbing!` : `All Stages Completed! Master of Japanese Kana! (Final Score: ${score} pts)`}
             </p>
             <button
               onClick={() => {
