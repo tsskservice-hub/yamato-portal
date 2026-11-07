@@ -51,7 +51,6 @@ interface RingNode {
   radius: number;
   vx: number;
   vy: number;
-  dir: number;
   rotation: number;
   vRot: number;
   data: { kana: string; romaji: string; correct: boolean };
@@ -246,12 +245,13 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
+    // 各段の定義（傾き：x1,y1 から x2,y2、端の開口部：openSide）
     const platforms = [
-      { x: 50, y: 520, w: 700, h: 16 },
-      { x: 100, y: 410, w: 600, h: 16 },
-      { x: 50, y: 300, w: 700, h: 16 },
-      { x: 100, y: 190, w: 600, h: 16 },
-      { x: 250, y: 90, w: 300, h: 16 }
+      { x1: 50, y1: 520, x2: 750, y2: 520, openSide: 'none', isGoal: false }, // 最下段（床）
+      { x1: 100, y1: 410, x2: 700, y2: 380, openSide: 'left', isGoal: false },  // 3段目 (左端が開く)
+      { x1: 100, y1: 290, x2: 700, y2: 320, openSide: 'right', isGoal: false }, // 2段目 (右端が開く)
+      { x1: 100, y1: 190, x2: 700, y2: 160, openSide: 'left', isGoal: false },  // 1段目 (左端が開く)
+      { x1: 250, y1: 90, x2: 550, y2: 90, openSide: 'none', isGoal: true }     // 最上段 (ゴール)
     ];
 
     const ladders = [
@@ -343,28 +343,32 @@ function RollingCharacterArena() {
       if (player.x < 30) player.x = 30;
       if (player.x > 750) player.x = 750;
 
-      // Platform collisions & landing
+      // Platform collisions for player (slanted surface calculation)
       player.isGrounded = false;
       for (let p of platforms) {
-        if (player.vy >= 0 &&
-            player.x + player.w > p.x && player.x < p.x + p.w &&
-            player.y + player.h >= p.y && player.y + player.h <= p.y + p.h + 12) {
-          player.y = p.y - player.h;
-          player.vy = 0;
-          player.isGrounded = true;
+        let minX = Math.min(p.x1, p.x2);
+        let maxX = Math.max(p.x1, p.x2);
+        if (player.x + player.w > minX && player.x < maxX) {
+          let t = (player.x + player.w/2 - p.x1) / (p.x2 - p.x1);
+          let surfaceY = p.y1 + t * (p.y2 - p.y1);
+          if (player.vy >= 0 && player.y + player.h >= surfaceY - 6 && player.y + player.h <= surfaceY + 14) {
+            player.y = surfaceY - player.h;
+            player.vy = 0;
+            player.isGrounded = true;
+          }
         }
       }
 
       // Goal detection
       let goalP = platforms[4];
-      if (player.y + player.h <= goalP.y + 10 &&
-          player.x >= goalP.x && player.x + player.w <= goalP.x + goalP.w) {
+      if (player.y + player.h <= goalP.y1 + 10 &&
+          player.x >= goalP.x1 && player.x + player.w <= goalP.x2) {
         setGameState('VICTORY');
         playSound('victory');
         return;
       }
 
-      // Spawn rings from upper platforms (Fixed spawning from top)
+      // Spawn rings from top platform area
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = Math.max(90 - (currentStage * 15), 50);
@@ -373,39 +377,50 @@ function RollingCharacterArena() {
         const dataset = KANA_DATA_SETS[currentStage as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
         const data = dataset[Math.floor(Math.random() * dataset.length)];
         
-        // Spawn from upper platforms (Index 3 or Index 2) so they drop down reliably
-        const spawnPlatform = Math.random() > 0.5 ? platforms[3] : platforms[2];
-        const startX = Math.random() > 0.5 ? spawnPlatform.x + 30 : spawnPlatform.x + spawnPlatform.w - 30;
-        const dir = startX < 400 ? 1 : -1;
-
         rings.push({
-          x: startX,
-          y: spawnPlatform.y - 25,
+          x: 350 + Math.random() * 100,
+          y: 60,
           radius: 22,
-          vx: dir * (2 + currentStage * 0.4),
-          vy: 1.5,
-          dir: dir,
+          vx: 1.5,
+          vy: 1,
           rotation: 0,
-          vRot: dir * 0.08,
+          vRot: 0.08,
           data: data
         });
       }
 
-      // Ring updates & physics
+      // Ring physics along slopes and falling through gaps
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
-        r.vy += 0.3; // Gravity for rings
+        r.vy += 0.35; // Gravity
         r.x += r.vx;
         r.y += r.vy;
         r.rotation += r.vRot;
 
         for (let p of platforms) {
-          if (r.x > p.x && r.x < p.x + p.w && Math.abs((r.y + r.radius) - p.y) < 6 && r.vy >= 0) {
-            r.vy = -r.vy * 0.4; // Small bounce on platforms
-            r.y = p.y - r.radius;
-            if (r.dir === 1 && r.x >= p.x + p.w - 30) r.dir = -1;
-            if (r.dir === -1 && r.x <= p.x + 30) r.dir = 1;
-            r.vx = r.dir * (2 + currentStage * 0.5);
+          let minX = Math.min(p.x1, p.x2);
+          let maxX = Math.max(p.x1, p.x2);
+
+          if (r.x >= minX && r.x <= maxX) {
+            let t = (r.x - p.x1) / (p.x2 - p.x1);
+            let surfaceY = p.y1 + t * (p.y2 - p.y1);
+
+            if (r.y + r.radius >= surfaceY && r.y + r.radius <= surfaceY + 12 && r.vy >= 0) {
+              r.y = surfaceY - r.radius;
+              
+              let slope = (p.y2 - p.y1) / (p.x2 - p.x1);
+              r.vx = -slope * 4.5 + (p.x2 > p.x1 ? 1.5 : -1.5);
+              r.vy = slope * r.vx;
+              r.vRot = r.vx * 0.05;
+
+              if (p.openSide === 'right' && r.x >= maxX - 25) {
+                r.vx = 2.5;
+                r.vy = 2.0;
+              } else if (p.openSide === 'left' && r.x <= minX + 25) {
+                r.vx = -2.5;
+                r.vy = 2.0;
+              }
+            }
           }
         }
 
@@ -454,13 +469,21 @@ function RollingCharacterArena() {
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      // Platforms
+      // Draw Slanted Platforms
       platforms.forEach((p, idx) => {
-        ctx.fillStyle = idx === 4 ? '#cc9900' : '#d9534f';
-        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.strokeStyle = idx === 4 ? '#cc9900' : '#d9534f';
+        ctx.lineWidth = 16;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(p.x1, p.y1);
+        ctx.lineTo(p.x2, p.y2);
+        ctx.stroke();
+
         ctx.fillStyle = '#fff';
-        for (let rx = p.x + 15; rx < p.x + p.w - 10; rx += 40) {
-          ctx.fillRect(rx, p.y + 4, 4, 4);
+        for (let t = 0.1; t < 0.9; t += 0.2) {
+          let rx = p.x1 + t * (p.x2 - p.x1);
+          let ry = p.y1 + t * (p.y2 - p.y1);
+          ctx.fillRect(rx - 2, ry - 2, 4, 4);
         }
       });
 
@@ -480,7 +503,7 @@ function RollingCharacterArena() {
       let gp = platforms[4];
       ctx.fillStyle = '#ffcc00';
       ctx.beginPath();
-      ctx.arc(gp.x + gp.w/2, gp.y - 20, 16, 0, Math.PI * 2);
+      ctx.arc((gp.x1 + gp.x2)/2, gp.y1 - 20, 16, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
@@ -488,15 +511,14 @@ function RollingCharacterArena() {
       ctx.fillStyle = '#111';
       ctx.font = 'bold 12px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('AI', gp.x + gp.w/2, gp.y - 16);
+      ctx.fillText('AI', (gp.x1 + gp.x2)/2, gp.y1 - 16);
 
-      // Rings (with rolling visual pattern/spokes)
+      // Rings (rolling with internal spokes)
       rings.forEach(r => {
         ctx.save();
         ctx.translate(r.x, r.y);
         ctx.rotate(r.rotation);
 
-        // Outer Ring
         ctx.beginPath();
         ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
         ctx.fillStyle = '#ff7700';
@@ -505,13 +527,11 @@ function RollingCharacterArena() {
         ctx.strokeStyle = '#ffffff';
         ctx.stroke();
 
-        // Inner hole
         ctx.beginPath();
         ctx.arc(0, 0, r.radius - 7, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
 
-        // Cross spokes to show rolling rotation
         ctx.strokeStyle = '#ff7700';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -523,7 +543,7 @@ function RollingCharacterArena() {
 
         ctx.restore();
 
-        // Text upright
+        // Upright text
         ctx.fillStyle = '#111122';
         ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
@@ -580,7 +600,7 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Check the rolling character rings from above!<br />
+              Watch the rings roll down the alternating slopes from top to bottom!<br />
               If the Kana and Romaji **match, collect them for points**. If they **don't match, touching them reduces HP**!<br />
               Climb the ladders (↑ key) to reach AI Yamato at the top!
             </p>
@@ -615,7 +635,7 @@ function RollingCharacterArena() {
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-[#ffcc00]">STAGE CLEAR!</h2>
             <p className="text-sm text-[#ccc]">
-              {stage < 3 ? `Stage ${stage} Cleared! Great job!` : `All Stages Completed! Congratulations! (Final Score: ${score} pts)`}
+              {stage < 3 ? `Stage ${stage} Cleared! Great job!` : `All Stages Completed! Congratulations! (Final Score: {score} pts)`}
             </p>
             <button
               onClick={() => {
