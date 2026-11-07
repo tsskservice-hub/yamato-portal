@@ -45,12 +45,20 @@ const KANA_DATA_SETS = {
   ]
 };
 
+const TYPING_WORDS = [
+  { word: 'yamato', hint: 'やまと (Yamato)' },
+  { word: 'nihon', hint: 'にほん (Japan)' },
+  { word: 'arigatou', hint: 'ありがとう (Thank you)' },
+  { word: 'sakura', hint: 'さくら (Cherry blossom)' },
+  { word: 'kore ga', hint: 'これがいちばん (This is the best)' }
+];
+
 interface RingNode {
   x: number;
   y: number;
   radius: number;
   vx: number;
-  floorIndex: number; // 現在どの段（0〜4）にいるか
+  floorIndex: number; // 0: 最下段, 1: 2段目, 2: 3段目, 3: 4段目(最上段の下)
   rotation: number;
   vRot: number;
   data: { kana: string; romaji: string; correct: boolean };
@@ -145,11 +153,15 @@ export default function RollingCharacterPage() {
 function RollingCharacterArena() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'GAMEOVER' | 'VICTORY'>('START');
+  const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'TYPING' | 'GAMEOVER' | 'VICTORY'>('START');
   const [score, setScore] = useState(0);
   const [stage, setStage] = useState(1);
   const [lives, setLives] = useState(3);
-  const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb the ladders to reach the top goal! Collect correct Romaji rings!');
+  const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb to the top treasure chest and type the secret word to win!');
+  
+  // Typing Challenge State
+  const [targetWordObj, setTargetWordObj] = useState(TYPING_WORDS[0]);
+  const [typedIndex, setTypedIndex] = useState(0);
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
@@ -176,7 +188,7 @@ function RollingCharacterArena() {
       }
     };
 
-    const playSound = (type: 'jump' | 'correct' | 'damage' | 'victory') => {
+    const playSound = (type: 'jump' | 'correct' | 'damage' | 'victory' | 'type') => {
       if (!audioCtx) return;
       try {
         const osc = audioCtx.createOscillator();
@@ -193,7 +205,7 @@ function RollingCharacterArena() {
           gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
           osc.start(now);
           osc.stop(now + 0.15);
-        } else if (type === 'correct') {
+        } else if (type === 'correct' || type === 'type') {
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(440, now);
           osc.frequency.setValueAtTime(880, now + 0.1);
@@ -224,6 +236,22 @@ function RollingCharacterArena() {
 
     const keys = { left: false, right: false, up: false, down: false, space: false };
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameStateRef.current === 'TYPING') {
+        e.preventDefault();
+        const expectedChar = targetWordObj.word[typedIndex];
+        if (e.key.toLowerCase() === expectedChar.toLowerCase()) {
+          playSound('type');
+          const nextIdx = typedIndex + 1;
+          setTypedIndex(nextIdx);
+          if (nextIdx >= targetWordObj.word.length) {
+            setGameState('VICTORY');
+            playSound('victory');
+            setYamatoSpeech('Fantastic! You opened the treasure chest and completed the typing challenge!');
+          }
+        }
+        return;
+      }
+
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'w', 'a', 's', 'd'].includes(e.code) || e.key === ' ') {
         e.preventDefault();
       }
@@ -245,21 +273,20 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 段の定義 (index 0: 最下段, 1: 3段目, 2: 2段目, 3: 1段目, 4: 最上段ゴール)
-    // openSide: 'left'なら左端に穴(管)、'right'なら右端に穴(管)
+    // 各段の定義
     const platforms = [
-      { x1: 50, y1: 520, x2: 750, y2: 520, openSide: 'none', isGoal: false }, // 床
-      { x1: 100, y1: 410, x2: 700, y2: 380, openSide: 'left', isGoal: false },  // 3段目 (左に穴)
-      { x1: 100, y1: 290, x2: 700, y2: 320, openSide: 'right', isGoal: false }, // 2段目 (右に穴)
-      { x1: 100, y1: 190, x2: 700, y2: 160, openSide: 'left', isGoal: false },  // 1段目 (左に穴)
-      { x1: 250, y1: 90, x2: 550, y2: 90, openSide: 'none', isGoal: true }     // 最上段
+      { x1: 50, y1: 520, x2: 750, y2: 500, direction: 1, isGoal: false },  // 最下段（右向き）
+      { x1: 50, y1: 410, x2: 750, y2: 430, direction: -1, isGoal: false }, // 2段目（左向き）
+      { x1: 50, y1: 300, x2: 750, y2: 280, direction: 1, isGoal: false },  // 3段目（右向き）
+      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 4段目（1段目・左向き）
+      { x1: 250, y1: 90, x2: 550, y2: 90, direction: 0, isGoal: true }     // 最上段（フラットなゴールエリア）
     ];
 
     const ladders = [
-      { x: 650, y: 410, h: 110 },
-      { x: 150, y: 300, h: 110 },
-      { x: 650, y: 190, h: 110 },
-      { x: 380, y: 90, h: 100 }
+      { x: 680, y: 410, h: 110 },
+      { x: 120, y: 300, h: 110 },
+      { x: 680, y: 190, h: 110 },
+      { x: 400, y: 90, h: 100 }
     ];
 
     let player = {
@@ -293,8 +320,11 @@ function RollingCharacterArena() {
       player.y = 480;
       player.vx = 0;
       player.vy = 0;
+      setTypedIndex(0);
+      const randomWord = TYPING_WORDS[Math.floor(Math.random() * TYPING_WORDS.length)];
+      setTargetWordObj(randomWord);
       setGameState('PLAYING');
-      setYamatoSpeech(`Stage ${st} Start! Climb up to the top goal!`);
+      setYamatoSpeech(`Stage ${st} Start! Climb to the top and open the treasure chest!`);
     };
 
     let animationFrameId: number;
@@ -347,15 +377,23 @@ function RollingCharacterArena() {
       // Platform collisions for player
       player.isGrounded = false;
       for (let p of platforms) {
-        let minX = Math.min(p.x1, p.x2);
-        let maxX = Math.max(p.x1, p.x2);
-        if (player.x + player.w > minX && player.x < maxX) {
-          let t = (player.x + player.w/2 - p.x1) / (p.x2 - p.x1);
-          let surfaceY = p.y1 + t * (p.y2 - p.y1);
-          if (player.vy >= 0 && player.y + player.h >= surfaceY - 6 && player.y + player.h <= surfaceY + 14) {
-            player.y = surfaceY - player.h;
+        if (p.isGoal) {
+          if (player.x + player.w > p.x1 && player.x < p.x2 && player.y + player.h >= p.y1 - 6 && player.y + player.h <= p.y1 + 14 && player.vy >= 0) {
+            player.y = p.y1 - player.h;
             player.vy = 0;
             player.isGrounded = true;
+          }
+        } else {
+          let minX = Math.min(p.x1, p.x2);
+          let maxX = Math.max(p.x1, p.x2);
+          if (player.x + player.w > minX && player.x < maxX) {
+            let t = (player.x + player.w/2 - p.x1) / (p.x2 - p.x1);
+            let surfaceY = p.y1 + t * (p.y2 - p.y1);
+            if (player.vy >= 0 && player.y + player.h >= surfaceY - 6 && player.y + player.h <= surfaceY + 14) {
+              player.y = surfaceY - player.h;
+              player.vy = 0;
+              player.isGrounded = true;
+            }
           }
         }
       }
@@ -363,13 +401,15 @@ function RollingCharacterArena() {
       // Goal detection
       let goalP = platforms[4];
       if (player.y + player.h <= goalP.y1 + 10 &&
-          player.x >= goalP.x1 && player.x + player.w <= goalP.x2) {
-        setGameState('VICTORY');
+          player.x >= goalP.x1 + 40 && player.x + player.w <= goalP.x2 - 40) {
+        setGameState('TYPING');
+        setTypedIndex(0);
         playSound('victory');
+        setYamatoSpeech(`Treasure chest opened! Type "${targetWordObj.hint}" correctly to win!`);
         return;
       }
 
-      // Spawn rings at the top stage (floorIndex = 3)
+      // Spawn rings at 2段目の右側 (floorIndex = 1 の右端)
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = Math.max(90 - (currentStage * 15), 50);
@@ -379,78 +419,65 @@ function RollingCharacterArena() {
         const data = dataset[Math.floor(Math.random() * dataset.length)];
         
         rings.push({
-          x: 400,
-          y: platforms[3].y1 - 25,
+          x: 720,
+          y: platforms[1].y2 - 25,
           radius: 22,
-          vx: 2.0, // 1段目は右へ転がる
-          floorIndex: 3, // 最上段のすぐ下（1段目）からスタート
+          vx: -2.0,
+          floorIndex: 1,
           rotation: 0,
-          vRot: 0.1,
+          vRot: -0.1,
           data: data
         });
       }
 
-      // 管を通るスムーズな往復リレー移動
+      // Ring physics and floor-to-floor continuation
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
         let p = platforms[r.floorIndex];
 
-        // 傾斜に沿った移動
         r.x += r.vx;
         r.rotation += r.vRot;
 
-        // 現在のx座標における床のY高さを計算
-        let t = (r.x - p.x1) / (p.x2 - p.x1);
-        r.y = (p.y1 + t * (p.y2 - p.y1)) - r.radius;
-
-        let minX = Math.min(p.x1, p.x2) + 15;
-        let maxX = Math.max(p.x1, p.x2) - 15;
-
-        // 1. 端（フェンス側）にぶつかったら反対へ折り返す
-        if (p.openSide === 'left' && r.x >= maxX) {
-          r.vx = -Math.abs(r.vx);
-          r.x = maxX;
-          r.vRot = -r.vRot;
-        } else if (p.openSide === 'right' && r.x <= minX) {
-          r.vx = Math.abs(r.vx);
-          r.x = minX;
-          r.vRot = -r.vRot;
+        let surfaceY = p.y1;
+        if (!p.isGoal) {
+          let t = (r.x - p.x1) / (p.x2 - p.x1);
+          surfaceY = p.y1 + t * (p.y2 - p.y1);
         }
+        r.y = surfaceY - r.radius;
 
-        // 2. 穴（開口部・管の入口）に到達したら下の段へワープ落下
-        let reachedHole = false;
-        if (p.openSide === 'left' && r.x <= minX) {
-          reachedHole = true;
-        } else if (p.openSide === 'right' && r.x >= maxX) {
-          reachedHole = true;
-        }
+        let minX = 50;
+        let maxX = 750;
 
-        if (reachedHole) {
+        // 画面外へ達したら次の下の段へスライドイン（directionがundefinedの場合は1をフォールバック）
+        if (r.x > maxX && r.vx > 0) {
           if (r.floorIndex > 0) {
-            // 下の段へ移動（管を通る演出として床の反対側から出現）
             r.floorIndex--;
             let nextP = platforms[r.floorIndex];
-            if (nextP.openSide === 'left') {
-              r.x = Math.max(nextP.x1, nextP.x2) - 30; // 右側から登場して左へ転がる
-              r.vx = -2.0;
-            } else {
-              r.x = Math.min(nextP.x1, nextP.x2) + 30; // 左側から登場して右へ転がる
-              r.vx = 2.0;
-            }
+            r.x = nextP.x1 + 10;
+            const nextDir = nextP.direction ?? 1;
+            r.vx = nextDir > 0 ? 2.0 : -2.0;
           } else {
-            // 最下段の端に達したら消去
+            rings.splice(i, 1);
+            continue;
+          }
+        } else if (r.x < minX && r.vx < 0) {
+          if (r.floorIndex > 0) {
+            r.floorIndex--;
+            let nextP = platforms[r.floorIndex];
+            r.x = nextP.x2 - 10;
+            const nextDir = nextP.direction ?? 1;
+            r.vx = nextDir > 0 ? 2.0 : -2.0;
+          } else {
             rings.splice(i, 1);
             continue;
           }
         }
 
-        // 画面外セーフティ
-        if (r.y > 620 || r.x < -50 || r.x > 850) {
+        if (r.y > 620 || r.y < 0) {
           rings.splice(i, 1);
           continue;
         }
 
-        // プレイヤーとの接触判定
         let distX = Math.abs(player.x + player.w/2 - r.x);
         let distY = Math.abs(player.y + player.h/2 - r.y);
         let hitDist = Math.sqrt(distX * distX + distY * distY);
@@ -491,9 +518,9 @@ function RollingCharacterArena() {
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      // Draw Slanted Platforms and Pipe Tunnels (管の表現)
-      platforms.forEach((p, idx) => {
-        ctx.strokeStyle = idx === 4 ? '#cc9900' : '#d9534f';
+      // Draw Slanted Platforms
+      platforms.forEach((p) => {
+        ctx.strokeStyle = p.isGoal ? '#cc9900' : '#d9534f';
         ctx.lineWidth = 16;
         ctx.lineCap = 'round';
         ctx.beginPath();
@@ -506,23 +533,6 @@ function RollingCharacterArena() {
           let rx = p.x1 + t * (p.x2 - p.x1);
           let ry = p.y1 + t * (p.y2 - p.y1);
           ctx.fillRect(rx - 2, ry - 2, 4, 4);
-        }
-
-        // 管（穴の部分）とフェンスの描画
-        if (p.openSide === 'left') {
-          // 左端に管（穴）
-          ctx.fillStyle = '#3399ff';
-          ctx.fillRect(p.x1 - 4, p.y1 - 10, 12, 20);
-          // 右端にフェンス
-          ctx.fillStyle = '#f59e0b';
-          ctx.fillRect(p.x2 - 6, p.y2 - 25, 6, 25);
-        } else if (p.openSide === 'right') {
-          // 右端に管（穴）
-          ctx.fillStyle = '#3399ff';
-          ctx.fillRect(p.x2 - 8, p.y2 - 10, 12, 20);
-          // 左端にフェンス
-          ctx.fillStyle = '#f59e0b';
-          ctx.fillRect(p.x1, p.y1 - 25, 6, 25);
         }
       });
 
@@ -538,21 +548,14 @@ function RollingCharacterArena() {
         }
       });
 
-      // Goal Icon
+      // Treasure Chest on Top Platform
       let gp = platforms[4];
-      ctx.fillStyle = '#ffcc00';
-      ctx.beginPath();
-      ctx.arc((gp.x1 + gp.x2)/2, gp.y1 - 20, 16, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.fillStyle = '#111';
-      ctx.font = 'bold 12px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('AI', (gp.x1 + gp.x2)/2, gp.y1 - 16);
+      ctx.fillStyle = '#854d0e';
+      ctx.fillRect((gp.x1 + gp.x2)/2 - 20, gp.y1 - 28, 40, 24);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect((gp.x1 + gp.x2)/2 - 6, gp.y1 - 20, 12, 10);
 
-      // Rings (rolling with internal spokes)
+      // Rings
       rings.forEach(r => {
         ctx.save();
         ctx.translate(r.x, r.y);
@@ -582,7 +585,6 @@ function RollingCharacterArena() {
 
         ctx.restore();
 
-        // Upright text
         ctx.fillStyle = '#111122';
         ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
@@ -639,9 +641,9 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Watch the rings roll along slopes, bounce off fences, and drop through pipe tunnels to the lower floors!<br />
-              If the Kana and Romaji **match, collect them for points**. If they **don't match, touching them reduces HP**!<br />
-              Climb the ladders (↑ key) to reach AI Yamato at the top!
+              Rings roll smoothly across wide slopes and drop down to lower floors!<br />
+              Reach the treasure chest at the top flat goal and type the secret word to win!<br />
+              Climb the ladders (↑ key) to reach the top!
             </p>
             <button
               onClick={() => (window as any).__startRollingGame(1)}
@@ -655,11 +657,25 @@ function RollingCharacterArena() {
           </div>
         )}
 
+        {/* Typing Challenge Screen */}
+        {gameState === 'TYPING' && (
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
+            <h2 className="text-2xl font-black text-[#ffcc00]">🎁 Treasure Chest Opened!</h2>
+            <p className="text-sm text-[#ccc]">Type the following word correctly to complete your climb:</p>
+            <div className="text-lg font-bold text-[#38bdf8]">{targetWordObj.hint}</div>
+            <div className="text-3xl font-mono tracking-widest bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl">
+              <span className="text-emerald-400">{targetWordObj.word.slice(0, typedIndex)}</span>
+              <span className="text-white underline">{targetWordObj.word.slice(typedIndex)}</span>
+            </div>
+            <div className="text-xs text-[#888]">Type using your keyboard!</div>
+          </div>
+        )}
+
         {/* Game Over Screen */}
         {gameState === 'GAMEOVER' && (
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
             <h2 className="text-3xl font-black text-red-500">GAME OVER</h2>
-            <p className="text-sm text-[#ccc]">Score: {score} pts. Try again while carefully checking Kana and Romaji!</p>
+            <p className="text-sm text-[#ccc]">Score: {score} pts. Try again!</p>
             <button
               onClick={() => (window as any).__startRollingGame(1)}
               className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
@@ -672,9 +688,9 @@ function RollingCharacterArena() {
         {/* Victory Screen */}
         {gameState === 'VICTORY' && (
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
-            <h2 className="text-3xl font-black text-[#ffcc00]">STAGE CLEAR!</h2>
+            <h2 className="text-3xl font-black text-[#ffcc00]">CONGRATULATIONS!</h2>
             <p className="text-sm text-[#ccc]">
-              {stage < 3 ? `Stage ${stage} Cleared! Great job!` : `All Stages Completed! Congratulations! (Final Score: ${score} pts)`}
+              {stage < 3 ? `Stage ${stage} Cleared! Excellent typing & climbing!` : `All Stages Completed! Master of Japanese Kana! (Final Score: ${score} pts)`}
             </p>
             <button
               onClick={() => {
