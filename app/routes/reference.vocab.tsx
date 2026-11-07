@@ -1,8 +1,7 @@
 /**
  * @file reference.vocab.tsx
- * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Client-side Fetch Version)
+ * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Schema Matched Version)
  */
-
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
@@ -13,11 +12,11 @@ import { generateModuleMeta } from '~/utils/seoMeta';
 
 interface Vocabulary {
   id: string;
+  lesson_id?: string;
   jp_text: string;
   romaji: string;
   english_text: string;
   category: string;
-  year_levels?: number[];
   order_index?: number;
 }
 
@@ -53,18 +52,18 @@ export default function VocabIndexPage() {
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLargeFont, setIsLargeFont] = useState(false);
 
-  // 漢字ページと同じく、クライアントサイドで確実にデータを取得
+  // 実際の edu_vocabulary テーブルの構造に合わせたデータ取得
   const loadVocabData = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
       const { data, error } = await supabase
         .from("edu_vocabulary")
-        .select("id, jp_text, romaji, english_text, category, year_levels, order_index")
+        .select("id, lesson_id, jp_text, romaji, english_text, category, order_index")
         .order("order_index", { ascending: true });
 
       if (error) throw error;
@@ -87,6 +86,11 @@ export default function VocabIndexPage() {
     loadVocabData();
   }, [loadVocabData]);
 
+  // 利用可能なカテゴリー一覧を動的に抽出
+  const availableCategories = useMemo(() => {
+    return Array.from(new Set(vocabularies.map(v => v.category).filter(Boolean))).sort();
+  }, [vocabularies]);
+
   const filteredVocabularies = useMemo(() => {
     return vocabularies.filter((item: Vocabulary) => {
       const matchesSearch =
@@ -94,13 +98,13 @@ export default function VocabIndexPage() {
         (item.english_text && item.english_text.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.romaji && item.romaji.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesYear =
-        selectedYear === "all" ||
-        item.year_levels?.includes(Number(selectedYear));
+      const matchesCategory =
+        selectedCategory === "all" ||
+        item.category === selectedCategory;
 
-      return matchesSearch && matchesYear;
+      return matchesSearch && matchesCategory;
     });
-  }, [vocabularies, searchQuery, selectedYear]);
+  }, [vocabularies, searchQuery, selectedCategory]);
 
   const toggleSelect = (id: string) => {
     if (selectedIds.includes(id)) {
@@ -182,20 +186,19 @@ export default function VocabIndexPage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                Year Level
+                Category
               </label>
               <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200"
               >
-                <option value="all">All Year Levels</option>
-                <option value="7">Year 7</option>
-                <option value="8">Year 8</option>
-                <option value="9">Year 9</option>
-                <option value="10">Year 10</option>
-                <option value="11">Year 11 (VCE)</option>
-                <option value="12">Year 12 (VCE)</option>
+                <option value="all">All Categories</option>
+                {availableCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -265,16 +268,6 @@ export default function VocabIndexPage() {
 
                       <div className={`text-slate-800 dark:text-slate-200 font-medium mb-3 pl-7 ${isLargeFont ? "text-xl" : "text-base"}`}>
                         {item.english_text}
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-end items-center text-xs text-slate-500 dark:text-slate-400 gap-2 pl-7">
-                      <div className="flex gap-1">
-                        {item.year_levels?.map((yr: number) => (
-                          <span key={yr} className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded font-bold">
-                            Y{yr}
-                          </span>
-                        ))}
                       </div>
                     </div>
                   </div>
