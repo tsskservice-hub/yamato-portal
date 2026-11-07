@@ -245,7 +245,7 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義（openSide: 穴が開いている方、反対側にフェンスを設置）
+    // 各段の定義
     const platforms = [
       { x1: 50, y1: 520, x2: 750, y2: 520, openSide: 'none', isGoal: false }, // 最下段（床）
       { x1: 100, y1: 410, x2: 700, y2: 380, openSide: 'left', isGoal: false },  // 3段目 (左に穴、右にフェンス)
@@ -389,7 +389,7 @@ function RollingCharacterArena() {
         });
       }
 
-      // Ring physics with fence bouncing and hole dropping
+      // Ring physics with robust fence bouncing and hole dropping
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
         r.vy += 0.35; // Gravity
@@ -413,22 +413,29 @@ function RollingCharacterArena() {
               r.vy = slope * r.vx;
               r.vRot = r.vx * 0.05;
 
-              // フェンス（柵）に当たった時の跳ね返り処理（穴の反対側）
-              if (p.openSide === 'left' && r.x >= maxX - 20) {
-                r.vx = -Math.abs(r.vx) * 0.8; // 逆方向に跳ね返る
-                r.vRot = -r.vRot;
-              } else if (p.openSide === 'right' && r.x <= minX + 20) {
-                r.vx = Math.abs(r.vx) * 0.8;  // 逆方向に跳ね返る
-                r.vRot = -r.vRot;
-              }
-
-              // 穴（開口部）に到達したら下の段へ落下
-              if (p.openSide === 'right' && r.x >= maxX - 15) {
+              // 穴（開口部）の判定（端の一定範囲内なら下へ落下）
+              let isAtHole = false;
+              if (p.openSide === 'right' && r.x >= maxX - 25) {
+                isAtHole = true;
                 r.vx = 2.5;
                 r.vy = 2.0;
-              } else if (p.openSide === 'left' && r.x <= minX + 15) {
+              } else if (p.openSide === 'left' && r.x <= minX + 25) {
+                isAtHole = true;
                 r.vx = -2.5;
                 r.vy = 2.0;
+              }
+
+              // 穴ではない方（フェンス側）の端に到達した場合は確実に反転＆押し戻す
+              if (!isAtHole) {
+                if (p.openSide === 'left' && r.x >= maxX - 28) {
+                  r.vx = -Math.abs(r.vx) - 1.0; // しっかり逆向きの初速を与える
+                  r.x = maxX - 30;              // めり込み防止の押し戻し
+                  r.vRot = -r.vRot;
+                } else if (p.openSide === 'right' && r.x <= minX + 28) {
+                  r.vx = Math.abs(r.vx) + 1.0;  // しっかり逆向きの初速を与える
+                  r.x = minX + 30;              // めり込み防止の押し戻し
+                  r.vRot = -r.vRot;
+                }
               }
             }
           }
@@ -480,7 +487,7 @@ function RollingCharacterArena() {
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      // Draw Slanted Platforms and Fences (柵の描画)
+      // Draw Slanted Platforms and Fences
       platforms.forEach((p, idx) => {
         ctx.strokeStyle = idx === 4 ? '#cc9900' : '#d9534f';
         ctx.lineWidth = 16;
@@ -497,13 +504,11 @@ function RollingCharacterArena() {
           ctx.fillRect(rx - 2, ry - 2, 4, 4);
         }
 
-        // 穴とは反対側の端にフェンス（柵）を描画
+        // 柵（フェンス）の描画
         if (p.openSide === 'left') {
-          // 右端にフェンス
           ctx.fillStyle = '#f59e0b';
           ctx.fillRect(p.x2 - 6, p.y2 - 25, 6, 25);
         } else if (p.openSide === 'right') {
-          // 左端にフェンス
           ctx.fillStyle = '#f59e0b';
           ctx.fillRect(p.x1, p.y1 - 25, 6, 25);
         }
@@ -622,7 +627,7 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Watch the rings roll down, bounce off fences, and drop through gaps from top to bottom!<br />
+              Watch the rings roll down, bounce cleanly off fences, and drop through gaps!<br />
               If the Kana and Romaji **match, collect them for points**. If they **don't match, touching them reduces HP**!<br />
               Climb the ladders (↑ key) to reach AI Yamato at the top!
             </p>
