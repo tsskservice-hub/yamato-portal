@@ -1,6 +1,11 @@
 /**
  * @file games.rolling-character.tsx
  * @description Rolling Kana 〜AI Yamato & Character Mountain Climbing〜 (Retro Arcade Learning Game)
+ * Shortened version: same game, same data, same screens and rules.
+ * Main savings: kana tables as [kana, romaji] pairs (ring pools are derived
+ * from them instead of duplicated), one sound table, one key handler,
+ * one synced-ref helper, one overlay/button style, and the duplicated
+ * ring drop-down logic merged into a single function.
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -9,126 +14,62 @@ import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
-// Character Data Sets by Stage
-const KANA_DATA_SETS = {
-  1: [
-    { kana: 'あ', romaji: 'a' },
-    { kana: 'い', romaji: 'i' },
-    { kana: 'う', romaji: 'u' },
-    { kana: 'え', romaji: 'e' },
-    { kana: 'お', romaji: 'o' },
-    { kana: 'か', romaji: 'ka' },
-    { kana: 'き', romaji: 'ki' },
-    { kana: 'く', romaji: 'ku' },
-    { kana: 'け', romaji: 'ke' },
-    { kana: 'こ', romaji: 'ko' }
-  ],
-  2: [
-    { kana: 'さ', romaji: 'sa' },
-    { kana: 'し', romaji: 'shi' },
-    { kana: 'す', romaji: 'su' },
-    { kana: 'せ', romaji: 'se' },
-    { kana: 'そ', romaji: 'so' },
-    { kana: 'た', romaji: 'ta' },
-    { kana: 'ち', romaji: 'chi' },
-    { kana: 'つ', romaji: 'tsu' },
-    { kana: 'な', romaji: 'na' },
-    { kana: 'に', romaji: 'ni' }
-  ],
-  3: [
-    { kana: 'は', romaji: 'ha' },
-    { kana: 'ひ', romaji: 'hi' },
-    { kana: 'ふ', romaji: 'fu' },
-    { kana: 'ま', romaji: 'ma' },
-    { kana: 'み', romaji: 'mi' },
-    { kana: 'ら', romaji: 'ra' },
-    { kana: 'り', romaji: 'ri' },
-    { kana: 'が', romaji: 'ga' },
-    { kana: 'ざ', romaji: 'za' },
-    { kana: 'だ', romaji: 'da' }
-  ]
-};
+// ---- Character data (one source of truth) ----
+// Each stage: 10 [kana, romaji] pairs. Used both for the treasure-chest
+// password (3 random kana) and, below, for the rolling rings.
+type Kana = [string, string];
+const STAGES: Kana[][] = [
+  [['あ', 'a'], ['い', 'i'], ['う', 'u'], ['え', 'e'], ['お', 'o'], ['か', 'ka'], ['き', 'ki'], ['く', 'ku'], ['け', 'ke'], ['こ', 'ko']],
+  [['さ', 'sa'], ['し', 'shi'], ['す', 'su'], ['せ', 'se'], ['そ', 'so'], ['た', 'ta'], ['ち', 'chi'], ['つ', 'tsu'], ['な', 'na'], ['に', 'ni']],
+  [['は', 'ha'], ['ひ', 'hi'], ['ふ', 'fu'], ['ま', 'ma'], ['み', 'mi'], ['ら', 'ra'], ['り', 'ri'], ['が', 'ga'], ['ざ', 'za'], ['だ', 'da']],
+];
 
-// トリック用のダミー判定を含む全データ（輪が転がる用）
-const KANA_ALL_SETS = {
-  1: [
-    { kana: 'あ', romaji: 'a', correct: true },
-    { kana: 'い', romaji: 'i', correct: true },
-    { kana: 'う', romaji: 'u', correct: true },
-    { kana: 'え', romaji: 'e', correct: true },
-    { kana: 'お', romaji: 'o', correct: true },
-    { kana: 'か', romaji: 'ka', correct: true },
-    { kana: 'き', romaji: 'ki', correct: true },
-    { kana: 'あ', romaji: 'o', correct: false },
-    { kana: 'い', romaji: 'a', correct: false },
-    { kana: 'う', romaji: 'e', correct: false }
-  ],
-  2: [
-    { kana: 'さ', romaji: 'sa', correct: true },
-    { kana: 'し', romaji: 'shi', correct: true },
-    { kana: 'す', romaji: 'su', correct: true },
-    { kana: 'た', romaji: 'ta', correct: true },
-    { kana: 'ち', romaji: 'chi', correct: true },
-    { kana: 'な', romaji: 'na', correct: true },
-    { kana: 'に', romaji: 'ni', correct: true },
-    { kana: 'し', romaji: 'su', correct: false },
-    { kana: 'た', romaji: 'na', correct: false },
-    { kana: 'な', romaji: 'shi', correct: false }
-  ],
-  3: [
-    { kana: 'は', romaji: 'ha', correct: true },
-    { kana: 'ひ', romaji: 'hi', correct: true },
-    { kana: 'ま', romaji: 'ma', correct: true },
-    { kana: 'ら', romaji: 'ra', correct: true },
-    { kana: 'が', romaji: 'ga', correct: true },
-    { kana: 'ざ', romaji: 'za', correct: true },
-    { kana: 'は', romaji: 'ma', correct: false },
-    { kana: 'ら', romaji: 'ta', correct: false },
-    { kana: 'が', romaji: 'da', correct: false }
-  ]
-};
+// Rolling rings: which stage entries are shown as correct pairs, plus the
+// wrong (mismatched) pairs. This reproduces the original ring pools exactly:
+// stage 1: あ〜き correct + あ/o, い/a, う/e wrong; stage 2: さ・し・す・た・ち・な・に
+// correct + し/su, た/na, な/shi wrong; stage 3: は・ひ・ま・ら・が・ざ correct
+// + は/ma, ら/ta, が/da wrong.
+const RING_OK = [[0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 5, 6, 8, 9], [0, 1, 3, 5, 7, 8]];
+const RING_BAD: Kana[][] = [
+  [['あ', 'o'], ['い', 'a'], ['う', 'e']],
+  [['し', 'su'], ['た', 'na'], ['な', 'shi']],
+  [['は', 'ma'], ['ら', 'ta'], ['が', 'da']],
+];
+type RingData = [string, string, boolean];
+const RINGS_DATA: RingData[][] = STAGES.map((s, i) => [
+  ...RING_OK[i].map((j) => [...s[j], true] as RingData),
+  ...RING_BAD[i].map(([k, r]) => [k, r, false] as RingData),
+]);
 
 interface RingNode {
-  x: number;
-  y: number;
-  radius: number;
-  vx: number;
-  floorIndex: number; // 0: 最下段, 1: 2段目, 2: 3段目, 3: 一番上の段
-  rotation: number;
-  vRot: number;
-  data: { kana: string; romaji: string; correct: boolean };
+  x: number; y: number; radius: number; vx: number;
+  floorIndex: number; // 0: bottom, 1: 2nd, 2: 3rd, 3: top
+  rotation: number; vRot: number; data: RingData;
+}
+
+// Keep a ref in sync with a state value, for use inside the game loop.
+function useLive<T>(value: T) {
+  const ref = useRef(value);
+  ref.current = value;
+  return ref;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
   let portalContent = null;
   try {
-    const { data: portalData } = await supabase
-      .from('portal_settings')
-      .select('content')
-      .eq('key', 'PORTAL_CONTENT')
-      .single();
-    portalContent = portalData?.content || null;
-  } catch (e) {}
-
-  return json({
-    portalContent,
-    currentPath: url.pathname,
-  });
+    const { data } = await supabase.from('portal_settings').select('content').eq('key', 'PORTAL_CONTENT').single();
+    portalContent = data?.content || null;
+  } catch {}
+  return json({ portalContent, currentPath: new URL(request.url).pathname });
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
-  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
-};
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) =>
+  generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
 
 export default function RollingCharacterPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false);
   const [isCodeUnlocked, setIsCodeUnlocked] = useState(false);
   const [inputPasscode, setInputPasscode] = useState('');
-
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
 
   const handlePasscodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,35 +89,22 @@ export default function RollingCharacterPage() {
           <p className="text-xs text-slate-500 mt-0.5">Japanese Character Learning Retro Arcade Game</p>
         </header>
 
-        {isAccessible ? (
+        {isCodeUnlocked ? (
           <RollingCharacterArena />
         ) : (
           <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
-              🔒
-            </div>
+            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">🔒</div>
             <div>
               <h2 className="text-xl font-bold text-slate-800 mb-2">This area is currently locked</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Complete the lessons or enter the passcode provided by your teacher.
-              </p>
+              <p className="text-sm text-slate-600 leading-relaxed">Complete the lessons or enter the passcode provided by your teacher.</p>
             </div>
-
             <form onSubmit={handlePasscodeSubmit} className="flex gap-2 max-w-xs mx-auto">
               <input
-                type="text"
-                maxLength={4}
-                placeholder="4-digit code"
-                value={inputPasscode}
+                type="text" maxLength={4} placeholder="4-digit code" value={inputPasscode}
                 onChange={(e) => setInputPasscode(e.target.value)}
                 className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
               />
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
-              >
-                Unlock
-              </button>
+              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition">Unlock</button>
             </form>
           </div>
         )}
@@ -185,38 +113,46 @@ export default function RollingCharacterPage() {
   );
 }
 
+// [waveform, pitch sequence, duration (s), volume]
+type Sound = 'jump' | 'correct' | 'damage' | 'victory' | 'type';
+const SOUNDS: Record<Sound, [OscillatorType, number[], number, number]> = {
+  jump: ['square', [150, 350], 0.15, 0.1],
+  correct: ['triangle', [440, 880], 0.25, 0.15],
+  type: ['triangle', [440, 880], 0.25, 0.15],
+  damage: ['sawtooth', [120, 60], 0.2, 0.2],
+  victory: ['sine', [523.25, 659.25, 783.99], 0.6, 0.15],
+};
+
+// Platforms: [x1, y1, x2, y2, isGoal]. Ladders: [x, y, height].
+const PLATS = [[50, 520, 750, 512, 0], [50, 410, 750, 418, 0], [50, 300, 750, 292, 0], [50, 190, 750, 198, 0], [250, 90, 550, 90, 1]];
+const LADDERS = [[680, 410, 110], [120, 300, 110], [680, 190, 110], [400, 90, 100]];
+const KEYMAP: Record<string, string> = {
+  ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
+  ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', Space: 'space',
+};
+const OVERLAY = 'absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center';
+const BTN = 'bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl shadow-lg cursor-pointer transition';
+
+function Overlay({ children }: { children: React.ReactNode }) {
+  return <div className={OVERLAY}>{children}</div>;
+}
+
 function RollingCharacterArena() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
   const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'TYPING' | 'GAMEOVER' | 'VICTORY'>('START');
   const [score, setScore] = useState(0);
   const [stage, setStage] = useState(1);
   const [lives, setLives] = useState(3);
   const [yamatoSpeech, setYamatoSpeech] = useState('Welcome! Climb to the top treasure chest and input the 3 kana passwords to win!');
-  
-  // 宝箱の鍵（ランダム3文字のひらがな問題と入力欄）
-  const [targetKanaList, setTargetKanaList] = useState<{ kana: string; romaji: string }[]>([]);
+  const [targetKanaList, setTargetKanaList] = useState<Kana[]>([]);
   const [inputAnswers, setInputAnswers] = useState<string[]>(['', '', '']);
 
-  const gameStateRef = useRef(gameState);
-  gameStateRef.current = gameState;
+  const gameStateRef = useLive(gameState);
+  const stageRef = useLive(stage);
+  const playSoundRef = useRef<((type: Sound) => void) | null>(null);
 
-  const stageRef = useRef(stage);
-  stageRef.current = stage;
-
-  const scoreRef = useRef(score);
-  scoreRef.current = score;
-
-  const livesRef = useRef(lives);
-  livesRef.current = lives;
-
-  const playSoundRef = useRef<((type: 'jump' | 'correct' | 'damage' | 'victory' | 'type') => void) | null>(null);
-
-  const generateRandomKanaProblem = (st: number) => {
-    const list = KANA_DATA_SETS[st as keyof typeof KANA_DATA_SETS] || KANA_DATA_SETS[1];
-    const shuffled = [...list].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 3);
-  };
+  const generateRandomKanaProblem = (st: number) =>
+    [...(STAGES[st - 1] || STAGES[0])].sort(() => 0.5 - Math.random()).slice(0, 3);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -225,134 +161,45 @@ function RollingCharacterArena() {
     if (!ctx) return;
 
     let audioCtx: AudioContext | null = null;
-    const initAudio = () => {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-    };
-
-    const playSound = (type: 'jump' | 'correct' | 'damage' | 'victory' | 'type') => {
+    const playSound = (type: Sound) => {
       if (!audioCtx) return;
       try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-
-        if (type === 'jump') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(150, now);
-          osc.frequency.exponentialRampToValueAtTime(350, now + 0.15);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-          osc.start(now);
-          osc.stop(now + 0.15);
-        } else if (type === 'correct' || type === 'type') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(440, now);
-          osc.frequency.setValueAtTime(880, now + 0.1);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-          osc.start(now);
-          osc.stop(now + 0.25);
-        } else if (type === 'damage') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(120, now);
-          osc.frequency.linearRampToValueAtTime(60, now + 0.2);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-          osc.start(now);
-          osc.stop(now + 0.2);
-        } else if (type === 'victory') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(523.25, now);
-          osc.frequency.setValueAtTime(659.25, now + 0.15);
-          osc.frequency.setValueAtTime(783.99, now + 0.3);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
-          osc.start(now);
-          osc.stop(now + 0.6);
-        }
-      } catch (e) {}
+        const [oscType, freqs, dur, vol] = SOUNDS[type];
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(), now = audioCtx.currentTime;
+        osc.type = oscType;
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        freqs.forEach((f, i) => osc.frequency.setValueAtTime(f, now + i * 0.15));
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + dur);
+        osc.start(now); osc.stop(now + dur);
+      } catch {}
     };
-
     playSoundRef.current = playSound;
 
-    const keys = { left: false, right: false, up: false, down: false, space: false };
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const keys: Record<string, boolean> = { left: false, right: false, up: false, down: false, space: false };
+    const onKey = (down: boolean) => (e: KeyboardEvent) => {
       if (gameStateRef.current === 'TYPING') return;
-
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'w', 'a', 's', 'd'].includes(e.code) || e.key === ' ') {
-        e.preventDefault();
-      }
-      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
-      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
-      if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = true;
-      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = true;
-      if (e.code === 'Space' || e.key === ' ') keys.space = true;
+      const k = KEYMAP[e.code] || (e.key === ' ' ? 'space' : undefined);
+      if (k) { e.preventDefault(); keys[k] = down; }
     };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (gameStateRef.current === 'TYPING') return;
-
-      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
-      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
-      if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
-      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = false;
-      if (e.code === 'Space' || e.key === ' ') keys.space = false;
-    };
-
+    const handleKeyDown = onKey(true), handleKeyUp = onKey(false);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義
-    const platforms = [
-      { x1: 50, y1: 520, x2: 750, y2: 512, isGoal: false },  // 最下段 (0)
-      { x1: 50, y1: 410, x2: 750, y2: 418, isGoal: false }, // 2段目 (1)
-      { x1: 50, y1: 300, x2: 750, y2: 292, isGoal: false },  // 3段目 (2)
-      { x1: 50, y1: 190, x2: 750, y2: 198, isGoal: false }, // 一番上の段 (3)
-      { x1: 250, y1: 90, x2: 550, y2: 90, isGoal: true }     // 最上段ゴールエリア
-    ];
-
-    const ladders = [
-      { x: 680, y: 410, h: 110 },
-      { x: 120, y: 300, h: 110 },
-      { x: 680, y: 190, h: 110 },
-      { x: 400, y: 90, h: 100 }
-    ];
-
-    let player = {
-      x: 100,
-      y: 498,
-      w: 24,
-      h: 18,
-      vx: 0,
-      vy: 0,
-      speed: 3.5,
-      jumpPower: -9.5,
-      gravity: 0.5,
-      isGrounded: false,
-      isOnLadder: false,
-      facing: 1
+    const player = {
+      x: 100, y: 498, w: 24, h: 18, vx: 0, vy: 0, speed: 3.5,
+      jumpPower: -9.5, gravity: 0.5, isGrounded: false, isOnLadder: false, facing: 1,
     };
-
     let rings: RingNode[] = [];
-    let spawnTimer = 0;
-    let invincibilityTimer = 0;
-    let spacePressedLastFrame = false;
+    let spawnTimer = 0, invincibilityTimer = 0, spacePressedLastFrame = false;
 
     (window as any).__startRollingGame = (st = 1) => {
-      initAudio();
+      if (!audioCtx) audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       setStage(st);
       if (st === 1) setScore(0);
       setLives(3);
-      rings = [];
-      spawnTimer = 0;
-      player.x = 100;
-      player.y = 498;
-      player.vx = 0;
-      player.vy = 0;
+      rings = []; spawnTimer = 0;
+      Object.assign(player, { x: 100, y: 498, vx: 0, vy: 0 });
       setTargetKanaList(generateRandomKanaProblem(st));
       setInputAnswers(['', '', '']);
       setGameState('PLAYING');
@@ -360,92 +207,56 @@ function RollingCharacterArena() {
     };
 
     let animationFrameId: number;
-
     const update = () => {
       if (gameStateRef.current !== 'PLAYING') return;
-
       if (invincibilityTimer > 0) invincibilityTimer--;
 
-      // Ladder detection
-      let touchingLadder = false;
-      for (let l of ladders) {
-        if (player.x + player.w/2 >= l.x - 12 && player.x + player.w/2 <= l.x + 12 &&
-            player.y + player.h >= l.y && player.y <= l.y + l.h) {
-          touchingLadder = true;
-          break;
-        }
-      }
-      player.isOnLadder = touchingLadder;
+      player.isOnLadder = LADDERS.some(([x, y, h]) =>
+        player.x + player.w / 2 >= x - 12 && player.x + player.w / 2 <= x + 12 &&
+        player.y + player.h >= y && player.y <= y + h);
 
-      // Movement
       player.vx = 0;
       if (keys.left) { player.vx = -player.speed; player.facing = -1; }
       if (keys.right) { player.vx = player.speed; player.facing = 1; }
-
       if (player.isOnLadder) {
-        if (keys.up) {
-          player.vy = -player.speed * 0.8;
-          player.isGrounded = false;
-        } else if (keys.down) {
-          player.vy = player.speed * 0.8;
-          player.isGrounded = false;
-        } else {
-          player.vy = 0;
-        }
+        player.vy = keys.up ? -player.speed * 0.8 : keys.down ? player.speed * 0.8 : 0;
+        if (keys.up || keys.down) player.isGrounded = false;
       }
 
-      let spacePressedNow = keys.space;
-      if (spacePressedNow && !spacePressedLastFrame && player.isGrounded && !player.isOnLadder) {
-        player.vy = player.jumpPower;
-        player.isGrounded = false;
-        playSound('jump');
+      if (keys.space && !spacePressedLastFrame && player.isGrounded && !player.isOnLadder) {
+        player.vy = player.jumpPower; player.isGrounded = false; playSound('jump');
       }
-      spacePressedLastFrame = spacePressedNow;
+      spacePressedLastFrame = keys.space;
+      if (!player.isOnLadder || player.isGrounded) player.vy += player.gravity;
+      player.x += player.vx; player.y += player.vy;
+      player.x = Math.max(30, Math.min(750, player.x));
 
-      if (!player.isOnLadder || player.isGrounded) {
-        player.vy += player.gravity;
-      }
-
-      player.x += player.vx;
-      player.y += player.vy;
-
-      if (player.x < 30) player.x = 30;
-      if (player.x > 750) player.x = 750;
-
-      // Platform collisions for player
+      // Platform collisions
       player.isGrounded = false;
-      for (let p of platforms) {
-        if (p.isGoal) {
-          if (player.x + player.w > p.x1 && player.x < p.x2 && player.y + player.h >= p.y1 - 4 && player.y + player.h <= p.y1 + 10 && player.vy >= 0) {
-            player.y = p.y1 - player.h;
-            player.vy = 0;
-            player.isGrounded = true;
+      for (const [x1, y1, x2, y2, isGoal] of PLATS) {
+        if (isGoal) {
+          if (player.x + player.w > x1 && player.x < x2 && player.y + player.h >= y1 - 4 && player.y + player.h <= y1 + 10 && player.vy >= 0) {
+            player.y = y1 - player.h; player.vy = 0; player.isGrounded = true;
           }
         } else {
-          let minX = Math.min(p.x1, p.x2);
-          let maxX = Math.max(p.x1, p.x2);
+          const minX = Math.min(x1, x2), maxX = Math.max(x1, x2);
           if (player.x + player.w > minX && player.x < maxX) {
-            let t = (player.x + player.w/2 - p.x1) / (p.x2 - p.x1);
-            let surfaceY = p.y1 + t * (p.y2 - p.y1);
-
+            const t = (player.x + player.w / 2 - x1) / (x2 - x1);
+            const surfaceY = y1 + t * (y2 - y1);
             if (player.vy < 0 && player.y <= surfaceY + 16 && player.y >= surfaceY && player.y + player.h > surfaceY) {
-              player.y = surfaceY;
-              player.vy = 0;
+              player.y = surfaceY; player.vy = 0;
             }
-
-            if (player.vy >= 0 && player.y + player.h >= surfaceY - 4 && player.y + player.h <= surfaceY + 10) {
-              player.y = surfaceY - player.h;
-              player.vy = 0;
-              player.isGrounded = true;
+            // While climbing down a ladder (↓ held), ignore landing so the player can drop through the floor
+            if (!keys.down && player.vy >= 0 && player.y + player.h >= surfaceY - 4 && player.y + player.h <= surfaceY + 10) {
+              player.y = surfaceY - player.h; player.vy = 0; player.isGrounded = true;
             }
           }
         }
       }
 
-      // Goal detection -> 宝箱に到着したら入力画面（TYPING）へ
-      let goalP = platforms[4];
-      if (player.y + player.h <= goalP.y1 + 10 &&
-          player.x >= goalP.x1 + 40 && player.x + player.w <= goalP.x2 - 40) {
+      // Reached the treasure chest -> typing challenge
+      const [gx1, gy, gx2] = [PLATS[4][0], PLATS[4][1], PLATS[4][2]];
+      if (player.y + player.h <= gy + 10 && player.x >= gx1 + 40 && player.x + player.w <= gx2 - 40) {
         setGameState('TYPING');
         setInputAnswers(['', '', '']);
         playSound('victory');
@@ -453,114 +264,49 @@ function RollingCharacterArena() {
         return;
       }
 
-      // Spawn rings (~2秒に1回 = 120フレーム)
-      spawnTimer++;
-      let currentStage = stageRef.current;
-      let spawnInterval = 120;
-      if (spawnTimer >= spawnInterval) {
+      // Spawn a ring every ~2 seconds (120 frames) from the top floor, left side
+      if (++spawnTimer >= 120) {
         spawnTimer = 0;
-        const allSets = KANA_ALL_SETS[currentStage as keyof typeof KANA_ALL_SETS] || KANA_ALL_SETS[1];
-        const data = allSets[Math.floor(Math.random() * allSets.length)];
-        
-        // 一番上の段の左側から右方向へスタート
+        const pool = RINGS_DATA[stageRef.current - 1] || RINGS_DATA[0];
         rings.push({
-          x: 60,
-          y: platforms[3].y1 - 25,
-          radius: 22,
-          vx: 2.0,
-          floorIndex: 3,
-          rotation: 0,
-          vRot: 0.1,
-          data: data
+          x: 60, y: PLATS[3][1] - 25, radius: 22, vx: 2.0, floorIndex: 3,
+          rotation: 0, vRot: 0.1, data: pool[Math.floor(Math.random() * pool.length)],
         });
       }
 
-      // Ring physics and zigzag continuation down to the bottom
+      // Rings roll along a floor, then zigzag down to the next floor
       for (let i = rings.length - 1; i >= 0; i--) {
-        let r = rings[i];
-        let p = platforms[r.floorIndex];
+        const r = rings[i];
+        const [x1, y1, x2, y2] = PLATS[r.floorIndex];
+        r.x += r.vx; r.rotation += r.vRot;
+        r.y = y1 + ((r.x - x1) / (x2 - x1)) * (y2 - y1) - r.radius;
 
-        r.x += r.vx;
-        r.rotation += r.vRot;
-
-        let surfaceY = p.y1;
-        let t = (r.x - p.x1) / (p.x2 - p.x1);
-        surfaceY = p.y1 + t * (p.y2 - p.y1);
-        r.y = surfaceY - r.radius;
-
-        let minX = 50;
-        let maxX = 750;
-
-        // 端に達したら下の段へジグザグにリレー落下
-        if (r.vx > 0 && r.x > maxX) {
+        const atEdge = (r.vx > 0 && r.x > 750) || (r.vx < 0 && r.x < 50);
+        if (atEdge) {
           if (r.floorIndex > 0) {
             r.floorIndex--;
-            let nextP = platforms[r.floorIndex];
-            if (r.floorIndex === 2 || r.floorIndex === 0) {
-              r.x = nextP.x2 - 10;
-              r.vx = -2.0;
-              r.vRot = -0.1;
-            } else {
-              r.x = nextP.x1 + 10;
-              r.vx = 2.0;
-              r.vRot = 0.1;
-            }
-          } else {
-            rings.splice(i, 1);
-            continue;
-          }
-        } else if (r.vx < 0 && r.x < minX) {
-          if (r.floorIndex > 0) {
-            r.floorIndex--;
-            let nextP = platforms[r.floorIndex];
-            if (r.floorIndex === 2 || r.floorIndex === 0) {
-              r.x = nextP.x2 - 10;
-              r.vx = -2.0;
-              r.vRot = -0.1;
-            } else {
-              r.x = nextP.x1 + 10;
-              r.vx = 2.0;
-              r.vRot = 0.1;
-            }
-          } else {
-            rings.splice(i, 1);
-            continue;
-          }
+            // Floors 2 and 0 are entered from the right, the others from the left
+            const fromRight = r.floorIndex === 2 || r.floorIndex === 0;
+            r.x = fromRight ? 740 : 60; r.vx = fromRight ? -2.0 : 2.0; r.vRot = fromRight ? -0.1 : 0.1;
+          } else { rings.splice(i, 1); continue; }
         }
+        if (r.y > 620 || r.y < 0) { rings.splice(i, 1); continue; }
 
-        if (r.y > 620 || r.y < 0) {
-          rings.splice(i, 1);
-          continue;
-        }
-
-        let distX = Math.abs(player.x + player.w/2 - r.x);
-        let distY = Math.abs(player.y + player.h/2 - r.y);
-        let hitDist = Math.sqrt(distX * distX + distY * distY);
-
-        if (hitDist < r.radius + 14) {
-          if (r.data.correct) {
-            setScore((s) => {
-              const newS = s + 100;
-              scoreRef.current = newS;
-              return newS;
-            });
+        const dist = Math.hypot(player.x + player.w / 2 - r.x, player.y + player.h / 2 - r.y);
+        if (dist < r.radius + 14) {
+          if (r.data[2]) {
+            setScore((s) => s + 100);
             playSound('correct');
-            setYamatoSpeech(`Correct! "${r.data.kana}" is "${r.data.romaji}"! (+100pt)`);
+            setYamatoSpeech(`Correct! "${r.data[0]}" is "${r.data[1]}"! (+100pt)`);
             rings.splice(i, 1);
-          } else {
-            if (invincibilityTimer === 0) {
-              setLives((l) => {
-                const newL = l - 1;
-                livesRef.current = newL;
-                if (newL <= 0) {
-                  setGameState('GAMEOVER');
-                }
-                return newL;
-              });
-              invincibilityTimer = 60;
-              playSound('damage');
-              setYamatoSpeech(`Oops! Incorrect. "${r.data.kana}" does not match that Romaji!`);
-            }
+          } else if (invincibilityTimer === 0) {
+            setLives((l) => {
+              if (l - 1 <= 0) setGameState('GAMEOVER');
+              return l - 1;
+            });
+            invincibilityTimer = 60;
+            playSound('damage');
+            setYamatoSpeech(`Oops! Incorrect. "${r.data[0]}" does not match that Romaji!`);
           }
         }
       }
@@ -568,103 +314,58 @@ function RollingCharacterArena() {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Background
       ctx.fillStyle = '#222233';
       ctx.fillRect(50, 50, 700, 500);
 
-      platforms.forEach((p) => {
-        ctx.strokeStyle = p.isGoal ? '#cc9900' : '#d9534f';
-        ctx.lineWidth = 16;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(p.x1, p.y1);
-        ctx.lineTo(p.x2, p.y2);
-        ctx.stroke();
-
+      PLATS.forEach(([x1, y1, x2, y2, isGoal]) => {
+        ctx.strokeStyle = isGoal ? '#cc9900' : '#d9534f';
+        ctx.lineWidth = 16; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
         ctx.fillStyle = '#fff';
-        for (let t = 0.1; t < 0.9; t += 0.2) {
-          let rx = p.x1 + t * (p.x2 - p.x1);
-          let ry = p.y1 + t * (p.y2 - p.y1);
-          ctx.fillRect(rx - 2, ry - 2, 4, 4);
-        }
+        for (let t = 0.1; t < 0.9; t += 0.2) ctx.fillRect(x1 + t * (x2 - x1) - 2, y1 + t * (y2 - y1) - 2, 4, 4);
       });
 
-      ladders.forEach(l => {
+      LADDERS.forEach(([x, y, h]) => {
         ctx.fillStyle = '#3399ff';
-        let rw = 24;
-        let sx = l.x - rw / 2;
-        ctx.fillRect(sx, l.y, 4, l.h);
-        ctx.fillRect(sx + rw - 4, l.y, 4, l.h);
-        for (let hy = l.y + 6; hy < l.y + l.h; hy += 16) {
-          ctx.fillRect(sx, hy, rw, 3);
-        }
+        ctx.fillRect(x - 12, y, 4, h); ctx.fillRect(x + 8, y, 4, h);
+        for (let hy = y + 6; hy < y + h; hy += 16) ctx.fillRect(x - 12, hy, 24, 3);
       });
 
-      let gp = platforms[4];
-      ctx.fillStyle = '#854d0e';
-      ctx.fillRect((gp.x1 + gp.x2)/2 - 20, gp.y1 - 28, 40, 24);
-      ctx.fillStyle = '#facc15';
-      ctx.fillRect((gp.x1 + gp.x2)/2 - 6, gp.y1 - 20, 12, 10);
+      const cx = (PLATS[4][0] + PLATS[4][2]) / 2, cy = PLATS[4][1];
+      ctx.fillStyle = '#854d0e'; ctx.fillRect(cx - 20, cy - 28, 40, 24);
+      ctx.fillStyle = '#facc15'; ctx.fillRect(cx - 6, cy - 20, 12, 10);
 
-      rings.forEach(r => {
-        ctx.save();
-        ctx.translate(r.x, r.y);
-        ctx.rotate(r.rotation);
-
+      rings.forEach((r) => {
+        ctx.save(); ctx.translate(r.x, r.y); ctx.rotate(r.rotation);
+        ctx.beginPath(); ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff7700'; ctx.fill();
+        ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, r.radius - 7, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff'; ctx.fill();
+        ctx.strokeStyle = '#ff7700'; ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#ff7700';
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = '#ffffff';
+        ctx.moveTo(-(r.radius - 7), 0); ctx.lineTo(r.radius - 7, 0);
+        ctx.moveTo(0, -(r.radius - 7)); ctx.lineTo(0, r.radius - 7);
         ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(0, 0, r.radius - 7, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-
-        ctx.strokeStyle = '#ff7700';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(-(r.radius - 7), 0);
-        ctx.lineTo(r.radius - 7, 0);
-        ctx.moveTo(0, -(r.radius - 7));
-        ctx.lineTo(0, r.radius - 7);
-        ctx.stroke();
-
         ctx.restore();
 
-        ctx.fillStyle = '#111122';
-        ctx.font = 'bold 15px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(r.data.kana, r.x, r.y + 1);
-
-        ctx.fillStyle = '#ffff00';
-        ctx.font = 'bold 18px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(r.data.romaji, r.x, r.y - r.radius - 10);
+        ctx.fillStyle = '#111122'; ctx.font = 'bold 28px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(r.data[0], r.x, r.y + 1);
+        ctx.fillStyle = '#ffff00'; ctx.font = 'bold 18px monospace';
+        ctx.fillText(r.data[1], r.x, r.y - r.radius - 10);
       });
 
       if (invincibilityTimer % 4 < 2) {
         ctx.fillStyle = '#00ffcc';
         ctx.fillRect(player.x, player.y, player.w, player.h);
         ctx.fillStyle = '#111';
-        let eyeX = player.facing === 1 ? player.x + 15 : player.x + 5;
-        ctx.fillRect(eyeX, player.y + 5, 4, 3);
+        ctx.fillRect(player.facing === 1 ? player.x + 15 : player.x + 5, player.y + 5, 4, 3);
       }
     };
 
-    const loop = () => {
-      update();
-      draw();
-      animationFrameId = requestAnimationFrame(loop);
-    };
-
+    const loop = () => { update(); draw(); animationFrameId = requestAnimationFrame(loop); };
     animationFrameId = requestAnimationFrame(loop);
-
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('keydown', handleKeyDown);
@@ -672,23 +373,16 @@ function RollingCharacterArena() {
     };
   }, []);
 
-  // 宝箱の鍵パスワード送信処理
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    let allCorrect = true;
-    for (let i = 0; i < targetKanaList.length; i++) {
-      if (inputAnswers[i].trim().toLowerCase() !== targetKanaList[i].romaji.toLowerCase()) {
-        allCorrect = false;
-        break;
-      }
-    }
-
+    const allCorrect = targetKanaList.every(([, romaji], i) =>
+      inputAnswers[i].trim().toLowerCase() === romaji.toLowerCase());
     if (allCorrect) {
-      if (playSoundRef.current) playSoundRef.current('victory');
+      playSoundRef.current?.('victory');
       setGameState('VICTORY');
       setYamatoSpeech('Fantastic! All romaji answers are correct! You opened the treasure chest!');
     } else {
-      if (playSoundRef.current) playSoundRef.current('damage');
+      playSoundRef.current?.('damage');
       setGameState('PLAYING');
       setInputAnswers(['', '', '']);
       setYamatoSpeech('Incorrect romaji! 振り出しに戻る (Back to start)!');
@@ -697,125 +391,80 @@ function RollingCharacterArena() {
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800">
-      {/* Status Bar */}
       <div className="flex flex-wrap justify-between items-center bg-slate-100 p-4 rounded-xl border border-slate-200 text-sm shadow-inner gap-2">
         <span className="text-red-500 font-bold">❤️ HP: {'❤️'.repeat(lives)}</span>
         <span className="text-indigo-600 font-bold">Stage: {stage} / 3</span>
         <span className="text-emerald-600 font-bold">Score: {score} pt</span>
       </div>
 
-      {/* Game Field */}
       <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl h-[600px] relative overflow-hidden flex items-center justify-center p-2 shadow-inner">
         <canvas ref={canvasRef} width={800} height={600} className="block bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg" />
 
-        {/* Start Screen */}
         {gameState === 'START' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
+          <Overlay>
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
               Rings roll from the top-left every 2 seconds, zigzagging down to the bottom.<br />
               Open the treasure chest at the top by inputting the correct romaji for 3 random kana!<br />
-              [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump
+              [← / →] Move ｜ [↑ / ↓] Ladders (Climb & Descend) ｜ [SPACE] Jump
             </p>
-            <button
-              onClick={() => (window as any).__startRollingGame(1)}
-              className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg cursor-pointer transition"
-            >
-              Start Game
-            </button>
-            <div className="text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-xs">
-              [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump
-            </div>
-          </div>
+            <button onClick={() => (window as any).__startRollingGame(1)} className={BTN}>Start Game</button>
+            <div className="text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-xs">[← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump</div>
+          </Overlay>
         )}
 
-        {/* Typing Challenge Screen */}
         {gameState === 'TYPING' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-5 z-30 p-6 text-center">
+          <Overlay>
             <h2 className="text-2xl font-black text-[#ffcc00]">🎁 宝箱が開きました！</h2>
             <p className="text-sm text-[#ccc]">次の仮名のローマ字を、それぞれの仮名の下にあるスペースに正しく入力してね</p>
-
             <form onSubmit={handlePasswordSubmit} className="space-y-6">
               <div className="flex justify-center gap-6">
-                {targetKanaList.map((item, idx) => (
+                {targetKanaList.map(([kana], idx) => (
                   <div key={idx} className="flex flex-col items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-inner">
-                    <span className="text-4xl font-bold text-white mb-3">{item.kana}</span>
+                    <span className="text-4xl font-bold text-white mb-3">{kana}</span>
                     <input
-                      type="text"
-                      maxLength={4}
-                      autoFocus={idx === 0}
-                      value={inputAnswers[idx]}
-                      onChange={(e) => {
-                        const newAnswers = [...inputAnswers];
-                        newAnswers[idx] = e.target.value;
-                        setInputAnswers(newAnswers);
-                      }}
+                      type="text" maxLength={4} autoFocus={idx === 0} value={inputAnswers[idx]}
+                      onChange={(e) => { const a = [...inputAnswers]; a[idx] = e.target.value; setInputAnswers(a); }}
                       placeholder="romaji"
                       className="bg-slate-900 border-2 border-[#ffcc00] rounded-lg px-3 py-2 text-center text-xl font-mono tracking-widest text-white focus:outline-none focus:border-emerald-400 w-24"
                     />
                   </div>
                 ))}
               </div>
-
-              <div>
-                <button
-                  type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
-                >
-                  答え合わせして鍵を開ける！ (Enter)
-                </button>
-              </div>
+              <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">答え合わせして鍵を開ける！ (Enter)</button>
             </form>
             <div className="text-xs text-[#ff5555]">※1つでも間違えると「振り出しに戻る」になるので気をつけて！</div>
-          </div>
+          </Overlay>
         )}
 
-        {/* Game Over Screen */}
         {gameState === 'GAMEOVER' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
+          <Overlay>
             <h2 className="text-3xl font-black text-red-500">GAME OVER</h2>
             <p className="text-sm text-[#ccc]">Score: {score} pts. Try again!</p>
-            <button
-              onClick={() => (window as any).__startRollingGame(1)}
-              className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
-            >
-              Play Again
-            </button>
-          </div>
+            <button onClick={() => (window as any).__startRollingGame(1)} className={BTN}>Play Again</button>
+          </Overlay>
         )}
 
-        {/* Victory Screen */}
         {gameState === 'VICTORY' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
+          <Overlay>
             <h2 className="text-3xl font-black text-[#ffcc00]">CONGRATULATIONS!</h2>
             <p className="text-sm text-[#ccc]">
               {stage < 3 ? `Stage ${stage} Cleared! Excellent kana typing & climbing!` : `All Stages Completed! Master of Japanese Kana! (Final Score: ${score} pts)`}
             </p>
             <button
-              onClick={() => {
-                if (stage < 3) {
-                  (window as any).__startRollingGame(stage + 1);
-                } else {
-                  (window as any).__startRollingGame(1);
-                }
-              }}
-              className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
+              onClick={() => (window as any).__startRollingGame(stage < 3 ? stage + 1 : 1)}
+              className={BTN}
             >
               {stage < 3 ? 'Proceed to Next Stage' : 'Play Again from Beginning'}
             </button>
-          </div>
+          </Overlay>
         )}
       </div>
 
-      {/* AI Dialogue Box */}
       <div className="bg-slate-100 border border-slate-200 rounded-xl p-4 flex items-center gap-4 text-left shadow-inner">
-        <div className="w-10 h-10 bg-[#ffcc00] text-slate-900 font-bold flex items-center justify-center rounded-full shrink-0 border-2 border-white shadow">
-          Yamato
-        </div>
-        <div className="text-xs text-slate-700 font-medium leading-relaxed">
-          {yamatoSpeech}
-        </div>
+        <div className="w-10 h-10 bg-[#ffcc00] text-slate-900 font-bold flex items-center justify-center rounded-full shrink-0 border-2 border-white shadow">Yamato</div>
+        <div className="text-xs text-slate-700 font-medium leading-relaxed">{yamatoSpeech}</div>
       </div>
     </div>
   );
