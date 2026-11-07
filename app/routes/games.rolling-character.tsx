@@ -58,7 +58,7 @@ interface RingNode {
   y: number;
   radius: number;
   vx: number;
-  floorIndex: number; // 0: 最下段, 1: 2段目, 2: 3段目, 3: 4段目(一番上の段)
+  floorIndex: number; // 3: 一番上の段, 2: 3段目, 1: 2段目, 0: 最下段
   rotation: number;
   vRot: number;
   data: { kana: string; romaji: string; correct: boolean };
@@ -273,13 +273,14 @@ function RollingCharacterArena() {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    // 各段の定義
+    // 各段の定義 (index 0: 最下段, 1: 2段目, 2: 3段目, 3: 一番上の段)
+    // direction: 1 = 左から右へ転がる, -1 = 右から左へ転がる
     const platforms = [
       { x1: 50, y1: 520, x2: 750, y2: 500, direction: 1, isGoal: false },  // 最下段（右向き）
-      { x1: 50, y1: 410, x2: 750, y2: 430, direction: -1, isGoal: false }, // 2段目（左向き）
-      { x1: 50, y1: 300, x2: 750, y2: 280, direction: 1, isGoal: false },  // 3段目（右向き）
-      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 4段目（一番上の段・左向き）
-      { x1: 250, y1: 90, x2: 550, y2: 90, direction: 0, isGoal: true }     // 最上段（フラットなゴールエリア）
+      { x1: 50, y1: 410, x2: 750, y2: 430, direction: -1, isGoal: false }, // 3段目（左向き）
+      { x1: 50, y1: 300, x2: 750, y2: 280, direction: 1, isGoal: false },  // 2段目（右向き）
+      { x1: 50, y1: 190, x2: 750, y2: 210, direction: -1, isGoal: false }, // 一番上の段（左向きにスタート？※ご指示により「一番上の段の左側から右へ」転がるため、生成時はvx>0）
+      { x1: 250, y1: 90, x2: 550, y2: 90, direction: 0, isGoal: true }     // 最上段ゴールエリア
     ];
 
     const ladders = [
@@ -409,7 +410,7 @@ function RollingCharacterArena() {
         return;
       }
 
-      // Spawn rings at 一番上の段の左側 (floorIndex = 3 の左端から右向きにスタート)
+      // Spawn rings: 一番上の段（floorIndex = 3）の左側から右へスタート
       spawnTimer++;
       let currentStage = stageRef.current;
       let spawnInterval = Math.max(90 - (currentStage * 15), 50);
@@ -419,10 +420,10 @@ function RollingCharacterArena() {
         const data = dataset[Math.floor(Math.random() * dataset.length)];
         
         rings.push({
-          x: 80,
+          x: 60,
           y: platforms[3].y1 - 25,
           radius: 22,
-          vx: 2.0, // 一番上の段の左側から右へ転がる
+          vx: 2.0, // 一番上の段は左から右へ転がる (+vx)
           floorIndex: 3,
           rotation: 0,
           vRot: 0.1,
@@ -430,7 +431,7 @@ function RollingCharacterArena() {
         });
       }
 
-      // Ring physics and floor-to-floor continuation
+      // Ring physics and zigzag continuation down to the bottom
       for (let i = rings.length - 1; i >= 0; i--) {
         let r = rings[i];
         let p = platforms[r.floorIndex];
@@ -439,34 +440,50 @@ function RollingCharacterArena() {
         r.rotation += r.vRot;
 
         let surfaceY = p.y1;
-        if (!p.isGoal) {
-          let t = (r.x - p.x1) / (p.x2 - p.x1);
-          surfaceY = p.y1 + t * (p.y2 - p.y1);
-        }
+        let t = (r.x - p.x1) / (p.x2 - p.x1);
+        surfaceY = p.y1 + t * (p.y2 - p.y1);
         r.y = surfaceY - r.radius;
 
         let minX = 50;
         let maxX = 750;
 
-        // 画面外へ達したら次の下の段へスライドイン
-        if (r.x > maxX && r.vx > 0) {
+        // 画面外に達したときの処理（ジグザグ降下）
+        // floorIndex 3 (一番上, 左から右へ進む) -> 右端(maxX)を過ぎたら -> floorIndex 2 (3段目) の右側から左へ (-vx)
+        // floorIndex 2 (3段目, 右から左へ進む) -> 左端(minX)を過ぎたら -> floorIndex 1 (2段目) の左側から右へ (+vx)
+        // floorIndex 1 (2段目, 左から右へ進む) -> 右端(maxX)を過ぎたら -> floorIndex 0 (最下段) の右側から左へ (-vx)
+        // floorIndex 0 (最下段, 右から左へ進む) -> 左端(minX)を過ぎたら -> 消去
+        if (r.vx > 0 && r.x > maxX) {
           if (r.floorIndex > 0) {
             r.floorIndex--;
             let nextP = platforms[r.floorIndex];
-            r.x = nextP.x1 + 10;
-            const nextDir = nextP.direction ?? 1;
-            r.vx = nextDir > 0 ? 2.0 : -2.0;
+            if (r.floorIndex === 2 || r.floorIndex === 0) {
+              // 3段目(idx=2)や最下段(idx=0)は右側からスタートして左へ転がる
+              r.x = nextP.x2 - 10;
+              r.vx = -2.0;
+              r.vRot = -0.1;
+            } else {
+              // 2段目(idx=1)は左側からスタートして右へ転がる
+              r.x = nextP.x1 + 10;
+              r.vx = 2.0;
+              r.vRot = 0.1;
+            }
           } else {
             rings.splice(i, 1);
             continue;
           }
-        } else if (r.x < minX && r.vx < 0) {
+        } else if (r.vx < 0 && r.x < minX) {
           if (r.floorIndex > 0) {
             r.floorIndex--;
             let nextP = platforms[r.floorIndex];
-            r.x = nextP.x2 - 10;
-            const nextDir = nextP.direction ?? 1;
-            r.vx = nextDir > 0 ? 2.0 : -2.0;
+            if (r.floorIndex === 2 || r.floorIndex === 0) {
+              r.x = nextP.x2 - 10;
+              r.vx = -2.0;
+              r.vRot = -0.1;
+            } else {
+              r.x = nextP.x1 + 10;
+              r.vx = 2.0;
+              r.vRot = 0.1;
+            }
           } else {
             rings.splice(i, 1);
             continue;
@@ -641,7 +658,7 @@ function RollingCharacterArena() {
             <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
             <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
               ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll from the top-left across slopes and cascade down to lower floors!<br />
+              Rings roll from the top-left, zigzagging down across each floor until they disappear at the bottom!<br />
               Reach the treasure chest at the top flat goal and type the secret word to win!<br />
               Climb the ladders (↑ key) to reach the top!
             </p>
