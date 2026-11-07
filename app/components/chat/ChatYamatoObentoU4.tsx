@@ -44,12 +44,10 @@ export function ChatYamatoObentoU4({
   return (
     <YamatoChatCommon
       characterName="Obento U4 Yamato"
-      initialGreeting="Let's start today's Japanese lesson! ✨
-Today, we will learn how to talk about our family members nicely.
+      initialGreeting="Awesome! Let's dive right into today's Japanese lesson! ✨
+Today, we are going to learn how to talk about our family members and pets nicely. 
 
-Are you ready? Please choose an option below:
-1. Let's start! 🚀
-2. Well, I'd rather rest right now... ☕"
+Let's check our Learning Intention and Success Criteria together, and then we'll start with our vocabulary introduction. Are you ready? Let's go!"
       systemPrompt=""
       appType="obento-u4"
       defaultOpen={defaultOpen}
