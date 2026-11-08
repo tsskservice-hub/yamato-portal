@@ -7,8 +7,7 @@
  * are written out exactly as in the supplied original file.
  * Main savings: kana tables as [kana, romaji] pairs (ring pools are derived
  * from them instead of duplicated), one sound table, one key handler,
- * one synced-ref helper, one overlay/button style, and the duplicated
- * ring drop-down logic merged into a single function.
+ * and the duplicated ring drop-down logic merged into a single function.
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -169,14 +168,26 @@ function RollingCharacterArena() {
     playSoundRef.current = playSound;
 
     const keys: Record<string, boolean> = { left: false, right: false, up: false, down: false, space: false };
+    const clearKeys = () => {
+      keys.left = keys.right = keys.up = keys.down = keys.space = false;
+    };
     const onKey = (down: boolean) => (e: KeyboardEvent) => {
-      if (gameStateRef.current === 'TYPING') return;
       const k = KEYMAP[e.code] || (e.key === ' ' ? 'space' : undefined);
-      if (k) { e.preventDefault(); keys[k] = down; }
+      if (!k) return;
+      // Key releases must always clear the key, even while the treasure-
+      // chest typing screen is up. Ignoring a keyup leaves that key stuck,
+      // so the player keeps climbing (or walking) on their own afterwards.
+      // Only key presses are ignored while typing.
+      if (down && gameStateRef.current === 'TYPING') return;
+      e.preventDefault();
+      keys[k] = down;
     };
     const handleKeyDown = onKey(true), handleKeyUp = onKey(false);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    // Releasing a key while the window is not focused never fires keyup,
+    // so clear every key on blur as well.
+    window.addEventListener('blur', clearKeys);
 
     const player = {
       x: 100, y: 598, w: 24, h: 18, vx: 0, vy: 0, speed: 3.5,
@@ -268,7 +279,13 @@ function RollingCharacterArena() {
             const surfaceY = y1 + t * (y2 - y1);
             // Climbing a ladder onto a floor: the feet crossed the surface
             // from below, so snap onto it instead of climbing past it.
-            if (player.isOnLadder && player.vy < 0 && prevBottom > surfaceY && player.y + player.h <= surfaceY + 4) {
+            // Only the floor at the top of the ladder being climbed counts:
+            // without this, the snap also fires for the floor the player is
+            // already standing on (its surface is a fraction of a pixel
+            // below the previous foot position on a slope), cancelling the
+            // climb as soon as it starts.
+            if (player.isOnLadder && player.vy < 0 && prevBottom > surfaceY && player.y + player.h <= surfaceY + 4 &&
+              ladderTopSurface !== null && Math.abs(surfaceY - ladderTopSurface) <= 4) {
               player.y = surfaceY - player.h; player.vy = 0; player.isGrounded = true;
             } else if (player.vy < 0 && player.y <= surfaceY + 16 && player.y >= surfaceY && player.y + player.h > surfaceY) {
               player.y = surfaceY; player.vy = 0;
@@ -400,6 +417,7 @@ function RollingCharacterArena() {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', clearKeys);
     };
   }, []);
 
