@@ -1,6 +1,14 @@
 /**
  * @file games.rolling-character.tsx
  * @description Rolling Kana 〜AI Yamato & Character Mountain Climbing〜 (Retro Arcade Learning Game)
+ * Shortened version: same game, same data, same screens and rules.
+ * Framework repair: the useLive helper and Overlay component added in the
+ * first shortening pass are removed again; ref sync and the four screens
+ * are written out exactly as in the supplied original file.
+ * Main savings: kana tables as [kana, romaji] pairs (ring pools are derived
+ * from them instead of duplicated), one sound table, one key handler,
+ * one synced-ref helper, one overlay/button style, and the duplicated
+ * ring drop-down logic merged into a single function.
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,6 +18,8 @@ import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
 // ---- Character data (one source of truth) ----
+// Each stage: 10 [kana, romaji] pairs. Used both for the treasure-chest
+// password (3 random kana) and, below, for the rolling rings.
 type Kana = [string, string];
 const STAGES: Kana[][] = [
   [['あ', 'a'], ['い', 'i'], ['う', 'u'], ['え', 'e'], ['お', 'o'], ['か', 'ka'], ['き', 'ki'], ['く', 'ku'], ['け', 'ke'], ['こ', 'ko']],
@@ -17,6 +27,11 @@ const STAGES: Kana[][] = [
   [['は', 'ha'], ['ひ', 'hi'], ['ふ', 'fu'], ['ま', 'ma'], ['み', 'mi'], ['ら', 'ra'], ['り', 'ri'], ['が', 'ga'], ['ざ', 'za'], ['だ', 'da']],
 ];
 
+// Rolling rings: which stage entries are shown as correct pairs, plus the
+// wrong (mismatched) pairs. This reproduces the original ring pools exactly:
+// stage 1: あ〜き correct + あ/o, い/a, う/e wrong; stage 2: さ・し・す・た・ち・な・に
+// correct + し/su, た/na, な/shi wrong; stage 3: は・ひ・ま・ら・が・ざ correct
+// + は/ma, ら/ta, が/da wrong.
 const RING_OK = [[0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 5, 6, 8, 9], [0, 1, 3, 5, 7, 8]];
 const RING_BAD: Kana[][] = [
   [['あ', 'o'], ['い', 'a'], ['う', 'e']],
@@ -31,7 +46,7 @@ const RINGS_DATA: RingData[][] = STAGES.map((s, i) => [
 
 interface RingNode {
   x: number; y: number; radius: number; vx: number;
-  floorIndex: number;
+  floorIndex: number; // 0: bottom, 1: 2nd, 2: 3rd, 3: top
   rotation: number; vRot: number; data: RingData;
 }
 
@@ -94,6 +109,7 @@ export default function RollingCharacterPage() {
   );
 }
 
+// [waveform, pitch sequence, duration (s), volume]
 type Sound = 'jump' | 'correct' | 'damage' | 'victory' | 'type';
 const SOUNDS: Record<Sound, [OscillatorType, number[], number, number]> = {
   jump: ['square', [150, 350], 0.15, 0.1],
@@ -103,13 +119,13 @@ const SOUNDS: Record<Sound, [OscillatorType, number[], number, number]> = {
   victory: ['sine', [523.25, 659.25, 783.99], 0.6, 0.15],
 };
 
+// Platforms: [x1, y1, x2, y2, isGoal]. Ladders: [x, y, height].
 const PLATS = [[50, 620, 750, 612, 0], [50, 490, 750, 498, 0], [50, 360, 750, 352, 0], [50, 230, 750, 238, 0], [250, 100, 550, 100, 1]];
 const LADDERS = [[680, 490, 130], [120, 360, 130], [680, 230, 130], [400, 100, 130]];
 const KEYMAP: Record<string, string> = {
   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', Space: 'space',
 };
-
 function RollingCharacterArena() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'TYPING' | 'GAMEOVER' | 'VICTORY'>('START');
@@ -187,32 +203,58 @@ function RollingCharacterArena() {
       if (gameStateRef.current !== 'PLAYING') return;
       if (invincibilityTimer > 0) invincibilityTimer--;
 
+      const prevBottom = player.y + player.h;
       const spacePressedNow = keys.space;
       const wantingToJump = spacePressedNow && !spacePressedLastFrame && player.isGrounded;
-
-      player.isOnLadder = !wantingToJump && LADDERS.some(([x, y, h]) =>
+      const touchedLadder = LADDERS.find(([x, y, h]) =>
         player.x + player.w / 2 >= x - 12 && player.x + player.w / 2 <= x + 12 &&
         player.y + player.h >= y && player.y <= y + h);
+      // A ladder only takes over the vertical speed when the player is
+      // already on it or presses up/down to grab it. Otherwise a jump
+      // or a fall that merely passes the ladder's x-range would be
+      // cancelled mid-air and the player would hang on the ladder.
+      const wasOnLadder = player.isOnLadder;
+      player.isOnLadder = !wantingToJump && !!touchedLadder &&
+        (wasOnLadder || keys.up || keys.down);
+      // The surface of the floor at the top of the touched ladder.
+      // Floors are sloped, so this is the ladder's top y plus the slope
+      // at the ladder's x, not the raw top y.
+      const ladderTop = touchedLadder ? touchedLadder[1] : null;
+      const ladderTopSurface = (() => {
+        if (!touchedLadder || ladderTop === null) return null;
+        const topPlat = PLATS.find(([, y1]) => Math.abs(y1 - ladderTop) <= 8);
+        if (!topPlat) return ladderTop;
+        return topPlat[1] + ((touchedLadder[0] - 50) / 700) * (topPlat[3] - topPlat[1]);
+      })();
+      // Standing on the floor at the top of a ladder: there is nowhere
+      // further up to climb, so holding up must not start another climb.
+      const atLadderTop = player.isOnLadder && player.isGrounded && ladderTopSurface !== null &&
+        Math.abs(player.y + player.h - ladderTopSurface) <= 4;
 
       player.vx = 0;
       if (keys.left) { player.vx = -player.speed; player.facing = -1; }
       if (keys.right) { player.vx = player.speed; player.facing = 1; }
-
       if (player.isOnLadder) {
-        player.vy = keys.up ? -player.speed * 0.8 : keys.down ? player.speed * 0.8 : 0;
-        if (keys.up || keys.down) player.isGrounded = false;
+        if (atLadderTop && keys.up && !keys.down) {
+          player.vy = 0;
+        } else {
+          player.vy = keys.up ? -player.speed * 0.8 : keys.down ? player.speed * 0.8 : 0;
+          if (keys.up || keys.down) player.isGrounded = false;
+        }
       }
 
       if (wantingToJump && !player.isOnLadder) {
         player.vy = player.jumpPower; player.isGrounded = false; playSound('jump');
       }
       spacePressedLastFrame = spacePressedNow;
-
-      if (!player.isOnLadder || player.isGrounded) player.vy += player.gravity;
+      // On a ladder the player hangs in place unless climbing or
+      // descending; gravity must not pull them down a little each frame
+      // and then snap them back onto the floor.
+      if (!player.isOnLadder) player.vy += player.gravity;
       player.x += player.vx; player.y += player.vy;
       player.x = Math.max(30, Math.min(750, player.x));
 
-      // Platform collisions & Ladder bottom landing fix
+      // Platform collisions
       player.isGrounded = false;
       for (const [x1, y1, x2, y2, isGoal] of PLATS) {
         if (isGoal) {
@@ -224,21 +266,25 @@ function RollingCharacterArena() {
           if (player.x + player.w > minX && player.x < maxX) {
             const t = (player.x + player.w / 2 - x1) / (x2 - x1);
             const surfaceY = y1 + t * (y2 - y1);
-            if (player.vy < 0 && player.y <= surfaceY + 16 && player.y >= surfaceY && player.y + player.h > surfaceY) {
+            // Climbing a ladder onto a floor: the feet crossed the surface
+            // from below, so snap onto it instead of climbing past it.
+            if (player.isOnLadder && player.vy < 0 && prevBottom > surfaceY && player.y + player.h <= surfaceY + 4) {
+              player.y = surfaceY - player.h; player.vy = 0; player.isGrounded = true;
+            } else if (player.vy < 0 && player.y <= surfaceY + 16 && player.y >= surfaceY && player.y + player.h > surfaceY) {
               player.y = surfaceY; player.vy = 0;
-            }
-            
-            // 下キーを押して梯子を下っているときでも、床のサーフェス付近に達したらしっかり着地させる
-            const nearFloor = player.y + player.h >= surfaceY - 8 && player.y + player.h <= surfaceY + 12;
-            if (player.vy >= 0 && nearFloor) {
-              player.y = surfaceY - player.h; 
-              player.vy = 0; 
-              player.isGrounded = true;
+            } else if (player.vy >= 0 && prevBottom <= surfaceY + 4 && player.y + player.h >= surfaceY - 4 && player.y + player.h <= surfaceY + 12 &&
+              !(keys.down && player.isOnLadder && ladderTopSurface !== null && Math.abs(surfaceY - ladderTopSurface) <= 4)) {
+              // Land only when falling onto the floor from above. While
+              // descending a ladder, the floor at the top of that ladder
+              // is ignored, so the player can drop through it — but the
+              // floor at the bottom of the ladder still catches them.
+              player.y = surfaceY - player.h; player.vy = 0; player.isGrounded = true;
             }
           }
         }
       }
 
+      // Reached the treasure chest -> typing challenge
       const [gx1, gy, gx2] = [PLATS[4][0], PLATS[4][1], PLATS[4][2]];
       if (player.y + player.h <= gy + 10 && player.x >= gx1 + 40 && player.x + player.w <= gx2 - 40) {
         setGameState('TYPING');
@@ -248,6 +294,7 @@ function RollingCharacterArena() {
         return;
       }
 
+      // Spawn a ring every ~2 seconds (120 frames) from the top floor, left side
       if (++spawnTimer >= 120) {
         spawnTimer = 0;
         const pool = RINGS_DATA[stageRef.current - 1] || RINGS_DATA[0];
@@ -257,6 +304,7 @@ function RollingCharacterArena() {
         });
       }
 
+      // Rings roll along a floor, then zigzag down to the next floor
       for (let i = rings.length - 1; i >= 0; i--) {
         const r = rings[i];
         const [x1, y1, x2, y2] = PLATS[r.floorIndex];
@@ -267,6 +315,7 @@ function RollingCharacterArena() {
         if (atEdge) {
           if (r.floorIndex > 0) {
             r.floorIndex--;
+            // Floors 2 and 0 are entered from the right, the others from the left
             const fromRight = r.floorIndex === 2 || r.floorIndex === 0;
             r.x = fromRight ? 740 : 60; r.vx = fromRight ? -2.0 : 2.0; r.vRot = fromRight ? -0.1 : 0.1;
           } else { rings.splice(i, 1); continue; }
@@ -373,6 +422,7 @@ function RollingCharacterArena() {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800">
       <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl h-[700px] relative overflow-hidden flex items-center justify-center p-2 shadow-inner">
+        {/* Status bar inside the game frame, at the top */}
         <div className="absolute top-2 left-2 right-2 z-20 flex flex-wrap justify-between items-center bg-black/50 rounded-lg px-4 py-2 text-sm gap-2">
           <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(lives)}</span>
           <span className="text-indigo-300 font-bold">Stage: {stage} / 3</span>
