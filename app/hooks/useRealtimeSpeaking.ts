@@ -1,16 +1,16 @@
 /**
  * @file app/hooks/useRealtimeSpeaking.ts
- * @description OpenAI Realtime API を用いたWebRTC音声会話および5往復の進行状況を管理するカスタムフック（Unit 4 プロンプト連動版）
+ * @description Google Cloud Vertex AI 対応の日本語スピーキング対話管理カスタムフック
  */
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface UseRealtimeSpeakingProps {
   userId: string;
   onFinished?: () => void;
-  apiBaseUrl?: string; // バックエンドAPIのURL（デフォルト: https://api.jptutoraiyamato.com）
-  appType?: string;    // アプリ種別・レッスン種別（例: "obento-unit-4-lesson-1"）
-  lessonSlug?: string; // レッスンSlug
-  topic?: string;      // 課題の具体的なトピック指示
+  apiBaseUrl?: string; 
+  appType?: string;    
+  lessonSlug?: string; 
+  topic?: string;      
 }
 
 export function useRealtimeSpeaking({
@@ -22,15 +22,11 @@ export function useRealtimeSpeaking({
   topic = '家族の人数や構成、ペットについての質問と答え方の練習',
 }: UseRealtimeSpeakingProps) {
   const [isConnected, setIsConnected] = useState(false);
-  const [statusText, setStatusText] = useState('「スタート」を押して会話を始めてください');
+  const [statusText, setStatusText] = useState('Click "Start Conversation" to begin.');
   const [turnCount, setTurnCount] = useState(0);
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
 
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const audioElementRef = useRef<HTMLAudioElement | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-
-  // コンポーネントアンマウント時のクリーンアップ
   useEffect(() => {
     return () => {
       stopSession();
@@ -38,29 +34,95 @@ export function useRealtimeSpeaking({
   }, []);
 
   const stopSession = useCallback(() => {
-    // マイクのストリームを停止
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
-
-    // WebRTC接続を閉じる
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
-    }
-
     setIsConnected(false);
     setIsAiSpeaking(false);
-    setStatusText('会話が終了しました');
+    setStatusText('Conversation ended.');
   }, []);
+
+  // AIの返答を音声ブラウザ合成（SpeechSynthesis）で読み上げる補助関数
+  const speakText = (text: string, onEnd?: () => void) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ja-JP'; // 日本語音声
+      utterance.rate = 0.9;     // 少しゆっくり（学習者向け）
+      utterance.onend = () => {
+        setIsAiSpeaking(false);
+        if (onEnd) onEnd();
+      };
+      setIsAiSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+    } else {
+      setIsAiSpeaking(false);
+      if (onEnd) onEnd();
+    }
+  };
 
   const startSession = useCallback(async () => {
     try {
-      setStatusText('セッションを準備中...');
+      setStatusText('Connecting to AI Yamato...');
       setTurnCount(0);
+      setChatHistory([]);
 
-      // 1. バックエンドからエフェメラルセッション（一時トークン）を取得（appTypeやlessonSlug、topicを送信）
+      const endpoint = `${apiBaseUrl}/api/realtime/session`;
+      
+      // 最初の一言（挨拶と最初の質問）をAIに要求する
+      const initialMessage = "こんにちは！スピーキング課題を始めます。最初の質問をしてください。";
+      
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          appType,
+          lessonSlug,
+          topic,
+          message: initialMessage,
+          history: [],
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = (await res.json().catch(() => ({}))) as any;
+        throw new Error(errData.error || 'Failed to start session');
+      }
+
+      const data = (await res.json()) as any;
+      const aiReply = data.reply || "こんにちは！";
+
+      setIsConnected(true);
+      setStatusText('AI Yamato is speaking...');
+      setChatHistory([
+        { role: 'user', content: initialMessage },
+        { role: 'assistant', content: aiReply },
+      ]);
+
+      // AIの返答を音声で読み上げ
+      speakText(aiReply, () => {
+        setStatusText('Your turn (Please reply in Japanese...)');
+      });
+
+    } catch (err: any) {
+      console.error('❌ [useRealtimeSpeaking] Start Error:', err);
+      setStatusText(`Error: ${err?.message || 'Connection failed'}`);
+      stopSession();
+    }
+  }, [userId, apiBaseUrl, appType, lessonSlug, topic, stopSession]);
+
+  // ユーザーが生徒としての返答を送信する関数
+  const sendUserMessage = async (userText: string) => {
+    if (!isConnected) return;
+
+    try {
+      setStatusText('AI Yamato is thinking...');
+      setIsAiSpeaking(true);
+
+      const newHistory = [
+        ...chatHistory,
+        { role: 'user', content: userText }
+      ];
+      setChatHistory(newHistory);
+
       const endpoint = `${apiBaseUrl}/api/realtime/session`;
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -70,104 +132,42 @@ export function useRealtimeSpeaking({
           appType,
           lessonSlug,
           topic,
+          message: userText,
+          history: newHistory,
         }),
       });
 
       if (!res.ok) {
-        const errData = (await res.json().catch(() => ({}))) as any;
-        throw new Error(errData.error || 'セッションの取得に失敗しました');
+        throw new Error('Failed to send message');
       }
 
       const data = (await res.json()) as any;
-      const EPHEMERAL_KEY = data.session?.client_secret?.value;
+      const aiReply = data.reply || "なるほど！";
 
-      if (!EPHEMERAL_KEY) {
-        throw new Error('有効なエフェメラルキーが取得できませんでした');
-      }
+      setChatHistory([
+        ...newHistory,
+        { role: 'assistant', content: aiReply }
+      ]);
 
-      // 2. WebRTC PeerConnection の初期化
-      const pc = new RTCPeerConnection();
-      peerConnectionRef.current = pc;
-
-      // 3. AIからの音声出力を再生するための <audio> 要素の準備
-      if (!audioElementRef.current) {
-        audioElementRef.current = document.createElement('audio');
-        audioElementRef.current.autoplay = true;
-      }
-
-      pc.ontrack = (e) => {
-        if (audioElementRef.current) {
-          audioElementRef.current.srcObject = e.streams[0];
+      setTurnCount((prev) => {
+        const next = prev + 1;
+        if (next >= 5 && onFinished) {
+          onFinished();
         }
-      };
-
-      // 4. ブラウザのマイク音声を取得してWebRTCに追加
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStreamRef.current = mediaStream;
-      mediaStream.getTracks().forEach((track) => {
-        pc.addTrack(track, mediaStream);
+        return next;
       });
 
-      // 5. データチャネル（イベント監視・ターン数制御用）の設定
-      const dataChannel = pc.createDataChannel('oai-events');
-      dataChannel.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          
-          // AIの発話開始・終了の検知
-          if (msg.type === 'response.audio.started' || msg.type === 'response.content_part.added') {
-            setIsAiSpeaking(true);
-            setStatusText('AIが話しています...');
-          }
-          
-          // 1回のAIのターンが完了したタイミング
-          if (msg.type === 'response.done') {
-            setIsAiSpeaking(false);
-            setStatusText('あなたの番です（話してください...）');
-            
-            setTurnCount((prev) => {
-              const next = prev + 1;
-              if (next >= 5 && onFinished) {
-                onFinished();
-              }
-              return next;
-            });
-          }
-        } catch (err) {
-          console.error('Data channel message parse error:', err);
-        }
-      };
-
-      // 6. SDP Offer の作成と OpenAI Realtime API エンドポイントへの送信
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      const baseUrl = 'https://api.openai.com/v1/realtime';
-      const model = 'gpt-4o-realtime-preview';
-      const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
-        method: 'POST',
-        body: offer.sdp,
-        headers: {
-          Authorization: `Bearer ${EPHEMERAL_KEY}`,
-          'Content-Type': 'application/sdp',
-        },
+      setStatusText('AI Yamato is speaking...');
+      speakText(aiReply, () => {
+        setStatusText('Your turn (Please reply in Japanese...)');
       });
 
-      if (!sdpResponse.ok) {
-        throw new Error(`OpenAI Realtime SDP connection failed: ${sdpResponse.statusText}`);
-      }
-
-      const answerSdp = await sdpResponse.text();
-      await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
-
-      setIsConnected(true);
-      setStatusText('会話中（AIが聞いています...）');
     } catch (err: any) {
-      console.error('❌ [useRealtimeSpeaking] Start Error:', err);
-      setStatusText(`エラー: ${err?.message || '接続に失敗しました'}`);
-      stopSession();
+      console.error('❌ Send Message Error:', err);
+      setStatusText(`Error: ${err?.message}`);
+      setIsAiSpeaking(false);
     }
-  }, [userId, apiBaseUrl, appType, lessonSlug, topic, onFinished, stopSession]);
+  };
 
   return {
     isConnected,
@@ -176,5 +176,7 @@ export function useRealtimeSpeaking({
     turnCount,
     startSession,
     stopSession,
+    sendUserMessage,
+    chatHistory,
   };
 }
