@@ -1,6 +1,6 @@
 /**
  * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリルモーダル連携版）
+ * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリル・リアルタイムスピーキング課題・英語指示・Unit 4プロンプト連携版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -17,7 +17,8 @@ import { EduLessonHeader } from "~/components/lessons/EduLessonHeader";
 import { EduLessonDetailsCard } from "~/components/lessons/EduLessonDetailsCard";
 import { EduVocabularySidebar } from "~/components/lessons/EduVocabularySidebar";
 import { EduLessonTaskManager } from "~/components/lessons/EduLessonTaskManager";
-import { EduVocabularyDrillModal } from "~/components/lessons/EduVocabularyDrillModal"; // 👈 語彙ドリルモーダルのインポート
+import { EduVocabularyDrillModal } from "~/components/lessons/EduVocabularyDrillModal";
+import { EduSpeakingTaskWidget } from "~/components/lessons/EduSpeakingTaskWidget";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -97,9 +98,12 @@ function LessonsObentoUnit4Lesson1Page() {
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
-  // 👈 語彙ドリルモーダルの開閉状態と達成状態の管理
+  // 語彙ドリルモーダルの開閉状態と達成状態の管理
   const [isDrillOpen, setIsDrillOpen] = useState(false);
   const [vocabTaskCompleted, setVocabTaskCompleted] = useState(false);
+
+  // スピーキング課題の完了状態
+  const [speakingTaskCompleted, setSpeakingTaskCompleted] = useState(false);
 
   const loaderData = useLoaderData<typeof loader>() || {};
   const { lesson, topic, vocabulary = [] } = loaderData;
@@ -195,10 +199,10 @@ function LessonsObentoUnit4Lesson1Page() {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-5xl mx-auto space-y-8">
           
-          {/* 1. ヘッダーカードモジュール */}
+          {/* 1. Header Card Module */}
           <EduLessonHeader lesson={lesson} topic={topic} />
 
-          {/* 2. 上部：常設ヤマト・AIチューター */}
+          {/* 2. Top: Persistent Yamato AI Tutor */}
           <YamatoChatCommon2
             characterName="Yamato Sensei"
             appType="obento-unit-4-lesson-1"
@@ -210,13 +214,12 @@ function LessonsObentoUnit4Lesson1Page() {
             assignedQuestion={`Obento Deluxe Unit 4 Lesson 1: ${lesson?.title_en || "Family and Pets"}`}
           />
 
-          {/* 3. メインコンテンツ & 語彙リストグリッド (Lesson Details & Vocabulary) */}
+          {/* 3. Main Content & Vocabulary Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
             <div className="md:col-span-2 space-y-6">
               <EduLessonDetailsCard lesson={lesson} />
             </div>
             <div className="space-y-6">
-              {/* 👈 語彙サイドバーに onStartDrill を渡してボタンを表示 */}
               <EduVocabularySidebar 
                 vocabulary={vocabulary} 
                 onStartDrill={() => setIsDrillOpen(true)}
@@ -224,20 +227,34 @@ function LessonsObentoUnit4Lesson1Page() {
             </div>
           </div>
 
-          {/* 4. 下部：自習タスクセクション (Task 1 からのドリル起動および完了状態の同期) */}
+          {/* 4. Bottom: Self-Study Task Section (5 Tasks with English Instructions) */}
           <EduLessonTaskManager 
             lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
             userId={user?.id}
             onStartVocabularyDrill={() => setIsDrillOpen(true)}
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
+              speaking: speakingTaskCompleted,
+            }}
+          />
+
+          {/* 5. Real-time Voice Speaking Task Widget (Family Size & Composition Practice) */}
+          <EduSpeakingTaskWidget
+            title="Speaking Task: Practice Talking About Your Family Members"
+            description="Have a 5-turn real-time voice conversation with AI Yamato. Practice asking and answering questions about your family size and who lives in your household."
+            userId={user?.id}
+            appType="obento-unit-4-lesson-1"
+            lessonSlug="obento-unit-4-lesson-1"
+            topic="家族は何人ですか？誰がいますか？という質問に対して、自分の家族構成（人数や特殊な数え方『ひとり・ふたり』、家族のメンバー）について日本語で答える練習。"
+            onCompleted={() => {
+              setSpeakingTaskCompleted(true);
             }}
           />
 
         </main>
       </div>
 
-      {/* 👈 5. フルスクリーン対応 語彙ドリルモーダル */}
+      {/* 6. Fullscreen Vocabulary Drill Modal */}
       <EduVocabularyDrillModal
         vocabulary={vocabulary}
         isOpen={isDrillOpen}
