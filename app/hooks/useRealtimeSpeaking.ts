@@ -11,16 +11,17 @@ interface UseRealtimeSpeakingProps {
   appType?: string;    
   lessonSlug?: string; 
   topic?: string;      
+  initialPrompt?: string; // 💡 追加: 最初の挨拶や指示を動的に変えられるようにする
 }
 
 export function useRealtimeSpeaking({
   userId,
   onFinished,
-  // 💡 PagesとAPI Workersが分離しているため、デフォルトでバックエンドWorkersのURLを指定します
   apiBaseUrl = 'https://api.jptutoraiyamato.com',
   appType = 'obento-unit-4-lesson-1',
   lessonSlug = 'obento-unit-4-lesson-1',
   topic = '家族の人数や構成、ペットについての質問と答え方の練習',
+  initialPrompt = 'あなたは日本語会話の先生です。日本語で短く挨拶し、最初の質問やフリートークを始めてください。',
 }: UseRealtimeSpeakingProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [statusText, setStatusText] = useState('Click "Start Conversation" to begin.');
@@ -72,7 +73,7 @@ export function useRealtimeSpeaking({
           appType,
           lessonSlug,
           topic,
-          prompt: "あなたは日本語会話の先生です。日本語で短く挨拶し、家族の人数や構成について最初の質問をしてください。",
+          prompt: initialPrompt,
         }),
       });
 
@@ -121,7 +122,7 @@ export function useRealtimeSpeaking({
           JSON.stringify({
             type: "response.create",
             response: {
-              instructions: "日本語で短く挨拶し、家族の人数や構成について最初の質問をしてください。",
+              instructions: initialPrompt,
             },
           })
         );
@@ -135,7 +136,7 @@ export function useRealtimeSpeaking({
             setStatusText('Your turn (Please reply in Japanese...)');
             setTurnCount((prev) => {
               const next = prev + 1;
-              if (next >= 5 && onFinished) {
+              if (next >= 10 && onFinished) { // Accelerated向けに少し長めの10ターンに設定可能
                 onFinished();
               }
               return next;
@@ -176,7 +177,7 @@ export function useRealtimeSpeaking({
       setStatusText(`Error: ${err?.message || 'Connection failed'}`);
       stopSession();
     }
-  }, [userId, apiBaseUrl, appType, lessonSlug, topic, stopSession, onFinished]);
+  }, [userId, apiBaseUrl, appType, lessonSlug, topic, initialPrompt, stopSession, onFinished]);
 
   return {
     isConnected,

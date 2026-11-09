@@ -1,6 +1,6 @@
 /**
  * @file content-vce-speaking.ts
- * @description Supabase kl_app (key: 'CONTENT_VCE_SPEAKING') からの動的データ取得モジュール
+ * @description Supabase kl_app (key: 'CONTENT_VCE_SPEAKING') からの動的データ取得モジュール（純粋なデータ駆動版）
  */
 
 import { useState, useEffect, useCallback } from 'react';
