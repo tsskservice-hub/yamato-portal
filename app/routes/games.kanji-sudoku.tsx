@@ -54,6 +54,8 @@ function KanjiSudokuFrameView({ userId }: { userId: string | null }) {
             title="Kanji Sudoku Puzzle"
             className="w-full h-full border-0 rounded-xl"
             sandbox="allow-scripts allow-same-origin allow-forms"
+            allowFullScreen
+            allow="fullscreen"
           />
         </div>
       </div>

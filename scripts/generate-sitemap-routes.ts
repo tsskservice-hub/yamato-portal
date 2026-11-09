@@ -25,9 +25,13 @@ function getRoutes(dir: string, base = ""): string[] {
         name.startsWith("_") ||
         name.includes("sitemap") ||
         name === "root" ||
-        name === "test-yamato" ||
-        name === "test-yamato-note" ||
-        name === "image-test"
+        name === "api.auth.callback" ||
+        name === "developer.image-test" ||
+        name === "developer.test-audio" ||
+        name === "developer.test-yamato" ||
+        name === "developer.test-yamato-note" ||
+        name === "vocab-creator" ||
+        name === "vocab-drill.$listId" 
       ) {
         continue;
       }
