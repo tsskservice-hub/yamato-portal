@@ -53,7 +53,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
   useEffect(() => {
     if (isOpen && currentMode === "audio_to_en" && shuffledVocab.length > 0) {
-      playJapaneseAudio(shuffledVocab[currentIndex % shuffledVocab.length]?.jp_text);
+      playVocabAudio(shuffledVocab[currentIndex % shuffledVocab.length]);
     }
   }, [currentMode, currentIndex, isOpen, shuffledVocab]);
 
@@ -61,14 +61,30 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
   const currentItem = shuffledVocab[currentIndex % shuffledVocab.length];
 
-  // 日本語の音声をブラウザ標準機能で読み上げる
-  const playJapaneseAudio = (text: string) => {
-    if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  // フォールバック用の音声合成関数
+  const playFallbackSpeech = (text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "ja-JP";
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
+  };
+
+  // 統合された音声再生関数（audio_urlの有無で分岐）
+  const playVocabAudio = (vocab: any) => {
+    // 1. 自作音声URLが登録されている場合は、そのMP3ファイルを再生
+    if (vocab?.audio_url) {
+      const audio = new Audio(vocab.audio_url);
+      audio.play().catch((err) => {
+        console.warn("Audio playback failed, falling back to Web Speech API:", err);
+        playFallbackSpeech(vocab.jp_text);
+      });
+      return;
+    }
+
+    // 2. 音声URLが無い場合は従来の自動音声合成にフォールバック
+    playFallbackSpeech(vocab?.jp_text);
   };
 
   // モード切替時に音声を自動再生または初期化
@@ -77,7 +93,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     setUserInput("");
     setFeedback(null);
     if (mode === "audio_to_en") {
-      playJapaneseAudio(currentItem.jp_text);
+      playVocabAudio(currentItem);
     }
   };
 
@@ -149,7 +165,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
           } else {
             setCurrentIndex(nextIdx);
             if (currentMode === "audio_to_en") {
-              playJapaneseAudio(shuffledVocab[nextIdx % shuffledVocab.length]?.jp_text);
+              playVocabAudio(shuffledVocab[nextIdx % shuffledVocab.length]);
             }
           }
         }
@@ -326,7 +342,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
                   <div className="flex justify-center py-2">
                     <button
                       type="button"
-                      onClick={() => playJapaneseAudio(currentItem.jp_text)}
+                      onClick={() => playVocabAudio(currentItem)}
                       className="w-20 h-20 sm:w-24 sm:h-24 bg-orange-500 hover:bg-orange-600 text-white rounded-3xl flex items-center justify-center text-3xl sm:text-4xl shadow-lg transition transform active:scale-95"
                       title="Play Audio"
                     >
