@@ -16,7 +16,8 @@ interface UseRealtimeSpeakingProps {
 export function useRealtimeSpeaking({
   userId,
   onFinished,
-  apiBaseUrl = '',
+  // 💡 PagesとAPI Workersが分離しているため、デフォルトでバックエンドWorkersのURLを指定します
+  apiBaseUrl = 'https://api.jptutoraiyamato.com',
   appType = 'obento-unit-4-lesson-1',
   lessonSlug = 'obento-unit-4-lesson-1',
   topic = '家族の人数や構成、ペットについての質問と答え方の練習',
@@ -77,10 +78,13 @@ export function useRealtimeSpeaking({
 
       if (!tokenRes.ok) {
         const errData = (await tokenRes.json().catch(() => ({}))) as any;
-        throw new Error(errData.error || 'Failed to get session token');
+        throw new Error(errData.error || `Failed to get session token (${tokenRes.status})`);
       }
 
       const { value } = (await tokenRes.json()) as { value: string };
+      if (!value) {
+        throw new Error("Token value is missing in server response.");
+      }
 
       // 3. WebRTC PeerConnection セットアップ
       const pc = new RTCPeerConnection();
@@ -156,7 +160,7 @@ export function useRealtimeSpeaking({
       });
 
       if (!sdpResponse.ok) {
-        throw new Error(`WebRTC接続に失敗しました: ${sdpResponse.status}`);
+        throw new Error(`WebRTC接続に失敗しました: ${sdpResponse.status} ${await sdpResponse.text()}`);
       }
 
       const answerSdp = await sdpResponse.text();
