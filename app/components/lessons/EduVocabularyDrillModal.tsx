@@ -58,6 +58,9 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
         activeAudioRef.current.pause();
         activeAudioRef.current = null;
       }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, [isOpen, vocabulary]);
 
@@ -71,7 +74,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
   const currentItem = shuffledVocab[currentIndex % shuffledVocab.length];
 
-  // フォールバック用の音声合成関数
+  // フォールバック用の音声合成関数（audio_urlが完全に対象外の時のみ使用）
   const playFallbackSpeech = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
@@ -81,34 +84,33 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     window.speechSynthesis.speak(utterance);
   };
 
-  // 統合された音声再生関数（重複再生・反響防止対応）
+  // 統合された音声再生関数（自作音声の有無で完全に分離・混信防止）
   const playVocabAudio = (vocab: any) => {
-    // 既存で再生中の音声があれば完全に停止してリセットする（反響防止）
+    // 既存で再生中のHTMLAudioを完全に停止してリセット
     if (activeAudioRef.current) {
       activeAudioRef.current.pause();
       activeAudioRef.current.currentTime = 0;
       activeAudioRef.current = null;
     }
 
-    // Web Speech APIの発話も念のためキャンセル
+    // ブラウザの音声合成（speechSynthesis）も必ずキャンセルしておく
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
 
-    // 1. 自作音声URLが登録されている場合は、そのMP3ファイルを再生
-    if (vocab?.audio_url) {
+    // 1. 自作音声URLが登録されている場合は、そのMP3ファイルのみを再生（フォールバックなし）
+    if (vocab?.audio_url && vocab.audio_url.trim() !== "") {
       const audio = new Audio(vocab.audio_url);
       activeAudioRef.current = audio;
 
       audio.play().catch((err) => {
-        console.warn("Audio playback failed, falling back to Web Speech API:", err);
+        console.warn("Custom audio playback failed:", err);
         activeAudioRef.current = null;
-        playFallbackSpeech(vocab.jp_text);
       });
       return;
     }
 
-    // 2. 音声URLが無い場合は従来の自動音声合成にフォールバック
+    // 2. 音声URLが未設定の場合のみ、従来の自動音声合成にフォールバック
     playFallbackSpeech(vocab?.jp_text);
   };
 
