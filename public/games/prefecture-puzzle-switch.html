@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan Prefecture Puzzle</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; flex-direction: column;
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #f6f1e6; color: #2b2118;
+  }
+  /* Top bar: title on the left, Easy/Hard switch and fullscreen link on the right. */
+  .bar {
+    background: #1e3a5f; color: #f3ecdc;
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 16px; flex-wrap: wrap; flex: none;
+  }
+  .bar h1 { font-size: 20px; margin: 0; font-weight: 700; }
+  .bar .jp { font-size: 13px; opacity: 0.85; }
+  .toggle {
+    display: flex; margin-left: auto;
+    border: 1.5px solid rgba(243, 236, 220, 0.6);
+    border-radius: 24px; overflow: hidden;
+  }
+  .toggle button {
+    border: 0; background: transparent; color: #f3ecdc;
+    font: 700 14px/1 Georgia, serif; padding: 9px 16px; cursor: pointer;
+  }
+  .toggle button.active { background: #d9a441; color: #2b2118; }
+  .full { color: #f3ecdc; font-size: 14px; text-decoration: underline; white-space: nowrap; }
+  .frames { flex: 1; position: relative; min-height: 0; }
+  .frames iframe {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    border: 0; display: none; background: #f6f1e6;
+  }
+  .frames iframe.active { display: block; }
+  @media (max-width: 560px) {
+    .bar h1 { font-size: 17px; }
+    .bar .jp { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>Japan Prefecture Puzzle</h1>
+    <span class="jp">日本の都道府県パズル</span>
+    <div class="toggle" role="group" aria-label="Difficulty">
+      <button id="btnEasy" type="button" aria-pressed="true">Easy · かんたん</button>
+      <button id="btnHard" type="button" aria-pressed="false">Hard · むずかしい</button>
+    </div>
+    <a id="fullLink" class="full" href="prefecture-puzzle-easy.html" target="_blank" rel="noreferrer">全画面で開く</a>
+  </div>
+  <div class="frames">
+    <!-- Both versions stay loaded, so switching keeps each game's progress. -->
+    <iframe id="frameEasy" class="active" src="prefecture-puzzle-easy.html" title="Japan Prefecture Puzzle — Easy"></iframe>
+    <iframe id="frameHard" src="prefecture-puzzle.html" title="Japan Prefecture Puzzle — Hard"></iframe>
+  </div>
+<script>
+  // One page, one button: switch between the Easy and Hard versions.
+  // The two games are separate files; this page only shows one at a time.
+  // Because both iframes stay loaded, each version keeps its own progress
+  // when you switch back and forth.
+  const FRAMES = { easy: document.getElementById('frameEasy'), hard: document.getElementById('frameHard') };
+  const BTNS = { easy: document.getElementById('btnEasy'), hard: document.getElementById('btnHard') };
+  const FULL = document.getElementById('fullLink');
+  const FILES = { easy: 'prefecture-puzzle-easy.html', hard: 'prefecture-puzzle.html' };
+  function switchVersion(v) {
+    if (!FRAMES[v]) v = 'easy';
+    for (const k of ['easy', 'hard']) {
+      FRAMES[k].classList.toggle('active', k === v);
+      BTNS[k].classList.toggle('active', k === v);
+      BTNS[k].setAttribute('aria-pressed', k === v ? 'true' : 'false');
+    }
+    FULL.href = FILES[v];
+    try { history.replaceState(null, '', '?version=' + v); } catch (e) {}
+  }
+  BTNS.easy.addEventListener('click', () => switchVersion('easy'));
+  BTNS.hard.addEventListener('click', () => switchVersion('hard'));
+  // The starting version can be chosen with ?version=easy or ?version=hard.
+  const start = new URLSearchParams(location.search).get('version');
+  switchVersion(start === 'hard' ? 'hard' : 'easy');
+</script>
+</body>
+</html>
