@@ -49,15 +49,17 @@ function PrefecturePuzzleFrameView({ userId }: { userId: string | null }) {
 
         {/* Prefecture Puzzle iframe (Wide Layout Centered View) */}
         <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-indigo-800/40 p-2">
-          <iframe
-            src="/games/prefecture-puzzle-switch.html"
-            style={{ width: '100%', height: '900px', border: 0 }}
-            title="Japan Prefecture Puzzle"
-            className="rounded-xl"
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
+        <iframe
+        src="/games/prefecture-puzzle-switch.html"
+        style={{ width: '100%', height: '900px', border: 0 }}
+        title="Japan Prefecture Puzzle"
+        className="rounded-xl"
+        sandbox="allow-scripts allow-same-origin allow-forms"
+        allowFullScreen
+        allow="fullscreen"
+        />
         </div>
-      </div>
+        </div>
     </div>
   );
 }
