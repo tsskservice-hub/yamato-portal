@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@600;700&display=swap" rel="stylesheet" />
+<!-- Portal copy of the 9x9 Go library game (byte-identical to go-portal-latest.html) plus an Open Fullscreen button, added 2026-11-10. Library original untouched. -->
     <style>
       :root {
         --bg: #e9e6de;
@@ -63,7 +64,7 @@
       }
       /* ---------- Top actions ---------- */
       .top-bar {
-        display: flex; align-items: center; justify-content: flex-end;
+        display: flex; align-items: center; justify-content: flex-end; gap: 8px;
         margin-bottom: 12px;
       }
       .rules-btn { flex: 0 0 auto; white-space: nowrap; font-weight: 700; }
@@ -299,6 +300,7 @@
     <main>
       <div class="top-bar">
         <button type="button" class="rules-btn" id="btnRules" aria-haspopup="dialog">How to Play &amp; Rules</button>
+        <button type="button" class="rules-btn" id="btnFull">Open Fullscreen</button>
       </div>
       <section class="card new-game-card">
         <h2>New Game</h2>
@@ -705,7 +707,7 @@
        "btnPass","btnUndo","btnResign","resignConfirm","btnResignYes","btnResignNo","btnNew",
        "segColor","segLevel","segLayout","gameLayout","overlay","resultTitle","resultSub",
        "rBS","rWS","rBT","rWT","rBTotal","rWTotal","btnAgain","btnCloseResult","gridLines","gridLabels",
-       "btnRules","rulesOverlay","btnCloseRules"
+       "btnRules","rulesOverlay","btnCloseRules","btnFull"
       ].forEach(function (id) { el[id] = document.getElementById(id); });
 
       // Grid lines + labels ship as static SVG markup above (no JS needed to
@@ -1033,6 +1035,33 @@
       });
       document.addEventListener("keydown", function (e) {
         if (e.key === "Escape" && el.rulesOverlay.classList.contains("show")) closeRules();
+      });
+
+      /* ---------------- Fullscreen (same pattern as the Prefecture Puzzle) ---------------- */
+      /* Uses the Fullscreen API on the whole page. When embedded in the portal,
+         the portal iframe needs allowfullscreen for this to work. If fullscreen
+         is blocked or unavailable, open this page in a new tab instead. */
+      function goIsFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+      }
+      function updateFullBtn() {
+        if (el.btnFull) el.btnFull.textContent = goIsFullscreen() ? "Exit Fullscreen" : "Open Fullscreen";
+      }
+      document.addEventListener("fullscreenchange", updateFullBtn);
+      document.addEventListener("webkitfullscreenchange", updateFullBtn);
+      if (el.btnFull) el.btnFull.addEventListener("click", function () {
+        if (goIsFullscreen()) {
+          var exit = document.exitFullscreen || document.webkitExitFullscreen;
+          if (exit) exit.call(document);
+          return;
+        }
+        var req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+        if (req) {
+          var p = req.call(document.documentElement);
+          if (p && p.catch) p.catch(function () { window.open(location.href, "_blank", "noopener"); });
+        } else {
+          window.open(location.href, "_blank", "noopener");
+        }
       });
 
       newGame();

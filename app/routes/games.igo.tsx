@@ -49,12 +49,14 @@ function IgoFrameView({ userId }: { userId: string | null }) {
 
         {/* Go Board iframe (Wide Layout Centered View) */}
         <div className="w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-amber-800/40 p-2">
-          <iframe
-            src="/games/9by9go.html"
-            title="9by9 Go Game"
-            className="w-full h-full border-0 rounded-xl"
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
+        <iframe
+        src="/games/9by9go.html"
+        title="9by9 Go Game"
+        className="w-full h-full border-0 rounded-xl"
+        sandbox="allow-scripts allow-same-origin allow-forms"
+        allowFullScreen
+        allow="fullscreen"
+        />
         </div>
       </div>
     </div>
