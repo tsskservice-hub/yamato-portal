@@ -29,10 +29,13 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
   const [isFinished, setIsFinished] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // 音声認識用・音声合成用の状態
+  // 音声認識用・音声合成・音声再生用の参照
   const [isListening, setIsListening] = useState(false);
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // 再生中のHTMLAudioElementを保持して重複再生（反響）を防ぐためのref
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // 目標スコア（vocabulary の数×2、または最低5問）
   const targetScore = Math.max(vocabulary.length * 2, 5);
@@ -49,6 +52,13 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       setIsFinished(false);
       setCurrentMode("jp_to_en");
     }
+    // クリーンアップ：モーダル閉時に音声があれば停止
+    return () => {
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+    };
   }, [isOpen, vocabulary]);
 
   useEffect(() => {
@@ -71,13 +81,28 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     window.speechSynthesis.speak(utterance);
   };
 
-  // 統合された音声再生関数（audio_urlの有無で分岐）
+  // 統合された音声再生関数（重複再生・反響防止対応）
   const playVocabAudio = (vocab: any) => {
+    // 既存で再生中の音声があれば完全に停止してリセットする（反響防止）
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current.currentTime = 0;
+      activeAudioRef.current = null;
+    }
+
+    // Web Speech APIの発話も念のためキャンセル
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
     // 1. 自作音声URLが登録されている場合は、そのMP3ファイルを再生
     if (vocab?.audio_url) {
       const audio = new Audio(vocab.audio_url);
+      activeAudioRef.current = audio;
+
       audio.play().catch((err) => {
         console.warn("Audio playback failed, falling back to Web Speech API:", err);
+        activeAudioRef.current = null;
         playFallbackSpeech(vocab.jp_text);
       });
       return;
