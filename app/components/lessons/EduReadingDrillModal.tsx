@@ -1,9 +1,9 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description 共通ユーティリティを活用したスマート表記ゆれ対応、録音安定制御、デュアルチェック付きリーディングドリル
+ * @description スペースキーでの録音開始・停止トグル対応、スマート表記ゆれ正規化、デュアルチェック付きリーディングドリル
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { normalizeJapanese, normalizeEnglish } from "~/utils/normalization";
 
 interface ReadingItem {
@@ -44,7 +44,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
   
   const recognitionRef = useRef<any>(null);
-  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐためのフラグ
+  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐフラグ
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -120,7 +120,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   };
 
   // 🎙️ 録音開始
-  const startRecording = () => {
+  const startRecording = useCallback(() => {
+    if (speechVerified || isListening) return;
     if (typeof window === "undefined") return;
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -146,7 +147,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       recognition.onstart = () => {
         setIsListening(true);
         setUserSpokenText("");
-        setSpeechStatusMessage("🔴 Recording... Speak clearly into the microphone, then click 'Stop & Verify'.");
+        setSpeechStatusMessage("🔴 Recording... Speak clearly, or press Spacebar to Stop & Verify.");
       };
 
       recognition.onresult = (event: any) => {
@@ -186,10 +187,11 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       setIsListening(false);
       setSpeechStatusMessage("Could not start recording. Please check microphone permissions.");
     }
-  };
+  }, [speechVerified, isListening]);
 
-  // ⏹️ 録音停止 ＆ 検証（インポートした normalizeJapanese を使用）
-  const stopRecordingAndVerify = () => {
+  // ⏹️ 録音停止 ＆ 検証
+  const stopRecordingAndVerify = useCallback(() => {
+    if (speechVerified || !isListening) return;
     isManuallyStoppedRef.current = true;
     if (recognitionRef.current) {
       try {
@@ -220,9 +222,37 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     } else {
       setSpeechStatusMessage(`Heard: "${userSpokenText}" (Target: ${currentItem.jp_text}). Try recording again!`);
     }
-  };
+  }, [speechVerified, isListening, userSpokenText, currentItem]);
 
-  // 英語意味タイピング判定（インポートした normalizeEnglish を使用）
+  // ⌨️ スペースキーによる録音開始・停止の切り替えリスナー
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // モーダル内で完了画面になっておらず、英語入力欄にフォーカスしていない場合にスペースキーを受け付ける
+      if (isFinished) return;
+      if (e.code === "Space") {
+        const activeElem = document.activeElement;
+        const isInputFocused = activeElem?.tagName === "INPUT" || activeElem?.tagName === "TEXTAREA";
+        
+        // 英語入力欄にフォーカスがあるときはスペースキーのデフォルト動作（タイピング）を邪魔しない
+        if (isInputFocused && speechVerified) return;
+
+        e.preventDefault(); // 画面のスクロール等を防止
+
+        if (!isListening && !speechVerified) {
+          startRecording();
+        } else if (isListening) {
+          stopRecordingAndVerify();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
+
+  // 英語意味タイピング判定
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
@@ -282,7 +312,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
               <span>Reading Comprehension Drill</span>
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Step 1: Record & Read Aloud ➔ Step 2: Type English meaning ({score} / {targetScore} completed)
+              Step 1: Record & Read Aloud (Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border rounded text-xs font-mono">Space</kbd>) ➔ Step 2: Type English ({score} / {targetScore})
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -351,7 +381,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                     }`}
                   >
                     <span>🎙️</span>
-                    <span>{isListening ? "Recording..." : "Start Recording"}</span>
+                    <span>{isListening ? "Recording... (Space to Stop)" : "Start Recording (Space)"}</span>
                   </button>
 
                   <button
@@ -375,7 +405,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                     Your Spoken Text (認識されたあなたの発音):
                   </span>
                   <span className={`text-base sm:text-lg font-black ${userSpokenText ? "text-slate-900 dark:text-slate-100" : "text-slate-400 italic"}`}>
-                    {userSpokenText ? `"${userSpokenText}"` : "(Click 'Start Recording' and speak into your mic)"}
+                    {userSpokenText ? `"${userSpokenText}"` : "(Press Spacebar or click 'Start Recording' and speak)"}
                   </span>
                 </div>
 
