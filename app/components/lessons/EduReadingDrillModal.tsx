@@ -1,10 +1,10 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description フック順序違反（Error #310）を修正したリーディングドリルモーダル
+ * @description 全アイテムの完了でタスク達成、スペースキー録音制御、スマート表記ゆれ対応リーディングドリル
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { normalizeJapanese, normalizeEnglish } from "~/utils/normalization";
+import { normalizeJapanese, normalizeEnglish, toHiragana } from "~/utils/normalization";
 
 interface ReadingItem {
   id?: string | number;
@@ -48,10 +48,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 目標スコア
-  const targetScore = Math.max(items.length, 5);
-
-  // 1. 初期化・シャッフル（すべてのフックは必ず早期リターンの上に配置）
+  // 初期化・シャッフル（モーダルオープン時にアイテムの総数を基準に設定）
   useEffect(() => {
     if (isOpen && items.length > 0) {
       const shuffled = [...items].sort(() => Math.random() - 0.5);
@@ -213,16 +210,16 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
     if (isSpeechCorrect) {
       setSpeechVerified(true);
-      setSpeechStatusMessage(`🎤 Voice Verified! ("${userSpokenText}"). Now type the English meaning below.`);
+      setSpeechStatusMessage(`🎤 Voice Verified! ("${toHiragana(userSpokenText)}"). Now type the English meaning below.`);
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     } else {
-      setSpeechStatusMessage(`Heard: "${userSpokenText}" (Target: ${currentItem.jp_text}). Try recording again!`);
+      setSpeechStatusMessage(`Heard: "${toHiragana(userSpokenText)}" (Target: ${currentItem.jp_text}). Try recording again!`);
     }
   }, [speechVerified, isListening, userSpokenText, currentItem]);
 
-  // ⌨️ スペースキーによる録音コントロール（useEffectもすべてのフックと共に上に配置）
+  // ⌨️ スペースキーによる録音コントロール
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen || isFinished) return;
@@ -248,7 +245,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
 
-  // 英語意味タイピング判定
+  // 英語意味タイピング判定（全アイテムを正確にクリアした時点で完了）
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
@@ -274,18 +271,12 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         setSpeechStatusMessage("");
         isManuallyStoppedRef.current = false;
 
-        if (nextScore >= targetScore) {
+        // すべてのアイテムを一通りクリアしたかどうかの判定
+        if (nextScore >= shuffledItems.length) {
           setIsFinished(true);
           onCompleted();
         } else {
-          const nextIdx = currentIndex + 1;
-          if (nextIdx % shuffledItems.length === 0) {
-            const reShuffled = [...items].sort(() => Math.random() - 0.5);
-            setShuffledItems(reShuffled);
-            setCurrentIndex(0);
-          } else {
-            setCurrentIndex(nextIdx);
-          }
+          setCurrentIndex((prev) => prev + 1);
         }
       }, 1200);
     } else {
@@ -294,7 +285,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  // 🔴 すべてのフック定義の「後」に早期リターンを配置（これでError #310が完全に解消されます）
   if (!isOpen || shuffledItems.length === 0) return null;
 
   return (
@@ -311,7 +301,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
               <span>Reading Comprehension Drill</span>
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Step 1: Record & Read Aloud (Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border rounded text-xs font-mono">Space</kbd>) ➔ Step 2: Type English ({score} / {targetScore})
+              Step 1: Record & Read Aloud (Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border rounded text-xs font-mono">Space</kbd>) ➔ Step 2: Type English ({score} / {shuffledItems.length})
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -340,7 +330,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
             <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
               <div 
                 className="bg-orange-500 h-full transition-all duration-300"
-                style={{ width: `${Math.min(100, (score / targetScore) * 100)}%` }}
+                style={{ width: `${Math.min(100, (score / shuffledItems.length) * 100)}%` }}
               />
             </div>
 
@@ -398,13 +388,13 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                   </button>
                 </div>
 
-                {/* 発話テキスト化の自己確認ボックス */}
+                {/* 発話テキスト化の自己確認ボックス（ひらがな表示） */}
                 <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-center min-h-[70px] flex flex-col justify-center">
                   <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1">
                     Your Spoken Text (認識されたあなたの発音):
                   </span>
                   <span className={`text-base sm:text-lg font-black ${userSpokenText ? "text-slate-900 dark:text-slate-100" : "text-slate-400 italic"}`}>
-                    {userSpokenText ? `"${userSpokenText}"` : "(Press Spacebar or click 'Start Recording' and speak)"}
+                    {userSpokenText ? `"${toHiragana(userSpokenText)}"` : "(Press Spacebar or click 'Start Recording' and speak)"}
                   </span>
                 </div>
 
@@ -441,9 +431,10 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                 {speechVerified && feedback === null && (
                   <button
                     type="submit"
-                    className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer"
+                    className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer flex items-center justify-center gap-2"
                   >
-                    Submit English Meaning ➔
+                    <span>Submit English Meaning ➔</span>
+                    <span className="text-xs opacity-80 font-normal">(Press Enter to Submit)</span>
                   </button>
                 )}
 
