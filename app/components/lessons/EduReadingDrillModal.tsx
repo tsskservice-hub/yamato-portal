@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description 全アイテム一巡で確実に完了画面になるリーディングドリルモーダル
+ * @description 全問完了時にお祝いメッセージを表示するリーディングドリルモーダル
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -246,7 +246,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
 
-  // 英語意味タイピング判定（厳密な全問クリア完了判定）
+  // 英語意味タイピング判定
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
@@ -273,7 +273,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         isManuallyStoppedRef.current = false;
 
         const nextIndex = currentIndex + 1;
-        // すべてのアイテムを解き終えたかどうかを判定
         if (nextIndex >= totalItems) {
           setIsFinished(true);
           onCompleted();
@@ -456,24 +455,27 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
           </div>
         ) : (
-          <div className="text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center">
+          <div className="text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center animate-fade-in">
             <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner">
-              🏆
+              🎉
             </div>
-            <div className="space-y-2 max-w-md">
-              <h4 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
-                Reading Task Mastered!
+            <div className="space-y-3 max-w-md">
+              <h4 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                Congratulations!
               </h4>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                You successfully completed all required reading and comprehension checks. This task is now marked as complete!
+              <p className="text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400">
+                You have successfully mastered all reading and comprehension items!
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Fantastic effort. Your progress has been saved and this task is now marked as complete.
               </p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="py-4 px-10 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-base transition shadow-md cursor-pointer"
+              className="py-4 px-12 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow-lg hover:shadow-orange-500/25 active:scale-95 cursor-pointer"
             >
-              Return to Lesson
+              Complete & Return to Lesson ➔
             </button>
           </div>
         )}
