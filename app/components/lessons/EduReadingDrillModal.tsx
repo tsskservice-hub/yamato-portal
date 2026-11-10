@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description ローマ字非表示・録音開始/停止ボタン明示・発話テキスト化自己確認付きリーディングドリル
+ * @description ループ防止・録音開始/停止の安定制御と発話テキスト化自己確認付きリーディングドリル
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -41,7 +41,9 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   // 音声認識・音声合成用 ref
   const [isListening, setIsListening] = useState(false);
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
+  
   const recognitionRef = useRef<any>(null);
+  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐためのフラグ
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -61,6 +63,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       setFeedback(null);
       setIsFinished(false);
       setSpeechStatusMessage("");
+      isManuallyStoppedRef.current = false;
     }
 
     return () => {
@@ -72,7 +75,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         window.speechSynthesis.cancel();
       }
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch(e) {}
+        try { recognitionRef.current.abort(); } catch(e) {}
       }
     };
   }, [isOpen, items]);
@@ -132,17 +135,26 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       return;
     }
 
+    // 既に動いているインスタンスがあれば安全に停止・破棄
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {}
+    }
+
     try {
+      isManuallyStoppedRef.current = false;
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
       recognition.lang = "ja-JP";
       recognition.interimResults = true;
       recognition.maxAlternatives = 1;
+      recognition.continuous = true; // 途切れでの自動終了を防ぎ、手動停止するまで継続させる
 
       recognition.onstart = () => {
         setIsListening(true);
         setUserSpokenText("");
-        setSpeechStatusMessage("🔴 Recording... Speak clearly into the microphone.");
+        setSpeechStatusMessage("🔴 Recording... Speak clearly into the microphone, then click 'Stop & Verify'.");
       };
 
       recognition.onresult = (event: any) => {
@@ -165,12 +177,17 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
       recognition.onerror = (event: any) => {
         console.warn("Speech recognition error:", event.error);
-        setIsListening(false);
-        setSpeechStatusMessage("Voice recognition error. Please try clicking Start Recording again.");
+        if (!isManuallyStoppedRef.current) {
+          setIsListening(false);
+          setSpeechStatusMessage("Voice recognition error. Please click 'Start Recording' again.");
+        }
       };
 
       recognition.onend = () => {
-        setIsListening(false);
+        // 手動で止めていないのに勝手に終了した場合のループをブロック
+        if (!isManuallyStoppedRef.current) {
+          setIsListening(false);
+        }
       };
 
       recognition.start();
@@ -182,6 +199,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
   // ⏹️ 録音停止 ＆ 検証
   const stopRecordingAndVerify = () => {
+    isManuallyStoppedRef.current = true;
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -231,6 +249,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         setFeedback(null);
         setSpeechVerified(false);
         setSpeechStatusMessage("");
+        isManuallyStoppedRef.current = false;
 
         if (nextScore >= targetScore) {
           setIsFinished(true);
@@ -305,7 +324,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                 <button
                   type="button"
                   onClick={playModelAudio}
-                  className="text-xs bg-slate-200 dark:bg-slate-700 hover:bg-orange-500 hover:text-white px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5"
+                  className="text-xs bg-slate-200 dark:bg-slate-700 hover:bg-orange-500 hover:text-white px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>🔊</span> Listen Model Audio
                 </button>
