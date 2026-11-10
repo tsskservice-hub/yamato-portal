@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description 全アイテムの完了でタスク達成、スペースキー録音制御、スマート表記ゆれ対応リーディングドリル
+ * @description 全アイテム一巡で確実に完了画面になるリーディングドリルモーダル
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -78,8 +78,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, items]);
 
-  const totalItems = shuffledItems.length > 0 ? shuffledItems.length : items.length;
-  const currentItem = shuffledItems[currentIndex % (shuffledItems.length || 1)] || items[0] || { jp_text: "", english_text: "" };
+  const totalItems = shuffledItems.length;
+  const currentItem = shuffledItems[currentIndex] || items[0] || { jp_text: "", english_text: "" };
 
   // 音声合成フォールバック
   const playFallbackSpeech = (text: string) => {
@@ -246,7 +246,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
 
-  // 英語意味タイピング判定（全問クリア判定の確実な実装）
+  // 英語意味タイピング判定（厳密な全問クリア完了判定）
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
@@ -272,12 +272,13 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         setSpeechStatusMessage("");
         isManuallyStoppedRef.current = false;
 
-        // 全アイテム数に達した時点で完了
-        if (nextScore >= totalItems) {
+        const nextIndex = currentIndex + 1;
+        // すべてのアイテムを解き終えたかどうかを判定
+        if (nextIndex >= totalItems) {
           setIsFinished(true);
           onCompleted();
         } else {
-          setCurrentIndex((prev) => prev + 1);
+          setCurrentIndex(nextIndex);
         }
       }, 1200);
     } else {
@@ -286,7 +287,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  if (!isOpen || shuffledItems.length === 0) return null;
+  if (!isOpen || totalItems === 0) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
@@ -389,7 +390,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                   </button>
                 </div>
 
-                {/* 発話テキスト化の自己確認ボックス（生テキスト表示） */}
+                {/* 発話テキスト化の自己確認ボックス */}
                 <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-center min-h-[70px] flex flex-col justify-center">
                   <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1">
                     Your Spoken Text (認識されたあなたの発音):
