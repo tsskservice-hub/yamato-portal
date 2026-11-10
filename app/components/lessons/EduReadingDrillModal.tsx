@@ -1,9 +1,10 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description 日本語・英語（数字・スペルゆれ対応）の両方でスマート判定を行うリーディングドリル
+ * @description 共通ユーティリティを活用したスマート表記ゆれ対応、録音安定制御、デュアルチェック付きリーディングドリル
  */
 
 import React, { useState, useEffect, useRef } from "react";
+import { normalizeJapanese, normalizeEnglish } from "~/utils/normalization";
 
 interface ReadingItem {
   id?: string | number;
@@ -43,7 +44,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
   
   const recognitionRef = useRef<any>(null);
-  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐフラグ
+  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐためのフラグ
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -118,62 +119,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     playFallbackSpeech(currentItem?.jp_text);
   };
 
-  // 💡 汎用スマート日本語表記ゆれ対応ヘルパー関数
-  const normalizeJapanese = (str: string): string => {
-    if (!str) return "";
-    let s = str.trim().toLowerCase();
-    
-    s = s.replace(/[?.!,。、・\s]+/g, "");
-
-    const map: { [key: string]: string } = {
-      "１": "1", "一": "1", "ひと": "1", "いち": "1",
-      "２": "2", "二": "2", "ふた": "2", "に": "2",
-      "３": "3", "三": "3", "みっ": "3", "さん": "3",
-      "４": "4", "四": "4", "よん": "4", "し": "4", "よ": "4",
-      "５": "5", "五": "5", "いつ": "5", "ご": "5",
-      "６": "6", "六": "6", "むっ": "6", "ろく": "6",
-      "７": "7", "七": "7", "なな": "7", "しち": "7",
-      "８": "8", "八": "8", "やっ": "8", "はち": "8",
-      "９": "9", "九": "9", "ここの": "9", "きゅう": "9", "く": "9",
-      "１０": "10", "十": "10", "とお": "10", "じゅう": "10",
-      "人": "n", "ニン": "n", "りん": "n"
-    };
-
-    for (const [key, val] of Object.entries(map)) {
-      s = s.split(key).join(val);
-    }
-
-    s = s.replace(/ひとり/g, "1人");
-    s = s.replace(/ふたり/g, "2人");
-
-    return s;
-  };
-
-  // 💡 汎用スマート英語表記ゆれ対応ヘルパー関数（数字 ⇔ スペル の相互変換対応）
-  const normalizeEnglish = (str: string): string => {
-    if (!str) return "";
-    let s = str.trim().toLowerCase();
-    
-    // 末尾のピリオド、クエスチョンマーク、カンマを除去
-    s = s.replace(/[?.!,]+$/, "");
-    // 余分なスペースを単一スペースに
-    s = s.replace(/[\s\-_]+/g, " ");
-
-    // 数字のスペルとアラビア数字の相互統一マップ
-    const numMap: { [key: string]: string } = {
-      "one": "1", "two": "2", "three": "3", "four": "4", "five": "5",
-      "six": "6", "seven": "7", "eight": "8", "nine": "9", "ten": "10"
-    };
-
-    for (const [word, digit] of Object.entries(numMap)) {
-      // 単語としての完全一致に近い形で置換（例: "five people" -> "5 people"）
-      const regex = new RegExp(`\\b${word}\\b`, "g");
-      s = s.replace(regex, digit);
-    }
-
-    return s.trim();
-  };
-
   // 🎙️ 録音開始
   const startRecording = () => {
     if (typeof window === "undefined") return;
@@ -243,7 +188,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  // ⏹️ 録音停止 ＆ 検証
+  // ⏹️ 録音停止 ＆ 検証（インポートした normalizeJapanese を使用）
   const stopRecordingAndVerify = () => {
     isManuallyStoppedRef.current = true;
     if (recognitionRef.current) {
@@ -277,7 +222,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  // 英語意味タイピング判定（数字・スペル相互変換対応）
+  // 英語意味タイピング判定（インポートした normalizeEnglish を使用）
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
