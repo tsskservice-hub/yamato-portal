@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { normalizeJapanese, normalizeEnglish, toHiragana } from "~/utils/normalization";
+import { normalizeJapanese, normalizeEnglish } from "~/utils/normalization";
 
 interface ReadingItem {
   id?: string | number;
@@ -48,7 +48,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 初期化・シャッフル（モーダルオープン時にアイテムの総数を基準に設定）
+  // 初期化・シャッフル
   useEffect(() => {
     if (isOpen && items.length > 0) {
       const shuffled = [...items].sort(() => Math.random() - 0.5);
@@ -78,7 +78,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, items]);
 
-  const currentItem = shuffledItems[currentIndex % shuffledItems.length] || items[0] || { jp_text: "", english_text: "" };
+  const totalItems = shuffledItems.length > 0 ? shuffledItems.length : items.length;
+  const currentItem = shuffledItems[currentIndex % (shuffledItems.length || 1)] || items[0] || { jp_text: "", english_text: "" };
 
   // 音声合成フォールバック
   const playFallbackSpeech = (text: string) => {
@@ -210,12 +211,12 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
     if (isSpeechCorrect) {
       setSpeechVerified(true);
-      setSpeechStatusMessage(`🎤 Voice Verified! ("${toHiragana(userSpokenText)}"). Now type the English meaning below.`);
+      setSpeechStatusMessage(`🎤 Voice Verified! ("${userSpokenText}"). Now type the English meaning below.`);
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     } else {
-      setSpeechStatusMessage(`Heard: "${toHiragana(userSpokenText)}" (Target: ${currentItem.jp_text}). Try recording again!`);
+      setSpeechStatusMessage(`Heard: "${userSpokenText}" (Target: ${currentItem.jp_text}). Try recording again!`);
     }
   }, [speechVerified, isListening, userSpokenText, currentItem]);
 
@@ -245,7 +246,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
 
-  // 英語意味タイピング判定（全アイテムを正確にクリアした時点で完了）
+  // 英語意味タイピング判定（全問クリア判定の確実な実装）
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
@@ -271,8 +272,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         setSpeechStatusMessage("");
         isManuallyStoppedRef.current = false;
 
-        // すべてのアイテムを一通りクリアしたかどうかの判定
-        if (nextScore >= shuffledItems.length) {
+        // 全アイテム数に達した時点で完了
+        if (nextScore >= totalItems) {
           setIsFinished(true);
           onCompleted();
         } else {
@@ -301,7 +302,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
               <span>Reading Comprehension Drill</span>
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Step 1: Record & Read Aloud (Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border rounded text-xs font-mono">Space</kbd>) ➔ Step 2: Type English ({score} / {shuffledItems.length})
+              Step 1: Record & Read Aloud (Press <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border rounded text-xs font-mono">Space</kbd>) ➔ Step 2: Type English ({score} / {totalItems})
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -330,7 +331,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
             <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
               <div 
                 className="bg-orange-500 h-full transition-all duration-300"
-                style={{ width: `${Math.min(100, (score / shuffledItems.length) * 100)}%` }}
+                style={{ width: `${Math.min(100, (score / totalItems) * 100)}%` }}
               />
             </div>
 
@@ -388,13 +389,13 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                   </button>
                 </div>
 
-                {/* 発話テキスト化の自己確認ボックス（ひらがな表示） */}
+                {/* 発話テキスト化の自己確認ボックス（生テキスト表示） */}
                 <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-center min-h-[70px] flex flex-col justify-center">
                   <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1">
                     Your Spoken Text (認識されたあなたの発音):
                   </span>
                   <span className={`text-base sm:text-lg font-black ${userSpokenText ? "text-slate-900 dark:text-slate-100" : "text-slate-400 italic"}`}>
-                    {userSpokenText ? `"${toHiragana(userSpokenText)}"` : "(Press Spacebar or click 'Start Recording' and speak)"}
+                    {userSpokenText ? `"${userSpokenText}"` : "(Press Spacebar or click 'Start Recording' and speak)"}
                   </span>
                 </div>
 
