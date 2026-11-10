@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description スペースキーでの録音開始・停止トグル対応、スマート表記ゆれ正規化、デュアルチェック付きリーディングドリル
+ * @description フック順序違反（Error #310）を修正したリーディングドリルモーダル
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -44,14 +44,14 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
   
   const recognitionRef = useRef<any>(null);
-  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐフラグ
+  const isManuallyStoppedRef = useRef<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // 目標スコア
   const targetScore = Math.max(items.length, 5);
 
-  // 初期化・シャッフル
+  // 1. 初期化・シャッフル（すべてのフックは必ず早期リターンの上に配置）
   useEffect(() => {
     if (isOpen && items.length > 0) {
       const shuffled = [...items].sort(() => Math.random() - 0.5);
@@ -81,9 +81,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, items]);
 
-  if (!isOpen || shuffledItems.length === 0) return null;
-
-  const currentItem = shuffledItems[currentIndex % shuffledItems.length];
+  const currentItem = shuffledItems[currentIndex % shuffledItems.length] || items[0] || { jp_text: "", english_text: "" };
 
   // 音声合成フォールバック
   const playFallbackSpeech = (text: string) => {
@@ -224,19 +222,17 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   }, [speechVerified, isListening, userSpokenText, currentItem]);
 
-  // ⌨️ スペースキーによる録音開始・停止の切り替えリスナー
+  // ⌨️ スペースキーによる録音コントロール（useEffectもすべてのフックと共に上に配置）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // モーダル内で完了画面になっておらず、英語入力欄にフォーカスしていない場合にスペースキーを受け付ける
-      if (isFinished) return;
+      if (!isOpen || isFinished) return;
       if (e.code === "Space") {
         const activeElem = document.activeElement;
         const isInputFocused = activeElem?.tagName === "INPUT" || activeElem?.tagName === "TEXTAREA";
         
-        // 英語入力欄にフォーカスがあるときはスペースキーのデフォルト動作（タイピング）を邪魔しない
         if (isInputFocused && speechVerified) return;
 
-        e.preventDefault(); // 画面のスクロール等を防止
+        e.preventDefault();
 
         if (!isListening && !speechVerified) {
           startRecording();
@@ -250,7 +246,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
+  }, [isOpen, isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
 
   // 英語意味タイピング判定
   const handleTypingSubmit = (e: React.FormEvent) => {
@@ -297,6 +293,9 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       setTimeout(() => setFeedback(null), 1500);
     }
   };
+
+  // 🔴 すべてのフック定義の「後」に早期リターンを配置（これでError #310が完全に解消されます）
+  if (!isOpen || shuffledItems.length === 0) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
