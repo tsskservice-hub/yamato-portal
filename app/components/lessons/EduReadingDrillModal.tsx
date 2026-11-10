@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description ループ防止・録音開始/停止の安定制御と発話テキスト化自己確認付きリーディングドリル
+ * @description 汎用スマート表記ゆれ対応・録音開始/停止安定制御・発話テキスト化自己確認付きリーディングドリル
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -118,6 +118,42 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     playFallbackSpeech(currentItem?.jp_text);
   };
 
+  // 💡 汎用スマート表記ゆれ対応ヘルパー関数（数字・漢数字・助数詞・ひらがな・カタカナを柔軟に正規化）
+  const normalizeJapanese = (str: string): string => {
+    if (!str) return "";
+    let s = str.trim().toLowerCase();
+    
+    // 句読点やスペースの除去
+    s = s.replace(/[?.!,。、・\s]+/g, "");
+
+    // 数字・カウンターの相互変換マップ
+    const map: { [key: string]: string } = {
+      "１": "1", "一": "1", "ひと": "1", "いち": "1",
+      "２": "2", "二": "2", "ふた": "2", "に": "2",
+      "３": "3", "三": "3", "みっ": "3", "さん": "3",
+      "４": "4", "四": "4", "よん": "4", "し": "4", "よ": "4",
+      "５": "5", "五": "5", "いつ": "5", "ご": "5",
+      "６": "6", "六": "6", "むっ": "6", "ろく": "6",
+      "７": "7", "七": "7", "なな": "7", "しち": "7",
+      "８": "8", "八": "8", "やっ": "8", "はち": "8",
+      "９": "9", "九": "9", "ここの": "9", "きゅう": "9", "く": "9",
+      "１０": "10", "十": "10", "とお": "10", "じゅう": "10",
+      // 助数詞・カウンターのゆれ
+      "人": "にん", "ニン": "にん", "りん": "にん",
+      "匹": "ひき", "才": "さい", "歳": "さい", "本": "ほん", "個": "こ"
+    };
+
+    for (const [key, val] of Object.entries(map)) {
+      s = s.split(key).join(val);
+    }
+
+    // 特殊読み（ひとり、ふたり等）の統一
+    s = s.replace(/ひとり/g, "1人");
+    s = s.replace(/ふたり/g, "2人");
+
+    return s;
+  };
+
   const normalizeAnswer = (str: string): string => {
     if (!str) return "";
     let s = str.trim().toLowerCase();
@@ -135,7 +171,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       return;
     }
 
-    // 既に動いているインスタンスがあれば安全に停止・破棄
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -148,8 +183,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       recognitionRef.current = recognition;
       recognition.lang = "ja-JP";
       recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
-      recognition.continuous = true; // 途切れでの自動終了を防ぎ、手動停止するまで継続させる
+      recognition.maxAlternatives = 5; // 認識候補を増やしてヒット率向上
+      recognition.continuous = true;
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -184,7 +219,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       };
 
       recognition.onend = () => {
-        // 手動で止めていないのに勝手に終了した場合のループをブロック
         if (!isManuallyStoppedRef.current) {
           setIsListening(false);
         }
@@ -197,7 +231,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  // ⏹️ 録音停止 ＆ 検証
+  // ⏹️ 録音停止 ＆ 検証（スマート表記ゆれ対応判定）
   const stopRecordingAndVerify = () => {
     isManuallyStoppedRef.current = true;
     if (recognitionRef.current) {
@@ -212,11 +246,14 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       return;
     }
 
-    const targetJp = currentItem.jp_text.trim();
+    const targetJpClean = normalizeJapanese(currentItem.jp_text);
+    const spokenClean = normalizeJapanese(userSpokenText);
+
+    // 柔軟な一致判定
     const isSpeechCorrect = 
-      userSpokenText.includes(targetJp) || 
-      targetJp.includes(userSpokenText) || 
-      normalizeAnswer(userSpokenText) === normalizeAnswer(targetJp);
+      spokenClean === targetJpClean || 
+      spokenClean.includes(targetJpClean) || 
+      targetJpClean.includes(spokenClean);
 
     if (isSpeechCorrect) {
       setSpeechVerified(true);
@@ -225,7 +262,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         inputRef.current?.focus();
       }, 100);
     } else {
-      setSpeechStatusMessage(`Heard: "${userSpokenText}". Not quite matching. Please try recording again!`);
+      setSpeechStatusMessage(`Heard: "${userSpokenText}" (Target: ${currentItem.jp_text}). Try recording again!`);
     }
   };
 
