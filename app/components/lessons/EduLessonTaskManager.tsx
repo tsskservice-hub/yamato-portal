@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduLessonTaskManager.tsx
- * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版）
+ * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リーディングドリル起動対応）
  */
 
 import React, { useState, useEffect } from "react";
@@ -11,6 +11,7 @@ export interface EduLessonTaskManagerProps {
   userId?: string;  // ユーザーID
   onAllCompletedChange?: (completed: boolean) => void;
   onStartVocabularyDrill?: () => void;
+  onStartReadingDrill?: () => void; // 追加：リーディングドリル起動ハンドラー
   externalTaskStatus?: {
     vocabulary?: boolean;
     listening?: boolean;
@@ -25,6 +26,7 @@ export function EduLessonTaskManager({
   userId, 
   onAllCompletedChange,
   onStartVocabularyDrill,
+  onStartReadingDrill, // 追加
   externalTaskStatus = {}
 }: EduLessonTaskManagerProps) {
   const [taskProgress, setTaskProgress] = useState({
@@ -227,18 +229,31 @@ export function EduLessonTaskManager({
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              📚 Reading Task (長文読解)
+              📚 Reading Task (リーディング読解・発話確認)
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              リーディングパッセージの読了チェックを通過すると完了になります。
+              画面の日本語をマイクに向かって発声し、意味を英語でタイピング入力するデュアルチェックドリルをクリアすると完了になります。
             </p>
-            <button
-              type="button"
-              onClick={() => updateTaskStatus("reading", !taskProgress.reading)}
-              className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold underline"
-            >
-              [開発・テスト用] 状態を切り替える
-            </button>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {onStartReadingDrill && (
+                <button
+                  type="button"
+                  onClick={onStartReadingDrill}
+                  className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+                >
+                  <span>🚀</span>
+                  <span>Start Reading Drill (リーディング開始)</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => updateTaskStatus("reading", !taskProgress.reading)}
+                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
+              >
+                [開発用] 状態切替
+              </button>
+            </div>
           </div>
 
           {/* Task 4: スピーキングタスク */}

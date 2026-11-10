@@ -1,6 +1,6 @@
 /**
  * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリル・リアルタイムスピーキング課題・英語指示・Unit 4プロンプト連携版）
+ * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリル・リーディングデュアルチェック・リアルタイムスピーキング課題連携版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -18,6 +18,7 @@ import { EduLessonDetailsCard } from "~/components/lessons/EduLessonDetailsCard"
 import { EduVocabularySidebar } from "~/components/lessons/EduVocabularySidebar";
 import { EduLessonTaskManager } from "~/components/lessons/EduLessonTaskManager";
 import { EduVocabularyDrillModal } from "~/components/lessons/EduVocabularyDrillModal";
+import { EduReadingDrillModal } from "~/components/lessons/EduReadingDrillModal"; // 追加：リーディング専用モーダル
 import { EduSpeakingTaskWidget } from "~/components/lessons/EduSpeakingTaskWidget";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -98,15 +99,27 @@ function LessonsObentoUnit4Lesson1Page() {
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
-  // 語彙ドリルモーダルの開閉状態と達成状態の管理
+  // 1. 語彙ドリルモーダルの開閉状態と達成状態の管理
   const [isDrillOpen, setIsDrillOpen] = useState(false);
   const [vocabTaskCompleted, setVocabTaskCompleted] = useState(false);
 
-  // スピーキング課題の完了状態
+  // 2. リーディングタスクモーダルの開閉状態と達成状態の管理（追加）
+  const [isReadingDrillOpen, setIsReadingDrillOpen] = useState(false);
+  const [readingTaskCompleted, setReadingTaskCompleted] = useState(false);
+
+  // 3. スピーキング課題の完了状態
   const [speakingTaskCompleted, setSpeakingTaskCompleted] = useState(false);
 
   const loaderData = useLoaderData<typeof loader>() || {};
   const { lesson, topic, vocabulary = [] } = loaderData;
+
+  // 語彙データからリーディング用アイテム（日本語文章・意味・音声）を生成
+  const readingItems = vocabulary.map((v) => ({
+    jp_text: v.jp_text,
+    romaji: v.romaji,
+    english_text: v.english_text,
+    audio_url: v.audio_url,
+  }));
 
   const handleOpenAuth = () => {
     window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
@@ -227,13 +240,15 @@ function LessonsObentoUnit4Lesson1Page() {
             </div>
           </div>
 
-          {/* 4. Bottom: Self-Study Task Section (5 Tasks with English Instructions) */}
+          {/* 4. Bottom: Self-Study Task Section (Tasks with English Instructions) */}
           <EduLessonTaskManager 
             lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
             userId={user?.id}
             onStartVocabularyDrill={() => setIsDrillOpen(true)}
+            onStartReadingDrill={() => setIsReadingDrillOpen(true)} // 追加：リーディングタスク起動
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
+              reading: readingTaskCompleted, // 追加：リーディングタスク達成状態の連携
               speaking: speakingTaskCompleted,
             }}
           />
@@ -260,6 +275,14 @@ function LessonsObentoUnit4Lesson1Page() {
         isOpen={isDrillOpen}
         onClose={() => setIsDrillOpen(false)}
         onCompleted={() => setVocabTaskCompleted(true)}
+      />
+
+      {/* 7. Fullscreen Reading Comprehension Dual-Check Drill Modal (追加) */}
+      <EduReadingDrillModal
+        items={readingItems}
+        isOpen={isReadingDrillOpen}
+        onClose={() => setIsReadingDrillOpen(false)}
+        onCompleted={() => setReadingTaskCompleted(true)}
       />
     </ToolPageWrapper>
   );
