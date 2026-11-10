@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description 語彙および文章（リーディング）対応のデュアルチェックドリル（音声発話 ＋ 英語意味タイピング）
+ * @description ローマ字非表示・録音開始/停止ボタン明示・発話テキスト化自己確認付きリーディングドリル
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -8,7 +8,6 @@ import React, { useState, useEffect, useRef } from "react";
 interface ReadingItem {
   id?: string | number;
   jp_text: string;         // 対象の日本語（文や語彙）
-  romaji?: string;         // ローマ字（任意）
   english_text: string;    // 英語の意味・翻訳
   audio_url?: string;      // 任意：自作音声MP3 URL
 }
@@ -29,35 +28,36 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const [shuffledItems, setShuffledItems] = useState<ReadingItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  // デュアルチェックのステップ管理 ("speech" -> "typing")
-  const [drillStep, setDrillStep] = useState<"speech" | "typing">("speech");
+  // デュアルチェックの状態管理
   const [speechVerified, setSpeechVerified] = useState(false);
   const [userInput, setUserInput] = useState("");
+  const [userSpokenText, setUserSpokenText] = useState(""); // 認識されたテキスト
   
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // 音声認識・音声合成・オーディオ用ref
+  // 音声認識・音声合成用 ref
   const [isListening, setIsListening] = useState(false);
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
+  const recognitionRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 目標スコア（itemsの数、または最低5問）
+  // 目標スコア
   const targetScore = Math.max(items.length, 5);
 
-  // モーダルオープン時・アイテム変更時の初期化とシャッフル
+  // 初期化・シャッフル
   useEffect(() => {
     if (isOpen && items.length > 0) {
       const shuffled = [...items].sort(() => Math.random() - 0.5);
       setShuffledItems(shuffled);
       setCurrentIndex(0);
       setScore(0);
-      setDrillStep("speech");
       setSpeechVerified(false);
       setUserInput("");
+      setUserSpokenText("");
       setFeedback(null);
       setIsFinished(false);
       setSpeechStatusMessage("");
@@ -71,6 +71,9 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch(e) {}
+      }
     };
   }, [isOpen, items]);
 
@@ -78,7 +81,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
   const currentItem = shuffledItems[currentIndex % shuffledItems.length];
 
-  // 音声合成によるフォールバック
+  // 音声合成フォールバック
   const playFallbackSpeech = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
@@ -88,7 +91,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     window.speechSynthesis.speak(utterance);
   };
 
-  // 模範音声の再生（リスニング確認用）
+  // 模範音声再生
   const playModelAudio = () => {
     if (activeAudioRef.current) {
       activeAudioRef.current.pause();
@@ -112,7 +115,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     playFallbackSpeech(currentItem?.jp_text);
   };
 
-  // 表記ゆれや句読点を正規化するヘルパー関数
   const normalizeAnswer = (str: string): string => {
     if (!str) return "";
     let s = str.trim().toLowerCase();
@@ -121,8 +123,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     return s;
   };
 
-  // ステップ1: 音声認識（朗読チェック）
-  const startSpeechRecognition = () => {
+  // 🎙️ 録音開始
+  const startRecording = () => {
     if (typeof window === "undefined") return;
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -130,55 +132,86 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = "ja-JP";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      setSpeechStatusMessage("Listening... Read the Japanese text clearly.");
-    };
-
-    recognition.onresult = (event: any) => {
-      const speechResult = event.results[0][0].transcript;
-      const targetJp = currentItem.jp_text.trim();
-
-      // 発話内容にターゲットが含まれているか、またはターゲットに含まれているか判定
-      const isSpeechCorrect = speechResult.includes(targetJp) || targetJp.includes(speechResult) || normalizeAnswer(speechResult) === normalizeAnswer(targetJp);
-
-      if (isSpeechCorrect) {
-        setSpeechVerified(true);
-        setDrillStep("typing");
-        setSpeechStatusMessage(`🎤 Voice Verified! ("${speechResult}"). Now type the English meaning below.`);
-        setIsListening(false);
-        // タイピング欄へフォーカス
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 100);
-      } else {
-        setSpeechStatusMessage(`Heard: "${speechResult}". Please try reading aloud again!`);
-        setIsListening(false);
-      }
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-      setSpeechStatusMessage("Voice recognition error. Please try again.");
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
     try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.lang = "ja-JP";
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setUserSpokenText("");
+        setSpeechStatusMessage("🔴 Recording... Speak clearly into the microphone.");
+      };
+
+      recognition.onresult = (event: any) => {
+        let interimTranscript = "";
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        const currentText = finalTranscript || interimTranscript;
+        if (currentText) {
+          setUserSpokenText(currentText);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn("Speech recognition error:", event.error);
+        setIsListening(false);
+        setSpeechStatusMessage("Voice recognition error. Please try clicking Start Recording again.");
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
       recognition.start();
     } catch (err) {
       setIsListening(false);
+      setSpeechStatusMessage("Could not start recording. Please check microphone permissions.");
     }
   };
 
-  // ステップ2: 英語意味タイピングの判定と次への進行
+  // ⏹️ 録音停止 ＆ 検証
+  const stopRecordingAndVerify = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+    }
+    setIsListening(false);
+
+    if (!userSpokenText.trim()) {
+      setSpeechStatusMessage("No speech detected. Please click 'Start Recording' and try speaking.");
+      return;
+    }
+
+    const targetJp = currentItem.jp_text.trim();
+    const isSpeechCorrect = 
+      userSpokenText.includes(targetJp) || 
+      targetJp.includes(userSpokenText) || 
+      normalizeAnswer(userSpokenText) === normalizeAnswer(targetJp);
+
+    if (isSpeechCorrect) {
+      setSpeechVerified(true);
+      setSpeechStatusMessage(`🎤 Voice Verified! ("${userSpokenText}"). Now type the English meaning below.`);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    } else {
+      setSpeechStatusMessage(`Heard: "${userSpokenText}". Not quite matching. Please try recording again!`);
+    }
+  };
+
+  // 英語タイピング判定
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
@@ -194,9 +227,9 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
       setTimeout(() => {
         setUserInput("");
+        setUserSpokenText("");
         setFeedback(null);
         setSpeechVerified(false);
-        setDrillStep("speech");
         setSpeechStatusMessage("");
 
         if (nextScore >= targetScore) {
@@ -205,7 +238,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         } else {
           const nextIdx = currentIndex + 1;
           if (nextIdx % shuffledItems.length === 0) {
-            // 全問終了したら再シャッフルして継続
             const reShuffled = [...items].sort(() => Math.random() - 0.5);
             setShuffledItems(reShuffled);
             setCurrentIndex(0);
@@ -234,7 +266,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
               <span>Reading Comprehension Drill</span>
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Step 1: Read aloud in Japanese ➔ Step 2: Type English meaning ({score} / {targetScore} completed)
+              Step 1: Record & Read Aloud ➔ Step 2: Type English meaning ({score} / {targetScore} completed)
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -259,7 +291,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         {!isFinished ? (
           <div className="space-y-6 sm:space-y-8 flex-1 flex flex-col justify-center">
             
-            {/* プロジェクト進捗バー */}
+            {/* 進捗バー */}
             <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
               <div 
                 className="bg-orange-500 h-full transition-all duration-300"
@@ -267,55 +299,70 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
               />
             </div>
 
-            {/* 問題文・リーディング表示エリア */}
-            <div className={`bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 sm:p-10 text-center space-y-4`}>
+            {/* 問題文（日本語のみ・ローマ字なし） */}
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 sm:p-10 text-center space-y-4">
               <div className="flex justify-end">
                 <button
                   type="button"
                   onClick={playModelAudio}
                   className="text-xs bg-slate-200 dark:bg-slate-700 hover:bg-orange-500 hover:text-white px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5"
-                  title="Listen to model pronunciation"
                 >
                   <span>🔊</span> Listen Model Audio
                 </button>
               </div>
 
-              <span className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 block tracking-tight leading-relaxed">
+              <span className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-slate-100 block tracking-tight leading-relaxed">
                 {currentItem.jp_text}
               </span>
-              {currentItem.romaji && (
-                <span className="text-sm sm:text-base font-medium text-slate-500 italic block">
-                  {currentItem.romaji}
-                </span>
-              )}
             </div>
 
-            {/* デュアルチェック進行ステップ */}
+            {/* デュアルチェックセクション */}
             <div className="space-y-4">
               
-              {/* ステップ1: 音声発話ボタン */}
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={startSpeechRecognition}
-                  disabled={speechVerified || isListening}
-                  className={`w-full py-4 px-6 rounded-2xl font-black text-sm sm:text-base text-white shadow-md transition flex items-center justify-center gap-3 ${
-                    speechVerified
-                      ? "bg-emerald-500 cursor-default"
-                      : isListening
-                      ? "bg-amber-500 animate-pulse"
-                      : "bg-orange-500 hover:bg-orange-600 active:scale-95"
-                  }`}
-                >
-                  <span className="text-2xl">🎤</span>
-                  <span>
-                    {speechVerified
-                      ? "Step 1 Completed: Speech Verified!"
-                      : isListening
-                      ? "Listening... Speak Japanese now!"
-                      : "Step 1: Click & Read Aloud in Japanese"}
+              {/* ステップ1: 録音コントロール ＆ テキスト化表示 */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={startRecording}
+                    disabled={speechVerified || isListening}
+                    className={`py-4 px-4 rounded-2xl font-black text-sm text-white shadow-md transition flex items-center justify-center gap-2 ${
+                      speechVerified
+                        ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed"
+                        : isListening
+                        ? "bg-amber-500 animate-pulse"
+                        : "bg-emerald-600 hover:bg-emerald-700 active:scale-95 cursor-pointer"
+                    }`}
+                  >
+                    <span>🎙️</span>
+                    <span>{isListening ? "Recording..." : "Start Recording"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={stopRecordingAndVerify}
+                    disabled={speechVerified || !isListening}
+                    className={`py-4 px-4 rounded-2xl font-black text-sm text-white shadow-md transition flex items-center justify-center gap-2 ${
+                      speechVerified || !isListening
+                        ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed"
+                        : "bg-rose-600 hover:bg-rose-700 active:scale-95 cursor-pointer"
+                    }`}
+                  >
+                    <span>⏹️</span>
+                    <span>Stop & Verify</span>
+                  </button>
+                </div>
+
+                {/* 発話テキスト化の自己確認ボックス */}
+                <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-center min-h-[70px] flex flex-col justify-center">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1">
+                    Your Spoken Text (認識されたあなたの発音):
                   </span>
-                </button>
+                  <span className={`text-base sm:text-lg font-black ${userSpokenText ? "text-slate-900 dark:text-slate-100" : "text-slate-400 italic"}`}>
+                    {userSpokenText ? `"${userSpokenText}"` : "(Click 'Start Recording' and speak into your mic)"}
+                  </span>
+                </div>
+
                 {speechStatusMessage && (
                   <p className={`text-xs sm:text-sm font-bold text-center ${speechVerified ? "text-emerald-600" : "text-slate-600 dark:text-slate-400"}`}>
                     {speechStatusMessage}
@@ -323,7 +370,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                 )}
               </div>
 
-              {/* ステップ2: 英語意味タイピングフォーム */}
+              {/* ステップ2: 英語意味タイピング */}
               <form onSubmit={handleTypingSubmit} className="space-y-3">
                 <div className="relative">
                   <input
@@ -332,7 +379,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
                     disabled={!speechVerified}
-                    placeholder={speechVerified ? "Step 2: Type English meaning..." : "Complete Step 1 (Speech) above first ↑"}
+                    placeholder={speechVerified ? "Step 2: Type English meaning..." : "Complete Step 1 (Record & Verify) above first ↑"}
                     className={`w-full px-6 py-5 rounded-2xl border font-bold text-lg sm:text-xl transition shadow-sm ${
                       feedback === "correct"
                         ? "border-emerald-500 ring-2 ring-emerald-500 bg-emerald-50/20 text-emerald-900"
@@ -349,7 +396,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                 {speechVerified && feedback === null && (
                   <button
                     type="submit"
-                    className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow"
+                    className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer"
                   >
                     Submit English Meaning ➔
                   </button>
