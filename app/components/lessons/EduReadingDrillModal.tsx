@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description 日本語・英語両方のスマート表記ゆれ対応、録音安定制御、デュアルチェック付きリーディングドリル
+ * @description 日本語・英語（数字・スペルゆれ対応）の両方でスマート判定を行うリーディングドリル
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -136,8 +136,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       "８": "8", "八": "8", "やっ": "8", "はち": "8",
       "９": "9", "九": "9", "ここの": "9", "きゅう": "9", "く": "9",
       "１０": "10", "十": "10", "とお": "10", "じゅう": "10",
-      "人": "にん", "ニン": "にん", "りん": "にん",
-      "匹": "ひき", "才": "さい", "歳": "さい", "本": "ほん", "個": "こ"
+      "人": "n", "ニン": "n", "りん": "n"
     };
 
     for (const [key, val] of Object.entries(map)) {
@@ -150,14 +149,28 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     return s;
   };
 
-  // 💡 汎用スマート英語表記ゆれ対応ヘルパー関数（大文字小文字、句読点、余分なスペースを柔軟に吸収）
+  // 💡 汎用スマート英語表記ゆれ対応ヘルパー関数（数字 ⇔ スペル の相互変換対応）
   const normalizeEnglish = (str: string): string => {
     if (!str) return "";
     let s = str.trim().toLowerCase();
-    // 末尾のピリオド、クエスチョンマーク、カンマや記号を除去
+    
+    // 末尾のピリオド、クエスチョンマーク、カンマを除去
     s = s.replace(/[?.!,]+$/, "");
-    // 連続するスペースや特殊記号を単一スペースに正規化
+    // 余分なスペースを単一スペースに
     s = s.replace(/[\s\-_]+/g, " ");
+
+    // 数字のスペルとアラビア数字の相互統一マップ
+    const numMap: { [key: string]: string } = {
+      "one": "1", "two": "2", "three": "3", "four": "4", "five": "5",
+      "six": "6", "seven": "7", "eight": "8", "nine": "9", "ten": "10"
+    };
+
+    for (const [word, digit] of Object.entries(numMap)) {
+      // 単語としての完全一致に近い形で置換（例: "five people" -> "5 people"）
+      const regex = new RegExp(`\\b${word}\\b`, "g");
+      s = s.replace(regex, digit);
+    }
+
     return s.trim();
   };
 
@@ -264,7 +277,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  // 英語意味タイピング判定（スマート英語表記ゆれ対応を適用）
+  // 英語意味タイピング判定（数字・スペル相互変換対応）
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
@@ -272,7 +285,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     const cleanInput = normalizeEnglish(userInput);
     const correctEn = normalizeEnglish(currentItem.english_text || "");
 
-    // 完全一致または部分一致（複数の訳語が含まれている場合の柔軟判定）
     const isTypingCorrect = 
       cleanInput === correctEn || 
       correctEn.includes(cleanInput) || 
