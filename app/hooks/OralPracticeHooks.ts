@@ -1,6 +1,6 @@
 /**
  * @file OralPracticeHooks.ts
- * @description isPracticing のガードを堅牢化したハンズフリー自動無音検知対応フック
+ * @description ハンズフリー自動送信のパラメータを最適化し、400エラーを解消した完全版フック
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -255,7 +255,7 @@ export function useOralPracticeEngine(
     };
   };
 
-  // ハンズフリー自動送信処理
+  // ハンズフリー自動送信処理（必要なパラメータを全て網羅）
   const processAndSendAudioAuto = async (audioBlob: Blob, answersMap: { [key: string]: string }) => {
     console.log("🤖 [DEBUG] processAndSendAudioAuto started. Blob size:", audioBlob.size);
     setIsAnalyzing(true);
@@ -268,23 +268,31 @@ export function useOralPracticeEngine(
 
       try {
         const endpoint = "https://api.jptutoraiyamato.com/chat";
-        console.log("🤖 [DEBUG] Sending audio to backend endpoint (/chat)...");
+        const requestPayload = {
+          audioBase64: base64Audio,
+          appType: "eoy-oral-accelerated",
+          mode: "drill",
+          section: "sec1",
+          expectedQuestion: currentQ?.questionOriginal || currentQ?.question,
+          registeredAnswer: registeredAnswer,
+          level: selectedLevel,
+          userId,
+          userNickname,
+          chatHistory: chatMessages.map(m => ({ role: m.role, content: m.content }))
+        };
+
+        console.log("🤖 [DEBUG] Sending audio to backend endpoint (/chat) with payload:", requestPayload);
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            audioBase64: base64Audio,
-            appType: "eoy-oral-accelerated",
-            expectedQuestion: currentQ?.questionOriginal || currentQ?.question,
-            registeredAnswer: registeredAnswer,
-            level: selectedLevel,
-            userId,
-            userNickname,
-            chatHistory: chatMessages.map(m => ({ role: m.role, content: m.content }))
-          }),
+          body: JSON.stringify(requestPayload),
         });
 
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        if (!res.ok) {
+          const errBody = await res.text();
+          console.error(`❌ [DEBUG] Backend HTTP Error ${res.status}:`, errBody);
+          throw new Error(`HTTP Error: ${res.status} - ${errBody}`);
+        }
 
         const data = (await res.json()) as any;
         console.log("🤖 [DEBUG] Backend response received:", data);
@@ -342,7 +350,7 @@ export function useOralPracticeEngine(
     };
   };
 
-  // 💡 自動無音検知録音の開始（isPracticing のガードを外し、確実に動作するように修正）
+  // 💡 自動無音検知録音の開始
   const startAutoRecording = useCallback(async (answersMap: { [key: string]: string }) => {
     console.log("🎤 [DEBUG] startAutoRecording invoked.");
     try {
