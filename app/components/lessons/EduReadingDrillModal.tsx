@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduReadingDrillModal.tsx
- * @description 汎用スマート表記ゆれ対応・録音開始/停止安定制御・発話テキスト化自己確認付きリーディングドリル
+ * @description 日本語・英語両方のスマート表記ゆれ対応、録音安定制御、デュアルチェック付きリーディングドリル
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -43,7 +43,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
   
   const recognitionRef = useRef<any>(null);
-  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐためのフラグ
+  const isManuallyStoppedRef = useRef<boolean>(false); // 勝手な再起動を防ぐフラグ
   const inputRef = useRef<HTMLInputElement>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -118,15 +118,13 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     playFallbackSpeech(currentItem?.jp_text);
   };
 
-  // 💡 汎用スマート表記ゆれ対応ヘルパー関数（数字・漢数字・助数詞・ひらがな・カタカナを柔軟に正規化）
+  // 💡 汎用スマート日本語表記ゆれ対応ヘルパー関数
   const normalizeJapanese = (str: string): string => {
     if (!str) return "";
     let s = str.trim().toLowerCase();
     
-    // 句読点やスペースの除去
     s = s.replace(/[?.!,。、・\s]+/g, "");
 
-    // 数字・カウンターの相互変換マップ
     const map: { [key: string]: string } = {
       "１": "1", "一": "1", "ひと": "1", "いち": "1",
       "２": "2", "二": "2", "ふた": "2", "に": "2",
@@ -138,7 +136,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       "８": "8", "八": "8", "やっ": "8", "はち": "8",
       "９": "9", "九": "9", "ここの": "9", "きゅう": "9", "く": "9",
       "１０": "10", "十": "10", "とお": "10", "じゅう": "10",
-      // 助数詞・カウンターのゆれ
       "人": "にん", "ニン": "にん", "りん": "にん",
       "匹": "ひき", "才": "さい", "歳": "さい", "本": "ほん", "個": "こ"
     };
@@ -147,19 +144,21 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       s = s.split(key).join(val);
     }
 
-    // 特殊読み（ひとり、ふたり等）の統一
     s = s.replace(/ひとり/g, "1人");
     s = s.replace(/ふたり/g, "2人");
 
     return s;
   };
 
-  const normalizeAnswer = (str: string): string => {
+  // 💡 汎用スマート英語表記ゆれ対応ヘルパー関数（大文字小文字、句読点、余分なスペースを柔軟に吸収）
+  const normalizeEnglish = (str: string): string => {
     if (!str) return "";
     let s = str.trim().toLowerCase();
-    s = s.replace(/[?.!,。、・]+$/, "");
-    s = s.replace(/\s+/g, " ");
-    return s;
+    // 末尾のピリオド、クエスチョンマーク、カンマや記号を除去
+    s = s.replace(/[?.!,]+$/, "");
+    // 連続するスペースや特殊記号を単一スペースに正規化
+    s = s.replace(/[\s\-_]+/g, " ");
+    return s.trim();
   };
 
   // 🎙️ 録音開始
@@ -183,7 +182,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       recognitionRef.current = recognition;
       recognition.lang = "ja-JP";
       recognition.interimResults = true;
-      recognition.maxAlternatives = 5; // 認識候補を増やしてヒット率向上
+      recognition.maxAlternatives = 5;
       recognition.continuous = true;
 
       recognition.onstart = () => {
@@ -231,7 +230,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  // ⏹️ 録音停止 ＆ 検証（スマート表記ゆれ対応判定）
+  // ⏹️ 録音停止 ＆ 検証
   const stopRecordingAndVerify = () => {
     isManuallyStoppedRef.current = true;
     if (recognitionRef.current) {
@@ -249,7 +248,6 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     const targetJpClean = normalizeJapanese(currentItem.jp_text);
     const spokenClean = normalizeJapanese(userSpokenText);
 
-    // 柔軟な一致判定
     const isSpeechCorrect = 
       spokenClean === targetJpClean || 
       spokenClean.includes(targetJpClean) || 
@@ -266,14 +264,19 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     }
   };
 
-  // 英語タイピング判定
+  // 英語意味タイピング判定（スマート英語表記ゆれ対応を適用）
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null) return;
 
-    const cleanInput = normalizeAnswer(userInput);
-    const correctEn = normalizeAnswer(currentItem.english_text || "");
-    const isTypingCorrect = cleanInput === correctEn || correctEn.includes(cleanInput);
+    const cleanInput = normalizeEnglish(userInput);
+    const correctEn = normalizeEnglish(currentItem.english_text || "");
+
+    // 完全一致または部分一致（複数の訳語が含まれている場合の柔軟判定）
+    const isTypingCorrect = 
+      cleanInput === correctEn || 
+      correctEn.includes(cleanInput) || 
+      cleanInput.includes(correctEn);
 
     if (isTypingCorrect) {
       setFeedback("correct");
