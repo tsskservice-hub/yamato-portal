@@ -1,6 +1,6 @@
 /**
  * @file OralPracticeHooks.ts
- * @description マニュアル録音（ボタンあり）と自動無音検知（ボタンなし・ハンズフリー）の両方に対応したオーラル練習エンジンフック
+ * @description マイクストリームを維持・再利用し、ブラウザの権限ブロックを防ぐハンズフリー自動無音検知対応フック
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -93,6 +93,9 @@ export function useOralPracticeEngine(
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
+  // 💡 マイクストリームをセッション中保持するためのRef
+  const persistentStreamRef = useRef<MediaStream | null>(null);
+
   // VAD（無音検知）用の参照
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -100,11 +103,28 @@ export function useOralPracticeEngine(
   const isSpeakingDetectedRef = useRef<boolean>(false);
   const animationFrameRef = useRef<number | null>(null);
 
-  // TTS Voice Playback via Backend API (カスケード型対応)
+  // 🔊 TTS Voice Playback with Safety Timeout
   const playTTS = async (textToSpeak: string): Promise<void> => {
     return new Promise(async (resolve) => {
+      let isResolved = false;
+      const safeResolve = () => {
+        if (!isResolved) {
+          isResolved = true;
+          resolve();
+        }
+      };
+
+      const safetyTimeout = setTimeout(() => {
+        console.warn("⚠️ TTS playback timeout triggered. Forcing next step.");
+        safeResolve();
+      }, 7000);
+
       try {
-        if (!textToSpeak) { resolve(); return; }
+        if (!textToSpeak) {
+          clearTimeout(safetyTimeout);
+          safeResolve();
+          return;
+        }
         const cleanedText = textToSpeak
           .replace(/<rt>.*?<\/rt>/g, "")
           .replace(/<.*?>/g, "")
@@ -112,7 +132,11 @@ export function useOralPracticeEngine(
           .replace(/※.*$/gm, "")
           .trim();
 
-        if (!cleanedText) { resolve(); return; }
+        if (!cleanedText) {
+          clearTimeout(safetyTimeout);
+          safeResolve();
+          return;
+        }
 
         const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
         const response = await fetch(ttsEndpoint, {
@@ -127,29 +151,39 @@ export function useOralPracticeEngine(
           const audio = new Audio(audioUrl);
           audio.playbackRate = speechSpeed || 1.0;
           
-          audio.onended = () => resolve();
-          audio.onerror = () => { fallbackWebSpeech(cleanedText, speechSpeed); resolve(); };
-          await audio.play().catch(() => {
+          audio.onended = () => {
+            clearTimeout(safetyTimeout);
+            safeResolve();
+          };
+          audio.onerror = () => {
+            clearTimeout(safetyTimeout);
             fallbackWebSpeech(cleanedText, speechSpeed);
-            resolve();
+            safeResolve();
+          };
+
+          await audio.play().catch(() => {
+            clearTimeout(safetyTimeout);
+            fallbackWebSpeech(cleanedText, speechSpeed);
+            safeResolve();
           });
         } else {
+          clearTimeout(safetyTimeout);
           fallbackWebSpeech(cleanedText, speechSpeed);
-          resolve();
+          safeResolve();
         }
       } catch (err) {
+        clearTimeout(safetyTimeout);
         fallbackWebSpeech(textToSpeak, speechSpeed);
-        resolve();
+        safeResolve();
       }
     });
   };
 
-  // ==========================================
-  // 🔘 【パターンA：ボタンあり（マニュアル録音）用】
-  // ==========================================
+  // ボタンありモード用の手動録音
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      persistentStreamRef.current = stream;
       let mimeType = "audio/webm";
       if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
         mimeType = "audio/webm;codecs=opus";
@@ -167,7 +201,6 @@ export function useOralPracticeEngine(
 
       mediaRecorder.onstop = async () => {
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        stream.getTracks().forEach((t) => t.stop());
         await transcribeAudioManually(blob);
       };
 
@@ -186,7 +219,6 @@ export function useOralPracticeEngine(
     }
   };
 
-  // ボタンありモードでの音声文字起こし（STT）
   const transcribeAudioManually = async (audioBlob: Blob) => {
     setIsAnalyzing(true);
     const reader = new FileReader();
@@ -194,7 +226,6 @@ export function useOralPracticeEngine(
     reader.onloadend = async () => {
       const base64Audio = reader.result as string;
       try {
-        // カスケード型の /chat エンドポイントを利用してSTTおよび返答を取得
         const endpoint = "https://api.jptutoraiyamato.com/chat";
         const res = await fetch(endpoint, {
           method: "POST",
@@ -219,9 +250,7 @@ export function useOralPracticeEngine(
     };
   };
 
-  // ==========================================
-  // 🎙️ 【パターンB：ボタンなし（ハンズフリー・自動無音検知）用】
-  // ==========================================
+  // ハンズフリー自動送信処理
   const processAndSendAudioAuto = async (audioBlob: Blob, answersMap: { [key: string]: string }) => {
     setIsAnalyzing(true);
     const reader = new FileReader();
@@ -286,6 +315,7 @@ export function useOralPracticeEngine(
             { role: "assistant", content: "<b>🎉 すべての質問が完了しました！お疲れ様でした。</b>", isHtml: true },
           ]);
           setIsPracticing(false);
+          stopPractice();
         }
       } catch (err) {
         console.error("Auto send error:", err);
@@ -299,10 +329,16 @@ export function useOralPracticeEngine(
     };
   };
 
+  // 💡 既に取得済みの persistentStreamRef を使い回すことで、ブラウザの権限ブロックを防ぐ
   const startAutoRecording = useCallback(async (answersMap: { [key: string]: string }) => {
     if (!isPracticing) return;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let stream = persistentStreamRef.current;
+      if (!stream || !stream.active) {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        persistentStreamRef.current = stream;
+      }
+
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = audioCtx;
       const source = audioCtx.createMediaStreamSource(stream);
@@ -328,7 +364,6 @@ export function useOralPracticeEngine(
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        stream.getTracks().forEach((t) => t.stop());
         if (audioCtx.state !== 'closed') audioCtx.close();
         processAndSendAudioAuto(blob, answersMap);
       };
@@ -349,7 +384,7 @@ export function useOralPracticeEngine(
         const average = sum / bufferLength;
 
         const VOICE_THRESHOLD = 15; 
-        const SILENCE_DURATION = 1300; // 1.3秒無音が続いたら送信
+        const SILENCE_DURATION = 1300; 
 
         if (average > VOICE_THRESHOLD) {
           isSpeakingDetectedRef.current = true;
@@ -373,22 +408,29 @@ export function useOralPracticeEngine(
       checkAudioLevel();
     } catch (err) {
       console.error("Microphone access error:", err);
-      alert("マイクへのアクセスが許可されていません。");
+      alert("マイクへのアクセスが許可されていません。ブラウザの設定をご確認ください。");
     }
   }, [isPracticing, currentQuestionIndex, activeQuestions, selectedLevel, userId, userNickname]);
 
-  // ==========================================
-  // 🚀 セッション開始関数（モード選択対応）
-  // ==========================================
   const startPractice = async (
     questionsList: QuestionData[],
     answersMap: { [key: string]: string },
     orderMode: "sequential" | "random" = "sequential",
-    modeType: "manual" | "handsfree" = "manual" // 👈 "manual"(ボタンあり) または "handsfree"(ボタンなし) を指定可能
+    modeType: "manual" | "handsfree" = "manual"
   ) => {
     if (!questionsList || questionsList.length === 0) {
       alert("練習用の設問が見つかりません。");
       return;
+    }
+
+    // 💡 ボタンクリックの直系イベント内で最初の一回だけマイク権限を取得してキャッシュする
+    if (modeType === "handsfree" && (!persistentStreamRef.current || !persistentStreamRef.current.active)) {
+      try {
+        persistentStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (e) {
+        alert("マイクの使用が許可されませんでした。ブラウザの設定をご確認ください。");
+        return;
+      }
     }
 
     let qList = [...questionsList];
@@ -419,7 +461,6 @@ export function useOralPracticeEngine(
 
     await playTTS(firstQ.questionOriginal || firstQ.question);
 
-    // ハンズフリーモードの場合はそのまま自動録音を開始
     if (modeType === "handsfree") {
       startAutoRecording(answersMap);
     }
@@ -432,10 +473,15 @@ export function useOralPracticeEngine(
     }
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+    
+    // ストリームのトラックを解放
+    if (persistentStreamRef.current) {
+      persistentStreamRef.current.getTracks().forEach((t) => t.stop());
+      persistentStreamRef.current = null;
+    }
     setIsRecording(false);
   };
 
-  // ボタンありモード用の手動メッセージ送信関数
   const sendAnswerMessage = async (
     e: React.FormEvent,
     answersMap: { [key: string]: string },
@@ -559,13 +605,13 @@ export function useOralPracticeEngine(
     isAnalyzing,
     isRecording,
     isWaitingForNext,
-    startRecording,      // ボタンあり用：手動録音開始
-    stopRecording,       // ボタンあり用：手動録音停止
+    startRecording,
+    stopRecording,
     playTTS,
-    startPractice,       // 第4引数に "manual" または "handsfree" を指定可能
+    startPractice,
     stopPractice,
     proceedToNextQuestion,
-    sendAnswerMessage,   // ボタンあり用：テキスト/音声入力送信
+    sendAnswerMessage,
   };
 }
 
