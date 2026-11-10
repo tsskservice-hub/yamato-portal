@@ -1,6 +1,6 @@
 /**
  * @file OralPracticeHooks.ts
- * @description バックエンドの仕様に合わせて送信キーを `image` に修正した完全版フック
+ * @description バックエンドの仕様（audioBase64 / audio）に合わせて送信キーを修正した完全版フック
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -236,7 +236,8 @@ export function useOralPracticeEngine(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            image: base64Audio, // 💡 手動録音側も必要に応じて合わせる
+            audioBase64: base64Audio, // 💡 サーバー仕様に合わせて修正
+            audio: base64Audio,       // 💡 予備キー
             appType: "eoy-oral-drill",
             level: selectedLevel,
             userId,
@@ -255,7 +256,7 @@ export function useOralPracticeEngine(
     };
   };
 
-  // ハンズフリー自動送信処理（imageキーに変更）
+  // ハンズフリー自動送信処理（audioBase64キーに修正）
   const processAndSendAudioAuto = async (audioBlob: Blob, answersMap: { [key: string]: string }) => {
     console.log("🤖 [DEBUG] processAndSendAudioAuto started. Blob size:", audioBlob.size);
     setIsAnalyzing(true);
@@ -269,7 +270,8 @@ export function useOralPracticeEngine(
       try {
         const endpoint = "https://api.jptutoraiyamato.com/chat";
         const requestPayload = {
-          image: base64Audio, // 💡 サーバー仕様に合わせて `image` キーに変更
+          audioBase64: base64Audio, // 💡 バックエンドが期待するキー (chat-handler.ts の body.audioBase64 に対応)
+          audio: base64Audio,       // 💡 予備キー (body.audio に対応)
           appType: "eoy-oral-accelerated",
           mode: "drill",
           section: "sec1",
