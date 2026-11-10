@@ -1,6 +1,6 @@
 /**
  * @file OralPracticeHooks.ts
- * @description 音声データに加え message プロパティを追加して400エラーを回避するように修正した完全版フック
+ * @description ダミーの message を排除し、音声データを正しくバックエンドに送信して Whisper STT で文字起こしさせる完全版フック
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -236,8 +236,7 @@ export function useOralPracticeEngine(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: "(voice-audio-input)", // 💡 バリデーション突破用
-            audioBase64: base64Audio,
+            audioBase64: base64Audio, // 💡 ダミー message を除外し音声データのみ送信
             audio: base64Audio,
             appType: "eoy-oral-drill",
             level: selectedLevel,
@@ -257,7 +256,7 @@ export function useOralPracticeEngine(
     };
   };
 
-  // ハンズフリー自動送信処理（messageプロパティを追加してバリデーションを確実突破）
+  // ハンズフリー自動送信処理（ダミーの message を削除し、音声データのみ送信してサーバー側で Whisper STT を実行）
   const processAndSendAudioAuto = async (audioBlob: Blob, answersMap: { [key: string]: string }) => {
     console.log("🤖 [DEBUG] processAndSendAudioAuto started. Blob size:", audioBlob.size);
     setIsAnalyzing(true);
@@ -271,8 +270,7 @@ export function useOralPracticeEngine(
       try {
         const endpoint = "https://api.jptutoraiyamato.com/chat";
         const requestPayload = {
-          message: "(voice-audio-input)", // 💡 chat-handler.ts の `if (!userMessage ...)` バリデーションを確実に突破させるため
-          audioBase64: base64Audio,
+          audioBase64: base64Audio, // 💡 サーバー側の Whisper STT が動作するように音声データのみ渡す
           audio: base64Audio,
           appType: "eoy-oral-accelerated",
           mode: "drill",
