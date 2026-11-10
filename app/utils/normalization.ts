@@ -1,10 +1,10 @@
 /**
  * @file app/utils/normalization.ts
- * @description 日本語・英語のスマート表記ゆれ対応（正規化）ヘルパー関数群
+ * @description 日本語・英語のスマート表記ゆれ対応（正規化）ヘルパー関数群（誤認識の過度な救済を排除した厳密版）
  */
 
 /**
- * 日本語の数字・漢数字・助数詞・漢字・ひらがなの表記ゆれを正規化する汎用関数
+ * 日本語の数字・漢数字・助数詞・漢字・ひらがな・カタカナの適切な表記ゆれを正規化する関数
  */
 export const normalizeJapanese = (str: string): string => {
   if (!str) return "";
@@ -13,9 +13,9 @@ export const normalizeJapanese = (str: string): string => {
   // 句読点やスペース、記号の除去
   s = s.replace(/[?.!,。、・\s]+/g, "");
 
-  // 漢字 ⇔ ひらがな、数字・カウンターの相互変換マップ
+  // 漢字 ⇔ ひらがな、数字・カウンターの適切な相互変換マップ
   const map: { [key: string]: string } = {
-    // 疑問詞・頻出表現の漢字とひらがなゆれ吸収
+    // 疑問詞の正確な表記ゆれ（「何に」などの誤認は含めない）
     "何人": "なんにん",
     "なん人": "なんにん",
     "何": "なん",
@@ -31,7 +31,7 @@ export const normalizeJapanese = (str: string): string => {
     "９": "9", "九": "9", "ここの": "9", "きゅう": "9", "く": "9",
     "１０": "10", "十": "10", "とお": "10", "じゅう": "10",
     // カウンター
-    "人": "にん", "ニン": "にん", "りん": "n",
+    "人": "にん", "ニン": "にん",
     "匹": "ひき", "才": "さい", "歳": "さい", "本": "ほん", "個": "こ"
   };
 
@@ -47,7 +47,7 @@ export const normalizeJapanese = (str: string): string => {
 };
 
 /**
- * 英語の数字スペル（one〜ten）とアラビア数字の相互変換、句読点ゆれを正規化する汎用関数
+ * 英語の数字スペル（one〜ten）とアラビア数字の相互変換、句読点ゆれを正規化する関数
  */
 export const normalizeEnglish = (str: string): string => {
   if (!str) return "";
