@@ -1,6 +1,6 @@
 /**
  * @file OralPracticeHooks.ts
- * @description ハンズフリー自動送信のパラメータを最適化し、400エラーを解消した完全版フック
+ * @description バックエンドの仕様に合わせて送信キーを `image` に修正した完全版フック
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -236,7 +236,7 @@ export function useOralPracticeEngine(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            audioBase64: base64Audio,
+            image: base64Audio, // 💡 手動録音側も必要に応じて合わせる
             appType: "eoy-oral-drill",
             level: selectedLevel,
             userId,
@@ -255,7 +255,7 @@ export function useOralPracticeEngine(
     };
   };
 
-  // ハンズフリー自動送信処理（必要なパラメータを全て網羅）
+  // ハンズフリー自動送信処理（imageキーに変更）
   const processAndSendAudioAuto = async (audioBlob: Blob, answersMap: { [key: string]: string }) => {
     console.log("🤖 [DEBUG] processAndSendAudioAuto started. Blob size:", audioBlob.size);
     setIsAnalyzing(true);
@@ -269,7 +269,7 @@ export function useOralPracticeEngine(
       try {
         const endpoint = "https://api.jptutoraiyamato.com/chat";
         const requestPayload = {
-          audioBase64: base64Audio,
+          image: base64Audio, // 💡 サーバー仕様に合わせて `image` キーに変更
           appType: "eoy-oral-accelerated",
           mode: "drill",
           section: "sec1",
@@ -281,7 +281,7 @@ export function useOralPracticeEngine(
           chatHistory: chatMessages.map(m => ({ role: m.role, content: m.content }))
         };
 
-        console.log("🤖 [DEBUG] Sending audio to backend endpoint (/chat) with payload:", requestPayload);
+        console.log("🤖 [DEBUG] Sending audio to backend endpoint (/chat) with payload keys:", Object.keys(requestPayload));
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
