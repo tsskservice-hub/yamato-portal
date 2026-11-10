@@ -1,6 +1,6 @@
 /**
  * @file app/routes/vce.speaking.eoy-oral-accelerated.tsx
- * @description VCE Japanese - EOY Oral Accelerated Practice (GPT Realtime WebRTC Edition)
+ * @description VCE Japanese - EOY Oral Accelerated Practice (Cascade Hand-Free VAD Voice Edition)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { generateModuleMeta } from '~/utils/seoMeta';
@@ -10,7 +10,7 @@ import React, { useState, useEffect, useRef } from "react";
 import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
 import ChatYamatoEoyOralDrill from '~/components/chat/ChatYamatoEoyOralDrill';
 import { supabase } from '~/lib/supabaseClient';
-import { useRealtimeSpeaking } from '~/hooks/useRealtimeSpeaking';
+import { useOralPracticeEngine, QuestionData } from '~/hooks/OralPracticeHooks'; // 💡 カスケード型ハンズフリーフックをインポート
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -43,23 +43,16 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Accelerated Student");
 
-  // 💡 OpenAI Realtime API (WebRTC) を用いた音声対話フックの呼び出し（Accelerated向けプロンプトと連動）
+  // 💡 カスケード型ハンズフリー対話エンジンフックの呼び出し
   const {
-    isConnected,
-    isAiSpeaking,
-    statusText,
-    turnCount,
-    startSession,
-    stopSession,
-  } = useRealtimeSpeaking({
-    userId: user?.id || "guest",
-    appType: "eoy-oral-accelerated",
-    lessonSlug: "accelerated-free-talk",
-    topic: "VCE Section 1 General Conversation & Advanced Discussion (Accelerated Pace)",
-    onFinished: () => {
-      alert("🎉 素晴らしい会話セッションでした！EOY Oral Accelerated 練習が完了しました。");
-    },
-  });
+    chatMessages,
+    isPracticing,
+    currentQuestionIndex,
+    isAnalyzing,
+    isRecording, // ユーザーが話しているかどうか（VAD連動）
+    startPractice,
+    stopPractice,
+  } = useOralPracticeEngine("normal", 1.0, user?.id, nickname);
 
   const handleOpenAuth = () => {
     window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
@@ -106,6 +99,30 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
     }
   };
 
+  // Accelerated用のサンプル質問リスト（必要に応じてSupabase等から動的取得に拡張可能）
+  const acceleratedQuestions: QuestionData[] = [
+    {
+      id: "acc-q1",
+      question: "日本語を勉強する理由や、将来どのように活かしたいか教えてください。",
+      questionOriginal: "日本語を勉強する理由や、将来どのように活かしたいか教えてください。",
+    },
+    {
+      id: "acc-q2",
+      question: "あなたの学校生活や、一番好きな教科について説明してください。",
+      questionOriginal: "あなたの学校生活や、一番好きな教科について説明してください。",
+    },
+    {
+      id: "acc-q3",
+      question: "オーストラリアの文化と日本の文化で、最も違いを感じるところは何ですか。",
+      questionOriginal: "オーストラリアの文化と日本の文化で、最も違いを感じるところは何ですか。",
+    },
+  ];
+
+  // ハンズフリー会話セッションの開始トリガー
+  const handleStartHandsfree = () => {
+    startPractice(acceleratedQuestions, {}, "sequential", "handsfree");
+  };
+
   if (isAuthLoading) {
     return (
       <ToolPageWrapper layoutRef={layoutRef}>
@@ -131,7 +148,7 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
                 Sign In Required
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                EOY Oral Accelerated Practice requires sign-in to access real-time GPT voice conversations with AI Yamato.
+                EOY Oral Accelerated Practice requires sign-in to access cascade voice conversations with AI Yamato.
               </p>
             </div>
             <button
@@ -156,67 +173,85 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border border-violet-300">
-                  ⚡ Accelerated Track
+                  ⚡ Accelerated Track (Hands-Free VAD)
                 </span>
                 <span className="text-xs text-slate-500">
-                  VCE Japanese Oral Exam (GPT Realtime Voice)
+                  VCE Japanese Oral Exam (Cascade Voice AI)
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
                 EOY Oral Accelerated Free Conversation
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                High-achieving VCE student session. Engage in natural, unconstrained real-time Japanese spoken dialogues with AI Yamato.
+                High-achieving VCE student session. Engage in natural, hands-free Japanese spoken dialogues with AI Yamato without touching buttons.
               </p>
             </div>
-            <OralExaminerAvatar statusText={isConnected ? "Live Connected" : "Ready"} themeColor={themeColor} />
+            <OralExaminerAvatar 
+              statusText={isPracticing ? (isRecording ? "🎤 Listening (Speak now...)" : isAnalyzing ? "🧠 AI Thinking & Evaluating..." : "🔊 AI Yamato Speaking...") : "Ready"} 
+              themeColor={themeColor} 
+            />
           </div>
 
-          {/* 🎙️ GPT Realtime 音声会話コントロールカード */}
-          <div className="bg-white dark:bg-slate-900 border border-violet-200 dark:border-violet-800 rounded-3xl p-8 shadow-sm space-y-6 text-center">
-            <div className="max-w-lg mx-auto space-y-4">
+          {/* 🎙️ ハンズフリー音声会話コントロール＆チャットログカード */}
+          <div className="bg-white dark:bg-slate-900 border border-violet-200 dark:border-violet-800 rounded-3xl p-8 shadow-sm space-y-6">
+            <div className="max-w-xl mx-auto text-center space-y-4">
               <div className="inline-flex p-4 bg-violet-50 dark:bg-violet-950/50 rounded-2xl border border-violet-100 dark:border-violet-900 text-violet-600 dark:text-violet-400 text-3xl">
                 🎙️
               </div>
               <div className="space-y-2">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                  Live Voice Conversation with AI Yamato
+                  Hands-Free Voice Session with AI Yamato
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-                  {statusText}
+                  {isPracticing 
+                    ? (isRecording ? "🔴 マイク収音中... お話しください（話し終わると自動送信されます）" : isAnalyzing ? "⏳ AIが回答を分析・生成中..." : "🔊 やまと言葉を再生中...")
+                    : "「ハンズフリー会話を始める」ボタンを押すと、ボタン操作なしの音声対話が始まります。"}
                 </p>
               </div>
 
-              {isConnected && (
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-500">Conversation Turns: <strong className="text-violet-600 dark:text-violet-400">{turnCount}</strong></span>
-                  {isAiSpeaking ? (
-                    <span className="text-amber-500 animate-pulse">🔊 AI Yamato is speaking...</span>
-                  ) : (
-                    <span className="text-emerald-500">🎤 Your turn (Speak freely)</span>
-                  )}
-                </div>
-              )}
-
               <div className="pt-4 flex items-center justify-center gap-4">
-                {!isConnected ? (
+                {!isPracticing ? (
                   <button
                     type="button"
-                    onClick={startSession}
+                    onClick={handleStartHandsfree}
                     className="py-4 px-8 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl font-black text-sm tracking-wider uppercase transition shadow-md cursor-pointer flex items-center gap-2 mx-auto"
                   >
-                    <span>🚀 リアルタイム会話を始める (Start Voice)</span>
+                    <span>🚀 ハンズフリー会話を始める (Start Hands-Free)</span>
                   </button>
                 ) : (
                   <button
                     type="button"
-                    onClick={stopSession}
+                    onClick={stopPractice}
                     className="py-4 px-8 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-black text-sm tracking-wider uppercase transition shadow-md cursor-pointer flex items-center gap-2 mx-auto"
                   >
-                    <span>⏹️ 会話を終了する (End Session)</span>
+                    <span>⏹️ セッションを終了する (End Session)</span>
                   </button>
                 )}
               </div>
+            </div>
+
+            {/* 会話ログ・フィードバック表示エリア */}
+            <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-6 space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Conversation & Feedback History</h4>
+              {chatMessages.map((msg, idx) => (
+                <div 
+                  key={idx} 
+                  className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                    msg.role === 'assistant' 
+                      ? 'bg-violet-50/80 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/50 text-slate-800 dark:text-slate-200' 
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ml-8'
+                  }`}
+                >
+                  <div className="font-bold mb-1 text-[10px] uppercase tracking-wider text-violet-600 dark:text-violet-400">
+                    {msg.role === 'assistant' ? 'Yamato-sensei' : `${nickname} (You)`}
+                  </div>
+                  {msg.isHtml ? (
+                    <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                  ) : (
+                    <p>{msg.content}</p>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
