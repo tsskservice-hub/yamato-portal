@@ -1,6 +1,6 @@
 /**
  * @file OralPracticeHooks.ts
- * @description マニュアル録音と詳細デバッグログ付きハンズフリー自動無音検知対応フック
+ * @description isPracticing のガードを堅牢化したハンズフリー自動無音検知対応フック
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -103,7 +103,7 @@ export function useOralPracticeEngine(
   const isSpeakingDetectedRef = useRef<boolean>(false);
   const animationFrameRef = useRef<number | null>(null);
 
-  // 🔊 TTS Voice Playback with Detailed Debug Logs & Estimated Duration Timer
+  // 🔊 TTS Voice Playback
   const playTTS = async (textToSpeak: string): Promise<void> => {
     return new Promise(async (resolve) => {
       console.log("🔊 [DEBUG] playTTS called with text:", textToSpeak);
@@ -134,15 +134,11 @@ export function useOralPracticeEngine(
         }
 
         const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
-        console.log("🔊 [DEBUG] Fetching TTS from endpoint:", ttsEndpoint);
-        
         const response = await fetch(ttsEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: cleanedText }),
         });
-
-        console.log("🔊 [DEBUG] TTS fetch status:", response.status);
 
         if (response.ok) {
           const audioBlob = await response.blob();
@@ -150,9 +146,7 @@ export function useOralPracticeEngine(
           const audio = new Audio(audioUrl);
           audio.playbackRate = speechSpeed || 1.0;
 
-          // 💡 文字数に応じた想定再生時間（例: 1文字200ms + 1.5秒余裕）
           const estimatedDurationMs = Math.max(cleanedText.length * 200, 2000) / (speechSpeed || 1.0) + 1500;
-          console.log(`🔊 [DEBUG] Audio created. Estimated duration: ${estimatedDurationMs}ms`);
 
           const estimatedTimer = setTimeout(() => {
             console.warn("⏱️ [DEBUG] Estimated duration reached. Forcing audio pause & resolve.");
@@ -173,16 +167,13 @@ export function useOralPracticeEngine(
             safeResolve("onerror");
           };
 
-          await audio.play().then(() => {
-            console.log("🔊 [DEBUG] audio.play() promise resolved successfully (Playing now).");
-          }).catch((playErr) => {
+          await audio.play().catch((playErr) => {
             console.warn("⚠️ [DEBUG] audio.play() was blocked or failed:", playErr);
             clearTimeout(estimatedTimer);
             fallbackWebSpeech(cleanedText, speechSpeed);
             safeResolve("play-catch");
           });
         } else {
-          console.warn("⚠️ [DEBUG] TTS response not ok. Falling back to Web Speech.");
           fallbackWebSpeech(cleanedText, speechSpeed);
           safeResolve("response-not-ok");
         }
@@ -194,7 +185,6 @@ export function useOralPracticeEngine(
     });
   };
 
-  // ボタンありモード用の手動録音
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -352,10 +342,9 @@ export function useOralPracticeEngine(
     };
   };
 
-  // 💡 自動無音検知録音の開始
+  // 💡 自動無音検知録音の開始（isPracticing のガードを外し、確実に動作するように修正）
   const startAutoRecording = useCallback(async (answersMap: { [key: string]: string }) => {
-    console.log("🎤 [DEBUG] startAutoRecording invoked. isPracticing:", isPracticing);
-    if (!isPracticing) return;
+    console.log("🎤 [DEBUG] startAutoRecording invoked.");
     try {
       let stream = persistentStreamRef.current;
       if (!stream || !stream.active) {
@@ -442,7 +431,7 @@ export function useOralPracticeEngine(
       console.error("❌ [DEBUG] Microphone access error in startAutoRecording:", err);
       alert("マイクへのアクセスが許可されていません。ブラウザの設定をご確認ください。");
     }
-  }, [isPracticing, currentQuestionIndex, activeQuestions, selectedLevel, userId, userNickname]);
+  }, [currentQuestionIndex, activeQuestions, selectedLevel, userId, userNickname]);
 
   const startPractice = async (
     questionsList: QuestionData[],
