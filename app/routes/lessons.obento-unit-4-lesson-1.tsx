@@ -19,7 +19,7 @@ import { EduVocabularySidebar } from "~/components/lessons/EduVocabularySidebar"
 import { EduLessonTaskManager } from "~/components/lessons/EduLessonTaskManager";
 import { EduVocabularyDrillModal } from "~/components/lessons/EduVocabularyDrillModal";
 import { EduReadingDrillModal } from "~/components/lessons/EduReadingDrillModal"; // 追加：リーディング専用モーダル
-import { EduSpeakingTaskWidget } from "~/components/lessons/EduSpeakingTaskWidget";
+import { EduSpeakingTaskModal } from "~/components/lessons/EduSpeakingTaskModal";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -103,11 +103,12 @@ function LessonsObentoUnit4Lesson1Page() {
   const [isDrillOpen, setIsDrillOpen] = useState(false);
   const [vocabTaskCompleted, setVocabTaskCompleted] = useState(false);
 
-  // 2. リーディングタスクモーダルの開閉状態と達成状態の管理（追加）
+  // 2. リーディングタスクモーダルの開閉状態と達成状態の管理
   const [isReadingDrillOpen, setIsReadingDrillOpen] = useState(false);
   const [readingTaskCompleted, setReadingTaskCompleted] = useState(false);
 
-  // 3. スピーキング課題の完了状態
+  // 3. スピーキング課題モーダルの開閉状態と完了状態の管理
+  const [isSpeakingModalOpen, setIsSpeakingModalOpen] = useState(false);
   const [speakingTaskCompleted, setSpeakingTaskCompleted] = useState(false);
 
   const loaderData = useLoaderData<typeof loader>() || {};
@@ -240,36 +241,24 @@ function LessonsObentoUnit4Lesson1Page() {
             </div>
           </div>
 
-          {/* 4. Bottom: Self-Study Task Section (Tasks with English Instructions) */}
+          {/* 4. Bottom: Self-Study Task Section */}
           <EduLessonTaskManager 
             lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
             userId={user?.id}
             onStartVocabularyDrill={() => setIsDrillOpen(true)}
-            onStartReadingDrill={() => setIsReadingDrillOpen(true)} // 追加：リーディングタスク起動
+            onStartReadingDrill={() => setIsReadingDrillOpen(true)}
+            onStartSpeakingDrill={() => setIsSpeakingModalOpen(true)} // スピーキングタスク起動を紐付け
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
-              reading: readingTaskCompleted, // 追加：リーディングタスク達成状態の連携
+              reading: readingTaskCompleted,
               speaking: speakingTaskCompleted,
-            }}
-          />
-
-          {/* 5. Real-time Voice Speaking Task Widget (Family Size & Composition Practice) */}
-          <EduSpeakingTaskWidget
-            title="Speaking Task: Practice Talking About Your Family Members"
-            description="Have a 5-turn real-time voice conversation with AI Yamato. Practice asking and answering questions about your family size and who lives in your household."
-            userId={user?.id}
-            appType="obento-unit-4-lesson-1"
-            lessonSlug="obento-unit-4-lesson-1"
-            topic="家族は何人ですか？誰がいますか？という質問に対して、自分の家族構成（人数や特殊な数え方『ひとり・ふたり』、家族のメンバー）について日本語で答える練習。"
-            onCompleted={() => {
-              setSpeakingTaskCompleted(true);
             }}
           />
 
         </main>
       </div>
 
-      {/* 6. Fullscreen Vocabulary Drill Modal */}
+      {/* 5. Fullscreen Vocabulary Drill Modal */}
       <EduVocabularyDrillModal
         vocabulary={vocabulary}
         isOpen={isDrillOpen}
@@ -277,12 +266,27 @@ function LessonsObentoUnit4Lesson1Page() {
         onCompleted={() => setVocabTaskCompleted(true)}
       />
 
-      {/* 7. Fullscreen Reading Comprehension Dual-Check Drill Modal (追加) */}
+      {/* 6. Fullscreen Reading Comprehension Dual-Check Drill Modal */}
       <EduReadingDrillModal
         items={readingItems}
         isOpen={isReadingDrillOpen}
         onClose={() => setIsReadingDrillOpen(false)}
         onCompleted={() => setReadingTaskCompleted(true)}
+      />
+
+      {/* 7. Real-time Voice Speaking Task Modal */}
+      <EduSpeakingTaskModal
+        isOpen={isSpeakingModalOpen}
+        onClose={() => setIsSpeakingModalOpen(false)}
+        title="Speaking Task: Practice Talking About Your Family Members"
+        description="Have a 5-turn real-time voice conversation with AI Yamato. Practice asking and answering questions about your family size and who lives in your household."
+        userId={user?.id}
+        appType="obento-unit-4-lesson-1"
+        lessonSlug="obento-unit-4-lesson-1"
+        topic="家族は何人ですか？誰がいますか？という質問に対して、自分の家族構成（人数や特殊な数え方『ひとり・ふたり』、家族のメンバー）について日本語で答える練習。"
+        onCompleted={() => {
+          setSpeakingTaskCompleted(true);
+        }}
       />
     </ToolPageWrapper>
   );

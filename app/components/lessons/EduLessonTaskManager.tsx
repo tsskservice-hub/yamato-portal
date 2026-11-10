@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduLessonTaskManager.tsx
- * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リーディングドリル起動対応）
+ * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リーディング＆スピーキングドリル起動対応）
  */
 
 import React, { useState, useEffect } from "react";
@@ -11,7 +11,8 @@ export interface EduLessonTaskManagerProps {
   userId?: string;  // ユーザーID
   onAllCompletedChange?: (completed: boolean) => void;
   onStartVocabularyDrill?: () => void;
-  onStartReadingDrill?: () => void; // 追加：リーディングドリル起動ハンドラー
+  onStartReadingDrill?: () => void;  // リーディングドリル起動ハンドラー
+  onStartSpeakingDrill?: () => void;  // 追加：スピーキングタスク起動ハンドラー
   externalTaskStatus?: {
     vocabulary?: boolean;
     listening?: boolean;
@@ -26,7 +27,8 @@ export function EduLessonTaskManager({
   userId, 
   onAllCompletedChange,
   onStartVocabularyDrill,
-  onStartReadingDrill, // 追加
+  onStartReadingDrill,
+  onStartSpeakingDrill, // 追加
   externalTaskStatus = {}
 }: EduLessonTaskManagerProps) {
   const [taskProgress, setTaskProgress] = useState({
@@ -152,7 +154,7 @@ export function EduLessonTaskManager({
           </div>
         </div>
 
-        {/* タスクカード群（背景を白に、テキストをスレート系に変更して視認性をアップ） */}
+        {/* タスクカード群 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
           
           {/* Task 1: 語彙ドリル */}
@@ -270,15 +272,28 @@ export function EduLessonTaskManager({
               🎤 Speaking Task (AI音声会話)
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              上部の Yamato Sensei と音声またはチャットで会話セッションを完了すると自動で記録されます。
+              AI Yamato との一問一答音声会話セッション（モーダル）を完了すると自動で記録されます。
             </p>
-            <button
-              type="button"
-              onClick={() => updateTaskStatus("speaking", !taskProgress.speaking)}
-              className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold underline"
-            >
-              [開発・テスト用] 状態を切り替える
-            </button>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {onStartSpeakingDrill && (
+                <button
+                  type="button"
+                  onClick={onStartSpeakingDrill}
+                  className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+                >
+                  <span>🚀</span>
+                  <span>Start Speaking Task (スピーキング開始)</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => updateTaskStatus("speaking", !taskProgress.speaking)}
+                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
+              >
+                [開発用] 状態切替
+              </button>
+            </div>
           </div>
 
         </div>
