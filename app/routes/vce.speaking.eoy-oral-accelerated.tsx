@@ -1,6 +1,6 @@
 /**
  * @file app/routes/vce.speaking.eoy-oral-accelerated.tsx
- * @description VCE Japanese - EOY Oral Accelerated Practice (Cascade Hand-Free VAD Voice Edition)
+ * @description VCE Japanese - EOY Oral Accelerated Practice (Cascade Hand-Free VAD Voice Edition with Mic Status Indicator)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { generateModuleMeta } from '~/utils/seoMeta';
@@ -10,7 +10,7 @@ import React, { useState, useEffect, useRef } from "react";
 import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
 import ChatYamatoEoyOralDrill from '~/components/chat/ChatYamatoEoyOralDrill';
 import { supabase } from '~/lib/supabaseClient';
-import { useOralPracticeEngine, QuestionData } from '~/hooks/OralPracticeHooks'; // 💡 カスケード型ハンズフリーフックをインポート
+import { useOralPracticeEngine, QuestionData } from '~/hooks/OralPracticeHooks';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -43,7 +43,6 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Accelerated Student");
 
-  // 💡 カスケード型ハンズフリー対話エンジンフックの呼び出し
   const {
     chatMessages,
     isPracticing,
@@ -99,7 +98,6 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
     }
   };
 
-  // Accelerated用のサンプル質問リスト（必要に応じてSupabase等から動的取得に拡張可能）
   const acceleratedQuestions: QuestionData[] = [
     {
       id: "acc-q1",
@@ -118,7 +116,6 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
     },
   ];
 
-  // ハンズフリー会話セッションの開始トリガー
   const handleStartHandsfree = () => {
     startPractice(acceleratedQuestions, {}, "sequential", "handsfree");
   };
@@ -195,17 +192,58 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
           {/* 🎙️ ハンズフリー音声会話コントロール＆チャットログカード */}
           <div className="bg-white dark:bg-slate-900 border border-violet-200 dark:border-violet-800 rounded-3xl p-8 shadow-sm space-y-6">
             <div className="max-w-xl mx-auto text-center space-y-4">
-              <div className="inline-flex p-4 bg-violet-50 dark:bg-violet-950/50 rounded-2xl border border-violet-100 dark:border-violet-900 text-violet-600 dark:text-violet-400 text-3xl">
-                🎙️
+              
+              {/* 💡 マイクのオン/オフ・状態がひと目でわかるビジュアルインジケーター */}
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <div className={`relative inline-flex p-5 rounded-3xl border transition-all duration-300 ${
+                  isPracticing && isRecording
+                    ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-600 shadow-lg shadow-emerald-500/20 scale-105'
+                    : isPracticing && isAnalyzing
+                    ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-600 shadow-md'
+                    : isPracticing
+                    ? 'bg-violet-50 dark:bg-violet-950/50 border-violet-300 dark:border-violet-600 animate-pulse'
+                    : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                }`}>
+                  {/* マイク作動中の波紋パルスエフェクト */}
+                  {isPracticing && isRecording && (
+                    <span className="absolute -inset-1 rounded-3xl bg-emerald-400/30 animate-ping pointer-events-none" />
+                  )}
+                  <span className="text-3xl relative z-10">
+                    {isPracticing ? (isRecording ? "🎙️" : isAnalyzing ? "⏳" : "🔊") : "🎤"}
+                  </span>
+                </div>
+
+                {/* ステータスバッジ */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border">
+                  {!isPracticing ? (
+                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 px-2.5 py-0.5 rounded-full">
+                      ⏸️ マイク停止中 (Standby)
+                    </span>
+                  ) : isRecording ? (
+                    <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 animate-pulse">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                      🟢 マイクON：収音中（お話しください...）
+                    </span>
+                  ) : isAnalyzing ? (
+                    <span className="bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800 px-2.5 py-0.5 rounded-full">
+                      🟡 解析中（AIが考えています）
+                    </span>
+                  ) : (
+                    <span className="bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-800 px-2.5 py-0.5 rounded-full">
+                      🔵 AI音声再生中（まもなくマイクONになります）
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="space-y-2">
+
+              <div className="space-y-1 pt-2">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
                   Hands-Free Voice Session with AI Yamato
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                   {isPracticing 
-                    ? (isRecording ? "🔴 マイク収音中... お話しください（話し終わると自動送信されます）" : isAnalyzing ? "⏳ AIが回答を分析・生成中..." : "🔊 やまと言葉を再生中...")
-                    : "「ハンズフリー会話を始める」ボタンを押すと、ボタン操作なしの音声対話が始まります。"}
+                    ? (isRecording ? "🔴 マイクがオンになっています。そのまま自然にお話しください（無音で自動送信されます）。" : isAnalyzing ? "⏳ あなたの発話をテキストに変換し、AIが評価・生成しています..." : "🔊 やまと言葉を再生中です。聞き終わったらすぐにお話しいただけます。")
+                    : "「ハンズフリー会話を始める」ボタンを押すと、マイクが自動で有効になり、会話が始まります。"}
                 </p>
               </div>
 
