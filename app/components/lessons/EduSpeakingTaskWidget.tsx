@@ -3,16 +3,16 @@
  * @description 教科書準拠の学習ページに配置する、一問一答スピーキング課題ウィジェット（挨拶・事前定義質問の音声読み上げ・マイク音声認識・終了挨拶対応版）
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { supabase } from "~/lib/supabaseClient";
 
-interface EduSpeakingTaskWidgetProps {
+export interface EduSpeakingTaskWidgetProps {
   title: string;          // 課題のタイトル（例: "Speaking Task: Family Members"）
   description?: string;   // 課題の説明文やプロンプト
   userId: string;         // ユーザーID
   appType?: string;       // アプリ種別（例: "obento-unit-4-lesson-1"）
   lessonSlug?: string;    // レッスンSlug
-  topic?: string;         // AIに渡すトピックや学習内容の指定（追加）
+  topic?: string;         // AIに渡すトピックや学習内容の指定
   questions?: {           // あらかじめ先生が用意した質問リスト
     question: string;
     english?: string;
@@ -68,7 +68,6 @@ export const EduSpeakingTaskWidget: React.FC<EduSpeakingTaskWidgetProps> = ({
     
     setStatusMessage("AI Yamato is greeting...");
     speakText("こんにちは！やまと先生です。それでは、スピーキングの練習を始めましょう。", () => {
-      // 挨拶終了後に1問目を読み上げ
       playCurrentQuestion(0);
     });
   };
@@ -76,7 +75,6 @@ export const EduSpeakingTaskWidget: React.FC<EduSpeakingTaskWidgetProps> = ({
   // 指定インデックスの質問を読み上げ、マイク入力を有効化
   const playCurrentQuestion = (index: number) => {
     if (index >= questions.length) {
-      // 全問終了 ➔ 終了の挨拶
       setStatusMessage("Session completed! Saying goodbye...");
       speakText("よく頑張りましたね！これでスピーキングの練習を終わります。お疲れ様でした！", () => {
         setSessionFinished(true);
@@ -91,7 +89,6 @@ export const EduSpeakingTaskWidget: React.FC<EduSpeakingTaskWidgetProps> = ({
     const q = questions[index];
     setStatusMessage(`Question ${index + 1} of ${questions.length}: Listening for your answer...`);
     speakText(q.question, () => {
-      // 読み上げが終わったら自動的にマイク音声認識を開始
       startSpeechRecognition(index);
     });
   };
@@ -121,7 +118,6 @@ export const EduSpeakingTaskWidget: React.FC<EduSpeakingTaskWidgetProps> = ({
       setIsListening(false);
       setStatusMessage(`Recognised: "${speechResult}" ✅ Moving to next...`);
 
-      // 1.5秒後に次の質問へ進む
       setTimeout(() => {
         setTranscript("");
         const nextIdx = index + 1;
@@ -171,7 +167,6 @@ export const EduSpeakingTaskWidget: React.FC<EduSpeakingTaskWidgetProps> = ({
         </div>
       </div>
 
-      {/* セッション中の進行状況表示 */}
       {isStarted && (
         <div className="p-4 bg-white rounded-2xl border border-indigo-100 shadow-inner space-y-3">
           <div className="flex items-center justify-between text-xs font-bold text-slate-600">
@@ -186,7 +181,6 @@ export const EduSpeakingTaskWidget: React.FC<EduSpeakingTaskWidgetProps> = ({
             />
           </div>
 
-          {/* 現在出題中の質問カード */}
           {currentIndex < questions.length && (
             <div className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 text-center space-y-1">
               <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider">AI Question</span>
@@ -205,12 +199,10 @@ export const EduSpeakingTaskWidget: React.FC<EduSpeakingTaskWidgetProps> = ({
         </div>
       )}
 
-      {/* ステータス・メッセージ */}
       <div className="text-xs sm:text-sm font-bold text-slate-700 bg-white/80 px-4 py-3 rounded-xl border border-slate-100 shadow-sm">
         📢 {statusMessage || (sessionFinished ? "🎉 Speaking Task Completed Successfully!" : "Ready to start speaking practice.")}
       </div>
 
-      {/* アクションボタン */}
       <div className="flex items-center gap-3">
         {!isStarted ? (
           <button
