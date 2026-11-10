@@ -1,6 +1,6 @@
 /**
  * @file OralPracticeHooks.ts
- * @description ダミーの message を排除し、音声データを正しくバックエンドに送信して Whisper STT で文字起こしさせる完全版フック
+ * @description ハンズフリー会話がエンドレスに継続し、ユーザーが終了を意図した際（「終わり」等の発話）にのみセッションが終了するように修正した完全版フック
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -236,7 +236,7 @@ export function useOralPracticeEngine(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            audioBase64: base64Audio, // 💡 ダミー message を除外し音声データのみ送信
+            audioBase64: base64Audio,
             audio: base64Audio,
             appType: "eoy-oral-drill",
             level: selectedLevel,
@@ -256,7 +256,7 @@ export function useOralPracticeEngine(
     };
   };
 
-  // ハンズフリー自動送信処理（ダミーの message を削除し、音声データのみ送信してサーバー側で Whisper STT を実行）
+  // 💡 ハンズフリー自動送信処理（会話をエンドレスに継続させ、終了キーワードで終了する仕様）
   const processAndSendAudioAuto = async (audioBlob: Blob, answersMap: { [key: string]: string }) => {
     console.log("🤖 [DEBUG] processAndSendAudioAuto started. Blob size:", audioBlob.size);
     setIsAnalyzing(true);
@@ -270,7 +270,7 @@ export function useOralPracticeEngine(
       try {
         const endpoint = "https://api.jptutoraiyamato.com/chat";
         const requestPayload = {
-          audioBase64: base64Audio, // 💡 サーバー側の Whisper STT が動作するように音声データのみ渡す
+          audioBase64: base64Audio,
           audio: base64Audio,
           appType: "eoy-oral-accelerated",
           mode: "drill",
@@ -303,6 +303,7 @@ export function useOralPracticeEngine(
         const aiFeedback = data.reply || "◎ よくできました。";
         const formattedHtml = formatOralFeedbackToHtml(aiFeedback);
 
+        // 💡 チャット履歴にユーザーの発話とAIの返答を追加
         setChatMessages((prev) => [
           ...prev,
           { role: "user", content: userTranscript, isHtml: false },
@@ -314,11 +315,28 @@ export function useOralPracticeEngine(
         await playTTS(aiFeedback);
         console.log("🔊 [DEBUG] AI feedback TTS finished.");
 
+        // 💡 終了キーワード（「終わり」「終了」「おしまい」など）が含まれているかチェック
+        const isEndRequested = 
+          userTranscript.includes("終わり") || 
+          userTranscript.includes("終了") || 
+          userTranscript.includes("おしまい") ||
+          userTranscript.includes("これで終わりにします");
+
+        if (isEndRequested) {
+          setChatMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: "<b>🎉 お疲れ様でした！練習を終了します。</b>", isHtml: true },
+          ]);
+          setIsPracticing(false);
+          stopPractice();
+          return;
+        }
+
+        // 💡 質問リストを順番に進めつつ、最後の質問を超えても会話を永続的に継続させる
         const nextIndex = currentQuestionIndex + 1;
         if (nextIndex < activeQuestions.length) {
           setCurrentQuestionIndex(nextIndex);
           const nextQ = activeQuestions[nextIndex];
-          const nextTargetAns = answersMap[nextQ.id] || "";
           
           setChatMessages((prev) => [
             ...prev,
@@ -333,12 +351,17 @@ export function useOralPracticeEngine(
           console.log("🔊 [DEBUG] Next question TTS finished. Starting auto recording...");
           startAutoRecording(answersMap);
         } else {
+          // 💡 すべての設問が終わった後も、自由対話・継続モードとして自動録音を再開し続ける
+          console.log("🔄 [DEBUG] Question list completed. Continuing open conversation loop...");
           setChatMessages((prev) => [
             ...prev,
-            { role: "assistant", content: "<b>🎉 すべての質問が完了しました！お疲れ様でした。</b>", isHtml: true },
+            {
+              role: "assistant",
+              content: `（続けてお話しください... 終了する場合は「おわり」または「終了」と言ってください）`,
+              isHtml: true,
+            },
           ]);
-          setIsPracticing(false);
-          stopPractice();
+          startAutoRecording(answersMap);
         }
       } catch (err) {
         console.error("❌ [DEBUG] Auto send error:", err);
@@ -482,7 +505,7 @@ export function useOralPracticeEngine(
     const userTargetAns = answersMap[firstQ.id] || "";
 
     const startMsg = modeType === "handsfree"
-      ? `【ハンズフリー会話開始】<br><br>Yamato: 「${firstQ.question}」<br><br>（どうぞ、マイクに向かってお話しください...）`
+      ? `【ハンズフリー会話開始】<br><br>Yamato: 「${firstQ.question}」<br><br>（どうぞ、マイクに向かってお話しください...終了時は「終わり」と言ってください）`
       : `【ドリルセッション開始】<br><br>Yamato: 「${firstQ.question}」<br><br>(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br>録音ボタンを押して答えてください！`;
 
     setChatMessages([
