@@ -56,13 +56,13 @@ export default function VocabIndexPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLargeFont, setIsLargeFont] = useState(false);
 
-  // 実際の edu_vocabulary テーブルの構造に合わせたデータ取得
+  // 実際の kl_vocabulary テーブルの構造に合わせたデータ取得
   const loadVocabData = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
       const { data, error } = await supabase
-        .from("edu_vocabulary")
+        .from("kl_vocabulary")
         .select("id, lesson_id, jp_text, romaji, english_text, category, order_index")
         .order("order_index", { ascending: true });
 
@@ -74,7 +74,7 @@ export default function VocabIndexPage() {
         setVocabularies([]);
       }
     } catch (err: any) {
-      console.error("Failed to load edu_vocabulary data:", err);
+      console.error("Failed to load kl_vocabulary data:", err);
       setError(true);
       setErrorMessage(err?.message || 'Unknown error');
     } finally {
@@ -225,7 +225,7 @@ export default function VocabIndexPage() {
             </div>
           ) : filteredVocabularies.length === 0 ? (
             <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found in the `edu_vocabulary` table.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found in the `kl_vocabulary` table.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

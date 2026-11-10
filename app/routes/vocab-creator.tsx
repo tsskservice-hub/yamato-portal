@@ -48,14 +48,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
-  // 2. edu_vocabulary テーブルから語彙データを取得
+  // 2. kl_vocabulary テーブルから語彙データを取得
   const { data: vocabularies, error } = await serverSupabase
-    .from("edu_vocabulary")
+    .from("kl_vocabulary")
     .select("id, japanese, kana, romaji, english, category")
     .order("order_index", { ascending: true });
 
   if (error) {
-    console.warn("Failed to fetch edu_vocabulary:", error.message);
+    console.warn("Failed to fetch kl_vocabulary:", error.message);
   }
 
   return json({
@@ -406,7 +406,7 @@ export default function VocabCreatorPage() {
               })}
               {filteredVocabularies.length === 0 && (
                 <div className="col-span-full py-8 text-center text-slate-400 text-xs">
-                  該当する語彙が見つかりません。Supabaseの `edu_vocabulary` テーブルにデータを登録してください。
+                  該当する語彙が見つかりません。Supabaseの `kl_vocabulary` テーブルにデータを登録してください。
                 </div>
               )}
             </div>

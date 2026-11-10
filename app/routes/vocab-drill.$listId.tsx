@@ -87,11 +87,11 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     }
   }
 
-  // 3. リストに紐づく単語を取得 (edu_vocab_list_items と edu_vocabulary を結合)
+  // 3. リストに紐づく単語を取得 (edu_vocab_list_items と kl_vocabulary を結合)
   const { data: listItems, error: itemsError } = await supabase
     .from("edu_vocab_list_items")
     .select(`
-      edu_vocabulary (
+      kl_vocabulary (
         id,
         japanese,
         kana,
@@ -107,7 +107,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   }
 
   const vocabularies: Vocabulary[] = listItems
-    .map((item: any) => item.edu_vocabulary)
+    .map((item: any) => item.kl_vocabulary)
     .filter(Boolean);
 
   return json({ listMeta, taskId: taskData?.id || null, vocabularies });

@@ -60,7 +60,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const lessonIds = lessonsData.map((l) => l.id);
     if (lessonIds.length > 0) {
       const { data: vocabs } = await supabase
-        .from("edu_vocabulary")
+        .from("kl_vocabulary")
         .select("*")
         .in("lesson_id", lessonIds)
         .order("order_index", { ascending: true });

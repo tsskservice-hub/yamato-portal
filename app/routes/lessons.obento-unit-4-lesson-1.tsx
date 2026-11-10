@@ -67,7 +67,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
 
       const { data: vocabs } = await supabase
-        .from("edu_vocabulary")
+        .from("kl_vocabulary")
         .select("*")
         .eq("lesson_id", lessonData.id)
         .order("order_index", { ascending: true });
