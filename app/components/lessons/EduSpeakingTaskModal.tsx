@@ -5,6 +5,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useEduSpeakingDrill } from "~/hooks/useEduSpeakingDrill";
+import { useSoundEffect } from "~/hooks/useSoundEffect"; // ← 効果音用フックのインポート
 
 import { EduSpeakingHeader } from "./EduSpeakingHeader";
 import { EduSpeakingPart1View } from "./EduSpeakingPart1View";
@@ -46,6 +47,18 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     askRoundsPerDynamicQuestion,
     onCompleted,
   });
+
+  // 効果音フックの呼び出し（必要に応じて new Audio("/path/to/sound.mp3") の代わりに useSoundEffect("パス") も指定可能です）
+  const { playSound } = useSoundEffect();
+  const prevResultRef = useRef(drill.result);
+
+  // 正解した瞬間（"correct" に切り替わったとき）に一度だけ効果音を鳴らす
+  useEffect(() => {
+    if (drill.result === "correct" && prevResultRef.current !== "correct") {
+      playSound();
+    }
+    prevResultRef.current = drill.result;
+  }, [drill.result, playSound]);
 
   // キーボードのイベントから常に最新の状態を読むための参照
   const drillRef = useRef(drill);
