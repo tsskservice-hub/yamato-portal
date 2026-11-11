@@ -1,6 +1,9 @@
 /**
  * @file app/components/lessons/EduSpeakingTaskModal.tsx
  * @description Supabase(edu_lesson_dialogues → kl_dialogues)から質問を取得し、AIが質問して生徒が録音で答える一問一答スピーキング課題モーダル（タスクカードから起動）
+ *
+ * 動的データ（slots）を持つ質問は、毎回ランダムな「数（cue）」を提示し、その数に合った答えだけを正解とする。
+ * 正解数が roundsPerDynamicQuestion に達するとタスク完了。
  */
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -14,6 +17,8 @@ interface SlotValue {
   reading?: string;
   romaji?: string;
   en?: string;
+  /** 画面に提示する数（例: "3"）。無ければ alt の数字 → en → text の順で使う */
+  cue?: string;
   alt?: string[];
 }
 
@@ -32,10 +37,23 @@ interface DialogueRow {
 
 /** 1つの正解パターン（動的データの場合は候補の数だけ作られる） */
 interface Model {
+  key: string;
   text: string;
   reading?: string;
   en?: string;
+  /** 生徒に提示する数。slots が無い質問では undefined */
+  cue?: string;
+  /** 提示する数の英語補足（例: "three people"） */
+  cueHint?: string;
   accepted: string[];
+}
+
+/** 1回の出題。target が null のときは自由回答（判定なし） */
+interface Round {
+  dialogue: DialogueRow;
+  target: Model | null;
+  cue: string | null;
+  cueHint: string | null;
 }
 
 export interface EduSpeakingTaskModalProps {
@@ -47,6 +65,8 @@ export interface EduSpeakingTaskModalProps {
   appType?: string;
   lessonSlug?: string; // edu_lesson_dialogues.lesson_key として使う
   topic?: string;
+  /** 動的データ(slots)の質問を何回出題するか。この回数だけ正解すれば完了（既定 3） */
+  roundsPerDynamicQuestion?: number;
   /** DBに行がない場合のフォールバック（任意）。返答の判定はせず、何か話せば次へ進む */
   questions?: { question: string; english?: string }[];
   onCompleted?: () => void;
@@ -59,9 +79,15 @@ const NEXT_DELAY_MS = 1500;
 const JP_SIMILARITY_THRESHOLD = 0.8;
 const SHORT_TEXT_LENGTH = 3; // これ以下は完全一致のみ
 
-// 👇 ご指定の開始用・終了用音声ファイルのURL定数
-const GREETING_AUDIO_URL = "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_cf5e3f6a-bb8c-434a-bb46-a4dc78241767.mp3";
-const FAREWELL_AUDIO_URL = "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_a38d5708-9450-4615-9686-8792e3a29623.mp3";
+const GREETING_AUDIO_URL =
+  "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_cf5e3f6a-bb8c-434a-bb46-a4dc78241767.mp3";
+const FAREWELL_AUDIO_URL =
+  "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_a38d5708-9450-4615-9686-8792e3a29623.mp3";
+
+/** 全角数字などを半角に揃えてから日本語の正規化をかける（"３人" と "3人" を同じ扱いにする） */
+function norm(s: string): string {
+  return normalizeJapanese(s.normalize("NFKC"));
+}
 
 function levenshtein(a: string, b: string): number {
   if (a === b) return 0;
@@ -88,8 +114,19 @@ function similarity(a: string, b: string): number {
 function isStrictMatch(input: string, target: string, threshold: number): boolean {
   if (!input || !target) return false;
   if (input === target) return true;
+  if (threshold >= 1) return false; // 完全一致のみ
   if (Math.max(input.length, target.length) <= SHORT_TEXT_LENGTH) return false;
   return similarity(input, target) >= threshold;
+}
+
+/** スロット値から、生徒に見せる「数」を決める（cue → alt内の数字 → en → text） */
+function slotCue(v: SlotValue): string {
+  if (v.cue) return v.cue;
+  for (const a of v.alt ?? []) {
+    const m = a.normalize("NFKC").match(/^\d+/);
+    if (m) return m[0];
+  }
+  return v.en ?? v.text;
 }
 
 /** "{count}家族です" のプレースホルダーを置き換える */
@@ -134,13 +171,23 @@ function buildModels(d: DialogueRow): Model[] {
       ...(d.response_reading ? expandTemplate(d.response_reading, combo) : []),
       ...(d.accepted_responses ?? []).flatMap((t) => expandTemplate(t, combo)),
     ]);
+    const text = fillWith(d.response_text, combo, (k) => combo[k].text);
+    const slotValues = Object.values(combo);
     return {
-      text: fillWith(d.response_text, combo, (k) => combo[k].text),
+      key: text,
+      text,
       reading: d.response_reading
         ? fillWith(d.response_reading, combo, (k) => combo[k].reading ?? combo[k].text)
         : undefined,
       en: d.response_en
         ? fillWith(d.response_en, combo, (k) => combo[k].en ?? combo[k].text)
+        : undefined,
+      cue: slotValues.length ? slotValues.map(slotCue).join(" / ") : undefined,
+      cueHint: slotValues.length
+        ? slotValues
+            .map((v) => v.en)
+            .filter(Boolean)
+            .join(" / ") || undefined
         : undefined,
       accepted: Array.from(accepted),
     };
@@ -156,6 +203,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
   description = "Practice speaking by listening to AI Yamato's questions and answering via microphone.",
   lessonSlug = "obento-unit-4-lesson-1",
   topic,
+  roundsPerDynamicQuestion = 3,
   questions,
   onCompleted,
 }) => {
@@ -213,6 +261,8 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
   // ----- 状態 -----
   const [isStarted, setIsStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentRound, setCurrentRound] = useState<Round | null>(null);
+  const [requiredCount, setRequiredCount] = useState(0); // 完了に必要な正解数
   const [isAIPlaying, setIsAIPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [spokenText, setSpokenText] = useState("");
@@ -226,9 +276,10 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
   // ----- ref（コールバックから最新値を同期的に参照するため）-----
   const dialoguesRef = useRef<DialogueRow[]>(dialogues);
   const onCompletedRef = useRef(onCompleted);
+  const roundsRef = useRef<Round[]>([]);
+  const currentRoundRef = useRef<Round | null>(null);
+  const usedKeysRef = useRef<Map<string, Set<string>>>(new Map()); // 質問ごとに出題済みの答え
   const indexRef = useRef(0);
-  const modelsRef = useRef<Model[]>([]);
-  const exampleModelRef = useRef<Model | null>(null);
   const attemptsRef = useRef(0);
   const resultRef = useRef<"correct" | "revealed" | null>(null);
   const spokenTextRef = useRef("");
@@ -327,6 +378,31 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     []
   );
 
+  /** 1つの質問から出題を1つ作る。同じ質問では、まだ出していない答えを優先してランダムに選ぶ */
+  const pickRound = useCallback((d: DialogueRow): Round => {
+    const models = buildModels(d);
+    if (models.length === 0) return { dialogue: d, target: null, cue: null, cueHint: null };
+
+    let used = usedKeysRef.current.get(d.id);
+    if (!used) {
+      used = new Set<string>();
+      usedKeysRef.current.set(d.id, used);
+    }
+    let pool = models.filter((m) => !used!.has(m.key));
+    if (pool.length === 0) {
+      used.clear(); // 全部出したら一巡目に戻る
+      pool = models;
+    }
+    const target = pool[Math.floor(Math.random() * pool.length)];
+    used.add(target.key);
+    return {
+      dialogue: d,
+      target,
+      cue: target.cue ?? null,
+      cueHint: target.cueHint ?? null,
+    };
+  }, []);
+
   const resetQuestionState = useCallback(() => {
     setSpokenText("");
     spokenTextRef.current = "";
@@ -342,7 +418,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     setStatusMessage("Session completed! Saying goodbye...");
     isAIPlayingRef.current = true;
     setIsAIPlaying(true);
-    // 👇 終了用音声URLを渡すように変更
     playAI(
       "よく頑張りましたね！これでスピーキングの練習を終わります。お疲れ様でした！",
       FAREWELL_AUDIO_URL,
@@ -359,32 +434,32 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     );
   }, [playAI]);
 
-  /** 指定インデックスの質問をAIが読み上げ、終わったら生徒の番にする */
+  /** 指定インデックスの出題をAIが読み上げ、終わったら生徒の番にする */
   const askQuestion = useCallback(
     (index: number) => {
-      const list = dialoguesRef.current;
-      if (index >= list.length) {
+      const rounds = roundsRef.current;
+      if (index >= rounds.length) {
         finishSession();
         return;
       }
-      const d = list[index];
+      const round = rounds[index];
       indexRef.current = index;
       setCurrentIndex(index);
       resetQuestionState();
-
-      const models = buildModels(d);
-      modelsRef.current = models;
-      exampleModelRef.current = models.length
-        ? models[Math.floor(Math.random() * models.length)]
-        : null;
+      currentRoundRef.current = round;
+      setCurrentRound(round);
 
       isAIPlayingRef.current = true;
       setIsAIPlaying(true);
-      setStatusMessage(`Question ${index + 1} of ${list.length}: Listen to AI Yamato...`);
-      playAI(d.prompt_text, d.prompt_audio_url, () => {
+      setStatusMessage("Listen to AI Yamato's question...");
+      playAI(round.dialogue.prompt_text, round.dialogue.prompt_audio_url, () => {
         isAIPlayingRef.current = false;
         setIsAIPlaying(false);
-        setStatusMessage("Your turn! Click 'Start Recording' (or press Space) and answer in Japanese.");
+        setStatusMessage(
+          round.cue
+            ? `Your turn! Answer using the number shown (${round.cue}). Click 'Start Recording' (or press Space).`
+            : "Your turn! Click 'Start Recording' (or press Space) and answer in Japanese."
+        );
       });
     },
     [finishSession, playAI, resetQuestionState]
@@ -395,16 +470,23 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
       clearTimeout(nextTimerRef.current);
       nextTimerRef.current = null;
     }
+    // 答えが表示されて終わった問は正解数に入らないので、同じ質問の追加ラウンドを足す
+    if (resultRef.current === "revealed" && currentRoundRef.current) {
+      roundsRef.current = [
+        ...roundsRef.current,
+        pickRound(currentRoundRef.current.dialogue),
+      ];
+    }
     askQuestion(indexRef.current + 1);
-  }, [askQuestion]);
+  }, [askQuestion, pickRound]);
 
   const replayQuestion = () => {
     if (isListeningRef.current || isAIPlayingRef.current || resultRef.current) return;
-    const d = dialoguesRef.current[indexRef.current];
-    if (!d) return;
+    const round = currentRoundRef.current;
+    if (!round) return;
     isAIPlayingRef.current = true;
     setIsAIPlaying(true);
-    playAI(d.prompt_text, d.prompt_audio_url, () => {
+    playAI(round.dialogue.prompt_text, round.dialogue.prompt_audio_url, () => {
       isAIPlayingRef.current = false;
       setIsAIPlaying(false);
       setStatusMessage("Your turn! Click 'Start Recording' (or press Space) and answer in Japanese.");
@@ -417,6 +499,20 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     clearTimers();
     stopAllMedia();
     completedRef.current = false;
+
+    // 出題を作る：動的データの質問は roundsPerDynamicQuestion 回、それ以外は1回
+    usedKeysRef.current = new Map();
+    const rounds: Round[] = [];
+    dialoguesRef.current.forEach((d) => {
+      const first = pickRound(d);
+      rounds.push(first);
+      if (first.cue) {
+        for (let i = 1; i < roundsPerDynamicQuestion; i++) rounds.push(pickRound(d));
+      }
+    });
+    roundsRef.current = rounds;
+    setRequiredCount(rounds.length);
+
     setIsStarted(true);
     setSessionFinished(false);
     setScore(0);
@@ -427,7 +523,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     setStatusMessage("AI Yamato is greeting...");
     isAIPlayingRef.current = true;
     setIsAIPlaying(true);
-    // 👇 開始用音声URLを渡すように変更
     playAI(
       "こんにちは！やまと先生です。それでは、スピーキングの練習を始めましょう。",
       GREETING_AUDIO_URL,
@@ -462,24 +557,25 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
       return;
     }
 
-    const models = modelsRef.current;
-    let matched: Model | null = null;
-    const isFreeAnswer = models.length === 0; // フォールバック質問：何か話せば正解
+    const round = currentRoundRef.current;
+    const target = round?.target ?? null;
+    const isFreeAnswer = !target; // フォールバック質問：何か話せば正解
+    let isCorrect = isFreeAnswer;
 
-    if (!isFreeAnswer) {
-      const spokenClean = normalizeJapanese(spoken);
-      matched =
-        models.find((m) =>
-          m.accepted.some((c) =>
-            isStrictMatch(spokenClean, normalizeJapanese(c), JP_SIMILARITY_THRESHOLD)
-          )
-        ) ?? null;
+    if (target && round) {
+      const spokenClean = norm(spoken);
+      // 数が提示される質問は完全一致（「二人」と「三人」を曖昧一致で通さない）
+      const threshold = round.cue ? 1 : JP_SIMILARITY_THRESHOLD;
+      // ★ 提示された数（target）の正解だけを見る
+      isCorrect = target.accepted.some((c) =>
+        isStrictMatch(spokenClean, norm(c), threshold)
+      );
     }
 
-    if (isFreeAnswer || matched) {
+    if (isCorrect) {
       resultRef.current = "correct";
       setResult("correct");
-      setShownModel(matched);
+      setShownModel(target);
       setScore((prev) => prev + 1);
       setStatusMessage(`✅ Correct! ("${spoken}") Moving to next...`);
       if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
@@ -496,8 +592,10 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     if (attemptsRef.current >= MAX_ATTEMPTS) {
       resultRef.current = "revealed";
       setResult("revealed");
-      setShownModel(exampleModelRef.current);
-      setStatusMessage(`Heard: "${spoken}". Let's look at an example answer and move on.`);
+      setShownModel(target);
+      setStatusMessage(
+        `Heard: "${spoken}". Here is the answer for this number. You'll get another question to make up for it.`
+      );
     } else {
       setStatusMessage(
         `Heard: "${spoken}" — not quite. Try recording again! (${attemptsRef.current} / ${MAX_ATTEMPTS})`
@@ -653,6 +751,10 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     setSessionFinished(false);
     setScore(0);
     setCurrentIndex(0);
+    setCurrentRound(null);
+    setRequiredCount(0);
+    currentRoundRef.current = null;
+    roundsRef.current = [];
     indexRef.current = 0;
     setStatusMessage("");
     resetQuestionState();
@@ -660,8 +762,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
 
   // ----- 表示用 -----
   const totalItems = dialogues.length;
-  const currentDialogue = dialogues[currentIndex];
-  const isLastQuestion = currentIndex >= totalItems - 1;
   const canRecord = isStarted && !isAIPlaying && !result;
 
   const handleClose = () => {
@@ -717,22 +817,20 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
           </div>
         )}
 
-        {isStarted && currentDialogue && (
+        {isStarted && currentRound && (
           <div className="p-4 bg-white rounded-2xl border border-indigo-100 shadow-inner space-y-4">
             {/* 進捗 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-slate-600">
-                <span>
-                  Progress: Question {Math.min(currentIndex + 1, totalItems)} / {totalItems}
-                </span>
+                <span>Question {currentIndex + 1}</span>
                 <span className="text-indigo-600">
-                  {score} / {totalItems} Correct
+                  {score} / {requiredCount} Correct
                 </span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                 <div
                   className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500"
-                  style={{ width: `${(score / totalItems) * 100}%` }}
+                  style={{ width: `${requiredCount ? (score / requiredCount) * 100 : 0}%` }}
                 />
               </div>
             </div>
@@ -753,12 +851,29 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
                 </button>
               </div>
               <p className="text-xl sm:text-2xl font-black text-slate-900">
-                {currentDialogue.prompt_text}
+                {currentRound.dialogue.prompt_text}
               </p>
-              {currentDialogue.prompt_en && (
-                <p className="text-xs text-slate-500 italic">({currentDialogue.prompt_en})</p>
+              {currentRound.dialogue.prompt_en && (
+                <p className="text-xs text-slate-500 italic">
+                  ({currentRound.dialogue.prompt_en})
+                </p>
               )}
             </div>
+
+            {/* 🔢 提示される「数」 */}
+            {currentRound.cue && (
+              <div className="p-4 bg-amber-50 rounded-xl border-2 border-amber-300 text-center space-y-1">
+                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block">
+                  Answer with this number
+                </span>
+                <span className="text-5xl font-black text-amber-900">{currentRound.cue}</span>
+                {currentRound.cueHint && (
+                  <span className="text-xs text-amber-700 italic block">
+                    ({currentRound.cueHint})
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* 録音コントロール */}
             <div className="grid grid-cols-2 gap-3">
@@ -832,7 +947,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
             {/* 模範解答の表示（規定回数を超えて間違えた場合） */}
             {result === "revealed" && (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-center space-y-1">
-                <p className="text-sm font-bold text-amber-700">Example answer:</p>
+                <p className="text-sm font-bold text-amber-700">Answer:</p>
                 {shownModel && (
                   <>
                     <p className="text-base font-black text-amber-900">{shownModel.text}</p>
@@ -849,7 +964,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
                   onClick={goNext}
                   className="mt-2 py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md transition active:scale-95 cursor-pointer"
                 >
-                  {isLastQuestion ? "Finish ➔" : "Next Question ➔"}
+                  Next Question ➔
                 </button>
               </div>
             )}
