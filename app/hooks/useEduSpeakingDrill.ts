@@ -14,6 +14,8 @@ interface SlotValue {
   en?: string;
   cue?: string;
   alt?: string[];
+  /** この組み合わせの返答音声（例: 「三人家族です」） */
+  response_audio_url?: string;
 }
 
 export interface DialogueRow {
@@ -25,6 +27,8 @@ export interface DialogueRow {
   response_reading: string | null;
   response_romaji: string | null;
   response_en: string | null;
+  /** 返答が1パターンだけの会話用の音声（slots 側に無いときの代わり） */
+  response_audio_url: string | null;
   accepted_responses: string[] | null;
   slots: Record<string, SlotValue[]> | null;
 }
@@ -36,6 +40,8 @@ export interface Model {
   en?: string;
   cue?: string;
   cueHint?: string;
+  /** AIが返答するときに再生する音声。無ければ音声合成で読み上げる */
+  audioUrl?: string;
   accepted: string[];
 }
 
@@ -147,6 +153,13 @@ function buildModels(d: DialogueRow): Model[] {
     ]);
     const text = fillWith(d.response_text, combo, (k) => combo[k].text);
     const slotValues = Object.values(combo);
+
+    // 返答音声：slots の要素のURL → 行の response_audio_url → なし（音声合成）
+    const audioUrl =
+      slotValues.map((v) => v.response_audio_url).find((u) => !!u) ||
+      d.response_audio_url ||
+      undefined;
+
     return {
       key: text,
       text,
@@ -154,6 +167,7 @@ function buildModels(d: DialogueRow): Model[] {
       en: d.response_en ? fillWith(d.response_en, combo, (k) => combo[k].en ?? combo[k].text) : undefined,
       cue: slotValues.length ? slotValues.map(slotCue).join(" / ") : undefined,
       cueHint: slotValues.length ? slotValues.map((v) => v.en).filter(Boolean).join(" / ") || undefined : undefined,
+      audioUrl,
       accepted: Array.from(accepted),
     };
   });
@@ -205,7 +219,7 @@ export function useEduSpeakingDrill({
     return () => { cancelled = true; };
   }, [lessonSlug, isOpen]);
 
-  const dialogues = useMemo(() => {
+  const dialogues: DialogueRow[] = useMemo(() => {
     if (dbDialogues && dbDialogues.length > 0) return dbDialogues;
     return (questions ?? []).map((q, i) => ({
       id: `fallback-${i}`,
@@ -216,6 +230,7 @@ export function useEduSpeakingDrill({
       response_reading: null,
       response_romaji: null,
       response_en: null,
+      response_audio_url: null,
       accepted_responses: null,
       slots: null,
     }));
@@ -276,6 +291,7 @@ export function useEduSpeakingDrill({
     isAIPlayingRef.current = false;
   }, []);
 
+  /** AIの発話：音声URLがあれば再生し、無い・失敗したときは音声合成で読み上げる */
   const playAI = useCallback((text: string, audioUrl: string | null | undefined, onEnd?: () => void) => {
     const token = ++speakTokenRef.current;
     const done = () => { if (token === speakTokenRef.current) onEnd?.(); };
@@ -341,13 +357,14 @@ export function useEduSpeakingDrill({
     });
   }, [playAI, onCompleted]);
 
+  /** Part 2：コンピュータが「〜人家族です」と答える（音声URLがあればそれを再生） */
   const startReply = useCallback((round: Round, prefix: string) => {
     askStepRef.current = "typing"; setAskStep("typing");
     attemptsRef.current = 0; setAttempts(0); setTypedAnswer("");
     const replyText = round.target ? round.target.reading ?? round.target.text : "";
     isAIPlayingRef.current = true; setIsAIPlaying(true);
     setStatusMessage(`${prefix} Listen to AI Yamato's answer...`);
-    playAI(replyText, null, () => {
+    playAI(replyText, round.target?.audioUrl ?? null, () => {
       isAIPlayingRef.current = false; setIsAIPlaying(false);
       setStatusMessage("How many people are in the family? Type the number (e.g. 3) and press Submit.");
     });
@@ -357,7 +374,7 @@ export function useEduSpeakingDrill({
     const round = currentRoundRef.current;
     if (!round || !round.target || isAIPlayingRef.current || resultRef.current) return;
     isAIPlayingRef.current = true; setIsAIPlaying(true);
-    playAI(round.target.reading ?? round.target.text, null, () => {
+    playAI(round.target.reading ?? round.target.text, round.target.audioUrl ?? null, () => {
       isAIPlayingRef.current = false; setIsAIPlaying(false);
       setStatusMessage("How many people are in the family? Type the number (e.g. 3) and press Submit.");
     });
@@ -518,7 +535,7 @@ export function useEduSpeakingDrill({
     if (currentRoundRef.current?.mode === "ask" && askStepRef.current === "typing") return;
     if (typeof window === "undefined") return;
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) { setStatusMessage("Speech recognition not supported."); return; }
+    if (!SpeechRecognition) { setStatusMessage("Speech recognition is not supported in this browser. Please use Chrome."); return; }
 
     if (recognitionRef.current) {
       const old = recognitionRef.current;
@@ -543,11 +560,23 @@ export function useEduSpeakingDrill({
         for (let i = 0; i < event.results.length; ++i) text += event.results[i][0].transcript;
         if (text) { spokenTextRef.current = text; setSpokenText(text); }
       };
-      recognition.onerror = () => {};
+      recognition.onerror = (event: any) => {
+        if (recognitionRef.current !== recognition) return;
+        console.warn("Speech recognition error:", event.error);
+        if (event.error === "aborted" || event.error === "no-speech") return;
+        finalizedRef.current = true; // エラー時は判定しない
+        isListeningRef.current = false; setIsListening(false);
+        setStatusMessage(
+          event.error === "not-allowed"
+            ? "Microphone access was denied. Please allow microphone permissions."
+            : "Voice recognition error. Please click 'Start Recording' again."
+        );
+      };
       recognition.onend = () => { if (recognitionRef.current === recognition) finalizeVerification(); };
       recognition.start();
     } catch (err) {
       isListeningRef.current = false; setIsListening(false);
+      setStatusMessage("Could not start recording. Please check microphone permissions.");
     }
   }, [finalizeVerification]);
 
@@ -559,11 +588,41 @@ export function useEduSpeakingDrill({
     finalizeFallbackTimerRef.current = setTimeout(() => { finalizeVerification(); }, 1200);
   }, [finalizeVerification]);
 
+  // アンマウント時のクリーンアップ
+  useEffect(() => {
+    return () => {
+      clearTimers();
+      stopAllMedia();
+    };
+  }, [clearTimers, stopAllMedia]);
+
+  // モーダルが閉じられたら、再生・録音を止めて状態を初期化する
+  useEffect(() => {
+    if (isOpen) return;
+    clearTimers();
+    stopAllMedia();
+    setIsStarted(false);
+    setIsAIPlaying(false);
+    setIsListening(false);
+    setSessionFinished(false);
+    setScore(0);
+    setCurrentIndex(0);
+    setCurrentRound(null);
+    setAskStep("question");
+    askStepRef.current = "question";
+    setRequiredCount(0);
+    currentRoundRef.current = null;
+    roundsRef.current = [];
+    indexRef.current = 0;
+    setStatusMessage("");
+    resetQuestionState();
+  }, [isOpen, clearTimers, stopAllMedia, resetQuestionState]);
+
   return {
     loadState, totalItems: dialogues.length, isStarted, sessionFinished, isFullscreen, setIsFullscreen,
     currentIndex, currentRound, askStep, typedAnswer, setTypedAnswer, requiredCount, isAIPlaying,
     isListening, spokenText, statusMessage, attempts, result, shownModel, score, inputRef,
-    startSession, stopSession, startRecording, stopRecordingAndVerify, replayQuestion, replyAgain,
-    submitTypedAnswer, goNext, clearTimers, stopAllMedia,
+    startSession, stopSession, startRecording, stopRecordingAndVerify, replayQuestion, replayAgainPlaceholder: undefined,
+    replyAgain, submitTypedAnswer, goNext, clearTimers, stopAllMedia,
   };
 }
