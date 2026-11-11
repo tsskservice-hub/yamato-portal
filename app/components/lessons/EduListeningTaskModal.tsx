@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "~/lib/supabaseClient";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
+import { useSoundEffect } from "~/hooks/useSoundEffect";
 
 // ---------- 型・設定 ----------
 
@@ -154,6 +155,10 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioError, setAudioError] = useState("");
 
+  const { playSound, playCompleteSound } = useSoundEffect(); // 正解音・完了音
+  const playCompleteSoundRef = useRef(playCompleteSound);
+  playCompleteSoundRef.current = playCompleteSound;
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const gapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playbackIdRef = useRef(0); // 再生し直した時に古い再生チェーンを無効化する
@@ -241,6 +246,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
   useEffect(() => {
     if (isFinished && !completedRef.current) {
       completedRef.current = true;
+      playCompleteSoundRef.current(); // 🎉 5問クリアの完了音
       onCompletedRef.current();
     }
   }, [isFinished]);
@@ -306,12 +312,42 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
     }
   };
 
+  // スペースキーのハンドラーから常に最新の playDialogue を呼ぶための ref
+  const playDialogueRef = useRef(playDialogue);
+  playDialogueRef.current = playDialogue;
+
+  // ⌨️ スペースキーで会話を再生
+  // 入力欄にフォーカスがあっても、入力が空なら再生する（"4 people" のように文字の後のスペースは普通に入力できる）
+  useEffect(() => {
+    if (!isOpen || isFinished) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== "Space") return;
+      if (e.isComposing) return; // 日本語IMEの変換中は何もしない
+
+      const activeElem = document.activeElement as HTMLElement | null;
+      const isTextField =
+        activeElem?.tagName === "INPUT" || activeElem?.tagName === "TEXTAREA";
+      if (isTextField && userInput.length > 0) return;
+      // ボタンにフォーカスがある時は、ボタン本来のスペース操作に任せる
+      if (activeElem?.tagName === "BUTTON") return;
+
+      e.preventDefault();
+      if (e.repeat || feedback === "correct") return;
+      playDialogueRef.current();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isFinished, userInput, feedback]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentQuestion || !userInput.trim() || feedback === "correct") return;
 
     if (isCorrectAnswer(userInput, currentQuestion.answer_count)) {
       setFeedback("correct");
+      playSound(); // ✅ 正解音
       if (wrongAttempts === 0 && !isRevealed) setFirstTryCorrect((prev) => prev + 1);
       nextTimerRef.current = setTimeout(goToNext, 1200);
     } else {
@@ -378,9 +414,9 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
                 }`}
               >
                 <span>{isPlaying ? "🔊" : "▶️"}</span>
-                <span>{isPlaying ? "Playing..." : "Play conversation"}</span>
+                <span>{isPlaying ? "Playing..." : "Play conversation (Space)"}</span>
               </button>
-              <p className="text-xs text-slate-400">You can replay the audio as many times as you like.</p>
+              <p className="text-xs text-slate-400">Press Space or click the button. You can replay the audio as many times as you like.</p>
               {audioError && <p className="text-xs font-bold text-rose-600">{audioError}</p>}
             </div>
 
