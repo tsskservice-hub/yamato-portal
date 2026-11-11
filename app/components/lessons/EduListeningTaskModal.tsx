@@ -153,6 +153,8 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
   const [firstTryCorrect, setFirstTryCorrect] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const isPlayingRef = useRef(false); // キー操作で同期的に再生中かを判定するため
+  isPlayingRef.current = isPlaying;
   const [audioError, setAudioError] = useState("");
 
   const { playSound, playCompleteSound } = useSoundEffect(); // 正解音・完了音
@@ -293,6 +295,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
       });
     };
 
+    isPlayingRef.current = true; // 次のキー入力までに再描画を待たず反映する
     setIsPlaying(true);
     playAt(0);
   };
@@ -329,6 +332,13 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
       const isTextField =
         activeElem?.tagName === "INPUT" || activeElem?.tagName === "TEXTAREA";
       if (isTextField && userInput.length > 0) return;
+
+      // 再生中はスペースキーを無効にする（最初から再生し直さない）
+      if (isPlayingRef.current) {
+        e.preventDefault();
+        return;
+      }
+
       // ボタンにフォーカスがある時は、ボタン本来のスペース操作に任せる
       if (activeElem?.tagName === "BUTTON") return;
 
@@ -408,7 +418,11 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
               </p>
               <button
                 type="button"
-                onClick={playDialogue}
+                onClick={(e) => {
+                  // e.detail === 0 はキーボード（Space/Enter）由来のクリック。再生中なら無視する
+                  if (e.detail === 0 && isPlayingRef.current) return;
+                  playDialogue();
+                }}
                 className={`mx-auto py-4 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
                   isPlaying ? "bg-amber-500 animate-pulse" : "bg-emerald-600 hover:bg-emerald-700"
                 }`}
