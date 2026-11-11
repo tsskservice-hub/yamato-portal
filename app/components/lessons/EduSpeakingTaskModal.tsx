@@ -48,8 +48,8 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     onCompleted,
   });
 
-  // 効果音フックの呼び出し（必要に応じて new Audio("/path/to/sound.mp3") の代わりに useSoundEffect("パス") も指定可能です）
-  const { playSound } = useSoundEffect();
+  // 効果音フックの呼び出し（playSound: 正解音 / playCompleteSound: タスク完了音）
+  const { playSound, playCompleteSound } = useSoundEffect();
   const prevResultRef = useRef(drill.result);
 
   // 正解した瞬間（"correct" に切り替わったとき）に一度だけ効果音を鳴らす
@@ -59,6 +59,16 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     }
     prevResultRef.current = drill.result;
   }, [drill.result, playSound]);
+
+  // セッションが完了した瞬間（false → true に切り替わったとき）に一度だけ完了音を鳴らす
+  const prevFinishedRef = useRef(drill.sessionFinished);
+
+  useEffect(() => {
+    if (drill.sessionFinished && !prevFinishedRef.current) {
+      playCompleteSound();
+    }
+    prevFinishedRef.current = drill.sessionFinished;
+  }, [drill.sessionFinished, playCompleteSound]);
 
   // キーボードのイベントから常に最新の状態を読むための参照
   const drillRef = useRef(drill);

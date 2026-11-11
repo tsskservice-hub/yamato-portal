@@ -7,6 +7,7 @@ import { useCallback, useRef } from "react";
 
 const BUCKET = "sound-effect-audio";
 const DEFAULT_FILE = "correct-answer-1.mp3";
+const COMPLETE_FILE = "completed-sound-2.mp3"; 
 
 /**
  * Supabase のプロジェクトURLを取得する。
@@ -23,6 +24,12 @@ function getSupabaseUrl(): string {
 
   const url = fromVite || fromWindow || "";
   return url.replace(/\/$/, "");
+}
+
+// バケット内のファイル名から公開URLを組み立てる（再生時に呼ぶ。SSRとのズレを防ぐため）
+function buildSoundUrl(fileName: string): string {
+  const base = getSupabaseUrl();
+  return base ? `${base}/storage/v1/object/public/${BUCKET}/${fileName}` : "";
 }
 
 // フォールバック音用の AudioContext は1つだけ作って使い回す
@@ -42,49 +49,53 @@ export function useSoundEffect(customSoundUrl?: string) {
   // URLごとに Audio 要素をキャッシュして、2回目以降の再生を速くする
   const audioCacheRef = useRef<Record<string, HTMLAudioElement>>({});
 
+  // 指定URLを再生する共通処理（失敗時はフォールバック音を鳴らす）
+  const playUrl = useCallback((targetUrl: string) => {
+    if (!targetUrl) {
+      console.error(
+        "[useSoundEffect] Supabase URL is not set. Set VITE_SUPABASE_URL (or window.ENV.SUPABASE_URL) and redeploy."
+      );
+      playFallbackBeep();
+      return;
+    }
+
+    try {
+      let audio = audioCacheRef.current[targetUrl];
+      if (!audio) {
+        audio = new Audio(targetUrl);
+        audio.preload = "auto";
+        audioCacheRef.current[targetUrl] = audio;
+      }
+
+      audio.currentTime = 0;
+      audio.play().catch((e) => {
+        console.warn("[useSoundEffect] audio.play failed, falling back to beep:", targetUrl, e);
+        playFallbackBeep();
+      });
+    } catch (e) {
+      console.error("[useSoundEffect] sound effect error:", e);
+      playFallbackBeep();
+    }
+  }, []);
+
+  // 正解音（デフォルト）。引数にURLを渡すと、そのURLを再生する
   const playSound = useCallback(
     (overrideUrl?: string) => {
-      // レンダリング時ではなく、再生時にURLを組み立てる（SSRとのズレを防ぐ）
-      const base = getSupabaseUrl();
-      const defaultUrl = base
-        ? `${base}/storage/v1/object/public/${BUCKET}/${DEFAULT_FILE}`
-        : "";
-
       // 注意: useEffect などから playSound() を引数なしで呼ぶ想定。
       // もしイベントオブジェクトが渡された場合は無視する。
       const override = typeof overrideUrl === "string" ? overrideUrl : undefined;
-      const targetUrl = override || customSoundUrl || defaultUrl;
-
-      if (!targetUrl) {
-        console.error(
-          "[useSoundEffect] Supabase URL is not set. Set VITE_SUPABASE_URL (or window.ENV.SUPABASE_URL) and redeploy."
-        );
-        playFallbackBeep();
-        return;
-      }
-
-      try {
-        let audio = audioCacheRef.current[targetUrl];
-        if (!audio) {
-          audio = new Audio(targetUrl);
-          audio.preload = "auto";
-          audioCacheRef.current[targetUrl] = audio;
-        }
-
-        audio.currentTime = 0;
-        audio.play().catch((e) => {
-          console.warn("[useSoundEffect] audio.play failed, falling back to beep:", targetUrl, e);
-          playFallbackBeep();
-        });
-      } catch (e) {
-        console.error("[useSoundEffect] sound effect error:", e);
-        playFallbackBeep();
-      }
+      const targetUrl = override || customSoundUrl || buildSoundUrl(DEFAULT_FILE);
+      playUrl(targetUrl);
     },
-    [customSoundUrl]
+    [customSoundUrl, playUrl]
   );
 
-  return { playSound };
+  // タスク完了音
+  const playCompleteSound = useCallback(() => {
+    playUrl(buildSoundUrl(COMPLETE_FILE));
+  }, [playUrl]);
+
+  return { playSound, playCompleteSound };
 }
 
 // 音声ファイルが再生できなかった場合のフォールバック（Web Audio APIによる合成音）
