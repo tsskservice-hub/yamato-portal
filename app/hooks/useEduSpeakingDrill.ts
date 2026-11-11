@@ -588,6 +588,30 @@ export function useEduSpeakingDrill({
     finalizeFallbackTimerRef.current = setTimeout(() => { finalizeVerification(); }, 1200);
   }, [finalizeVerification]);
 
+  /** 録音をやり直す：今の認識結果を捨てて、判定せずに最初から録音し直す（試行回数は減らない） */
+  const restartRecording = useCallback(() => {
+    if (!isListeningRef.current) return;
+    if (finalizeFallbackTimerRef.current) {
+      clearTimeout(finalizeFallbackTimerRef.current);
+      finalizeFallbackTimerRef.current = null;
+    }
+    if (recognitionRef.current) {
+      const rec = recognitionRef.current;
+      recognitionRef.current = null; // 古いイベント（onend など）を無視させる
+      try { rec.abort(); } catch (e) {}
+    }
+    isListeningRef.current = false;
+    setIsListening(false);
+    finalizedRef.current = false;
+    spokenTextRef.current = "";
+    setSpokenText("");
+    setStatusMessage("Restarting...");
+    setTimeout(() => {
+      // 待っている間に閉じられていたら再開しない
+      if (currentRoundRef.current) startRecording();
+    }, 200);
+  }, [startRecording]);
+
   // アンマウント時のクリーンアップ
   useEffect(() => {
     return () => {
@@ -622,7 +646,7 @@ export function useEduSpeakingDrill({
     loadState, totalItems: dialogues.length, isStarted, sessionFinished, isFullscreen, setIsFullscreen,
     currentIndex, currentRound, askStep, typedAnswer, setTypedAnswer, requiredCount, isAIPlaying,
     isListening, spokenText, statusMessage, attempts, result, shownModel, score, inputRef,
-    startSession, stopSession, startRecording, stopRecordingAndVerify, replayQuestion, replayAgainPlaceholder: undefined,
-    replyAgain, submitTypedAnswer, goNext, clearTimers, stopAllMedia,
+    startSession, stopSession, startRecording, stopRecordingAndVerify, restartRecording,
+    replayQuestion, replyAgain, submitTypedAnswer, goNext, clearTimers, stopAllMedia,
   };
 }

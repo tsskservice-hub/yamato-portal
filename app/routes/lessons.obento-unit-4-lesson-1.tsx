@@ -247,7 +247,7 @@ function LessonsObentoUnit4Lesson1Page() {
             userId={user?.id}
             onStartVocabularyDrill={() => setIsDrillOpen(true)}
             onStartReadingDrill={() => setIsReadingDrillOpen(true)}
-            onStartSpeakingDrill={() => setIsSpeakingModalOpen(true)} // スピーキングタスク起動を紐付け
+            onStartSpeakingDrill={() => setIsSpeakingModalOpen(true)}
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
               reading: readingTaskCompleted,
@@ -279,11 +279,9 @@ function LessonsObentoUnit4Lesson1Page() {
         isOpen={isSpeakingModalOpen}
         onClose={() => setIsSpeakingModalOpen(false)}
         title="Speaking Task: Practice Talking About Your Family Members"
-        description="Have a 5-turn real-time voice conversation with AI Yamato. Practice asking and answering questions about your family size and who lives in your household."
         userId={user?.id}
         appType="obento-unit-4-lesson-1"
         lessonSlug="obento-unit-4-lesson-1"
-        topic="家族は何人ですか？誰がいますか？という質問に対して、自分の家族構成（人数や特殊な数え方『ひとり・ふたり』、家族のメンバー）について日本語で答える練習。"
         onCompleted={() => {
           setSpeakingTaskCompleted(true);
         }}
