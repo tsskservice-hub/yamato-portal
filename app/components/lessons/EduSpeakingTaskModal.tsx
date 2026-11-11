@@ -1,23 +1,17 @@
 /**
  * @file app/components/lessons/EduSpeakingTaskModal.tsx
  * @description Supabase(edu_lesson_dialogues → kl_dialogues)から質問を取得し、AIが質問して生徒が録音で答える一問一答スピーキング課題モーダル（タスクカードから起動）
- *
- * 動的データ（slots）を持つ質問は、毎回ランダムな「数（cue）」を提示し、その数に合った答えだけを正解とする。
- * 正解数が roundsPerDynamicQuestion に達するとタスク完了。
  */
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "~/lib/supabaseClient";
 import { normalizeJapanese } from "~/utils/normalization";
 
-// ---------- 型 ----------
-
 interface SlotValue {
   text: string;
   reading?: string;
   romaji?: string;
   en?: string;
-  /** 画面に提示する数（例: "3"）。無ければ alt の数字 → en → text の順で使う */
   cue?: string;
   alt?: string[];
 }
@@ -35,20 +29,16 @@ interface DialogueRow {
   slots: Record<string, SlotValue[]> | null;
 }
 
-/** 1つの正解パターン（動的データの場合は候補の数だけ作られる） */
 interface Model {
   key: string;
   text: string;
   reading?: string;
   en?: string;
-  /** 生徒に提示する数。slots が無い質問では undefined */
   cue?: string;
-  /** 提示する数の英語補足（例: "three people"） */
   cueHint?: string;
   accepted: string[];
 }
 
-/** 1回の出題。target が null のときは自由回答（判定なし） */
 interface Round {
   dialogue: DialogueRow;
   target: Model | null;
@@ -63,28 +53,23 @@ export interface EduSpeakingTaskModalProps {
   description?: string;
   userId: string;
   appType?: string;
-  lessonSlug?: string; // edu_lesson_dialogues.lesson_key として使う
+  lessonSlug?: string;
   topic?: string;
-  /** 動的データ(slots)の質問を何回出題するか。この回数だけ正解すれば完了（既定 3） */
   roundsPerDynamicQuestion?: number;
-  /** DBに行がない場合のフォールバック（任意）。返答の判定はせず、何か話せば次へ進む */
   questions?: { question: string; english?: string }[];
   onCompleted?: () => void;
 }
 
-// ---------- ユーティリティ ----------
-
 const MAX_ATTEMPTS = 3;
 const NEXT_DELAY_MS = 1500;
 const JP_SIMILARITY_THRESHOLD = 0.8;
-const SHORT_TEXT_LENGTH = 3; // これ以下は完全一致のみ
+const SHORT_TEXT_LENGTH = 3;
 
 const GREETING_AUDIO_URL =
   "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_cf5e3f6a-bb8c-434a-bb46-a4dc78241767.mp3";
 const FAREWELL_AUDIO_URL =
   "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_a38d5708-9450-4615-9686-8792e3a29623.mp3";
 
-/** 全角数字などを半角に揃えてから日本語の正規化をかける（"３人" と "3人" を同じ扱いにする） */
 function norm(s: string): string {
   return normalizeJapanese(s.normalize("NFKC"));
 }
@@ -114,12 +99,11 @@ function similarity(a: string, b: string): number {
 function isStrictMatch(input: string, target: string, threshold: number): boolean {
   if (!input || !target) return false;
   if (input === target) return true;
-  if (threshold >= 1) return false; // 完全一致のみ
+  if (threshold >= 1) return false;
   if (Math.max(input.length, target.length) <= SHORT_TEXT_LENGTH) return false;
   return similarity(input, target) >= threshold;
 }
 
-/** スロット値から、生徒に見せる「数」を決める（cue → alt内の数字 → en → text） */
 function slotCue(v: SlotValue): string {
   if (v.cue) return v.cue;
   for (const a of v.alt ?? []) {
@@ -129,7 +113,6 @@ function slotCue(v: SlotValue): string {
   return v.en ?? v.text;
 }
 
-/** "{count}家族です" のプレースホルダーを置き換える */
 function fillWith(
   template: string,
   combo: Record<string, SlotValue>,
@@ -138,7 +121,6 @@ function fillWith(
   return template.replace(/\{(\w+)\}/g, (m, key) => (combo[key] ? pick(key) : m));
 }
 
-/** テンプレートから「文字・読み・別表記」の全パターンを展開する */
 function expandTemplate(template: string, combo: Record<string, SlotValue>): string[] {
   const out = new Set<string>();
   const keys = Object.keys(combo);
@@ -152,7 +134,6 @@ function expandTemplate(template: string, combo: Record<string, SlotValue>): str
   return Array.from(out);
 }
 
-/** slots の全組み合わせ（slots が無ければ空の組み合わせ1つ） */
 function buildCombos(slots: DialogueRow["slots"]): Record<string, SlotValue>[] {
   let combos: Record<string, SlotValue>[] = [{}];
   Object.entries(slots ?? {}).forEach(([key, values]) => {
@@ -162,7 +143,6 @@ function buildCombos(slots: DialogueRow["slots"]): Record<string, SlotValue>[] {
   return combos;
 }
 
-/** 1つの会話から、正解パターン（Model）の一覧を作る。response_text が空なら自由回答（判定なし） */
 function buildModels(d: DialogueRow): Model[] {
   if (!d.response_text) return [];
   return buildCombos(d.slots).map((combo) => {
@@ -184,17 +164,12 @@ function buildModels(d: DialogueRow): Model[] {
         : undefined,
       cue: slotValues.length ? slotValues.map(slotCue).join(" / ") : undefined,
       cueHint: slotValues.length
-        ? slotValues
-            .map((v) => v.en)
-            .filter(Boolean)
-            .join(" / ") || undefined
+        ? slotValues.map((v) => v.en).filter(Boolean).join(" / ") || undefined
         : undefined,
       accepted: Array.from(accepted),
     };
   });
 }
-
-// ---------- コンポーネント本体 ----------
 
 export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
   isOpen,
@@ -207,7 +182,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
   questions,
   onCompleted,
 }) => {
-  // ----- Supabase からの取得（モーダルが開いたときに実行）-----
   const [dbDialogues, setDbDialogues] = useState<DialogueRow[] | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
 
@@ -258,11 +232,10 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     }));
   }, [dbDialogues, questions]);
 
-  // ----- 状態 -----
   const [isStarted, setIsStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentRound, setCurrentRound] = useState<Round | null>(null);
-  const [requiredCount, setRequiredCount] = useState(0); // 完了に必要な正解数
+  const [requiredCount, setRequiredCount] = useState(0);
   const [isAIPlaying, setIsAIPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [spokenText, setSpokenText] = useState("");
@@ -272,42 +245,46 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
   const [shownModel, setShownModel] = useState<Model | null>(null);
   const [score, setScore] = useState(0);
   const [sessionFinished, setSessionFinished] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // ----- ref（コールバックから最新値を同期的に参照するため）-----
   const dialoguesRef = useRef<DialogueRow[]>(dialogues);
   const onCompletedRef = useRef(onCompleted);
   const roundsRef = useRef<Round[]>([]);
   const currentRoundRef = useRef<Round | null>(null);
-  const usedKeysRef = useRef<Map<string, Set<string>>>(new Map()); // 質問ごとに出題済みの答え
+  // ★ 修正：型引数を戻した（以前は `useRef>>(new Map())` になっていた）
+  const usedKeysRef = useRef<Map<string, Set<string>>>(new Map());
   const indexRef = useRef(0);
   const attemptsRef = useRef(0);
   const resultRef = useRef<"correct" | "revealed" | null>(null);
   const spokenTextRef = useRef("");
   const isListeningRef = useRef(false);
   const isAIPlayingRef = useRef(false);
-  const finalizedRef = useRef(false); // 1回の録音につき判定は1回だけ
+  const finalizedRef = useRef(false);
   const completedRef = useRef(false);
-  const speakTokenRef = useRef(0); // 古い読み上げのコールバックを無効化する
+  const speakTokenRef = useRef(0);
   const recognitionRef = useRef<any>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // ブラウザ/Node どちらの環境でも通る型
   const finalizeFallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   dialoguesRef.current = dialogues;
   onCompletedRef.current = onCompleted;
 
-  // ----- 共通処理 -----
   const clearTimers = useCallback(() => {
-    [nextTimerRef, finalizeFallbackTimerRef].forEach((ref) => {
-      if (ref.current) {
-        clearTimeout(ref.current);
-        ref.current = null;
-      }
-    });
+    if (nextTimerRef.current) {
+      clearTimeout(nextTimerRef.current);
+      nextTimerRef.current = null;
+    }
+    if (finalizeFallbackTimerRef.current) {
+      clearTimeout(finalizeFallbackTimerRef.current);
+      finalizeFallbackTimerRef.current = null;
+    }
   }, []);
 
   const stopAllMedia = useCallback(() => {
-    speakTokenRef.current += 1; // 実行待ちの読み上げコールバックを全て無効化
+    speakTokenRef.current += 1;
     if (activeAudioRef.current) {
       activeAudioRef.current.pause();
       activeAudioRef.current = null;
@@ -317,7 +294,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     }
     if (recognitionRef.current) {
       const rec = recognitionRef.current;
-      recognitionRef.current = null; // 古いイベントを無視させる
+      recognitionRef.current = null;
       try {
         rec.abort();
       } catch (e) {}
@@ -326,7 +303,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     isAIPlayingRef.current = false;
   }, []);
 
-  /** AIの発話（音声URLがあればそれを再生、なければ音声合成） */
   const playAI = useCallback(
     (text: string, audioUrl: string | null | undefined, onEnd?: () => void) => {
       const token = ++speakTokenRef.current;
@@ -378,7 +354,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     []
   );
 
-  /** 1つの質問から出題を1つ作る。同じ質問では、まだ出していない答えを優先してランダムに選ぶ */
   const pickRound = useCallback((d: DialogueRow): Round => {
     const models = buildModels(d);
     if (models.length === 0) return { dialogue: d, target: null, cue: null, cueHint: null };
@@ -390,7 +365,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     }
     let pool = models.filter((m) => !used!.has(m.key));
     if (pool.length === 0) {
-      used.clear(); // 全部出したら一巡目に戻る
+      used.clear();
       pool = models;
     }
     const target = pool[Math.floor(Math.random() * pool.length)];
@@ -434,7 +409,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     );
   }, [playAI]);
 
-  /** 指定インデックスの出題をAIが読み上げ、終わったら生徒の番にする */
   const askQuestion = useCallback(
     (index: number) => {
       const rounds = roundsRef.current;
@@ -470,7 +444,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
       clearTimeout(nextTimerRef.current);
       nextTimerRef.current = null;
     }
-    // 答えが表示されて終わった問は正解数に入らないので、同じ質問の追加ラウンドを足す
     if (resultRef.current === "revealed" && currentRoundRef.current) {
       roundsRef.current = [
         ...roundsRef.current,
@@ -493,14 +466,12 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     });
   };
 
-  // ----- セッション開始・中断 -----
   const startSession = () => {
     if (dialoguesRef.current.length === 0) return;
     clearTimers();
     stopAllMedia();
     completedRef.current = false;
 
-    // 出題を作る：動的データの質問は roundsPerDynamicQuestion 回、それ以外は1回
     usedKeysRef.current = new Map();
     const rounds: Round[] = [];
     dialoguesRef.current.forEach((d) => {
@@ -539,7 +510,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     setStatusMessage("Session stopped.");
   };
 
-  // ----- 🎯 最終判定（onend で最終結果が届いてから実行）-----
   const finalizeVerification = useCallback(() => {
     if (finalizedRef.current || resultRef.current) return;
     finalizedRef.current = true;
@@ -559,14 +529,12 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
 
     const round = currentRoundRef.current;
     const target = round?.target ?? null;
-    const isFreeAnswer = !target; // フォールバック質問：何か話せば正解
+    const isFreeAnswer = !target;
     let isCorrect = isFreeAnswer;
 
     if (target && round) {
       const spokenClean = norm(spoken);
-      // 数が提示される質問は完全一致（「二人」と「三人」を曖昧一致で通さない）
       const threshold = round.cue ? 1 : JP_SIMILARITY_THRESHOLD;
-      // ★ 提示された数（target）の正解だけを見る
       isCorrect = target.accepted.some((c) =>
         isStrictMatch(spokenClean, norm(c), threshold)
       );
@@ -603,7 +571,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     }
   }, [goNext]);
 
-  // ----- 🎙️ 録音開始 -----
   const startRecording = useCallback(() => {
     if (isListeningRef.current || isAIPlayingRef.current || resultRef.current) return;
     if (typeof window === "undefined") return;
@@ -657,9 +624,9 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
         if (recognitionRef.current !== recognition) return;
         console.warn("Speech recognition error:", event.error);
         if (event.error === "aborted") return;
-        if (event.error === "no-speech") return; // onend → finalize で「No speech detected」を表示
+        if (event.error === "no-speech") return;
 
-        finalizedRef.current = true; // エラー時は判定しない
+        finalizedRef.current = true;
         isListeningRef.current = false;
         setIsListening(false);
         setStatusMessage(
@@ -682,25 +649,22 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     }
   }, [finalizeVerification]);
 
-  // ----- ⏹️ 録音停止 ＆ 検証 -----
   const stopRecordingAndVerify = useCallback(() => {
     if (!isListeningRef.current) return;
     setStatusMessage("Processing...");
 
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop(); // 最終結果の後に onend が発火する
+        recognitionRef.current.stop();
       } catch (e) {}
     }
 
-    // 保険：onend が来ない環境でも判定が走るようにする
     if (finalizeFallbackTimerRef.current) clearTimeout(finalizeFallbackTimerRef.current);
     finalizeFallbackTimerRef.current = setTimeout(() => {
       finalizeVerification();
     }, 1200);
   }, [finalizeVerification]);
 
-  // ----- ⌨️ スペースキーによる録音コントロール -----
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen || !isStarted || sessionFinished || isAIPlaying || result) return;
@@ -732,7 +696,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     stopRecordingAndVerify,
   ]);
 
-  // アンマウント時のクリーンアップ
   useEffect(() => {
     return () => {
       clearTimers();
@@ -740,7 +703,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     };
   }, [clearTimers, stopAllMedia]);
 
-  // 閉じられたら読み上げ・録音を止めて、状態を初期化する
   useEffect(() => {
     if (isOpen) return;
     clearTimers();
@@ -760,7 +722,6 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     resetQuestionState();
   }, [isOpen, clearTimers, stopAllMedia, resetQuestionState]);
 
-  // ----- 表示用 -----
   const totalItems = dialogues.length;
   const canRecord = isStarted && !isAIPlaying && !result;
 
@@ -770,14 +731,18 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     onClose();
   };
 
-  // フックの呼び出しより後ろで、閉じているときは何も描画しない
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-5 sm:p-8 shadow-2xl space-y-4">
-        {/* ヘッダー */}
-        <div className="flex items-start justify-between gap-3">
+      <div
+        className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full p-5 sm:p-8 shadow-2xl space-y-4 transition-all duration-300 ${
+          isFullscreen
+            ? "max-w-full min-h-screen sm:min-h-[90vh] flex flex-col justify-between rounded-none sm:rounded-3xl"
+            : "max-w-2xl"
+        }`}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <span className="inline-block px-2.5 py-1 mb-2 text-xs font-bold tracking-wide text-indigo-700 bg-indigo-100 rounded-full">
               🗣️ Speaking Task (AI Yamato Drill)
@@ -790,13 +755,23 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
             </p>
             {topic && <p className="text-xs text-indigo-600 font-medium mt-1">Topic: {topic}</p>}
           </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-sm p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-          >
-            ✕ Close
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold text-sm p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 transition"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Mode"}
+            >
+              {isFullscreen ? "🗗" : "⛶"}
+            </button>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-sm p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+            >
+              ✕ Close
+            </button>
+          </div>
         </div>
 
         {loadState === "loading" && (
@@ -817,26 +792,26 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
           </div>
         )}
 
-        {isStarted && currentRound && (
-          <div className="p-4 bg-white rounded-2xl border border-indigo-100 shadow-inner space-y-4">
-            {/* 進捗 */}
+        {isStarted && currentRound && !sessionFinished && (
+          <div className="p-4 bg-white dark:bg-slate-800/40 rounded-2xl border border-indigo-100 dark:border-slate-800 shadow-inner space-y-4">
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
                 <span>Question {currentIndex + 1}</span>
-                <span className="text-indigo-600">
+                <span className="text-indigo-600 dark:text-indigo-400">
                   {score} / {requiredCount} Correct
                 </span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div
                   className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500"
-                  style={{ width: `${requiredCount ? (score / requiredCount) * 100 : 0}%` }}
+                  style={{
+                    width: `${requiredCount > 0 ? (Number(score) / Number(requiredCount)) * 100 : 0}%`,
+                  }}
                 />
               </div>
             </div>
 
-            {/* AIの質問 */}
-            <div className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 text-center space-y-1">
+            <div className="p-4 bg-indigo-50/50 dark:bg-slate-800 rounded-xl border border-indigo-100 dark:border-slate-700 text-center space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider">
                   AI Question
@@ -845,37 +820,35 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
                   type="button"
                   onClick={replayQuestion}
                   disabled={isAIPlaying || isListening || !!result}
-                  className="text-xs bg-slate-200 hover:bg-indigo-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer"
+                  className="text-xs bg-slate-200 dark:bg-slate-700 hover:bg-indigo-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>🔊</span> Listen Again
                 </button>
               </div>
-              <p className="text-xl sm:text-2xl font-black text-slate-900">
+              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100">
                 {currentRound.dialogue.prompt_text}
               </p>
               {currentRound.dialogue.prompt_en && (
-                <p className="text-xs text-slate-500 italic">
+                <p className="text-xs text-slate-500 dark:text-slate-400 italic">
                   ({currentRound.dialogue.prompt_en})
                 </p>
               )}
             </div>
 
-            {/* 🔢 提示される「数」 */}
             {currentRound.cue && (
-              <div className="p-4 bg-amber-50 rounded-xl border-2 border-amber-300 text-center space-y-1">
-                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block">
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl border-2 border-amber-300 dark:border-amber-700 text-center space-y-1">
+                <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
                   Answer with this number
                 </span>
-                <span className="text-5xl font-black text-amber-900">{currentRound.cue}</span>
+                <span className="text-5xl font-black text-amber-900 dark:text-amber-200">{currentRound.cue}</span>
                 {currentRound.cueHint && (
-                  <span className="text-xs text-amber-700 italic block">
+                  <span className="text-xs text-amber-700 dark:text-amber-400 italic block">
                     ({currentRound.cueHint})
                   </span>
                 )}
               </div>
             )}
 
-            {/* 録音コントロール */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -883,7 +856,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
                 disabled={!canRecord || isListening}
                 className={`py-4 px-4 rounded-2xl font-black text-sm text-white shadow-md transition flex items-center justify-center gap-2 ${
                   !canRecord
-                    ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed"
                     : isListening
                     ? "bg-amber-500 animate-pulse"
                     : "bg-emerald-600 hover:bg-emerald-700 active:scale-95 cursor-pointer"
@@ -901,7 +874,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
                 disabled={!canRecord || !isListening}
                 className={`py-4 px-4 rounded-2xl font-black text-sm text-white shadow-md transition flex items-center justify-center gap-2 ${
                   !canRecord || !isListening
-                    ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    ? "bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed"
                     : "bg-rose-600 hover:bg-rose-700 active:scale-95 cursor-pointer"
                 }`}
               >
@@ -910,14 +883,13 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
               </button>
             </div>
 
-            {/* 認識されたテキスト */}
-            <div className="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-center min-h-[70px] flex flex-col justify-center">
-              <span className="text-xs text-slate-500 block font-bold mb-1">
+            <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-center min-h-[70px] flex flex-col justify-center">
+              <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1">
                 Your Spoken Text (認識されたあなたの発音):
               </span>
               <span
                 className={`text-base sm:text-lg font-black ${
-                  spokenText ? "text-slate-900" : "text-slate-400 italic"
+                  spokenText ? "text-slate-900 dark:text-slate-100" : "text-slate-400 italic"
                 }`}
               >
                 {spokenText
@@ -926,36 +898,34 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
               </span>
             </div>
 
-            {/* 正解 */}
             {result === "correct" && (
-              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-center space-y-0.5">
-                <p className="text-sm font-bold text-emerald-700">✨ Correct!</p>
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-center space-y-0.5">
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">✨ Correct!</p>
                 {shownModel && (
                   <>
-                    <p className="text-base font-black text-emerald-900">{shownModel.text}</p>
+                    <p className="text-base font-black text-emerald-900 dark:text-emerald-200">{shownModel.text}</p>
                     {shownModel.reading && (
-                      <p className="text-xs text-emerald-700">{shownModel.reading}</p>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400">{shownModel.reading}</p>
                     )}
                     {shownModel.en && (
-                      <p className="text-xs text-emerald-700 italic">({shownModel.en})</p>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400 italic">({shownModel.en})</p>
                     )}
                   </>
                 )}
               </div>
             )}
 
-            {/* 模範解答の表示（規定回数を超えて間違えた場合） */}
             {result === "revealed" && (
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-center space-y-1">
-                <p className="text-sm font-bold text-amber-700">Answer:</p>
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-center space-y-1">
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Answer:</p>
                 {shownModel && (
                   <>
-                    <p className="text-base font-black text-amber-900">{shownModel.text}</p>
+                    <p className="text-base font-black text-amber-900 dark:text-amber-200">{shownModel.text}</p>
                     {shownModel.reading && (
-                      <p className="text-xs text-amber-700">{shownModel.reading}</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400">{shownModel.reading}</p>
                     )}
                     {shownModel.en && (
-                      <p className="text-xs text-amber-700 italic">({shownModel.en})</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 italic">({shownModel.en})</p>
                     )}
                   </>
                 )}
@@ -977,7 +947,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
           </div>
         )}
 
-        <div className="text-xs sm:text-sm font-bold text-slate-700 bg-white/80 px-4 py-3 rounded-xl border border-slate-100 shadow-sm">
+        <div className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-800/60 px-4 py-3 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
           📢{" "}
           {statusMessage ||
             (sessionFinished
@@ -985,38 +955,55 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
               : "Ready to start speaking practice.")}
         </div>
 
-        <div className="flex items-center gap-3">
-          {!isStarted ? (
-            <button
-              type="button"
-              onClick={startSession}
-              disabled={loadState === "loading" || totalItems === 0}
-              className="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md transition transform active:scale-95 flex items-center gap-2 cursor-pointer"
-            >
-              <span>🎙️</span>
-              <span>Start Voice Speaking Practice</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={stopSession}
-              className="py-3 px-6 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md transition transform active:scale-95 flex items-center gap-2 cursor-pointer"
-            >
-              <span>⏹️</span>
-              <span>End Session</span>
-            </button>
-          )}
-        </div>
+        {!sessionFinished && (
+          <div className="flex items-center gap-3">
+            {!isStarted ? (
+              <button
+                type="button"
+                onClick={startSession}
+                disabled={loadState === "loading" || totalItems === 0}
+                className="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md transition transform active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <span>🎙️</span>
+                <span>Start Voice Speaking Practice</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={stopSession}
+                className="py-3 px-6 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md transition transform active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <span>⏹️</span>
+                <span>End Session</span>
+              </button>
+            )}
+          </div>
+        )}
 
-        {/* 完了後に表示 */}
         {sessionFinished && (
-          <button
-            type="button"
-            onClick={handleClose}
-            className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-base transition shadow-lg active:scale-95 cursor-pointer"
-          >
-            Complete & Return to Lesson ➔
-          </button>
+          <div className="text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center animate-fade-in">
+            <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner">
+              🎉
+            </div>
+            <div className="space-y-3 max-w-md">
+              <h4 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                Congratulations!
+              </h4>
+              <p className="text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400">
+                You have successfully mastered all speaking practice rounds!
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Fantastic effort. Your progress has been saved and this task is now marked as complete.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="py-4 px-12 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow-lg hover:shadow-orange-500/25 active:scale-95 cursor-pointer"
+            >
+              Complete & Return to Lesson ➔
+            </button>
+          </div>
         )}
       </div>
     </div>
