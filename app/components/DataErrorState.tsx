@@ -34,8 +34,6 @@ export function DataErrorState({
       // Supabase Edge Function 'send-error-report' を呼び出し
       const { error } = await supabase.functions.invoke('send-error-report', {
         body: {
-          recipient: 'support@jptutoraiyamato.com',
-          subject: '[System Error Report] JP Tutor AI Yamato',
           pageUrl: currentUrl,
           timestamp: timestamp,
           errorMessage: errorMessage,

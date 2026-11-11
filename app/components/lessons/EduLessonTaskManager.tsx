@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduLessonTaskManager.tsx
- * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リーディング＆スピーキングドリル起動対応）
+ * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リスニング＆リーディング＆スピーキングドリル起動対応）
  */
 
 import React, { useState, useEffect } from "react";
@@ -11,8 +11,9 @@ export interface EduLessonTaskManagerProps {
   userId?: string;  // ユーザーID
   onAllCompletedChange?: (completed: boolean) => void;
   onStartVocabularyDrill?: () => void;
+  onStartListeningDrill?: () => void; // 追加：リスニングタスク起動ハンドラー
   onStartReadingDrill?: () => void;  // リーディングドリル起動ハンドラー
-  onStartSpeakingDrill?: () => void;  // 追加：スピーキングタスク起動ハンドラー
+  onStartSpeakingDrill?: () => void;  // スピーキングタスク起動ハンドラー
   externalTaskStatus?: {
     vocabulary?: boolean;
     listening?: boolean;
@@ -27,8 +28,9 @@ export function EduLessonTaskManager({
   userId, 
   onAllCompletedChange,
   onStartVocabularyDrill,
+  onStartListeningDrill, // 追加
   onStartReadingDrill,
-  onStartSpeakingDrill, // 追加
+  onStartSpeakingDrill,
   externalTaskStatus = {}
 }: EduLessonTaskManagerProps) {
   const [taskProgress, setTaskProgress] = useState({
@@ -209,15 +211,28 @@ export function EduLessonTaskManager({
               🎧 Listening Task (リスニング確認)
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              音声を聞いて内容理解クイズに正解すると自動で完了になります。
+              「何人家族ですか」の会話を聞いて、人数をタイピングで答える問題を5問クリアすると完了になります。
             </p>
-            <button
-              type="button"
-              onClick={() => updateTaskStatus("listening", !taskProgress.listening)}
-              className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold underline"
-            >
-              [開発・テスト用] 状態を切り替える
-            </button>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {onStartListeningDrill && (
+                <button
+                  type="button"
+                  onClick={onStartListeningDrill}
+                  className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+                >
+                  <span>🚀</span>
+                  <span>Start Listening Task (リスニング開始)</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => updateTaskStatus("listening", !taskProgress.listening)}
+                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
+              >
+                [開発用] 状態切替
+              </button>
+            </div>
           </div>
 
           {/* Task 3: リーディングタスク */}
