@@ -59,6 +59,10 @@ const NEXT_DELAY_MS = 1500;
 const JP_SIMILARITY_THRESHOLD = 0.8;
 const SHORT_TEXT_LENGTH = 3; // これ以下は完全一致のみ
 
+// 👇 ご指定の開始用・終了用音声ファイルのURL定数
+const GREETING_AUDIO_URL = "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_cf5e3f6a-bb8c-434a-bb46-a4dc78241767.mp3";
+const FAREWELL_AUDIO_URL = "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_a38d5708-9450-4615-9686-8792e3a29623.mp3";
+
 function levenshtein(a: string, b: string): number {
   if (a === b) return 0;
   if (a.length === 0) return b.length;
@@ -338,9 +342,10 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     setStatusMessage("Session completed! Saying goodbye...");
     isAIPlayingRef.current = true;
     setIsAIPlaying(true);
+    // 👇 終了用音声URLを渡すように変更
     playAI(
       "よく頑張りましたね！これでスピーキングの練習を終わります。お疲れ様でした！",
-      null,
+      FAREWELL_AUDIO_URL,
       () => {
         isAIPlayingRef.current = false;
         setIsAIPlaying(false);
@@ -422,9 +427,10 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
     setStatusMessage("AI Yamato is greeting...");
     isAIPlayingRef.current = true;
     setIsAIPlaying(true);
+    // 👇 開始用音声URLを渡すように変更
     playAI(
       "こんにちは！やまと先生です。それでは、スピーキングの練習を始めましょう。",
-      null,
+      GREETING_AUDIO_URL,
       () => askQuestion(0)
     );
   };
