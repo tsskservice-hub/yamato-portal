@@ -64,9 +64,9 @@ const JP_SIMILARITY_THRESHOLD = 0.8;
 const SHORT_TEXT_LENGTH = 3;
 
 const GREETING_AUDIO_URL =
-  "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_cf5e3f6a-bb8c-434a-bb46-a4dc78241767.mp3";
+  "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/dialogue-audio/family/dialogue_cf5e3f6a-bb8c-434a-bb46-a4dc78241767.mp3";
 const FAREWELL_AUDIO_URL =
-  "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/vocabulary-audio/dialogue_a38d5708-9450-4615-9686-8792e3a29623.mp3";
+  "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/dialogue-audio/family/dialogue_a38d5708-9450-4615-9686-8792e3a29623.mp3";
 
 const KANJI_NUMBERS: Record<string, string> = {
   一: "1", 二: "2", 三: "3", 四: "4", 五: "5", 六: "6", 七: "7", 八: "8", 九: "9", 十: "10",
