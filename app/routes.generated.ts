@@ -30,7 +30,6 @@ export const generatedRoutes: string[] = [
   "/reference.vce-grammar",
   "/reference.vocab",
   "/reference.writing-styles",
-  "/teacher/teacher-dashboard",
   "/vce._index",
   "/vce.speaking._index",
   "/vce.speaking.eoy-oral-accelerated",

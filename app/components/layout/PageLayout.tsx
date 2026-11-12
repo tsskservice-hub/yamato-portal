@@ -15,9 +15,12 @@ import {
   ChevronDown, 
   ChevronUp, 
   Lock, 
-  Sparkles, 
-  UserPlus
+  Sparkles,
+  UserPlus,
+  GraduationCap
 } from "lucide-react";
+import { SCHOOL_PURPOSE_TEXT, TEACHER_LIMITS } from "../../lib/teacher-config";
+import { SchoolPicker, type SchoolValue } from "../SchoolPicker";
 import Header from "./header";
 import Footer from "./Footer";
 import { Breadcrumbs } from "./Breadcrumbs"; // 💡 切り出したパンくずモジュールのインポート
@@ -176,12 +179,19 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   const [emailInput, setEmailInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  // 💡 先生用アカウント登録（「Are you a Japanese teacher?」から入る）
+  const [isTeacherInfoOpen, setIsTeacherInfoOpen] = useState(false);
+  const [isTeacherSignup, setIsTeacherSignup] = useState(false);
+  const [teacherSchool, setTeacherSchool] = useState<SchoolValue>({ state: '', schoolName: '', schoolRefId: null });
 
   const handleOpenAuthModal = (mode: 'signin' | 'signup' | string) => {
     setAuthMode(mode === 'signup' ? 'signup' : 'signin');
     setAuthError(null);
     setEmailInput('');
     setIsToggleOpen(false);
+    setIsTeacherInfoOpen(false);
+    setIsTeacherSignup(false);
+    setTeacherSchool({ state: '', schoolName: '', schoolRefId: null });
     if (mode === 'signup') {
       setIsGuideStep(true);
     } else {
@@ -207,8 +217,21 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         if (!emailInput) {
           throw new Error('Please enter your email address for passkey registration.');
         }
-        await signUpAndRegisterPasskey(emailInput);
-        alert('Passkey registration successful! Welcome to AI Yamato.');
+        const asTeacher = isTeacherSignup;
+        await signUpAndRegisterPasskey(emailInput, {
+          asTeacher,
+          state: teacherSchool.state,
+          schoolName: teacherSchool.schoolName,
+          schoolRefId: teacherSchool.schoolRefId,
+        });
+        alert(asTeacher
+          ? 'Thanks! Your teacher account request has been sent. We check every teacher account before classes can be created. You can use AI Yamato as usual in the meantime.'
+          : 'Passkey registration successful! Welcome to AI Yamato.');
+        if (asTeacher) {
+          // 先生用アカウントは教師ダッシュボードへ（承認されるまでは審査中の案内が出る）
+          window.location.href = '/teacher-dashboard';
+          return;
+        }
       } else {
         await signInWithPasskey();
         alert('Passkey sign in successful!');
@@ -352,6 +375,52 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                   </button>
                 </div>
 
+                {/* 💡 先生向けフック：クリックすると先生用アカウントの案内が開く */}
+                <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70">
+                  <button
+                    type="button"
+                    onClick={() => setIsTeacherInfoOpen(!isTeacherInfoOpen)}
+                    aria-expanded={isTeacherInfoOpen}
+                    className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left bg-transparent border-none cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2 text-xs font-bold text-indigo-700">
+                      <GraduationCap className="w-4 h-4" /> Are you a Japanese teacher?
+                    </span>
+                    {isTeacherInfoOpen ? <ChevronUp className="w-4 h-4 text-indigo-600" /> : <ChevronDown className="w-4 h-4 text-indigo-600" />}
+                  </button>
+
+                  {isTeacherInfoOpen && (
+                    <div className="px-4 pb-4 space-y-3 text-left animate-fadeIn">
+                      <p className="text-[11px] text-slate-700 leading-relaxed">
+                        We have a <strong>free teacher account</strong> (limited features) with its own Teacher Dashboard:
+                      </p>
+                      <ul className="text-[11px] text-slate-700 space-y-1 list-disc pl-4">
+                        <li>Set lesson tasks on AI Yamato as homework for your class</li>
+                        <li>Track each student&apos;s progress on every task</li>
+                        <li>See what percentage of homework each student completed over any period</li>
+                        <li>View your students&apos; handwritten writing submissions</li>
+                      </ul>
+                      <p className="text-[10px] text-slate-500">
+                        Free plan: {TEACHER_LIMITS.maxClasses} class with up to {TEACHER_LIMITS.maxStudentsPerClass} students. Need more classes? Ask us about a school plan.
+                      </p>
+                      <p className="text-[10px] text-slate-500">
+                        To protect students, you&apos;ll verify your school Google or Microsoft account and we check every teacher account before you can create a class. Only students from your school can ask to join, and you approve each one. Teacher accounts do not include extra AI credits.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsTeacherSignup(true);
+                          setIsGuideStep(false);
+                        }}
+                        className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <span>Create a Free Teacher Account</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="border-t border-slate-200 pt-4">
                   <button
                     type="button"
@@ -408,13 +477,23 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                     <KeyRound className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-extrabold tracking-tight">
-                    {authMode === 'signup' ? 'Create Account with Passkey' : 'Sign In with Passkey'}
+                    {authMode === 'signup'
+                      ? (isTeacherSignup ? 'Create a Free Teacher Account' : 'Create Account with Passkey')
+                      : 'Sign In with Passkey'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {authMode === 'signup' 
-                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.' 
+                    {authMode === 'signup'
+                      ? 'Register securely using biometrics, Touch ID, Face ID, or a security key.'
                       : 'Authenticate instantly with your registered biometric passkey.'}
                   </p>
+                  {authMode === 'signup' && isTeacherSignup && (
+                    <p className="text-[11px] text-indigo-700">
+                      Not a teacher?{' '}
+                      <button type="button" onClick={() => setIsTeacherSignup(false)} className="font-semibold underline bg-transparent border-none p-0 cursor-pointer text-indigo-700">
+                        Create a student account instead
+                      </button>
+                    </p>
+                  )}
                 </div>
 
                 {authError && (
@@ -435,6 +514,23 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                         onChange={(e) => setEmailInput(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900"
                       />
+                    </div>
+                  )}
+
+                  {authMode === 'signup' && isTeacherSignup && (
+                    <div className="space-y-1.5 text-left">
+                      <SchoolPicker
+                        value={teacherSchool}
+                        onChange={setTeacherSchool}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                        labelClassName="block text-xs font-semibold text-slate-500 mb-1.5"
+                        inputClassName="w-full px-3 py-2.5 rounded-xl border text-sm outline-none bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900"
+                        stateLabel="State"
+                        schoolLabel="School"
+                      />
+                      <p className="text-[10px] text-slate-500">
+                        Your school helps us confirm your teacher account. {SCHOOL_PURPOSE_TEXT}
+                      </p>
                     </div>
                   )}
 
