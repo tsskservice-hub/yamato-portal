@@ -1,7 +1,7 @@
 /**
  * @file vce-eoy-oral-spec.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Oral Examination Specification.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-eoy-oral-spec'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-eoy-oral-spec'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -53,11 +53,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_EOY_ORAL_SPEC';
 
 /**
- * Fetch VCE Oral Examination Specification data from Supabase 'app_knowledge' table.
+ * Fetch VCE Oral Examination Specification data from Supabase 'kl_app' table.
  */
 export async function fetchOralSpecification(supabaseClient: SupabaseClient): Promise<OralSpecification | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -71,7 +71,7 @@ export async function fetchOralSpecification(supabaseClient: SupabaseClient): Pr
 }
 
 /**
- * Upsert VCE Oral Examination Specification data to Supabase 'app_knowledge' table.
+ * Upsert VCE Oral Examination Specification data to Supabase 'kl_app' table.
  */
 export async function upsertOralSpecification(
   supabaseClient: SupabaseClient,
@@ -79,7 +79,7 @@ export async function upsertOralSpecification(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Oral Examination Specification',

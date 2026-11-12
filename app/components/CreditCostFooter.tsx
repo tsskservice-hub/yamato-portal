@@ -1,13 +1,13 @@
 /**
  * @file CreditCostFooter.tsx
- * @description Supabase / app_knowledge / PRICE_PLANS 一元管理データ連動型クレジット消費案内
+ * @description Supabase / kl_app / PRICE_PLANS 一元管理データ連動型クレジット消費案内
  * 💡 特徴：
  * 1. app/data/price-plans.ts の CREDIT_CONSUMPTION_GUIDE を直接参照し完全同期
  * 2. 入力欄下部にはチャットで即座に必要な主要コスト（Text / Photo / Visual Aid）をコンパクトに表示
  * 3. ℹ️ アイコンホバーまたはクリックで、全6機能の消費ガイドを一回り大きな文字（text-xs）でポップアップ確認可能
  */
 import React, { useState } from "react";
-// 🌟 Supabase の app_knowledge (PRICE_PLANS) から連携されている共通データを直接インポート
+// 🌟 Supabase の kl_app (PRICE_PLANS) から連携されている共通データを直接インポート
 import { CREDIT_CONSUMPTION_GUIDE } from "../data/price-plans";
 
 export type CreditCostFooterProps = {

@@ -6,6 +6,7 @@
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
     <title>花札　こいこい</title>
+<!-- Portal copy of the Hanafuda Koi-Koi library game plus an Open Fullscreen button, added 2026-11-10. Library original (ts-spaces/hua-zha-koikoi/index.html) untouched. -->
     <style>
       :root{
         --bg:#f4efe4; --panel:#fffdf6; --ink:#2b2620; --ink-soft:#6b6257;
@@ -31,6 +32,7 @@
       }
       .wrap{max-width:1060px;margin:0 auto;padding:14px 14px 40px}
       .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-bottom:10px}
+      .top-actions{display:flex;gap:10px;flex-wrap:wrap}
       .page-title{
         margin:0;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
         font-size:1.65rem;font-weight:700;line-height:1.35;letter-spacing:.02em;
@@ -131,6 +133,46 @@
       .cap-row .card:last-child{margin-right:0}
       .cap-empty{font-size:.75rem;color:#e8dfbe;opacity:.6;padding:6px 2px}
       .yaku-now{font-size:.8rem;color:#ffe9a8;min-height:1.2em}
+      /* Yaku guide (separate frame below the game) */
+      .yaku-guide{
+        margin-top:18px;background:var(--panel);border:1px solid var(--line);
+        border-radius:18px;box-shadow:var(--shadow);padding:20px 18px 14px;
+      }
+      .yaku-guide-head h2{
+        margin:0 0 4px;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:1.4rem;line-height:1.3;
+      }
+      .yaku-guide-head p{margin:0 0 6px;color:var(--ink-soft);font-size:.92rem;max-width:72ch}
+      .yaku-grid{
+        display:grid;grid-template-columns:repeat(auto-fill,minmax(308px,1fr));
+        gap:14px;margin-top:14px;
+      }
+      .yaku-item{
+        border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;
+        background:var(--bg);display:flex;flex-direction:column;gap:8px;
+      }
+      .yaku-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+      .yaku-title{
+        margin:0;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+        font-size:1.42rem;font-weight:700;line-height:1.45;letter-spacing:.02em;
+      }
+      .yaku-title rt{font-size:.56rem;letter-spacing:.14em;color:var(--ink-soft);font-weight:400}
+      .yaku-pts{
+        flex:none;background:var(--accent);color:var(--accent-ink);font-weight:800;
+        font-size:.82rem;border-radius:999px;padding:3px 10px;white-space:nowrap;margin-top:4px;
+      }
+      .yaku-en{margin:0;font-weight:800;font-size:.98rem;line-height:1.3}
+      .yaku-cards{display:flex;flex-wrap:wrap;gap:6px}
+      .yaku-cards .card{width:50px;height:75px;cursor:default}
+      .yaku-cards .card .tag{font-size:.5rem;padding:1px 2px}
+      .yaku-desc{margin:0;font-size:.9rem;color:var(--ink)}
+      .yaku-need{margin:0;font-size:.85rem;color:var(--ink-soft)}
+      .yaku-need strong{color:var(--ink)}
+      .yaku-guide-note{margin:14px 2px 4px}
+      @media (max-width:640px){
+        .yaku-guide{padding:16px 12px 10px}
+        .yaku-grid{grid-template-columns:1fr}
+        .yaku-cards .card{width:46px;height:69px}
+      }
       /* Dialogs */
       .overlay{
         position:fixed;inset:0;background:rgba(20,16,8,.55);display:none;
@@ -172,7 +214,10 @@
     <div class="wrap">
       <div class="topbar">
         <h1 class="page-title"><ruby>花札<rt>はなふだ</rt></ruby>　こいこい</h1>
+        <div class="top-actions">
+          <button id="fullBtn" type="button">Open Fullscreen</button>
         <button id="rulesBtn" type="button">How to Play &amp; Yaku List</button>
+        </div>
       </div>
 
       <section class="setup" aria-label="New match">
@@ -229,6 +274,14 @@
         <div class="captured" id="myCaptured"></div>
         <div class="zone-label" style="margin-top:12px"><span>Your hand (tap a card to play it)</span><span class="yaku-now" id="myYakuNow"></span></div>
         <div class="my-hand" id="myHand"></div>
+      </section>
+
+      <section class="yaku-guide" aria-label="Yaku guide — all scoring combinations">
+        <div class="yaku-guide-head">
+          <h2>Yaku Guide</h2>
+          <p>Every scoring combination in this game, shown with the actual cards that form it. Points shown are base points, before doubling. A finish of 7 points or more doubles the score, and each Koi-Koi call — by the finisher or by the opponent — doubles it again.</p>
+        </div>
+        <div class="yaku-grid" id="yakuGuideGrid"></div>
       </section>
     </div>
 
@@ -879,6 +932,122 @@ function render(justIds){
   });
 }
 
+/* ================= 役ガイド（ゲーム枠の下の別枠） ================= */
+var YAKU_GUIDE = [
+  {
+    jp: '<ruby>五光<rt>ごこう</rt></ruby>', en: "Five Brights", pts: "10 pts",
+    ids: [0, 8, 28, 40, 44],
+    need: "All 5 Bright cards",
+    desc: "The highest Bright combination. Collect every Bright card in the deck: the Pine Crane, the Cherry Blossom Curtain, the Susuki Grass Moon, the Willow Rain, and the Paulownia Phoenix."
+  },
+  {
+    jp: '<ruby>四光<rt>しこう</rt></ruby>', en: "Four Brights", pts: "8 pts",
+    ids: [0, 8, 28, 44],
+    need: "4 Bright cards, without the Willow Rain card",
+    desc: "Any four Bright cards, as long as the Willow Rain card is not among them. The four cards shown here are the only set that qualifies."
+  },
+  {
+    jp: '<ruby>雨四光<rt>あめしこう</rt></ruby>', en: "Rainy Four Brights", pts: "7 pts",
+    ids: [0, 8, 28, 40],
+    need: "4 Bright cards, including the Willow Rain card",
+    desc: "Four Bright cards that include the Willow Rain card. It scores one point less than Four Brights because the Rain card is counted as a weaker Bright."
+  },
+  {
+    jp: '<ruby>三光<rt>さんこう</rt></ruby>', en: "Three Brights", pts: "5 pts",
+    ids: [0, 8, 28],
+    need: "3 Bright cards, without the Willow Rain card",
+    desc: "Any three Bright cards, as long as the Willow Rain card is not among them. Three Brights that include the Rain card do not score."
+  },
+  {
+    jp: '<ruby>猪<rt>いの</rt>鹿<rt>しか</rt>蝶<rt>ちょう</rt></ruby>', en: "Boar, Deer & Butterfly", pts: "5 pts + extras",
+    ids: [24, 36, 20],
+    need: "Boar (Bush Clover) + Deer (Maple) + Butterfly (Peony)",
+    desc: "The three signature Animal cards: the Boar, the Deer, and the Butterfly. Worth 5 points, plus 1 extra point for every additional Animal card you hold."
+  },
+  {
+    jp: '<ruby>赤短<rt>あかたん</rt></ruby>', en: "Red Ribbons", pts: "5 pts + extras",
+    ids: [1, 5, 9],
+    need: "The ribbons of Pine, Plum Blossom & Cherry Blossom",
+    desc: "The three red poetry ribbons, each inscribed with writing. Worth 5 points, plus 1 extra point for every additional Ribbon card you hold."
+  },
+  {
+    jp: '<ruby>青短<rt>あおたん</rt></ruby>', en: "Blue Ribbons", pts: "5 pts + extras",
+    ids: [21, 33, 37],
+    need: "The ribbons of Peony, Chrysanthemum & Maple",
+    desc: "The three blue ribbons of Peony, Chrysanthemum, and Maple. Worth 5 points, plus 1 extra point for every additional Ribbon card you hold."
+  },
+  {
+    jp: '<ruby>花見<rt>はなみ</rt></ruby>で<ruby>一杯<rt>いっぱい</rt></ruby>', en: "Cherry Blossom Viewing", pts: "3 pts",
+    ids: [8, 32],
+    need: "Cherry Blossom Curtain (Bright) + Sake Cup (Chrysanthemum)",
+    desc: "A cup of sake under the cherry blossoms: pair the Cherry Blossom Bright card with the Chrysanthemum Sake Cup."
+  },
+  {
+    jp: '<ruby>月見<rt>つきみ</rt></ruby>で<ruby>一杯<rt>いっぱい</rt></ruby>', en: "Moon Viewing", pts: "3 pts",
+    ids: [28, 32],
+    need: "Susuki Grass Moon (Bright) + Sake Cup (Chrysanthemum)",
+    desc: "A cup of sake under the full moon: pair the Susuki Grass Moon Bright card with the Chrysanthemum Sake Cup. It can be scored together with Cherry Blossom Viewing when you hold all three cards."
+  },
+  {
+    jp: '<ruby>タネ<rt>たね</rt></ruby>', en: "Animals", pts: "1 pt + extras",
+    ids: [4, 12, 16, 29, 41],
+    need: "Any 5 Animal cards — five examples are shown",
+    desc: "Collect any five Animal cards for 1 point, plus 1 extra point for each Animal card from the sixth onward. If Boar, Deer & Butterfly is completed, its points are counted instead of this combination for those three cards."
+  },
+  {
+    jp: '<ruby>短冊<rt>たんざく</rt></ruby>', en: "Ribbons", pts: "1 pt + extras",
+    ids: [13, 17, 25, 42, 1],
+    need: "Any 5 Ribbon cards — five examples are shown",
+    desc: "Collect any five Ribbon cards for 1 point, plus 1 extra point for each Ribbon card from the sixth onward. Ribbons that complete Red Ribbons or Blue Ribbons score through those combinations instead."
+  },
+  {
+    jp: '<ruby>カス<rt>かす</rt></ruby>', en: "Chaff", pts: "1 pt + extras",
+    ids: [2, 6, 10, 14, 18, 22, 26, 30, 34, 45],
+    need: "Any 10 Chaff (Plain) cards — ten examples are shown",
+    desc: "Collect any ten Chaff cards — the plain cards tagged “Plain” — for 1 point, plus 1 extra point for each card from the eleventh onward. The Chrysanthemum Sake Cup also counts as a Chaff card, on top of counting as an Animal."
+  },
+  {
+    jp: '<ruby>手役<rt>てやく</rt></ruby>', en: "Hand Yaku — Four of a Month", pts: "6 pts",
+    ids: [0, 1, 2, 3],
+    need: "All 4 cards of one month in your opening hand — all four Pine cards are shown as an example",
+    desc: "A special hand dealt at the start of a month: if your opening hand contains all four cards of a single month, you win the month immediately for 6 points, with no doubling. If all four cards of a month are dealt onto the field instead, the month is redealt."
+  }
+];
+function renderYakuGuide(){
+  var grid = document.getElementById("yakuGuideGrid");
+  if(!grid) return;
+  grid.innerHTML = "";
+  YAKU_GUIDE.forEach(function(y){
+    var item = document.createElement("article");
+    item.className = "yaku-item";
+    var head = document.createElement("div");
+    head.className = "yaku-item-head";
+    var title = document.createElement("h3");
+    title.className = "yaku-title";
+    title.innerHTML = y.jp;
+    var pts = document.createElement("span");
+    pts.className = "yaku-pts";
+    pts.textContent = y.pts;
+    head.appendChild(title); head.appendChild(pts);
+    var en = document.createElement("p");
+    en.className = "yaku-en";
+    en.textContent = y.en;
+    var cards = document.createElement("div");
+    cards.className = "yaku-cards";
+    y.ids.forEach(function(id){ cards.appendChild(cardEl(cardById(id))); });
+    var need = document.createElement("p");
+    need.className = "yaku-need";
+    need.innerHTML = "<strong>Cards needed:</strong> ";
+    need.appendChild(document.createTextNode(y.need));
+    var desc = document.createElement("p");
+    desc.className = "yaku-desc";
+    desc.textContent = y.desc;
+    item.appendChild(head); item.appendChild(en); item.appendChild(cards); item.appendChild(need); item.appendChild(desc);
+    grid.appendChild(item);
+  });
+}
+renderYakuGuide();
+
 /* ================= UI配線 ================= */
 function openOverlay(id){ document.getElementById(id).classList.add("open"); }
 function closeOverlay(id){ document.getElementById(id).classList.remove("open"); }
@@ -907,6 +1076,29 @@ document.getElementById("closeRulesBtn").addEventListener("click", function(){ c
 document.getElementById("rulesOverlay").addEventListener("click", function(e){ if(e.target === this) closeOverlay("rulesOverlay"); });
 document.addEventListener("keydown", function(e){
   if(e.key === "Escape"){ closeOverlay("rulesOverlay"); closeOverlay("finalOverlay"); }
+});
+/* Fullscreen (same pattern as the Prefecture Puzzle): the Fullscreen API
+   on the whole page. When embedded in the portal, the portal iframe needs
+   allowfullscreen for this to work. If fullscreen is blocked or unavailable,
+   open this page in a new tab instead. */
+var FULL_BTN = document.getElementById("fullBtn");
+function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function updateFullBtn(){ if(FULL_BTN) FULL_BTN.textContent = isFullscreen() ? "Exit Fullscreen" : "Open Fullscreen"; }
+document.addEventListener("fullscreenchange", updateFullBtn);
+document.addEventListener("webkitfullscreenchange", updateFullBtn);
+if(FULL_BTN) FULL_BTN.addEventListener("click", function(){
+  if(isFullscreen()){
+    var exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if(exit) exit.call(document);
+    return;
+  }
+  var req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+  if(req){
+    var p = req.call(document.documentElement);
+    if(p && p.catch) p.catch(function(){ window.open(location.href, "_blank", "noopener"); });
+  } else {
+    window.open(location.href, "_blank", "noopener");
+  }
 });
 render();
 </script>

@@ -1,0 +1,292 @@
+/**
+ * @file reference.200kanji.tsx
+ * @description VCE 200 Kanji Reference 一覧ページ (ScrollTopButton統合・scrollUtils共通化対応版)
+ */
+import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from '@remix-run/react';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
+import ScrollTopButton from '~/components/layout/ScrollTopButton'; // ページトップへ戻るボタンをインポート
+import { generateModuleMeta } from '~/utils/seoMeta';
+import { supabase } from '~/lib/supabaseClient';
+import { handleScrollToSection, getAnchorId } from '~/utils/scrollUtils'; // 共通のスクロール関数をインポート
+
+export interface KanjiCharacter {
+  id: string;
+  character: string;        // 漢字
+  kun_display?: string;     // 訓読み（表示用）
+  kun_reading?: string;     // 訓読み（かな等）
+  kun_romaji?: string;      // 訓読み（ローマ字）
+  on_display?: string;      // 音読み（表示用）
+  on_romaji?: string;       // 音読み（ローマ字）
+  reading_kana?: string;
+  romaji?: string;
+  meaning?: string;         // 意味
+  stroke_count?: number;    // 画数
+  radical?: string;         // 部首
+  char_type: string;        // 文字種 ('kanji' 等)
+  grade_level?: number;     // 学年レベル
+  category?: string;        // カテゴリー
+  sort_order?: number;      // 表示順
+  created_at?: string;
+}
+
+// 新しいカテゴリー表示順序
+const CATEGORY_ORDER = [
+  'Numbers',
+  'Counters',
+  'Season',
+  'Days of the week',
+  'Day',
+  'Time',
+  'Parts of the body',
+  'Positions',
+  'Directions',
+  'School life',
+  'People/family',
+  'Adjectives/adverbs',
+  'Verbs (Movement)',
+  'Verbs (Body/Senses)',
+  'Verbs (Lifestyle)',
+  'Verbs (Activity)',
+  'Country/city',
+  'Place',
+  'Travel/transport',
+  'Food',
+  'Nature',
+  'Animals',
+  'Colours',
+  'Repeat sign',
+  'Miscellaneous'
+];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase
+      .from('portal_settings')
+      .select('content')
+      .eq('key', 'PORTAL_CONTENT')
+      .single();
+    portalContent = portalData?.content || null;
+  } catch (e) {}
+
+  return json({
+    portalContent,
+    currentPath: url.pathname,
+  });
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
+  return generateModuleMeta(data?.portalContent || null, data?.currentPath || '');
+};
+
+export default function Kanji200Component() {
+  const layoutRef = useRef<PageLayoutRef>(null);
+  const [kanjiList, setKanjiList] = useState<KanjiCharacter[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const loadKanjiData = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const { data, error } = await supabase
+        .from('kl_character')
+        .select('*')
+        .eq('char_type', 'kanji')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && Array.isArray(data)) {
+        setKanjiList(data);
+      } else {
+        setKanjiList([]);
+      }
+    } catch (err: any) {
+      console.error("Failed to load kl_character data:", err);
+      setError(true);
+      setErrorMessage(err?.message || 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadKanjiData();
+  }, [loadKanjiData]);
+
+  const groupedKanji = CATEGORY_ORDER.reduce((acc, cat) => {
+    acc[cat] = kanjiList.filter(item => (item.category || 'Miscellaneous') === cat);
+    return acc;
+  }, {} as Record<string, KanjiCharacter[]>);
+
+  return (
+    <ToolPageWrapper layoutRef={layoutRef}>
+      <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8 relative pb-16">
+        <div className="max-w-6xl mx-auto">
+          
+          {/* ヘッダーセクション */}
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
+                200 Essential Kanji / 必修漢字200字
+              </h1>
+              <p className="text-sm text-slate-600 max-w-2xl">
+                Master the core 200 kanji required for VCE Japanese by categories.
+              </p>
+            </div>
+            <Link
+              to="/faq#category-Kanji"
+              className="inline-flex items-center justify-center px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition-colors self-start sm:self-auto shadow-xs whitespace-nowrap gap-1.5"
+            >
+              <span>View FAQ: Kanji Tips</span>
+              <span>↗</span>
+            </Link>
+          </div>
+
+          {/* クイックジャンプ目次 ＆ 音読みに関する注記 */}
+          {!loading && !error && kanjiList.length > 0 && (
+            <div className="mb-10 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                  Quick Jump to Categories
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORY_ORDER.map(cat => {
+                    const count = (groupedKanji[cat] || []).length;
+                    if (count === 0) return null;
+                    const anchorId = getAnchorId(cat);
+                    return (
+                      <a
+                        key={cat}
+                        href={`#${anchorId}`}
+                        onClick={(e) => handleScrollToSection(e, anchorId)}
+                        className="text-xs bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition-colors border border-slate-200/60 cursor-pointer"
+                      >
+                        {cat} <span className="text-slate-400 ml-1">({count})</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 音読みに関する英語の注記 */}
+              <div className="border-t border-slate-100 pt-3">
+                <p className="text-xs text-slate-500 italic">
+                  * Note: While some kanji have multiple readings, only the representative Onyomi is displayed here.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ステータス・データ表示 */}
+          {loading ? (
+            <div className="text-center py-20 text-slate-500 text-sm">Loading kanji data from Supabase...</div>
+          ) : error ? (
+            <div className="text-center py-20 text-red-500 text-sm font-bold">
+              Failed to load kanji records: {errorMessage}
+            </div>
+          ) : kanjiList.length === 0 ? (
+            <div className="text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm">
+              No kanji records found in the kl_character table.
+            </div>
+          ) : (
+            <div className="space-y-12">
+              {CATEGORY_ORDER.map(categoryName => {
+                const items = groupedKanji[categoryName] || [];
+                if (items.length === 0) return null;
+                const anchorId = getAnchorId(categoryName);
+
+                return (
+                  <div key={categoryName} id={anchorId} className="space-y-4 scroll-mt-24">
+                    <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                      <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        <span className="w-2 h-6 bg-indigo-600 rounded-full inline-block"></span>
+                        {categoryName}
+                      </h2>
+                      <span className="text-xs font-semibold text-slate-500 bg-slate-200/70 px-2.5 py-1 rounded-full">
+                        {items.length} kanji
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                      {items.map((item, index) => (
+                        <div
+                          key={item.id || index}
+                          className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between hover:border-indigo-300 transition-colors relative group"
+                        >
+                          <div>
+                            <div className="flex items-center justify-end mb-2 min-h-[1.5rem]">
+                              {item.grade_level !== undefined && item.grade_level !== null && (
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
+                                  Grade {item.grade_level}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="text-center my-2">
+                              <span className="text-6xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                {item.character || '—'}
+                              </span>
+                            </div>
+
+                            <div className="text-center text-sm font-semibold text-slate-800 mb-4 min-h-[2rem] flex items-center justify-center">
+                              {item.meaning || '—'}
+                            </div>
+
+                            <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600">
+                              {(item.on_display || item.on_romaji) && (
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-slate-500">Onyomi:</span>
+                                  <span className="text-right font-medium">
+                                    {item.on_display} {item.on_romaji ? `(${item.on_romaji})` : ''}
+                                  </span>
+                                </div>
+                              )}
+
+                              {(item.kun_display || item.kun_reading || item.kun_romaji) && (
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-slate-500">Kunyomi:</span>
+                                  <span className="text-right font-medium">
+                                    {[item.kun_display, item.kun_reading ? `[${item.kun_reading}]` : '', item.kun_romaji ? `(${item.kun_romaji})` : '']
+                                      .filter(Boolean)
+                                      .join(' ')}
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold text-slate-500">Radical:</span>
+                                <span className="text-right font-medium">{item.radical || '—'}</span>
+                              </div>
+
+                              <div className="flex justify-between items-center">
+                                <span className="font-bold text-slate-500">Strokes:</span>
+                                <span className="text-right font-medium">
+                                  {item.stroke_count !== undefined && item.stroke_count !== null ? `${item.stroke_count}画` : '—'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+        </div>
+
+        {/* ページトップへ戻るボタン */}
+        <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" />
+      </div>
+    </ToolPageWrapper>
+  );
+}

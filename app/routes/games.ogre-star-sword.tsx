@@ -5,8 +5,8 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import type { PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 

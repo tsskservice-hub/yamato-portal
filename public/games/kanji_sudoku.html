@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Portal copy of the Kanji Sudoku library game plus an Open Fullscreen button, added 2026-11-10. Library original untouched. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -306,7 +307,7 @@
           <h1>Kanji Sudoku <span class="jp">漢数字数独</span></h1>
           <p>The classic 9×9 Sudoku, played entirely with Japanese kanji numerals — from <span class="kanji-font">一</span> (one) to <span class="kanji-font">九</span> (nine). Fill every row, column, and 3×3 box with all nine kanji, with no repeats.</p>
         </div>
-        <div class="seal" aria-hidden="true">数独</div>
+        <div class="head-row"><div class="seal" aria-hidden="true">数独</div><button type="button" class="ghost-btn" id="fullBtn">Open Fullscreen</button></div>
       </header>
 
       <div class="stats" role="group" aria-label="Game status and difficulty">
@@ -905,6 +906,30 @@
 
         newGame("easy");
       })();
+
+    /* Fullscreen (same pattern as the Prefecture Puzzle): the Fullscreen API
+       on the whole page. When embedded in the portal, the portal iframe needs
+       allowfullscreen for this to work. If fullscreen is blocked or unavailable,
+       open this page in a new tab instead. */
+    var FULL_BTN = document.getElementById("fullBtn");
+    function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+    function updateFullBtn() { if (FULL_BTN) FULL_BTN.textContent = isFullscreen() ? "Exit Fullscreen" : "Open Fullscreen"; }
+    document.addEventListener("fullscreenchange", updateFullBtn);
+    document.addEventListener("webkitfullscreenchange", updateFullBtn);
+    if (FULL_BTN) FULL_BTN.addEventListener("click", function () {
+      if (isFullscreen()) {
+        var exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) exit.call(document);
+        return;
+      }
+      var req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+      if (req) {
+        var p = req.call(document.documentElement);
+        if (p && p.catch) p.catch(function () { window.open(location.href, "_blank", "noopener"); });
+      } else {
+        window.open(location.href, "_blank", "noopener");
+      }
+    });
     </script>
   </body>
 </html>

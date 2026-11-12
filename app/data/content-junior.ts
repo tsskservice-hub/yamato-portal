@@ -1,6 +1,6 @@
 /**
  * @file content-junior.ts
- * @description Supabase app_knowledge (key: 'CONTENT_JUNIOR') からの動的データ取得モジュール
+ * @description Supabase kl_app (key: 'CONTENT_JUNIOR') からの動的データ取得モジュール
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -19,7 +19,7 @@ export async function fetchJuniorContentData(
 ): Promise<JuniorContentKnowledge | null> {
   try {
     const { data: row, error } = await supabase
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data, updated_at')
       .eq('key', KNOWLEDGE_KEY)
       .maybeSingle();

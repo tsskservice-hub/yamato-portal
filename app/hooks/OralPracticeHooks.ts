@@ -1,8 +1,8 @@
 /**
- *  @file OralPracticeHooks.ts
- *  @description バックエンドAPIの音声・チャットエンドポイントと確実に通信するオーラル練習エンジンフック
+ * @file OralPracticeHooks.ts
+ * @description ハンズフリー会話がエンドレスに継続し、ユーザーが終了を意図した際（「終わり」等の発話）にのみセッションが終了するように修正した完全版フック
  */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export type ChatMessage = {
   role: "assistant" | "user";
@@ -69,7 +69,6 @@ export function formatOralFeedbackToHtml(rawText: string): string {
   return cleaned;
 }
 
-// 💡 第3引数 userId と 第4引数 userNickname を追加
 export function useOralPracticeEngine(
   selectedLevel = "normal",
   speechSpeed = 1.0,
@@ -79,7 +78,7 @@ export function useOralPracticeEngine(
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "ようこそ！ Click 'SPEAK TO AI YAMATO' above to start practicing in the center screen.",
+      content: "ようこそ！練習モードを選択してスタートしてください。",
       isHtml: false,
     },
   ]);
@@ -94,57 +93,107 @@ export function useOralPracticeEngine(
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // TTS Voice Playback via Backend API
-  const playTTS = async (textToSpeak: string) => {
-    try {
-      if (!textToSpeak) return;
-      const cleanedText = textToSpeak
-        .replace(/<rt>.*?<\/rt>/g, "")
-        .replace(/<.*?>/g, "")
-        .replace(/【.*?】/g, "")
-        .replace(/※.*$/gm, "")
-        .trim();
+  // 💡 マイクストリームをセッション中保持するためのRef
+  const persistentStreamRef = useRef<MediaStream | null>(null);
 
-      if (!cleanedText) return;
+  // VAD（無音検知）用の参照
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const silenceTimerRef = useRef<any>(null);
+  const isSpeakingDetectedRef = useRef<boolean>(false);
+  const animationFrameRef = useRef<number | null>(null);
 
-      const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
+  // 🔊 TTS Voice Playback
+  const playTTS = async (textToSpeak: string): Promise<void> => {
+    return new Promise(async (resolve) => {
+      console.log("🔊 [DEBUG] playTTS called with text:", textToSpeak);
+      let isResolved = false;
+      const safeResolve = (origin: string) => {
+        if (!isResolved) {
+          isResolved = true;
+          console.log(`🔊 [DEBUG] playTTS resolved from: ${origin}`);
+          resolve();
+        }
+      };
 
-      const response = await fetch(ttsEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: cleanedText,
-        }),
-      });
+      try {
+        if (!textToSpeak) {
+          safeResolve("empty-text");
+          return;
+        }
+        const cleanedText = textToSpeak
+          .replace(/<rt>.*?<\/rt>/g, "")
+          .replace(/<.*?>/g, "")
+          .replace(/【.*?】/g, "")
+          .replace(/※.*$/gm, "")
+          .trim();
 
-      if (response.ok) {
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.playbackRate = speechSpeed || 1.0;
-        await audio.play();
-      } else {
-        console.warn("Backend TTS failed, falling back to Web Speech API");
-        fallbackWebSpeech(cleanedText, speechSpeed);
+        if (!cleanedText) {
+          safeResolve("empty-cleaned-text");
+          return;
+        }
+
+        const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
+        const response = await fetch(ttsEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: cleanedText }),
+        });
+
+        if (response.ok) {
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audio.playbackRate = speechSpeed || 1.0;
+
+          const estimatedDurationMs = Math.max(cleanedText.length * 200, 2000) / (speechSpeed || 1.0) + 1500;
+
+          const estimatedTimer = setTimeout(() => {
+            console.warn("⏱️ [DEBUG] Estimated duration reached. Forcing audio pause & resolve.");
+            audio.pause();
+            safeResolve("estimated-timer");
+          }, estimatedDurationMs);
+          
+          audio.onended = () => {
+            console.log("🔊 [DEBUG] audio.onended event fired.");
+            clearTimeout(estimatedTimer);
+            safeResolve("onended");
+          };
+
+          audio.onerror = (e) => {
+            console.error("❌ [DEBUG] audio.onerror event fired:", e);
+            clearTimeout(estimatedTimer);
+            fallbackWebSpeech(cleanedText, speechSpeed);
+            safeResolve("onerror");
+          };
+
+          await audio.play().catch((playErr) => {
+            console.warn("⚠️ [DEBUG] audio.play() was blocked or failed:", playErr);
+            clearTimeout(estimatedTimer);
+            fallbackWebSpeech(cleanedText, speechSpeed);
+            safeResolve("play-catch");
+          });
+        } else {
+          fallbackWebSpeech(cleanedText, speechSpeed);
+          safeResolve("response-not-ok");
+        }
+      } catch (err) {
+        console.error("❌ [DEBUG] playTTS exception caught:", err);
+        fallbackWebSpeech(textToSpeak, speechSpeed);
+        safeResolve("exception");
       }
-    } catch (err) {
-      console.warn("Server TTS connection error, falling back to Web Speech:", err);
-      fallbackWebSpeech(textToSpeak, speechSpeed);
-    }
+    });
   };
 
-  // Start Audio Recording
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
+      persistentStreamRef.current = stream;
       let mimeType = "audio/webm";
-      if (typeof MediaRecorder !== "undefined") {
-        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-          mimeType = "audio/webm;codecs=opus";
-        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
-          mimeType = "audio/mp4";
-        }
+      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+        mimeType = "audio/webm;codecs=opus";
+      } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+        mimeType = "audio/mp4";
       }
 
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
@@ -157,78 +206,288 @@ export function useOralPracticeEngine(
 
       mediaRecorder.onstop = async () => {
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        await transcribeAudio(blob);
+        await transcribeAudioManually(blob);
       };
 
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
       console.error("Microphone access error:", err);
-      alert("Microphone access is denied or not supported on this browser.");
+      alert("マイクへのアクセスが許可されていません。");
     }
   };
 
-  // Stop Audio Recording
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop());
       setIsRecording(false);
     }
   };
 
-  // Spacebar Keyboard Event Listener
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space" || e.key === " ") {
-        const target = e.target as HTMLElement;
-        if (
-          target &&
-          (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
-        ) {
-          return;
-        }
-        if (!isPracticing || isAnalyzing || isWaitingForNext) return;
-
-        e.preventDefault();
-        if (!isRecording) startRecording();
-        else stopRecording();
+  const transcribeAudioManually = async (audioBlob: Blob) => {
+    setIsAnalyzing(true);
+    const reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = async () => {
+      const base64Audio = reader.result as string;
+      try {
+        const endpoint = "https://api.jptutoraiyamato.com/chat";
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            audioBase64: base64Audio,
+            audio: base64Audio,
+            appType: "eoy-oral-drill",
+            level: selectedLevel,
+            userId,
+            userNickname,
+          }),
+        });
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        const data = (await res.json()) as any;
+        setInputMessage(data.transcript || "");
+      } catch (err) {
+        console.error("Transcription error:", err);
+        alert("音声の文字起こしに失敗しました。");
+      } finally {
+        setIsAnalyzing(false);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPracticing, isAnalyzing, isWaitingForNext, isRecording]);
-
-  // Speech Transcription via Backend API
-  const transcribeAudio = async (audioBlob: Blob) => {
-    setIsAnalyzing(true);
-    const formData = new FormData();
-    formData.append("audio", audioBlob, "recording.webm");
-
-    try {
-      const sttEndpoint = "https://api.jptutoraiyamato.com/api/test-stt";
-
-      const res = await fetch(sttEndpoint, { method: "POST", body: formData });
-      if (!res.ok) throw new Error(`Transcription HTTP Error: ${res.status}`);
-      const data = (await res.json()) as any;
-      setInputMessage(data.userText || "");
-    } catch (err) {
-      console.error("Transcription error:", err);
-      alert("Audio transcription failed. Please try speaking again or typing your answer.");
-    } finally {
-      setIsAnalyzing(false);
-    }
   };
 
-  // Start Practice Session
-  const startPractice = (
+  // 💡 ハンズフリー自動送信処理（会話をエンドレスに継続させ、終了キーワードで終了する仕様）
+  const processAndSendAudioAuto = async (audioBlob: Blob, answersMap: { [key: string]: string }) => {
+    console.log("🤖 [DEBUG] processAndSendAudioAuto started. Blob size:", audioBlob.size);
+    setIsAnalyzing(true);
+    const reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = async () => {
+      const base64Audio = reader.result as string;
+      const currentQ = activeQuestions[currentQuestionIndex];
+      const registeredAnswer = answersMap[currentQ?.id] || "";
+
+      try {
+        const endpoint = "https://api.jptutoraiyamato.com/chat";
+        const requestPayload = {
+          audioBase64: base64Audio,
+          audio: base64Audio,
+          appType: "eoy-oral-accelerated",
+          mode: "drill",
+          section: "sec1",
+          expectedQuestion: currentQ?.questionOriginal || currentQ?.question,
+          registeredAnswer: registeredAnswer,
+          level: selectedLevel,
+          userId,
+          userNickname,
+          chatHistory: chatMessages.map(m => ({ role: m.role, content: m.content }))
+        };
+
+        console.log("🤖 [DEBUG] Sending audio to backend endpoint (/chat) with payload keys:", Object.keys(requestPayload));
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestPayload),
+        });
+
+        if (!res.ok) {
+          const errBody = await res.text();
+          console.error(`❌ [DEBUG] Backend HTTP Error ${res.status}:`, errBody);
+          throw new Error(`HTTP Error: ${res.status} - ${errBody}`);
+        }
+
+        const data = (await res.json()) as any;
+        console.log("🤖 [DEBUG] Backend response received:", data);
+
+        const userTranscript = data.transcript || "（音声認識完了）";
+        const aiFeedback = data.reply || "◎ よくできました。";
+        const formattedHtml = formatOralFeedbackToHtml(aiFeedback);
+
+        // 💡 チャット履歴にユーザーの発話とAIの返答を追加
+        setChatMessages((prev) => [
+          ...prev,
+          { role: "user", content: userTranscript, isHtml: false },
+          { role: "assistant", content: formattedHtml, isHtml: true },
+        ]);
+
+        setIsAnalyzing(false);
+        console.log("🔊 [DEBUG] Playing AI feedback TTS...");
+        await playTTS(aiFeedback);
+        console.log("🔊 [DEBUG] AI feedback TTS finished.");
+
+        // 💡 終了キーワード（「終わり」「終了」「おしまい」など）が含まれているかチェック
+        const isEndRequested = 
+          userTranscript.includes("終わり") || 
+          userTranscript.includes("終了") || 
+          userTranscript.includes("おしまい") ||
+          userTranscript.includes("これで終わりにします");
+
+        if (isEndRequested) {
+          setChatMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: "<b>🎉 お疲れ様でした！練習を終了します。</b>", isHtml: true },
+          ]);
+          setIsPracticing(false);
+          stopPractice();
+          return;
+        }
+
+        // 💡 質問リストを順番に進めつつ、最後の質問を超えても会話を永続的に継続させる
+        const nextIndex = currentQuestionIndex + 1;
+        if (nextIndex < activeQuestions.length) {
+          setCurrentQuestionIndex(nextIndex);
+          const nextQ = activeQuestions[nextIndex];
+          
+          setChatMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>（どうぞ、お話しください...）`,
+              isHtml: true,
+            },
+          ]);
+          console.log("🔊 [DEBUG] Playing next question TTS...");
+          await playTTS(nextQ.questionOriginal || nextQ.question);
+          console.log("🔊 [DEBUG] Next question TTS finished. Starting auto recording...");
+          startAutoRecording(answersMap);
+        } else {
+          // 💡 すべての設問が終わった後も、自由対話・継続モードとして自動録音を再開し続ける
+          console.log("🔄 [DEBUG] Question list completed. Continuing open conversation loop...");
+          setChatMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: `（続けてお話しください... 終了する場合は「おわり」または「終了」と言ってください）`,
+              isHtml: true,
+            },
+          ]);
+          startAutoRecording(answersMap);
+        }
+      } catch (err) {
+        console.error("❌ [DEBUG] Auto send error:", err);
+        setIsAnalyzing(false);
+        setChatMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "通信エラーが発生しました。もう一度お話しください。", isHtml: false },
+        ]);
+        startAutoRecording(answersMap);
+      }
+    };
+  };
+
+  // 💡 自動無音検知録音の開始
+  const startAutoRecording = useCallback(async (answersMap: { [key: string]: string }) => {
+    console.log("🎤 [DEBUG] startAutoRecording invoked.");
+    try {
+      let stream = persistentStreamRef.current;
+      if (!stream || !stream.active) {
+        console.log("🎤 [DEBUG] Requesting getUserMedia stream inside startAutoRecording...");
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        persistentStreamRef.current = stream;
+      }
+
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioCtx;
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      let mimeType = "audio/webm";
+      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+        mimeType = "audio/webm;codecs=opus";
+      } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+        mimeType = "audio/mp4";
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        console.log("🎤 [DEBUG] MediaRecorder stopped. Processing recorded blob...");
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (audioCtx.state !== 'closed') audioCtx.close();
+        processAndSendAudioAuto(blob, answersMap);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      isSpeakingDetectedRef.current = false;
+      console.log("🔴 [DEBUG] MediaRecorder started successfully. Mic is now ON (Listening...).");
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const checkAudioLevel = () => {
+        if (!analyserRef.current || mediaRecorder.state !== "recording") return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
+        const average = sum / bufferLength;
+
+        const VOICE_THRESHOLD = 15; 
+        const SILENCE_DURATION = 1300; 
+
+        if (average > VOICE_THRESHOLD) {
+          if (!isSpeakingDetectedRef.current) {
+            console.log("🗣️ [DEBUG] Voice detected! Average volume:", average);
+          }
+          isSpeakingDetectedRef.current = true;
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+        } else if (isSpeakingDetectedRef.current && !silenceTimerRef.current) {
+          console.log("🤫 [DEBUG] Silence detected after speech. Starting silence countdown...");
+          silenceTimerRef.current = setTimeout(() => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+              console.log("⏹️ [DEBUG] Silence duration reached. Stopping MediaRecorder automatically.");
+              setIsRecording(false);
+              mediaRecorderRef.current.stop();
+              if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+            }
+          }, SILENCE_DURATION);
+        }
+
+        animationFrameRef.current = requestAnimationFrame(checkAudioLevel);
+      };
+
+      checkAudioLevel();
+    } catch (err) {
+      console.error("❌ [DEBUG] Microphone access error in startAutoRecording:", err);
+      alert("マイクへのアクセスが許可されていません。ブラウザの設定をご確認ください。");
+    }
+  }, [currentQuestionIndex, activeQuestions, selectedLevel, userId, userNickname]);
+
+  const startPractice = async (
     questionsList: QuestionData[],
     answersMap: { [key: string]: string },
-    orderMode: "sequential" | "random" = "sequential"
+    orderMode: "sequential" | "random" = "sequential",
+    modeType: "manual" | "handsfree" = "manual"
   ) => {
+    console.log("🚀 [DEBUG] startPractice invoked with modeType:", modeType);
     if (!questionsList || questionsList.length === 0) {
-      alert("No practice questions found for the selected filter.");
+      alert("練習用の設問が見つかりません。");
       return;
+    }
+
+    if (modeType === "handsfree" && (!persistentStreamRef.current || !persistentStreamRef.current.active)) {
+      try {
+        console.log("🚀 [DEBUG] Requesting initial getUserMedia permission for handsfree...");
+        persistentStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("🚀 [DEBUG] Initial getUserMedia granted.");
+      } catch (e) {
+        console.error("❌ [DEBUG] getUserMedia rejected:", e);
+        alert("マイクの使用が許可されませんでした。ブラウザの設定をご確認ください。");
+        return;
+      }
     }
 
     let qList = [...questionsList];
@@ -242,42 +501,47 @@ export function useOralPracticeEngine(
     setIsWaitingForNext(false);
     setInputMessage("");
 
-    // 💡 配列の最初の要素を取得するように [0] を指定
     const firstQ = qList[0];
     const userTargetAns = answersMap[firstQ.id] || "";
+
+    const startMsg = modeType === "handsfree"
+      ? `【ハンズフリー会話開始】<br><br>Yamato: 「${firstQ.question}」<br><br>（どうぞ、マイクに向かってお話しください...終了時は「終わり」と言ってください）`
+      : `【ドリルセッション開始】<br><br>Yamato: 「${firstQ.question}」<br><br>(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br>録音ボタンを押して答えてください！`;
 
     setChatMessages([
       {
         role: "assistant",
-        content: `【Practice Session Started】<br><br>Yamato: 「${firstQ.question}」<br><br>(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br>Please respond using microphone or text!`,
+        content: startMsg,
         isHtml: true,
       },
     ]);
 
-    playTTS(firstQ.questionOriginal || firstQ.question);
-  };
+    console.log("🔊 [DEBUG] Playing first question TTS...");
+    await playTTS(firstQ.questionOriginal || firstQ.question);
+    console.log("🔊 [DEBUG] First question TTS finished.");
 
-  // Proceed to Next Question (型注釈を追加して自己参照エラーを解消)
-  const proceedToNextQuestion: (answersMap: { [key: string]: string }) => void = (answersMap) => {
-    const nextIndex = currentQuestionIndex + 1;
-    if (nextIndex < activeQuestions.length) {
-      setCurrentQuestionIndex(nextIndex);
-      const nextQ = activeQuestions[nextIndex];
-      const nextTargetAns = answersMap[nextQ.id] || "";
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
-          isHtml: true,
-        },
-      ]);
-      setIsWaitingForNext(false);
-      playTTS(nextQ.questionOriginal || nextQ.question);
+    if (modeType === "handsfree") {
+      console.log("🎤 [DEBUG] Triggering initial startAutoRecording...");
+      startAutoRecording(answersMap);
     }
   };
 
-  // Send User Answer Message (Gemini Evaluation Chat)
+  const stopPractice = () => {
+    console.log("🛑 [DEBUG] stopPractice invoked.");
+    setIsPracticing(false);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+    
+    if (persistentStreamRef.current) {
+      persistentStreamRef.current.getTracks().forEach((t) => t.stop());
+      persistentStreamRef.current = null;
+    }
+    setIsRecording(false);
+  };
+
   const sendAnswerMessage = async (
     e: React.FormEvent,
     answersMap: { [key: string]: string },
@@ -298,7 +562,7 @@ export function useOralPracticeEngine(
     setIsAnalyzing(true);
 
     const currentQ = activeQuestions[currentQuestionIndex];
-    const registeredAnswer = answersMap[currentQ.id] || "";
+    const registeredAnswer = answersMap[currentQ?.id] || "";
 
     try {
       const endpoint = "https://api.jptutoraiyamato.com/chat";
@@ -308,13 +572,13 @@ export function useOralPracticeEngine(
         body: JSON.stringify({
           message: userText,
           appType: "eoy-oral-drill",
-          expectedQuestion: currentQ.questionOriginal || currentQ.question,
+          expectedQuestion: currentQ?.questionOriginal || currentQ?.question,
           registeredAnswer: registeredAnswer,
           mode,
           level: selectedLevel,
           section,
-          userId: userId,           // 💡 クレジット減算用
-          userNickname: userNickname, // 💡 ニックネーム呼びかけ用
+          userId: userId,
+          userNickname: userNickname,
         }),
       });
 
@@ -355,7 +619,7 @@ export function useOralPracticeEngine(
           ...newMessages,
           {
             role: "assistant",
-            content: `${formattedHtml}<br><br><b>🎉 All questions completed! Great job!</b>`,
+            content: `${formattedHtml}<br><br><b>🎉 すべての質問が完了しました！お疲れ様でした。</b>`,
             isHtml: true,
           },
         ]);
@@ -365,10 +629,29 @@ export function useOralPracticeEngine(
       console.error("Send answer error:", err);
       setChatMessages([
         ...newMessages,
-        { role: "assistant", content: "An error occurred. Please try sending again.", isHtml: false },
+        { role: "assistant", content: "エラーが発生しました。もう一度送信してください。", isHtml: false },
       ]);
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const proceedToNextQuestion = (answersMap: { [key: string]: string }) => {
+    const nextIndex = currentQuestionIndex + 1;
+    if (nextIndex < activeQuestions.length) {
+      setCurrentQuestionIndex(nextIndex);
+      const nextQ = activeQuestions[nextIndex];
+      const nextTargetAns = answersMap[nextQ.id] || "";
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
+          isHtml: true,
+        },
+      ]);
+      setIsWaitingForNext(false);
+      playTTS(nextQ.questionOriginal || nextQ.question);
     }
   };
 
@@ -386,6 +669,7 @@ export function useOralPracticeEngine(
     stopRecording,
     playTTS,
     startPractice,
+    stopPractice,
     proceedToNextQuestion,
     sendAnswerMessage,
   };

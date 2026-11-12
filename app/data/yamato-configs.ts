@@ -1,7 +1,7 @@
 /**
  * @file app/data/yamato-configs.ts
  * @description Decoupled TypeScript logic & Supabase client integration for Yamato Bot Configs.
- * Stores data in Supabase 'app_knowledge' table under key: 'YAMATO_CONFIGS'.
+ * Stores data in Supabase 'kl_app' table under key: 'YAMATO_CONFIGS'.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -84,12 +84,12 @@ export const YAMATO_BOT_CONFIGS: YamatoConfigsData = {
 const KNOWLEDGE_KEY = 'YAMATO_CONFIGS';
 
 /**
- * Fetch Yamato Bot Configs data from Supabase 'app_knowledge' table.
+ * Fetch Yamato Bot Configs data from Supabase 'kl_app' table.
  */
 export async function fetchYamatoConfigsData(supabaseClient: SupabaseClient): Promise<YamatoConfigsData | null> {
   try {
     const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('*')
       .eq('key', KNOWLEDGE_KEY)
       .single();

@@ -1,18 +1,19 @@
 /**
  * @file faq.tsx
- * @description VCE Japanese Portal FAQ ページ (PageLayout 統合型データエラーガード対応版)
+ * @description VCE Japanese Portal FAQ ページ (スムーズスクロール共通化・データエラーガード対応版)
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useLocation } from '@remix-run/react';
 import { Search, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
-import PageLayout from '~/components/PageLayout';
-import ScrollTopButton from '~/components/ScrollTopButton';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
+import PageLayout from '~/components/layout/PageLayout';
+import ScrollTopButton from '~/components/layout/ScrollTopButton';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { fetchFaqData, FaqItem } from '~/data/faq-database';
 import { supabase } from '~/lib/supabaseClient';
+import { handleScrollToSection, getAnchorId } from '~/utils/scrollUtils'; // 共通のスクロール関数をインポート
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -69,12 +70,13 @@ export default function FaqPage() {
     loadData();
   }, [loadData]);
 
+  // URLハッシュ（例: #category-Kanji など）がある場合の初期スクロール処理
   useEffect(() => {
     if (!loading && faqs && faqs.length > 0) {
       const hash = location.hash;
       if (hash) {
-        const elementId = hash.replace('#', '');
-        const element = document.getElementById(elementId);
+        const anchorId = hash.replace('#', '');
+        const element = document.getElementById(anchorId);
         if (element) {
           setTimeout(() => {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -115,11 +117,10 @@ export default function FaqPage() {
     return groups;
   }, [filteredFaqs]);
 
-  const scrollToCategory = (categoryName: string) => {
-    const element = document.getElementById(`category-${categoryName}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  // カテゴリーボタンクリック時のスクロール処理（共通のgetAnchorIdを使用）
+  const scrollToCategory = (e: React.MouseEvent<HTMLAnchorElement>, categoryName: string) => {
+    const anchorId = getAnchorId(`category-${categoryName}`);
+    handleScrollToSection(e, anchorId);
   };
 
   const faqJsonLd = useMemo(() => {
@@ -172,16 +173,19 @@ export default function FaqPage() {
               {groupedFaqs.length > 0 && (
                 <div className="mt-6 flex flex-wrap items-center gap-2">
                   <span className="text-xs text-blue-200 font-medium mr-1">Categories:</span>
-                  {groupedFaqs.map(group => (
-                    <button
-                      key={group.category}
-                      type="button"
-                      onClick={() => scrollToCategory(group.category)}
-                      className="px-3 py-1 rounded-full bg-blue-700/60 hover:bg-blue-600 text-white text-xs font-semibold border border-blue-400/30 transition-all cursor-pointer shadow-xs capitalize"
-                    >
-                      {group.category} ({group.items.length})
-                    </button>
-                  ))}
+                  {groupedFaqs.map(group => {
+                    const anchorId = getAnchorId(`category-${group.category}`);
+                    return (
+                      <a
+                        key={group.category}
+                        href={`#${anchorId}`}
+                        onClick={(e) => scrollToCategory(e, group.category)}
+                        className="px-3 py-1 rounded-full bg-blue-700/60 hover:bg-blue-600 text-white text-xs font-semibold border border-blue-400/30 transition-all cursor-pointer shadow-xs capitalize inline-block"
+                      >
+                        {group.category} ({group.items.length})
+                      </a>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -190,54 +194,57 @@ export default function FaqPage() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
             <div className="space-y-10">
               {groupedFaqs.length > 0 ? (
-                groupedFaqs.map(group => (
-                  <div key={group.category} id={`category-${group.category}`} className="space-y-4 scroll-mt-6">
-                    <div className="flex items-center space-x-3 border-b border-slate-200 pb-2">
-                      <h2 className="text-lg font-extrabold text-slate-900 capitalize">
-                        {group.category}
-                      </h2>
-                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                        {group.items.length} {group.items.length === 1 ? 'question' : 'questions'}
-                      </span>
-                    </div>
+                groupedFaqs.map(group => {
+                  const anchorId = getAnchorId(`category-${group.category}`);
+                  return (
+                    <div key={group.category} id={anchorId} className="space-y-4 scroll-mt-24">
+                      <div className="flex items-center space-x-3 border-b border-slate-200 pb-2">
+                        <h2 className="text-lg font-extrabold text-slate-900 capitalize">
+                          {group.category}
+                        </h2>
+                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                          {group.items.length} {group.items.length === 1 ? 'question' : 'questions'}
+                        </span>
+                      </div>
 
-                    <div className="space-y-4">
-                      {group.items.map((faq: FaqItem) => {
-                        const isOpen = !!openIds[faq.id];
-                        return (
-                          <div
-                            key={faq.id}
-                            className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all hover:border-blue-200"
-                          >
-                            <button
-                              type="button"
-                              onClick={() => toggleAccordion(faq.id)}
-                              className="w-full text-left px-6 py-5 flex items-start justify-between space-x-4 cursor-pointer focus:outline-hidden"
+                      <div className="space-y-4">
+                        {group.items.map((faq: FaqItem) => {
+                          const isOpen = !!openIds[faq.id];
+                          return (
+                            <div
+                              key={faq.id}
+                              className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all hover:border-blue-200"
                             >
-                              <div className="space-y-1">
-                                <h3 className="text-base font-bold text-slate-900">
-                                  {faq.question}
-                                </h3>
-                              </div>
-                              <div className="shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
-                                {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                              </div>
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => toggleAccordion(faq.id)}
+                                className="w-full text-left px-6 py-5 flex items-start justify-between space-x-4 cursor-pointer focus:outline-hidden"
+                              >
+                                <div className="space-y-1">
+                                  <h3 className="text-base font-bold text-slate-900">
+                                    {faq.question}
+                                  </h3>
+                                </div>
+                                <div className="shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200">
+                                  {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </div>
+                              </button>
 
-                            {isOpen && (
-                              <div className="px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4">
-                                <div
-                                  className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
-                                  dangerouslySetInnerHTML={{ __html: faq.answer }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                              {isOpen && (
+                                <div className="px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4">
+                                  <div
+                                    className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
+                                    dangerouslySetInnerHTML={{ __html: faq.answer }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
                   <HelpCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />

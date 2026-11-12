@@ -42199,9 +42199,9 @@ var DEFAULT_PRICE_PLANS = {
 var CREDIT_CONSUMPTION_GUIDE = DEFAULT_PRICE_PLANS.creditConsumptionGuide;
 async function fetchPricePlansData(supabaseClient) {
   try {
-    const { data: row, error } = await supabaseClient.from("app_knowledge").select("data").eq("key", KNOWLEDGE_KEY$7).single();
+    const { data: row, error } = await supabaseClient.from("kl_app").select("data").eq("key", KNOWLEDGE_KEY$7).single();
     if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY$7}] Failed to fetch from Supabase app_knowledge:`, error == null ? void 0 : error.message);
+      console.error(`[${KNOWLEDGE_KEY$7}] Failed to fetch from Supabase kl_app:`, error == null ? void 0 : error.message);
       return null;
     }
     const result = row.data;
@@ -43152,7 +43152,7 @@ var YAMATO_BOT_CONFIGS = {
 var KNOWLEDGE_KEY$6 = "YAMATO_CONFIGS";
 async function fetchYamatoConfigsData(supabaseClient) {
   try {
-    const { data: row, error } = await supabaseClient.from("app_knowledge").select("*").eq("key", KNOWLEDGE_KEY$6).single();
+    const { data: row, error } = await supabaseClient.from("kl_app").select("*").eq("key", KNOWLEDGE_KEY$6).single();
     if (error || !row) {
       console.warn(`[${KNOWLEDGE_KEY$6}] Supabase\u304B\u3089\u306E\u53D6\u5F97\u5931\u6557\u306E\u305F\u3081\u30C7\u30D5\u30A9\u30EB\u30C8\u3092\u8FD4\u3057\u307E\u3059:`, error == null ? void 0 : error.message);
       return YAMATO_BOT_CONFIGS;
@@ -44465,7 +44465,7 @@ function DataErrorState({
 var KNOWLEDGE_KEY$5 = "ORAL_EXAM_QUESTIONS";
 async function fetchOralExamQuestionsData(supabaseClient) {
   try {
-    const { data: rows, error } = await supabaseClient.from("app_knowledge").select("key, data").eq("key", KNOWLEDGE_KEY$5);
+    const { data: rows, error } = await supabaseClient.from("kl_app").select("key, data").eq("key", KNOWLEDGE_KEY$5);
     if (error) {
       console.warn(`[${KNOWLEDGE_KEY$5}] Supabase fetch error:`, error.message);
       return null;
@@ -44616,7 +44616,7 @@ function OralExamQuestions() {
           {
             title: "Oral Exam Resources Unavailable",
             message: "Failed to load oral exam questions from the database. Please check your network connection and try again.",
-            errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase.",
+            errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from kl_app table in Supabase.",
             onRetry: loadData
           }
         ) })
@@ -45769,7 +45769,7 @@ function EoyOralElaboratePage() {
       {
         title: "Oral Exam Database Unavailable",
         message: "Unable to load Oral Exam Questions from Supabase. Please reload or report this error.",
-        errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+        errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from kl_app table in Supabase."
       }
     ) }) });
   }
@@ -47382,7 +47382,7 @@ function EoyOralDrillPage() {
       {
         title: "Oral Exam Database Unavailable",
         message: "Unable to load Oral Exam Questions from Supabase. Please reload or report this error.",
-        errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+        errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from kl_app table in Supabase."
       }
     ) }) });
   }
@@ -47550,9 +47550,9 @@ var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
 var KNOWLEDGE_KEY$4 = "WRITING_STYLES";
 async function fetchWritingStylesData(supabaseClient) {
   try {
-    const { data: row, error } = await supabaseClient.from("app_knowledge").select("data").eq("key", KNOWLEDGE_KEY$4).single();
+    const { data: row, error } = await supabaseClient.from("kl_app").select("data").eq("key", KNOWLEDGE_KEY$4).single();
     if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY$4}] Failed to fetch from Supabase app_knowledge:`, error == null ? void 0 : error.message);
+      console.error(`[${KNOWLEDGE_KEY$4}] Failed to fetch from Supabase kl_app:`, error == null ? void 0 : error.message);
       return null;
     }
     const result = row.data;
@@ -47616,7 +47616,7 @@ function WritingStylesGuide() {
         {
           title: "Writing Styles Guide Unavailable",
           message: "Failed to load Writing Styles from the database. Please check your network connection and try again.",
-          errorMessage: "Failed to fetch key 'WRITING_STYLES' from app_knowledge table in Supabase.",
+          errorMessage: "Failed to fetch key 'WRITING_STYLES' from kl_app table in Supabase.",
           onRetry: loadData
         }
       ) })
@@ -48439,7 +48439,7 @@ function MockOralMode() {
       {
         title: "Oral Exam Database Unavailable",
         message: "Unable to load Oral Exam Questions for Mock Exam from the database. Please reload or report this error.",
-        errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+        errorMessage: "Failed to fetch key 'ORAL_EXAM_QUESTIONS' from kl_app table in Supabase."
       }
     ) }) });
   }
@@ -48792,7 +48792,7 @@ var WRITING_EXAM_QUESTIONS_FALLBACK = [
 var KNOWLEDGE_KEY$3 = "WRITING_EXAM_QUESTIONS";
 async function fetchWritingExamQuestionsData(supabaseClient) {
   try {
-    const { data: row, error } = await supabaseClient.from("app_knowledge").select("*").eq("key", KNOWLEDGE_KEY$3).single();
+    const { data: row, error } = await supabaseClient.from("kl_app").select("*").eq("key", KNOWLEDGE_KEY$3).single();
     if (error || !row) {
       console.warn(`[${KNOWLEDGE_KEY$3}] Supabase\u304B\u3089\u306E\u53D6\u5F97\u5931\u6557\u307E\u305F\u306F\u30C7\u30FC\u30BF\u672A\u767B\u9332\u306E\u305F\u3081\u3001\u30D5\u30A9\u30FC\u30EB\u30D0\u30C3\u30AF\u6848\u5185\u3092\u8FD4\u3057\u307E\u3059:`, error == null ? void 0 : error.message);
       return WRITING_EXAM_QUESTIONS_FALLBACK;
@@ -48815,9 +48815,9 @@ function getGenkoyoshiData(textTypesData) {
 }
 async function fetchTextTypesData(supabaseClient) {
   try {
-    const { data: row, error } = await supabaseClient.from("app_knowledge").select("data").eq("key", KNOWLEDGE_KEY$2).single();
+    const { data: row, error } = await supabaseClient.from("kl_app").select("data").eq("key", KNOWLEDGE_KEY$2).single();
     if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY$2}] Failed to fetch from Supabase app_knowledge:`, error == null ? void 0 : error.message);
+      console.error(`[${KNOWLEDGE_KEY$2}] Failed to fetch from Supabase kl_app:`, error == null ? void 0 : error.message);
       return null;
     }
     const result = row.data;
@@ -48918,7 +48918,7 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
       {
         title: "Text Types Specification Unavailable",
         message: "Unable to load Text Types and Genkoyoshi guides from the database. Please reload or report this error.",
-        errorMessage: "Failed to fetch key 'TEXTTYPES' from app_knowledge table in Supabase.",
+        errorMessage: "Failed to fetch key 'TEXTTYPES' from kl_app table in Supabase.",
         onRetry: loadDataFromSupabase
       }
     ) }) });
@@ -48929,7 +48929,7 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
       {
         title: "Writing Styles Unavailable",
         message: "Unable to load Writing Styles information from the database.",
-        errorMessage: "Failed to fetch key 'WRITING_STYLES' from app_knowledge table in Supabase.",
+        errorMessage: "Failed to fetch key 'WRITING_STYLES' from kl_app table in Supabase.",
         onRetry: loadDataFromSupabase
       }
     ) }) });
@@ -49591,7 +49591,7 @@ var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 var KNOWLEDGE_KEY$1 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
   try {
-    const { data: row, error } = await supabaseClient.from("app_knowledge").select("*").eq("key", KNOWLEDGE_KEY$1).single();
+    const { data: row, error } = await supabaseClient.from("kl_app").select("*").eq("key", KNOWLEDGE_KEY$1).single();
     if (error || !row) {
       console.error(`[${KNOWLEDGE_KEY$1}] Supabase fetch error:`, error == null ? void 0 : error.message);
       return null;
@@ -50164,7 +50164,7 @@ var TextTypesComponent = () => {
       {
         title: "Text Types Specification Unavailable",
         message: "Failed to load Text Types from the database. Please check your network connection and try again.",
-        errorMessage: "Failed to fetch key 'TEXTTYPES' from app_knowledge table in Supabase.",
+        errorMessage: "Failed to fetch key 'TEXTTYPES' from kl_app table in Supabase.",
         onRetry: loadData
       }
     ) })
@@ -51173,7 +51173,7 @@ function Prices() {
       {
         title: "Pricing Plans Unavailable",
         message: "Failed to load pricing plans from the database. Please check your network connection and try again.",
-        errorMessage: "Failed to fetch key 'PRICE_PLANS' from app_knowledge table in Supabase.",
+        errorMessage: "Failed to fetch key 'PRICE_PLANS' from kl_app table in Supabase.",
         onRetry: loadData
       }
     ) }) });
@@ -51513,7 +51513,7 @@ var PORTAL_CONTENT = {
 var PORTAL_KNOWLEDGE_KEY = "PORTAL_CONTENT";
 async function fetchPortalContentData(supabaseClient) {
   try {
-    const { data: data2, error } = await supabaseClient.from("app_knowledge").select("data").eq("key", PORTAL_KNOWLEDGE_KEY).single();
+    const { data: data2, error } = await supabaseClient.from("kl_app").select("data").eq("key", PORTAL_KNOWLEDGE_KEY).single();
     if (error) {
       return {
         data: null,
@@ -52222,7 +52222,7 @@ function Home() {
               {
                 title: "Pricing Data Unavailable",
                 message: "Failed to load pricing packages from Supabase.",
-                errorMessage: "Failed to fetch key 'PRICE_PLANS' from app_knowledge table in Supabase.",
+                errorMessage: "Failed to fetch key 'PRICE_PLANS' from kl_app table in Supabase.",
                 onRetry: loadPricePlans
               }
             ) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
@@ -52844,9 +52844,9 @@ var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 var KNOWLEDGE_KEY = "FAQ";
 async function fetchFaqData(supabaseClient) {
   try {
-    const { data: row, error } = await supabaseClient.from("app_knowledge").select("data").eq("key", KNOWLEDGE_KEY).single();
+    const { data: row, error } = await supabaseClient.from("kl_app").select("data").eq("key", KNOWLEDGE_KEY).single();
     if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase app_knowledge:`, error == null ? void 0 : error.message);
+      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase kl_app:`, error == null ? void 0 : error.message);
       return null;
     }
     const result = row.data;
@@ -53011,7 +53011,7 @@ function FaqPage() {
           {
             title: "FAQ Data Unavailable",
             message: "Failed to load FAQ items from the database. Please check your network connection and try again.",
-            errorMessage: "Failed to fetch key 'FAQ' from app_knowledge table in Supabase.",
+            errorMessage: "Failed to fetch key 'FAQ' from kl_app table in Supabase.",
             onRetry: loadData
           }
         ) })

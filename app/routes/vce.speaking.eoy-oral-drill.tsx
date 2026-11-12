@@ -1,23 +1,23 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
 /**
  *  @file eoy-oral-drill.tsx
  *  @description VCE Japanese - EOY Oral Practice & Custom QA Bank (Clean Cloudflare-compatible Edition)
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import PageLayout from '~/components/PageLayout';
+import PageLayout from '~/components/layout/PageLayout';
 import { DataErrorState } from '~/components/DataErrorState';
-import OralExaminerAvatar from '~/components/OralExaminerAvatar';
-import ChatYamatoEoyOralDrill from '~/components/ChatYamatoEoyOralDrill';
+import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
+import ChatYamatoEoyOralDrill from '~/components/chat/ChatYamatoEoyOralDrill';
 import { supabase } from '~/lib/supabaseClient';
 
 // 💡 Modular Oral components & hooks
-import OralCenterChatPractice from '~/components/OralCenterChatPractice';
-import OralUserAnswerList, { QuestionItem } from '~/components/OralUserAnswerList';
-import OralCustomQuestionForm from '~/components/OralCustomQuestionForm';
-import OralDrillQuestionSelector from '~/components/OralDrillQuestionSelector';
+import OralCenterChatPractice from '~/components/oral/OralCenterChatPractice';
+import OralUserAnswerList, { QuestionItem } from '~/components/oral/OralUserAnswerList';
+import OralCustomQuestionForm from '~/components/oral/OralCustomQuestionForm';
+import OralDrillQuestionSelector from '~/components/oral/OralDrillQuestionSelector';
 import { useOralPracticeEngine, QuestionData } from '~/hooks/OralPracticeHooks';
 import { useSupabaseUserAnswers } from '~/hooks/OralUserAnswersHooks';
 import {
@@ -386,7 +386,7 @@ export default function EoyOralDrillPage() {
           <DataErrorState
             title="Oral Exam Database Unavailable"
             message="Unable to load Oral Exam Questions from Supabase. Please reload or report this error."
-            errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from app_knowledge table in Supabase."
+            errorMessage="Failed to fetch key 'ORAL_EXAM_QUESTIONS' from kl_app table in Supabase."
           />
         </div>
       </ToolPageWrapper>

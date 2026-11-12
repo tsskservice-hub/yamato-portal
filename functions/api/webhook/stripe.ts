@@ -1,9 +1,9 @@
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-// フォールバック用の安全なダミー値
+// フォールバック用のURL（秘密情報ではない）
+// ※管理者キー（SUPABASE_SERVICE_ROLE_KEY）は環境変数からのみ取得する。コードに直接書かないこと。
 const DEFAULT_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
-const DEFAULT_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicXV3em9yZWVjeHhiZXdqcGRuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjY5MDk0OSwiZXhwIjoyMTAyMjY2OTQ5fQ.3urGAd9dp1ZS36kF_vBCQ_1RrbIypR-Def_0QRHqE4k";
 
 export async function onRequestPost(context: {
   request: Request;
@@ -20,10 +20,16 @@ export async function onRequestPost(context: {
   const webhookSecret = env.STRIPE_WEBHOOK_SECRET || (typeof process !== 'undefined' ? process.env.STRIPE_WEBHOOK_SECRET : '');
   
   const supabaseUrl = env.SUPABASE_URL || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : '') || DEFAULT_URL;
-  const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || (typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : '') || DEFAULT_SERVICE_KEY;
+  const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || (typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : '');
 
   if (!stripeSecretKey) {
     return new Response(JSON.stringify({ error: "Stripe Secret Key is missing" }), { status: 500 });
+  }
+
+  if (!supabaseServiceKey) {
+    // 500を返すとStripeが自動で再送するため、環境変数を設定すれば取りこぼしは回復できる
+    console.error("SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.");
+    return new Response(JSON.stringify({ error: "Server configuration error" }), { status: 500 });
   }
 
   const stripe = new Stripe(stripeSecretKey, { apiVersion: "2026-09-30.endive" as any });

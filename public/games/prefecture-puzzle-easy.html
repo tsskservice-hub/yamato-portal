@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan Prefecture Puzzle — 日本の都道府県パズル</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: #f6f1e5;
+    background-image: radial-gradient(ellipse at 20% 0%, #fdf9ec 0%, #f6f1e5 55%, #efe7d2 100%);
+    color: #33302a;
+    min-height: 100vh;
+  }
+  .page { max-width: 1080px; margin: 0 auto; padding: 14px 14px 28px; }
+  header.topbar {
+    display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;
+    background: #fffdf6; border: 1px solid #e2d9c2; border-radius: 14px;
+    padding: 14px 18px; box-shadow: 0 2px 10px rgba(61, 43, 31, .08);
+  }
+  header.topbar .titles { flex: 1 1 260px; min-width: 220px; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 26px; line-height: 1.15; margin: 0; color: #1e3a5f; letter-spacing: .2px;
+  }
+  h1 .jp { display: block; font-size: 14px; color: #8a6d3b; font-weight: normal; margin-top: 3px; letter-spacing: 2px; }
+  .level-badge {
+    display: inline-block; font-family: -apple-system, "Segoe UI", sans-serif; font-size: 13px; font-weight: 700;
+    border-radius: 999px; padding: 3px 11px; vertical-align: middle; margin-left: 8px; letter-spacing: .3px;
+  }
+  .level-badge.easy { background: #e6f4ea; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .level-badge.hard { background: #fdecea; color: #b03024; border: 1px solid #ef9a9a; }
+  .subtitle { margin: 6px 0 0; font-size: 13px; color: #6d675c; line-height: 1.5; }
+  .top-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+  button {
+    font-family: inherit; cursor: pointer; border-radius: 999px; border: 1px solid transparent;
+    padding: 9px 16px; font-size: 14px; font-weight: 600; transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
+  }
+  button:active { transform: translateY(1px); }
+  .btn-ghost { background: #fff; border-color: #c9bfa5; color: #4a4438; }
+  .btn-ghost:hover { background: #f4edda; }
+  .btn-primary { background: #1e3a5f; color: #fff; box-shadow: 0 2px 6px rgba(30, 58, 95, .35); }
+  .btn-primary:hover { background: #2a4d77; }
+  .btn-gold { background: #c9a227; color: #fff; box-shadow: 0 2px 6px rgba(201, 162, 39, .35); }
+  .btn-gold:hover { background: #d4ad33; }
+  .icon-btn { padding: 8px 12px; font-size: 16px; line-height: 1; }
+
+  .layout { display: flex; gap: 16px; margin-top: 16px; align-items: flex-start; }
+  .layout.stacked { flex-direction: column; }
+  .layout.side { flex-direction: row; }
+  .map-col { flex: 1 1 auto; min-width: 0; }
+  .side-col { flex: 0 0 300px; width: 300px; }
+  .layout.stacked .side-col { flex: 1 1 auto; width: 100%; }
+
+  .map-card {
+    background: #fffdf6; border: 1px solid #e2d9c2; border-radius: 14px;
+    padding: 10px; box-shadow: 0 2px 10px rgba(61, 43, 31, .08);
+  }
+  .map-wrap { position: relative; border-radius: 10px; overflow: hidden; line-height: 0; }
+  #mapSvg { width: 100%; height: auto; display: block; touch-action: none; }
+  .slot { fill: #f3ecdc; stroke: var(--rc, #a89a7d); stroke-width: 1; stroke-linejoin: round; }
+  .slot.hover { stroke: #1e3a5f; stroke-width: 2; }
+  .slot.placed { stroke: rgba(0,0,0,.35); stroke-width: 1; }
+  .slot-label { font-size: 11px; font-weight: 700; fill: #fff; stroke: rgba(0,0,0,.45); stroke-width: 3px; paint-order: stroke; text-anchor: middle; pointer-events: none; font-family: -apple-system, "Segoe UI", sans-serif; }
+  .sea-label { font-family: Georgia, serif; font-style: italic; fill: rgba(255,255,255,.55); font-size: 15px; letter-spacing: 2px; }
+
+  .piece-box {
+    position: absolute; left: 12px; top: 12px; width: 196px; z-index: 5;
+    background: rgba(255, 253, 246, .97); border: 1px solid #d8cba6; border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(20, 40, 70, .35); padding: 10px 10px 8px; line-height: 1.35;
+  }
+  .piece-box.shake { animation: shake .4s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); } 40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); } 80% { transform: translateX(3px); }
+  }
+  .piece-box .box-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8a6d3b; text-align: center; }
+  .piece-box .box-hint { font-size: 11px; color: #6d675c; text-align: center; margin-top: 2px; }
+  #pieceHolder { margin-top: 6px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #pieceHolder:active { cursor: grabbing; }
+  #pieceHolder svg { width: 100%; max-height: 200px; height: auto; display: block; filter: drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
+  .piece-box .tap-hint { font-size: 11px; color: #1e3a5f; text-align: center; margin-top: 4px; }
+  .piece-box .tap-hint button { background: none; border: none; padding: 2px 6px; font-size: 11px; color: #1e3a5f; text-decoration: underline; font-weight: 600; }
+
+  #dragGhost {
+    position: fixed; z-index: 60; pointer-events: none; display: none;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.45));
+  }
+  #dragGhost svg { width: 100%; height: 100%; display: block; }
+
+  .panel { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: #fffdf6; border: 1px solid #e2d9c2; border-radius: 14px;
+    padding: 14px 16px; box-shadow: 0 2px 10px rgba(61, 43, 31, .08);
+  }
+  .card h2 { font-family: Georgia, serif; font-size: 16px; margin: 0 0 8px; color: #1e3a5f; }
+  .big-count { font-family: Georgia, serif; font-size: 30px; color: #1e3a5f; line-height: 1; }
+  .big-count small { font-size: 16px; color: #6d675c; }
+  .progress-track { height: 10px; background: #ece3cb; border-radius: 999px; overflow: hidden; margin: 10px 0 4px; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #c9a227, #d97b29); border-radius: 999px; transition: width .4s ease; }
+  .stats { display: flex; gap: 16px; margin-top: 10px; font-size: 13px; color: #6d675c; }
+  .stats b { color: #33302a; font-size: 15px; }
+  #statusMsg { min-height: 38px; font-size: 13.5px; line-height: 1.45; color: #4a4438; margin-top: 10px; }
+  #statusMsg.good { color: #2e7d32; font-weight: 600; }
+  #statusMsg.bad { color: #b03024; font-weight: 600; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .btn-row button { flex: 1 1 auto; }
+
+  #placedList { list-style: none; margin: 0; padding: 0; max-height: 230px; overflow-y: auto; font-size: 13px; }
+  #placedList li { display: flex; align-items: center; gap: 8px; padding: 4px 2px; border-bottom: 1px dashed #eadfc3; color: #9a938a; }
+  #placedList li.done { color: #33302a; font-weight: 600; }
+  #placedList li .dot { width: 10px; height: 10px; border-radius: 50%; background: #d8d0ba; flex: 0 0 10px; }
+  #placedList li.done .dot { background: var(--rc, #888); }
+  #placedList li .kanji { margin-left: auto; color: #9a938a; font-size: 12px; }
+  #placedList li.done .kanji { color: #6d675c; }
+  #placedList li .tick { color: #2e7d32; font-weight: 700; width: 14px; text-align: center; }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(30, 30, 40, .55); z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: #fffdf6; border-radius: 16px; max-width: 520px; width: 100%;
+    max-height: 88vh; overflow-y: auto; padding: 22px 24px; position: relative;
+    box-shadow: 0 16px 50px rgba(0,0,0,.35); border: 1px solid #e2d9c2;
+  }
+  .modal h2 { font-family: Georgia, serif; color: #1e3a5f; margin: 0 0 4px; font-size: 22px; }
+  .modal .jp-big { font-size: 15px; color: #8a6d3b; margin-bottom: 10px; }
+  .modal p { font-size: 14px; line-height: 1.65; color: #4a4438; }
+  .modal ul { font-size: 14px; line-height: 1.65; color: #4a4438; padding-left: 20px; }
+  .modal ul li { margin-bottom: 8px; }
+  .modal .close-x {
+    position: absolute; top: 10px; right: 10px; background: #f0e9d6; border: none;
+    width: 32px; height: 32px; border-radius: 50%; font-size: 16px; color: #4a4438; padding: 0;
+  }
+  .modal .close-x:hover { background: #e6dcc0; }
+  .food-badge {
+    position: absolute; top: 12px; right: 52px;
+    background: #fff3d6; border: 1px solid #e3c98a; color: #6b4e12;
+    border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700;
+    max-width: 58%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .detail-shape { background: linear-gradient(160deg, #16324f, #1e4a6b); border-radius: 12px; padding: 12px; margin: 12px 0; position: relative; }
+  .detail-shape svg { width: 100%; height: auto; display: block; max-height: 300px; }
+  /* North is up in every shape, so this badge tells the player which way
+     the blue coastline faces (north, east, south or west). */
+  .north-arrow { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.92); color: #1e3a5f; font: 700 13px/1 Georgia, serif; padding: 5px 8px; border-radius: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+  .detail-rows { font-size: 14px; line-height: 1.9; }
+  .detail-rows .row { display: flex; gap: 10px; border-bottom: 1px dashed #eadfc3; padding: 3px 0; }
+  .detail-rows .k { flex: 0 0 84px; color: #8a6d3b; font-weight: 700; }
+  .coast-note { font-size: 12.5px; color: #1e3a5f; background: #e8f0fa; border: 1px solid #bcd2ea; border-radius: 8px; padding: 8px 10px; margin-top: 12px; line-height: 1.5; }
+  .coast-note .blue-line { display: inline-block; width: 26px; height: 0; border-top: 3px solid #2563eb; vertical-align: middle; margin: 0 4px; }
+  .win-emoji { font-size: 44px; text-align: center; }
+  .win-stats { text-align: center; font-size: 14px; color: #4a4438; margin: 8px 0 16px; line-height: 1.8; }
+  .center { text-align: center; }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 21px; }
+    .piece-box { width: 150px; top: 8px; left: 8px; padding: 8px 8px 6px; }
+    .side-col { flex-basis: auto; }
+    #placedList { max-height: 170px; }
+    .food-badge { font-size: 12px; padding: 5px 9px; max-width: 52%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="topbar">
+    <div class="titles">
+      <h1>Japan Prefecture Puzzle <span class="level-badge" id="levelBadge"></span><span class="jp">日本の都道府県パズル</span></h1>
+      <p class="subtitle" id="subtitleEl">Drag each prefecture onto the map and complete the Japanese archipelago — all 47 prefectures.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn-ghost icon-btn" id="soundBtn" title="Sound on / off" aria-label="Toggle sound">🔊</button>
+      <button class="btn-ghost" id="howBtn">How to Play</button>
+    </div>
+  </header>
+
+  <div class="layout side" id="layout">
+    <div class="map-col">
+      <div class="map-card">
+        <div class="map-wrap" id="mapWrap">
+          <svg id="mapSvg" viewBox="0 0 640 696" role="img" aria-label="Map of Japan with 47 prefecture outlines">
+            <defs>
+              <linearGradient id="seaGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1e4a6b"/>
+                <stop offset="55%" stop-color="#16324f"/>
+                <stop offset="100%" stop-color="#122a44"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="640" height="696" fill="url(#seaGrad)"/>
+            <text class="sea-label" x="470" y="640">Pacific Ocean</text>
+            <g id="slots"></g>
+            <g id="placedLayer"></g>
+            <g id="labelsLayer"></g>
+          </svg>
+          <div class="piece-box" id="pieceBox">
+            <div class="box-title">Next piece</div>
+            <div id="pieceHolder" title="Drag me onto the map"></div>
+            <div class="box-hint">Drag it onto the map</div>
+            <div class="tap-hint"><button id="detailBtn" type="button">Tap for details</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col">
+      <div class="panel">
+        <div class="card">
+          <h2>Your progress</h2>
+          <div class="big-count"><span id="placedCount">0</span> <small>/ 47 placed</small></div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="stats">
+            <span>⏱ Time <b id="timeEl">0:00</b></span>
+            <span>✖ Mistakes <b id="mistakeEl">0</b></span>
+            <span>⏭ Skipped <b id="skipEl">0</b></span>
+          </div>
+          <div id="statusMsg">Drag the piece in the box onto the map. Tap the piece to see which prefecture it is.</div>
+          <div class="btn-row">
+            <button class="btn-primary" id="skipBtn">Skip this piece ⏭</button>
+            <button class="btn-gold" id="newBtn">New Game</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Prefectures placed</h2>
+          <ul id="placedList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="dragGhost"></div>
+
+<div class="overlay" id="howOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+    <button class="close-x" data-close="howOverlay" aria-label="Close">✕</button>
+    <h2 id="howTitle">How to Play</h2>
+    <ul>
+      <li>One prefecture piece at a time appears in the box over the Sea of Japan. Drag it onto the map and drop it in the right place. Tap a piece to see its details.</li>
+      <li>All prefecture pieces are prepared with <b>north at the top</b>. They are never rotated.</li>
+      <li>If the shape in the pop-up has a <b style="color:#2563eb">blue line</b>, that part of the prefecture <b>faces the sea</b>. The pop-up also tells you which sea it is.</li>
+      <li id="howColour" style="display:none">This is the <b>easy version</b>: each prefecture's outline is coloured by its region, and each piece has the colour of its region — match the colours to find where it goes!</li>
+      <li>Stuck? Press <b>Skip</b> to try the next piece. Skipped pieces come back later, and you must place every one of them to finish.</li>
+    </ul>
+    <p class="center"><button class="btn-primary" data-close="howOverlay">Got it!</button></p>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <button class="close-x" data-close="detailOverlay" aria-label="Close">✕</button>
+    <div class="food-badge" id="detailFood">—</div>
+    <h2 id="detailTitle">—</h2>
+    <div class="jp-big" id="detailKanji">—</div>
+    <div class="detail-shape"><div class="north-arrow" title="North is up">↑ N</div><svg id="detailSvg" viewBox="0 0 100 100"></svg></div>
+    <div class="detail-rows">
+      <div class="row"><span class="k">Region</span><span id="detailRegion">—</span></div>
+      <div class="row"><span class="k">Capital</span><span id="detailCapital">—</span></div>
+      <div class="row"><span class="k">Coast</span><span id="detailCoast">—</span></div>
+    </div>
+    <div class="coast-note" id="coastNote"></div>
+    <p class="center" style="margin-top:16px"><button class="btn-primary" data-close="detailOverlay">Back to the puzzle</button></p>
+  </div>
+</div>
+
+<div class="overlay" id="winOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-emoji">🎉</div>
+    <h2 id="winTitle" class="center">Congratulations!</h2>
+    <p class="center" style="font-size:15px">You placed all 47 prefectures — the Japanese archipelago is complete!</p>
+    <div class="win-stats" id="winStats"></div>
+    <p class="center"><button class="btn-gold" id="againBtn">Play Again</button></p>
+  </div>
+</div>
+
+<script>
+"use strict";
+const PREF_DATA = {"viewW":640,"viewH":696,"prefs":[{"id":1,"name":"Hokkaido","kanji":"北海道","capital":"Sapporo","region":"Hokkaido","food":"🦀 かに","seas":["Sea of Japan","Pacific Ocean","Sea of Okhotsk"],"coastDirs":["all around"],"rings":[[[490,23],[491,14],[492,16],[495,16],[499,12],[513,27],[519,36],[526,42],[540,52],[558,56],[558,59],[561,61],[572,62],[586,49],[587,52],[580,63],[579,68],[581,71],[586,73],[585,74],[586,73],[582,72],[587,82],[590,83],[594,79],[598,79],[592,82],[591,86],[581,87],[577,92],[574,91],[573,89],[570,92],[572,93],[564,93],[560,91],[550,95],[541,102],[536,110],[532,125],[525,119],[513,114],[497,104],[491,103],[493,102],[483,106],[475,113],[467,104],[461,104],[457,109],[457,114],[463,119],[469,119],[474,125],[480,128],[474,131],[469,129],[467,130],[468,128],[466,128],[465,130],[461,132],[460,137],[456,139],[454,141],[451,141],[449,135],[452,128],[453,123],[450,119],[447,118],[444,114],[445,108],[445,103],[447,101],[451,100],[454,96],[457,98],[459,93],[463,91],[458,84],[458,81],[462,79],[470,85],[475,84],[475,85],[479,87],[486,81],[483,68],[491,62],[491,50],[494,45],[495,40],[490,23]],[[476,20],[474,14],[477,15],[476,20]],[[479,21],[480,20],[482,21],[483,24],[481,25],[478,22]],[[628,39],[628,39]],[[596,58],[606,44],[611,47],[618,46],[615,49],[614,48],[610,51],[606,51],[601,55],[597,62],[592,64],[591,70],[591,68],[588,69],[588,65],[596,58]],[[486,46],[485,46],[486,46]],[[482,47],[483,47]],[[619,69],[618,66],[622,65],[621,65],[624,63],[627,65],[620,69]],[[625,66],[625,66]],[[623,68],[623,68]],[[621,68],[621,68]],[[621,68],[621,68]],[[612,72],[610,71],[612,72]],[[583,73],[584,73]],[[586,73],[586,73]],[[613,73],[613,73]],[[586,73],[586,73]],[[606,77],[604,75],[608,74],[606,77]],[[600,78],[599,77],[602,77],[600,78]],[[604,78],[605,77],[604,78]],[[607,78],[607,78]],[[607,78],[607,78]],[[600,79],[600,79]],[[603,80],[603,80]],[[465,81],[465,81]],[[594,82],[595,82]],[[593,84],[593,84]],[[482,85],[482,85]],[[593,85],[593,85]],[[581,89],[581,89]],[[580,90],[580,90]],[[574,93],[574,93]],[[435,121],[434,117],[438,114],[435,121]],[[432,138],[433,137],[432,138]],[[444,143],[444,142]],[[498,12],[498,12]],[[474,13],[474,13]],[[474,13],[474,13]],[[474,13],[474,13]],[[474,14],[474,14]],[[474,13],[474,14]],[[533,125],[533,125]],[[434,117],[434,117]]],"coast":"M490,23L491,14L492,16L495,16L499,12L513,27L519,36L526,42L540,52L558,56L558,59L561,61L572,62L586,49L587,52L580,63L579,68L581,71L586,73L585,74L586,73L582,72L587,82L590,83L594,79L598,79L592,82L591,86L581,87L577,92L574,91L573,89L570,92L572,93L564,93L560,91L550,95L541,102L536,110L532,125L525,119L513,114L497,104L491,103L493,102L483,106L475,113L467,104L461,104L457,109L457,114L463,119L469,119L474,125L480,128L474,131L469,129L467,130L468,128L466,128L465,130L461,132L460,137L456,139L454,141L451,141L449,135L452,128L453,123L450,119L447,118L444,114L445,108L445,103L447,101L451,100L454,96L457,98L459,93L463,91L458,84L458,81L462,79L470,85L475,84L475,85L479,87L486,81L483,68L491,62L491,50L494,45L495,40L490,23L490,23M476,20L474,14L477,15L476,20L476,20M479,21L480,20L482,21L483,24L481,25L478,22L479,21M628,39L628,39L628,39M596,58L606,44L611,47L618,46L615,49L614,48L610,51L606,51L601,55L597,62L592,64L591,70L591,68L588,69L588,65L596,58L596,58M486,46L485,46L486,46L486,46M482,47L483,47L482,47M619,69L618,66L622,65L621,65L624,63L627,65L620,69L619,69M625,66L625,66L625,66M623,68L623,68L623,68M621,68L621,68L621,68M621,68L621,68L621,68M612,72L610,71L612,72L612,72M583,73L584,73L583,73M586,73L586,73L586,73M613,73L613,73L613,73M586,73L586,73L586,73M606,77L604,75L608,74L606,77L606,77M600,78L599,77L602,77L600,78L600,78M604,78L605,77L604,78L604,78M607,78L607,78L607,78M607,78L607,78L607,78M600,79L600,79L600,79M603,80L603,80L603,80M465,81L465,81L465,81M594,82L595,82L594,82M593,84L593,84L593,84M482,85L482,85L482,85M593,85L593,85L593,85M581,89L581,89L581,89M580,90L580,90L580,90M574,93L574,93L574,93M435,121L434,117L438,114L435,121L435,121M432,138L433,137L432,138L432,138M444,143L444,142L444,143M498,12L498,12L498,12M474,13L474,13L474,13M474,13L474,13L474,13M474,13L474,13L474,13M474,14L474,14L474,14M474,13L474,14L474,13M533,125L533,125L533,125M434,117L434,117L434,117","cx":515,"cy":79,"area":7034,"bbox":[432,12,628,143]},{"id":2,"name":"Aomori","kanji":"青森県","capital":"Aomori","region":"Tohoku","food":"🍎 りんご","seas":["Sea of Japan","Pacific Ocean"],"coastDirs":[],"rings":[[[473,136],[473,136]],[[469,147],[473,136],[482,142],[487,140],[485,148],[485,161],[487,167],[492,171],[489,174],[486,173],[484,174],[483,173],[475,178],[473,177],[474,171],[471,171],[472,169],[466,172],[464,171],[464,172],[459,170],[458,171],[451,170],[450,172],[448,171],[448,168],[446,166],[449,162],[456,160],[457,151],[456,149],[457,149],[458,145],[461,148],[463,146],[466,148],[466,156],[468,159],[471,157],[472,153],[477,157],[479,157],[482,149],[481,146],[479,145],[476,148],[470,150],[469,147]],[[472,153],[472,153]],[[471,156],[471,156]],[[436,168],[436,168]]],"coast":"M473,136L473,136L473,136M469,147L473,136L482,142L487,140L485,148L485,161L487,167L492,171M448,171L448,168L446,166L449,162L456,160L457,151L456,149L457,149L458,145L461,148L463,146L466,148L466,156L468,159L471,157L472,153L477,157L479,157L482,149L481,146L479,145L476,148L470,150L469,147L469,147M472,153L472,153L472,153M471,156L471,156L471,156M436,168L436,168L436,168","cx":471,"cy":160,"area":846,"bbox":[436,136,492,178]},{"id":3,"name":"Iwate","kanji":"岩手県","capital":"Morioka","region":"Tohoku","food":"🍜 わんこそば","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[490,173],[492,171],[496,177],[495,179],[497,180],[496,183],[499,185],[501,193],[499,198],[501,196],[502,199],[499,201],[500,202],[502,201],[498,206],[500,205],[500,206],[498,207],[499,208],[498,208],[500,208],[496,212],[498,213],[496,213],[497,214],[496,214],[496,215],[494,215],[493,214],[493,218],[492,216],[491,217],[487,216],[486,223],[483,222],[480,224],[477,221],[478,220],[474,220],[469,217],[470,214],[468,212],[470,210],[466,204],[470,196],[469,193],[471,191],[469,189],[472,189],[471,183],[472,178],[476,178],[483,173],[484,174],[490,173]],[[500,195],[500,195]],[[501,203],[501,203]],[[500,204],[500,204]],[[500,207],[500,207]],[[493,218],[493,218]]],"coast":"M492,171L496,177L495,179L497,180L496,183L499,185L501,193L499,198L501,196L502,199L499,201L500,202L502,201L498,206L500,205L500,206L498,207L499,208L498,208L500,208L496,212L498,213L496,213L497,214L496,214L496,215L494,215L493,214L493,218L492,216L491,217M500,195L500,195L500,195M501,203L501,203L501,203M500,204L500,204L500,204M500,207L500,207L500,207M493,218L493,218L493,218","cx":484,"cy":198,"area":1278,"bbox":[466,171,502,224]},{"id":4,"name":"Miyagi","kanji":"宮城県","capital":"Sendai","region":"Tohoku","food":"🐄 ぎゅうたん","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[487,217],[491,217],[492,221],[490,219],[490,222],[488,223],[489,226],[488,225],[486,226],[488,227],[487,230],[489,232],[487,231],[488,233],[486,234],[487,235],[489,235],[487,236],[488,239],[485,235],[482,234],[479,236],[480,237],[477,236],[475,237],[477,238],[475,239],[476,239],[473,245],[473,251],[471,251],[471,254],[468,254],[467,251],[462,251],[461,249],[456,248],[456,246],[460,245],[461,239],[465,233],[463,228],[465,227],[466,223],[463,220],[470,217],[474,220],[478,220],[478,222],[481,224],[483,222],[486,223],[487,217]],[[491,221],[491,220],[491,221]],[[491,221],[491,221]],[[488,230],[488,230]],[[488,232],[488,232]],[[488,234],[488,234]],[[490,234],[490,234]],[[490,235],[490,235]],[[490,235],[490,235]],[[486,236],[486,236]],[[477,236],[477,236]],[[477,236],[477,236]],[[477,236],[477,236]],[[479,236],[479,236]],[[478,236],[478,236]],[[478,237],[478,237]],[[478,237],[478,237]],[[478,237],[478,237]],[[478,237],[478,237]],[[478,237],[478,237]],[[476,237],[476,237]],[[476,237],[476,237]],[[478,237],[478,237]],[[477,237],[477,237]],[[479,237],[479,237]],[[490,239],[489,238],[490,239]],[[485,238],[485,238]],[[488,240],[487,239],[488,240]]],"coast":"M491,217L492,221L490,219L490,222L488,223L489,226L488,225L486,226L488,227L487,230L489,232L487,231L488,233L486,234L487,235L489,235L487,236L488,239L485,235L482,234L479,236L480,237L477,236L475,237L477,238L475,239L476,239L473,245L473,251M491,221L491,220L491,221L491,221M491,221L491,221L491,221M488,230L488,230L488,230M488,232L488,232L488,232M488,234L488,234L488,234M490,234L490,234L490,234M490,235L490,235L490,235M490,235L490,235L490,235M486,236L486,236L486,236M477,236L477,236L477,236M477,236L477,236L477,236M477,236L477,236L477,236M479,236L479,236L479,236M478,236L478,236L478,236M478,237L478,237L478,237M478,237L478,237L478,237M478,237L478,237L478,237M478,237L478,237L478,237M478,237L478,237L478,237M476,237L476,237L476,237M476,237L476,237L476,237M478,237L478,237L478,237M477,237L477,237L477,237M479,237L479,237L479,237M490,239L489,238L490,239L490,239M485,238L485,238L485,238M488,240L487,239L488,240L488,240","cx":473,"cy":234,"area":601,"bbox":[456,217,492,254]},{"id":5,"name":"Akita","kanji":"秋田県","capital":"Akita","region":"Tohoku","food":"🍲 きりたんぽ","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[472,169],[471,171],[474,171],[475,173],[471,179],[472,189],[469,189],[471,191],[469,193],[470,196],[466,204],[470,210],[468,212],[470,214],[469,217],[464,220],[460,216],[453,215],[451,212],[446,212],[450,203],[451,192],[447,188],[443,189],[441,185],[444,186],[448,182],[450,174],[448,171],[450,172],[451,170],[458,171],[459,170],[464,172],[464,171],[466,172],[472,169]],[[441,184],[442,184]],[[450,192],[450,192]],[[437,210],[437,210]]],"coast":"M446,212L450,203L451,192L447,188L443,189L441,185L444,186L448,182L450,174L448,171M441,184L442,184L441,184M450,192L450,192L450,192M437,210L437,210L437,210","cx":460,"cy":192,"area":983,"bbox":[437,169,475,220]},{"id":6,"name":"Yamagata","kanji":"山形県","capital":"Yamagata","region":"Tohoku","food":"🍒 さくらんぼ","seas":["Sea of Japan"],"coastDirs":["west"],"rings":[[[438,210],[438,210]],[[446,212],[451,212],[453,215],[458,215],[466,223],[465,227],[463,228],[465,233],[461,239],[460,245],[456,246],[457,253],[455,255],[449,255],[448,253],[444,254],[440,251],[442,241],[444,241],[447,238],[442,235],[442,232],[438,230],[443,222],[446,213]]],"coast":"M438,210L438,210L438,210M438,230L443,222L446,213L446,212","cx":452,"cy":233,"area":771,"bbox":[438,210,466,255]},{"id":7,"name":"Fukushima","kanji":"福島県","capital":"Fukushima","region":"Tohoku","food":"🍑 もも","seas":["Pacific Ocean"],"coastDirs":["east"],"rings":[[[456,248],[467,251],[468,254],[471,254],[471,251],[473,251],[476,258],[476,271],[474,279],[470,283],[464,280],[464,283],[461,285],[455,280],[456,278],[453,275],[448,274],[434,281],[430,281],[430,274],[428,271],[429,265],[434,264],[435,263],[439,263],[438,258],[443,253],[441,252],[444,254],[448,253],[449,255],[452,256],[455,255],[457,253],[456,248]]],"coast":"M473,251L476,258L476,271L474,279L470,283","cx":455,"cy":267,"area":1127,"bbox":[428,248,476,285]},{"id":8,"name":"Ibaraki","kanji":"茨城県","capital":"Mito","region":"Kanto","food":"🍈 めろん","seas":["Pacific Ocean"],"coastDirs":["east"],"rings":[[[464,281],[470,283],[465,295],[465,298],[464,302],[467,312],[466,313],[467,312],[471,318],[462,311],[462,313],[453,315],[448,312],[441,305],[449,298],[454,297],[456,294],[455,288],[457,288],[456,281],[461,285],[464,283],[464,281]],[[467,312],[467,312]]],"coast":"M470,283L465,295L465,298L464,302L467,312L466,313L467,312L471,318M467,312L467,312L467,312","cx":457,"cy":300,"area":498,"bbox":[441,281,471,318]},{"id":9,"name":"Tochigi","kanji":"栃木県","capital":"Utsunomiya","region":"Kanto","food":"🍓 いちご","seas":[],"coastDirs":[],"rings":[[[448,274],[456,278],[456,294],[454,297],[449,298],[445,302],[441,304],[440,301],[435,301],[433,298],[436,292],[432,290],[434,284],[433,283],[435,280],[448,274]]],"coast":"","cx":445,"cy":288,"area":514,"bbox":[432,274,456,304]},{"id":10,"name":"Gunma","kanji":"群馬県","capital":"Maebashi","region":"Kanto","food":"🍜 みずさわうどん","seas":[],"coastDirs":[],"rings":[[[414,297],[408,296],[409,291],[411,288],[418,287],[419,284],[422,284],[423,279],[425,279],[426,277],[430,281],[434,281],[432,290],[436,292],[433,298],[435,301],[440,301],[441,303],[436,304],[427,301],[425,306],[416,310],[414,309],[415,306],[413,305],[414,305],[413,301],[415,300],[415,297]]],"coast":"","cx":423,"cy":294,"area":521,"bbox":[408,277,441,310]},{"id":11,"name":"Saitama","kanji":"埼玉県","capital":"Saitama","region":"Kanto","food":"🍠 さつまいも","seas":[],"coastDirs":[],"rings":[[[427,301],[436,304],[441,304],[446,313],[446,317],[443,316],[442,317],[440,316],[438,318],[437,316],[434,317],[431,315],[424,313],[421,315],[417,313],[417,309],[425,306],[427,301]]],"coast":"","cx":432,"cy":310,"area":292,"bbox":[417,301,446,318]},{"id":12,"name":"Chiba","kanji":"千葉県","capital":"Chiba","region":"Kanto","food":"🥜 らっかせい","seas":["Pacific Ocean","Tokyo Bay"],"coastDirs":[],"rings":[[[443,307],[448,312],[453,315],[462,313],[462,311],[471,318],[471,320],[467,319],[462,323],[459,328],[459,335],[452,338],[446,344],[443,342],[446,342],[444,340],[446,333],[444,331],[447,330],[447,328],[452,323],[449,320],[446,321],[447,319],[447,314],[444,307]],[[448,320],[448,320]],[[443,331],[443,331]],[[443,331],[443,331]]],"coast":"M471,318L471,320L467,319L462,323L459,328L459,335L452,338L446,344L443,342L446,342L444,340L446,333L444,331L447,330L447,328L452,323L449,320L446,321M448,320L448,320L448,320M443,331L443,331L443,331M443,331L443,331L443,331","cx":455,"cy":325,"area":391,"bbox":[443,307,471,344]},{"id":13,"name":"Tokyo","kanji":"東京都","capital":"Tokyo","region":"Kanto","food":"🍣 すし","seas":["Pacific Ocean","Tokyo Bay"],"coastDirs":[],"rings":[[[422,314],[424,313],[431,315],[434,317],[437,316],[438,318],[445,316],[447,319],[446,321],[443,321],[444,325],[437,321],[435,322],[437,323],[436,326],[434,323],[430,322],[424,319],[422,315]],[[445,321],[445,321]],[[446,321],[446,321]],[[446,321],[446,321]],[[443,322],[443,322]],[[443,322],[443,322]],[[445,322],[445,322]],[[444,322],[444,322]],[[443,323],[443,323]],[[444,323],[445,322]],[[444,323],[445,323]],[[444,323],[444,323]],[[443,324],[443,323]],[[435,351],[433,351],[433,348],[435,348],[435,351]],[[431,357],[431,356]],[[431,358],[431,358]],[[431,362],[431,359],[431,362]],[[429,361],[429,361]],[[429,362],[429,362]],[[429,363],[429,363]],[[431,362],[431,362]],[[427,367],[427,365],[427,367]],[[429,366],[429,366]],[[425,367],[426,367]],[[436,371],[437,369],[438,370],[437,371]],[[439,377],[439,376],[440,377]],[[445,402],[443,399],[445,400],[445,402]],[[442,400],[442,400]],[[443,421],[444,421]],[[451,453],[451,453]],[[457,483],[457,483]],[[433,371],[433,371]],[[419,374],[419,374]],[[419,374],[419,374]],[[431,383],[431,383]],[[419,374],[419,374]],[[419,374],[419,374]],[[419,374],[419,374]],[[419,374],[419,374]],[[447,439],[447,439]]],"coast":"M446,321L443,321L444,325M445,321L445,321L445,321M446,321L446,321L446,321M446,321L446,321L446,321M443,322L443,322L443,322M443,322L443,322L443,322M445,322L445,322L445,322M444,322L444,322L444,322M443,323L443,323L443,323M444,323L445,322L444,323M444,323L445,323L444,323M444,323L444,323L444,323M443,324L443,323L443,324M435,351L433,351L433,348L435,348L435,351L435,351M431,357L431,356L431,357M431,358L431,358L431,358M431,362L431,359L431,362L431,362M429,361L429,361L429,361M429,362L429,362L429,362M429,363L429,363L429,363M431,362L431,362L431,362M427,367L427,365L427,367L427,367M429,366L429,366L429,366M425,367L426,367L425,367M436,371L437,369L438,370L437,371L436,371M439,377L439,376L440,377L439,377M445,402L443,399L445,400L445,402L445,402M442,400L442,400L442,400M443,421L444,421L443,421M451,453L451,453L451,453M457,483L457,483L457,483M433,371L433,371L433,371M419,374L419,374L419,374M419,374L419,374L419,374M431,383L431,383L431,383M419,374L419,374L419,374M419,374L419,374L419,374M419,374L419,374L419,374M419,374L419,374L419,374M447,439L447,439L447,439","cx":434,"cy":319,"area":146,"bbox":[419,313,457,483]},{"id":14,"name":"Kanagawa","kanji":"神奈川県","capital":"Yokohama","region":"Kanto","food":"🥟 しゅうまい","seas":["Pacific Ocean","Tokyo Bay"],"coastDirs":[],"rings":[[[427,320],[434,323],[436,326],[437,323],[435,322],[437,321],[444,325],[440,327],[441,327],[440,328],[440,332],[443,333],[440,335],[441,337],[439,337],[438,332],[435,331],[429,333],[427,334],[428,337],[426,337],[423,335],[424,329],[421,328],[426,325],[427,320]],[[443,326],[444,325],[443,326]],[[442,326],[442,326]],[[440,327],[440,327]],[[441,327],[442,327]],[[440,327],[440,327]],[[441,329],[441,329]],[[441,329],[441,328]],[[440,331],[440,331]],[[440,332],[440,332]],[[440,337],[440,337]]],"coast":"M444,325L440,327L441,327L440,328L440,332L443,333L440,335L441,337L439,337L438,332L435,331L429,333L427,334L428,337L426,337M443,326L444,325L443,326L443,326M442,326L442,326L442,326M440,327L440,327L440,327M441,327L442,327L441,327M440,327L440,327L440,327M441,329L441,329L441,329M441,329L441,328L441,329M440,331L440,331L440,331M440,332L440,332L440,332M440,337L440,337L440,337","cx":432,"cy":328,"area":197,"bbox":[421,320,444,337]},{"id":15,"name":"Niigata","kanji":"新潟県","capital":"Niigata","region":"Chubu","food":"🍚 おこめ","seas":["Sea of Japan"],"coastDirs":["northwest"],"rings":[[[438,230],[442,232],[442,235],[447,239],[441,242],[440,250],[443,253],[438,258],[439,263],[435,263],[434,264],[429,266],[430,268],[428,271],[430,274],[430,280],[426,277],[425,279],[423,279],[422,284],[416,287],[416,283],[413,281],[412,278],[408,279],[405,284],[403,283],[399,285],[398,282],[395,281],[392,286],[391,281],[389,279],[396,277],[401,273],[404,273],[412,267],[417,260],[419,254],[425,249],[430,248],[434,243],[435,235],[438,230]],[[429,234],[430,232],[429,234]],[[410,237],[410,237]],[[404,254],[403,253],[407,249],[406,247],[404,248],[404,245],[411,237],[409,245],[413,245],[412,247],[410,251],[404,254]],[[404,245],[404,245]],[[430,232],[430,232]]],"coast":"M389,279L396,277L401,273L404,273L412,267L417,260L419,254L425,249L430,248L434,243L435,235L438,230L438,230M429,234L430,232L429,234L429,234M410,237L410,237L410,237M404,254L403,253L407,249L406,247L404,248L404,245L411,237L409,245L413,245L412,247L410,251L404,254L404,254M404,245L404,245L404,245M430,232L430,232L430,232","cx":423,"cy":263,"area":962,"bbox":[389,230,447,287]},{"id":16,"name":"Toyama","kanji":"富山県","capital":"Toyama","region":"Chubu","food":"🦐 しろえび","seas":["Sea of Japan"],"coastDirs":["north"],"rings":[[[389,279],[391,281],[392,289],[388,298],[382,296],[381,297],[380,295],[376,296],[372,301],[369,298],[367,301],[367,287],[369,281],[374,280],[372,283],[373,284],[376,286],[380,286],[382,285],[383,281],[388,279]]],"coast":"M374,280L372,283L373,284L376,286L380,286L382,285L383,281L388,279L389,279","cx":379,"cy":290,"area":354,"bbox":[367,279,392,301]},{"id":17,"name":"Ishikawa","kanji":"石川県","capital":"Kanazawa","region":"Chubu","food":"🍛 かなざわかれー","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[370,252],[370,252]],[[370,260],[370,260]],[[369,260],[369,260]],[[369,260],[369,260]],[[375,264],[379,262],[382,265],[379,265],[379,268],[375,270],[373,273],[371,271],[370,272],[369,276],[372,277],[374,275],[374,280],[369,281],[367,287],[366,297],[369,302],[366,307],[364,308],[361,305],[356,305],[353,301],[361,292],[366,283],[366,279],[365,274],[364,274],[366,268],[374,264]],[[371,276],[370,274],[374,274],[374,275],[371,276]],[[370,275],[370,275]]],"coast":"M370,252L370,252L370,252M370,260L370,260L370,260M369,260L369,260L369,260M369,260L369,260L369,260M375,264L379,262L382,265L379,265L379,268L375,270L373,273L371,271L370,272L369,276L372,277L374,275L374,280M353,301L361,292L366,283L366,279L365,274L364,274L366,268L374,264L375,264M371,276L370,274L374,274L374,275L371,276L371,276M370,275L370,275L370,275","cx":366,"cy":286,"area":333,"bbox":[353,252,382,308]},{"id":18,"name":"Fukui","kanji":"福井県","capital":"Fukui","region":"Chubu","food":"🍜 えちぜんそば","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[353,301],[356,305],[361,305],[364,308],[366,307],[365,310],[368,314],[367,316],[360,317],[360,318],[356,316],[354,321],[351,319],[351,324],[350,323],[349,325],[347,326],[345,325],[344,329],[342,328],[341,330],[335,329],[333,327],[334,324],[335,326],[338,324],[336,326],[340,326],[341,324],[339,325],[340,323],[342,324],[342,321],[346,322],[346,319],[347,317],[349,321],[349,317],[346,311],[350,302],[353,301]],[[350,302],[350,302]],[[342,322],[342,321]]],"coast":"M334,324L335,326L338,324L336,326L340,326L341,324L339,325L340,323L342,324L342,321L346,322L346,319L347,317L349,321L349,317L346,311L350,302L353,301L353,301M350,302L350,302L350,302M342,322L342,321L342,322","cx":352,"cy":315,"area":338,"bbox":[333,301,368,330]},{"id":19,"name":"Yamanashi","kanji":"山梨県","capital":"Kofu","region":"Chubu","food":"🍇 ぶどう","seas":[],"coastDirs":[],"rings":[[[407,311],[410,313],[413,312],[415,314],[417,313],[422,314],[424,319],[427,320],[426,325],[421,329],[415,330],[412,328],[411,336],[408,335],[407,331],[405,332],[404,330],[405,325],[403,316],[407,311]]],"coast":"","cx":414,"cy":322,"area":361,"bbox":[403,311,427,336]},{"id":20,"name":"Nagano","kanji":"長野県","capital":"Nagano","region":"Chubu","food":"🍜 しんしゅうそば","seas":[],"coastDirs":[],"rings":[[[411,278],[416,283],[416,287],[411,288],[409,291],[408,296],[415,297],[415,300],[413,301],[414,305],[413,305],[417,313],[414,314],[413,312],[410,313],[407,311],[403,316],[404,318],[403,319],[404,321],[402,324],[402,330],[395,334],[387,335],[386,333],[388,331],[387,329],[389,329],[388,327],[389,325],[386,322],[386,321],[384,318],[381,315],[388,309],[387,306],[389,300],[387,298],[392,292],[392,286],[395,283],[395,281],[398,282],[399,285],[403,283],[405,284],[408,279],[411,278]]],"coast":"","cx":399,"cy":306,"area":1086,"bbox":[381,278,417,335]},{"id":21,"name":"Gifu","kanji":"岐阜県","capital":"Gifu","region":"Chubu","food":"🍖 ひだぎゅう","seas":[],"coastDirs":[],"rings":[[[374,298],[376,296],[380,295],[381,297],[382,296],[389,299],[387,306],[388,308],[387,310],[381,315],[386,321],[386,322],[389,325],[388,327],[389,329],[387,329],[387,332],[383,334],[380,332],[377,333],[374,332],[372,328],[366,330],[364,337],[360,333],[356,334],[358,329],[357,325],[355,324],[354,321],[356,316],[360,318],[360,317],[367,316],[368,313],[365,310],[366,305],[369,302],[367,301],[369,298],[372,301],[374,298]]],"coast":"","cx":374,"cy":317,"area":851,"bbox":[354,295,389,337]},{"id":22,"name":"Shizuoka","kanji":"静岡県","capital":"Shizuoka","region":"Chubu","food":"🍵 おちゃ","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[404,321],[404,331],[407,331],[409,336],[412,335],[412,329],[413,327],[415,330],[424,329],[423,335],[426,337],[425,339],[427,345],[424,349],[423,352],[420,354],[417,351],[418,342],[418,340],[421,340],[416,337],[412,338],[411,342],[407,344],[403,351],[404,354],[397,352],[385,351],[385,347],[389,345],[394,335],[402,330],[402,324],[403,321]],[[428,340],[428,340]],[[421,340],[421,340]],[[404,353],[404,353]]],"coast":"M426,337L425,339L427,345L424,349L423,352L420,354L417,351L418,342L418,340L421,340L416,337L412,338L411,342L407,344L403,351L404,354L397,352L385,351M428,340L428,340L428,340M421,340L421,340L421,340M404,353L404,353L404,353","cx":407,"cy":341,"area":596,"bbox":[385,321,428,354]},{"id":23,"name":"Aichi","kanji":"愛知県","capital":"Nagoya","region":"Chubu","food":"🍜 みそにこみうどん","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[371,328],[377,333],[380,332],[383,334],[387,332],[387,335],[394,335],[389,345],[385,347],[385,351],[373,354],[374,352],[375,353],[380,350],[380,351],[381,348],[378,347],[377,349],[373,348],[371,347],[372,342],[370,348],[372,351],[371,351],[368,349],[368,345],[370,338],[366,341],[364,337],[364,334],[366,330],[371,328]],[[368,341],[368,341]],[[368,343],[368,343]],[[367,346],[367,345],[367,346]],[[380,347],[380,347]],[[380,348],[380,348]],[[378,348],[378,348]],[[375,349],[375,349]],[[381,350],[381,350]],[[374,350],[374,350]],[[381,350],[381,350]],[[379,350],[379,350]],[[372,351],[373,350]],[[373,352],[372,352]],[[376,352],[376,352]],[[375,352],[375,352]]],"coast":"M385,351L373,354L374,352L375,353L380,350L380,351L381,348L378,347L377,349L373,348L371,347L372,342L370,348L372,351L371,351L368,349L368,345L370,338L366,341M368,341L368,341L368,341M368,343L368,343L368,343M367,346L367,345L367,346L367,346M380,347L380,347L380,347M380,348L380,348L380,348M378,348L378,348L378,348M375,349L375,349L375,349M381,350L381,350L381,350M374,350L374,350L374,350M381,350L381,350L381,350M379,350L379,350L379,350M372,351L373,350L372,351M373,352L372,352L373,352M376,352L376,352L376,352M375,352L375,352L375,352","cx":378,"cy":340,"area":416,"bbox":[364,328,394,354]},{"id":24,"name":"Mie","kanji":"三重県","capital":"Tsu","region":"Kansai","food":"🥩 まつさかぎゅう","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[360,333],[366,341],[363,341],[360,350],[360,353],[368,357],[369,359],[370,359],[370,361],[368,361],[370,361],[370,364],[367,364],[369,364],[368,363],[364,364],[365,362],[364,362],[362,364],[362,363],[361,365],[360,364],[360,365],[359,364],[355,366],[354,370],[354,368],[352,370],[354,373],[352,373],[353,374],[349,376],[347,381],[345,381],[343,377],[347,374],[347,371],[349,372],[350,363],[349,360],[353,357],[348,354],[348,352],[349,351],[347,348],[349,347],[350,344],[353,346],[356,344],[358,339],[357,334],[360,333]],[[364,342],[364,342]],[[372,356],[372,355]],[[370,356],[370,356]],[[369,357],[370,356],[369,357]],[[369,356],[369,356]],[[368,356],[368,356]],[[368,357],[368,357]],[[369,358],[370,358]],[[369,357],[369,357]],[[370,358],[370,358]],[[370,358],[370,358]],[[369,361],[369,361]],[[365,362],[365,362]],[[368,363],[368,363]],[[368,363],[368,363]],[[368,363],[368,363]],[[364,363],[364,363]],[[368,363],[368,363]],[[368,363],[368,363]],[[368,363],[368,363]],[[368,364],[368,363]],[[368,364],[368,364]],[[368,364],[368,364]],[[361,365],[361,365]],[[356,366],[356,366]],[[357,366],[357,366]],[[357,367],[357,367]],[[357,367],[357,367]],[[355,367],[355,367]],[[355,367],[355,367]],[[354,368],[355,367]],[[356,368],[356,368]],[[353,370],[353,370]],[[353,371],[353,371]]],"coast":"M366,341L363,341L360,350L360,353L368,357L369,359L370,359L370,361L368,361L370,361L370,364L367,364L369,364L368,363L364,364L365,362L364,362L362,364L362,363L361,365L360,364L360,365L359,364L355,366L354,370L354,368L352,370L354,373L352,373L353,374L349,376L347,381M364,342L364,342L364,342M372,356L372,355L372,356M370,356L370,356L370,356M369,357L370,356L369,357L369,357M369,356L369,356L369,356M368,356L368,356L368,356M368,357L368,357L368,357M369,358L370,358L369,358M369,357L369,357L369,357M370,358L370,358L370,358M370,358L370,358L370,358M369,361L369,361L369,361M365,362L365,362L365,362M368,363L368,363L368,363M368,363L368,363L368,363M368,363L368,363L368,363M364,363L364,363L364,363M368,363L368,363L368,363M368,363L368,363L368,363M368,363L368,363L368,363M368,364L368,363L368,364M368,364L368,364L368,364M368,364L368,364L368,364M361,365L361,365L361,365M356,366L356,366L356,366M357,366L357,366L357,366M357,367L357,367L357,367M357,367L357,367L357,367M355,367L355,367L355,367M355,367L355,367L355,367M354,368L355,367L354,368M356,368L356,368L356,368M353,370L353,370L353,370M353,371L353,371L353,371","cx":356,"cy":356,"area":435,"bbox":[343,333,372,381]},{"id":25,"name":"Shiga","kanji":"滋賀県","capital":"Otsu","region":"Kansai","food":"🐮 おうみぎゅう","seas":[],"coastDirs":[],"rings":[[[351,319],[354,321],[355,324],[357,325],[358,329],[356,334],[358,336],[358,339],[356,344],[353,346],[350,344],[349,347],[347,348],[345,345],[343,345],[342,340],[343,332],[341,330],[342,328],[344,329],[345,325],[347,326],[349,325],[350,323],[351,324],[351,320]]],"coast":"","cx":350,"cy":335,"area":317,"bbox":[341,319,358,348]},{"id":26,"name":"Kyoto","kanji":"京都府","capital":"Kyoto","region":"Kansai","food":"🍡 やつはし","seas":["Sea of Japan"],"coastDirs":["northwest"],"rings":[[[322,324],[319,325],[318,321],[327,317],[329,320],[326,324],[328,322],[329,327],[331,326],[330,324],[333,322],[334,324],[333,327],[335,329],[341,330],[343,332],[342,341],[344,345],[345,345],[347,347],[347,350],[345,349],[344,350],[340,350],[337,342],[335,344],[334,341],[331,341],[331,337],[326,336],[325,333],[323,334],[319,331],[319,328],[322,328],[322,325]],[[332,320],[332,320]],[[333,323],[333,323]],[[330,326],[330,326]]],"coast":"M318,321L327,317L329,320L326,324L328,322L329,327L331,326L330,324L333,322L334,324M332,320L332,320L332,320M333,323L333,323L333,323M330,326L330,326L330,326","cx":332,"cy":333,"area":376,"bbox":[318,317,347,350]},{"id":27,"name":"Osaka","kanji":"大阪府","capital":"Osaka","region":"Kansai","food":"🐙 たこやき","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[331,340],[335,344],[337,342],[340,347],[338,353],[339,360],[325,364],[324,363],[327,362],[331,356],[332,356],[331,354],[333,354],[331,351],[333,350],[332,347],[332,344],[333,344],[330,342],[331,340]],[[332,352],[332,352]],[[331,352],[331,352]],[[332,353],[332,353]],[[332,353],[332,353]],[[332,355],[332,355]],[[331,356],[331,356]],[[330,359],[330,358]],[[327,359],[327,359]]],"coast":"M324,363L327,362L331,356L332,356L331,354L333,354L331,351M332,352L332,352L332,352M331,352L331,352L331,352M332,353L332,353L332,353M332,353L332,353L332,353M332,355L332,355L332,355M331,356L331,356L331,356M330,359L330,358L330,359M327,359L327,359L327,359","cx":334,"cy":353,"area":152,"bbox":[324,340,340,364]},{"id":28,"name":"Hyogo","kanji":"兵庫県","capital":"Kobe","region":"Kansai","food":"🥩 こうべぎゅう","seas":["Sea of Japan","Seto Inland Sea"],"coastDirs":[],"rings":[[[318,321],[319,325],[322,325],[322,328],[319,328],[319,331],[323,334],[325,333],[326,336],[331,337],[330,342],[333,344],[332,344],[332,347],[333,350],[331,351],[329,350],[323,353],[314,348],[308,349],[307,347],[306,350],[304,350],[302,346],[302,341],[306,336],[305,334],[309,333],[305,322],[309,320],[318,321]],[[313,321],[313,321]],[[313,349],[313,348]],[[330,350],[330,350]],[[329,350],[329,350]],[[329,350],[329,350]],[[330,351],[330,350]],[[317,351],[318,350]],[[318,351],[318,351]],[[328,351],[328,351]],[[312,351],[312,351]],[[309,352],[309,352]],[[327,352],[327,351],[327,352]],[[311,351],[311,351]],[[310,352],[310,352]],[[308,352],[308,352]],[[309,353],[309,352]],[[307,352],[307,352]],[[309,352],[309,352]],[[311,353],[311,353]],[[327,353],[327,353]],[[308,353],[308,353]],[[316,359],[321,354],[318,359],[320,364],[314,367],[312,363],[316,359]],[[308,354],[308,354]],[[320,364],[320,364]],[[316,368],[316,368]]],"coast":"M331,351L329,350L323,353L314,348L308,349L307,347L306,350L304,350M305,322L309,320L318,321L318,321M313,321L313,321L313,321M313,349L313,348L313,349M330,350L330,350L330,350M329,350L329,350L329,350M329,350L329,350L329,350M330,351L330,350L330,351M317,351L318,350L317,351M318,351L318,351L318,351M328,351L328,351L328,351M312,351L312,351L312,351M309,352L309,352L309,352M327,352L327,351L327,352L327,352M311,351L311,351L311,351M310,352L310,352L310,352M308,352L308,352L308,352M309,353L309,352L309,353M307,352L307,352L307,352M309,352L309,352L309,352M311,353L311,353L311,353M327,353L327,353L327,353M308,353L308,353L308,353M316,359L321,354L318,359L320,364L314,367L312,363L316,359L316,359M308,354L308,354L308,354M320,364L320,364L320,364M316,368L316,368L316,368","cx":316,"cy":338,"area":616,"bbox":[302,320,333,368]},{"id":29,"name":"Nara","kanji":"奈良県","capital":"Nara","region":"Kansai","food":"🍣 かきのはすし","seas":[],"coastDirs":[],"rings":[[[339,348],[343,350],[345,349],[347,350],[348,349],[348,354],[353,357],[349,360],[350,363],[349,372],[345,373],[343,377],[342,375],[337,376],[337,373],[335,370],[338,366],[340,365],[338,361],[339,348]]],"coast":"","cx":343,"cy":362,"area":292,"bbox":[335,348,353,377]},{"id":30,"name":"Wakayama","kanji":"和歌山県","capital":"Wakayama","region":"Kansai","food":"🍜 わかやまらーめん","seas":["Pacific Ocean","Seto Inland Sea"],"coastDirs":[],"rings":[[[335,362],[338,361],[340,365],[338,366],[335,369],[337,373],[337,376],[343,376],[343,378],[347,381],[345,384],[346,386],[342,388],[341,390],[341,389],[333,387],[330,383],[331,381],[327,379],[325,376],[323,376],[324,374],[323,373],[326,371],[323,370],[326,368],[323,364],[324,363],[325,364],[335,362]],[[322,363],[322,363]],[[321,364],[321,364]],[[326,368],[326,368]],[[324,369],[324,369]],[[323,369],[323,369]],[[324,372],[324,372]],[[345,373],[347,372],[346,375],[344,375],[345,373]],[[324,372],[324,372]],[[323,372],[323,372]],[[323,373],[323,373]],[[323,374],[323,374]],[[344,375],[344,377],[344,375]],[[325,377],[325,377]],[[329,380],[329,380]],[[330,382],[330,382]],[[331,382],[331,382]],[[345,384],[345,384]],[[334,387],[334,387]],[[335,388],[335,388]],[[342,390],[342,389],[343,389],[342,390]],[[342,390],[342,390]]],"coast":"M347,381L345,384L346,386L342,388L341,390L341,389L333,387L330,383L331,381L327,379L325,376L323,376L324,374L323,373L326,371L323,370L326,368L323,364L324,363M322,363L322,363L322,363M321,364L321,364L321,364M326,368L326,368L326,368M324,369L324,369L324,369M323,369L323,369L323,369M324,372L324,372L324,372M324,372L324,372L324,372M323,372L323,372L323,372M323,373L323,373L323,373M323,374L323,374L323,374M325,377L325,377L325,377M329,380L329,380L329,380M330,382L330,382L330,382M331,382L331,382L331,382M345,384L345,384L345,384M334,387L334,387L334,387M335,388L335,388L335,388M342,390L342,389L343,389L342,390L342,390M342,390L342,390L342,390","cx":334,"cy":376,"area":356,"bbox":[321,361,347,390]},{"id":31,"name":"Tottori","kanji":"鳥取県","capital":"Tottori","region":"Chugoku","food":"🍐 なし","seas":["Sea of Japan"],"coastDirs":["north"],"rings":[[[305,322],[309,330],[307,334],[300,336],[299,332],[296,332],[296,330],[292,333],[285,330],[283,335],[280,336],[280,338],[277,339],[273,339],[275,336],[274,334],[278,333],[278,328],[275,325],[276,324],[280,327],[284,325],[298,325],[305,322]]],"coast":"M276,324L280,327L284,325L298,325L305,322L305,322","cx":292,"cy":330,"area":285,"bbox":[273,322,309,339]},{"id":32,"name":"Shimane","kanji":"島根県","capital":"Matsue","region":"Chugoku","food":"🍜 いずもそば","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[276,305],[275,301],[277,299],[280,302],[278,304],[279,305],[276,305]],[[273,305],[273,305]],[[270,309],[269,307],[272,306],[271,308],[269,307],[270,309]],[[274,306],[274,306]],[[272,309],[273,306],[274,308],[272,309]],[[274,307],[274,307]],[[271,310],[270,309],[271,310]],[[271,310],[271,310]],[[272,310],[272,310]],[[271,310],[271,310]],[[276,324],[275,325],[278,328],[278,333],[274,334],[275,336],[273,339],[267,338],[261,344],[262,346],[258,348],[255,347],[254,348],[250,347],[248,350],[247,354],[243,363],[242,362],[240,363],[238,361],[239,359],[237,359],[236,351],[240,350],[255,335],[260,332],[262,329],[260,328],[269,325],[272,322],[274,324],[278,323],[276,324]],[[273,323],[273,323]],[[276,323],[276,323]],[[271,324],[271,323]],[[254,336],[254,336]],[[254,336],[254,336]],[[255,336],[255,336]],[[245,344],[246,344]],[[246,344],[246,344]],[[240,346],[240,346]],[[241,271],[241,271]],[[241,271],[241,271]],[[241,271],[241,271]]],"coast":"M276,305L275,301L277,299L280,302L278,304L279,305L276,305L276,305M273,305L273,305L273,305M270,309L269,307L272,306L271,308L269,307L270,309L270,309M274,306L274,306L274,306M272,309L273,306L274,308L272,309L272,309M274,307L274,307L274,307M271,310L270,309L271,310L271,310M271,310L271,310L271,310M272,310L272,310L272,310M271,310L271,310L271,310M236,351L240,350L255,335L260,332L262,329L260,328L269,325L272,322L274,324L278,323L276,324L276,324M273,323L273,323L273,323M276,323L276,323L276,323M271,324L271,323L271,324M254,336L254,336L254,336M254,336L254,336L254,336M255,336L255,336L255,336M245,344L246,344L245,344M246,344L246,344L246,344M240,346L240,346L240,346M241,271L241,271L241,271M241,271L241,271L241,271M241,271L241,271L241,271","cx":258,"cy":341,"area":514,"bbox":[236,271,280,363]},{"id":33,"name":"Okayama","kanji":"岡山県","capital":"Okayama","region":"Chugoku","food":"🍑 はくとう","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[296,330],[296,332],[299,332],[300,336],[306,334],[306,337],[302,341],[302,346],[304,350],[300,349],[302,351],[298,354],[294,354],[297,354],[294,358],[291,358],[290,359],[289,356],[288,358],[288,356],[285,358],[282,356],[283,358],[282,359],[281,357],[280,347],[277,345],[277,338],[280,338],[280,336],[283,336],[285,330],[292,333],[296,330]],[[304,351],[303,350],[304,350]],[[301,350],[301,350]],[[302,350],[302,350]],[[302,351],[302,351]],[[303,351],[303,351]],[[302,351],[302,351]],[[303,351],[303,351]],[[301,352],[301,352]],[[300,354],[300,354]],[[301,353],[301,353]],[[295,354],[295,354]],[[300,354],[301,354]],[[300,354],[300,354]],[[298,355],[298,355]],[[298,355],[298,355]],[[296,357],[296,357],[296,357]],[[288,358],[288,358]],[[289,358],[289,358]],[[292,359],[292,358]],[[283,359],[283,359]],[[283,359],[283,359]],[[290,359],[290,359]],[[291,359],[291,359]],[[291,359],[291,359]],[[293,359],[294,359]],[[283,360],[283,360]],[[284,361],[284,360],[284,361]],[[283,361],[283,361]],[[285,361],[285,361]],[[285,362],[285,361]],[[283,362],[283,362]],[[283,362],[283,362]],[[284,363],[284,363]]],"coast":"M304,350L300,349L302,351L298,354L294,354L297,354L294,358L291,358L290,359L289,356L288,358L288,356L285,358L282,356L283,358L282,359L281,357M304,351L303,350L304,350L304,351M301,350L301,350L301,350M302,350L302,350L302,350M302,351L302,351L302,351M303,351L303,351L303,351M302,351L302,351L302,351M303,351L303,351L303,351M301,352L301,352L301,352M300,354L300,354L300,354M301,353L301,353L301,353M295,354L295,354L295,354M300,354L301,354L300,354M300,354L300,354L300,354M298,355L298,355L298,355M298,355L298,355L298,355M296,357L296,357L296,357M288,358L288,358L288,358M289,358L289,358L289,358M292,359L292,358L292,359M283,359L283,359L283,359M283,359L283,359L283,359M290,359L290,359L290,359M291,359L291,359L291,359M291,359L291,359L291,359M293,359L294,359M283,360L283,360L283,360M284,361L284,360L284,361L284,361M283,361L283,361L283,361M285,361L285,361L285,361M285,362L285,361L285,362M283,362L283,362L283,362M283,362L283,362L283,362M284,363L284,363L284,363","cx":291,"cy":344,"area":554,"bbox":[277,330,306,363]},{"id":34,"name":"Hiroshima","kanji":"広島県","capital":"Hiroshima","region":"Chugoku","food":"🦪 かき","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[266,338],[276,339],[278,341],[277,345],[280,347],[281,357],[279,361],[276,360],[276,359],[272,360],[271,362],[265,363],[264,365],[261,366],[260,365],[258,366],[258,361],[254,361],[250,365],[251,366],[248,365],[248,362],[246,361],[245,357],[247,354],[248,350],[250,347],[254,348],[255,347],[258,348],[262,346],[261,344],[266,338]],[[275,361],[274,360],[276,360],[275,361]],[[274,361],[274,361]],[[280,361],[280,361]],[[277,361],[277,361]],[[276,361],[276,361]],[[278,362],[278,361]],[[273,361],[274,361]],[[272,361],[273,361]],[[273,363],[273,361],[273,362]],[[275,364],[274,361],[275,364]],[[274,361],[274,361]],[[277,362],[277,362]],[[282,361],[282,361]],[[256,362],[256,362]],[[281,362],[281,362]],[[257,362],[257,362]],[[272,363],[272,363]],[[255,363],[255,363]],[[269,363],[269,363]],[[256,363],[256,363]],[[282,363],[282,363]],[[272,364],[273,363],[272,364]],[[270,363],[270,363]],[[251,365],[253,363],[251,365]],[[268,364],[268,364]],[[255,368],[256,367],[254,364],[256,366],[255,365],[257,363],[257,368],[255,368]],[[254,363],[254,363]],[[265,364],[265,363]],[[267,364],[267,364]],[[268,364],[268,364]],[[267,366],[266,365],[268,364],[267,366]],[[265,364],[265,364]],[[254,364],[254,364]],[[267,364],[268,364]],[[267,364],[267,364]],[[267,365],[267,364]],[[264,364],[264,364]],[[264,364],[264,364]],[[264,364],[264,364]],[[266,365],[266,365]],[[266,365],[266,365]],[[253,365],[253,365]],[[262,366],[262,366]],[[263,368],[262,366],[264,366],[263,367]],[[261,367],[262,366],[261,367]],[[252,366],[252,366]],[[258,370],[256,370],[258,366],[258,369],[259,369],[259,370]],[[257,366],[257,366]],[[252,367],[252,367]],[[265,367],[265,367]],[[265,368],[266,366],[265,368]],[[266,367],[266,366]],[[264,367],[264,367]],[[254,368],[255,368]],[[259,368],[259,368]],[[255,368],[256,368]],[[261,368],[262,368]],[[261,368],[261,368]],[[264,368],[264,368]],[[252,369],[252,369],[252,369]],[[264,369],[265,369]],[[258,370],[259,370]],[[258,371],[258,371]],[[256,371],[256,371]],[[257,371],[257,371]]],"coast":"M281,357L279,361L276,360L276,359L272,360L271,362L265,363L264,365L261,366L260,365L258,366L258,361L254,361L250,365L251,366M275,361L274,360L276,360L275,361L275,361M274,361L274,361L274,361M280,361L280,361L280,361M277,361L277,361L277,361M276,361L276,361L276,361M278,362L278,361L278,362M273,361L274,361L273,361M272,361L273,361L272,361M273,363L273,361L273,362L273,363M275,364L274,361L275,364L275,364M274,361L274,361L274,361M277,362L277,362L277,362M282,361L282,361L282,361M256,362L256,362L256,362M281,362L281,362L281,362M257,362L257,362L257,362M272,363L272,363L272,363M255,363L255,363L255,363M269,363L269,363L269,363M256,363L256,363L256,363M282,363L282,363L282,363M272,364L273,363L272,364L272,364M270,363L270,363L270,363M251,365L253,363L251,365L251,365M268,364L268,364L268,364M255,368L256,367L254,364L256,366L255,365L257,363L257,368L255,368L255,368M254,363L254,363L254,363M265,364L265,363L265,364M267,364L267,364L267,364M268,364L268,364L268,364M267,366L266,365L268,364L267,366L267,366M265,364L265,364L265,364M254,364L254,364L254,364M267,364L268,364L267,364M267,364L267,364L267,364M267,365L267,364L267,365M264,364L264,364L264,364M264,364L264,364L264,364M264,364L264,364L264,364M266,365L266,365L266,365M266,365L266,365L266,365M253,365L253,365L253,365M262,366L262,366L262,366M263,368L262,366L264,366L263,367L263,368M261,367L262,366L261,367L261,367M252,366L252,366L252,366M258,370L256,370L258,366L258,369L259,369L259,370L258,370M257,366L257,366L257,366M252,367L252,367L252,367M265,367L265,367L265,367M265,368L266,366L265,368L265,368M266,367L266,366L266,367M264,367L264,367L264,367M254,368L255,368L254,368M259,368L259,368L259,368M255,368L256,368L255,368M261,368L262,368L261,368M261,368L261,368L261,368M264,368L264,368L264,368M252,369L252,369L252,369M264,369L265,369L264,369M258,370L259,370L258,370M258,371L258,371L258,371M256,371L256,371L256,371M257,371L257,371L257,371","cx":264,"cy":353,"area":640,"bbox":[245,338,282,371]},{"id":35,"name":"Yamaguchi","kanji":"山口県","capital":"Yamaguchi","region":"Chugoku","food":"🐡 ふぐ","seas":["Sea of Japan","Seto Inland Sea"],"coastDirs":[],"rings":[[[222,349],[222,348],[222,349]],[[236,351],[237,355],[236,357],[237,359],[239,359],[239,362],[243,363],[246,358],[248,365],[251,366],[250,372],[247,374],[248,378],[246,375],[243,375],[241,372],[238,373],[240,372],[238,370],[233,373],[231,371],[230,373],[229,371],[225,375],[223,375],[223,373],[220,371],[216,375],[216,371],[215,369],[217,366],[215,364],[216,361],[220,361],[217,360],[218,359],[222,359],[223,361],[226,361],[229,359],[229,358],[234,352],[236,351]],[[231,355],[231,354]],[[232,355],[232,355]],[[229,356],[229,356]],[[226,357],[226,357]],[[229,357],[229,357]],[[228,357],[227,357]],[[228,357],[228,357]],[[228,358],[228,358]],[[224,360],[223,359],[225,359],[224,360]],[[227,359],[227,359]],[[226,360],[226,360]],[[215,362],[215,361],[215,362]],[[218,361],[218,361]],[[216,367],[216,367]],[[216,367],[216,367]],[[252,369],[252,369],[252,369]],[[213,370],[214,370]],[[254,371],[255,371]],[[237,372],[239,371],[238,372]],[[254,372],[254,371]],[[255,371],[255,371]],[[237,373],[237,371],[237,373]],[[255,372],[255,372]],[[233,373],[234,372],[233,373]],[[239,372],[239,372]],[[251,373],[251,373]],[[255,372],[255,372]],[[219,373],[219,373]],[[253,373],[253,373]],[[219,373],[219,373]],[[253,373],[253,373]],[[240,375],[241,373],[240,375]],[[238,373],[238,373]],[[215,373],[215,373]],[[253,374],[253,374]],[[250,377],[250,374],[252,376],[256,374],[254,375],[254,377],[252,376],[250,377]],[[256,374],[257,374]],[[253,374],[253,374]],[[257,374],[257,374]],[[236,375],[237,374]],[[248,374],[248,374]],[[243,374],[242,374]],[[217,375],[217,375]],[[256,375],[256,375]],[[254,376],[254,375]],[[246,376],[246,376]],[[246,377],[246,377]],[[245,377],[245,377]],[[252,377],[252,377]],[[254,377],[254,377]],[[246,379],[246,377],[247,378],[246,379]],[[249,377],[249,377]],[[247,378],[247,378]],[[251,380],[249,379],[251,380]],[[251,379],[251,378]],[[254,379],[255,379]],[[243,380],[244,380]],[[243,379],[243,379]],[[254,379],[254,379]],[[246,380],[246,379]],[[248,381],[248,380],[248,381]],[[245,381],[245,381]]],"coast":"M222,349L222,348L222,349L222,349M251,366L250,372L247,374L248,378L246,375L243,375L241,372L238,373L240,372L238,370L233,373L231,371L230,373L229,371L225,375L223,375L223,373L220,371L216,375L216,371L215,369L217,366L215,364L216,361L220,361L217,360L218,359L222,359L223,361L226,361L229,359L229,358L234,352L236,351L236,351M231,355L231,354L231,355M232,355L232,355L232,355M229,356L229,356L229,356M226,357L226,357L226,357M229,357L229,357L229,357M228,357L227,357L228,357M228,357L228,357L228,357M228,358L228,358L228,358M224,360L223,359L225,359L224,360L224,360M227,359L227,359L227,359M226,360L226,360L226,360M215,362L215,361L215,362L215,362M218,361L218,361L218,361M216,367L216,367L216,367M216,367L216,367L216,367M252,369L252,369L252,369M213,370L214,370L213,370M254,371L255,371L254,371M237,372L239,371L238,372L237,372M254,372L254,371L254,372M255,371L255,371L255,371M237,373L237,371L237,373L237,373M255,372L255,372L255,372M233,373L234,372L233,373L233,373M239,372L239,372L239,372M251,373L251,373L251,373M255,372L255,372L255,372M219,373L219,373L219,373M253,373L253,373L253,373M219,373L219,373L219,373M253,373L253,373L253,373M240,375L241,373L240,375L240,375M238,373L238,373L238,373M215,373L215,373L215,373M253,374L253,374L253,374M250,377L250,374L252,376L256,374L254,375L254,377L252,376L250,377L250,377M256,374L257,374L256,374M253,374L253,374L253,374M257,374L257,374L257,374M236,375L237,374L236,375M248,374L248,374L248,374M243,374L242,374L243,374M217,375L217,375L217,375M256,375L256,375L256,375M254,376L254,375L254,376M246,376L246,376L246,376M246,377L246,377L246,377M245,377L245,377L245,377M252,377L252,377L252,377M254,377L254,377L254,377M246,379L246,377L247,378L246,379L246,379M249,377L249,377L249,377M247,378L247,378L247,378M251,380L249,379L251,380L251,380M251,379L251,378L251,379M254,379L255,379L254,379M243,380L244,380L243,380M243,379L243,379L243,379M254,379L254,379L254,379M246,380L246,379L246,380M248,381L248,380L248,381L248,381M245,381L245,381L245,381","cx":233,"cy":366,"area":467,"bbox":[213,348,257,381]},{"id":36,"name":"Tokushima","kanji":"徳島県","capital":"Tokushima","region":"Shikoku","food":"🍋 すだち","seas":["Seto Inland Sea","Pacific Ocean"],"coastDirs":[],"rings":[[[311,366],[311,365],[311,366]],[[311,367],[311,366],[312,365],[312,367]],[[307,366],[311,365],[312,367],[311,372],[314,375],[312,377],[315,378],[306,383],[303,387],[300,386],[300,382],[297,382],[296,378],[293,379],[287,377],[287,372],[292,369],[295,370],[300,367],[306,368],[307,366]],[[313,377],[313,377]],[[312,377],[312,377]],[[314,377],[314,377]],[[316,377],[316,377]],[[314,377],[314,377]],[[316,377],[316,377]],[[316,378],[316,377]],[[308,384],[308,384]],[[307,384],[307,384]],[[306,384],[306,384]],[[304,387],[304,387]]],"coast":"M311,366L311,365L311,366L311,366M311,367L311,366L312,365L312,367L311,367M307,366L311,365L312,367L311,372L314,375L312,377L315,378L306,383L303,387M313,377L313,377L313,377M312,377L312,377L312,377M314,377L314,377L314,377M316,377L316,377L316,377M314,377L314,377L314,377M316,377L316,377L316,377M316,378L316,377L316,378M308,384L308,384L308,384M307,384L307,384L307,384M306,384L306,384L306,384M304,387L304,387L304,387","cx":302,"cy":375,"area":334,"bbox":[287,365,316,387]},{"id":37,"name":"Kagawa","kanji":"香川県","capital":"Takamatsu","region":"Shikoku","food":"🍜 さぬきうどん","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[304,355],[304,359],[303,359],[303,357],[301,360],[301,357],[299,358],[300,356],[304,355]],[[300,356],[300,356]],[[300,356],[300,356]],[[299,356],[299,356]],[[295,357],[295,357]],[[296,357],[296,357],[296,357]],[[295,357],[295,357]],[[298,358],[296,357],[298,357],[298,358]],[[295,357],[295,357]],[[295,357],[295,357]],[[299,358],[299,358]],[[295,358],[295,358]],[[295,359],[295,358],[295,359]],[[295,358],[296,358]],[[294,358],[294,358]],[[300,358],[300,358]],[[296,358],[296,358]],[[294,358],[295,358]],[[304,359],[304,358]],[[296,359],[296,359]],[[304,359],[304,359]],[[297,359],[297,359]],[[291,360],[291,359]],[[299,359],[299,359]],[[293,359],[294,359],[294,359]],[[290,360],[290,360]],[[298,360],[298,360]],[[299,360],[299,360]],[[299,360],[299,360]],[[287,361],[287,360]],[[297,361],[297,360]],[[291,360],[291,360]],[[290,360],[290,360]],[[289,361],[290,361]],[[288,361],[288,360],[288,361]],[[299,368],[295,370],[294,369],[288,372],[285,371],[287,366],[284,364],[287,366],[294,360],[298,362],[299,360],[300,362],[302,361],[302,364],[307,366],[306,368],[299,368]],[[300,360],[300,360]],[[294,360],[294,360]],[[291,361],[291,360]],[[291,360],[291,360]],[[287,361],[287,361]],[[292,361],[292,361]],[[290,361],[290,361]],[[286,362],[286,362]],[[286,362],[286,362]],[[287,363],[287,363]],[[286,363],[286,363]],[[286,364],[286,364]],[[287,364],[287,364]],[[286,366],[286,366]],[[286,366],[286,366]],[[282,368],[282,368]],[[284,369],[284,369]]],"coast":"M304,355L304,359L303,359L303,357L301,360L301,357L299,358L300,356L304,355L304,355M300,356L300,356L300,356M300,356L300,356L300,356M299,356L299,356L299,356M295,357L295,357L295,357M296,357L296,357L296,357M295,357L295,357L295,357M298,358L296,357L298,357L298,358L298,358M295,357L295,357L295,357M295,357L295,357L295,357M299,358L299,358L299,358M295,358L295,358L295,358M295,359L295,358L295,359L295,359M295,358L296,358L295,358M294,358L294,358L294,358M300,358L300,358L300,358M296,358L296,358L296,358M294,358L295,358L294,358M304,359L304,358L304,359M296,359L296,359L296,359M304,359L304,359L304,359M297,359L297,359L297,359M291,360L291,359L291,360M299,359L299,359L299,359M294,359L294,359L293,359M290,360L290,360L290,360M298,360L298,360L298,360M299,360L299,360L299,360M299,360L299,360L299,360M287,361L287,360L287,361M297,361L297,360L297,361M291,360L291,360L291,360M290,360L290,360L290,360M289,361L290,361L289,361M288,361L288,360L288,361L288,361M285,371L287,366L284,364L287,366L294,360L298,362L299,360L300,362L302,361L302,364L307,366M300,360L300,360L300,360M294,360L294,360L294,360M291,361L291,360L291,361M291,360L291,360L291,360M287,361L287,361L287,361M292,361L292,361L292,361M290,361L290,361L290,361M286,362L286,362L286,362M286,362L286,362L286,362M287,363L287,363L287,363M286,363L286,363L286,363M286,364L286,364L286,364M287,364L287,364L287,364M286,366L286,366L286,366M286,366L286,366L286,366M282,368L282,368L282,368M284,369L284,369L284,369","cx":295,"cy":366,"area":134,"bbox":[282,355,307,372]},{"id":38,"name":"Ehime","kanji":"愛媛県","capital":"Matsuyama","region":"Shikoku","food":"🍊 みかん","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[269,367],[271,363],[271,366],[269,366]],[[275,365],[276,363],[275,365]],[[274,364],[274,363]],[[274,364],[274,364]],[[274,364],[275,364]],[[273,365],[274,364],[274,365]],[[275,365],[275,365]],[[269,365],[269,365]],[[274,365],[274,365]],[[273,367],[272,365],[273,366]],[[276,365],[277,365]],[[274,366],[274,366]],[[268,366],[268,366]],[[268,367],[268,367]],[[277,367],[277,367]],[[267,367],[267,367]],[[272,366],[272,366]],[[271,369],[271,366],[273,367],[271,369]],[[272,367],[272,367]],[[267,367],[268,367]],[[268,367],[268,367]],[[278,367],[278,367]],[[279,367],[279,367]],[[270,368],[270,368]],[[258,384],[261,382],[264,373],[268,370],[267,369],[268,368],[273,375],[278,373],[283,373],[285,371],[287,372],[287,376],[275,379],[270,389],[265,389],[267,394],[265,395],[262,399],[260,398],[262,405],[261,406],[257,405],[257,407],[256,405],[258,405],[257,402],[254,403],[255,401],[257,402],[256,400],[257,400],[255,397],[257,399],[259,397],[258,395],[256,396],[257,394],[254,394],[255,389],[253,388],[245,393],[257,384]],[[269,369],[269,369]],[[274,369],[274,369]],[[275,369],[275,369]],[[270,369],[270,369]],[[275,369],[275,369]],[[262,370],[262,370]],[[273,371],[273,371]],[[273,371],[273,371]],[[259,372],[259,372]],[[272,372],[272,372]],[[260,374],[261,372],[260,374]],[[279,373],[279,373]],[[258,374],[258,373]],[[257,374],[257,373]],[[262,374],[262,374]],[[264,373],[264,373]],[[261,374],[261,374]],[[258,375],[258,375]],[[259,375],[259,375]],[[261,377],[262,375],[261,376]],[[261,376],[261,376]],[[258,377],[258,377]],[[256,381],[257,381]],[[253,390],[253,390]],[[254,390],[254,390]],[[253,392],[253,392]],[[253,392],[254,392]],[[258,397],[258,397]],[[254,397],[254,397]],[[254,398],[254,397],[254,398]],[[257,397],[257,397]],[[255,398],[255,398]],[[251,398],[251,398]],[[251,398],[251,398]],[[254,398],[254,398]],[[252,399],[252,399]],[[254,398],[255,398]],[[254,399],[254,399]],[[252,399],[252,399]],[[252,399],[253,399]],[[255,400],[255,400]],[[255,401],[255,401]],[[252,401],[253,401]],[[255,406],[256,406]],[[255,406],[255,406]],[[255,406],[255,406]],[[258,407],[258,406]],[[259,407],[259,406]]],"coast":"M269,367L271,363L271,366L269,366L269,367M275,365L276,363L275,365L275,365M274,364L274,363L274,364M274,364L274,364L274,364M274,364L275,364L274,364M273,365L274,364L274,365L273,365M275,365L275,365L275,365M269,365L269,365L269,365M274,365L274,365L274,365M273,367L272,365L273,366L273,367M276,365L277,365L276,365M274,366L274,366L274,366M268,366L268,366L268,366M268,367L268,367L268,367M277,367L277,367L277,367M267,367L267,367L267,367M272,366L272,366L272,366M271,369L271,366L273,367L271,369L271,369M272,367L272,367L272,367M267,367L268,367L267,367M268,367L268,367L268,367M278,367L278,367L278,367M279,367L279,367L279,367M270,368L270,368L270,368M258,384L261,382L264,373L268,370L267,369L268,368L273,375L278,373L283,373L285,371M261,406L257,405L257,407L256,405L258,405L257,402L254,403L255,401L257,402L256,400L257,400L255,397L257,399L259,397L258,395L256,396L257,394L254,394L255,389L253,388L245,393L257,384L258,384M269,369L269,369L269,369M274,369L274,369L274,369M275,369L275,369L275,369M270,369L270,369L270,369M275,369L275,369L275,369M262,370L262,370L262,370M273,371L273,371L273,371M273,371L273,371L273,371M259,372L259,372L259,372M272,372L272,372L272,372M260,374L261,372L260,374L260,374M279,373L279,373L279,373M258,374L258,373L258,374M257,374L257,373L257,374M262,374L262,374L262,374M264,373L264,373L264,373M261,374L261,374L261,374M258,375L258,375L258,375M259,375L259,375L259,375M261,377L262,375L261,376L261,377M261,376L261,376L261,376M258,377L258,377L258,377M256,381L257,381L256,381M253,390L253,390L253,390M254,390L254,390L254,390M253,392L253,392L253,392M253,392L254,392L253,392M258,397L258,397L258,397M254,397L254,397L254,397M254,398L254,397L254,398L254,398M257,397L257,397L257,397M255,398L255,398L255,398M251,398L251,398L251,398M251,398L251,398L251,398M254,398L254,398L254,398M252,399L252,399L252,399M254,398L255,398L254,398M254,399L254,399L254,399M252,399L252,399L252,399M252,399L253,399L252,399M255,400L255,400L255,400M255,401L255,401L255,401M252,401L253,401L252,401M255,406L256,406L255,406M255,406L255,406L255,406M255,406L255,406L255,406M258,407L258,406L258,407M259,407L259,406L259,407","cx":266,"cy":385,"area":413,"bbox":[245,363,287,407]},{"id":39,"name":"Kochi","kanji":"高知県","capital":"Kochi","region":"Shikoku","food":"🐟 かつお","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[285,377],[291,377],[293,379],[296,378],[297,382],[300,382],[300,386],[303,387],[300,396],[294,389],[289,387],[284,388],[284,386],[285,388],[279,391],[282,391],[278,393],[277,391],[276,399],[275,399],[272,403],[270,403],[270,407],[269,408],[270,412],[268,410],[260,411],[261,408],[263,408],[262,406],[261,406],[262,405],[260,398],[262,399],[265,395],[267,394],[265,389],[270,389],[275,379],[285,377]],[[303,387],[303,387]],[[304,387],[304,387]],[[278,393],[278,393]],[[278,393],[278,393]],[[278,393],[278,393]],[[262,406],[262,406]],[[261,406],[261,406]],[[261,406],[261,406]],[[262,407],[262,406]],[[257,410],[257,410]],[[260,411],[260,411]],[[258,413],[258,411],[258,413]],[[260,412],[260,412]],[[257,412],[257,412]]],"coast":"M303,387L300,396L294,389L289,387L284,388L284,386L285,388L279,391L282,391L278,393L277,391L276,399L275,399L272,403L270,403L270,407L269,408L270,412L268,410L260,411L261,408L263,408L262,406L261,406M303,387L303,387L303,387M304,387L304,387L304,387M278,393L278,393L278,393M278,393L278,393L278,393M278,393L278,393L278,393M262,406L262,406L262,406M261,406L261,406L261,406M261,406L261,406L261,406M262,407L262,406L262,407M257,410L257,410L257,410M260,411L260,411L260,411M258,413L258,411L258,413L258,413M260,412L260,412L260,412M257,412L257,412L257,412","cx":279,"cy":391,"area":558,"bbox":[257,377,304,413]},{"id":40,"name":"Fukuoka","kanji":"福岡県","capital":"Fukuoka","region":"Kyushu","food":"🍜 はかたらーめん","seas":["Sea of Japan","Seto Inland Sea"],"coastDirs":[],"rings":[[[196,365],[196,365]],[[212,372],[212,372]],[[211,372],[211,372]],[[214,372],[214,372]],[[214,373],[214,373]],[[215,374],[215,374]],[[210,375],[213,374],[214,376],[212,376],[214,376],[214,375],[216,376],[219,374],[218,378],[221,384],[223,384],[223,388],[218,388],[216,390],[214,396],[216,398],[215,400],[210,398],[210,400],[206,402],[206,404],[204,404],[202,399],[203,396],[207,393],[207,390],[204,391],[200,389],[194,389],[197,387],[195,386],[198,383],[200,386],[203,385],[204,382],[202,384],[200,382],[203,382],[205,380],[205,377],[210,375]],[[214,375],[213,374],[215,374]],[[204,376],[204,376]],[[206,376],[206,376]],[[194,377],[194,377]],[[205,377],[205,377]],[[219,378],[219,377],[220,378]],[[218,378],[218,378]],[[219,378],[219,378]],[[219,379],[219,379]],[[202,380],[202,380]],[[199,382],[199,382]],[[203,383],[204,383]],[[201,385],[201,385]],[[194,386],[194,386]]],"coast":"M196,365L196,365L196,365M212,372L212,372L212,372M211,372L211,372L211,372M214,372L214,372L214,372M214,373L214,373L214,373M215,374L215,374L215,374M210,375L213,374L214,376L212,376L214,376L214,375L216,376L219,374L218,378L221,384L223,384M204,404L202,399M194,389L197,387L195,386L198,383L200,386L203,385L204,382L202,384L200,382L203,382L205,380L205,377L210,375L210,375M214,375L213,374L215,374L214,375M204,376L204,376L204,376M206,376L206,376L206,376M194,377L194,377L194,377M205,377L205,377L205,377M219,378L219,377L220,378L219,378M218,378L218,378L218,378M219,378L219,378L219,378M219,379L219,379L219,379M202,380L202,380L202,380M199,382L199,382L199,382M203,383L204,383L203,383M201,385L201,385L201,385M194,386L194,386L194,386","cx":210,"cy":387,"area":390,"bbox":[194,365,223,404]},{"id":41,"name":"Saga","kanji":"佐賀県","capital":"Saga","region":"Kyushu","food":"🐮 さがぎゅう","seas":["East China Sea"],"coastDirs":[],"rings":[[[190,385],[190,385]],[[190,385],[190,385]],[[189,386],[189,385]],[[187,386],[187,386]],[[190,387],[190,387]],[[194,389],[200,389],[204,391],[207,390],[207,393],[203,396],[202,399],[199,397],[196,400],[198,405],[191,401],[191,399],[188,398],[187,395],[188,393],[189,395],[190,391],[187,390],[189,390],[189,386],[190,388],[191,387],[192,389],[194,389]],[[192,387],[192,387]],[[193,389],[193,389]],[[189,391],[189,391]],[[189,391],[190,391]],[[189,394],[189,394]],[[199,405],[199,405]]],"coast":"M190,385L190,385L190,385M190,385L190,385L190,385M189,386L189,385L189,386M187,386L187,386L187,386M190,387L190,387L190,387M202,399L199,397L196,400L198,405M188,393L189,395L190,391L187,390L189,390L189,386L190,388L191,387L192,389L194,389L194,389M192,387L192,387L192,387M193,389L193,389L193,389M189,391L189,391L189,391M189,391L190,391L189,391M189,394L189,394L189,394M199,405L199,405L199,405","cx":196,"cy":395,"area":178,"bbox":[187,385,207,405]},{"id":42,"name":"Nagasaki","kanji":"長崎県","capital":"Nagasaki","region":"Kyushu","food":"🍜 ちゃんぽん","seas":["East China Sea"],"coastDirs":["all around"],"rings":[[[179,350],[179,350]],[[177,359],[176,363],[177,361],[175,362],[175,360],[175,362],[173,361],[176,356],[175,355],[176,352],[178,353],[179,350],[180,355],[177,359]],[[180,351],[180,351]],[[174,359],[174,359]],[[174,359],[174,359]],[[174,359],[174,359]],[[178,362],[178,361]],[[178,362],[178,362]],[[176,361],[176,361]],[[176,362],[176,362]],[[176,362],[176,362]],[[176,362],[176,362]],[[176,363],[175,362],[176,363]],[[173,370],[172,369],[172,363],[175,364],[175,362],[176,364],[173,370]],[[178,363],[178,363]],[[176,363],[176,363]],[[177,364],[177,364]],[[174,369],[174,369]],[[185,377],[185,377]],[[185,377],[185,377]],[[185,377],[185,377]],[[186,382],[184,380],[185,377],[188,379],[186,382]],[[184,378],[184,378]],[[184,380],[184,380]],[[184,381],[184,381]],[[190,381],[190,381]],[[187,381],[187,381]],[[184,381],[184,381]],[[184,381],[184,381]],[[183,382],[183,382]],[[182,385],[182,385]],[[182,389],[180,389],[181,388],[182,389]],[[186,391],[187,389],[188,390],[186,391]],[[186,390],[186,390]],[[180,390],[181,390],[181,390]],[[178,393],[178,390],[179,393]],[[181,391],[181,390]],[[186,391],[186,391]],[[185,391],[185,391]],[[188,393],[188,391],[189,392],[188,393]],[[177,398],[179,393],[181,393],[182,391],[180,396],[177,398]],[[187,391],[188,391]],[[184,392],[185,391],[185,393],[188,393],[187,395],[188,398],[191,399],[191,401],[198,405],[195,408],[201,408],[203,411],[202,414],[197,417],[196,413],[198,411],[195,410],[192,411],[190,414],[186,417],[190,412],[189,413],[184,406],[185,401],[187,402],[186,404],[187,403],[188,404],[188,408],[193,408],[190,402],[189,403],[187,401],[186,402],[188,399],[185,399],[184,401],[185,399],[184,397],[183,398],[182,397],[183,394],[182,394],[182,392],[183,392]],[[187,392],[187,392]],[[183,392],[183,392]],[[182,394],[182,394]],[[170,396],[169,395],[171,394],[171,396]],[[182,395],[182,395]],[[182,395],[182,395]],[[182,395],[182,395]],[[182,395],[182,395]],[[182,396],[182,395]],[[182,396],[182,396]],[[182,396],[182,396]],[[169,396],[169,396]],[[182,396],[182,396]],[[182,396],[182,396]],[[182,396],[182,396]],[[169,396],[169,396]],[[176,396],[176,396]],[[182,397],[182,397]],[[171,397],[171,397]],[[169,397],[169,397]],[[169,398],[169,397],[170,397],[169,398]],[[182,397],[182,397]],[[171,399],[171,397],[171,399]],[[168,398],[168,397]],[[182,397],[182,397]],[[176,397],[176,397]],[[183,397],[183,397]],[[183,397],[183,397]],[[183,398],[183,398]],[[183,398],[183,398]],[[182,398],[182,398]],[[176,398],[176,398]],[[166,398],[166,398]],[[167,398],[167,398]],[[182,399],[183,399]],[[176,398],[176,398]],[[183,398],[183,398]],[[176,398],[176,398]],[[168,398],[168,398]],[[169,398],[169,398]],[[168,398],[168,398]],[[168,399],[168,399]],[[165,399],[165,398]],[[168,398],[168,398]],[[181,399],[181,398]],[[185,399],[185,399]],[[169,409],[169,407],[167,405],[169,404],[170,399],[170,404],[172,403],[172,405],[170,405],[169,409]],[[184,399],[184,399]],[[185,399],[185,399]],[[165,399],[165,399]],[[184,399],[185,399]],[[181,400],[181,399]],[[185,400],[185,399]],[[184,399],[184,399]],[[171,400],[171,400]],[[184,400],[184,400]],[[187,400],[187,400]],[[188,402],[188,402]],[[183,403],[184,402],[183,403]],[[182,402],[182,402]],[[188,402],[188,402]],[[184,403],[184,403]],[[182,404],[182,404]],[[173,404],[174,404]],[[172,403],[172,403]],[[179,403],[179,403]],[[176,404],[176,404]],[[172,404],[172,403]],[[168,404],[168,404]],[[181,404],[181,403]],[[184,404],[184,404]],[[182,404],[182,404]],[[187,404],[187,404]],[[177,404],[177,404]],[[186,404],[187,404]],[[168,405],[168,404]],[[170,404],[170,404]],[[167,405],[167,405]],[[188,405],[188,405]],[[184,405],[184,405]],[[183,406],[183,406]],[[168,409],[167,408],[167,406],[168,408]],[[166,407],[167,407]],[[191,407],[191,407]],[[172,406],[172,406]],[[169,406],[169,406]],[[188,406],[188,406]],[[192,407],[192,407]],[[166,407],[166,407]],[[165,407],[165,407]],[[168,407],[169,407]],[[189,407],[189,407]],[[183,408],[183,407]],[[166,410],[165,408],[166,409],[166,408],[166,410]],[[168,408],[168,408]],[[188,408],[188,408]],[[165,408],[165,408]],[[182,408],[181,408]],[[191,408],[191,408]],[[188,408],[188,408]],[[169,408],[169,408]],[[182,408],[182,408]],[[168,408],[168,408]],[[188,408],[189,408]],[[169,408],[169,408]],[[167,408],[167,408]],[[168,409],[168,409]],[[164,411],[164,409],[165,410],[164,411]],[[159,410],[159,410]],[[166,410],[166,410]],[[166,410],[166,410]],[[162,417],[157,416],[159,415],[159,411],[162,412],[163,410],[164,412],[165,415],[161,415],[162,417]],[[187,410],[187,410]],[[167,412],[167,410],[167,412]],[[167,411],[167,411]],[[193,412],[193,412]],[[203,411],[203,411]],[[193,412],[193,411]],[[193,411],[193,411]],[[168,411],[168,411]],[[163,411],[163,411]],[[164,412],[164,412]],[[162,412],[162,412]],[[157,413],[157,413]],[[164,413],[164,412]],[[164,413],[164,412]],[[188,413],[188,413]],[[187,413],[188,413]],[[165,413],[165,413]],[[158,415],[158,414],[158,415]],[[187,415],[187,415]],[[186,415],[186,415]],[[162,416],[162,416]],[[162,416],[162,416]],[[163,416],[163,416]],[[165,417],[166,416]],[[165,417],[165,417]],[[160,417],[160,417]],[[165,417],[165,417]],[[187,418],[188,418]],[[152,434],[152,434]],[[152,434],[152,434]],[[151,434],[151,434]],[[151,435],[151,435]],[[151,435],[151,435]],[[179,350],[179,350]],[[178,350],[178,350]],[[162,398],[162,398]],[[162,398],[162,398]],[[145,427],[145,427]],[[145,427],[145,427]],[[145,427],[145,427]],[[152,433],[152,433]],[[151,435],[151,435]],[[162,398],[162,398]],[[162,398],[162,398]],[[185,376],[185,376]]],"coast":"M179,350L179,350L179,350M177,359L176,363L177,361L175,362L175,360L175,362L173,361L176,356L175,355L176,352L178,353L179,350L180,355L177,359L177,359M180,351L180,351L180,351M174,359L174,359L174,359M174,359L174,359L174,359M174,359L174,359L174,359M178,362L178,361L178,362M178,362L178,362L178,362M176,361L176,361L176,361M176,362L176,362L176,362M176,362L176,362L176,362M176,362L176,362L176,362M176,363L175,362L176,363L176,363M173,370L172,369L172,363L175,364L175,362L176,364L173,370L173,370M178,363L178,363L178,363M176,363L176,363L176,363M177,364L177,364L177,364M174,369L174,369L174,369M185,377L185,377L185,377M185,377L185,377L185,377M185,377L185,377L185,377M186,382L184,380L185,377L188,379L186,382L186,382M184,378L184,378L184,378M184,380L184,380L184,380M184,381L184,381L184,381M190,381L190,381L190,381M187,381L187,381L187,381M184,381L184,381L184,381M184,381L184,381L184,381M183,382L183,382L183,382M182,385L182,385L182,385M182,389L180,389L181,388L182,389L182,389M186,391L187,389L188,390L186,391L186,391M186,390L186,390L186,390M180,390L181,390L181,390L180,390M178,393L178,390L179,393L178,393M181,391L181,390L181,391M186,391L186,391L186,391M185,391L185,391L185,391M188,393L188,391L189,392L188,393L188,393M177,398L179,393L181,393L182,391L180,396L177,398L177,398M187,391L188,391L187,391M184,392L185,391L185,393L188,393M198,405L195,408L201,408L203,411L202,414L197,417L196,413L198,411L195,410L192,411L190,414L186,417L190,412L189,413L184,406L185,401L187,402L186,404L187,403L188,404L188,408L193,408L190,402L189,403L187,401L186,402L188,399L185,399L184,401L185,399L184,397L183,398L182,397L183,394L182,394L182,392L183,392L184,392M187,392L187,392L187,392M183,392L183,392L183,392M182,394L182,394L182,394M170,396L169,395L171,394L171,396L170,396M182,395L182,395L182,395M182,395L182,395L182,395M182,395L182,395L182,395M182,395L182,395L182,395M182,396L182,395L182,396M182,396L182,396L182,396M182,396L182,396L182,396M169,396L169,396L169,396M182,396L182,396L182,396M182,396L182,396L182,396M182,396L182,396L182,396M169,396L169,396L169,396M176,396L176,396L176,396M182,397L182,397L182,397M171,397L171,397L171,397M169,397L169,397L169,397M169,398L169,397L170,397L169,398L169,398M182,397L182,397L182,397M171,399L171,397L171,399L171,399M168,398L168,397L168,398M182,397L182,397L182,397M176,397L176,397L176,397M183,397L183,397L183,397M183,397L183,397L183,397M183,398L183,398L183,398M183,398L183,398L183,398M182,398L182,398L182,398M176,398L176,398L176,398M166,398L166,398L166,398M167,398L167,398L167,398M182,399L183,399L182,399M176,398L176,398L176,398M183,398L183,398L183,398M176,398L176,398L176,398M168,398L168,398L168,398M169,398L169,398L169,398M168,398L168,398L168,398M168,399L168,399L168,399M165,399L165,398L165,399M168,398L168,398L168,398M181,399L181,398L181,399M185,399L185,399L185,399M169,409L169,407L167,405L169,404L170,399L170,404L172,403L172,405L170,405L169,409L169,409M184,399L184,399L184,399M185,399L185,399L185,399M165,399L165,399L165,399M184,399L185,399L184,399M181,400L181,399L181,400M185,400L185,399L185,400M184,399L184,399L184,399M171,400L171,400L171,400M184,400L184,400L184,400M187,400L187,400L187,400M188,402L188,402L188,402M183,403L184,402L183,403L183,403M182,402L182,402L182,402M188,402L188,402L188,402M184,403L184,403L184,403M182,404L182,404L182,404M173,404L174,404L173,404M172,403L172,403L172,403M179,403L179,403L179,403M176,404L176,404L176,404M172,404L172,403L172,404M168,404L168,404L168,404M181,404L181,403L181,404M184,404L184,404L184,404M182,404L182,404L182,404M187,404L187,404L187,404M177,404L177,404L177,404M186,404L187,404L186,404M168,405L168,404L168,405M170,404L170,404L170,404M167,405L167,405L167,405M188,405L188,405L188,405M184,405L184,405L184,405M183,406L183,406L183,406M168,409L167,408L167,406L168,408L168,409M166,407L167,407L166,407M191,407L191,407L191,407M172,406L172,406L172,406M169,406L169,406L169,406M188,406L188,406L188,406M192,407L192,407L192,407M166,407L166,407L166,407M165,407L165,407L165,407M168,407L169,407L168,407M189,407L189,407L189,407M183,408L183,407L183,408M166,410L165,408L166,409L166,408L166,410L166,410M168,408L168,408L168,408M188,408L188,408L188,408M165,408L165,408L165,408M182,408L181,408L182,408M191,408L191,408L191,408M188,408L188,408L188,408M169,408L169,408L169,408M182,408L182,408L182,408M168,408L168,408L168,408M188,408L189,408L188,408M169,408L169,408L169,408M167,408L167,408L167,408M168,409L168,409L168,409M164,411L164,409L165,410L164,411L164,411M159,410L159,410L159,410M166,410L166,410L166,410M166,410L166,410L166,410M162,417L157,416L159,415L159,411L162,412L163,410L164,412L165,415L161,415L162,417L162,417M187,410L187,410L187,410M167,412L167,410L167,412L167,412M167,411L167,411L167,411M193,412L193,412L193,412M203,411L203,411L203,411M193,412L193,411L193,412M193,411L193,411L193,411M168,411L168,411L168,411M163,411L163,411L163,411M164,412L164,412L164,412M162,412L162,412L162,412M157,413L157,413L157,413M164,413L164,412L164,413M164,413L164,412L164,413M188,413L188,413L188,413M187,413L188,413L187,413M165,413L165,413L165,413M158,415L158,414L158,415L158,415M187,415L187,415L187,415M186,415L186,415L186,415M162,416L162,416L162,416M162,416L162,416L162,416M163,416L163,416L163,416M165,417L166,416L165,417M165,417L165,417L165,417M160,417L160,417L160,417M165,417L165,417L165,417M187,418L188,418L187,418M152,434L152,434L152,434M152,434L152,434L152,434M151,434L151,434L151,434M151,435L151,435L151,435M151,435L151,435L151,435M179,350L179,350L179,350M178,350L178,350L178,350M162,398L162,398L162,398M162,398L162,398L162,398M145,427L145,427L145,427M145,427L145,427L145,427M145,427L145,427L145,427M152,433L152,433L152,433M151,435L151,435L151,435M162,398L162,398L162,398M162,398L162,398L162,398M185,376L185,376L185,376","cx":193,"cy":404,"area":172,"bbox":[145,350,203,435]},{"id":43,"name":"Kumamoto","kanji":"熊本県","capital":"Kumamoto","region":"Kyushu","food":"🐴 ばさし","seas":["East China Sea"],"coastDirs":[],"rings":[[[222,398],[227,409],[225,409],[221,417],[219,418],[219,421],[222,425],[220,427],[221,430],[219,430],[217,431],[212,432],[209,429],[205,431],[202,430],[208,421],[207,418],[210,415],[205,416],[209,413],[209,410],[204,406],[204,404],[206,404],[206,402],[210,400],[210,398],[218,403],[218,398],[221,398]],[[204,418],[204,415],[204,418]],[[206,417],[206,416],[206,417]],[[202,416],[202,416]],[[205,416],[205,416]],[[205,416],[205,416]],[[205,418],[205,417],[205,418]],[[203,417],[203,417]],[[205,417],[205,417]],[[196,418],[196,418]],[[202,422],[199,423],[198,422],[198,425],[193,429],[193,426],[195,426],[192,425],[194,420],[193,418],[198,418],[198,421],[205,418],[203,423],[202,422]],[[203,418],[203,418]],[[204,418],[204,418]],[[198,418],[198,418]],[[203,418],[203,418]],[[204,418],[204,418]],[[204,419],[204,418]],[[203,419],[203,418]],[[204,419],[204,419]],[[206,420],[206,420]],[[199,422],[199,422]],[[199,423],[199,422]],[[204,424],[204,423]],[[201,423],[202,423]],[[203,423],[203,423]],[[202,423],[202,423]],[[201,423],[201,423]],[[199,424],[199,424]],[[201,424],[201,423]],[[202,424],[202,424]],[[201,424],[201,424]],[[202,424],[202,424]],[[201,426],[203,424],[201,425]],[[200,425],[200,424]],[[198,425],[199,425]],[[201,425],[201,425]],[[197,427],[197,427]],[[192,429],[192,429]],[[195,429],[195,429]],[[202,429],[202,429]],[[194,430],[194,430]],[[192,429],[192,429]],[[193,429],[193,429]],[[194,430],[194,430]],[[194,430],[194,430]],[[194,430],[194,430]],[[192,431],[192,430]]],"coast":"M202,430L208,421L207,418L210,415L205,416L209,413L209,410L204,406L204,404M204,418L204,415L204,418L204,418M206,417L206,416L206,417L206,417M202,416L202,416L202,416M205,416L205,416L205,416M205,416L205,416L205,416M205,418L205,417L205,418L205,418M203,417L203,417L203,417M205,417L205,417L205,417M196,418L196,418L196,418M202,422L199,423L198,422L198,425L193,429L193,426L195,426L192,425L194,420L193,418L198,418L198,421L205,418L203,423L202,422L202,422M203,418L203,418L203,418M204,418L204,418L204,418M198,418L198,418L198,418M203,418L203,418L203,418M204,418L204,418L204,418M204,419L204,418L204,419M203,419L203,418L203,419M204,419L204,419L204,419M206,420L206,420L206,420M199,422L199,422L199,422M199,423L199,422L199,423M204,424L204,423L204,424M201,423L202,423L201,423M203,423L203,423L203,423M202,423L202,423L202,423M201,423L201,423L201,423M199,424L199,424L199,424M201,424L201,423L201,424M202,424L202,424L202,424M201,424L201,424L201,424M202,424L202,424L202,424M201,426L203,424L201,425L201,426M200,425L200,424L200,425M198,425L199,425L198,425M201,425L201,425L201,425M197,427L197,427L197,427M192,429L192,429L192,429M195,429L195,429L195,429M202,429L202,429L202,429M194,430L194,430L194,430M192,429L192,429L192,429M193,429L193,429L193,429M194,430L194,430L194,430M194,430L194,430L194,430M194,430L194,430L194,430M192,431L192,430L192,431","cx":215,"cy":415,"area":492,"bbox":[192,398,227,432]},{"id":44,"name":"Oita","kanji":"大分県","capital":"Oita","region":"Kyushu","food":"🍗 とりてん","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[235,381],[237,381],[235,381]],[[233,383],[236,383],[238,387],[237,391],[235,391],[234,393],[231,392],[232,395],[242,395],[239,400],[242,400],[241,401],[244,401],[245,402],[242,402],[241,404],[246,406],[244,406],[245,407],[243,409],[244,409],[241,410],[241,412],[240,412],[240,409],[233,411],[231,409],[228,410],[221,398],[218,398],[218,403],[215,401],[216,398],[214,397],[214,393],[216,390],[218,388],[223,388],[223,384],[230,386],[233,383]],[[243,395],[243,395]],[[238,396],[238,396]],[[242,396],[242,396]],[[240,398],[240,398]],[[244,399],[244,399]],[[244,399],[244,399]],[[241,399],[241,399]],[[244,401],[245,400]],[[242,401],[242,401]],[[242,404],[242,404]],[[242,404],[242,403]],[[246,405],[246,405]],[[243,405],[243,405]],[[246,406],[246,406]],[[245,407],[245,407]],[[245,408],[245,408]],[[242,411],[242,411]],[[242,413],[242,413]]],"coast":"M235,381L237,381L235,381L235,381M233,383L236,383L238,387L237,391L235,391L234,393L231,392L232,395L242,395L239,400L242,400L241,401L244,401L245,402L242,402L241,404L246,406L244,406L245,407L243,409L244,409L241,410L241,412M223,384L230,386L233,383L233,383M243,395L243,395L243,395M238,396L238,396L238,396M242,396L242,396L242,396M240,398L240,398L240,398M244,399L244,399L244,399M244,399L244,399L244,399M241,399L241,399L241,399M244,401L245,400L244,401M242,401L242,401L242,401M242,404L242,404L242,404M242,404L242,403L242,404M246,405L246,405L246,405M243,405L243,405L243,405M246,406L246,406L246,406M245,407L245,407L245,407M245,408L245,408L245,408M242,411L242,411L242,411M242,413L242,413L242,413","cx":230,"cy":397,"area":496,"bbox":[214,381,246,413]},{"id":45,"name":"Miyazaki","kanji":"宮崎県","capital":"Miyazaki","region":"Kyushu","food":"🥭 まんごー","seas":["Pacific Ocean"],"coastDirs":["east"],"rings":[[[232,411],[237,411],[238,409],[241,409],[240,412],[241,412],[236,417],[237,420],[235,420],[236,422],[234,425],[231,438],[231,446],[228,449],[228,455],[223,452],[224,447],[220,446],[218,442],[216,441],[216,439],[211,433],[217,431],[219,430],[221,430],[220,427],[222,425],[219,421],[219,418],[221,417],[225,409],[231,409],[232,411]],[[240,414],[240,414]],[[240,415],[240,415]],[[240,415],[240,415]],[[237,420],[237,420]],[[236,421],[236,421]],[[237,421],[237,421]],[[231,443],[231,443]],[[229,450],[229,450]],[[229,451],[229,451]],[[229,451],[229,451]],[[228,452],[228,452]]],"coast":"M241,412L236,417L237,420L235,420L236,422L234,425L231,438L231,446L228,449L228,455L223,452M240,414L240,414L240,414M240,415L240,415L240,415M240,415L240,415L240,415M237,420L237,420L237,420M236,421L236,421L236,421M237,421L237,421L237,421M231,443L231,443L231,443M229,450L229,450L229,450M229,451L229,451L229,451M229,451L229,451L229,451M228,452L228,452L228,452","cx":226,"cy":429,"area":600,"bbox":[211,409,241,455]},{"id":46,"name":"Kagoshima","kanji":"鹿児島県","capital":"Kagoshima","region":"Kyushu","food":"🐷 くろぶた","seas":["Pacific Ocean","East China Sea"],"coastDirs":[],"rings":[[[199,427],[200,425],[199,427]],[[197,428],[198,427],[197,428]],[[198,427],[198,427]],[[199,427],[199,427]],[[198,428],[198,427]],[[198,429],[198,428]],[[197,432],[195,429],[198,428],[198,430],[197,432]],[[198,428],[198,428]],[[199,428],[199,428]],[[208,429],[216,439],[216,441],[218,442],[220,446],[224,447],[223,452],[221,451],[219,454],[221,456],[221,458],[222,458],[219,459],[218,462],[210,466],[214,456],[211,452],[211,449],[208,448],[210,447],[211,449],[213,449],[214,446],[210,443],[206,451],[208,456],[210,458],[209,460],[208,461],[205,458],[199,459],[199,457],[197,456],[198,455],[196,453],[200,453],[202,448],[197,442],[199,438],[197,432],[201,432],[202,430],[205,431],[208,429]],[[197,432],[197,432]],[[197,434],[197,434]],[[197,434],[197,434]],[[190,441],[189,439],[191,439],[190,441]],[[191,439],[192,439]],[[192,439],[192,439]],[[192,439],[192,439]],[[189,441],[189,441]],[[189,442],[189,441],[189,442]],[[186,447],[184,446],[188,442],[186,447]],[[211,444],[211,444]],[[212,447],[212,447]],[[222,453],[222,453]],[[219,455],[220,455]],[[197,455],[197,455]],[[210,458],[210,458]],[[180,460],[180,460]],[[179,461],[179,461]],[[210,466],[210,466]],[[179,471],[179,471]],[[191,472],[191,471],[191,472]],[[178,471],[179,471]],[[217,478],[220,471],[221,476],[218,483],[218,485],[215,487],[215,483],[217,478]],[[204,473],[203,472],[204,472]],[[200,473],[201,473],[200,473]],[[202,472],[202,472]],[[215,475],[215,474],[215,475]],[[198,484],[197,482],[200,484],[199,484]],[[206,490],[204,490],[203,486],[206,483],[210,486],[210,488],[207,490]],[[218,484],[218,484]],[[167,534],[168,534]],[[167,535],[167,535]],[[184,547],[185,544],[186,547],[179,551],[178,552],[180,554],[178,555],[176,555],[177,557],[174,554],[175,553],[171,552],[174,552],[173,551],[179,547],[180,548],[181,546],[183,545],[183,547],[184,547]],[[192,552],[191,550],[194,548],[192,551]],[[173,551],[173,551]],[[176,558],[174,557],[173,558],[172,554],[174,554],[173,555],[176,556],[176,558]],[[172,554],[172,554]],[[171,556],[171,556]],[[172,557],[172,557]],[[171,560],[172,558],[171,560]],[[174,560],[173,558],[174,560]],[[175,560],[175,559]],[[174,560],[174,560]],[[165,568],[165,564],[167,563],[168,567],[167,570],[165,570],[165,568]],[[157,579],[160,578],[156,581],[155,580],[156,579]],[[153,591],[152,590],[153,589],[154,591]],[[186,457],[186,457]],[[178,461],[178,461]],[[178,462],[178,462]],[[186,457],[186,457]],[[178,461],[178,461]],[[178,472],[178,472]],[[178,471],[178,471]]],"coast":"M199,427L200,425L199,427L199,427M197,428L198,427L197,428L197,428M198,427L198,427L198,427M199,427L199,427L199,427M198,428L198,427L198,428M198,429L198,428L198,429M197,432L195,429L198,428L198,430L197,432L197,432M198,428L198,428L198,428M199,428L199,428L199,428M223,452L221,451L219,454L221,456L221,458L222,458L219,459L218,462L210,466L214,456L211,452L211,449L208,448L210,447L211,449L213,449L214,446L210,443L206,451L208,456L210,458L209,460L208,461L205,458L199,459L199,457L197,456L198,455L196,453L200,453L202,448L197,442L199,438L197,432L201,432L202,430M197,432L197,432L197,432M197,434L197,434L197,434M197,434L197,434L197,434M190,441L189,439L191,439L190,441L190,441M191,439L192,439L191,439M192,439L192,439L192,439M192,439L192,439L192,439M189,441L189,441L189,441M189,442L189,441L189,442L189,442M186,447L184,446L188,442L186,447L186,447M211,444L211,444L211,444M212,447L212,447L212,447M222,453L222,453L222,453M219,455L220,455L219,455M197,455L197,455L197,455M210,458L210,458L210,458M180,460L180,460L180,460M179,461L179,461L179,461M210,466L210,466L210,466M179,471L179,471L179,471M191,472L191,471L191,472L191,472M178,471L179,471L178,471M217,478L220,471L221,476L218,483L218,485L215,487L215,483L217,478L217,478M204,473L203,472L204,472L204,473M200,473L201,473L200,473L200,473M202,472L202,472L202,472M215,475L215,474L215,475L215,475M198,484L197,482L200,484L199,484L198,484M206,490L204,490L203,486L206,483L210,486L210,488L207,490L206,490M218,484L218,484L218,484M167,534L168,534L167,534M167,535L167,535L167,535M184,547L185,544L186,547L179,551L178,552L180,554L178,555L176,555L177,557L174,554L175,553L171,552L174,552L173,551L179,547L180,548L181,546L183,545L183,547L184,547L184,547M192,552L191,550L194,548L192,551L192,552M173,551L173,551L173,551M176,558L174,557L173,558L172,554L174,554L173,555L176,556L176,558L176,558M172,554L172,554L172,554M171,556L171,556L171,556M172,557L172,557L172,557M171,560L172,558L171,560L171,560M174,560L173,558L174,560L174,560M175,560L175,559L175,560M174,560L174,560L174,560M165,568L165,564L167,563L168,567L167,570L165,570L165,568L165,568M157,579L160,578L156,581L155,580L156,579L157,579M153,591L152,590L153,589L154,591L153,591M186,457L186,457L186,457M178,461L178,461L178,461M178,462L178,462L178,462M186,457L186,457L186,457M178,461L178,461L178,461M178,472L178,472L178,472M178,471L178,471L178,471","cx":210,"cy":448,"area":505,"bbox":[152,425,224,591]},{"id":47,"name":"Okinawa","kanji":"沖縄県","capital":"Naha","region":"Kyushu","food":"🍜 おきなわそば","seas":["Pacific Ocean","East China Sea"],"coastDirs":["all around"],"rings":[[[148,564],[148,564]],[[140,592],[142,588],[140,591]],[[140,592],[140,591]],[[141,592],[141,592]],[[140,594],[140,593],[140,594]],[[140,595],[140,595]],[[146,600],[149,595],[150,598],[149,602],[146,603],[145,605],[143,605],[140,609],[137,609],[140,613],[138,612],[136,616],[137,617],[133,620],[132,616],[136,613],[134,609],[137,609],[141,605],[139,604],[139,600],[142,601],[142,603],[146,600]],[[150,599],[150,599]],[[137,601],[135,600],[137,600]],[[142,601],[142,601]],[[143,602],[142,602],[143,602]],[[144,602],[144,602]],[[138,603],[138,603]],[[137,603],[137,602]],[[143,603],[143,603]],[[122,605],[122,605]],[[142,611],[142,611]],[[109,612],[111,610],[111,614],[109,612]],[[119,611],[119,611]],[[140,612],[141,611],[140,612]],[[120,612],[120,612]],[[113,612],[113,612]],[[138,612],[138,612]],[[112,612],[112,612]],[[112,612],[112,612]],[[113,612],[113,612]],[[112,612],[112,612]],[[141,613],[141,613]],[[140,613],[140,613]],[[142,613],[142,613]],[[130,614],[130,614]],[[131,615],[131,614]],[[131,615],[131,614]],[[140,615],[140,615]],[[127,615],[127,615]],[[124,616],[124,615],[124,616]],[[128,615],[128,615]],[[126,616],[126,616]],[[128,616],[128,615]],[[125,618],[125,616],[125,618]],[[127,616],[128,616]],[[122,616],[123,616]],[[124,616],[124,616]],[[124,616],[124,616]],[[123,617],[123,617]],[[126,617],[126,617]],[[124,617],[124,617]],[[122,618],[122,617]],[[124,618],[124,617]],[[139,618],[139,617]],[[125,618],[125,618]],[[123,618],[123,618]],[[124,618],[124,618]],[[125,618],[125,618]],[[136,619],[136,619]],[[227,625],[226,624],[227,625]],[[31,625],[31,625]],[[225,629],[225,627],[225,628]],[[26,631],[26,631]],[[28,631],[28,631]],[[28,631],[28,631]],[[71,656],[71,656]],[[73,657],[73,657]],[[73,663],[71,662],[73,659],[71,657],[77,663],[73,663]],[[70,660],[69,658],[70,660]],[[70,660],[69,659],[69,660]],[[57,662],[57,662]],[[71,663],[72,663]],[[57,665],[57,664],[57,665]],[[44,675],[41,671],[45,671],[48,666],[46,674],[44,675]],[[35,671],[35,670]],[[14,672],[12,671],[14,671]],[[223,671],[224,671]],[[43,671],[43,671]],[[36,677],[31,676],[32,674],[33,675],[33,672],[38,674],[36,677]],[[32,674],[32,674]],[[39,674],[39,674]],[[33,674],[33,674]],[[39,675],[38,674],[39,675]],[[38,675],[38,675]],[[41,676],[42,675]],[[43,675],[43,675]],[[40,678],[39,677],[40,678]],[[38,678],[38,678]],[[37,679],[38,679]],[[28,679],[28,679]],[[34,684],[33,683],[34,684]],[[28,629],[28,629]],[[28,630],[28,630]],[[28,630],[28,630]],[[28,630],[28,630]],[[27,631],[27,631]],[[112,604],[112,604]],[[27,631],[27,631]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]]],"coast":"M148,564L148,564L148,564M140,592L142,588L140,591L140,592M140,592L140,591L140,592M141,592L141,592L141,592M140,594L140,593L140,594L140,594M140,595L140,595L140,595M146,600L149,595L150,598L149,602L146,603L145,605L143,605L140,609L137,609L140,613L138,612L136,616L137,617L133,620L132,616L136,613L134,609L137,609L141,605L139,604L139,600L142,601L142,603L146,600L146,600M150,599L150,599L150,599M137,601L135,600L137,600L137,601M142,601L142,601L142,601M143,602L142,602L143,602L143,602M144,602L144,602L144,602M138,603L138,603L138,603M137,603L137,602L137,603M143,603L143,603L143,603M122,605L122,605L122,605M142,611L142,611L142,611M109,612L111,610L111,614L109,612L109,612M119,611L119,611L119,611M140,612L141,611L140,612L140,612M120,612L120,612L120,612M113,612L113,612L113,612M138,612L138,612L138,612M112,612L112,612L112,612M112,612L112,612L112,612M113,612L113,612L113,612M112,612L112,612L112,612M141,613L141,613L141,613M140,613L140,613L140,613M142,613L142,613L142,613M130,614L130,614L130,614M131,615L131,614L131,615M131,615L131,614L131,615M140,615L140,615L140,615M127,615L127,615L127,615M124,616L124,615L124,616L124,616M128,615L128,615L128,615M126,616L126,616L126,616M128,616L128,615L128,616M125,618L125,616L125,618L125,618M127,616L128,616L127,616M122,616L123,616L122,616M124,616L124,616L124,616M124,616L124,616L124,616M123,617L123,617L123,617M126,617L126,617L126,617M124,617L124,617L124,617M122,618L122,617L122,618M124,618L124,617L124,618M139,618L139,617L139,618M125,618L125,618L125,618M123,618L123,618L123,618M124,618L124,618L124,618M125,618L125,618L125,618M136,619L136,619L136,619M227,625L226,624L227,625L227,625M31,625L31,625L31,625M225,629L225,627L225,628L225,629M26,631L26,631L26,631M28,631L28,631L28,631M28,631L28,631L28,631M71,656L71,656L71,656M73,657L73,657L73,657M73,663L71,662L73,659L71,657L77,663L73,663L73,663M70,660L69,658L70,660L70,660M70,660L69,659L69,660L70,660M57,662L57,662L57,662M71,663L72,663L71,663M57,665L57,664L57,665L57,665M44,675L41,671L45,671L48,666L46,674L44,675L44,675M35,671L35,670L35,671M14,672L12,671L14,671L14,672M223,671L224,671L223,671M43,671L43,671L43,671M36,677L31,676L32,674L33,675L33,672L38,674L36,677L36,677M32,674L32,674L32,674M39,674L39,674L39,674M33,674L33,674L33,674M39,675L38,674L39,675L39,675M38,675L38,675L38,675M41,676L42,675L41,676M43,675L43,675L43,675M40,678L39,677L40,678L40,678M38,678L38,678L38,678M37,679L38,679L37,679M28,679L28,679L28,679M34,684L33,683L34,684L34,684M28,629L28,629L28,629M28,630L28,630L28,630M28,630L28,630L28,630M28,630L28,630L28,630M27,631L27,631L27,631M112,604L112,604L112,604M27,631L27,631L27,631M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625","cx":141,"cy":607,"area":87,"bbox":[12,564,227,684]}]};
+const VERSION = 'easy';
+
+const IS_EASY = VERSION === 'easy';
+const VIEW_W = PREF_DATA.viewW, VIEW_H = PREF_DATA.viewH;
+const PREFS = PREF_DATA.prefs;
+const BY_ID = {};
+PREFS.forEach(p => { BY_ID[p.id] = p; });
+const REGION_COLORS = {
+  Hokkaido: '#4a6fa5', Tohoku: '#5b8c5a', Kanto: '#d97b29', Chubu: '#2a9d8f',
+  Kansai: '#7b5ea7', Chugoku: '#c25e7a', Shikoku: '#b98a1d', Kyushu: '#c0392b',
+};
+const PIECE_FILL = '#c0392b';
+// Easy version: the piece takes its region's colour, matching the
+// region-coloured map. Hard version: every piece is the same vermilion.
+function pieceFill(p) { return IS_EASY ? REGION_COLORS[p.region] : PIECE_FILL; }
+function pieceStroke(p) { return IS_EASY ? 'rgba(0,0,0,.4)' : '#7e2418'; }
+const $ = id => document.getElementById(id);
+
+// ---------- geometry helpers ----------
+function pathFromRings(rings) {
+  return rings.map(r => 'M' + r.map(p => p[0] + ',' + p[1]).join('L') + 'Z').join('');
+}
+function pointInRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function distToRing(x, y, ring) {
+  let best = Infinity;
+  for (let i = 0; i < ring.length; i++) {
+    const ax = ring[i][0], ay = ring[i][1];
+    const bx = ring[(i + 1) % ring.length][0], by = ring[(i + 1) % ring.length][1];
+    const dx = bx - ax, dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    let t = len2 ? ((x - ax) * dx + (y - ay) * dy) / len2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    const d = Math.hypot(x - (ax + t * dx), y - (ay + t * dy));
+    if (d < best) best = d;
+  }
+  return best;
+}
+function hitTest(pref, x, y) {
+  for (const ring of pref.rings) {
+    if (pointInRing(x, y, ring)) return true;
+  }
+  for (const ring of pref.rings) {
+    if (distToRing(x, y, ring) <= 6) return true;
+  }
+  return false;
+}
+function prefAtPoint(x, y) {
+  for (const p of PREFS) {
+    for (const ring of p.rings) {
+      if (pointInRing(x, y, ring)) return p;
+    }
+  }
+  return null;
+}
+function joinSeas(seas) {
+  const s = seas.map(x => 'the ' + x);
+  if (s.length === 1) return s[0];
+  if (s.length === 2) return s[0] + ' and ' + s[1];
+  return s.slice(0, -1).join(', ') + ' and ' + s[s.length - 1];
+}
+
+// ---------- sound ----------
+let soundOn = true;
+let audioCtx = null;
+function tone(freq, dur, type, when, vol) {
+  if (!soundOn) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = audioCtx.currentTime + (when || 0);
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol || 0.12, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  } catch (e) {}
+}
+const sfxCorrect = () => { tone(659, 0.18, 'sine', 0); tone(880, 0.28, 'sine', 0.12); };
+const sfxWrong = () => { tone(150, 0.22, 'triangle', 0, 0.14); };
+const sfxClick = () => { tone(520, 0.07, 'sine', 0, 0.06); };
+const sfxWin = () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.3, 'sine', i * 0.14)); };
+
+// ---------- game state ----------
+let queue = [];        // ids left to place, in order
+let placed = new Set();
+let currentId = null;
+let mistakes = 0, skips = 0;
+let startTime = null, elapsed = 0, timerInt = null, won = false;
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function fmtTime(s) {
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+function setStatus(msg, kind) {
+  const el = $('statusMsg');
+  el.textContent = msg;
+  el.className = kind || '';
+}
+
+// ---------- rendering ----------
+function renderSlots() {
+  const g = $('slots');
+  g.innerHTML = PREFS.map(p => {
+    if (IS_EASY) {
+      // Easy version: the slot stays whitish like the hard version, and
+      // only its outline takes the region's colour, so the player can
+      // match the piece's colour to the outline on the map.
+      const col = REGION_COLORS[p.region];
+      return `<path class="slot" data-id="${p.id}" d="${pathFromRings(p.rings)}" style="--rc:${col}" stroke-width="1.5"/>`;
+    }
+    return `<path class="slot" data-id="${p.id}" d="${pathFromRings(p.rings)}"/>`;
+  }).join('');
+}
+function renderPlacedList() {
+  const ul = $('placedList');
+  ul.innerHTML = PREFS.map(p => {
+    const done = placed.has(p.id);
+    const col = REGION_COLORS[p.region];
+    return `<li class="${done ? 'done' : ''}" style="--rc:${col}">
+      <span class="dot"></span><span>${p.name}</span>
+      <span class="kanji">${p.kanji}</span>
+      <span class="tick">${done ? '✓' : ''}</span></li>`;
+  }).join('');
+}
+function updateProgress() {
+  $('placedCount').textContent = placed.size;
+  $('progressFill').style.width = (placed.size / 47 * 100) + '%';
+  $('mistakeEl').textContent = mistakes;
+  $('skipEl').textContent = skips;
+  $('timeEl').textContent = fmtTime(elapsed);
+  renderPlacedList();
+}
+function pieceViewBox(p) {
+  const [x1, y1, x2, y2] = p.bbox;
+  const pad = 10;
+  return `${x1 - pad} ${y1 - pad} ${x2 - x1 + pad * 2} ${y2 - y1 + pad * 2}`;
+}
+function renderCurrentPiece() {
+  const holder = $('pieceHolder');
+  const p = BY_ID[currentId];
+  if (!p) { holder.innerHTML = ''; return; }
+  holder.innerHTML =
+    `<svg viewBox="${pieceViewBox(p)}" aria-label="Prefecture piece">
+       <path d="${pathFromRings(p.rings)}" fill="${pieceFill(p)}" stroke="${pieceStroke(p)}" stroke-width="1.5" stroke-linejoin="round"/>
+     </svg>`;
+}
+function placeOnMap(p) {
+  const g = $('placedLayer');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', pathFromRings(p.rings));
+  // Fill via inline style, not a presentation attribute: the .slot CSS
+  // rule would otherwise override the attribute and leave the placed
+  // piece parchment-coloured.
+  path.style.fill = REGION_COLORS[p.region];
+  path.style.stroke = 'rgba(0,0,0,.35)';
+  path.setAttribute('stroke-width', '1');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('class', 'slot placed');
+  path.setAttribute('data-id', p.id);
+  path.style.cursor = 'pointer';
+  path.addEventListener('click', () => showDetails(p));
+  g.appendChild(path);
+  const slot = document.querySelector(`#slots .slot[data-id="${p.id}"]`);
+  if (slot) slot.style.display = 'none';
+  // name label when the shape is big enough to hold it
+  const [x1, y1, x2, y2] = p.bbox;
+  if (p.area > 1500 && (x2 - x1) > 55) {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', p.cx); t.setAttribute('y', p.cy + 4);
+    t.setAttribute('class', 'slot-label');
+    t.textContent = p.name;
+    $('labelsLayer').appendChild(t);
+  }
+}
+
+// ---------- flow ----------
+function nextPiece() {
+  if (queue.length === 0) { currentId = null; renderCurrentPiece(); return; }
+  currentId = queue[0];
+  renderCurrentPiece();
+}
+function startGame() {
+  queue = shuffle(PREFS.map(p => p.id));
+  placed = new Set();
+  mistakes = 0; skips = 0; elapsed = 0; won = false;
+  startTime = null;
+  if (timerInt) clearInterval(timerInt);
+  timerInt = null;
+  $('placedLayer').innerHTML = '';
+  $('labelsLayer').innerHTML = '';
+  document.querySelectorAll('#slots .slot').forEach(s => { s.style.display = ''; });
+  updateProgress();
+  nextPiece();
+  setStatus('Drag the piece in the box onto the map. Tap the piece to see which prefecture it is.');
+}
+function startTimer() {
+  if (timerInt || startTime !== null) return;
+  startTime = Date.now();
+  timerInt = setInterval(() => {
+    elapsed = Math.floor((Date.now() - startTime) / 1000);
+    $('timeEl').textContent = fmtTime(elapsed);
+  }, 1000);
+}
+function onCorrectDrop(p) {
+  placed.add(p.id);
+  queue = queue.filter(id => id !== p.id);
+  placeOnMap(p);
+  sfxCorrect();
+  startTimer();
+  updateProgress();
+  if (placed.size === 47) {
+    won = true;
+    if (timerInt) clearInterval(timerInt);
+    sfxWin();
+    $('winStats').innerHTML =
+      `Time: <b>${fmtTime(elapsed)}</b> &nbsp;·&nbsp; Mistakes: <b>${mistakes}</b> &nbsp;·&nbsp; Skipped: <b>${skips}</b>`;
+    openOverlay('winOverlay');
+    setStatus('🎉 All 47 prefectures placed — the archipelago is complete!', 'good');
+    currentId = null;
+    renderCurrentPiece();
+    return;
+  }
+  setStatus(`Nice! ${p.name} (${p.kanji}) placed. ${47 - placed.size} to go.`, 'good');
+  nextPiece();
+}
+function onWrongDrop(p) {
+  mistakes++;
+  sfxWrong();
+  updateProgress();
+  setStatus(`Not quite — ${p.name} doesn't go there. Look at the shape and the coastline, then try again.`, 'bad');
+  const box = $('pieceBox');
+  box.classList.remove('shake');
+  void box.offsetWidth;
+  box.classList.add('shake');
+}
+
+// ---------- drag & drop ----------
+const holder = $('pieceHolder');
+const ghost = $('dragGhost');
+let drag = null; // {id, moved, startX, startY, startT}
+
+function mapPointFromClient(cx, cy) {
+  const r = $('mapSvg').getBoundingClientRect();
+  return { x: (cx - r.left) / r.width * VIEW_W, y: (cy - r.top) / r.height * VIEW_H, rect: r };
+}
+function showGhost(p, cx, cy) {
+  const r = $('mapSvg').getBoundingClientRect();
+  const scale = r.width / VIEW_W;
+  const [x1, y1, x2, y2] = p.bbox;
+  const pad = 10;
+  const vbW = x2 - x1 + pad * 2, vbH = y2 - y1 + pad * 2;
+  const w = Math.max(48, vbW * scale * 1.15);
+  const h = Math.max(36, vbH * scale * 1.15);
+  // Anchor the drag on the centre of the prefecture's main landmass
+  // (its largest ring), not the centre of the whole bounding box: for an
+  // island chain such as Tokyo, the box centre is empty sea, so a drop
+  // aimed at the mainland was judged as sea and the piece never went in.
+  const fx = (p.cx - (x1 - pad)) / vbW;
+  const fy = (p.cy - (y1 - pad)) / vbH;
+  ghost.style.display = 'block';
+  ghost.style.width = w + 'px';
+  ghost.style.height = h + 'px';
+  ghost.style.left = (cx - fx * w) + 'px';
+  ghost.style.top = (cy - fy * h) + 'px';
+  ghost.innerHTML =
+    `<svg viewBox="${pieceViewBox(p)}">
+       <path d="${pathFromRings(p.rings)}" fill="${pieceFill(p)}" stroke="${pieceStroke(p)}" stroke-width="2" stroke-linejoin="round"/>
+     </svg>`;
+}
+function clearHover() {
+  document.querySelectorAll('#slots .slot.hover').forEach(s => s.classList.remove('hover'));
+}
+holder.addEventListener('pointerdown', e => {
+  if (!currentId || won) return;
+  e.preventDefault();
+  holder.setPointerCapture(e.pointerId);
+  drag = { id: currentId, moved: false, startX: e.clientX, startY: e.clientY, startT: Date.now() };
+});
+holder.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+  if (!drag.moved && Math.hypot(dx, dy) > 8) drag.moved = true;
+  if (!drag.moved) return;
+  const p = BY_ID[drag.id];
+  showGhost(p, e.clientX, e.clientY);
+  const mp = mapPointFromClient(e.clientX, e.clientY);
+  clearHover();
+  const under = prefAtPoint(mp.x, mp.y);
+  if (under) {
+    const el = document.querySelector(`#slots .slot[data-id="${under.id}"]`);
+    if (el) el.classList.add('hover');
+  }
+});
+holder.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag;
+  drag = null;
+  ghost.style.display = 'none';
+  clearHover();
+  const p = BY_ID[d.id];
+  if (!d.moved) {
+    // a tap: show details
+    if (Date.now() - d.startT < 600) showDetails(p);
+    return;
+  }
+  const mp = mapPointFromClient(e.clientX, e.clientY);
+  if (mp.x < 0 || mp.x > VIEW_W || mp.y < 0 || mp.y > VIEW_H) {
+    setStatus('That was outside the map — the piece is back in its box. Try again.');
+    return;
+  }
+  if (hitTest(p, mp.x, mp.y)) onCorrectDrop(p);
+  else onWrongDrop(p);
+});
+holder.addEventListener('pointercancel', () => {
+  drag = null;
+  ghost.style.display = 'none';
+  clearHover();
+});
+
+// ---------- modals ----------
+function openOverlay(id) { $(id).classList.add('open'); }
+function closeOverlay(id) { $(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(el => {
+  el.addEventListener('click', () => closeOverlay(el.getAttribute('data-close')));
+});
+document.querySelectorAll('.overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+});
+$('howBtn').addEventListener('click', () => openOverlay('howOverlay'));
+$('detailBtn').addEventListener('click', () => { if (currentId) showDetails(BY_ID[currentId]); });
+$('againBtn').addEventListener('click', () => { closeOverlay('winOverlay'); startGame(); });
+$('newBtn').addEventListener('click', () => { sfxClick(); startGame(); });
+$('skipBtn').addEventListener('click', () => {
+  if (!currentId || won) return;
+  if (queue.length <= 1) {
+    setStatus('This is the last piece — give it a try! Tap it to see its details.');
+    return;
+  }
+  const id = queue.shift();
+  queue.push(id);
+  skips++;
+  sfxClick();
+  updateProgress();
+  nextPiece();
+  setStatus('Skipped — that piece will come back later. Here is the next one.');
+});
+$('soundBtn').addEventListener('click', () => {
+  soundOn = !soundOn;
+  $('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+  if (soundOn) sfxClick();
+});
+
+function showDetails(p) {
+  $('detailTitle').textContent = p.name;
+  $('detailKanji').textContent = p.kanji + ' · ' + p.name;
+  $('detailRegion').textContent = p.region;
+  $('detailCapital').textContent = p.capital;
+  $('detailFood').textContent = p.food;
+  $('detailCoast').textContent = p.seas.length ? p.seas.join(', ') : 'Landlocked — no coast';
+  const note = $('coastNote');
+  if (p.seas.length) {
+    // The direction is only stated when it is clear (see the build script):
+    // a single dominant side, or "all around" for an island prefecture.
+    const dir = (p.coastDirs && p.coastDirs.length)
+      ? (p.coastDirs[0] === 'all around'
+        ? 'It runs all around the prefecture.'
+        : `It runs along the ${p.coastDirs[0]} side.`)
+      : '';
+    note.innerHTML = `The <span class="blue-line"></span> blue line is the coastline. ${dir} This prefecture faces ${joinSeas(p.seas)}. ` +
+      `The grey line is a land border with a neighbouring prefecture.`;
+  } else {
+    note.innerHTML = `This prefecture is landlocked, so it has no coastline and no blue line. ` +
+      `The grey line is a land border with a neighbouring prefecture.`;
+  }
+  const svg = $('detailSvg');
+  svg.setAttribute('viewBox', pieceViewBox(p));
+  const hasCoast = p.coast && p.coast.length > 0;
+  // The lines are drawn with vector-effect="non-scaling-stroke", so they
+  // stay the same thin width on screen for every prefecture. Without it,
+  // the stroke width is measured in map units, and on a small prefecture
+  // (whose shape is magnified many times) the blue line looked very thick.
+  svg.innerHTML =
+    `<path d="${pathFromRings(p.rings)}" fill="#f3ecdc" stroke="#8a7f66" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>` +
+    (hasCoast ? `<path d="${p.coast}" fill="none" stroke="#2563eb" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>` : '');
+  openOverlay('detailOverlay');
+}
+
+// ---------- layout (side / stacked, like the Go game) ----------
+const layoutEl = $('layout');
+let layoutMode = 'auto';
+function applyLayout(mode) {
+  layoutMode = mode;
+  const side = mode === 'side' || (mode === 'auto' && window.innerWidth >= 860);
+  layoutEl.classList.toggle('side', side);
+  layoutEl.classList.toggle('stacked', !side);
+  try {
+    window.parent.postMessage({ type: 'prefecture-layout-changed', layout: side ? 'side' : 'stacked' }, '*');
+  } catch (e) {}
+}
+window.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d && d.type === 'prefecture-layout' && (d.layout === 'side' || d.layout === 'stacked' || d.layout === 'auto')) {
+    applyLayout(d.layout);
+  }
+});
+window.addEventListener('resize', () => { if (layoutMode === 'auto') applyLayout('auto'); });
+(function initLayout() {
+  const m = new URLSearchParams(location.search).get('layout');
+  applyLayout(m === 'side' || m === 'stacked' ? m : 'auto');
+})();
+
+// ---------- init ----------
+$('mapSvg').setAttribute('viewBox', `0 0 ${VIEW_W} ${VIEW_H}`);
+(function initVersion() {
+  const badge = $('levelBadge');
+  badge.textContent = IS_EASY ? 'Easy · かんたん' : 'Hard · むずかしい';
+  badge.classList.add(IS_EASY ? 'easy' : 'hard');
+  document.title = 'Japan Prefecture Puzzle — ' + (IS_EASY ? 'Easy' : 'Hard') + ' — 日本の都道府県パズル';
+  if (IS_EASY) {
+    $('subtitleEl').textContent = 'Drag each prefecture onto the map and complete the Japanese archipelago — all 47 prefectures. Each prefecture\u2019s outline is coloured by its region, and each piece has its region\u2019s colour — match the colours!';
+    $('howColour').style.display = '';
+  }
+})();
+renderSlots();
+startGame();
+</script>
+</body>
+</html>

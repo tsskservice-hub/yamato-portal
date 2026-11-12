@@ -1,7 +1,7 @@
 /**
  * @file vce-u4o3-descriptor.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Unit 4 Outcome 3 Performance Descriptor.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-u4o3-descriptor'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-u4o3-descriptor'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -36,11 +36,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_U4O3_DESCRIPTOR';
 
 /**
- * Fetch VCE Unit 4 Outcome 3 Performance Descriptor data from Supabase 'app_knowledge' table.
+ * Fetch VCE Unit 4 Outcome 3 Performance Descriptor data from Supabase 'kl_app' table.
  */
 export async function fetchUnitOutcomeDescriptor(supabaseClient: SupabaseClient): Promise<UnitOutcomeDescriptor | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -54,7 +54,7 @@ export async function fetchUnitOutcomeDescriptor(supabaseClient: SupabaseClient)
 }
 
 /**
- * Upsert VCE Unit 4 Outcome 3 Performance Descriptor data to Supabase 'app_knowledge' table.
+ * Upsert VCE Unit 4 Outcome 3 Performance Descriptor data to Supabase 'kl_app' table.
  */
 export async function upsertUnitOutcomeDescriptor(
   supabaseClient: SupabaseClient,
@@ -62,7 +62,7 @@ export async function upsertUnitOutcomeDescriptor(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Unit 4 Outcome 3 Performance Descriptor',

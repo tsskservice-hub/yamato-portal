@@ -4,14 +4,14 @@
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
-import { MockExamConfig, OralMockConfig } from '~/components/OralMockConfig';
-import { ExamResultData, OralMockSession } from '~/components/OralMockSession';
-import { OralMockReport } from '~/components/OralMockReport';
-import ChatYamatoEoyOralMock from '~/components/ChatYamatoEoyOralMock';
+import { MockExamConfig, OralMockConfig } from '~/components/oral/OralMockConfig';
+import { ExamResultData, OralMockSession } from '~/components/oral/OralMockSession';
+import { OralMockReport } from '~/components/oral/OralMockReport';
+import ChatYamatoEoyOralMock from '~/components/chat/ChatYamatoEoyOralMock';
 import { OralExamQuestionsData, fetchOralExamQuestionsData } from '~/data/oral-exam-questions';
 
 export async function loader({ request }: LoaderFunctionArgs) {

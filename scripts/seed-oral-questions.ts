@@ -4,9 +4,9 @@ import oralExamData from '../app/data/oral-exam-questions.json';
 async function seedOralQuestions() {
   console.log('📦 Supabaseへの登録を開始します...');
 
-  // 💡 app_knowledge テーブルの実際のカラム (key, data, updated_at) のみに指定
+  // 💡 kl_app テーブルの実際のカラム (key, data, updated_at) のみに指定
   const { error } = await supabase
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: 'ORAL_EXAM_QUESTIONS',
       data: oralExamData,

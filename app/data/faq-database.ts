@@ -1,6 +1,6 @@
 /**
  * @file faq-database.ts
- * @description Supabase 'app_knowledge' (key: 'FAQ') とフロントエンドを繋ぐアダプター
+ * @description Supabase 'kl_app' (key: 'FAQ') とフロントエンドを繋ぐアダプター
  * 
  * 💡 設計方針 (terms.tsx 模範準拠):
  * 1. 質問1件を最小単位とする「フラットな配列形式（FaqItem[]）」を採用。
@@ -29,23 +29,23 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-// 💡 Supabase app_knowledge の key（大文字の 'FAQ'）
+// 💡 Supabase kl_app の key（大文字の 'FAQ'）
 const KNOWLEDGE_KEY = 'FAQ';
 
 /**
- * Supabase 'app_knowledge' テーブルから FAQ データを取得
+ * Supabase 'kl_app' テーブルから FAQ データを取得
  * 取得失敗・レコード不在時は null を返し、UI側で DataErrorState を表示させます
  */
 export async function fetchFaqData(supabaseClient: SupabaseClient): Promise<FaqItem[] | null> {
   try {
     const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data')
       .eq('key', KNOWLEDGE_KEY)
       .single();
 
     if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase app_knowledge:`, error?.message);
+      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase kl_app:`, error?.message);
       return null;
     }
 
@@ -70,7 +70,7 @@ export async function upsertFaqData(
   category = 'FAQ & Knowledge Base'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'AI Yamato Portal FAQ',

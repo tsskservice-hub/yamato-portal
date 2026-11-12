@@ -1,7 +1,7 @@
 /**
  * @file vce-eoy-written-criteria.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Written Examination Assessment Criteria.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-eoy-written-criteria'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-eoy-written-criteria'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -42,11 +42,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_EOY_WRITTEN_CRITERIA';
 
 /**
- * Fetch VCE Written Examination Assessment Criteria data from Supabase 'app_knowledge' table.
+ * Fetch VCE Written Examination Assessment Criteria data from Supabase 'kl_app' table.
  */
 export async function fetchWrittenCriteriaData(supabaseClient: SupabaseClient): Promise<WrittenCriteriaData | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -60,7 +60,7 @@ export async function fetchWrittenCriteriaData(supabaseClient: SupabaseClient): 
 }
 
 /**
- * Upsert VCE Written Examination Assessment Criteria data to Supabase 'app_knowledge' table.
+ * Upsert VCE Written Examination Assessment Criteria data to Supabase 'kl_app' table.
  */
 export async function upsertWrittenCriteriaData(
   supabaseClient: SupabaseClient,
@@ -68,7 +68,7 @@ export async function upsertWrittenCriteriaData(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Written Examination Assessment Criteria',

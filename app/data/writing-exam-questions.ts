@@ -1,7 +1,7 @@
 /**
  * @file writing-exam-questions.ts
  * @description Decoupled TypeScript logic & Supabase client integration for Writing Exam Questions Database.
- * Stores data in Supabase 'app_knowledge' table under key: 'writing-exam-questions' (or 'WRITING_EXAM_QUESTIONS').
+ * Stores data in Supabase 'kl_app' table under key: 'writing-exam-questions' (or 'WRITING_EXAM_QUESTIONS').
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -47,7 +47,7 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'WRITING_EXAM_QUESTIONS';
 
 /**
- * Fetch Writing Exam Questions Database data from Supabase 'app_knowledge' table.
+ * Fetch Writing Exam Questions Database data from Supabase 'kl_app' table.
  * 取得に失敗した場合は、案内メッセージが入ったフォールバック配列を安全に返します。
  */
 export async function fetchWritingExamQuestionsData(
@@ -55,7 +55,7 @@ export async function fetchWritingExamQuestionsData(
 ): Promise<WritingExamQuestionsData> {
   try {
     const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('*')
       .eq('key', KNOWLEDGE_KEY)
       .single();
@@ -79,7 +79,7 @@ export async function fetchWritingExamQuestionsData(
 }
 
 /**
- * Upsert Writing Exam Questions Database data to Supabase 'app_knowledge' table.
+ * Upsert Writing Exam Questions Database data to Supabase 'kl_app' table.
  */
 export async function upsertWritingExamQuestionsData(
   supabaseClient: SupabaseClient,
@@ -87,7 +87,7 @@ export async function upsertWritingExamQuestionsData(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'Writing Exam Questions Database',

@@ -1,7 +1,6 @@
 /**
  * @file content-other.ts
- * @description Supabase app_knowledge (key: 'CONTENT_OTHER') からLP全体の設定・メタデータ・ウィジェット情報を動的取得するモジュール
- * 💡 静的フォールバックデータを撤去し、通信失敗・データ不在時は isError: true を返します。
+ * @description Supabase kl_app (key: 'CONTENT_OTHER') からLP全体の設定・メタデータ・ウィジェット情報を動的取得するモジュール
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -95,6 +94,22 @@ export interface FooterConfig {
   links: FooterLink[];
 }
 
+/**
+ * 💡 PortalModulesGrid.tsx で使用されているプロパティをすべて網羅した PortalModule 型定義
+ */
+export interface PortalModule {
+  id: string;
+  name: string;
+  description?: string;
+  path?: string;
+  category?: string;
+  iconName: string;
+  actionLabel: string;
+  isComingSoon?: boolean;
+  creditRequirement?: number | null;
+  accentColor?: string;
+}
+
 export interface OtherContentKnowledge {
   hero: HeroConfig;
   header: HeaderConfig;
@@ -103,20 +118,21 @@ export interface OtherContentKnowledge {
   dailyChallengeBanner: DailyChallengeBannerConfig;
   systemRules: SystemRulesConfig;
   footer: FooterConfig;
+  portalModules?: PortalModule[];
   updatedAt?: string;
 }
 
 const KNOWLEDGE_KEY = 'CONTENT_OTHER';
 
 /**
- * Supabase の app_knowledge テーブルから CONTENT_OTHER キーのデータを直接フェッチする関数
+ * Supabase の kl_app テーブルから CONTENT_OTHER キーのデータを直接フェッチする関数
  */
 export async function fetchOtherContentData(
   supabase: SupabaseClient
 ): Promise<OtherContentKnowledge | null> {
   try {
     const { data: row, error } = await supabase
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data, updated_at')
       .eq('key', KNOWLEDGE_KEY)
       .maybeSingle();
@@ -141,6 +157,7 @@ export async function fetchOtherContentData(
       dailyChallengeBanner: content.dailyChallengeBanner || {},
       systemRules: content.systemRules || {},
       footer: content.footer || {},
+      portalModules: content.portalModules || [],
       updatedAt: row.updated_at,
     };
   } catch (err) {
@@ -151,7 +168,6 @@ export async function fetchOtherContentData(
 
 /**
  * ページ用のカスタムフック
- * 💡 失敗時は otherData: null かつ isError: true を返し、エラーハンドリングに引き継ぎます。
  */
 export function useOtherContent(supabase: SupabaseClient) {
   const [otherData, setOtherData] = useState<OtherContentKnowledge | null>(null);
@@ -171,12 +187,12 @@ export function useOtherContent(supabase: SupabaseClient) {
       } else {
         setOtherData(null);
         setIsError(true);
-        setErrorMessage('Failed to retrieve CONTENT_OTHER from Supabase. Data does not exist or the key is invalid.');
+        setErrorMessage('Failed to retrieve CONTENT_OTHER from Supabase.');
       }
     } catch (err: any) {
       setOtherData(null);
       setIsError(true);
-      setErrorMessage(`Supabase connection error: ${err?.message || 'An unexpected error occurred while loading CONTENT_OTHER.'}`);
+      setErrorMessage(`Supabase connection error: ${err?.message || 'An unexpected error occurred.'}`);
     } finally {
       setIsLoading(false);
     }

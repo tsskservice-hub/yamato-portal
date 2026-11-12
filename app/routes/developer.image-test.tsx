@@ -4,8 +4,8 @@
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useRef, useState } from 'react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 // 💡 `createServerSupabaseClient` 関数をインポートします
 import { createServerSupabaseClient } from '~/lib/supabase.server';

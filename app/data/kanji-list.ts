@@ -1,7 +1,7 @@
 /**
  * @file kanji-list.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Kanji List.
- * Stores data in Supabase 'app_knowledge' table under key: 'kanji-list'.
+ * Stores data in Supabase 'kl_app' table under key: 'kanji-list'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -42,11 +42,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'KANJI_LIST';
 
 /**
- * Fetch VCE Kanji List data from Supabase 'app_knowledge' table.
+ * Fetch VCE Kanji List data from Supabase 'kl_app' table.
  */
 export async function fetchKanjiListData(supabaseClient: SupabaseClient): Promise<KanjiListData | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -60,7 +60,7 @@ export async function fetchKanjiListData(supabaseClient: SupabaseClient): Promis
 }
 
 /**
- * Upsert VCE Kanji List data to Supabase 'app_knowledge' table.
+ * Upsert VCE Kanji List data to Supabase 'kl_app' table.
  */
 export async function upsertKanjiListData(
   supabaseClient: SupabaseClient,
@@ -68,7 +68,7 @@ export async function upsertKanjiListData(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Kanji List',

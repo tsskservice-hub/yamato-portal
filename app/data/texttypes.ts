@@ -1,7 +1,7 @@
 /**
  * @file texttypes.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Japanese Text Types Specification.
- * Stores data in Supabase 'app_knowledge' table under key: 'TEXTTYPES'.
+ * Stores data in Supabase 'kl_app' table under key: 'TEXTTYPES'.
  * 
  * 💡 設計方針 (legal-content.ts 準拠):
  * 1. 静的オブジェクトではなく、非同期取得関数 (fetchTextTypesData) を提供。
@@ -35,7 +35,7 @@ export interface AppKnowledgeRecord<T = any> {
   updated_at?: string;
 }
 
-// 💡 Supabase app_knowledge の key（大文字の 'TEXTTYPES'）
+// 💡 Supabase kl_app の key（大文字の 'TEXTTYPES'）
 const KNOWLEDGE_KEY = 'TEXTTYPES';
 
 /**
@@ -52,19 +52,19 @@ export function getGenkoyoshiData(textTypesData?: TextTypesData | null): TextTyp
 }
 
 /**
- * Supabase 'app_knowledge' テーブルから TEXTTYPES データを取得
+ * Supabase 'kl_app' テーブルから TEXTTYPES データを取得
  * 失敗時やレコード不在時は null を返し、画面側で DataErrorState を表示させます
  */
 export async function fetchTextTypesData(supabaseClient: SupabaseClient): Promise<TextTypesData | null> {
   try {
     const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data')
       .eq('key', KNOWLEDGE_KEY)
       .single();
 
     if (error || !row) {
-      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase app_knowledge:`, error?.message);
+      console.error(`[${KNOWLEDGE_KEY}] Failed to fetch from Supabase kl_app:`, error?.message);
       return null;
     }
 

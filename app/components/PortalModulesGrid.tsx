@@ -1,10 +1,10 @@
 /**
  * @file PortalModulesGrid.tsx
- * @description Supabase の各 content モジュール（General, Speaking, Writing, Reference, Junior）および Games を統合して描画するグリッドコンポーネント
+ * @description Supabase の各 content モジュール（General, Speaking, Writing, Reference, Lessons, Junior）および Games を統合して描画するグリッドコンポーネント
  */
 import React from 'react';
-import { ArrowRight, FileText, Gamepad2, Grid, Mic, Sparkles } from 'lucide-react';
-import type { PortalModule } from '~/data/portal-content';
+import { ArrowRight, BookOpen, FileText, Gamepad2, Grid, Mic, Sparkles } from 'lucide-react';
+import type { PortalModule } from '~/data/content-other';
 
 interface PortalModulesGridProps {
   generalModules: PortalModule[];
@@ -37,19 +37,22 @@ export function PortalModulesGrid({
       case "Mic": return <Mic className={className} />;
       case "FileText": return <FileText className={className} />;
       case "Gamepad2": return <Gamepad2 className={className} />;
+      case "BookOpen": return <BookOpen className={className} />;
       default: return <FileText className={className} />;
     }
   };
 
   const renderCard = (mod: PortalModule, accentColor: string = 'blue') => {
     const hoverBorderClass = accentColor === 'red' ? 'hover:border-red-500/50' : 
-                             accentColor === 'indigo' ? 'hover:border-indigo-500/50' : 
-                             accentColor === 'emerald' ? 'hover:border-emerald-500/50' : 
-                             'hover:border-blue-500/50';
+                            accentColor === 'indigo' ? 'hover:border-indigo-500/50' : 
+                            accentColor === 'emerald' ? 'hover:border-emerald-500/50' : 
+                            accentColor === 'orange' ? 'hover:border-orange-500/50' : 
+                            'hover:border-blue-500/50';
 
     const textHoverClass = accentColor === 'red' ? 'group-hover:text-red-500' : 
                            accentColor === 'indigo' ? 'group-hover:text-indigo-500' : 
                            accentColor === 'emerald' ? 'group-hover:text-emerald-500' : 
+                           accentColor === 'orange' ? 'group-hover:text-orange-500' : 
                            'group-hover:text-blue-500';
 
     return (
@@ -104,27 +107,12 @@ export function PortalModulesGrid({
         </p>
       </div>
 
-      {/* 1. 一般セクション (CONTENT_GENERAL) */}
-      {generalModules.length > 0 && (
-        <div className="space-y-4 pt-4">
-          <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-            <span className="text-xl">🌍</span>
-            <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
-              Section 1: Global & General Japanese Learners
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {generalModules.map((mod) => renderCard(mod, 'blue'))}
-          </div>
-        </div>
-      )}
-
       {/* VCE セクション全体のラッパー */}
       <div id="section-vce" className="space-y-8 pt-6">
         <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
           <span className="text-xl">🇦🇺🐨🦘</span>
           <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
-            Section 2: Victorian Curriculum & VCE Students (Australia)
+            Victorian Curriculum & VCE Students (Australia)
           </h3>
         </div>
 
@@ -154,7 +142,7 @@ export function PortalModulesGrid({
           </div>
         )}
 
-        {/* 4. VCE References & Guides (CONTENT_REFERENCE) */}
+        {/* 4. VCE References & Guides (CONTENT_REFERENCE) - 語彙リストカードが Supabase から読み込まれてここに自動展開されます */}
         {referenceModules.length > 0 && (
           <div className="space-y-4 pt-4">
             <div className="flex items-center space-x-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
@@ -166,6 +154,31 @@ export function PortalModulesGrid({
             </div>
           </div>
         )}
+
+        {/* 🌟 4.5. Lessons & Interactive Units (lessons._index.tsxへの誘導カード) */}
+        <div className="space-y-4 pt-4">
+          <div className="flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400">
+            <span>🍱</span>
+            <h4>Japanese Lessons & Textbook Hub</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {renderCard(
+              {
+                id: 'lessons-hub',
+                name: 'Textbook Lessons & Units',
+                description: 'Explore interactive lessons such as Obento Deluxe Unit 4 (Family & Pets), vocabulary lists, and AI Yamato sensei guidance.',
+                path: '/lessons',
+                category: 'Curriculum Hub',
+                iconName: 'BookOpen',
+                actionLabel: 'Explore Lessons',
+                isComingSoon: false,
+                creditRequirement: null,
+                accentColor: 'orange',
+              },
+              'orange'
+            )}
+          </div>
+        </div>
 
         {/* 5. Years 7–10 Japanese (CONTENT_JUNIOR) */}
         {juniorModules.length > 0 && (
@@ -200,7 +213,7 @@ export function PortalModulesGrid({
                 actionLabel: 'View Arcade',
                 isComingSoon: false,
                 creditRequirement: null,
-                accentColor: 'red', // 💡 PortalModule型で必須の accentColor を追加
+                accentColor: 'red',
               },
               'red'
             )}
@@ -208,6 +221,21 @@ export function PortalModulesGrid({
         </div>
 
       </div>
+
+      {/* 1. 一般セクション (CONTENT_GENERAL) - ゲームズ・アーケードの下に移動 */}
+      {generalModules.length > 0 && (
+        <div className="space-y-4 pt-6">
+          <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+            <span className="text-xl">🌍</span>
+            <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
+              Global & General Japanese Learners
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {generalModules.map((mod) => renderCard(mod, 'blue'))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

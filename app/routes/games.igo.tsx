@@ -5,8 +5,8 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 import { Swords } from 'lucide-react';
@@ -38,7 +38,7 @@ function IgoFrameView({ userId }: { userId: string | null }) {
     <div className="space-y-6">
       <div className="flex flex-col items-center">
         <div className="flex items-center space-x-2 mb-2">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">9x9 Go Board Arena</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">9x9 Go Board</h2>
           <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold">
             ⚔️ Go Board Game
           </span>
@@ -49,12 +49,14 @@ function IgoFrameView({ userId }: { userId: string | null }) {
 
         {/* Go Board iframe (Wide Layout Centered View) */}
         <div className="w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-amber-800/40 p-2">
-          <iframe
-            src="/games/9by9go.html"
-            title="9by9 Go Game"
-            className="w-full h-full border-0 rounded-xl"
-            sandbox="allow-scripts allow-same-origin allow-forms"
-          />
+        <iframe
+        src="/games/9by9go.html"
+        title="9by9 Go Game"
+        className="w-full h-full border-0 rounded-xl"
+        sandbox="allow-scripts allow-same-origin allow-forms"
+        allowFullScreen
+        allow="fullscreen"
+        />
         </div>
       </div>
     </div>
@@ -105,7 +107,7 @@ export default function IgoRoute() {
       <ToolPageWrapper layoutRef={layoutRef}>
         <div className="flex justify-center items-center h-screen bg-[#f4f1ea] font-sans">
           <h3 className="text-xl font-semibold text-slate-700 animate-pulse">
-            Loading Go Board Arena... ♟️
+            Loading Go Board... ♟️
           </h3>
         </div>
       </ToolPageWrapper>

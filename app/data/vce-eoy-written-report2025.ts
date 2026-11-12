@@ -1,7 +1,7 @@
 /**
  * @file vce-eoy-written-report2025.ts
  * @description Decoupled TypeScript logic & Supabase client integration for 2025 VCE Japanese Written External Assessment Report.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-eoy-written-report2025'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-eoy-written-report2025'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -49,11 +49,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_EOY_WRITTEN_REPORT2025';
 
 /**
- * Fetch 2025 VCE Japanese Written External Assessment Report data from Supabase 'app_knowledge' table.
+ * Fetch 2025 VCE Japanese Written External Assessment Report data from Supabase 'kl_app' table.
  */
 export async function fetchWrittenAssessmentReport2025(supabaseClient: SupabaseClient): Promise<WrittenAssessmentReport2025 | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -67,7 +67,7 @@ export async function fetchWrittenAssessmentReport2025(supabaseClient: SupabaseC
 }
 
 /**
- * Upsert 2025 VCE Japanese Written External Assessment Report data to Supabase 'app_knowledge' table.
+ * Upsert 2025 VCE Japanese Written External Assessment Report data to Supabase 'kl_app' table.
  */
 export async function upsertWrittenAssessmentReport2025(
   supabaseClient: SupabaseClient,
@@ -75,7 +75,7 @@ export async function upsertWrittenAssessmentReport2025(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: '2025 VCE Japanese Written External Assessment Report',

@@ -1,17 +1,21 @@
 /**
  * @file my-account.tsx
- * @description アカウント設定画面（クレジット残高・履歴・NGワードバリデーション対応版・クライアント更新対応）
+ * @description アカウント設定画面（モジュール分割・クレジット残高・履歴・リアルタイム同期対応版）
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import React, { useEffect, useRef, useState } from 'react';
-import { useLoaderData, useNavigate, useRevalidator, useRouteLoaderData, useFetcher } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import PageLayout, { type PageLayoutRef } from '~/components/PageLayout';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { ArrowDownRight, ArrowUpRight, Gauge, History, UserCheck } from 'lucide-react';
 import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
 import { supabase } from '~/lib/supabaseClient';
-import { nicknameSchema } from '~/validations/profile';
+
+// モジュール化したコンポーネントのインポート
+import { TutorPreferencesSection } from '~/components/TutorPreferencesSection';
+import { RegistrationDetails } from '~/components/RegistrationDetails';
+import { CreditTransactionsSection } from '~/components/CreditTransactionsSection';
+import { DeleteAccountModal } from '~/components/DeleteAccountModal';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -96,20 +100,13 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 export default function AccountSettingsRoute() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const initialData = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
   const revalidator = useRevalidator();
-
-  // アカウント削除等のfetcher（アカウント削除モーダル用）
-  const fetcher = useFetcher<{ success?: boolean; error?: string; message?: string }>();
 
   const rootData = useRouteLoaderData("root") as {
     user?: any;
     credits?: number;
     nickname?: string;
   } | undefined;
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [confirmInput, setConfirmInput] = useState("");
 
   const [nicknameInput, setNicknameInput] = useState(() => {
     return (rootData?.nickname && rootData.nickname.trim() !== "")
@@ -119,7 +116,7 @@ export default function AccountSettingsRoute() {
           : "");
   });
 
-  const [paceInput, setPaceInput] = useState(initialData.learningPace);
+  const [paceInput] = useState(initialData.learningPace);
   const [userEmail, setUserEmail] = useState(initialData.email);
   const [userPlan] = useState(initialData.plan);
   const [userCreatedAt, setUserCreatedAt] = useState(initialData.createdAt);
@@ -127,58 +124,112 @@ export default function AccountSettingsRoute() {
   const [user, setUser] = useState<any>(rootData?.user ?? initialData.user ?? null);
   const [credits, setCredits] = useState<number>(rootData?.credits ?? initialData.credits);
 
-  // プロフィール保存専用のステート
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
-
   // クレジット履歴ステート
   const [transactions, setTransactions] = useState<Array<any>>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
 
-  // クライアント側で認証セッション・最新プロフィール(残高)・履歴を非同期取得
-  useEffect(() => {
-    const fetchUserDataAndTransactions = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const activeUser = session?.user ?? rootData?.user ?? initialData.user;
+  // 🔄 ユーザーデータとクレジット履歴を最新化する共通関数
+  const fetchUserDataAndTransactions = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const activeUser = session?.user ?? rootData?.user ?? initialData.user;
 
-        if (activeUser) {
-          setUser(activeUser);
-          setUserEmail(activeUser.email ?? "");
-          if (activeUser.created_at) {
-            setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
-          }
+      if (activeUser) {
+        setUser(activeUser);
+        setUserEmail(activeUser.email ?? "");
+        if (activeUser.created_at) {
+          setUserCreatedAt(new Date(activeUser.created_at).toLocaleDateString("en-AU"));
+        }
 
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("credits")
-            .eq("id", activeUser.id)
-            .maybeSingle();
+        // プロファイル（残高・ニックネーム）の取得
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("credits, nickname")
+          .eq("id", activeUser.id)
+          .maybeSingle();
 
-          if (profileData && profileData.credits !== undefined) {
+        if (profileData) {
+          if (profileData.credits !== undefined) {
             setCredits(profileData.credits);
           }
-
-          const { data: txData, error: txError } = await supabase
-            .from("credit_transactions")
-            .select("id, amount, feature_used, description, created_at, expires_at")
-            .eq("user_id", activeUser.id)
-            .order("created_at", { ascending: false });
-
-          if (!txError && txData) {
-            setTransactions(txData);
+          if (profileData.nickname) {
+            setNicknameInput(profileData.nickname);
           }
         }
-      } catch (err) {
-        console.error("Failed to fetch user data on client:", err);
-      } finally {
-        setIsLoadingTransactions(false);
+
+        // クレジット履歴（加算・減算両方）の取得
+        const { data: txData, error: txError } = await supabase
+          .from("credit_transactions")
+          .select("id, amount, feature_used, description, created_at, expires_at")
+          .eq("user_id", activeUser.id)
+          .order("created_at", { ascending: false });
+
+        if (!txError && txData) {
+          setTransactions(txData);
+        }
       }
+    } catch (err) {
+      console.error("Failed to fetch user data on client:", err);
+    } finally {
+      setIsLoadingTransactions(false);
+    }
+  }, [rootData, initialData]);
+
+  // 初回マウント時および rootData 変更時にデータ取得を実行
+  useEffect(() => {
+    fetchUserDataAndTransactions();
+  }, [fetchUserDataAndTransactions]);
+
+  // リアルタイムリスナー（Supabase Realtime）の設定：クレジット加算や減算時に自動で再取得
+  useEffect(() => {
+    let channel: any = null;
+
+    const setupRealtimeSync = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const activeUser = session?.user ?? rootData?.user ?? initialData.user;
+
+      if (!activeUser?.id) return;
+
+      // profiles テーブルまたは credit_transactions テーブルの変更を監視
+      channel = supabase
+        .channel(`public:user_credits:${activeUser.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${activeUser.id}`,
+          },
+          () => {
+            // 残高が変動した際に即座にデータを再取得
+            fetchUserDataAndTransactions();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'credit_transactions',
+            filter: `user_id=eq.${activeUser.id}`,
+          },
+          () => {
+            // 新しいトランザクション（加算・減算履歴）が追加された際に即座に再取得
+            fetchUserDataAndTransactions();
+          }
+        )
+        .subscribe();
     };
 
-    fetchUserDataAndTransactions();
-  }, [rootData]);
+    setupRealtimeSync();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [rootData, initialData, fetchUserDataAndTransactions]);
 
   useEffect(() => {
     if (rootData) {
@@ -194,45 +245,6 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
-  // クライアント側でのプロフィール更新処理（Zodバリデーション ＋ supabase直接更新）
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaveError(null);
-    setShowSavedIndicator(false);
-
-    // 1. Zodによるクライアントサイド・バリデーション
-    const result = nicknameSchema.safeParse(nicknameInput);
-    if (!result.success) {
-      setSaveError(result.error.errors[0].message);
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      if (!user?.id) throw new Error("User not authenticated.");
-
-      // 2. Supabaseクライアントで直接プロフィールを更新
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          nickname: result.data,
-          learning_pace: paceInput,
-        })
-        .eq("id", user.id);
-
-      if (updateError) {
-        throw new Error(updateError.message);
-      }
-
-      setShowSavedIndicator(true);
-      revalidator.revalidate(); // Remixのローダーを再検証してデータを最新に同期
-    } catch (err: any) {
-      setSaveError("Failed to update profile: " + err.message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       <div className="max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]">
@@ -243,229 +255,30 @@ export default function AccountSettingsRoute() {
           </p>
         </div>
 
-        {/* 1. AIチューター設定・プロフィールセクション */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
-            <UserCheck className="w-5 h-5 text-blue-600" /> AI Tutor Preferences & Profile
-          </h2>
+        {/* 1. AIチューター設定・プロフィールセクション（モジュール化） */}
+        <TutorPreferencesSection
+          userId={user?.id}
+          initialNickname={nicknameInput}
+          initialPace={paceInput}
+          onSaved={() => revalidator.revalidate()}
+        />
 
-          {/* クライアント側の関数で安全に更新処理を実行 */}
-          <form onSubmit={handleUpdateProfile} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Your Nickname (AI呼びかけ用)
-                </label>
-                <input
-                  type="text"
-                  name="nickname"
-                  value={nicknameInput}
-                  onChange={(e) => setNicknameInput(e.target.value)}
-                  placeholder="e.g. Kenji"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Yamato will call you by this name. If left blank, you will be called "My Friend".
-                </p>
-              </div>
+        {/* 2. 総合的なアカウント情報セクション（モジュール化） */}
+        <RegistrationDetails
+          email={userEmail}
+          plan={userPlan}
+          credits={credits}
+          createdAt={userCreatedAt}
+        />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
-                  <Gauge className="w-4 h-4 text-blue-600" /> Default Learning Pace
-                </label>
-                <select
-                  name="learningPace"
-                  value={paceInput}
-                  onChange={(e) => setPaceInput(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                  <option value="steady">Steady (じっくり丁寧・基礎重視)</option>
-                  <option value="normal">Normal (標準ペース)</option>
-                  <option value="accelerated">Accelerated (高速・発展重視)</option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Let Yamato know whether you want to learn at a steady, normal, or accelerated pace.
-                </p>
-              </div>
-            </div>
+        {/* 3. クレジット履歴セクション（モジュール化） */}
+        <CreditTransactionsSection
+          transactions={transactions}
+          isLoading={isLoadingTransactions}
+        />
 
-            {saveError && (
-              <p className="text-xs text-red-600 font-medium">{saveError}</p>
-            )}
-
-            <div className="flex items-center justify-end space-x-3">
-              {showSavedIndicator && (
-                <span className="text-xs font-semibold text-emerald-600 animate-fade-in flex items-center gap-1">
-                  ✓ Saved!
-                </span>
-              )}
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
-              >
-                {isSaving ? "Saving..." : "Save Preferences"}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* 2. 総合的なアカウント情報セクション */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-gray-900 border-b pb-3">Registration Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div>
-              <span className="block text-gray-500">Email Address</span>
-              <span className="font-medium text-gray-900">{userEmail || "Loading..."}</span>
-            </div>
-            <div>
-              <span className="block text-gray-500">Current Plan</span>
-              <span className="font-medium text-gray-900">{userPlan}</span>
-            </div>
-            <div>
-              <span className="block text-gray-500">Credit Balance</span>
-              <span className="font-medium text-gray-900">{credits} pts</span>
-            </div>
-            <div>
-              <span className="block text-gray-500">Account Created</span>
-              <span className="font-medium text-gray-900">{userCreatedAt}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. クレジット履歴セクション */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
-            <History className="w-5 h-5 text-blue-600" /> Credit Transactions History
-          </h2>
-          <p className="text-xs text-gray-500">
-            A complete record of all credits earned (such as daily quizzes or top-ups) and credits consumed across AI features.
-          </p>
-
-          {isLoadingTransactions ? (
-            <div className="text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg animate-pulse">
-              Loading transactions history...
-            </div>
-          ) : transactions.length === 0 ? (
-            <div className="text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg">
-              No credit transactions recorded yet.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 text-gray-600">
-                    <th className="py-2.5 px-3 font-semibold">Date / Time</th>
-                    <th className="py-2.5 px-3 font-semibold">Feature / Type</th>
-                    <th className="py-2.5 px-3 font-semibold">Description</th>
-                    <th className="py-2.5 px-3 font-semibold text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {transactions.map((tx) => {
-                    const isPositive = tx.amount > 0;
-                    const formattedDate = new Date(tx.created_at).toLocaleString("en-AU", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    });
-
-                    return (
-                      <tr key={tx.id} className="hover:bg-gray-50/50">
-                        <td className="py-3 px-3 text-gray-600 whitespace-nowrap">
-                          {formattedDate}
-                        </td>
-                        <td className="py-3 px-3 font-medium text-gray-900 whitespace-nowrap">
-                          {tx.feature_used || "general"}
-                        </td>
-                        <td className="py-3 px-3 text-gray-600 max-w-xs truncate" title={tx.description || ""}>
-                          {tx.description || "-"}
-                        </td>
-                        <td className="py-3 px-3 text-right whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-full font-bold ${
-                              isPositive
-                                ? "bg-emerald-50 text-emerald-700"
-                                : "bg-rose-50 text-rose-700"
-                            }`}
-                          >
-                            {isPositive ? (
-                              <ArrowUpRight className="w-3.5 h-3.5" />
-                            ) : (
-                              <ArrowDownRight className="w-3.5 h-3.5" />
-                            )}
-                            {isPositive ? `+${tx.amount}` : tx.amount} pts
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* 4. 危険なエリア（アカウント削除セクション） */}
-        <div className="bg-white border border-red-200 rounded-lg shadow-sm p-6 space-y-4">
-          <div className="border-b border-red-100 pb-4">
-            <h2 className="text-lg font-semibold text-red-600">Delete Account</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Deleting your account will permanently erase all saved data, learning history, purchased credits, and personal information. This action cannot be undone.
-            </p>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition cursor-pointer"
-            >
-              Delete Account
-            </button>
-          </div>
-        </div>
-
-        {/* 削除確認モーダル */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-6">
-              <h3 className="text-xl font-bold text-gray-900">Are you sure you want to delete your account?</h3>
-              <p className="text-sm text-gray-600">
-                To confirm, please type <span className="font-semibold text-gray-900">「DELETE」</span> in the field below.
-              </p>
-
-              <fetcher.Form method="post" className="space-y-4">
-                <input type="hidden" name="intent" value="delete-account" />
-                <input
-                  type="text"
-                  name="confirmText"
-                  value={confirmInput}
-                  onChange={(e) => setConfirmInput(e.target.value)}
-                  placeholder="Type 'DELETE'"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900"
-                  required
-                />
-                <div className="flex justify-end space-x-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={confirmInput !== "DELETE"}
-                    className="px-4 py-2 text-sm text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
-                  >
-                    Permanently Delete
-                  </button>
-                </div>
-              </fetcher.Form>
-            </div>
-          </div>
-        )}
-
+        {/* 4. 危険なエリア（アカウント削除セクション ＆ モーダル・モジュール化） */}
+        <DeleteAccountModal />
       </div>
     </ToolPageWrapper>
   );

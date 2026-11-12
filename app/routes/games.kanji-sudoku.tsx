@@ -5,8 +5,8 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from '@remix-run/react';
-import { ToolPageWrapper } from '~/components/ToolPageWrapper';
-import { type PageLayoutRef } from '~/components/PageLayout';
+import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 import { Grid } from 'lucide-react';
@@ -54,6 +54,8 @@ function KanjiSudokuFrameView({ userId }: { userId: string | null }) {
             title="Kanji Sudoku Puzzle"
             className="w-full h-full border-0 rounded-xl"
             sandbox="allow-scripts allow-same-origin allow-forms"
+            allowFullScreen
+            allow="fullscreen"
           />
         </div>
       </div>

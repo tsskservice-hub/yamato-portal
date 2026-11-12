@@ -1,7 +1,7 @@
 /**
  * @file legal-content.ts
  * @description Decoupled TypeScript logic & Supabase client integration for AI Yamato Portal legal documents.
- * Stores data in Supabase 'app_knowledge' table under key: 'LEGAL_CONTENTS'.
+ * Stores data in Supabase 'kl_app' table under key: 'LEGAL_CONTENTS'.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -38,17 +38,17 @@ export interface LegalContent {
   contact: LegalDocument;
 }
 
-// 💡 Supabase app_knowledge の key
+// 💡 Supabase kl_app の key
 const KNOWLEDGE_KEY = 'LEGAL_CONTENTS';
 
 /**
- * Fetch Legal Content data from Supabase 'app_knowledge' table.
+ * Fetch Legal Content data from Supabase 'kl_app' table.
  * 失敗時は null を返し、呼び出し元の画面で DataErrorState を表示させます。
  */
 export async function fetchLegalContentData(supabaseClient: SupabaseClient): Promise<LegalContent | null> {
   try {
     const { data: row, error } = await supabaseClient
-      .from('app_knowledge')
+      .from('kl_app')
       .select('*')
       .eq('key', KNOWLEDGE_KEY)
       .single();
@@ -71,7 +71,7 @@ export async function fetchLegalContentData(supabaseClient: SupabaseClient): Pro
 }
 
 /**
- * Upsert Legal Content data to Supabase 'app_knowledge' table.
+ * Upsert Legal Content data to Supabase 'kl_app' table.
  */
 export async function upsertLegalContentData(
   supabaseClient: SupabaseClient,
@@ -79,7 +79,7 @@ export async function upsertLegalContentData(
   category = 'Legal & Compliance'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'AI Yamato Legal Documents',

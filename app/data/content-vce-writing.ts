@@ -1,6 +1,6 @@
 /**
  * @file content-vce-writing.ts
- * @description Supabase app_knowledge (key: 'CONTENT_VCE_WRITING') からの動的データ取得モジュール
+ * @description Supabase kl_app (key: 'CONTENT_VCE_WRITING') からの動的データ取得モジュール
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -19,7 +19,7 @@ export async function fetchVceWritingContentData(
 ): Promise<VceWritingContentKnowledge | null> {
   try {
     const { data: row, error } = await supabase
-      .from('app_knowledge')
+      .from('kl_app')
       .select('data, updated_at')
       .eq('key', KNOWLEDGE_KEY)
       .maybeSingle();

@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Portal copy of the Shogi vs Computer library game plus an Open Fullscreen button, added 2026-11-10. Library original untouched. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -63,7 +64,7 @@
       .page { max-width: 1060px; margin: 0 auto; padding: 14px 14px 40px; }
 
       /* ---------- top bar & new game ---------- */
-      .topbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+      .topbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
       .btn {
         appearance: none; border: 1px solid var(--line); background: var(--surface);
         color: var(--ink); border-radius: 8px; padding: 8px 14px; font-size: 14px;
@@ -232,6 +233,7 @@
     <div class="page">
       <div class="topbar">
         <button class="btn" id="rulesBtn" type="button">How to Play &amp; Rules</button>
+        <button class="btn" id="fullBtn" type="button">Open Fullscreen</button>
       </div>
 
       <section class="newgame" aria-label="New game">
@@ -1038,6 +1040,30 @@
 
       /* ---------- Init ---------- */
       startGame(0, 2);
+
+      /* Fullscreen (same pattern as the Prefecture Puzzle): the Fullscreen API
+         on the whole page. When embedded in the portal, the portal iframe needs
+         allowfullscreen for this to work. If fullscreen is blocked or unavailable,
+         open this page in a new tab instead. */
+      var FULL_BTN = document.getElementById("fullBtn");
+      function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+      function updateFullBtn() { if (FULL_BTN) FULL_BTN.textContent = isFullscreen() ? "Exit Fullscreen" : "Open Fullscreen"; }
+      document.addEventListener("fullscreenchange", updateFullBtn);
+      document.addEventListener("webkitfullscreenchange", updateFullBtn);
+      if (FULL_BTN) FULL_BTN.addEventListener("click", function () {
+        if (isFullscreen()) {
+          var exit = document.exitFullscreen || document.webkitExitFullscreen;
+          if (exit) exit.call(document);
+          return;
+        }
+        var req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+        if (req) {
+          var p = req.call(document.documentElement);
+          if (p && p.catch) p.catch(function () { window.open(location.href, "_blank", "noopener"); });
+        } else {
+          window.open(location.href, "_blank", "noopener");
+        }
+      });
     </script>
   </body>
 </html>

@@ -1,7 +1,7 @@
 /**
  * @file vce-vocabulary-list.ts
  * @description Decoupled TypeScript logic & Supabase client integration for VCE Vocabulary List.
- * Stores data in Supabase 'app_knowledge' table under key: 'vce-vocabulary-list'.
+ * Stores data in Supabase 'kl_app' table under key: 'vce-vocabulary-list'.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -33,11 +33,11 @@ export interface AppKnowledgeRecord<T = any> {
 const KNOWLEDGE_KEY = 'VCE_VOCABULARY_LIST';
 
 /**
- * Fetch VCE Vocabulary List data from Supabase 'app_knowledge' table.
+ * Fetch VCE Vocabulary List data from Supabase 'kl_app' table.
  */
 export async function fetchVocabularyListData(supabaseClient: SupabaseClient): Promise<VocabularyListData | null> {
   const { data, error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .select('*')
     .eq('key', KNOWLEDGE_KEY)
     .single();
@@ -51,7 +51,7 @@ export async function fetchVocabularyListData(supabaseClient: SupabaseClient): P
 }
 
 /**
- * Upsert VCE Vocabulary List data to Supabase 'app_knowledge' table.
+ * Upsert VCE Vocabulary List data to Supabase 'kl_app' table.
  */
 export async function upsertVocabularyListData(
   supabaseClient: SupabaseClient,
@@ -59,7 +59,7 @@ export async function upsertVocabularyListData(
   category = 'VCE Japanese Data'
 ): Promise<boolean> {
   const { error } = await supabaseClient
-    .from('app_knowledge')
+    .from('kl_app')
     .upsert({
       key: KNOWLEDGE_KEY,
       title: 'VCE Vocabulary List',
