@@ -139,16 +139,14 @@ function LessonsObentoUnit4Lesson1Page() {
   const [savedProgress, setSavedProgress] = useState<LessonTaskProgress | null>(null);
   const [completedNotice, setCompletedNotice] = useState<LessonTaskKey | null>(null);
 
-  const startTask = (key: Exclude<LessonTaskKey, "writing">, open: () => void, resetCompleted: () => void) => {
+  const startTask = (key: Exclude<LessonTaskKey, "writing">, open: () => void) => {
     if (savedProgress?.[key]) {
       setCompletedNotice(key);
       return;
     }
-    // [開発用] 状態切替で未完了に戻した場合も、もう一度完了したときに保存されるようにする
-    resetCompleted();
     open();
   };
-  const startVocabularyDrill = () => startTask("vocabulary", () => setIsDrillOpen(true), () => setVocabTaskCompleted(false));
+  const startVocabularyDrill = () => startTask("vocabulary", () => setIsDrillOpen(true));
 
   const loaderData = useLoaderData<typeof loader>() || {};
   const { lesson, topic, vocabulary = [] } = loaderData;
@@ -301,9 +299,9 @@ function LessonsObentoUnit4Lesson1Page() {
             userId={user?.id}
             onProgressChange={setSavedProgress}
             onStartVocabularyDrill={startVocabularyDrill}
-            onStartListeningDrill={() => startTask("listening", () => setIsListeningTaskOpen(true), () => setListeningTaskCompleted(false))}
-            onStartReadingDrill={() => startTask("reading", () => setIsReadingDrillOpen(true), () => setReadingTaskCompleted(false))}
-            onStartSpeakingDrill={() => startTask("speaking", () => setIsSpeakingModalOpen(true), () => setSpeakingTaskCompleted(false))}
+            onStartListeningDrill={() => startTask("listening", () => setIsListeningTaskOpen(true))}
+            onStartReadingDrill={() => startTask("reading", () => setIsReadingDrillOpen(true))}
+            onStartSpeakingDrill={() => startTask("speaking", () => setIsSpeakingModalOpen(true))}
             onStartWritingTask={() => setIsWritingTaskOpen(true)}
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
