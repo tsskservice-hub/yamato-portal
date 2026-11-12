@@ -1,6 +1,6 @@
 /**
  * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリル・リスニング課題・リーディングデュアルチェック・リアルタイムスピーキング課題連携版）
+ * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリル・リスニング課題・リーディングデュアルチェック・リアルタイムスピーキング課題・ライティング課題連携版）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -21,6 +21,7 @@ import { EduVocabularyDrillModal } from "~/components/lessons/EduVocabularyDrill
 import { EduListeningTaskModal } from "~/components/lessons/EduListeningTaskModal"; // 追加：リスニング課題モーダル
 import { EduReadingDrillModal } from "~/components/lessons/EduReadingDrillModal";
 import { EduSpeakingTaskModal } from "~/components/lessons/EduSpeakingTaskModal";
+import { EduWritingTaskModal } from "~/components/lessons/EduWritingTaskModal"; // 追加：ライティング課題モーダル
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -115,6 +116,10 @@ function LessonsObentoUnit4Lesson1Page() {
   // 4. スピーキング課題モーダルの開閉状態と完了状態の管理
   const [isSpeakingModalOpen, setIsSpeakingModalOpen] = useState(false);
   const [speakingTaskCompleted, setSpeakingTaskCompleted] = useState(false);
+
+  // 5. ライティング課題モーダルの開閉状態と完了状態の管理
+  const [isWritingTaskOpen, setIsWritingTaskOpen] = useState(false);
+  const [writingTaskCompleted, setWritingTaskCompleted] = useState(false);
 
   const loaderData = useLoaderData<typeof loader>() || {};
   const { lesson, topic, vocabulary = [] } = loaderData;
@@ -254,11 +259,13 @@ function LessonsObentoUnit4Lesson1Page() {
             onStartListeningDrill={() => setIsListeningTaskOpen(true)}
             onStartReadingDrill={() => setIsReadingDrillOpen(true)}
             onStartSpeakingDrill={() => setIsSpeakingModalOpen(true)}
+            onStartWritingTask={() => setIsWritingTaskOpen(true)}
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
               listening: listeningTaskCompleted,
               reading: readingTaskCompleted,
               speaking: speakingTaskCompleted,
+              writing: writingTaskCompleted,
             }}
           />
 
@@ -300,6 +307,16 @@ function LessonsObentoUnit4Lesson1Page() {
           setSpeakingTaskCompleted(true);
         }}
       />
+
+      {/* 9. Writing Task Modal（手書き・デジタル原稿用紙 → AI 読み取り＆フィードバック） */}
+      {lesson?.id && (
+        <EduWritingTaskModal
+          isOpen={isWritingTaskOpen}
+          onClose={() => setIsWritingTaskOpen(false)}
+          onCompleted={() => setWritingTaskCompleted(true)}
+          lessonId={String(lesson.id)} // edu_writing_tasks.lesson_id（文字列）と照合する
+        />
+      )}
     </ToolPageWrapper>
   );
 }

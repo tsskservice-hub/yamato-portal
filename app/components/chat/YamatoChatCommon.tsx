@@ -2,6 +2,7 @@
  * @file YamatoChatCommon.tsx
  * @description ポータル共通AIチャットウィジェット（ニックネームモジュール連携・プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）
  */
+import { yamatoFetch } from '~/lib/yamatoApi';
 import React, { useState, useEffect, useRef } from "react";
 import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
 import { ScrollTopButton } from "../layout/ScrollTopButton";
@@ -385,7 +386,7 @@ export function YamatoChatCommon({
 
       const sendingNickname = resolveDisplayName(currentNickname, "My friend");
 
-      const response = await fetch("https://api.jptutoraiyamato.com/chat", {
+      const response = await yamatoFetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

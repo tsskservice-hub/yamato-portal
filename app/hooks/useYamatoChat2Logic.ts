@@ -1,3 +1,4 @@
+import { yamatoFetch } from '~/lib/yamatoApi';
 import { useState, useRef } from "react";
 import { useYamatoAccount, getSafeString } from "../hooks/useYamatoAccount";
 import { personaliseGreeting, resolveDisplayName } from "../utils/nickname";
@@ -237,7 +238,7 @@ export function useYamatoChat2Logic({
 
       const sendingNickname = resolveDisplayName(currentNickname, "My friend");
 
-      const response = await fetch("https://api.jptutoraiyamato.com/chat", {
+      const response = await yamatoFetch("https://api.jptutoraiyamato.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -2,6 +2,7 @@
  * @file OralPracticeHooks.ts
  * @description ハンズフリー会話がエンドレスに継続し、ユーザーが終了を意図した際（「終わり」等の発話）にのみセッションが終了するように修正した完全版フック
  */
+import { yamatoFetch } from '~/lib/yamatoApi';
 import { useState, useEffect, useRef, useCallback } from "react";
 
 export type ChatMessage = {
@@ -134,7 +135,7 @@ export function useOralPracticeEngine(
         }
 
         const ttsEndpoint = "https://api.jptutoraiyamato.com/api/test-tts";
-        const response = await fetch(ttsEndpoint, {
+        const response = await yamatoFetch(ttsEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: cleanedText }),
@@ -232,7 +233,7 @@ export function useOralPracticeEngine(
       const base64Audio = reader.result as string;
       try {
         const endpoint = "https://api.jptutoraiyamato.com/chat";
-        const res = await fetch(endpoint, {
+        const res = await yamatoFetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -284,7 +285,7 @@ export function useOralPracticeEngine(
         };
 
         console.log("🤖 [DEBUG] Sending audio to backend endpoint (/chat) with payload keys:", Object.keys(requestPayload));
-        const res = await fetch(endpoint, {
+        const res = await yamatoFetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestPayload),
@@ -566,7 +567,7 @@ export function useOralPracticeEngine(
 
     try {
       const endpoint = "https://api.jptutoraiyamato.com/chat";
-      const res = await fetch(endpoint, {
+      const res = await yamatoFetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
