@@ -16,7 +16,8 @@ import { supabase } from "~/lib/supabaseClient";
 import { EduLessonHeader } from "~/components/lessons/EduLessonHeader";
 import { EduLessonDetailsCard } from "~/components/lessons/EduLessonDetailsCard";
 import { EduVocabularySidebar } from "~/components/lessons/EduVocabularySidebar";
-import { EduLessonTaskManager } from "~/components/lessons/EduLessonTaskManager";
+import { EduLessonTaskManager, type LessonTaskKey, type LessonTaskProgress } from "~/components/lessons/EduLessonTaskManager";
+import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 import { EduVocabularyDrillModal } from "~/components/lessons/EduVocabularyDrillModal";
 import { EduListeningTaskModal } from "~/components/lessons/EduListeningTaskModal"; // 追加：リスニング課題モーダル
 import { EduReadingDrillModal } from "~/components/lessons/EduReadingDrillModal";
@@ -95,6 +96,15 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
+/** 完了メッセージ「You have successfully mastered all ○○!」に入れるタスク名 */
+const COMPLETED_TASK_NAMES: Record<LessonTaskKey, string> = {
+  vocabulary: "vocabulary drills",
+  listening: "listening tasks",
+  reading: "reading tasks",
+  speaking: "speaking practice rounds",
+  writing: "writing tasks",
+};
+
 function LessonsObentoUnit4Lesson1Page() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const themeColor = "#f97316";
@@ -123,6 +133,22 @@ function LessonsObentoUnit4Lesson1Page() {
   // 5. ライティング課題モーダルの開閉状態と完了状態の管理
   const [isWritingTaskOpen, setIsWritingTaskOpen] = useState(false);
   const [writingTaskCompleted, setWritingTaskCompleted] = useState(false);
+
+  // 6. 保存済みの完了状態（EduLessonTaskManager から受け取る）と、「完了済み」メッセージの表示
+  //    完了済みのタスクはモーダルを開かずにメッセージを出す（ライティングはモーダル自身がサーバーの記録で判断する）
+  const [savedProgress, setSavedProgress] = useState<LessonTaskProgress | null>(null);
+  const [completedNotice, setCompletedNotice] = useState<LessonTaskKey | null>(null);
+
+  const startTask = (key: Exclude<LessonTaskKey, "writing">, open: () => void, resetCompleted: () => void) => {
+    if (savedProgress?.[key]) {
+      setCompletedNotice(key);
+      return;
+    }
+    // [開発用] 状態切替で未完了に戻した場合も、もう一度完了したときに保存されるようにする
+    resetCompleted();
+    open();
+  };
+  const startVocabularyDrill = () => startTask("vocabulary", () => setIsDrillOpen(true), () => setVocabTaskCompleted(false));
 
   const loaderData = useLoaderData<typeof loader>() || {};
   const { lesson, topic, vocabulary = [] } = loaderData;
@@ -264,7 +290,7 @@ function LessonsObentoUnit4Lesson1Page() {
             <div className="space-y-6">
               <EduVocabularySidebar 
                 vocabulary={vocabulary} 
-                onStartDrill={() => setIsDrillOpen(true)}
+                onStartDrill={startVocabularyDrill}
               />
             </div>
           </div>
@@ -273,10 +299,11 @@ function LessonsObentoUnit4Lesson1Page() {
           <EduLessonTaskManager 
             lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
             userId={user?.id}
-            onStartVocabularyDrill={() => setIsDrillOpen(true)}
-            onStartListeningDrill={() => setIsListeningTaskOpen(true)}
-            onStartReadingDrill={() => setIsReadingDrillOpen(true)}
-            onStartSpeakingDrill={() => setIsSpeakingModalOpen(true)}
+            onProgressChange={setSavedProgress}
+            onStartVocabularyDrill={startVocabularyDrill}
+            onStartListeningDrill={() => startTask("listening", () => setIsListeningTaskOpen(true), () => setListeningTaskCompleted(false))}
+            onStartReadingDrill={() => startTask("reading", () => setIsReadingDrillOpen(true), () => setReadingTaskCompleted(false))}
+            onStartSpeakingDrill={() => startTask("speaking", () => setIsSpeakingModalOpen(true), () => setSpeakingTaskCompleted(false))}
             onStartWritingTask={() => setIsWritingTaskOpen(true)}
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
@@ -325,6 +352,19 @@ function LessonsObentoUnit4Lesson1Page() {
           setSpeakingTaskCompleted(true);
         }}
       />
+
+      {/* 10. 完了済みのタスクを開こうとしたときのメッセージ（ライティング課題の完了画面と同じ見た目） */}
+      {completedNotice && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl p-5 sm:p-10 shadow-2xl my-auto">
+            <EduFinishedView
+              taskName={COMPLETED_TASK_NAMES[completedNotice]}
+              description="You have already completed this task. Your progress has been saved."
+              onClose={() => setCompletedNotice(null)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* 9. Writing Task Modal（手書き・デジタル原稿用紙 → AI 読み取り＆フィードバック） */}
       {lesson?.id && (

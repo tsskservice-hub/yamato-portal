@@ -256,20 +256,19 @@ export default function Home() {
     setIsQuizCorrect(correct);
 
     if (correct) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const newCredits = credits + 2;
+      // 🔐 クレジットの付与はデータベース側の関数で行う（1日1回・+2 をサーバー側で確認）
+      // ブラウザから profiles.credits を直接書き換えることはできない
+      const { data, error } = await supabase.rpc('claim_daily_quiz_reward');
+      const result = data as { granted?: boolean; credits?: number } | null;
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          credits: newCredits,
-          last_quiz_date: todayStr 
-        })
-        .eq('id', user.id);
-
-      if (!error) {
-        setCredits(newCredits);
+      if (!error && result) {
+        if (result.granted && typeof result.credits === 'number') {
+          setCredits(result.credits);
+          window.dispatchEvent(new CustomEvent("yamato:credits-updated", { detail: result.credits }));
+        }
         setHasCompletedTodayQuiz(true);
+      } else if (error) {
+        console.error("Failed to claim daily quiz reward:", error.message);
       }
     }
   };
