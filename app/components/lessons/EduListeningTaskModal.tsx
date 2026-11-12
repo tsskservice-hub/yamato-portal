@@ -301,6 +301,8 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const completedRef = useRef(false);
   const onCompletedRef = useRef(onCompleted);
   onCompletedRef.current = onCompleted;
@@ -319,7 +321,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
   const currentQuestion = taskQuestions[currentIndex];
 
   const clearTimers = () => {
-    [nextTimerRef, feedbackTimerRef].forEach((ref) => {
+    [nextTimerRef, feedbackTimerRef, focusTimerRef].forEach((ref) => {
       if (ref.current) {
         clearTimeout(ref.current);
         ref.current = null;
@@ -368,6 +370,13 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
     setIsFinished(false);
     completedRef.current = false;
     resetQuestionState();
+
+    // 開いた直後から解答欄にフォーカスを移す
+    // （ページ側の「Start Listening Task」ボタンにフォーカスが残ったままだと、Space がそのボタンに奪われるため）
+    focusTimerRef.current = setTimeout(() => {
+      focusTimerRef.current = null;
+      inputRef.current?.focus();
+    }, 50);
   }, [isOpen, questionsKey]);
 
   // 閉じた時・アンマウント時のクリーンアップ
@@ -482,8 +491,9 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
         return;
       }
 
-      // ボタンにフォーカスがある時は、ボタン本来のスペース操作に任せる
-      if (activeElem?.tagName === "BUTTON") return;
+      // モーダル内のボタンにフォーカスがある時は、ボタン本来のスペース操作に任せる
+      // （モーダルの外＝ページ側のボタンにフォーカスが残っている場合は、こちらで再生する）
+      if (activeElem?.tagName === "BUTTON" && modalRef.current?.contains(activeElem)) return;
 
       e.preventDefault();
       if (e.repeat || feedback === "correct") return;
@@ -520,7 +530,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 sm:p-10 shadow-2xl space-y-6">
+      <div ref={modalRef} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 sm:p-10 shadow-2xl space-y-6">
         {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
