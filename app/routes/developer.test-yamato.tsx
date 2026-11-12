@@ -9,6 +9,14 @@ import { useState, useEffect } from "react";
 import { YamatoChatCommon } from '~/components/chat/YamatoChatCommon';
 import { fetchYamatoConfigsData, YamatoConfigsData, AppType } from '~/data/yamato-configs';
 import { supabase } from '~/lib/supabaseClient';
+import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { blockOnProduction } from '~/utils/developerOnly';
+
+// 本番サイトでは非公開（404）。プレビューとローカルでは表示される
+export async function loader({ request }: LoaderFunctionArgs) {
+  blockOnProduction(request);
+  return null;
+}
 
 export const meta: MetaFunction = () => {
   return [
