@@ -238,7 +238,7 @@ export const EduGenkoyoshiCanvas = forwardRef<GenkoyoshiCanvasHandle>(function E
           onPointerMove={handlePointerMove}
           onPointerUp={finishStroke}
           onPointerCancel={finishStroke}
-          aria-label="Digital genkouyoushi writing area"
+          aria-label="Digital genkoyoshi writing area"
         />
       </div>
       <p className="text-xs text-slate-500 dark:text-slate-400">
