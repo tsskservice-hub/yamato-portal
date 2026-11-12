@@ -13651,7 +13651,7 @@ function groupRoutesByParentId(manifest) {
 function getRouteComponents(route, routeModule, isSpaMode2) {
   let Component = getRouteModuleComponent(routeModule);
   let HydrateFallback = routeModule.HydrateFallback && (!isSpaMode2 || route.id === "root") ? routeModule.HydrateFallback : route.id === "root" ? RemixRootDefaultHydrateFallback : void 0;
-  let ErrorBoundary = routeModule.ErrorBoundary ? routeModule.ErrorBoundary : route.id === "root" ? () => /* @__PURE__ */ reactExports.createElement(RemixRootDefaultErrorBoundary, {
+  let ErrorBoundary2 = routeModule.ErrorBoundary ? routeModule.ErrorBoundary : route.id === "root" ? () => /* @__PURE__ */ reactExports.createElement(RemixRootDefaultErrorBoundary, {
     error: useRouteError()
   }) : void 0;
   if (route.id === "root" && routeModule.Layout) {
@@ -13661,10 +13661,10 @@ function getRouteComponents(route, routeModule, isSpaMode2) {
       } : {
         Component
       },
-      ...ErrorBoundary ? {
-        errorElement: /* @__PURE__ */ reactExports.createElement(routeModule.Layout, null, /* @__PURE__ */ reactExports.createElement(ErrorBoundary, null))
+      ...ErrorBoundary2 ? {
+        errorElement: /* @__PURE__ */ reactExports.createElement(routeModule.Layout, null, /* @__PURE__ */ reactExports.createElement(ErrorBoundary2, null))
       } : {
-        ErrorBoundary
+        ErrorBoundary: ErrorBoundary2
       },
       ...HydrateFallback ? {
         hydrateFallbackElement: /* @__PURE__ */ reactExports.createElement(routeModule.Layout, null, /* @__PURE__ */ reactExports.createElement(HydrateFallback, null))
@@ -13675,7 +13675,7 @@ function getRouteComponents(route, routeModule, isSpaMode2) {
   }
   return {
     Component,
-    ErrorBoundary,
+    ErrorBoundary: ErrorBoundary2,
     HydrateFallback
   };
 }
@@ -18637,207 +18637,6 @@ var entryServer = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePro
   __proto__: null,
   default: handleRequest
 }, Symbol.toStringTag, { value: "Module" }));
-var dist$1 = {};
-var workersKVStorage = {};
-var implementations$1 = {};
-var require$$2 = /* @__PURE__ */ getAugmentedNamespace(esm);
-var crypto$2 = {};
-Object.defineProperty(crypto$2, "__esModule", { value: true });
-var encoder = new TextEncoder();
-var sign = async (value, secret) => {
-  let key = await createKey(secret, ["sign"]);
-  let data2 = encoder.encode(value);
-  let signature = await crypto.subtle.sign("HMAC", key, data2);
-  let hash = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/=+$/, "");
-  return value + "." + hash;
-};
-var unsign = async (signed, secret) => {
-  let index = signed.lastIndexOf(".");
-  let value = signed.slice(0, index);
-  let hash = signed.slice(index + 1);
-  let key = await createKey(secret, ["verify"]);
-  let data2 = encoder.encode(value);
-  let signature = byteStringToUint8Array(atob(hash));
-  let valid = await crypto.subtle.verify("HMAC", key, signature, data2);
-  return valid ? value : false;
-};
-async function createKey(secret, usages) {
-  let key = await crypto.subtle.importKey("raw", encoder.encode(secret), {
-    name: "HMAC",
-    hash: "SHA-256"
-  }, false, usages);
-  return key;
-}
-function byteStringToUint8Array(byteString) {
-  let array = new Uint8Array(byteString.length);
-  for (let i = 0; i < byteString.length; i++) {
-    array[i] = byteString.charCodeAt(i);
-  }
-  return array;
-}
-crypto$2.sign = sign;
-crypto$2.unsign = unsign;
-Object.defineProperty(implementations$1, "__esModule", { value: true });
-var serverRuntime = require$$2;
-var crypto$1 = crypto$2;
-var createCookie = serverRuntime.createCookieFactory({
-  sign: crypto$1.sign,
-  unsign: crypto$1.unsign
-});
-var createCookieSessionStorage = serverRuntime.createCookieSessionStorageFactory(createCookie);
-var createSessionStorage = serverRuntime.createSessionStorageFactory(createCookie);
-var createMemorySessionStorage$1 = serverRuntime.createMemorySessionStorageFactory(createSessionStorage);
-implementations$1.createCookie = createCookie;
-implementations$1.createCookieSessionStorage = createCookieSessionStorage;
-implementations$1.createMemorySessionStorage = createMemorySessionStorage$1;
-implementations$1.createSessionStorage = createSessionStorage;
-Object.defineProperty(workersKVStorage, "__esModule", { value: true });
-var implementations = implementations$1;
-function createWorkersKVSessionStorage({
-  cookie,
-  kv
-}) {
-  return implementations.createSessionStorage({
-    cookie,
-    async createData(data2, expires) {
-      while (true) {
-        let randomBytes = new Uint8Array(8);
-        crypto.getRandomValues(randomBytes);
-        let id2 = [...randomBytes].map((x2) => x2.toString(16).padStart(2, "0")).join("");
-        if (await kv.get(id2, "json")) {
-          continue;
-        }
-        await kv.put(id2, JSON.stringify(data2), {
-          expiration: expires ? Math.round(expires.getTime() / 1e3) : void 0
-        });
-        return id2;
-      }
-    },
-    async readData(id2) {
-      let session = await kv.get(id2);
-      if (!session) {
-        return null;
-      }
-      return JSON.parse(session);
-    },
-    async updateData(id2, data2, expires) {
-      await kv.put(id2, JSON.stringify(data2), {
-        expiration: expires ? Math.round(expires.getTime() / 1e3) : void 0
-      });
-    },
-    async deleteData(id2) {
-      await kv.delete(id2);
-    }
-  });
-}
-workersKVStorage.createWorkersKVSessionStorage = createWorkersKVSessionStorage;
-(function(exports) {
-  Object.defineProperty(exports, "__esModule", { value: true });
-  var workersKVStorage$1 = workersKVStorage;
-  var implementations2 = implementations$1;
-  var serverRuntime2 = require$$2;
-  exports.createWorkersKVSessionStorage = workersKVStorage$1.createWorkersKVSessionStorage;
-  exports.createCookie = implementations2.createCookie;
-  exports.createCookieSessionStorage = implementations2.createCookieSessionStorage;
-  exports.createMemorySessionStorage = implementations2.createMemorySessionStorage;
-  exports.createSessionStorage = implementations2.createSessionStorage;
-  Object.defineProperty(exports, "MaxPartSizeExceededError", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.MaxPartSizeExceededError;
-    }
-  });
-  Object.defineProperty(exports, "broadcastDevReady", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.broadcastDevReady;
-    }
-  });
-  Object.defineProperty(exports, "createRequestHandler", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.createRequestHandler;
-    }
-  });
-  Object.defineProperty(exports, "createSession", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.createSession;
-    }
-  });
-  Object.defineProperty(exports, "data", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.data;
-    }
-  });
-  Object.defineProperty(exports, "defer", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.defer;
-    }
-  });
-  Object.defineProperty(exports, "isCookie", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.isCookie;
-    }
-  });
-  Object.defineProperty(exports, "isSession", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.isSession;
-    }
-  });
-  Object.defineProperty(exports, "json", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.json;
-    }
-  });
-  Object.defineProperty(exports, "logDevReady", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.logDevReady;
-    }
-  });
-  Object.defineProperty(exports, "redirect", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.redirect;
-    }
-  });
-  Object.defineProperty(exports, "redirectDocument", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.redirectDocument;
-    }
-  });
-  Object.defineProperty(exports, "replace", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.replace;
-    }
-  });
-  Object.defineProperty(exports, "unstable_composeUploadHandlers", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.unstable_composeUploadHandlers;
-    }
-  });
-  Object.defineProperty(exports, "unstable_createMemoryUploadHandler", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.unstable_createMemoryUploadHandler;
-    }
-  });
-  Object.defineProperty(exports, "unstable_parseMultipartFormData", {
-    enumerable: true,
-    get: function() {
-      return serverRuntime2.unstable_parseMultipartFormData;
-    }
-  });
-})(dist$1);
 var EXTRACTOR_KEY = Symbol.for("@supabase/supabase-js.traceContextExtractor");
 function getTraceContextExtractor() {
   return globalThis[EXTRACTOR_KEY];
@@ -26622,7 +26421,7 @@ var CONNECTION_TIMEOUTS = {
 };
 var RECONNECT_INTERVALS = [1e3, 2e3, 5e3, 1e4];
 var DEFAULT_RECONNECT_FALLBACK = 1e4;
-function createMemorySessionStorage() {
+function createMemorySessionStorage$1() {
   const store = /* @__PURE__ */ new Map();
   return {
     get length() {
@@ -26653,7 +26452,7 @@ function resolveSessionStorage() {
     }
   } catch (_a) {
   }
-  return createMemorySessionStorage();
+  return createMemorySessionStorage$1();
 }
 var WORKER_SCRIPT = `
   addEventListener("message", (e) => {
@@ -39761,6 +39560,314 @@ function shouldShowDeprecationWarning() {
 }
 if (shouldShowDeprecationWarning())
   console.warn("\u26A0\uFE0F  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715");
+var __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": true, "VITE_SUPABASE_URL": "https://ybquwzoreecxxbewjpdn.supabase.co" };
+var define_process_env_default$2 = {};
+var cachedSupabase = null;
+var FALLBACK_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
+var FALLBACK_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
+var getSupabase = () => {
+  if (cachedSupabase) {
+    return cachedSupabase;
+  }
+  let envUrl = "";
+  let envKey = "";
+  try {
+    if (typeof import.meta !== "undefined" && __vite_import_meta_env__) {
+      envUrl = "https://ybquwzoreecxxbewjpdn.supabase.co";
+      envKey = "";
+    }
+  } catch (e) {
+  }
+  if (!envUrl && typeof process !== "undefined" && define_process_env_default$2) {
+    envUrl = define_process_env_default$2.VITE_SUPABASE_URL || define_process_env_default$2.SUPABASE_URL || "";
+  }
+  if (!envKey && typeof process !== "undefined" && define_process_env_default$2) {
+    envKey = define_process_env_default$2.VITE_SUPABASE_ANON_KEY || define_process_env_default$2.SUPABASE_ANON_KEY || "";
+  }
+  const finalUrl = envUrl && !envUrl.includes("placeholder") ? envUrl : FALLBACK_URL;
+  const finalKey = envKey && !envKey.includes("placeholder") ? envKey : FALLBACK_ANON_KEY;
+  if (!finalUrl || !finalKey) {
+    console.error("\u274C CRITICAL: Supabase URL or Anon Key is missing during client initialization.");
+  }
+  cachedSupabase = createClient(finalUrl, finalKey);
+  return cachedSupabase;
+};
+var supabase = new Proxy({}, {
+  get(_, prop) {
+    const client = getSupabase();
+    const value = client[prop];
+    return typeof value === "function" ? value.bind(client) : value;
+  }
+});
+function DataErrorState({
+  title = "Unable to Load Data",
+  message = "An unexpected error has occurred while loading the page. You can automatically notify our support team by clicking the button below.",
+  errorMessage = "No additional error details provided.",
+  onRetry
+}) {
+  const [isSending, setIsSending] = reactExports.useState(false);
+  const [sentSuccess, setSentSuccess] = reactExports.useState(false);
+  const [sendError, setSendError] = reactExports.useState(false);
+  const handleAutoReport = async () => {
+    setIsSending(true);
+    setSendError(false);
+    try {
+      const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      const { error } = await supabase.functions.invoke("send-error-report", {
+        body: {
+          pageUrl: currentUrl,
+          timestamp,
+          errorMessage
+        }
+      });
+      if (error) {
+        throw error;
+      }
+      setSentSuccess(true);
+    } catch (err) {
+      console.error("Failed to send error report:", err);
+      setSendError(true);
+    } finally {
+      setIsSending(false);
+    }
+  };
+  const handleRetry = () => {
+    if (onRetry) {
+      onRetry();
+    } else if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-8 text-center bg-white border border-slate-200 rounded-2xl shadow-sm max-w-lg mx-auto my-12", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold", children: "\u26A0\uFE0F" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-bold text-slate-800 mb-2", children: title }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mb-6 leading-relaxed", children: message }),
+    sentSuccess ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-bold mb-4", children: "\u2713 Error report sent successfully to support. Thank you!" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-3 justify-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: handleRetry,
+          className: "px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm cursor-pointer shadow-xs",
+          children: "Retry / Reload"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: handleAutoReport,
+          disabled: isSending,
+          className: "px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold rounded-xl transition-colors text-sm inline-flex items-center cursor-pointer shadow-xs",
+          children: isSending ? "Sending Report..." : "Report Error to Support"
+        }
+      )
+    ] }),
+    sendError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-rose-600 mt-3 font-medium", children: "Failed to send automatically. Please contact support@jptutoraiyamato.com directly." })
+  ] });
+}
+var dist$1 = {};
+var workersKVStorage = {};
+var implementations$1 = {};
+var require$$2 = /* @__PURE__ */ getAugmentedNamespace(esm);
+var crypto$2 = {};
+Object.defineProperty(crypto$2, "__esModule", { value: true });
+var encoder = new TextEncoder();
+var sign = async (value, secret) => {
+  let key = await createKey(secret, ["sign"]);
+  let data2 = encoder.encode(value);
+  let signature = await crypto.subtle.sign("HMAC", key, data2);
+  let hash = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/=+$/, "");
+  return value + "." + hash;
+};
+var unsign = async (signed, secret) => {
+  let index = signed.lastIndexOf(".");
+  let value = signed.slice(0, index);
+  let hash = signed.slice(index + 1);
+  let key = await createKey(secret, ["verify"]);
+  let data2 = encoder.encode(value);
+  let signature = byteStringToUint8Array(atob(hash));
+  let valid = await crypto.subtle.verify("HMAC", key, signature, data2);
+  return valid ? value : false;
+};
+async function createKey(secret, usages) {
+  let key = await crypto.subtle.importKey("raw", encoder.encode(secret), {
+    name: "HMAC",
+    hash: "SHA-256"
+  }, false, usages);
+  return key;
+}
+function byteStringToUint8Array(byteString) {
+  let array = new Uint8Array(byteString.length);
+  for (let i = 0; i < byteString.length; i++) {
+    array[i] = byteString.charCodeAt(i);
+  }
+  return array;
+}
+crypto$2.sign = sign;
+crypto$2.unsign = unsign;
+Object.defineProperty(implementations$1, "__esModule", { value: true });
+var serverRuntime = require$$2;
+var crypto$1 = crypto$2;
+var createCookie = serverRuntime.createCookieFactory({
+  sign: crypto$1.sign,
+  unsign: crypto$1.unsign
+});
+var createCookieSessionStorage = serverRuntime.createCookieSessionStorageFactory(createCookie);
+var createSessionStorage = serverRuntime.createSessionStorageFactory(createCookie);
+var createMemorySessionStorage = serverRuntime.createMemorySessionStorageFactory(createSessionStorage);
+implementations$1.createCookie = createCookie;
+implementations$1.createCookieSessionStorage = createCookieSessionStorage;
+implementations$1.createMemorySessionStorage = createMemorySessionStorage;
+implementations$1.createSessionStorage = createSessionStorage;
+Object.defineProperty(workersKVStorage, "__esModule", { value: true });
+var implementations = implementations$1;
+function createWorkersKVSessionStorage({
+  cookie,
+  kv
+}) {
+  return implementations.createSessionStorage({
+    cookie,
+    async createData(data2, expires) {
+      while (true) {
+        let randomBytes = new Uint8Array(8);
+        crypto.getRandomValues(randomBytes);
+        let id2 = [...randomBytes].map((x2) => x2.toString(16).padStart(2, "0")).join("");
+        if (await kv.get(id2, "json")) {
+          continue;
+        }
+        await kv.put(id2, JSON.stringify(data2), {
+          expiration: expires ? Math.round(expires.getTime() / 1e3) : void 0
+        });
+        return id2;
+      }
+    },
+    async readData(id2) {
+      let session = await kv.get(id2);
+      if (!session) {
+        return null;
+      }
+      return JSON.parse(session);
+    },
+    async updateData(id2, data2, expires) {
+      await kv.put(id2, JSON.stringify(data2), {
+        expiration: expires ? Math.round(expires.getTime() / 1e3) : void 0
+      });
+    },
+    async deleteData(id2) {
+      await kv.delete(id2);
+    }
+  });
+}
+workersKVStorage.createWorkersKVSessionStorage = createWorkersKVSessionStorage;
+(function(exports) {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  var workersKVStorage$1 = workersKVStorage;
+  var implementations2 = implementations$1;
+  var serverRuntime2 = require$$2;
+  exports.createWorkersKVSessionStorage = workersKVStorage$1.createWorkersKVSessionStorage;
+  exports.createCookie = implementations2.createCookie;
+  exports.createCookieSessionStorage = implementations2.createCookieSessionStorage;
+  exports.createMemorySessionStorage = implementations2.createMemorySessionStorage;
+  exports.createSessionStorage = implementations2.createSessionStorage;
+  Object.defineProperty(exports, "MaxPartSizeExceededError", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.MaxPartSizeExceededError;
+    }
+  });
+  Object.defineProperty(exports, "broadcastDevReady", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.broadcastDevReady;
+    }
+  });
+  Object.defineProperty(exports, "createRequestHandler", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.createRequestHandler;
+    }
+  });
+  Object.defineProperty(exports, "createSession", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.createSession;
+    }
+  });
+  Object.defineProperty(exports, "data", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.data;
+    }
+  });
+  Object.defineProperty(exports, "defer", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.defer;
+    }
+  });
+  Object.defineProperty(exports, "isCookie", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.isCookie;
+    }
+  });
+  Object.defineProperty(exports, "isSession", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.isSession;
+    }
+  });
+  Object.defineProperty(exports, "json", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.json;
+    }
+  });
+  Object.defineProperty(exports, "logDevReady", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.logDevReady;
+    }
+  });
+  Object.defineProperty(exports, "redirect", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.redirect;
+    }
+  });
+  Object.defineProperty(exports, "redirectDocument", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.redirectDocument;
+    }
+  });
+  Object.defineProperty(exports, "replace", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.replace;
+    }
+  });
+  Object.defineProperty(exports, "unstable_composeUploadHandlers", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.unstable_composeUploadHandlers;
+    }
+  });
+  Object.defineProperty(exports, "unstable_createMemoryUploadHandler", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.unstable_createMemoryUploadHandler;
+    }
+  });
+  Object.defineProperty(exports, "unstable_parseMultipartFormData", {
+    enumerable: true,
+    get: function() {
+      return serverRuntime2.unstable_parseMultipartFormData;
+    }
+  });
+})(dist$1);
 var dist = {};
 Object.defineProperty(dist, "__esModule", { value: true });
 dist.parseCookie = parseCookie;
@@ -40476,7 +40583,7 @@ function warnOnce(message) {
   warnedMessages.add(message);
   console.warn(message);
 }
-var define_process_env_default$2 = {};
+var define_process_env_default$1 = {};
 var warned = false;
 var DEPRECATED_PACKAGES = [
   "@supabase/auth-helpers-nextjs",
@@ -40488,10 +40595,10 @@ function warnIfUsingDeprecatedAuthHelpersPackage() {
   if (warned) {
     return;
   }
-  if (typeof process === "undefined" || !(define_process_env_default$2 == null ? void 0 : define_process_env_default$2.npm_package_name)) {
+  if (typeof process === "undefined" || !(define_process_env_default$1 == null ? void 0 : define_process_env_default$1.npm_package_name)) {
     return;
   }
-  const packageName = define_process_env_default$2.npm_package_name;
+  const packageName = define_process_env_default$1.npm_package_name;
   if (!DEPRECATED_PACKAGES.includes(packageName)) {
     return;
   }
@@ -40561,7 +40668,7 @@ function createServerClient(supabaseUrl, supabaseKey, options) {
   });
   return client;
 }
-var define_process_env_default$1 = {};
+var define_process_env_default = {};
 var DEFAULT_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
 var DEFAULT_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
 var getEnv = (key, context) => {
@@ -40571,8 +40678,8 @@ var getEnv = (key, context) => {
     return cfEnv[key];
   }
   try {
-    if (typeof process !== "undefined" && (define_process_env_default$1 == null ? void 0 : define_process_env_default$1[key]) && !String(define_process_env_default$1[key]).includes("placeholder")) {
-      return define_process_env_default$1[key];
+    if (typeof process !== "undefined" && (define_process_env_default == null ? void 0 : define_process_env_default[key]) && !String(define_process_env_default[key]).includes("placeholder")) {
+      return define_process_env_default[key];
     }
   } catch {
   }
@@ -40609,46 +40716,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": true, "VITE_SUPABASE_URL": "https://ybquwzoreecxxbewjpdn.supabase.co" };
-var define_process_env_default = {};
-var cachedSupabase = null;
-var FALLBACK_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
-var FALLBACK_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
-var getSupabase = () => {
-  if (cachedSupabase) {
-    return cachedSupabase;
-  }
-  let envUrl = "";
-  let envKey = "";
-  try {
-    if (typeof import.meta !== "undefined" && __vite_import_meta_env__) {
-      envUrl = "https://ybquwzoreecxxbewjpdn.supabase.co";
-      envKey = "";
-    }
-  } catch (e) {
-  }
-  if (!envUrl && typeof process !== "undefined" && define_process_env_default) {
-    envUrl = define_process_env_default.VITE_SUPABASE_URL || define_process_env_default.SUPABASE_URL || "";
-  }
-  if (!envKey && typeof process !== "undefined" && define_process_env_default) {
-    envKey = define_process_env_default.VITE_SUPABASE_ANON_KEY || define_process_env_default.SUPABASE_ANON_KEY || "";
-  }
-  const finalUrl = envUrl && !envUrl.includes("placeholder") ? envUrl : FALLBACK_URL;
-  const finalKey = envKey && !envKey.includes("placeholder") ? envKey : FALLBACK_ANON_KEY;
-  if (!finalUrl || !finalKey) {
-    console.error("\u274C CRITICAL: Supabase URL or Anon Key is missing during client initialization.");
-  }
-  cachedSupabase = createClient(finalUrl, finalKey);
-  return cachedSupabase;
-};
-var supabase = new Proxy({}, {
-  get(_, prop) {
-    const client = getSupabase();
-    const value = client[prop];
-    return typeof value === "function" ? value.bind(client) : value;
-  }
-});
-var stylesheet = "/assets/tailwind-gq1CQUtM.css";
+var stylesheet = "/assets/tailwind-DP61AyRe.css";
 var links$1 = () => [
   { rel: "stylesheet", href: stylesheet },
   // 💡 ヤマトのアイコンをファビコンとして設定
@@ -40742,8 +40810,30 @@ function App() {
   }, [(_a = data2.user) == null ? void 0 : _a.id, revalidator]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {});
 }
+function ErrorBoundary() {
+  const error = useRouteError();
+  let title = "Something Went Wrong";
+  let detail = "Unknown error";
+  if (isRouteErrorResponse(error)) {
+    title = error.status === 404 ? "Page Not Found" : `Error ${error.status}`;
+    detail = `${error.status} ${error.statusText || ""} ${typeof error.data === "string" ? error.data : ""}`.trim();
+  } else if (error instanceof Error) {
+    detail = error.message;
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 flex items-center justify-center px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      DataErrorState,
+      {
+        title,
+        errorMessage: `Unhandled page error: ${detail}`
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/", className: "text-indigo-600 hover:underline font-medium", children: "Back to Home" }) })
+  ] }) });
+}
 var route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
+  ErrorBoundary,
   Layout,
   default: App,
   links: links$1,
@@ -42354,74 +42444,6 @@ var PageLayout = reactExports.forwardRef(({
   ] });
 });
 PageLayout.displayName = "PageLayout";
-function DataErrorState({
-  title = "Unable to Load Data",
-  message = "An unexpected error has occurred while loading the page. You can automatically notify our support team by clicking the button below.",
-  errorMessage = "No additional error details provided.",
-  onRetry
-}) {
-  const [isSending, setIsSending] = reactExports.useState(false);
-  const [sentSuccess, setSentSuccess] = reactExports.useState(false);
-  const [sendError, setSendError] = reactExports.useState(false);
-  const handleAutoReport = async () => {
-    setIsSending(true);
-    setSendError(false);
-    try {
-      const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
-      const { error } = await supabase.functions.invoke("send-error-report", {
-        body: {
-          pageUrl: currentUrl,
-          timestamp,
-          errorMessage
-        }
-      });
-      if (error) {
-        throw error;
-      }
-      setSentSuccess(true);
-    } catch (err) {
-      console.error("Failed to send error report:", err);
-      setSendError(true);
-    } finally {
-      setIsSending(false);
-    }
-  };
-  const handleRetry = () => {
-    if (onRetry) {
-      onRetry();
-    } else if (typeof window !== "undefined") {
-      window.location.reload();
-    }
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-8 text-center bg-white border border-slate-200 rounded-2xl shadow-sm max-w-lg mx-auto my-12", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold", children: "\u26A0\uFE0F" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-bold text-slate-800 mb-2", children: title }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mb-6 leading-relaxed", children: message }),
-    sentSuccess ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-bold mb-4", children: "\u2713 Error report sent successfully to support. Thank you!" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-3 justify-center", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: handleRetry,
-          className: "px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm cursor-pointer shadow-xs",
-          children: "Retry / Reload"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: handleAutoReport,
-          disabled: isSending,
-          className: "px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold rounded-xl transition-colors text-sm inline-flex items-center cursor-pointer shadow-xs",
-          children: isSending ? "Sending Report..." : "Report Error to Support"
-        }
-      )
-    ] }),
-    sendError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-rose-600 mt-3 font-medium", children: "Failed to send automatically. Please contact support@jptutoraiyamato.com directly." })
-  ] });
-}
 function generatePageJsonLd(currentPath, portalContent) {
   var _a, _b;
   const baseUrl = "https://jptutoraiyamato.com";
@@ -42644,6 +42666,7 @@ var OralExaminerAvatar = ({
     ] })
   ] });
 };
+var YAMATO_API_BASE = "https://api.jptutoraiyamato.com";
 async function getAccessToken() {
   var _a;
   try {
@@ -43521,6 +43544,19 @@ ${callName}, standard text chat (${baseCreditCost} credits) is available, but th
             await refreshUserCredits();
             return;
           }
+        }
+        if (response.status === 401) {
+          setIsTutorLoading(false);
+          setTutorMessages([
+            ...newMessages,
+            {
+              role: "assistant",
+              content: `\u{1F510} **[Login Required]**
+
+Please log in to chat with AI Yamato.`
+            }
+          ]);
+          return;
         }
         if ((data2 == null ? void 0 : data2.error) === "UNREGISTERED_APP_PROMPT") {
           setIsTutorLoading(false);
@@ -46282,91 +46318,101 @@ function OralExamQuestions() {
   };
   const activeItems = ((_a = oralData == null ? void 0 : oralData[currentSection]) == null ? void 0 : _a[currentPace]) || [];
   const userNickname = (user == null ? void 0 : user.email) ? user.email.split("@")[0] : "Student";
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: oralData && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-4xl mx-auto px-4 py-10 flex-grow w-full", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border-2 border-amber-300 rounded-2xl p-6 sm:p-8 shadow-xl mb-10 text-center relative overflow-hidden", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -right-1 -bottom-1 text-amber-100 text-9xl select-none pointer-events-none", children: "\u{1F399}\uFE0F" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3", children: "VCE Oral Exam: Frequently Used Examiner Questions Audio Library" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed", children: "Listen to authentic examiner questions with exam-style speed and pronunciation. Switch between learning paces and sections to start improving your listening skills!" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-amber-100/70 border border-amber-300 rounded-2xl p-5 mb-8 shadow-inner flex flex-col md:flex-row gap-6 justify-between items-center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full md:w-auto", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2", children: "Select Section" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex flex-wrap rounded-xl bg-white p-1 shadow-xs border border-amber-200 w-full sm:w-auto gap-1", children: ["beforeSec1", "sec1", "sec2", "afterSec2"].map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: () => setCurrentSection(sec),
-              className: `flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${currentSection === sec ? "bg-amber-600 text-white" : "text-slate-700 hover:text-amber-700"}`,
-              children: sec === "beforeSec1" ? "Before" : sec === "sec1" ? "Section 1" : sec === "sec2" ? "Section 2" : "After"
-            },
-            sec
-          )) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full md:w-auto", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2", children: "Learning Pace" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex rounded-xl bg-white p-1 shadow-xs border border-amber-200 w-full sm:w-auto", children: ["steady", "normal", "accelerated"].map((pace) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: () => setCurrentPace(pace),
-              className: `flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs sm:text-sm font-bold capitalize transition cursor-pointer ${currentPace === pace ? "bg-amber-600 text-white shadow-xs" : "text-slate-700 hover:text-amber-700"}`,
-              children: pace
-            },
-            pace
-          )) })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: activeItems.length > 0 ? activeItems.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
-        {
-          className: "bg-white border border-amber-200 rounded-xl p-5 shadow-xs hover:shadow-md transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full", children: item.category }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "div",
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load ORAL_EXAM_QUESTIONS from Supabase (kl_app).",
+      onRetry: loadData,
+      children: oralData && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-4xl mx-auto px-4 py-10 flex-grow w-full", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border-2 border-amber-300 rounded-2xl p-6 sm:p-8 shadow-xl mb-10 text-center relative overflow-hidden", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -right-1 -bottom-1 text-amber-100 text-9xl select-none pointer-events-none", children: "\u{1F399}\uFE0F" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3", children: "VCE Oral Exam: Frequently Used Examiner Questions Audio Library" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed", children: "Listen to authentic examiner questions with exam-style speed and pronunciation. Switch between learning paces and sections to start improving your listening skills!" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-amber-100/70 border border-amber-300 rounded-2xl p-5 mb-8 shadow-inner flex flex-col md:flex-row gap-6 justify-between items-center", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full md:w-auto", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2", children: "Select Section" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex flex-wrap rounded-xl bg-white p-1 shadow-xs border border-amber-200 w-full sm:w-auto gap-1", children: ["beforeSec1", "sec1", "sec2", "afterSec2"].map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
                 {
-                  className: "question-text text-base sm:text-lg font-medium text-slate-900 pt-1 leading-relaxed",
-                  dangerouslySetInnerHTML: { __html: item.text }
-                }
-              )
+                  type: "button",
+                  onClick: () => setCurrentSection(sec),
+                  className: `flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${currentSection === sec ? "bg-amber-600 text-white" : "text-slate-700 hover:text-amber-700"}`,
+                  children: sec === "beforeSec1" ? "Before" : sec === "sec1" ? "Section 1" : sec === "sec2" ? "Section 2" : "After"
+                },
+                sec
+              )) })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                type: "button",
-                disabled: playingIndex === index,
-                onClick: () => handlePlayAudio(item, index),
-                className: "w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-xs shrink-0 disabled:opacity-60 cursor-pointer",
-                children: playingIndex === index ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u23F3 \u518D\u751F\u4E2D..." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F50A} \u97F3\u58F0\u3092\u304D\u304F" })
-              }
-            )
-          ]
-        },
-        index
-      )) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-12 bg-white rounded-2xl border border-amber-200 p-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-500 font-medium text-sm", children: "No questions available for this section and pace." }) }) })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { "aria-label": "Floating Controls", className: "fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3", children: [
-      showScrollTop && /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: scrollToTop,
-          className: "bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-full shadow-lg transition-all cursor-pointer text-sm flex items-center justify-center",
-          title: "Scroll to top",
-          children: "\u2B06\uFE0F"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        ChatYamatoOralExamQuestions,
-        {
-          userId: user == null ? void 0 : user.id,
-          userNickname
-        }
-      )
-    ] })
-  ] }) });
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full md:w-auto", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2", children: "Learning Pace" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex rounded-xl bg-white p-1 shadow-xs border border-amber-200 w-full sm:w-auto", children: ["steady", "normal", "accelerated"].map((pace) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => setCurrentPace(pace),
+                  className: `flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs sm:text-sm font-bold capitalize transition cursor-pointer ${currentPace === pace ? "bg-amber-600 text-white shadow-xs" : "text-slate-700 hover:text-amber-700"}`,
+                  children: pace
+                },
+                pace
+              )) })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: activeItems.length > 0 ? activeItems.map((item, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "bg-white border border-amber-200 rounded-xl p-5 shadow-xs hover:shadow-md transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full", children: item.category }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "div",
+                    {
+                      className: "question-text text-base sm:text-lg font-medium text-slate-900 pt-1 leading-relaxed",
+                      dangerouslySetInnerHTML: { __html: item.text }
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    disabled: playingIndex === index,
+                    onClick: () => handlePlayAudio(item, index),
+                    className: "w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-xs shrink-0 disabled:opacity-60 cursor-pointer",
+                    children: playingIndex === index ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u23F3 \u518D\u751F\u4E2D..." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F50A} \u97F3\u58F0\u3092\u304D\u304F" })
+                  }
+                )
+              ]
+            },
+            index
+          )) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-12 bg-white rounded-2xl border border-amber-200 p-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-500 font-medium text-sm", children: "No questions available for this section and pace." }) }) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { "aria-label": "Floating Controls", className: "fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3", children: [
+          showScrollTop && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: scrollToTop,
+              className: "bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-full shadow-lg transition-all cursor-pointer text-sm flex items-center justify-center",
+              title: "Scroll to top",
+              children: "\u2B06\uFE0F"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            ChatYamatoOralExamQuestions,
+            {
+              userId: user == null ? void 0 : user.id,
+              userNickname
+            }
+          )
+        ] })
+      ] })
+    }
+  );
 }
 var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -47978,6 +48024,19 @@ Hello, ${callName}! Please top up your credits to continue!`
             }
           ]);
           await refreshUserCredits();
+          return;
+        }
+        if (response.status === 401) {
+          setIsTutorLoading(false);
+          setTutorMessages([
+            ...newMessages,
+            {
+              role: "assistant",
+              content: `\u{1F510} **[Login Required]**
+
+Please log in to chat with AI Yamato.`
+            }
+          ]);
           return;
         }
         if ((data2 == null ? void 0 : data2.error) === "UNREGISTERED_APP_PROMPT") {
@@ -51917,6 +51976,7 @@ var EduGenkoyoshiCanvas = reactExports.forwardRef(function EduGenkoyoshiCanvas2(
     }
   );
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Write from left to right, one character per square. A stylus or your finger works best; writing with a mouse is hard." }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
       toolButton("pen", "Pen", "\u270F\uFE0F"),
       toolButton("eraser", "Eraser", "\u{1F9FD}"),
@@ -51955,28 +52015,27 @@ var EduGenkoyoshiCanvas = reactExports.forwardRef(function EduGenkoyoshiCanvas2(
           onPointerMove: handlePointerMove,
           onPointerUp: finishStroke,
           onPointerCancel: finishStroke,
-          "aria-label": "Digital genkouyoushi writing area"
+          "aria-label": "Digital genkoyoshi writing area"
         }
       )
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Write from left to right, one character per square. A stylus or your finger works best; writing with a mouse is hard." })
+    ] })
   ] });
 });
-var API_PATH = "/api/textbook-lesson-writing";
+function moreTimesText(left) {
+  return `You can send it ${left} more time${left === 1 ? "" : "s"}.`;
+}
+var API_URL = `${YAMATO_API_BASE}/api/textbook-lesson-writing`;
 var MAX_IMAGE_EDGE = 1500;
 var MAX_PDF_BYTES = 5 * 1024 * 1024;
 async function apiFetch(init) {
-  var _a;
-  const { data: data2 } = await supabase.auth.getSession();
-  const token = (_a = data2.session) == null ? void 0 : _a.access_token;
+  const { query, ...requestInit } = init ?? {};
   let res;
   try {
-    res = await fetch(`${API_PATH}${(init == null ? void 0 : init.query) ?? ""}`, {
-      ...init,
+    res = await yamatoFetch(`${API_URL}${query ?? ""}`, {
+      ...requestInit,
       headers: {
         "Content-Type": "application/json",
-        ...token ? { Authorization: `Bearer ${token}` } : {},
-        ...(init == null ? void 0 : init.headers) ?? {}
+        ...requestInit.headers ?? {}
       }
     });
   } catch {
@@ -51984,7 +52043,7 @@ async function apiFetch(init) {
   }
   const body = await res.json().catch(() => null);
   if (body === null) {
-    console.error(`[EduWritingTaskModal] ${API_PATH} returned a non-JSON response (HTTP ${res.status}).`);
+    console.error(`[EduWritingTaskModal] ${API_URL} returned a non-JSON response (HTTP ${res.status}).`);
     return { ok: false, status: res.status, body: { message: `The writing task service is not available (HTTP ${res.status}). Please try again later.` } };
   }
   return { ok: res.ok, status: res.status, body };
@@ -52064,7 +52123,8 @@ var CONVEYED_STYLE = {
 var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
   const [phase, setPhase] = reactExports.useState("loading");
   const [status, setStatus] = reactExports.useState(null);
-  const [method, setMethod] = reactExports.useState("photo");
+  const [method, setMethod] = reactExports.useState("upload");
+  const [isGuideOpen, setIsGuideOpen] = reactExports.useState(false);
   const [prepared, setPrepared] = reactExports.useState(null);
   const [message, setMessage] = reactExports.useState(null);
   const [submissionId, setSubmissionId] = reactExports.useState(null);
@@ -52075,7 +52135,6 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
   const [feedback, setFeedback] = reactExports.useState(null);
   const [completedNow, setCompletedNow] = reactExports.useState(false);
   const canvasRef = reactExports.useRef(null);
-  const photoInputRef = reactExports.useRef(null);
   const uploadInputRef = reactExports.useRef(null);
   const completedRef = reactExports.useRef(false);
   const onCompletedRef = reactExports.useRef(onCompleted);
@@ -52083,7 +52142,6 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
   const { playCompleteSound } = useSoundEffect();
   const task = (status == null ? void 0 : status.task) ?? null;
   const attemptsLeft = status ? Math.max(0, status.maxAttempts - status.attemptsUsed) : 0;
-  const retakesLeft = status ? Math.max(0, status.maxRetakes - status.retakesUsed) : 0;
   const resetDraft = (options = {}) => {
     var _a;
     setPrepared(null);
@@ -52133,6 +52191,7 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
       return;
     resetDraft();
     setCompletedNow(false);
+    setIsGuideOpen(false);
     void loadStatus();
   }, [isOpen, lessonId]);
   const handleFileChosen = async (e) => {
@@ -52166,10 +52225,10 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
         return;
       }
       const parts = splitDataUrl(canvasRef.current.exportImage());
-      file = parts ? { ...parts, previewUrl: null, name: "genkouyoushi.jpg" } : null;
+      file = parts ? { ...parts, previewUrl: null, name: "genkoyoshi.jpg" } : null;
     }
     if (!file) {
-      setMessage({ tone: "error", text: method === "photo" ? "Take a photo of your writing first." : "Choose a file first." });
+      setMessage({ tone: "error", text: "Choose a photo or PDF of your writing first." });
       return;
     }
     setPhase("reading");
@@ -52198,7 +52257,7 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
       setPrepared(null);
       setMessage({
         tone: "info",
-        text: `\u{1F4F7} Your reader couldn't see the photo clearly: ${body.qualityIssue} Please take it again. This did not use up a submission. (Retakes left: ${Math.max(0, body.maxRetakes - body.retakesUsed)})`
+        text: `\u{1F4F7} Your reader couldn't see the photo clearly: ${body.qualityIssue} Please take a new photo and upload it again. This photo was not counted as a submission.`
       });
       return;
     }
@@ -52259,363 +52318,341 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
       ]
     }
   );
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-start sm:items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl p-5 sm:p-10 shadow-2xl space-y-6 my-auto", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-start sm:items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl p-5 sm:p-10 shadow-2xl space-y-6 my-auto", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u270D\uFE0F" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: (task == null ? void 0 : task.title) || "Writing Task" })
-        ] }),
-        status && phase !== "finished" && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5", children: [
-          "Submissions used: ",
-          status.attemptsUsed,
-          " / ",
-          status.maxAttempts
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: onClose,
-          disabled: busy,
-          className: "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-sm p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0 disabled:opacity-40",
-          children: "\u2715 Close"
-        }
-      )
-    ] }),
-    phase === "loading" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center py-16 font-bold text-slate-500 dark:text-slate-400 animate-pulse", children: "Loading your writing task..." }),
-    phase === "load_error" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-4 py-10", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-5xl", children: "\u26A0\uFE0F" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold rounded-xl p-3 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 max-w-md mx-auto", children: (message == null ? void 0 : message.text) || "Could not load this task. Please try again." }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center gap-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => void loadStatus(),
-            className: "py-3 px-8 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow cursor-pointer",
-            children: "Try again"
-          }
-        ),
+        ] }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
             type: "button",
             onClick: onClose,
-            className: "py-3 px-8 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-black text-sm cursor-pointer",
-            children: "Close"
+            disabled: busy,
+            className: "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-sm p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0 disabled:opacity-40",
+            children: "\u2715 Close"
           }
         )
-      ] })
-    ] }),
-    phase === "no_task" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center py-16 font-bold text-slate-500 dark:text-slate-400", children: "There is no writing task for this lesson yet." }),
-    task && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: phase === "compose" || phase === "reading" ? "space-y-6" : "hidden", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-3xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/30 p-5 sm:p-6 space-y-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base sm:text-lg font-black text-slate-900 dark:text-slate-100", children: [
-          "To: ",
-          recipientLabel
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: task.situation }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold", children: "Your goal: " }),
-          task.purpose
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: task.instructions_en }),
-        task.required_points.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-800 dark:text-slate-200 mb-1", children: "Make sure your reader finds out:" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "text-sm text-slate-700 dark:text-slate-300 space-y-0.5 list-disc pl-5", children: task.required_points.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-            p2.label_en,
-            p2.label_ja ? `\uFF08${p2.label_ja}\uFF09` : ""
-          ] }, p2.key)) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Your reader will read exactly what you wrote. If a character can't be read, they won't understand it, so write clearly enough for someone else to read." })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800", children: [
-          methodTab("photo", "\u{1F4F7}", "Take a photo"),
-          methodTab("upload", "\u{1F4C1}", "Upload a file"),
-          methodTab("canvas", "\u270F\uFE0F", "Write here")
-        ] }),
-        method === "photo" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: "Write on paper, then take a photo from directly above in good light. Keep the whole page in the frame." }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { ref: photoInputRef, type: "file", accept: "image/*", capture: "environment", onChange: handleFileChosen, className: "hidden" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: () => {
-                var _a;
-                return (_a = photoInputRef.current) == null ? void 0 : _a.click();
-              },
-              disabled: busy,
-              className: "w-full py-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-black text-sm hover:border-orange-400 hover:text-orange-600 transition cursor-pointer",
-              children: [
-                "\u{1F4F7} ",
-                prepared ? "Take the photo again" : "Open camera"
-              ]
-            }
-          )
-        ] }),
-        method === "upload" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: "Upload a photo, a screenshot, or a PDF of your writing (for example from a note-taking app)." }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { ref: uploadInputRef, type: "file", accept: "image/*,application/pdf", onChange: handleFileChosen, className: "hidden" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: () => {
-                var _a;
-                return (_a = uploadInputRef.current) == null ? void 0 : _a.click();
-              },
-              disabled: busy,
-              className: "w-full py-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-black text-sm hover:border-orange-400 hover:text-orange-600 transition cursor-pointer",
-              children: [
-                "\u{1F4C1} ",
-                prepared ? "Choose a different file" : "Choose a file"
-              ]
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: method === "canvas" ? "" : "hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EduGenkoyoshiCanvas, { ref: canvasRef }) }),
-        prepared && method !== "canvas" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-2xl border border-slate-200 dark:border-slate-700 p-3 bg-slate-50 dark:bg-slate-800/50", children: prepared.previewUrl ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: prepared.previewUrl, alt: "Preview of your writing", className: "max-h-80 mx-auto rounded-xl object-contain" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-300 text-center py-4", children: [
-          "\u{1F4C4} ",
-          prepared.name
-        ] }) })
-      ] }),
-      (status == null ? void 0 : status.retention.deleteAfter) && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-xl p-3", children: [
-        "\u{1F512} Your image will be kept privately so your teacher can check it, and will be deleted on ",
-        formatDate(status.retention.deleteAfter),
-        "."
-      ] }),
-      message && /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "p",
-        {
-          className: `text-sm font-bold rounded-xl p-3 ${message.tone === "error" ? "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40" : "text-sky-800 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/40"}`,
-          children: message.text
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: handleSend,
-          disabled: busy,
-          className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-black text-base transition shadow cursor-pointer flex items-center justify-center gap-2",
-          children: phase === "reading" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "animate-pulse", children: [
-            task.recipient,
-            " is reading your message..."
-          ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-              "Send to ",
-              task.recipient,
-              " \u2709\uFE0F"
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs opacity-80 font-normal", children: [
-              "(",
-              attemptsLeft,
-              " submission",
-              attemptsLeft === 1 ? "" : "s",
-              " left)"
-            ] })
-          ] })
-        }
-      ),
-      retakesLeft < ((status == null ? void 0 : status.maxRetakes) ?? 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-center text-slate-400", children: [
-        "Photo retakes left: ",
-        retakesLeft
-      ] })
-    ] }),
-    (phase === "confirm" || phase === "feedback_loading") && task && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-600 dark:text-slate-300", children: [
-          "This is what ",
-          task.recipient,
-          " could read:"
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-3xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-5 sm:p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(TranscriptionText, { text: transcription || "\uFF08\u3088\u3081\u307E\u305B\u3093\u3067\u3057\u305F\uFF09" }) }),
-        unreadableCount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-rose-600 dark:text-rose-400", children: [
-          unreadableCount,
-          " character",
-          unreadableCount === 1 ? "" : "s",
-          " could not be read."
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base font-black text-slate-900 dark:text-slate-100", children: "Is this what you wrote?" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: [
+      phase === "loading" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center py-16 font-bold text-slate-500 dark:text-slate-400 animate-pulse", children: "Loading your writing task..." }),
+      phase === "load_error" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-4 py-10", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-5xl", children: "\u26A0\uFE0F" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold rounded-xl p-3 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 max-w-md mx-auto", children: (message == null ? void 0 : message.text) || "Could not load this task. Please try again." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center gap-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "button",
             {
               type: "button",
-              onClick: () => setMismatch(false),
-              disabled: busy,
-              "aria-pressed": !mismatch,
-              className: `py-3 px-4 rounded-2xl font-black text-sm border-2 transition cursor-pointer ${!mismatch ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300" : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`,
-              children: "\u{1F44D} Yes, that's what I wrote"
+              onClick: () => void loadStatus(),
+              className: "py-3 px-8 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow cursor-pointer",
+              children: "Try again"
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "button",
             {
               type: "button",
-              onClick: () => setMismatch(true),
-              disabled: busy,
-              "aria-pressed": mismatch,
-              className: `py-3 px-4 rounded-2xl font-black text-sm border-2 transition cursor-pointer ${mismatch ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300" : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`,
-              children: "\u{1F914} No, I meant something different"
+              onClick: onClose,
+              className: "py-3 px-8 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-black text-sm cursor-pointer",
+              children: "Close"
             }
           )
-        ] }),
-        mismatch && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "intended-text", className: "text-sm font-bold text-slate-700 dark:text-slate-300 block", children: "Type what you meant to write, in Japanese:" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "textarea",
-            {
-              id: "intended-text",
-              value: intendedText,
-              onChange: (e) => setIntendedText(e.target.value),
-              disabled: busy,
-              rows: 4,
-              className: "w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-lg font-bold",
-              placeholder: "\u308F\u305F\u3057\u306F\u2026"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Your reader only saw your handwriting. This helps you see where your message didn't get across." })
         ] })
       ] }),
-      message && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold rounded-xl p-3 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40", children: message.text }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: handleGetFeedback,
-          disabled: busy,
-          className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-black text-base transition shadow cursor-pointer",
-          children: phase === "feedback_loading" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "animate-pulse", children: [
-            "Waiting for ",
-            task.recipient,
-            "'s reply..."
-          ] }) : `See ${task.recipient}'s reply`
-        }
-      )
-    ] }),
-    phase === "feedback" && feedback && task && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-3xl border border-sky-200 dark:border-sky-900/60 bg-sky-50 dark:bg-sky-950/30 p-5 sm:p-6 space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs font-bold text-sky-700 dark:text-sky-300", children: [
-          "Reply from ",
-          recipientLabel
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 leading-relaxed", children: feedback.reader_reaction_ja }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: feedback.reader_reaction_en })
-      ] }),
-      feedback.points.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100", children: "Did your message get across?" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: feedback.points.map((p2) => {
-          const style = CONVEYED_STYLE[p2.conveyed] ?? CONVEYED_STYLE.no;
-          return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "rounded-2xl border border-slate-200 dark:border-slate-700 p-3 text-sm", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: `font-bold ${style.className}`, children: [
-              style.icon,
-              " ",
-              p2.label_en ?? p2.key
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 dark:text-slate-300 mt-0.5", children: p2.note_en })
-          ] }, p2.key);
-        }) })
-      ] }),
-      feedback.handwriting_note_en && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100", children: "Could your reader read your writing?" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: feedback.handwriting_note_en })
-      ] }),
-      feedback.corrections.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100", children: "Japanese to fix" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: feedback.corrections.map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "rounded-2xl border border-slate-200 dark:border-slate-700 p-3 text-sm space-y-1", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-600 dark:text-rose-400 line-through decoration-2", children: c.original }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mx-2 text-slate-400", children: "\u2794" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-emerald-700 dark:text-emerald-400", children: c.corrected })
+      phase === "no_task" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center py-16 font-bold text-slate-500 dark:text-slate-400", children: "There is no writing task for this lesson yet." }),
+      task && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: phase === "compose" || phase === "reading" ? "space-y-6" : "hidden", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-3xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/30 p-5 sm:p-6 space-y-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base sm:text-lg font-black text-slate-900 dark:text-slate-100", children: [
+            "To: ",
+            recipientLabel
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 dark:text-slate-300", children: c.explanation_en })
-        ] }, i)) })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl bg-slate-100 dark:bg-slate-800 p-4 text-sm space-y-1", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-800 dark:text-slate-200", children: feedback.overall_en }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold text-orange-600 dark:text-orange-400", children: [
-          "Next: ",
-          feedback.next_step_en
-        ] })
-      ] }),
-      (status == null ? void 0 : status.completed) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: task.situation }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold", children: "Your goal: " }),
+            task.purpose
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: task.instructions_en }),
+          task.required_points.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-800 dark:text-slate-200 mb-1", children: "Make sure your reader finds out:" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "text-sm text-slate-700 dark:text-slate-300 space-y-0.5 list-disc pl-5", children: task.required_points.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+              p2.label_en,
+              p2.label_ja ? `\uFF08${p2.label_ja}\uFF09` : ""
+            ] }, p2.key)) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Your reader will read exactly what you wrote. If a character can't be read, they won't understand it, so write clearly enough for someone else to read." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800", children: [
+            methodTab("upload", "\u{1F4C1}", "Upload a photo or PDF"),
+            methodTab("canvas", "\u270F\uFE0F", "Write on genkoyoshi")
+          ] }),
+          method === "upload" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: "Write on paper and take a photo with your phone or tablet, then upload the photo here. Take it from directly above in good light, with the whole page in the frame. You can also upload a PDF or a screenshot (for example from a note-taking app)." }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { ref: uploadInputRef, type: "file", accept: "image/*,application/pdf", onChange: handleFileChosen, className: "hidden" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: () => {
+                  var _a;
+                  return (_a = uploadInputRef.current) == null ? void 0 : _a.click();
+                },
+                disabled: busy,
+                className: "w-full py-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-black text-sm hover:border-orange-400 hover:text-orange-600 transition cursor-pointer",
+                children: [
+                  "\u{1F4C1} ",
+                  prepared ? "Choose a different file" : "Choose a file"
+                ]
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: method === "canvas" ? "space-y-3" : "hidden", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/30 p-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "flex-1 text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-black text-slate-900 dark:text-slate-100", children: "What is genkoyoshi\uFF08\u3052\u3093\u3053\u3046\u3088\u3046\u3057\uFF09?" }),
+                " It is Japanese writing paper with one square for each character. Check how to use it before you start."
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => setIsGuideOpen(true),
+                  disabled: busy,
+                  className: "shrink-0 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm transition shadow cursor-pointer",
+                  children: "\u{1F4DD} How to use genkoyoshi"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(EduGenkoyoshiCanvas, { ref: canvasRef })
+          ] }),
+          prepared && method !== "canvas" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-2xl border border-slate-200 dark:border-slate-700 p-3 bg-slate-50 dark:bg-slate-800/50", children: prepared.previewUrl ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: prepared.previewUrl, alt: "Preview of your writing", className: "max-h-80 mx-auto rounded-xl object-contain" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-300 text-center py-4", children: [
+            "\u{1F4C4} ",
+            prepared.name
+          ] }) })
+        ] }),
+        (status == null ? void 0 : status.retention.deleteAfter) && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-xl p-3", children: [
+          "\u{1F512} Your image will be kept privately so your teacher can check it, and will be deleted on ",
+          formatDate(status.retention.deleteAfter),
+          "."
+        ] }),
+        message && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "p",
+          {
+            className: `text-sm font-bold rounded-xl p-3 ${message.tone === "error" ? "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40" : "text-sky-800 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/40"}`,
+            children: message.text
+          }
+        ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
             type: "button",
-            onClick: () => setPhase("finished"),
-            className: "py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer",
-            children: completedNow ? "Finish task \u{1F389}" : "Done"
+            onClick: handleSend,
+            disabled: busy,
+            className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-black text-base transition shadow cursor-pointer flex items-center justify-center gap-2",
+            children: phase === "reading" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "animate-pulse", children: [
+              task.recipient,
+              " is reading your message..."
+            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Send to ",
+                task.recipient,
+                " \u2709\uFE0F"
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs opacity-90 font-bold", children: "(send to AI Yamato)" })
+            ] })
           }
         ),
-        attemptsLeft > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        ((status == null ? void 0 : status.attemptsUsed) ?? 0) > 0 && attemptsLeft > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-center text-slate-500 dark:text-slate-400", children: moreTimesText(attemptsLeft) })
+      ] }),
+      (phase === "confirm" || phase === "feedback_loading") && task && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-600 dark:text-slate-300", children: [
+            "This is what ",
+            task.recipient,
+            " could read:"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-3xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-5 sm:p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(TranscriptionText, { text: transcription || "\uFF08\u3088\u3081\u307E\u305B\u3093\u3067\u3057\u305F\uFF09" }) }),
+          unreadableCount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-rose-600 dark:text-rose-400", children: [
+            unreadableCount,
+            " character",
+            unreadableCount === 1 ? "" : "s",
+            " could not be read."
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base font-black text-slate-900 dark:text-slate-100", children: "Is this what you wrote?" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => setMismatch(false),
+                disabled: busy,
+                "aria-pressed": !mismatch,
+                className: `py-3 px-4 rounded-2xl font-black text-sm border-2 transition cursor-pointer ${!mismatch ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300" : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`,
+                children: "\u{1F44D} Yes, that's what I wrote"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => setMismatch(true),
+                disabled: busy,
+                "aria-pressed": mismatch,
+                className: `py-3 px-4 rounded-2xl font-black text-sm border-2 transition cursor-pointer ${mismatch ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300" : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`,
+                children: "\u{1F914} No, I meant something different"
+              }
+            )
+          ] }),
+          mismatch && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "intended-text", className: "text-sm font-bold text-slate-700 dark:text-slate-300 block", children: "Type what you meant to write, in Japanese:" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "textarea",
+              {
+                id: "intended-text",
+                value: intendedText,
+                onChange: (e) => setIntendedText(e.target.value),
+                disabled: busy,
+                rows: 4,
+                className: "w-full px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-lg font-bold",
+                placeholder: "\u308F\u305F\u3057\u306F\u2026"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Your reader only saw your handwriting. This helps you see where your message didn't get across." })
+          ] })
+        ] }),
+        message && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold rounded-xl p-3 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40", children: message.text }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
             type: "button",
-            onClick: handleRewrite,
-            className: "py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-black text-sm hover:border-orange-400 transition cursor-pointer",
-            children: [
-              "Rewrite to improve (",
-              attemptsLeft,
-              " left)"
-            ]
+            onClick: handleGetFeedback,
+            disabled: busy,
+            className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-black text-base transition shadow cursor-pointer",
+            children: phase === "feedback_loading" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "animate-pulse", children: [
+              "Waiting for ",
+              task.recipient,
+              "'s reply..."
+            ] }) : `See ${task.recipient}'s reply`
           }
         )
-      ] }) : attemptsLeft > 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-300 text-center", children: "Your message didn't do the task yet. Rewrite it and send it again." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      ] }),
+      phase === "feedback" && feedback && task && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-3xl border border-sky-200 dark:border-sky-900/60 bg-sky-50 dark:bg-sky-950/30 p-5 sm:p-6 space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs font-bold text-sky-700 dark:text-sky-300", children: [
+            "Reply from ",
+            recipientLabel
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 leading-relaxed", children: feedback.reader_reaction_ja }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: feedback.reader_reaction_en })
+        ] }),
+        feedback.points.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100", children: "Did your message get across?" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: feedback.points.map((p2) => {
+            const style = CONVEYED_STYLE[p2.conveyed] ?? CONVEYED_STYLE.no;
+            return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "rounded-2xl border border-slate-200 dark:border-slate-700 p-3 text-sm", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: `font-bold ${style.className}`, children: [
+                style.icon,
+                " ",
+                p2.label_en ?? p2.key
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 dark:text-slate-300 mt-0.5", children: p2.note_en })
+            ] }, p2.key);
+          }) })
+        ] }),
+        feedback.handwriting_note_en && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100", children: "Could your reader read your writing?" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: feedback.handwriting_note_en })
+        ] }),
+        feedback.corrections.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100", children: "Japanese to fix" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: feedback.corrections.map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "rounded-2xl border border-slate-200 dark:border-slate-700 p-3 text-sm space-y-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-600 dark:text-rose-400 line-through decoration-2", children: c.original }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mx-2 text-slate-400", children: "\u2794" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-emerald-700 dark:text-emerald-400", children: c.corrected })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 dark:text-slate-300", children: c.explanation_en })
+          ] }, i)) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl bg-slate-100 dark:bg-slate-800 p-4 text-sm space-y-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-800 dark:text-slate-200", children: feedback.overall_en }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold text-orange-600 dark:text-orange-400", children: [
+            "Next: ",
+            feedback.next_step_en
+          ] })
+        ] }),
+        (status == null ? void 0 : status.completed) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: () => setPhase("finished"),
+              className: "py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer",
+              children: completedNow ? "Finish task \u{1F389}" : "Done"
+            }
+          ),
+          attemptsLeft > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: handleRewrite,
+              className: "py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-black text-sm hover:border-orange-400 transition cursor-pointer",
+              children: "Rewrite to improve"
+            }
+          )
+        ] }) : attemptsLeft > 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-300 text-center", children: [
+            "Your message didn't do the task yet. Rewrite it and send it again. ",
+            moreTimesText(attemptsLeft)
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: handleRewrite,
+              className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer",
+              children: "Rewrite and send again"
+            }
+          )
+        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
             type: "button",
-            onClick: handleRewrite,
-            className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer",
-            children: [
-              "Rewrite and send again (",
-              attemptsLeft,
-              " left)"
-            ]
+            onClick: () => setPhase("locked"),
+            className: "w-full py-4 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-black text-base cursor-pointer",
+            children: "Continue"
           }
         )
-      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
+      ] }),
+      phase === "locked" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-4 py-10", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-5xl", children: "\u{1F4EE}" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-xl font-black text-slate-900 dark:text-slate-100", children: "You've used all your submissions" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto", children: "This task isn't complete yet. Your teacher will check your writing and talk with you about the next step." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: onClose,
+            className: "py-3 px-10 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-black text-sm cursor-pointer",
+            children: "Close"
+          }
+        )
+      ] }),
+      phase === "finished" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        EduFinishedView,
         {
-          type: "button",
-          onClick: () => setPhase("locked"),
-          className: "w-full py-4 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-black text-base cursor-pointer",
-          children: "Continue"
+          taskName: "writing tasks",
+          description: task ? `${task.recipient} received your message. Your progress has been saved and this task is now marked as complete.` : void 0,
+          onClose
         }
       )
-    ] }),
-    phase === "locked" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-4 py-10", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-5xl", children: "\u{1F4EE}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-xl font-black text-slate-900 dark:text-slate-100", children: "You've used all your submissions" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto", children: "This task isn't complete yet. Your teacher will check your writing and talk with you about the next step." }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: onClose,
-          className: "py-3 px-10 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-black text-sm cursor-pointer",
-          children: "Close"
-        }
-      )
-    ] }),
-    phase === "finished" && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      EduFinishedView,
-      {
-        taskName: "writing tasks",
-        description: task ? `${task.recipient} received your message. Your progress has been saved and this task is now marked as complete.` : void 0,
-        onClose
-      }
-    )
-  ] }) });
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GenkoyoshiModal, { isOpen: isGuideOpen, onClose: () => setIsGuideOpen(false) })
+  ] });
 };
 async function loader$I({ request }) {
   const url = new URL(request.url);
@@ -52628,6 +52665,7 @@ async function loader$I({ request }) {
   let lessonData = null;
   let vocabData = [];
   let topicData = null;
+  let loadError = null;
   try {
     const { data: lessons } = await supabase.from("edu_lessons").select("*").ilike("slug", "%obento-unit-4-%").eq("lesson_order", 1).limit(1);
     if (lessons && lessons.length > 0) {
@@ -52646,13 +52684,15 @@ async function loader$I({ request }) {
     }
   } catch (err) {
     console.warn("\u26A0\uFE0F [Loader] Failed to fetch Obento Unit 4 Lesson 1 data from Supabase:", err);
+    loadError = `Supabase error: ${(err == null ? void 0 : err.message) || String(err)}`;
   }
   return dist$1.json({
     portalContent,
     currentPath: url.pathname,
     lesson: lessonData,
     topic: topicData,
-    vocabulary: vocabData
+    vocabulary: vocabData,
+    loadError: loadError || (!lessonData ? "Obento Unit 4 Lesson 1 not found in edu_lessons." : null)
   });
 }
 var meta$G = ({ data: data2 }) => {
@@ -52723,122 +52763,149 @@ function LessonsObentoUnit4Lesson1Page() {
     }
   };
   if (isAuthLoading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse", children: "Loading Obento Unit 4 - Lesson 1..." }) }) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ToolPageWrapper,
+      {
+        layoutRef,
+        hasError: !!loaderData.loadError,
+        errorTitle: "Unable to Load Data",
+        errorMessage: loaderData.loadError || "",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse", children: "Loading Obento Unit 4 - Lesson 1..." }) })
+      }
+    );
   }
   if (!user) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-md w-full bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black", children: "\u{1F512}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-800 dark:text-slate-100", children: "Sign In Required" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "Obento Deluxe Unit 4 lessons and AI Yamato tutoring require you to sign in. Please sign in to access interactive lessons." })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: handleOpenAuth,
-          className: "w-full py-3 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs tracking-wider uppercase transition shadow-sm cursor-pointer",
-          children: "Sign In / Sign Up Now"
-        }
-      )
-    ] }) }) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ToolPageWrapper,
+      {
+        layoutRef,
+        hasError: !!loaderData.loadError,
+        errorTitle: "Unable to Load Data",
+        errorMessage: loaderData.loadError || "",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-md w-full bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black", children: "\u{1F512}" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-800 dark:text-slate-100", children: "Sign In Required" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "Obento Deluxe Unit 4 lessons and AI Yamato tutoring require you to sign in. Please sign in to access interactive lessons." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: handleOpenAuth,
+              className: "w-full py-3 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs tracking-wider uppercase transition shadow-sm cursor-pointer",
+              children: "Sign In / Sign Up Now"
+            }
+          )
+        ] }) })
+      }
+    );
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(ToolPageWrapper, { layoutRef, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-8", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonHeader, { lesson, topic }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        YamatoChatCommon2,
-        {
-          characterName: "Yamato Sensei",
-          appType: "obento-unit-4-lesson-1",
-          themeColor,
-          userId: user == null ? void 0 : user.id,
-          userNickname: nickname,
-          credits,
-          onOpenAuth: handleOpenAuth,
-          assignedQuestion: `Obento Deluxe Unit 4 Lesson 1: ${(lesson == null ? void 0 : lesson.title_en) || "Family and Pets"}`
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 pt-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:col-span-2 space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonDetailsCard, { lesson }) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          EduVocabularySidebar,
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !!loaderData.loadError,
+      errorTitle: "Unable to Load Data",
+      errorMessage: loaderData.loadError || "",
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-8", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonHeader, { lesson, topic }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            YamatoChatCommon2,
+            {
+              characterName: "Yamato Sensei",
+              appType: "obento-unit-4-lesson-1",
+              themeColor,
+              userId: user == null ? void 0 : user.id,
+              userNickname: nickname,
+              credits,
+              onOpenAuth: handleOpenAuth,
+              assignedQuestion: `Obento Deluxe Unit 4 Lesson 1: ${(lesson == null ? void 0 : lesson.title_en) || "Family and Pets"}`
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 pt-4", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:col-span-2 space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonDetailsCard, { lesson }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+              EduVocabularySidebar,
+              {
+                vocabulary,
+                onStartDrill: () => setIsDrillOpen(true)
+              }
+            ) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            EduLessonTaskManager,
+            {
+              lessonId: (lesson == null ? void 0 : lesson.id) || "obento-unit-4-lesson-1",
+              userId: user == null ? void 0 : user.id,
+              onStartVocabularyDrill: () => setIsDrillOpen(true),
+              onStartListeningDrill: () => setIsListeningTaskOpen(true),
+              onStartReadingDrill: () => setIsReadingDrillOpen(true),
+              onStartSpeakingDrill: () => setIsSpeakingModalOpen(true),
+              onStartWritingTask: () => setIsWritingTaskOpen(true),
+              externalTaskStatus: {
+                vocabulary: vocabTaskCompleted,
+                listening: listeningTaskCompleted,
+                reading: readingTaskCompleted,
+                speaking: speakingTaskCompleted,
+                writing: writingTaskCompleted
+              }
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          EduVocabularyDrillModal,
           {
             vocabulary,
-            onStartDrill: () => setIsDrillOpen(true)
+            isOpen: isDrillOpen,
+            onClose: () => setIsDrillOpen(false),
+            onCompleted: () => setVocabTaskCompleted(true)
           }
-        ) })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        EduLessonTaskManager,
-        {
-          lessonId: (lesson == null ? void 0 : lesson.id) || "obento-unit-4-lesson-1",
-          userId: user == null ? void 0 : user.id,
-          onStartVocabularyDrill: () => setIsDrillOpen(true),
-          onStartListeningDrill: () => setIsListeningTaskOpen(true),
-          onStartReadingDrill: () => setIsReadingDrillOpen(true),
-          onStartSpeakingDrill: () => setIsSpeakingModalOpen(true),
-          onStartWritingTask: () => setIsWritingTaskOpen(true),
-          externalTaskStatus: {
-            vocabulary: vocabTaskCompleted,
-            listening: listeningTaskCompleted,
-            reading: readingTaskCompleted,
-            speaking: speakingTaskCompleted,
-            writing: writingTaskCompleted
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          EduListeningTaskModal,
+          {
+            isOpen: isListeningTaskOpen,
+            onClose: () => setIsListeningTaskOpen(false),
+            onCompleted: () => setListeningTaskCompleted(true)
           }
-        }
-      )
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      EduVocabularyDrillModal,
-      {
-        vocabulary,
-        isOpen: isDrillOpen,
-        onClose: () => setIsDrillOpen(false),
-        onCompleted: () => setVocabTaskCompleted(true)
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      EduListeningTaskModal,
-      {
-        isOpen: isListeningTaskOpen,
-        onClose: () => setIsListeningTaskOpen(false),
-        onCompleted: () => setListeningTaskCompleted(true)
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      EduReadingDrillModal,
-      {
-        items: readingItems,
-        isOpen: isReadingDrillOpen,
-        onClose: () => setIsReadingDrillOpen(false),
-        onCompleted: () => setReadingTaskCompleted(true)
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      EduSpeakingTaskModal,
-      {
-        isOpen: isSpeakingModalOpen,
-        onClose: () => setIsSpeakingModalOpen(false),
-        title: "Speaking Task: Practice Talking About Your Family Members",
-        userId: user == null ? void 0 : user.id,
-        appType: "obento-unit-4-lesson-1",
-        lessonSlug: "obento-unit-4-lesson-1",
-        onCompleted: () => {
-          setSpeakingTaskCompleted(true);
-        }
-      }
-    ),
-    (lesson == null ? void 0 : lesson.id) && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      EduWritingTaskModal,
-      {
-        isOpen: isWritingTaskOpen,
-        onClose: () => setIsWritingTaskOpen(false),
-        onCompleted: () => setWritingTaskCompleted(true),
-        lessonId: String(lesson.id)
-      }
-    )
-  ] });
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          EduReadingDrillModal,
+          {
+            items: readingItems,
+            isOpen: isReadingDrillOpen,
+            onClose: () => setIsReadingDrillOpen(false),
+            onCompleted: () => setReadingTaskCompleted(true)
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          EduSpeakingTaskModal,
+          {
+            isOpen: isSpeakingModalOpen,
+            onClose: () => setIsSpeakingModalOpen(false),
+            title: "Speaking Task: Practice Talking About Your Family Members",
+            userId: user == null ? void 0 : user.id,
+            appType: "obento-unit-4-lesson-1",
+            lessonSlug: "obento-unit-4-lesson-1",
+            onCompleted: () => {
+              setSpeakingTaskCompleted(true);
+            }
+          }
+        ),
+        (lesson == null ? void 0 : lesson.id) && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          EduWritingTaskModal,
+          {
+            isOpen: isWritingTaskOpen,
+            onClose: () => setIsWritingTaskOpen(false),
+            onCompleted: () => setWritingTaskCompleted(true),
+            lessonId: String(lesson.id)
+          }
+        )
+      ]
+    }
+  );
 }
 var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -55401,43 +55468,53 @@ function MockOralMode() {
     setExamResult(result);
     setExamPhase("result");
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: questionsData && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative", children: [
-    examPhase === "config" && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      OralMockConfig,
-      {
-        onStartExam: handleStartExam,
-        defaultStudentName: nickname,
-        themeColor: "#ef4444"
-      }
-    ),
-    examPhase === "examining" && currentConfig && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      SessionComponent,
-      {
-        config: currentConfig,
-        questionsData,
-        onExamComplete: handleExamComplete,
-        onCancel: () => setExamPhase("config"),
-        themeColor: "#ef4444"
-      }
-    ),
-    examPhase === "result" && examResult && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      OralMockReport,
-      {
-        result: examResult,
-        onRetry: () => setExamPhase("config"),
-        onBackToHome: () => window.location.href = "/",
-        themeColor: "#ef4444"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("aside", { "aria-label": "Floating Controls", className: "fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      ChatYamatoEoyOralMock,
-      {
-        userId: user == null ? void 0 : user.id,
-        userNickname: nickname,
-        credits
-      }
-    ) })
-  ] }) });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !isLoading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load ORAL_EXAM_QUESTIONS from Supabase (kl_app).",
+      onRetry: loadQuestions,
+      children: questionsData && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative", children: [
+        examPhase === "config" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          OralMockConfig,
+          {
+            onStartExam: handleStartExam,
+            defaultStudentName: nickname,
+            themeColor: "#ef4444"
+          }
+        ),
+        examPhase === "examining" && currentConfig && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SessionComponent,
+          {
+            config: currentConfig,
+            questionsData,
+            onExamComplete: handleExamComplete,
+            onCancel: () => setExamPhase("config"),
+            themeColor: "#ef4444"
+          }
+        ),
+        examPhase === "result" && examResult && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          OralMockReport,
+          {
+            result: examResult,
+            onRetry: () => setExamPhase("config"),
+            onBackToHome: () => window.location.href = "/",
+            themeColor: "#ef4444"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("aside", { "aria-label": "Floating Controls", className: "fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          ChatYamatoEoyOralMock,
+          {
+            userId: user == null ? void 0 : user.id,
+            userNickname: nickname,
+            credits
+          }
+        ) })
+      ] })
+    }
+  );
 }
 var meta$B = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
@@ -55513,86 +55590,96 @@ function WritingStylesGuide() {
     loadData();
   }, [loadData]);
   const currentStyle = stylesData ? stylesData[activeStyleKey] : void 0;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: stylesData && Object.keys(stylesData).length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-6xl mx-auto p-6 bg-slate-50 min-h-screen text-slate-800", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-8 text-center", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: "VCE Writing Styles Guide" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 max-w-2xl mx-auto text-sm md:text-base", children: "Explore the 5 core writing styles for VCE Japanese, complete with purpose, key features, grammar, compatible text types, and effective vocabulary." })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-2 mb-8", children: Object.keys(stylesData).map((key) => {
-      const style = stylesData[key];
-      const isActive = key === activeStyleKey;
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "button",
-        {
-          type: "button",
-          onClick: () => setActiveStyleKey(key),
-          className: `px-5 py-2.5 rounded-full font-medium text-sm transition-all shadow-xs cursor-pointer ${isActive ? "bg-blue-600 text-white shadow-blue-200" : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"}`,
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: style.styleName }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `block text-xs ${isActive ? "text-blue-100" : "text-slate-400"}`, children: style.japaneseName })
-          ]
-        },
-        key
-      );
-    }) }),
-    currentStyle && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "md:col-span-1 space-y-6", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full mb-3", children: currentStyle.japaneseName }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold text-slate-900 mb-2", children: currentStyle.styleName }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 text-sm leading-relaxed", children: currentStyle.purpose })
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load WRITING_STYLES from Supabase (kl_app).",
+      onRetry: loadData,
+      children: stylesData && Object.keys(stylesData).length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-6xl mx-auto p-6 bg-slate-50 min-h-screen text-slate-800", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-8 text-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: "VCE Writing Styles Guide" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 max-w-2xl mx-auto text-sm md:text-base", children: "Explore the 5 core writing styles for VCE Japanese, complete with purpose, key features, grammar, compatible text types, and effective vocabulary." })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-5", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Key Features" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: currentStyle.keyFeatures.map((feature, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-start text-sm text-slate-700", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-500 mr-2 font-bold", children: "\u2022" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feature })
-          ] }, idx)) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-5", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Compatible Text Types" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5", children: currentStyle.compatibleTextTypes.map((type, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "span",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-2 mb-8", children: Object.keys(stylesData).map((key) => {
+          const style = stylesData[key];
+          const isActive = key === activeStyleKey;
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
             {
-              className: "px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md",
-              children: type
-            },
-            idx
-          )) })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "md:col-span-2 space-y-6 border-t md:border-t-0 md:border-l border-slate-100 md:pl-8", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-4", children: "Effective Vocabulary" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: currentStyle.effectiveVocabulary.map((vocabCat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-50 rounded-xl p-4 border border-slate-100", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-xs font-bold text-blue-600 uppercase tracking-wide mb-2", children: vocabCat.categories }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: vocabCat.examples.map((ex, eIdx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "span",
-              {
-                className: "px-3 py-1 bg-white border border-slate-200 text-slate-800 text-xs rounded-lg shadow-2xs font-medium",
-                children: ex
-              },
-              eIdx
-            )) })
-          ] }, idx)) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-6", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Effective Grammar" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: currentStyle.effectiveGrammar.map((grammar, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "li",
-            {
-              className: "flex items-start text-sm text-slate-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50",
+              type: "button",
+              onClick: () => setActiveStyleKey(key),
+              className: `px-5 py-2.5 rounded-full font-medium text-sm transition-all shadow-xs cursor-pointer ${isActive ? "bg-blue-600 text-white shadow-blue-200" : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"}`,
               children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-600 mr-2 font-bold", children: "\u2713" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: grammar })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: style.styleName }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `block text-xs ${isActive ? "text-blue-100" : "text-slate-400"}`, children: style.japaneseName })
               ]
             },
-            idx
-          )) })
+            key
+          );
+        }) }),
+        currentStyle && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "md:col-span-1 space-y-6", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full mb-3", children: currentStyle.japaneseName }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold text-slate-900 mb-2", children: currentStyle.styleName }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 text-sm leading-relaxed", children: currentStyle.purpose })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-5", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Key Features" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: currentStyle.keyFeatures.map((feature, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-start text-sm text-slate-700", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-500 mr-2 font-bold", children: "\u2022" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feature })
+              ] }, idx)) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-5", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Compatible Text Types" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5", children: currentStyle.compatibleTextTypes.map((type, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "span",
+                {
+                  className: "px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-md",
+                  children: type
+                },
+                idx
+              )) })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "md:col-span-2 space-y-6 border-t md:border-t-0 md:border-l border-slate-100 md:pl-8", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-4", children: "Effective Vocabulary" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: currentStyle.effectiveVocabulary.map((vocabCat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-50 rounded-xl p-4 border border-slate-100", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-xs font-bold text-blue-600 uppercase tracking-wide mb-2", children: vocabCat.categories }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: vocabCat.examples.map((ex, eIdx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "span",
+                  {
+                    className: "px-3 py-1 bg-white border border-slate-200 text-slate-800 text-xs rounded-lg shadow-2xs font-medium",
+                    children: ex
+                  },
+                  eIdx
+                )) })
+              ] }, idx)) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-6", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Effective Grammar" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: currentStyle.effectiveGrammar.map((grammar, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "li",
+                {
+                  className: "flex items-start text-sm text-slate-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-600 mr-2 font-bold", children: "\u2713" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: grammar })
+                  ]
+                },
+                idx
+              )) })
+            ] })
+          ] })
         ] })
       ] })
-    ] })
-  ] }) });
+    }
+  );
 }
 var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -56588,297 +56675,307 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
   const assignedQuestionText = selectedQuestion ? `Q${selectedQuestion.id}: (${selectedQuestion.textType}) ${selectedQuestion.english}` : "";
   const activeModalData = activeModal && modalData ? modalData[activeModal] || null : null;
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-white text-slate-800 font-sans relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-4xl mx-auto px-4 py-8 relative", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "button",
-        {
-          type: "button",
-          onClick: () => setIsGenkoyoshiOpen(true),
-          className: "w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 truncate", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-base", children: "\u{1F4DD}" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: "How to use Genkoyoshi" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2", children: "View \u2192" })
-          ]
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        Link,
-        {
-          to: "/kanji-grammar-checker",
-          className: "w-full text-left p-3.5 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border no-underline",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 truncate", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-base", children: "\u2728" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: "VCE Kanji & Grammar Checker" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-amber-200 shrink-0 ml-2", children: "Open \u2192" })
-          ]
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4 flex-wrap", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-indigo-900 font-bold text-lg", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F916}" }),
-          " AI Yamato is ready for you"
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "input",
-            {
-              type: "file",
-              accept: "image/*",
-              ref: fileInputRef,
-              onChange: handleImageChange,
-              className: "hidden"
-            }
-          ),
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !isLoading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load EOY writing data (WRITING_EXAM_QUESTIONS / TEXTTYPES / WRITING_STYLES) from Supabase (kl_app).",
+      onRetry: loadDataFromSupabase,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-white text-slate-800 font-sans relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-4xl mx-auto px-4 py-8 relative", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "button",
             {
               type: "button",
-              onClick: () => {
-                var _a;
-                return (_a = fileInputRef.current) == null ? void 0 : _a.click();
-              },
-              className: "px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs",
+              onClick: () => setIsGenkoyoshiOpen(true),
+              className: "w-full text-left p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border",
               children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4F7}" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo" })
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 truncate", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-base", children: "\u{1F4DD}" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: "How to use Genkoyoshi" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-rose-200 shrink-0 ml-2", children: "View \u2192" })
               ]
             }
           ),
-          selectedImagePreview && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded", children: "\u2713 Attached" })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "active-ai-tutor-banner", className: "px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 flex-wrap", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F3AF} Active Question Q" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "number",
-            min: "1",
-            max: questions.length,
-            value: selectedQuestion ? selectedQuestion.id : "",
-            onChange: (e) => {
-              const qId = parseInt(e.target.value, 10);
-              const found = questions.find((q2) => q2.id === qId);
-              if (found) {
-                setSelectedQuestion(found);
-              } else if (e.target.value === "") {
-                setSelectedQuestion(null);
-              }
-            },
-            placeholder: "No.",
-            className: "w-16 px-2 py-1 bg-white border border-indigo-300 rounded text-center text-indigo-900 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          }
-        ),
-        selectedQuestion ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm font-normal text-indigo-700 truncate max-w-xs sm:max-w-sm", children: [
-          "(",
-          selectedQuestion.textType,
-          ") ",
-          selectedQuestion.english
-        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-normal text-amber-700", children: "\u26A0\uFE0F None selected" })
-      ] }) }),
-      selectedImagePreview && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3 bg-white border border-indigo-200 px-3 py-2 rounded-lg text-sm", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: selectedImagePreview, alt: "Preview", className: "w-10 h-10 object-cover rounded border" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-grow", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-indigo-900 text-xs", children: "Handwritten Answer Ready for AI Tutor" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-slate-600 text-xs truncate", children: "You can now open the chat and send it!" })
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Link,
+            {
+              to: "/kanji-grammar-checker",
+              className: "w-full text-left p-3.5 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl cursor-pointer font-bold text-sm shadow-xs transition-all flex items-center justify-between box-border no-underline",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 truncate", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-base", children: "\u2728" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: "VCE Kanji & Grammar Checker" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold bg-white px-2 py-0.5 rounded-lg shadow-2xs border border-amber-200 shrink-0 ml-2", children: "Open \u2192" })
+              ]
+            }
+          )
         ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm space-y-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4 flex-wrap", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-indigo-900 font-bold text-lg", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F916}" }),
+              " AI Yamato is ready for you"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
+                {
+                  type: "file",
+                  accept: "image/*",
+                  ref: fileInputRef,
+                  onChange: handleImageChange,
+                  className: "hidden"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => {
+                    var _a;
+                    return (_a = fileInputRef.current) == null ? void 0 : _a.click();
+                  },
+                  className: "px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4F7}" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: selectedImagePreview ? "Change Answer Photo" : "Upload Answer Photo" })
+                  ]
+                }
+              ),
+              selectedImagePreview && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-emerald-700 font-bold bg-emerald-100 px-2 py-1 rounded", children: "\u2713 Attached" })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "active-ai-tutor-banner", className: "px-4 py-3 bg-white/80 border border-indigo-200 rounded-lg text-indigo-900 text-base font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-xs scroll-mt-6 gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 flex-wrap", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F3AF} Active Question Q" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                type: "number",
+                min: "1",
+                max: questions.length,
+                value: selectedQuestion ? selectedQuestion.id : "",
+                onChange: (e) => {
+                  const qId = parseInt(e.target.value, 10);
+                  const found = questions.find((q2) => q2.id === qId);
+                  if (found) {
+                    setSelectedQuestion(found);
+                  } else if (e.target.value === "") {
+                    setSelectedQuestion(null);
+                  }
+                },
+                placeholder: "No.",
+                className: "w-16 px-2 py-1 bg-white border border-indigo-300 rounded text-center text-indigo-900 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              }
+            ),
+            selectedQuestion ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm font-normal text-indigo-700 truncate max-w-xs sm:max-w-sm", children: [
+              "(",
+              selectedQuestion.textType,
+              ") ",
+              selectedQuestion.english
+            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-normal text-amber-700", children: "\u26A0\uFE0F None selected" })
+          ] }) }),
+          selectedImagePreview && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3 bg-white border border-indigo-200 px-3 py-2 rounded-lg text-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: selectedImagePreview, alt: "Preview", className: "w-10 h-10 object-cover rounded border" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-grow", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-indigo-900 text-xs", children: "Handwritten Answer Ready for AI Tutor" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-slate-600 text-xs truncate", children: "You can now open the chat and send it!" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => {
+                  setSelectedImage(null);
+                  setSelectedImagePreview(null);
+                  if (fileInputRef.current)
+                    fileInputRef.current.value = "";
+                },
+                className: "text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 rounded",
+                children: "Remove \u2715"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-between items-end border-b-2 border-slate-200 pb-2 mb-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("h1", { className: "text-slate-800 text-2xl sm:text-3xl font-bold m-0", children: [
+          "\u{1F4DA} Task List (",
+          filteredQuestions.length,
+          " questions)"
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-2 text-lg font-bold text-slate-600", children: "Filter by Writing Style" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2.5 flex-wrap mb-4", children: ["all", "Informative", "Evaluative", "Persuasive", "Personal", "Imaginative"].map((cat) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              onClick: () => setActiveCategory(cat),
+              className: `px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${activeCategory === cat ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"}`,
+              children: cat === "all" ? "All" : cat
+            },
+            cat
+          )) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "filter-by-text-type", className: "scroll-mt-10", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-2 text-lg font-bold text-slate-600", children: "Filter by Text Type" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2.5 flex-wrap", children: ["all", "Speech", "Email", "Letter", "Article", "Journal", "Essay", "Story", "Report", "Account", "Message", "Review", "Summary", "Official Report"].map((type) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: () => setActiveTextType(type),
+                className: `px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${activeTextType === type ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"}`,
+                children: type === "all" ? "All" : type
+              },
+              type
+            )) })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col gap-6 mb-12", children: filteredQuestions.map((q2) => {
+          const isSelected = (selectedQuestion == null ? void 0 : selectedQuestion.id) === q2.id;
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: `p-6 border rounded-xl bg-white shadow-sm transition-all ${isSelected ? "border-indigo-500 ring-2 ring-indigo-200" : "border-slate-200"}`,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center mb-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 flex-wrap items-center", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "span",
+                      {
+                        onClick: () => setActiveStyleModal(q2.category),
+                        className: "text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-sky-200 hover:scale-105 transition-all shadow-2xs",
+                        title: "Click to view Writing Style specifications",
+                        children: [
+                          q2.category,
+                          " \u2197"
+                        ]
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "span",
+                      {
+                        onClick: () => setActiveModal(q2.textType),
+                        className: "text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 hover:scale-105 transition-all shadow-2xs",
+                        title: "Click to view Text Type format and conventions",
+                        children: [
+                          q2.textType,
+                          " \u2197"
+                        ]
+                      }
+                    )
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-lg text-slate-600 font-bold", children: [
+                    "Q",
+                    q2.id
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[20px] text-slate-800 mb-3 leading-relaxed font-medium", children: q2.english }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg sm:text-[20px] text-slate-700 mb-4 border-l-4 border-slate-200 pl-4 leading-relaxed", dangerouslySetInnerHTML: { __html: q2.japanese } }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    onClick: () => {
+                      setSelectedQuestion(q2);
+                      const banner = document.getElementById("active-ai-tutor-banner");
+                      if (banner)
+                        banner.scrollIntoView({ behavior: "smooth", block: "start" });
+                    },
+                    className: `px-4 py-2 text-base rounded-lg cursor-pointer font-bold transition-colors shadow-sm ${isSelected ? "bg-indigo-600 text-white" : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-700"}`,
+                    children: isSelected ? "\u{1F916} Currently Active in AI Tutor Bubble" : "\u{1F3AF} Select for AI Tutor"
+                  }
+                )
+              ]
+            },
+            q2.id
+          );
+        }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
+          ChatYamatoEoyWriting,
           {
-            type: "button",
-            onClick: () => {
+            systemPrompt: currentSystemPrompt,
+            userId: user == null ? void 0 : user.id,
+            userNickname: nickname || ((user == null ? void 0 : user.email) ? user.email.split("@") : "Student"),
+            credits,
+            externalImageFile: selectedImage,
+            externalImagePreview: selectedImagePreview,
+            assignedQuestion: assignedQuestionText,
+            onClearExternalImage: () => {
               setSelectedImage(null);
               setSelectedImagePreview(null);
               if (fileInputRef.current)
                 fileInputRef.current.value = "";
-            },
-            className: "text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 rounded",
-            children: "Remove \u2715"
+            }
           }
-        )
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-between items-end border-b-2 border-slate-200 pb-2 mb-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("h1", { className: "text-slate-800 text-2xl sm:text-3xl font-bold m-0", children: [
-      "\u{1F4DA} Task List (",
-      filteredQuestions.length,
-      " questions)"
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-2 text-lg font-bold text-slate-600", children: "Filter by Writing Style" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2.5 flex-wrap mb-4", children: ["all", "Informative", "Evaluative", "Persuasive", "Personal", "Imaginative"].map((cat) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          onClick: () => setActiveCategory(cat),
-          className: `px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${activeCategory === cat ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"}`,
-          children: cat === "all" ? "All" : cat
-        },
-        cat
-      )) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "filter-by-text-type", className: "scroll-mt-10", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-2 text-lg font-bold text-slate-600", children: "Filter by Text Type" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2.5 flex-wrap", children: ["all", "Speech", "Email", "Letter", "Article", "Journal", "Essay", "Story", "Report", "Account", "Message", "Review", "Summary", "Official Report"].map((type) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
+        ),
+        modalImageSrc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4", onClick: () => setModalImageSrc(null), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative max-w-4xl max-h-[90vh]", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setModalImageSrc(null), className: "absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition", children: "\u2715 Close" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: modalImageSrc, alt: "Enlarged View", className: "max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" })
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          GenkoyoshiModal,
           {
-            onClick: () => setActiveTextType(type),
-            className: `px-4 py-2 rounded-lg text-base font-bold cursor-pointer transition-colors ${activeTextType === type ? "bg-blue-600 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"}`,
-            children: type === "all" ? "All" : type
-          },
-          type
-        )) })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col gap-6 mb-12", children: filteredQuestions.map((q2) => {
-      const isSelected = (selectedQuestion == null ? void 0 : selectedQuestion.id) === q2.id;
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
-        {
-          className: `p-6 border rounded-xl bg-white shadow-sm transition-all ${isSelected ? "border-indigo-500 ring-2 ring-indigo-200" : "border-slate-200"}`,
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center mb-3", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 flex-wrap items-center", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                  "span",
-                  {
-                    onClick: () => setActiveStyleModal(q2.category),
-                    className: "text-base bg-sky-100 text-sky-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-sky-200 hover:scale-105 transition-all shadow-2xs",
-                    title: "Click to view Writing Style specifications",
-                    children: [
-                      q2.category,
-                      " \u2197"
-                    ]
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                  "span",
-                  {
-                    onClick: () => setActiveModal(q2.textType),
-                    className: "text-base bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md font-bold cursor-pointer hover:bg-emerald-200 hover:scale-105 transition-all shadow-2xs",
-                    title: "Click to view Text Type format and conventions",
-                    children: [
-                      q2.textType,
-                      " \u2197"
-                    ]
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-lg text-slate-600 font-bold", children: [
-                "Q",
-                q2.id
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[20px] text-slate-800 mb-3 leading-relaxed font-medium", children: q2.english }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg sm:text-[20px] text-slate-700 mb-4 border-l-4 border-slate-200 pl-4 leading-relaxed", dangerouslySetInnerHTML: { __html: q2.japanese } }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                onClick: () => {
-                  setSelectedQuestion(q2);
-                  const banner = document.getElementById("active-ai-tutor-banner");
-                  if (banner)
-                    banner.scrollIntoView({ behavior: "smooth", block: "start" });
-                },
-                className: `px-4 py-2 text-base rounded-lg cursor-pointer font-bold transition-colors shadow-sm ${isSelected ? "bg-indigo-600 text-white" : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-700"}`,
-                children: isSelected ? "\u{1F916} Currently Active in AI Tutor Bubble" : "\u{1F3AF} Select for AI Tutor"
-              }
-            )
-          ]
-        },
-        q2.id
-      );
-    }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      ChatYamatoEoyWriting,
-      {
-        systemPrompt: currentSystemPrompt,
-        userId: user == null ? void 0 : user.id,
-        userNickname: nickname || ((user == null ? void 0 : user.email) ? user.email.split("@") : "Student"),
-        credits,
-        externalImageFile: selectedImage,
-        externalImagePreview: selectedImagePreview,
-        assignedQuestion: assignedQuestionText,
-        onClearExternalImage: () => {
-          setSelectedImage(null);
-          setSelectedImagePreview(null);
-          if (fileInputRef.current)
-            fileInputRef.current.value = "";
-        }
-      }
-    ),
-    modalImageSrc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4", onClick: () => setModalImageSrc(null), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative max-w-4xl max-h-[90vh]", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setModalImageSrc(null), className: "absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 px-3 py-1 rounded-full hover:bg-black/80 transition", children: "\u2715 Close" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: modalImageSrc, alt: "Enlarged View", className: "max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl bg-white" })
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      GenkoyoshiModal,
-      {
-        isOpen: isGenkoyoshiOpen,
-        onClose: () => setIsGenkoyoshiOpen(false)
-      }
-    ),
-    activeModal && activeModalData && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      TextTypeModal,
-      {
-        isOpen: true,
-        onClose: () => setActiveModal(null),
-        modalKey: activeModal,
-        ...activeModalData
-      }
-    ),
-    activeStyleModal && activeWritingStyleData && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "div",
-      {
-        className: "fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4",
-        onClick: () => setActiveStyleModal(null),
-        children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            isOpen: isGenkoyoshiOpen,
+            onClose: () => setIsGenkoyoshiOpen(false)
+          }
+        ),
+        activeModal && activeModalData && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          TextTypeModal,
+          {
+            isOpen: true,
+            onClose: () => setActiveModal(null),
+            modalKey: activeModal,
+            ...activeModalData
+          }
+        ),
+        activeStyleModal && activeWritingStyleData && /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
-            className: "bg-white p-6 sm:p-7 w-full max-w-2xl rounded-2xl shadow-2xl relative max-h-[85vh] overflow-y-auto box-border border border-slate-200",
-            onClick: (e) => e.stopPropagation(),
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "button",
-                {
-                  type: "button",
-                  className: "absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 border-none w-8 h-8 rounded-full flex items-center justify-center text-lg cursor-pointer text-slate-500 hover:text-slate-800 transition",
-                  onClick: () => setActiveStyleModal(null),
-                  children: "\u2715"
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-2 mb-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider bg-sky-100 text-sky-800 px-2.5 py-1 rounded-md", children: "Writing Style (Kind of Writing)" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "mt-2 text-slate-800 text-2xl font-bold", children: [
-                activeWritingStyleData.styleName,
-                " (",
-                activeWritingStyleData.japaneseName,
-                ")"
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 bg-sky-50/70 p-4 rounded-xl border border-sky-100", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "m-0 mb-1.5 font-bold text-sky-900 text-base flex items-center gap-2", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F3AF}" }),
-                  " Purpose & Stance"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "m-0 text-slate-700 text-base leading-relaxed", children: activeWritingStyleData.purpose })
-              ] }),
-              activeWritingStyleData.keyFeatures && activeWritingStyleData.keyFeatures.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "m-0 mb-2 font-bold text-slate-800 text-base flex items-center gap-2", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4CC}" }),
-                  " Key Features in VCE"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "m-0 pl-5 text-slate-700 space-y-1.5 text-base list-disc", children: activeWritingStyleData.keyFeatures.map((feature, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "leading-relaxed", children: feature }, idx)) })
-              ] })
-            ]
+            className: "fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4",
+            onClick: () => setActiveStyleModal(null),
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "div",
+              {
+                className: "bg-white p-6 sm:p-7 w-full max-w-2xl rounded-2xl shadow-2xl relative max-h-[85vh] overflow-y-auto box-border border border-slate-200",
+                onClick: (e) => e.stopPropagation(),
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      type: "button",
+                      className: "absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 border-none w-8 h-8 rounded-full flex items-center justify-center text-lg cursor-pointer text-slate-500 hover:text-slate-800 transition",
+                      onClick: () => setActiveStyleModal(null),
+                      children: "\u2715"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-2 mb-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider bg-sky-100 text-sky-800 px-2.5 py-1 rounded-md", children: "Writing Style (Kind of Writing)" }) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "mt-2 text-slate-800 text-2xl font-bold", children: [
+                    activeWritingStyleData.styleName,
+                    " (",
+                    activeWritingStyleData.japaneseName,
+                    ")"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 bg-sky-50/70 p-4 rounded-xl border border-sky-100", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "m-0 mb-1.5 font-bold text-sky-900 text-base flex items-center gap-2", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F3AF}" }),
+                      " Purpose & Stance"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "m-0 text-slate-700 text-base leading-relaxed", children: activeWritingStyleData.purpose })
+                  ] }),
+                  activeWritingStyleData.keyFeatures && activeWritingStyleData.keyFeatures.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "m-0 mb-2 font-bold text-slate-800 text-base flex items-center gap-2", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4CC}" }),
+                      " Key Features in VCE"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "m-0 pl-5 text-slate-700 space-y-1.5 text-base list-disc", children: activeWritingStyleData.keyFeatures.map((feature, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "leading-relaxed", children: feature }, idx)) })
+                  ] })
+                ]
+              }
+            )
           }
         )
-      }
-    )
-  ] }) }) });
+      ] }) })
+    }
+  );
 }
 var meta$x = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
@@ -57641,6 +57738,7 @@ async function loader$w({ request }) {
   let topicData = null;
   let lessonsData = [];
   let vocabData = [];
+  let loadError = null;
   try {
     const { data: topic } = await supabase.from("edu_topics").select("*").ilike("slug", "%obento-unit-4%").single();
     topicData = topic || null;
@@ -57659,13 +57757,15 @@ async function loader$w({ request }) {
     }
   } catch (err) {
     console.warn("\u26A0\uFE0F [Loader] Failed to fetch Obento Unit 4 data from Supabase:", err);
+    loadError = `Supabase error: ${(err == null ? void 0 : err.message) || String(err)}`;
   }
   return dist$1.json({
     portalContent,
     currentPath: url.pathname,
     topic: topicData,
     lessons: lessonsData,
-    vocabulary: vocabData
+    vocabulary: vocabData,
+    loadError: loadError || (lessonsData.length === 0 ? "No Obento Unit 4 lessons found in edu_lessons." : null)
   });
 }
 var meta$u = ({ data: data2 }) => {
@@ -57700,102 +57800,129 @@ function LessonsObentoUnit4Page() {
     return () => subscription.unsubscribe();
   }, []);
   if (isAuthLoading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse", children: "Loading Obento Unit 4 Hub..." }) }) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ToolPageWrapper,
+      {
+        layoutRef,
+        hasError: !!loaderData.loadError,
+        errorTitle: "Unable to Load Data",
+        errorMessage: loaderData.loadError || "",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse", children: "Loading Obento Unit 4 Hub..." }) })
+      }
+    );
   }
   if (!user) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-md w-full bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black", children: "\u{1F512}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-800 dark:text-slate-100", children: "Sign In Required" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "Obento Deluxe Unit 4 lessons require you to sign in. Please sign in to access the learning materials." })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: handleOpenAuth,
-          className: "w-full py-3 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs tracking-wider uppercase transition shadow-sm cursor-pointer",
-          children: "Sign In / Sign Up Now"
-        }
-      )
-    ] }) }) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ToolPageWrapper,
+      {
+        layoutRef,
+        hasError: !!loaderData.loadError,
+        errorTitle: "Unable to Load Data",
+        errorMessage: loaderData.loadError || "",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-md w-full bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black", children: "\u{1F512}" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-800 dark:text-slate-100", children: "Sign In Required" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "Obento Deluxe Unit 4 lessons require you to sign in. Please sign in to access the learning materials." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: handleOpenAuth,
+              className: "w-full py-3 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs tracking-wider uppercase transition shadow-sm cursor-pointer",
+              children: "Sign In / Sign Up Now"
+            }
+          )
+        ] }) })
+      }
+    );
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-8", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-3xl p-8 shadow-xl", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-white/20 w-fit px-3 py-1 rounded-full mb-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Obento Deluxe" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2022" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Unit 4 Hub" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl font-extrabold mb-2", children: (topic == null ? void 0 : topic.title_en) || "Obento Unit 4: Family and Pets" }),
-      (topic == null ? void 0 : topic.title_jp) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-orange-200 font-semibold text-sm mb-3", children: topic.title_jp }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-orange-100 text-sm sm:text-base leading-relaxed max-w-2xl", children: (topic == null ? void 0 : topic.description) || "Learn how to introduce your family members, count people correctly using Japanese counters, and talk about your pets!" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:col-span-2 space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4D6}" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Lessons & Learning Intentions" })
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !!loaderData.loadError,
+      errorTitle: "Unable to Load Data",
+      errorMessage: loaderData.loadError || "",
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-8", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-3xl p-8 shadow-xl", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-white/20 w-fit px-3 py-1 rounded-full mb-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Obento Deluxe" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2022" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Unit 4 Hub" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl font-extrabold mb-2", children: (topic == null ? void 0 : topic.title_en) || "Obento Unit 4: Family and Pets" }),
+          (topic == null ? void 0 : topic.title_jp) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-orange-200 font-semibold text-sm mb-3", children: topic.title_jp }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-orange-100 text-sm sm:text-base leading-relaxed max-w-2xl", children: (topic == null ? void 0 : topic.description) || "Learn how to introduce your family members, count people correctly using Japanese counters, and talk about your pets!" })
         ] }),
-        lessons.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 italic", children: "No lessons registered yet for this unit." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: lessons.map((lesson, index) => {
-          const lessonSlug = lesson.slug || `obento-unit-4-lesson-${lesson.lesson_order || index + 1}`;
-          const lessonPath = `/lessons/${lessonSlug}`;
-          return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 transition hover:shadow-md space-y-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-900 px-2.5 py-0.5 rounded-full", children: [
-                "Lesson ",
-                lesson.lesson_order || index + 1
-              ] }),
-              lesson.obento_page_ref && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full", children: [
-                "\u{1F4DA} ",
-                lesson.obento_page_ref
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:col-span-2 space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4D6}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Lessons & Learning Intentions" })
+            ] }),
+            lessons.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 italic", children: "No lessons registered yet for this unit." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: lessons.map((lesson, index) => {
+              const lessonSlug = lesson.slug || `obento-unit-4-lesson-${lesson.lesson_order || index + 1}`;
+              const lessonPath = `/lessons/${lessonSlug}`;
+              return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 transition hover:shadow-md space-y-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-900 px-2.5 py-0.5 rounded-full", children: [
+                    "Lesson ",
+                    lesson.lesson_order || index + 1
+                  ] }),
+                  lesson.obento_page_ref && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full", children: [
+                    "\u{1F4DA} ",
+                    lesson.obento_page_ref
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-base text-slate-800 dark:text-slate-200", children: lesson.title_en }),
+                  lesson.title_jp && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-medium text-orange-600 dark:text-orange-400 mt-0.5", children: lesson.title_jp })
+                ] }),
+                lesson.learning_intention && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-700 dark:text-slate-300 block mb-0.5", children: "Learning Intention:" }),
+                  lesson.learning_intention
+                ] }),
+                lesson.success_criteria && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-700 dark:text-slate-300 block mb-0.5", children: "Success Criteria:" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: Array.isArray(lesson.success_criteria) ? lesson.success_criteria.join(", ") : lesson.success_criteria })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-2 flex justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  Link,
+                  {
+                    to: lessonPath,
+                    className: "inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start This Lesson" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2192" })
+                    ]
+                  }
+                ) })
+              ] }, lesson.id || index);
+            }) })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-base font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4DD}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Vocabulary Highlights (",
+                vocabulary.length,
+                ")"
               ] })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-base text-slate-800 dark:text-slate-200", children: lesson.title_en }),
-              lesson.title_jp && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-medium text-orange-600 dark:text-orange-400 mt-0.5", children: lesson.title_jp })
-            ] }),
-            lesson.learning_intention && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-700 dark:text-slate-300 block mb-0.5", children: "Learning Intention:" }),
-              lesson.learning_intention
-            ] }),
-            lesson.success_criteria && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-700 dark:text-slate-300 block mb-0.5", children: "Success Criteria:" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: Array.isArray(lesson.success_criteria) ? lesson.success_criteria.join(", ") : lesson.success_criteria })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-2 flex justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              Link,
-              {
-                to: lessonPath,
-                className: "inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm",
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start This Lesson" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2192" })
-                ]
-              }
-            ) })
-          ] }, lesson.id || index);
-        }) })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-base font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4DD}" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "Vocabulary Highlights (",
-            vocabulary.length,
-            ")"
-          ] })
-        ] }),
-        vocabulary.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 italic", children: "No vocabulary items loaded." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 max-h-[500px] overflow-y-auto pr-1", children: vocabulary.map((vocab, vIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-800 dark:text-slate-200 block text-sm", children: vocab.jp_text }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-400 italic text-[11px]", children: vocab.romaji })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-600 dark:text-slate-400 font-medium text-right", children: vocab.english_text })
-        ] }, vocab.id || vIdx)) })
+            vocabulary.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 italic", children: "No vocabulary items loaded." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 max-h-[500px] overflow-y-auto pr-1", children: vocabulary.map((vocab, vIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-800 dark:text-slate-200 block text-sm", children: vocab.jp_text }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-400 italic text-[11px]", children: vocab.romaji })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-600 dark:text-slate-400 font-medium text-right", children: vocab.english_text })
+            ] }, vocab.id || vIdx)) })
+          ] }) })
+        ] })
       ] }) })
-    ] })
-  ] }) }) });
+    }
+  );
 }
 var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -57938,10 +58065,14 @@ function VceGrammarComponent() {
           }) })
         ] })
       ] }),
-      loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 text-slate-500 text-sm", children: "Loading grammar data from Supabase..." }) : error ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-20 text-red-500 text-sm font-bold", children: [
-        "Failed to load grammar records: ",
-        errorMessage
-      ] }) : categories.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm", children: "No grammar records found in the kl_app table." }) : filteredCategories.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm", children: [
+      loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 text-slate-500 text-sm", children: "Loading grammar data from Supabase..." }) : error ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        DataErrorState,
+        {
+          title: "Unable to Load Data",
+          errorMessage: `Failed to load VCE_GRAMMAR_LIST (kl_app): ${errorMessage}`,
+          onRetry: loadGrammarData
+        }
+      ) : categories.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm", children: "No grammar records found in the kl_app table." }) : filteredCategories.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm", children: [
         'No grammar items match your search query "',
         searchQuery,
         '".'
@@ -59025,59 +59156,69 @@ function TextTypesComponent() {
     loadData();
   }, [loadData]);
   const textTypeEntries = data2 ? Object.entries(data2) : [];
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: data2 && textTypeEntries.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-6xl mx-auto", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: "Text Types / \u6587\u7AE0\u306E\u7A2E\u985E" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 max-w-2xl", children: "While there are various text types in VCE Japanese, these 8 essential formats frequently appear in external exams. Master these core structures first!" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        Link,
-        {
-          to: "/faq#category-Text%20Types%20and%20Styles",
-          className: "inline-flex items-center justify-center px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition-colors self-start sm:self-auto shadow-xs whitespace-nowrap gap-1.5",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "View FAQ: Text Types & Styles" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2197" })
-          ]
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: textTypeEntries.map(([typeName, item]) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
-      {
-        className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex flex-col justify-between hover:border-slate-300 transition-colors",
-        children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load TEXTTYPES from Supabase (kl_app).",
+      onRetry: loadData,
+      children: data2 && textTypeEntries.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-6xl mx-auto", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md", children: typeName }),
-              item.sampleImage && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-400", children: "Sample Guide Available" })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 mb-2", children: item.title }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 text-sm leading-relaxed mb-4", children: item.purpose }),
-            item.structure && item.structure.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-xs font-bold uppercase tracking-wider text-slate-700 mb-2 flex items-center gap-1.5", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4CC}" }),
-                " Structure & Key Elements"
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc list-inside text-sm text-slate-600 space-y-1.5", children: item.structure.map((struct, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "leading-relaxed", children: struct }, idx)) })
-            ] })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: "Text Types / \u6587\u7AE0\u306E\u7A2E\u985E" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 max-w-2xl", children: "While there are various text types in VCE Japanese, these 8 essential formats frequently appear in external exams. Master these core structures first!" })
           ] }),
-          item.sampleImage && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6 pt-4 border-t border-slate-100 flex justify-end items-center text-xs", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "a",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Link,
             {
-              href: item.sampleImage.startsWith("/") ? item.sampleImage : `/${item.sampleImage}`,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors inline-flex items-center gap-1",
-              children: "View Sample PDF \u2197"
+              to: "/faq#category-Text%20Types%20and%20Styles",
+              className: "inline-flex items-center justify-center px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl transition-colors self-start sm:self-auto shadow-xs whitespace-nowrap gap-1.5",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "View FAQ: Text Types & Styles" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2197" })
+              ]
             }
-          ) })
-        ]
-      },
-      typeName
-    )) })
-  ] }) }) });
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: textTypeEntries.map(([typeName, item]) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex flex-col justify-between hover:border-slate-300 transition-colors",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md", children: typeName }),
+                  item.sampleImage && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-400", children: "Sample Guide Available" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 mb-2", children: item.title }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 text-sm leading-relaxed mb-4", children: item.purpose }),
+                item.structure && item.structure.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-xs font-bold uppercase tracking-wider text-slate-700 mb-2 flex items-center gap-1.5", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4CC}" }),
+                    " Structure & Key Elements"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc list-inside text-sm text-slate-600 space-y-1.5", children: item.structure.map((struct, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "leading-relaxed", children: struct }, idx)) })
+                ] })
+              ] }),
+              item.sampleImage && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6 pt-4 border-t border-slate-100 flex justify-end items-center text-xs", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "a",
+                {
+                  href: item.sampleImage.startsWith("/") ? item.sampleImage : `/${item.sampleImage}`,
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg transition-colors inline-flex items-center gap-1",
+                  children: "View Sample PDF \u2197"
+                }
+              ) })
+            ]
+          },
+          typeName
+        )) })
+      ] }) })
+    }
+  );
 }
 var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -60462,7 +60603,13 @@ function MemoryMatchPage() {
       /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-1 text-3xl font-black tracking-tight text-slate-900 dark:text-white", children: "Kana & Kanji Memory Match" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mx-auto mt-2 max-w-xl text-sm leading-relaxed text-slate-500 dark:text-slate-400", children: "Flip two cards at a time and find every matching pair. Hiragana and Katakana match with their romaji; Kanji match with the reading or the meaning \u2014 you choose." })
     ] }),
-    isAccessible ? data2.loadError && data2.pools.hiragana.length === 0 && data2.pools.katakana.length === 0 && data2.pools.kanji.length === 0 && data2.pools.kanjiMeaning.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm font-medium text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200", children: data2.loadError }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+    isAccessible ? data2.loadError && data2.pools.hiragana.length === 0 && data2.pools.katakana.length === 0 && data2.pools.kanji.length === 0 && data2.pools.kanjiMeaning.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+      DataErrorState,
+      {
+        title: "Unable to Load Data",
+        errorMessage: `Failed to load characters (kl_character): ${data2.loadError}`
+      }
+    ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
       MemoryMatchGame,
       {
         pools: data2.pools,
@@ -61023,10 +61170,14 @@ function Kanji200Component() {
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-slate-100 pt-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 italic", children: "* Note: While some kanji have multiple readings, only the representative Onyomi is displayed here." }) })
       ] }),
-      loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 text-slate-500 text-sm", children: "Loading kanji data from Supabase..." }) : error ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-20 text-red-500 text-sm font-bold", children: [
-        "Failed to load kanji records: ",
-        errorMessage
-      ] }) : kanjiList.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm", children: "No kanji records found in the kl_character table." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-12", children: CATEGORY_ORDER.map((categoryName) => {
+      loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 text-slate-500 text-sm", children: "Loading kanji data from Supabase..." }) : error ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        DataErrorState,
+        {
+          title: "Unable to Load Data",
+          errorMessage: `Failed to load kanji (kl_character): ${errorMessage}`,
+          onRetry: loadKanjiData
+        }
+      ) : kanjiList.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm", children: "No kanji records found in the kl_character table." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-12", children: CATEGORY_ORDER.map((categoryName) => {
         const items = groupedKanji[categoryName] || [];
         if (items.length === 0)
           return null;
@@ -61307,63 +61458,73 @@ function Disclaimer() {
   reactExports.useEffect(() => {
     loadData();
   }, [loadData]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-8", children: [
-      "Last updated: ",
-      doc.lastUpdated
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-8 text-sm sm:text-base leading-relaxed text-slate-700", children: doc.sections.map((section, idx) => {
-      var _a;
-      const isExamSection = ((_a = section.heading) == null ? void 0 : _a.includes("No Guarantee of Exam Results")) || Boolean(section.globalContent && section.vceContent);
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-        section.heading && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900 mb-3", children: section.heading }),
-        isExamSection ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-2 border-b border-slate-200 mb-4 pb-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                type: "button",
-                onClick: () => setActiveTab("global"),
-                className: "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " + (activeTab === "global" ? "bg-indigo-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"),
-                children: "Global Learners"
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                type: "button",
-                onClick: () => setActiveTab("vce"),
-                className: "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " + (activeTab === "vce" ? "bg-indigo-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"),
-                children: "VCE Learners (Victoria, Australia)"
-              }
-            )
-          ] }),
-          activeTab === "global" ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: section.globalContent }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: section.vceContent }),
-            section.vceNote && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-slate-500 text-xs", children: [
-              "* ",
-              section.vceNote
-            ] })
-          ] })
-        ] }) : section.listItems && section.listItems.length > 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-          section.content && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2", children: section.content }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-2 mt-2", children: section.listItems.map((item, itemIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-            item.strong && /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
-              item.strong,
-              ": "
-            ] }),
-            item.text
-          ] }, itemIdx)) })
-        ] }) : section.isContactLink ? /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
-          "If you have any questions concerning this Disclaimer, please feel free to reach out via our",
-          " ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/contact", className: "text-indigo-600 underline hover:text-indigo-500 font-medium", children: "Contact page" }),
-          "."
-        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: section.content })
-      ] }, idx);
-    }) })
-  ] }) }) });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load LEGAL_CONTENTS (disclaimer) from Supabase (kl_app).",
+      onRetry: loadData,
+      children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-8", children: [
+          "Last updated: ",
+          doc.lastUpdated
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-8 text-sm sm:text-base leading-relaxed text-slate-700", children: doc.sections.map((section, idx) => {
+          var _a;
+          const isExamSection = ((_a = section.heading) == null ? void 0 : _a.includes("No Guarantee of Exam Results")) || Boolean(section.globalContent && section.vceContent);
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
+            section.heading && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900 mb-3", children: section.heading }),
+            isExamSection ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex space-x-2 border-b border-slate-200 mb-4 pb-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => setActiveTab("global"),
+                    className: "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " + (activeTab === "global" ? "bg-indigo-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"),
+                    children: "Global Learners"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => setActiveTab("vce"),
+                    className: "px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer " + (activeTab === "vce" ? "bg-indigo-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"),
+                    children: "VCE Learners (Victoria, Australia)"
+                  }
+                )
+              ] }),
+              activeTab === "global" ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: section.globalContent }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: section.vceContent }),
+                section.vceNote && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-slate-500 text-xs", children: [
+                  "* ",
+                  section.vceNote
+                ] })
+              ] })
+            ] }) : section.listItems && section.listItems.length > 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              section.content && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2", children: section.content }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-2 mt-2", children: section.listItems.map((item, itemIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                item.strong && /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
+                  item.strong,
+                  ": "
+                ] }),
+                item.text
+              ] }, itemIdx)) })
+            ] }) : section.isContactLink ? /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+              "If you have any questions concerning this Disclaimer, please feel free to reach out via our",
+              " ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/contact", className: "text-indigo-600 underline hover:text-indigo-500 font-medium", children: "Contact page" }),
+              "."
+            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: section.content })
+          ] }, idx);
+        }) })
+      ] }) })
+    }
+  );
 }
 var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -61742,10 +61903,14 @@ function VocabIndexPage() {
           }
         )
       ] }),
-      loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 text-slate-500 text-sm", children: "Loading vocabulary data from Supabase..." }) : error ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-20 text-red-500 text-sm font-bold", children: [
-        "Failed to load vocabulary records: ",
-        errorMessage
-      ] }) : filteredVocabularies.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-500 dark:text-slate-400 text-sm", children: "No vocabulary terms found in the `kl_vocabulary` table." }) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: filteredVocabularies.map((item) => {
+      loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-20 text-slate-500 text-sm", children: "Loading vocabulary data from Supabase..." }) : error ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        DataErrorState,
+        {
+          title: "Unable to Load Data",
+          errorMessage: `Failed to load vocabulary (kl_vocabulary): ${errorMessage}`,
+          onRetry: loadVocabData
+        }
+      ) : filteredVocabularies.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-500 dark:text-slate-400 text-sm", children: "No vocabulary terms found in the `kl_vocabulary` table." }) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: filteredVocabularies.map((item) => {
         const isSelected = selectedIds.includes(item.id);
         return /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
@@ -61935,7 +62100,7 @@ function LessonsHubIndex() {
     ToolPageWrapper,
     {
       breadcrumbTitle: "Japanese Lessons Hub",
-      hasError: false,
+      hasError: !!errorMessage,
       errorTitle: "Failed to Load Lessons Content",
       errorMessage: errorMessage || "",
       children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-6xl mx-auto", children: [
@@ -62085,30 +62250,40 @@ function PrivacyPolicy() {
   reactExports.useEffect(() => {
     loadData();
   }, [loadData]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-8", children: [
-      "Last updated: ",
-      doc.lastUpdated
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-8 text-sm sm:text-base leading-relaxed text-slate-700", children: doc.sections.map((section, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-      section.heading && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900 mb-3", children: section.heading }),
-      section.content && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2", children: section.content }),
-      section.listItems && section.listItems.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-2 mt-2", children: section.listItems.map((item, itemIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-        item.strong && /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
-          item.strong,
-          ": "
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load LEGAL_CONTENTS (privacy) from Supabase (kl_app).",
+      onRetry: loadData,
+      children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-8", children: [
+          "Last updated: ",
+          doc.lastUpdated
         ] }),
-        item.text
-      ] }, itemIdx)) }),
-      section.isContactLink && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
-        "If you have questions or comments about this Privacy Policy, please contact us through our",
-        " ",
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/contact", className: "text-indigo-600 underline hover:text-indigo-500 font-medium", children: "Contact page" }),
-        "."
-      ] })
-    ] }, idx)) })
-  ] }) }) });
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-8 text-sm sm:text-base leading-relaxed text-slate-700", children: doc.sections.map((section, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
+          section.heading && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900 mb-3", children: section.heading }),
+          section.content && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2", children: section.content }),
+          section.listItems && section.listItems.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-2 mt-2", children: section.listItems.map((item, itemIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+            item.strong && /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
+              item.strong,
+              ": "
+            ] }),
+            item.text
+          ] }, itemIdx)) }),
+          section.isContactLink && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+            "If you have questions or comments about this Privacy Policy, please contact us through our",
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/contact", className: "text-indigo-600 underline hover:text-indigo-500 font-medium", children: "Contact page" }),
+            "."
+          ] })
+        ] }, idx)) })
+      ] }) })
+    }
+  );
 }
 var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -62926,30 +63101,40 @@ function TermsOfService() {
   reactExports.useEffect(() => {
     loadData();
   }, [loadData]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-8", children: [
-      "Last updated: ",
-      doc.lastUpdated
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-8 text-sm sm:text-base leading-relaxed text-slate-700", children: doc.sections.map((section, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-      section.heading && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900 mb-3", children: section.heading }),
-      section.content && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2", children: section.content }),
-      section.listItems && section.listItems.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-2 mt-2", children: section.listItems.map((item, itemIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-        item.strong && /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
-          item.strong,
-          ": "
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load LEGAL_CONTENTS (terms) from Supabase (kl_app).",
+      onRetry: loadData,
+      children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-8", children: [
+          "Last updated: ",
+          doc.lastUpdated
         ] }),
-        item.text
-      ] }, itemIdx)) }),
-      section.isContactLink && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
-        "If you have any questions about these Terms of Service, please reach out to us via our",
-        " ",
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/contact", className: "text-indigo-600 underline hover:text-indigo-500 font-medium", children: "Contact page" }),
-        "."
-      ] })
-    ] }, idx)) })
-  ] }) }) });
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-8 text-sm sm:text-base leading-relaxed text-slate-700", children: doc.sections.map((section, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
+          section.heading && /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900 mb-3", children: section.heading }),
+          section.content && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2", children: section.content }),
+          section.listItems && section.listItems.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-2 mt-2", children: section.listItems.map((item, itemIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+            item.strong && /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
+              item.strong,
+              ": "
+            ] }),
+            item.text
+          ] }, itemIdx)) }),
+          section.isContactLink && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+            "If you have any questions about these Terms of Service, please reach out to us via our",
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/contact", className: "text-indigo-600 underline hover:text-indigo-500 font-medium", children: "Contact page" }),
+            "."
+          ] })
+        ] }, idx)) })
+      ] }) })
+    }
+  );
 }
 var meta$8 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
@@ -67541,106 +67726,116 @@ function Contact() {
   reactExports.useEffect(() => {
     loadData();
   }, [loadData]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 mb-8 leading-relaxed", children: doc.summary }),
-    (actionData == null ? void 0 : actionData.success) && actionData.message && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-medium", children: [
-      "\u2713 ",
-      actionData.message
-    ] }),
-    (actionData == null ? void 0 : actionData.success) === false && actionData.error && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm font-medium", children: [
-      "\u26A0\uFE0F ",
-      actionData.error
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { method: "post", className: "space-y-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "name", className: "block text-sm font-medium text-slate-700 mb-1", children: [
-          "Your Name ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-500", children: "*" })
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load LEGAL_CONTENTS (contact) from Supabase (kl_app).",
+      onRetry: loadData,
+      children: doc && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900 mb-2", children: doc.title }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 mb-8 leading-relaxed", children: doc.summary }),
+        (actionData == null ? void 0 : actionData.success) && actionData.message && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm font-medium", children: [
+          "\u2713 ",
+          actionData.message
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "text",
-            id: "name",
-            name: "name",
-            required: true,
-            defaultValue: (rootData == null ? void 0 : rootData.nickname) || "",
-            placeholder: "e.g. Alex Smith",
-            className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "email", className: "block text-sm font-medium text-slate-700 mb-1", children: [
-          "Email Address ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-500", children: "*" })
+        (actionData == null ? void 0 : actionData.success) === false && actionData.error && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-sm font-medium", children: [
+          "\u26A0\uFE0F ",
+          actionData.error
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "email",
-            id: "email",
-            name: "email",
-            required: true,
-            defaultValue: ((_a = rootData == null ? void 0 : rootData.user) == null ? void 0 : _a.email) || "",
-            placeholder: "your.email@example.com",
-            className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          }
-        )
-      ] }),
-      doc.inquiryTypes && doc.inquiryTypes.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "inquiryType", className: "block text-sm font-medium text-slate-700 mb-1", children: "Inquiry Type" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "select",
-          {
-            id: "inquiryType",
-            name: "inquiryType",
-            className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white",
-            children: doc.inquiryTypes.map((type, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: type, children: type }, idx))
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "message", className: "block text-sm font-medium text-slate-700 mb-1", children: [
-          "Message ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-500", children: "*" })
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { method: "post", className: "space-y-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "name", className: "block text-sm font-medium text-slate-700 mb-1", children: [
+              "Your Name ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-500", children: "*" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                type: "text",
+                id: "name",
+                name: "name",
+                required: true,
+                defaultValue: (rootData == null ? void 0 : rootData.nickname) || "",
+                placeholder: "e.g. Alex Smith",
+                className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "email", className: "block text-sm font-medium text-slate-700 mb-1", children: [
+              "Email Address ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-500", children: "*" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                type: "email",
+                id: "email",
+                name: "email",
+                required: true,
+                defaultValue: ((_a = rootData == null ? void 0 : rootData.user) == null ? void 0 : _a.email) || "",
+                placeholder: "your.email@example.com",
+                className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              }
+            )
+          ] }),
+          doc.inquiryTypes && doc.inquiryTypes.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "inquiryType", className: "block text-sm font-medium text-slate-700 mb-1", children: "Inquiry Type" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "select",
+              {
+                id: "inquiryType",
+                name: "inquiryType",
+                className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white",
+                children: doc.inquiryTypes.map((type, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: type, children: type }, idx))
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "message", className: "block text-sm font-medium text-slate-700 mb-1", children: [
+              "Message ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-rose-500", children: "*" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "textarea",
+              {
+                id: "message",
+                name: "message",
+                rows: 5,
+                required: true,
+                placeholder: "How can we help you?",
+                className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "submit",
+              disabled: isSubmitting,
+              className: "w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-md transition-all text-sm cursor-pointer",
+              children: isSubmitting ? "Sending Message..." : "Send Message"
+            }
+          )
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "textarea",
-          {
-            id: "message",
-            name: "message",
-            rows: 5,
-            required: true,
-            placeholder: "How can we help you?",
-            className: "w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "submit",
-          disabled: isSubmitting,
-          className: "w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-md transition-all text-sm cursor-pointer",
-          children: isSubmitting ? "Sending Message..." : "Send Message"
-        }
-      )
-    ] }),
-    doc.directEmail && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-12 pt-8 border-t border-slate-200", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-semibold text-slate-900 mb-2", children: "Direct Contact Information" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mb-2", children: "If you prefer sending an email directly, you can reach our team at:" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "a",
-        {
-          href: `mailto:${doc.directEmail}`,
-          className: "text-sm font-bold text-indigo-600 hover:text-indigo-500 hover:underline",
-          children: doc.directEmail
-        }
-      )
-    ] })
-  ] }) }) });
+        doc.directEmail && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-12 pt-8 border-t border-slate-200", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-semibold text-slate-900 mb-2", children: "Direct Contact Information" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mb-2", children: "If you prefer sending an email directly, you can reach our team at:" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "a",
+            {
+              href: `mailto:${doc.directEmail}`,
+              className: "text-sm font-bold text-indigo-600 hover:text-indigo-500 hover:underline",
+              children: doc.directEmail
+            }
+          )
+        ] })
+      ] }) })
+    }
+  );
 }
 var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -67726,288 +67921,298 @@ function Prices() {
     }
   };
   const pricePlans = priceData == null ? void 0 : priceData.pricePlans;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: priceData && pricePlans && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "flex-grow", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "pt-14 pb-8 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs sm:text-sm font-medium mb-4 shadow-sm", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldCheck, { className: "w-4 h-4" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Transparent & Flexible Pricing" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4", children: "Plans & Credit Packs" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed", children: "Start for free with daily credits, or top up with prepaid charge packs for intensive study." }),
-      priceData.creditConsumptionGuide && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto mt-6 p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Coins, { className: "w-4 h-4 text-amber-500" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Credit Consumption Guide" })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 text-slate-500 dark:text-slate-400", children: priceData.creditConsumptionGuide.map((row, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: row.item }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-semibold text-slate-700 dark:text-slate-300", children: row.cost })
-        ] }, idx)) })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24", children: [
-      priceData.campaignNotice && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center space-y-4 max-w-3xl mx-auto mb-12", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Flame, { className: "w-4 h-4 text-orange-500 shrink-0 animate-bounce" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: priceData.campaignNotice.rawText || priceData.campaignNotice.description })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch", children: [
-        pricePlans.free && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-500", children: pricePlans.free.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.free.price }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.free.period })
-            ] }),
-            pricePlans.free.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold", children: pricePlans.free.badge }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.free.description }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.free.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-            ] }, idx)) })
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load PRICE_PLANS from Supabase (kl_app).",
+      onRetry: loadData,
+      children: priceData && pricePlans && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "flex-grow", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "pt-14 pb-8 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs sm:text-sm font-medium mb-4 shadow-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldCheck, { className: "w-4 h-4" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Transparent & Flexible Pricing" })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6 space-y-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Link,
-            {
-              to: pricePlans.free.ctaLink || "/",
-              className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all block",
-              children: pricePlans.free.ctaText || "Get Started Free"
-            }
-          ) })
-        ] }),
-        pricePlans.starter && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.starter.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.starter.price }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.starter.period })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4", children: "Plans & Credit Packs" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed", children: "Start for free with daily credits, or top up with prepaid charge packs for intensive study." }),
+          priceData.creditConsumptionGuide && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto mt-6 p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Coins, { className: "w-4 h-4 text-amber-500" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Credit Consumption Guide" })
             ] }),
-            pricePlans.starter.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.starter.badge }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.starter.description }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.starter.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 text-slate-500 dark:text-slate-400", children: priceData.creditConsumptionGuide.map((row, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: row.item }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-semibold text-slate-700 dark:text-slate-300", children: row.cost })
             ] }, idx)) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                type: "button",
-                onClick: () => handleCheckout(pricePlans.starter.id),
-                disabled: loadingPriceId === pricePlans.starter.id,
-                className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.starter.id ? "Processing..." : pricePlans.starter.ctaText || "Buy Starter Pack" })
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-              "By purchasing, you agree to our ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-              " & ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-              "."
-            ] })
           ] })
         ] }),
-        pricePlans.standard && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 flex flex-col justify-between shadow-xl relative", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm", children: "Most Popular" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.standard.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.standard.price }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.standard.period })
-            ] }),
-            pricePlans.standard.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.standard.badge }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.standard.description }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.standard.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-            ] }, idx)) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                type: "button",
-                onClick: () => handleCheckout(pricePlans.standard.id),
-                disabled: loadingPriceId === pricePlans.standard.id,
-                className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.standard.id ? "Processing..." : pricePlans.standard.ctaText || "Buy Standard Pack" })
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-              "By purchasing, you agree to our ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-              " & ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-              "."
-            ] })
-          ] })
-        ] }),
-        pricePlans.pro && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-purple-600", children: pricePlans.pro.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.pro.price }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.pro.period })
-            ] }),
-            pricePlans.pro.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal", children: pricePlans.pro.badge }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.pro.description }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.pro.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-purple-600 shrink-0" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-            ] }, idx)) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                type: "button",
-                onClick: () => handleCheckout(pricePlans.pro.id),
-                disabled: loadingPriceId === pricePlans.pro.id,
-                className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.pro.id ? "Processing..." : pricePlans.pro.ctaText || "Buy Pro Pack" })
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-              "By purchasing, you agree to our ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-              " & ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-              "."
-            ] })
-          ] })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-10", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            type: "button",
-            onClick: () => setIsSpecsOpen(!isSpecsOpen),
-            className: "w-full py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SlidersHorizontal, { className: "w-4 h-4 text-blue-600" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "View Detailed Plan Specs & Study Volume Estimates" })
-              ] }),
-              isSpecsOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "w-5 h-5 text-slate-400" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "w-5 h-5 text-slate-400" })
-            ]
-          }
-        ),
-        isSpecsOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 space-y-4 animate-fadeIn", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-sm", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-slate-900 dark:text-white text-base", children: "Plan Specifications & Learning Volume Breakdown" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mt-1", children: "All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume." })
-          ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24", children: [
+          priceData.campaignNotice && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center space-y-4 max-w-3xl mx-auto mb-12", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Flame, { className: "w-4 h-4 text-orange-500 shrink-0 animate-bounce" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: priceData.campaignNotice.rawText || priceData.campaignNotice.description })
+          ] }) }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-slate-700 dark:text-slate-300 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Free Plan" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Daily Earnings:" }),
-                  " 4 Credits (Promo until Oct 29, normally 2)"
+            pricePlans.free && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-500", children: pricePlans.free.name }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.free.price }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.free.period })
                 ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost per Credit:" }),
-                  " Free"
+                pricePlans.free.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold", children: pricePlans.free.badge }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.free.description }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.free.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
+                ] }, idx)) })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6 space-y-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Link,
+                {
+                  to: pricePlans.free.ctaLink || "/",
+                  className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all block",
+                  children: pricePlans.free.ctaText || "Get Started Free"
+                }
+              ) })
+            ] }),
+            pricePlans.starter && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.starter.name }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.starter.price }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.starter.period })
                 ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                  " ~0.2 sessions / day"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Credit Expiry:" }),
-                  " 7 days"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Feature Access:" }),
-                  " Full AI Chat & Tools"
-                ] })
-              ] })
-            ] }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Starter Pack ($10)" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
-                  " 2,000"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
-                  " Standard"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                  " ~6\u20138 sessions"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
-                  " ~40\u201350 mins"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
-                  " Oct 29"
-                ] })
-              ] })
-            ] }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 shadow-xl space-y-4 flex flex-col justify-between relative", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm", children: "Popular Specs" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800 pt-1", children: "Standard ($25)" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
-                    " 5,600 (+120% value)"
-                  ] }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
-                    " High Value"
-                  ] }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                    " ~18\u201322 sessions"
-                  ] }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
-                    " ~110\u2013140 mins"
-                  ] }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
-                    " Oct 29"
-                  ] })
+                pricePlans.starter.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.starter.badge }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.starter.description }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.starter.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
+                ] }, idx)) })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => handleCheckout(pricePlans.starter.id),
+                    disabled: loadingPriceId === pricePlans.starter.id,
+                    className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.starter.id ? "Processing..." : pricePlans.starter.ctaText || "Buy Starter Pack" })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
+                  "By purchasing, you agree to our ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
+                  " & ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
+                  "."
                 ] })
               ] })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-purple-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Pro Intensivist ($50)" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
-                  " 12,000 (Maximum)"
+            pricePlans.standard && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 flex flex-col justify-between shadow-xl relative", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm", children: "Most Popular" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.standard.name }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.standard.price }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.standard.period })
                 ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
-                  " Best Value"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                  " ~40\u201350 sessions"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
-                  " ~240\u2013300 mins"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
-                  " Oct 29"
+                pricePlans.standard.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.standard.badge }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.standard.description }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.standard.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
+                ] }, idx)) })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => handleCheckout(pricePlans.standard.id),
+                    disabled: loadingPriceId === pricePlans.standard.id,
+                    className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.standard.id ? "Processing..." : pricePlans.standard.ctaText || "Buy Standard Pack" })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
+                  "By purchasing, you agree to our ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
+                  " & ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
+                  "."
                 ] })
               ] })
-            ] }) })
+            ] }),
+            pricePlans.pro && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-purple-600", children: pricePlans.pro.name }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.pro.price }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.pro.period })
+                ] }),
+                pricePlans.pro.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal", children: pricePlans.pro.badge }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.pro.description }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.pro.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-purple-600 shrink-0" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
+                ] }, idx)) })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => handleCheckout(pricePlans.pro.id),
+                    disabled: loadingPriceId === pricePlans.pro.id,
+                    className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.pro.id ? "Processing..." : pricePlans.pro.ctaText || "Buy Pro Pack" })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
+                  "By purchasing, you agree to our ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
+                  " & ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
+                  "."
+                ] })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-10", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: () => setIsSpecsOpen(!isSpecsOpen),
+                className: "w-full py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SlidersHorizontal, { className: "w-4 h-4 text-blue-600" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "View Detailed Plan Specs & Study Volume Estimates" })
+                  ] }),
+                  isSpecsOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "w-5 h-5 text-slate-400" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "w-5 h-5 text-slate-400" })
+                ]
+              }
+            ),
+            isSpecsOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 space-y-4 animate-fadeIn", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-sm", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-slate-900 dark:text-white text-base", children: "Plan Specifications & Learning Volume Breakdown" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mt-1", children: "All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume." })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-slate-700 dark:text-slate-300 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Free Plan" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Daily Earnings:" }),
+                      " 4 Credits (Promo until Oct 29, normally 2)"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost per Credit:" }),
+                      " Free"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
+                      " ~0.2 sessions / day"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Credit Expiry:" }),
+                      " 7 days"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Feature Access:" }),
+                      " Full AI Chat & Tools"
+                    ] })
+                  ] })
+                ] }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Starter Pack ($10)" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
+                      " 2,000"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
+                      " Standard"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
+                      " ~6\u20138 sessions"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
+                      " ~40\u201350 mins"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
+                      " Oct 29"
+                    ] })
+                  ] })
+                ] }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 shadow-xl space-y-4 flex flex-col justify-between relative", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm", children: "Popular Specs" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800 pt-1", children: "Standard ($25)" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
+                        " 5,600 (+120% value)"
+                      ] }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
+                        " High Value"
+                      ] }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
+                        " ~18\u201322 sessions"
+                      ] }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
+                        " ~110\u2013140 mins"
+                      ] }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
+                        " Oct 29"
+                      ] })
+                    ] })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-purple-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Pro Intensivist ($50)" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
+                      " 12,000 (Maximum)"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
+                      " Best Value"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
+                      " ~40\u201350 sessions"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
+                      " ~240\u2013300 mins"
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
+                      " Oct 29"
+                    ] })
+                  ] })
+                ] }) })
+              ] })
+            ] })
           ] })
         ] })
-      ] })
-    ] })
-  ] }) }) });
+      ] }) })
+    }
+  );
 }
 var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -68015,62 +68220,6 @@ var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   loader: loader$3,
   meta: meta$3
 }, Symbol.toStringTag, { value: "Module" }));
-var PORTAL_CONTENT = {
-  hero: {
-    badge: "Decades of Expertise in Japanese Language Education",
-    title: "Japanese Tutor AI Yamato",
-    subtitle: "Your Gateway to Japanese Mastery",
-    description: "Backed by decades of expert classroom teaching, now available to learners worldwide. Experience precision AI-driven Japanese tutoring tailored to your unique goals."
-  },
-  dailyChallengeBanner: {
-    badge: "Daily Challenge",
-    reward: "+2 Credits",
-    title: "Today's Japanese & Culture Quiz",
-    unauthenticatedText: "Sign in to take today's quiz and earn 2 free credits! \u2728",
-    completedText: "You've already completed today's quiz! Come back tomorrow for more \u2728",
-    defaultText: "Answer correctly to earn 2 credits! (Available once per day)",
-    unauthenticatedBtnText: "Sign In to Play Quiz",
-    completedBtnText: "View Quiz Results & Explanation",
-    defaultBtnText: "Take Today's Quiz"
-  },
-  dailyQuizModal: {
-    badge: "Daily Challenge (+2 Credits)",
-    title: "Today's Japanese & Culture Quiz",
-    completedMessage: "\u2728 You have already completed today's quiz! (Credits earned: +2)",
-    correctMessage: "\u{1F389} Correct! You earned 2 credits!",
-    incorrectMessage: "\u{1F4AA} Incorrect! Try again tomorrow!",
-    closeBtnText: "Close"
-  },
-  aiDemoWidget: {
-    title: "Japanese Tutor AI Yamato (Auto Demo)",
-    badge: "\u25CF Live Demo",
-    learningPaceLabel: "Learning Pace (Demo)",
-    defaultPace: "normal",
-    startingNotice: "AI Yamato demo is starting...",
-    thinkingNotice: "Yamato is thinking...",
-    inputPlaceholder: "Ask Yamato a question...",
-    chatNotice: "Want to chat with Yamato-sensei? (Requires login & 2 credits for text chat)",
-    guideLinkText: "Guide",
-    subNotice: "Answer today's Daily Quiz to earn 2 credits, or sign up now to receive 10 welcome credits!",
-    chatWithYamatoBtn: "Chat with Yamato",
-    freeSignUpBtn: "Free Sign Up",
-    chatWidgetAlert: "You can chat directly with Yamato-sensei using the chat widget in the bottom right corner!",
-    demoConversations: [
-      {
-        user: "How do I practice Japanese writing?",
-        yamato: "Hello!\u{1F338} You can use our EOY Writing Exam Tutor with 110 original prompts, Genkoyoshi layout tools, and instant AI feedback."
-      },
-      {
-        user: "Can I practice oral conversations here?",
-        yamato: "Yes! Our EOY Oral Mock Exam module provides realistic voice interaction and real-time AI examiner scoring."
-      },
-      {
-        user: "How do credits work?",
-        yamato: "Chats and vocabulary Q&A cost 1-2 credits. You also get daily free credits upon login, or you can top up anytime!"
-      }
-    ]
-  }
-};
 function HeroDemoChat({
   isDarkMode,
   user,
@@ -68080,7 +68229,7 @@ function HeroDemoChat({
   validateFeatureCredits,
   portalContent
 }) {
-  const content = portalContent || PORTAL_CONTENT;
+  const content = portalContent || {};
   const hero = content.hero;
   const quizBanner = content.dailyChallengeBanner;
   const demoWidget = content.aiDemoWidget;
@@ -68303,8 +68452,8 @@ function DailyQuizModal({
   var _a;
   if (!isOpen)
     return null;
-  const content = portalContent || PORTAL_CONTENT;
-  const modalText = (content == null ? void 0 : content.dailyQuizModal) || PORTAL_CONTENT.dailyQuizModal;
+  const content = portalContent || {};
+  const modalText = (content == null ? void 0 : content.dailyQuizModal) || {};
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "div",
     {
@@ -69000,13 +69149,22 @@ function Home() {
   const [credits, setCredits] = reactExports.useState((rootData == null ? void 0 : rootData.credits) ?? 10);
   const learningPace = (rootData == null ? void 0 : rootData.learningPace) ?? "normal";
   const isTeacher = (rootData == null ? void 0 : rootData.isTeacher) ?? false;
-  const { generalData } = useGeneralContent(supabase);
-  const { vceSpeakingData } = useVceSpeakingContent(supabase);
-  const { vceWritingData } = useVceWritingContent(supabase);
-  const { referenceData } = useReferenceContent(supabase);
-  const { juniorData } = useJuniorContent(supabase);
-  const { gamesData } = useGamesContent(supabase);
-  const { otherData } = useOtherContent(supabase);
+  const { generalData, isError: isGeneralError } = useGeneralContent(supabase);
+  const { vceSpeakingData, isError: isSpeakingError } = useVceSpeakingContent(supabase);
+  const { vceWritingData, isError: isWritingError } = useVceWritingContent(supabase);
+  const { referenceData, isError: isReferenceError } = useReferenceContent(supabase);
+  const { juniorData, isError: isJuniorError } = useJuniorContent(supabase);
+  const { gamesData, isError: isGamesError } = useGamesContent(supabase);
+  const { otherData, isError: isOtherError } = useOtherContent(supabase);
+  const failedContentKeys = [
+    isOtherError && "CONTENT_OTHER",
+    isGeneralError && "CONTENT_GENERAL",
+    isSpeakingError && "CONTENT_VCE_SPEAKING",
+    isWritingError && "CONTENT_VCE_WRITING",
+    isReferenceError && "CONTENT_REFERENCE",
+    isJuniorError && "CONTENT_JUNIOR",
+    isGamesError && "CONTENT_GAMES"
+  ].filter(Boolean);
   reactExports.useEffect(() => {
     if (user && isTeacher) {
       navigate("/teacher-dashboard", { replace: true });
@@ -69144,15 +69302,16 @@ function Home() {
     const correct = selectedIndex === currentQuiz.answer;
     setIsQuizCorrect(correct);
     if (correct) {
-      const todayStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
-      const newCredits = credits + 2;
-      const { error } = await supabase.from("profiles").update({
-        credits: newCredits,
-        last_quiz_date: todayStr
-      }).eq("id", user.id);
-      if (!error) {
-        setCredits(newCredits);
+      const { data: data2, error } = await supabase.rpc("claim_daily_quiz_reward");
+      const result = data2;
+      if (!error && result) {
+        if (result.granted && typeof result.credits === "number") {
+          setCredits(result.credits);
+          window.dispatchEvent(new CustomEvent("yamato:credits-updated", { detail: result.credits }));
+        }
         setHasCompletedTodayQuiz(true);
+      } else if (error) {
+        console.error("Failed to claim daily quiz reward:", error.message);
       }
     }
   };
@@ -69191,87 +69350,96 @@ function Home() {
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-400 font-medium", children: "\u6559\u5E2B\u7528\u30C0\u30C3\u30B7\u30E5\u30DC\u30FC\u30C9\u3078\u79FB\u52D5\u3057\u3066\u3044\u307E\u3059..." })
     ] });
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `min-h-screen font-sans ${isDarkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-950"} transition-colors duration-300 relative flex flex-col justify-between`, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        HeroDemoChat,
-        {
-          isDarkMode,
-          user,
-          hasCompletedTodayQuiz,
-          onOpenAuthModal: handleOpenAuthModal,
-          onOpenQuizModal: () => {
-            if (!hasCompletedTodayQuiz) {
-              setSelectedOption(null);
-              setIsAnswerSubmitted(false);
-              setIsQuizCorrect(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: failedContentKeys.length > 0,
+      errorTitle: "Unable to Load Data",
+      errorMessage: `Failed to load ${failedContentKeys.join(", ")} from Supabase (kl_app).`,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `min-h-screen font-sans ${isDarkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-950"} transition-colors duration-300 relative flex flex-col justify-between`, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            HeroDemoChat,
+            {
+              isDarkMode,
+              user,
+              hasCompletedTodayQuiz,
+              onOpenAuthModal: handleOpenAuthModal,
+              onOpenQuizModal: () => {
+                if (!hasCompletedTodayQuiz) {
+                  setSelectedOption(null);
+                  setIsAnswerSubmitted(false);
+                  setIsQuizCorrect(false);
+                }
+                setIsQuizModalOpen(true);
+              },
+              validateFeatureCredits,
+              portalContent: {
+                modulesSection: { header: { title: "Portal Pages & Modules" } },
+                hero: otherData == null ? void 0 : otherData.hero,
+                aiDemoWidget: otherData == null ? void 0 : otherData.aiDemoWidget,
+                dailyChallengeBanner: otherData == null ? void 0 : otherData.dailyChallengeBanner
+              }
             }
-            setIsQuizModalOpen(true);
-          },
-          validateFeatureCredits,
-          portalContent: {
-            modulesSection: { header: { title: "Portal Pages & Modules" } },
-            hero: otherData == null ? void 0 : otherData.hero,
-            aiDemoWidget: otherData == null ? void 0 : otherData.aiDemoWidget,
-            dailyChallengeBanner: otherData == null ? void 0 : otherData.dailyChallengeBanner
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            PricingSection,
+            {
+              isDarkMode,
+              checkoutLoadingPriceId,
+              onCheckout: handleCheckout,
+              onOpenAuthModal: handleOpenAuthModal
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            PortalModulesGrid,
+            {
+              generalModules: (generalData == null ? void 0 : generalData.modules) || [],
+              speakingModules: (vceSpeakingData == null ? void 0 : vceSpeakingData.modules) || [],
+              writingModules: (vceWritingData == null ? void 0 : vceWritingData.modules) || [],
+              referenceModules: (referenceData == null ? void 0 : referenceData.modules) || [],
+              juniorModules: (juniorData == null ? void 0 : juniorData.modules) || [],
+              gamesData,
+              isDarkMode,
+              onSelectModule: async (mod) => {
+                if (mod.isComingSoon)
+                  return;
+                if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
+                  navigate(mod.path);
+                }
+              },
+              onNavigateGames: () => navigate("/games")
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          ChatYamatoConcierge,
+          {
+            initialLearningPace: learningPace,
+            userId: user == null ? void 0 : user.id,
+            credits,
+            onOpenAuth: () => handleOpenAuthModal("signup")
           }
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        PricingSection,
-        {
-          isDarkMode,
-          checkoutLoadingPriceId,
-          onCheckout: handleCheckout,
-          onOpenAuthModal: handleOpenAuthModal
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        PortalModulesGrid,
-        {
-          generalModules: (generalData == null ? void 0 : generalData.modules) || [],
-          speakingModules: (vceSpeakingData == null ? void 0 : vceSpeakingData.modules) || [],
-          writingModules: (vceWritingData == null ? void 0 : vceWritingData.modules) || [],
-          referenceModules: (referenceData == null ? void 0 : referenceData.modules) || [],
-          juniorModules: (juniorData == null ? void 0 : juniorData.modules) || [],
-          gamesData,
-          isDarkMode,
-          onSelectModule: async (mod) => {
-            if (mod.isComingSoon)
-              return;
-            if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement)) {
-              navigate(mod.path);
-            }
-          },
-          onNavigateGames: () => navigate("/games")
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      ChatYamatoConcierge,
-      {
-        initialLearningPace: learningPace,
-        userId: user == null ? void 0 : user.id,
-        credits,
-        onOpenAuth: () => handleOpenAuthModal("signup")
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      DailyQuizModal,
-      {
-        isOpen: isQuizModalOpen,
-        onClose: () => setIsQuizModalOpen(false),
-        isDarkMode,
-        currentQuiz,
-        selectedOption,
-        isAnswerSubmitted,
-        hasCompletedTodayQuiz,
-        isQuizCorrect,
-        onAnswer: handleAnswerQuiz,
-        portalContent: otherData
-      }
-    )
-  ] }) });
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          DailyQuizModal,
+          {
+            isOpen: isQuizModalOpen,
+            onClose: () => setIsQuizModalOpen(false),
+            isDarkMode,
+            currentQuiz,
+            selectedOption,
+            isAnswerSubmitted,
+            hasCompletedTodayQuiz,
+            isQuizCorrect,
+            onAnswer: handleAnswerQuiz,
+            portalContent: otherData
+          }
+        )
+      ] })
+    }
+  );
 }
 var meta$2 = ({ data: data2 }) => {
   return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "");
@@ -69549,113 +69717,123 @@ function FaqPage() {
       }))
     };
   }, [faqs]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(ToolPageWrapper, { layoutRef, children: [
-    faqJsonLd && /* @__PURE__ */ jsxRuntimeExports.jsx("script", { type: "application/ld+json", dangerouslySetInnerHTML: { __html: JSON.stringify(faqJsonLd) } }),
-    faqs && faqs.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-800 pb-16 relative", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-md", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl font-extrabold tracking-tight mb-3", children: "Frequently Asked Questions & AI Guide" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-blue-100 text-sm sm:text-base max-w-2xl", children: "Everything you need to know about VCE Japanese external exam writing rules, genkoyoshi formatting, oral examinations, and how to interact with AI Yamato." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-8 relative max-w-2xl", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Search, { className: "w-5 h-5" }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "input",
-            {
-              type: "text",
-              value: searchQuery,
-              onChange: (e) => setSearchQuery(e.target.value),
-              placeholder: "Search across all questions (e.g., kanji, credits, punctuation)...",
-              disabled: loading || error || !faqs,
-              className: "w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all disabled:opacity-60"
-            }
-          )
-        ] }),
-        groupedFaqs.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 flex flex-wrap items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-blue-200 font-medium mr-1", children: "Categories:" }),
-          groupedFaqs.map((group) => {
-            const anchorId = getAnchorId(`category-${group.category}`);
-            return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "a",
-              {
-                href: `#${anchorId}`,
-                onClick: (e) => scrollToCategory(e, group.category),
-                className: "px-3 py-1 rounded-full bg-blue-700/60 hover:bg-blue-600 text-white text-xs font-semibold border border-blue-400/30 transition-all cursor-pointer shadow-xs capitalize inline-block",
-                children: [
-                  group.category,
-                  " (",
-                  group.items.length,
-                  ")"
-                ]
-              },
-              group.category
-            );
-          })
-        ] })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-10", children: groupedFaqs.length > 0 ? groupedFaqs.map((group) => {
-          const anchorId = getAnchorId(`category-${group.category}`);
-          return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: anchorId, className: "space-y-4 scroll-mt-24", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-3 border-b border-slate-200 pb-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-extrabold text-slate-900 capitalize", children: group.category }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800", children: [
-                group.items.length,
-                " ",
-                group.items.length === 1 ? "question" : "questions"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: group.items.map((faq) => {
-              const isOpen = !!openIds[faq.id];
-              return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "div",
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    ToolPageWrapper,
+    {
+      layoutRef,
+      hasError: !loading && error,
+      errorTitle: "Unable to Load Data",
+      errorMessage: "Failed to load FAQ from Supabase (kl_app).",
+      onRetry: loadData,
+      children: [
+        faqJsonLd && /* @__PURE__ */ jsxRuntimeExports.jsx("script", { type: "application/ld+json", dangerouslySetInnerHTML: { __html: JSON.stringify(faqJsonLd) } }),
+        faqs && faqs.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-800 pb-16 relative", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-md", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl font-extrabold tracking-tight mb-3", children: "Frequently Asked Questions & AI Guide" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-blue-100 text-sm sm:text-base max-w-2xl", children: "Everything you need to know about VCE Japanese external exam writing rules, genkoyoshi formatting, oral examinations, and how to interact with AI Yamato." }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-8 relative max-w-2xl", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Search, { className: "w-5 h-5" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
                 {
-                  className: "bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all hover:border-blue-200",
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                      "button",
-                      {
-                        type: "button",
-                        onClick: () => toggleAccordion(faq.id),
-                        className: "w-full text-left px-6 py-5 flex items-start justify-between space-x-4 cursor-pointer focus:outline-hidden",
-                        children: [
-                          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base font-bold text-slate-900", children: faq.question }) }),
-                          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200", children: isOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "w-4 h-4" }) })
-                        ]
-                      }
-                    ),
-                    isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "div",
-                      {
-                        className: "text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none",
-                        dangerouslySetInnerHTML: { __html: faq.answer }
-                      }
-                    ) })
-                  ]
-                },
-                faq.id
-              );
-            }) })
-          ] }, group.category);
-        }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-16 bg-white rounded-2xl border border-slate-200 p-8", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(CircleQuestionMark, { className: "w-12 h-12 text-slate-300 mx-auto mb-3" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base font-bold text-slate-700", children: "No matching questions found" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-1", children: "Try searching with a different keyword." })
-        ] }) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-bold text-blue-900", children: "Still have questions?" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-blue-700 max-w-xl mx-auto", children: "Please let us know your question via Contact, Report Bug & Photo, or Quick Feedback in the footer." }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Link,
-            {
-              to: "/",
-              className: "inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all",
-              children: "Go to Dashboard"
-            }
-          ) })
+                  type: "text",
+                  value: searchQuery,
+                  onChange: (e) => setSearchQuery(e.target.value),
+                  placeholder: "Search across all questions (e.g., kanji, credits, punctuation)...",
+                  disabled: loading || error || !faqs,
+                  className: "w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all disabled:opacity-60"
+                }
+              )
+            ] }),
+            groupedFaqs.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 flex flex-wrap items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-blue-200 font-medium mr-1", children: "Categories:" }),
+              groupedFaqs.map((group) => {
+                const anchorId = getAnchorId(`category-${group.category}`);
+                return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "a",
+                  {
+                    href: `#${anchorId}`,
+                    onClick: (e) => scrollToCategory(e, group.category),
+                    className: "px-3 py-1 rounded-full bg-blue-700/60 hover:bg-blue-600 text-white text-xs font-semibold border border-blue-400/30 transition-all cursor-pointer shadow-xs capitalize inline-block",
+                    children: [
+                      group.category,
+                      " (",
+                      group.items.length,
+                      ")"
+                    ]
+                  },
+                  group.category
+                );
+              })
+            ] })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-10", children: groupedFaqs.length > 0 ? groupedFaqs.map((group) => {
+              const anchorId = getAnchorId(`category-${group.category}`);
+              return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: anchorId, className: "space-y-4 scroll-mt-24", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-3 border-b border-slate-200 pb-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-extrabold text-slate-900 capitalize", children: group.category }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800", children: [
+                    group.items.length,
+                    " ",
+                    group.items.length === 1 ? "question" : "questions"
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: group.items.map((faq) => {
+                  const isOpen = !!openIds[faq.id];
+                  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    "div",
+                    {
+                      className: "bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden transition-all hover:border-blue-200",
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                          "button",
+                          {
+                            type: "button",
+                            onClick: () => toggleAccordion(faq.id),
+                            className: "w-full text-left px-6 py-5 flex items-start justify-between space-x-4 cursor-pointer focus:outline-hidden",
+                            children: [
+                              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base font-bold text-slate-900", children: faq.question }) }),
+                              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 mt-1 w-7 h-7 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-200", children: isOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "w-4 h-4" }) })
+                            ]
+                          }
+                        ),
+                        isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                          "div",
+                          {
+                            className: "text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none",
+                            dangerouslySetInnerHTML: { __html: faq.answer }
+                          }
+                        ) })
+                      ]
+                    },
+                    faq.id
+                  );
+                }) })
+              ] }, group.category);
+            }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center py-16 bg-white rounded-2xl border border-slate-200 p-8", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(CircleQuestionMark, { className: "w-12 h-12 text-slate-300 mx-auto mb-3" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base font-bold text-slate-700", children: "No matching questions found" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-1", children: "Try searching with a different keyword." })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 sm:p-8 text-center space-y-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-bold text-blue-900", children: "Still have questions?" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-blue-700 max-w-xl mx-auto", children: "Please let us know your question via Contact, Report Bug & Photo, or Quick Feedback in the footer." }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Link,
+                {
+                  to: "/",
+                  className: "inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all",
+                  children: "Go to Dashboard"
+                }
+              ) })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
         ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
-    ] })
-  ] });
+      ]
+    }
+  );
 }
 var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
@@ -69663,7 +69841,7 @@ var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-2dcFtQul.js", "imports": ["/assets/components-DlQUnH2_.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-B8oqZEzp.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-R7y0rncF.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/OralExaminerAvatar-C-eFHXXJ.js", "/assets/ChatYamatoEoyOralDrill-BkG7-ZxO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-2LEanGLu.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-BFENHgAh.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DMMVT-QD.js", "/assets/check-DVTRM-5Z.js", "/assets/book-open-KcNfra8R.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-BdruR0OF.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-akc7y-Cb.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CeQKewTm.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-1zW0bETr.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/OralExaminerAvatar-C-eFHXXJ.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-b_Remm2e.js", "/assets/OralPracticeHooks-2LEanGLu.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-DSXYE54h.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/nickname-Oq3xsFg4.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-D5-rx0ts.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-CnV3rG-r.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DMMVT-QD.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-CDcBdL_S.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-p5YPb10h.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/OralExaminerAvatar-C-eFHXXJ.js", "/assets/ChatYamatoEoyOralDrill-BkG7-ZxO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-b_Remm2e.js", "/assets/OralPracticeHooks-2LEanGLu.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-CYDkNjYP.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-DqQxA3Cy.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-C-eFHXXJ.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-CGphr1xh.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle--iB3L76K.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-B2PmHAlo.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-D0SLsiV2.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DMMVT-QD.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-J8UQk5tY.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-BTAOIEcR.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-CYT-t-9c.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-8q6AYndw.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/ScrollTopButton-DWpmCRGe.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js"], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-B3DCli7d.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-BXz1Oy7d.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-pKeN4YEy.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-DH4Xb7Iw.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-BmsHsR5p.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-Dx6tKVD6.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/content-vce-speaking-CnSKFjKM.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-BNkEWY60.js", "imports": ["/assets/components-DlQUnH2_.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-BUIkTUyy.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-imHLg9zk.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-CGWDg7WY.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/ScrollTopButton-DWpmCRGe.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-CHRfg2HK.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/content-vce-writing-BTD-GLEP.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-BerylTMb.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-CVtZkv3e.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/content-reference-BP_KcSaM.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-Bumn-c_u.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DJIEBqsF.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-CVdo-K0G.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-yrf52aG7.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-DWZNjUEP.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-DI_e8dXB.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DJIEBqsF.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-peJDCkex.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/content-games-DuA2MYBX.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-DiSd8ckX.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-zdwxgW5l.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-D22Exd26.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-B7xJznMi.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-BaTO0PCI.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/content-vce-speaking-CnSKFjKM.js", "/assets/content-vce-writing-BTD-GLEP.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-3M7ImIco.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-Bkus51SB.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-BvYZcvX9.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-D5-rx0ts.js", "/assets/flame-7q5RYLCf.js", "/assets/check-DVTRM-5Z.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CXXFELE7.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-7q5RYLCf.js", "/assets/check-DVTRM-5Z.js", "/assets/yamato-configs-g7FMAxit.js", "/assets/price-plans-D5-rx0ts.js", "/assets/loader-circle-akc7y-Cb.js", "/assets/book-open-KcNfra8R.js", "/assets/content-games-DuA2MYBX.js", "/assets/content-vce-speaking-CnSKFjKM.js", "/assets/content-vce-writing-BTD-GLEP.js", "/assets/content-reference-BP_KcSaM.js", "/assets/yamatoApi-BZV_ijjr.js", "/assets/nickname-Oq3xsFg4.js", "/assets/ScrollTopButton-DWpmCRGe.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-BjeguQuj.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/ScrollTopButton-DWpmCRGe.js", "/assets/book-open-KcNfra8R.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-hMMDsQW7.js", "imports": ["/assets/components-DlQUnH2_.js", "/assets/seoMeta-DJIEBqsF.js", "/assets/ScrollTopButton-DWpmCRGe.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js"], "css": [] } }, "url": "/assets/manifest-d0c97cfc.js", "version": "d0c97cfc" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-DQ0FH9K8.js", "imports": ["/assets/components-CXrMrLPc.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-Cd3t7JrW.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-CD0e1UI-.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/ChatYamatoEoyOralDrill-DtZ_Z0sX.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-DzDfT3NV.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-CXLXOJes.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/check-CNZ2w1kT.js", "/assets/book-open-ChvvrgQB.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-DOqXh2OW.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-hkzU2yfX.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CjZl5bag.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-DzURYtk9.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-D4zn1OyI.js", "/assets/OralPracticeHooks-DzDfT3NV.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-DnPrbEQO.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/nickname-Co6DH_40.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/price-plans-D5-rx0ts.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-C1LydpPP.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-BnINXrEf.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-D6JwIlQo.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/ChatYamatoEoyOralDrill-DtZ_Z0sX.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-D4zn1OyI.js", "/assets/OralPracticeHooks-DzDfT3NV.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-BKycJp38.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-BhYlmLfI.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-CzClUf3I.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-C2kZBd1l.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BlFl_QQd.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-B1DjDMVk.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-GFIznnxn.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-Cnon6S3I.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-C-ckxXl2.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-CioKLM-_.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js"], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-CZwII6em.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-DUePn8Zm.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-D9Go9ecP.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-DbvYwUWw.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-Ddh1ka5J.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-C2GLneYy.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-vce-speaking-DQz2Y_Jl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmNzcT1m.js", "imports": ["/assets/components-CXrMrLPc.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-C_SmHxR8.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-Dlgg6DW_.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-BzZkjQnn.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BYWKhCLt.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-vce-writing-Dv7b1DSk.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-BlzGbj-v.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-Duxi7gK8.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-reference-BlUSpM3v.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-Btn-yBiD.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-C8GosHYz.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BJU3PFZs.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-C_wxN72-.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-CDpv3Wsd.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-SwZ2NTt0.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-C8GosHYz.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-DRAR0vFf.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-games-DUd7J3tZ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BAUbUrmX.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-B56C-zb1.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-CwOAmGj-.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-uVAHz7WP.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-DyDo-XC0.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-vce-speaking-DQz2Y_Jl.js", "/assets/content-vce-writing-Dv7b1DSk.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-B34wFhjS.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-C4x5Wyh3.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-E5FqaFGk.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-D5-rx0ts.js", "/assets/flame-f2xpM8mt.js", "/assets/check-CNZ2w1kT.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CcYD0LHA.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-f2xpM8mt.js", "/assets/check-CNZ2w1kT.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/price-plans-D5-rx0ts.js", "/assets/loader-circle-hkzU2yfX.js", "/assets/book-open-ChvvrgQB.js", "/assets/content-games-DUd7J3tZ.js", "/assets/content-vce-speaking-DQz2Y_Jl.js", "/assets/content-vce-writing-Dv7b1DSk.js", "/assets/content-reference-BlUSpM3v.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-D_nk7GoW.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/book-open-ChvvrgQB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-3AddBZxo.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] } }, "url": "/assets/manifest-edac45f9.js", "version": "edac45f9" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";

@@ -4,19 +4,26 @@
  *
  * 流れ
  * 1. 課題（読み手・場面・目的・伝えるべきこと）を確認して書く
- *    - 紙に書いて写真を撮る / 画像・PDFをアップロード / デジタル原稿用紙に書く
+ *    - 紙に書いて自分のデバイスで撮った写真（または PDF）をアップロード / デジタル原稿用紙に書く
+ *    - デジタル原稿用紙のタブには、原稿用紙の使い方ガイド（GenkoyoshiModal）を開くボタンを置く
+ *
+ * 提出回数の上限は最初からは見せない（「何回出さないといけないのか」と生徒が迷わないように）。
+ * 書き直しが必要になったときだけ「あと○回まで送れる」と伝える。
  * 2. AI が「読み手として読めたもの」をそのまま書き起こす（読めない字は［？］）
  * 3. 生徒が「書きたかったことと同じか」を確認し、違えば本来の意図を入力
  * 4. 読み手からの反応＋伝わったかのチェック＋日本語の直しをフィードバック
  * 5. 課題に沿った提出でフィードバックを受けたら完了 → EduFinishedView
  *
- * 提出回数・画像の保存はすべてサーバー（/api/textbook-lesson-writing）で管理する
+ * 提出回数・画像の保存はすべてサーバーで管理する
+ * サーバー: api プロジェクト（Workers）の src/handlers/textbook-lesson-writing-handler.ts
+ *          https://api.jptutoraiyamato.com/api/textbook-lesson-writing
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "~/lib/supabaseClient";
+import { YAMATO_API_BASE, yamatoFetch } from "~/lib/yamatoApi";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 import { EduGenkoyoshiCanvas, type GenkoyoshiCanvasHandle } from "~/components/lessons/EduGenkoyoshiCanvas";
+import { GenkoyoshiModal } from "~/components/writing/GenkoyoshiModal";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
 
 // ---------- 型 ----------
@@ -62,7 +69,12 @@ interface WritingFeedback {
 }
 
 type Phase = "loading" | "load_error" | "no_task" | "compose" | "reading" | "confirm" | "feedback_loading" | "feedback" | "locked" | "finished";
-type InputMethod = "photo" | "upload" | "canvas";
+type InputMethod = "upload" | "canvas";
+
+/** 書き直しのときに見せる「あと○回まで送れる」 */
+function moreTimesText(left: number) {
+  return `You can send it ${left} more time${left === 1 ? "" : "s"}.`;
+}
 
 interface PreparedFile {
   mediaType: string;
@@ -79,23 +91,22 @@ interface EduWritingTaskModalProps {
   lessonId: string;
 }
 
-const API_PATH = "/api/textbook-lesson-writing"; // functions/api/textbook-lesson-writing.ts
+const API_URL = `${YAMATO_API_BASE}/api/textbook-lesson-writing`; // api: src/handlers/textbook-lesson-writing-handler.ts
 const MAX_IMAGE_EDGE = 1500; // 画像の費用は画素数に比例するので縮小してから送る
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 
 // ---------- ユーティリティ ----------
 
 async function apiFetch(init?: RequestInit & { query?: string }) {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
+  const { query, ...requestInit } = init ?? {};
   let res: Response;
   try {
-    res = await fetch(`${API_PATH}${init?.query ?? ""}`, {
-      ...init,
+    // yamatoFetch がログイン中のアクセストークンを Authorization ヘッダーに付ける
+    res = await yamatoFetch(`${API_URL}${query ?? ""}`, {
+      ...requestInit,
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(init?.headers ?? {}),
+        ...(requestInit.headers ?? {}),
       },
     });
   } catch {
@@ -104,8 +115,8 @@ async function apiFetch(init?: RequestInit & { query?: string }) {
   }
   const body: any = await res.json().catch(() => null);
   if (body === null) {
-    // JSON 以外が返った = API が動いていない（例: npm run dev では functions/ が実行されず 404 の HTML が返る）
-    console.error(`[EduWritingTaskModal] ${API_PATH} returned a non-JSON response (HTTP ${res.status}).`);
+    // JSON 以外が返った = API が正常に動いていない
+    console.error(`[EduWritingTaskModal] ${API_URL} returned a non-JSON response (HTTP ${res.status}).`);
     return { ok: false, status: res.status, body: { message: `The writing task service is not available (HTTP ${res.status}). Please try again later.` } as any };
   }
   return { ok: res.ok, status: res.status, body };
@@ -198,7 +209,8 @@ const CONVEYED_STYLE = {
 export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen, onClose, onCompleted, lessonId }) => {
   const [phase, setPhase] = useState<Phase>("loading");
   const [status, setStatus] = useState<WritingStatus | null>(null);
-  const [method, setMethod] = useState<InputMethod>("photo");
+  const [method, setMethod] = useState<InputMethod>("upload");
+  const [isGuideOpen, setIsGuideOpen] = useState(false); // 原稿用紙の使い方ガイド
   const [prepared, setPrepared] = useState<PreparedFile | null>(null);
   const [message, setMessage] = useState<{ tone: "info" | "error"; text: string } | null>(null);
 
@@ -211,7 +223,6 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
   const [completedNow, setCompletedNow] = useState(false);
 
   const canvasRef = useRef<GenkoyoshiCanvasHandle>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const completedRef = useRef(false);
   const onCompletedRef = useRef(onCompleted);
@@ -221,7 +232,6 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
 
   const task = status?.task ?? null;
   const attemptsLeft = status ? Math.max(0, status.maxAttempts - status.attemptsUsed) : 0;
-  const retakesLeft = status ? Math.max(0, status.maxRetakes - status.retakesUsed) : 0;
 
   const resetDraft = (options: { keepCanvas?: boolean } = {}) => {
     setPrepared(null);
@@ -276,6 +286,7 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
     if (!isOpen) return;
     resetDraft();
     setCompletedNow(false);
+    setIsGuideOpen(false);
     void loadStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, lessonId]);
@@ -314,10 +325,10 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
         return;
       }
       const parts = splitDataUrl(canvasRef.current.exportImage());
-      file = parts ? { ...parts, previewUrl: null, name: "genkouyoushi.jpg" } : null;
+      file = parts ? { ...parts, previewUrl: null, name: "genkoyoshi.jpg" } : null;
     }
     if (!file) {
-      setMessage({ tone: "error", text: method === "photo" ? "Take a photo of your writing first." : "Choose a file first." });
+      setMessage({ tone: "error", text: "Choose a photo or PDF of your writing first." });
       return;
     }
 
@@ -353,7 +364,7 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
       setPrepared(null);
       setMessage({
         tone: "info",
-        text: `📷 Your reader couldn't see the photo clearly: ${body.qualityIssue} Please take it again. This did not use up a submission. (Retakes left: ${Math.max(0, body.maxRetakes - body.retakesUsed)})`,
+        text: `📷 Your reader couldn't see the photo clearly: ${body.qualityIssue} Please take a new photo and upload it again. This photo was not counted as a submission.`,
       });
       return;
     }
@@ -432,6 +443,7 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
   );
 
   return (
+    <>
     <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-start sm:items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl p-5 sm:p-10 shadow-2xl space-y-6 my-auto">
         {/* ヘッダー */}
@@ -441,11 +453,6 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
               <span>✍️</span>
               <span>{task?.title || "Writing Task"}</span>
             </h3>
-            {status && phase !== "finished" && (
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                Submissions used: {status.attemptsUsed} / {status.maxAttempts}
-              </p>
-            )}
           </div>
           <button
             type="button"
@@ -525,32 +532,14 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
             {/* 書き方の選択 */}
             <div className="space-y-4">
               <div className="flex gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800">
-                {methodTab("photo", "📷", "Take a photo")}
-                {methodTab("upload", "📁", "Upload a file")}
-                {methodTab("canvas", "✏️", "Write here")}
+                {methodTab("upload", "📁", "Upload a photo or PDF")}
+                {methodTab("canvas", "✏️", "Write on genkoyoshi")}
               </div>
-
-              {method === "photo" && (
-                <div className="space-y-3">
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
-                    Write on paper, then take a photo from directly above in good light. Keep the whole page in the frame.
-                  </p>
-                  <input ref={photoInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChosen} className="hidden" />
-                  <button
-                    type="button"
-                    onClick={() => photoInputRef.current?.click()}
-                    disabled={busy}
-                    className="w-full py-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-black text-sm hover:border-orange-400 hover:text-orange-600 transition cursor-pointer"
-                  >
-                    📷 {prepared ? "Take the photo again" : "Open camera"}
-                  </button>
-                </div>
-              )}
 
               {method === "upload" && (
                 <div className="space-y-3">
                   <p className="text-sm text-slate-600 dark:text-slate-300">
-                    Upload a photo, a screenshot, or a PDF of your writing (for example from a note-taking app).
+                    Write on paper and take a photo with your phone or tablet, then upload the photo here. Take it from directly above in good light, with the whole page in the frame. You can also upload a PDF or a screenshot (for example from a note-taking app).
                   </p>
                   <input ref={uploadInputRef} type="file" accept="image/*,application/pdf" onChange={handleFileChosen} className="hidden" />
                   <button
@@ -564,7 +553,22 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
                 </div>
               )}
 
-              <div className={method === "canvas" ? "" : "hidden"}>
+              <div className={method === "canvas" ? "space-y-3" : "hidden"}>
+                {/* 原稿用紙を初めて使う生徒向けの案内（キャンバスのすぐ上に置く） */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/30 p-4">
+                  <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <span className="font-black text-slate-900 dark:text-slate-100">What is genkoyoshi（げんこうようし）?</span> It is Japanese
+                    writing paper with one square for each character. Check how to use it before you start.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsGuideOpen(true)}
+                    disabled={busy}
+                    className="shrink-0 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm transition shadow cursor-pointer"
+                  >
+                    📝 How to use genkoyoshi
+                  </button>
+                </div>
                 <EduGenkoyoshiCanvas ref={canvasRef} />
               </div>
 
@@ -610,14 +614,14 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
               ) : (
                 <>
                   <span>Send to {task.recipient} ✉️</span>
-                  <span className="text-xs opacity-80 font-normal">
-                    ({attemptsLeft} submission{attemptsLeft === 1 ? "" : "s"} left)
-                  </span>
+                  {/* 本当に相手に届くと思わないように、AI ヤマトに送ることを添える */}
+                  <span className="text-xs opacity-90 font-bold">(send to AI Yamato)</span>
                 </>
               )}
             </button>
-            {retakesLeft < (status?.maxRetakes ?? 0) && (
-              <p className="text-xs text-center text-slate-400">Photo retakes left: {retakesLeft}</p>
+            {/* 書き直しのときだけ、あと何回送れるかを伝える */}
+            {(status?.attemptsUsed ?? 0) > 0 && attemptsLeft > 0 && (
+              <p className="text-xs text-center text-slate-500 dark:text-slate-400">{moreTimesText(attemptsLeft)}</p>
             )}
           </div>
         )}
@@ -780,21 +784,21 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
                     onClick={handleRewrite}
                     className="py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-black text-sm hover:border-orange-400 transition cursor-pointer"
                   >
-                    Rewrite to improve ({attemptsLeft} left)
+                    Rewrite to improve
                   </button>
                 )}
               </div>
             ) : attemptsLeft > 0 ? (
               <div className="space-y-2">
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-300 text-center">
-                  Your message didn't do the task yet. Rewrite it and send it again.
+                  Your message didn't do the task yet. Rewrite it and send it again. {moreTimesText(attemptsLeft)}
                 </p>
                 <button
                   type="button"
                   onClick={handleRewrite}
                   className="w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer"
                 >
-                  Rewrite and send again ({attemptsLeft} left)
+                  Rewrite and send again
                 </button>
               </div>
             ) : (
@@ -841,6 +845,10 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
         )}
       </div>
     </div>
+
+    {/* 原稿用紙の使い方ガイド。モーダルの外（兄弟要素）に置き、後ろに描画してライティング画面より上に重ねる */}
+    <GenkoyoshiModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
+    </>
   );
 };
 

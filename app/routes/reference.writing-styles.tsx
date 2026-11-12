@@ -68,7 +68,13 @@ export default function WritingStylesGuide() {
   const currentStyle: WritingStyleDetail | undefined = stylesData ? stylesData[activeStyleKey] : undefined;
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!loading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load WRITING_STYLES from Supabase (kl_app)."
+      onRetry={loadData}
+    >
       {stylesData && Object.keys(stylesData).length > 0 && (
         <div className="max-w-6xl mx-auto p-6 bg-slate-50 min-h-screen text-slate-800">
           <div className="mb-8 text-center">

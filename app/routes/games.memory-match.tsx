@@ -4,6 +4,7 @@
  * Katakana and Kanji) whose cards are loaded live from the Supabase
  * table `kl_character`, featuring passcode/unlock protection matching character-maze.tsx.
  */
+import { DataErrorState } from '~/components/DataErrorState';
 import {
   json,
   type LoaderFunctionArgs,
@@ -338,9 +339,10 @@ export default function MemoryMatchPage() {
           data.pools.katakana.length === 0 &&
           data.pools.kanji.length === 0 &&
           data.pools.kanjiMeaning.length === 0 ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm font-medium text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
-              {data.loadError}
-            </div>
+            <DataErrorState
+              title="Unable to Load Data"
+              errorMessage={`Failed to load characters (kl_character): ${data.loadError}`}
+            />
           ) : (
             <MemoryMatchGame
               pools={data.pools}

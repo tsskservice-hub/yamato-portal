@@ -64,13 +64,24 @@ export default function Home() {
   const isTeacher = rootData?.isTeacher ?? false;
 
   // 💡 各分割コンテンツフックの呼び出し (CONTENT_OTHER を追加)
-  const { generalData } = useGeneralContent(supabase);
-  const { vceSpeakingData } = useVceSpeakingContent(supabase);
-  const { vceWritingData } = useVceWritingContent(supabase);
-  const { referenceData } = useReferenceContent(supabase);
-  const { juniorData } = useJuniorContent(supabase);
-  const { gamesData } = useGamesContent(supabase);
-  const { otherData } = useOtherContent(supabase);
+  const { generalData, isError: isGeneralError } = useGeneralContent(supabase);
+  const { vceSpeakingData, isError: isSpeakingError } = useVceSpeakingContent(supabase);
+  const { vceWritingData, isError: isWritingError } = useVceWritingContent(supabase);
+  const { referenceData, isError: isReferenceError } = useReferenceContent(supabase);
+  const { juniorData, isError: isJuniorError } = useJuniorContent(supabase);
+  const { gamesData, isError: isGamesError } = useGamesContent(supabase);
+  const { otherData, isError: isOtherError } = useOtherContent(supabase);
+
+  // 💡 どれか1つでも CONTENT_* の取得に失敗したら DataErrorState（報告ボタン付き）を表示する
+  const failedContentKeys = [
+    isOtherError && 'CONTENT_OTHER',
+    isGeneralError && 'CONTENT_GENERAL',
+    isSpeakingError && 'CONTENT_VCE_SPEAKING',
+    isWritingError && 'CONTENT_VCE_WRITING',
+    isReferenceError && 'CONTENT_REFERENCE',
+    isJuniorError && 'CONTENT_JUNIOR',
+    isGamesError && 'CONTENT_GAMES',
+  ].filter(Boolean);
 
   // 💡 先生がログインしている場合、トップページを開いた瞬間に教師ダッシュボードへ自動リダイレクト
   useEffect(() => {
@@ -245,20 +256,19 @@ export default function Home() {
     setIsQuizCorrect(correct);
 
     if (correct) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const newCredits = credits + 2;
+      // 🔐 クレジットの付与はデータベース側の関数で行う（1日1回・+2 をサーバー側で確認）
+      // ブラウザから profiles.credits を直接書き換えることはできない
+      const { data, error } = await supabase.rpc('claim_daily_quiz_reward');
+      const result = data as { granted?: boolean; credits?: number } | null;
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          credits: newCredits,
-          last_quiz_date: todayStr 
-        })
-        .eq('id', user.id);
-
-      if (!error) {
-        setCredits(newCredits);
+      if (!error && result) {
+        if (result.granted && typeof result.credits === 'number') {
+          setCredits(result.credits);
+          window.dispatchEvent(new CustomEvent("yamato:credits-updated", { detail: result.credits }));
+        }
         setHasCompletedTodayQuiz(true);
+      } else if (error) {
+        console.error("Failed to claim daily quiz reward:", error.message);
       }
     }
   };
@@ -308,7 +318,12 @@ export default function Home() {
   }
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={failedContentKeys.length > 0}
+      errorTitle="Unable to Load Data"
+      errorMessage={`Failed to load ${failedContentKeys.join(', ')} from Supabase (kl_app).`}
+    >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-950'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
           

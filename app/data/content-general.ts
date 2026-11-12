@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { PortalModule } from '~/data/portal-content';
+import type { PortalModule } from '~/data/content-other';
 
 export interface GeneralContentKnowledge {
   modules: PortalModule[];

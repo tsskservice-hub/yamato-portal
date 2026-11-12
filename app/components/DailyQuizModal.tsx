@@ -6,7 +6,6 @@
 import React from 'react';
 import { X, Check } from 'lucide-react';
 import { QuizItem } from '../data/quizzes';
-import { PORTAL_CONTENT as DEFAULT_PORTAL_CONTENT } from '../data/portal-content';
 
 export interface DailyQuizModalProps {
   isOpen: boolean;
@@ -35,9 +34,9 @@ export function DailyQuizModal({
 }: DailyQuizModalProps) {
   if (!isOpen) return null;
 
-  // 💡 文言マスターデータの解決（props優先、フォールバックとしてデフォルト定数を使用）
-  const content = portalContent || DEFAULT_PORTAL_CONTENT;
-  const modalText = content?.dailyQuizModal || DEFAULT_PORTAL_CONTENT.dailyQuizModal;
+  // 💡 文言は Supabase kl_app (CONTENT_OTHER) から渡される。読み込み中・取得失敗時は空表示
+  const content = portalContent || {};
+  const modalText = content?.dailyQuizModal || {};
 
   return (
     <div 

@@ -3,13 +3,20 @@
  * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リスニング＆リーディング＆スピーキング＆ライティング起動対応）
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "~/lib/supabaseClient";
+
+const TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing"] as const;
+
+export type LessonTaskKey = "vocabulary" | "listening" | "reading" | "speaking" | "writing";
+export type LessonTaskProgress = Record<LessonTaskKey, boolean>;
 
 export interface EduLessonTaskManagerProps {
   lessonId: string; // レッスンID
   userId?: string;  // ユーザーID
   onAllCompletedChange?: (completed: boolean) => void;
+  /** 完了状態（データベースの記録＋このページで完了したもの）が変わるたびに呼ばれる。完了済みタスクを開かせないために使う */
+  onProgressChange?: (progress: LessonTaskProgress) => void;
   onStartVocabularyDrill?: () => void;
   onStartListeningDrill?: () => void; // 追加：リスニングタスク起動ハンドラー
   onStartReadingDrill?: () => void;  // リーディングドリル起動ハンドラー
@@ -28,6 +35,7 @@ export function EduLessonTaskManager({
   lessonId, 
   userId, 
   onAllCompletedChange,
+  onProgressChange,
   onStartVocabularyDrill,
   onStartListeningDrill, // 追加
   onStartReadingDrill,
@@ -45,7 +53,21 @@ export function EduLessonTaskManager({
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const onProgressChangeRef = useRef(onProgressChange);
+  onProgressChangeRef.current = onProgressChange;
+  const onAllCompletedChangeRef = useRef(onAllCompletedChange);
+  onAllCompletedChangeRef.current = onAllCompletedChange;
+
+  // 親が毎回新しいオブジェクトを渡しても、値が変わったときだけ読み込み直す
+  const externalKey = TASK_KEYS.map((k) => (externalTaskStatus[k] ? "1" : "0")).join("");
+
+  const publishProgress = (progress: LessonTaskProgress) => {
+    onProgressChangeRef.current?.(progress);
+    onAllCompletedChangeRef.current?.(Object.values(progress).every(Boolean));
+  };
+
   useEffect(() => {
+    let cancelled = false;
     async function fetchProgress() {
       if (!userId) return;
       try {
@@ -54,40 +76,45 @@ export function EduLessonTaskManager({
           .select("task_key, is_completed")
           .eq("user_id", userId)
           .eq("lesson_id", lessonId);
+        if (error || !data || cancelled) return;
 
-        if (!error && data) {
-          const loadedProgress = {
-            vocabulary: false,
-            listening: false,
-            reading: false,
-            speaking: false,
-            writing: false,
-          };
+        const saved: LessonTaskProgress = { vocabulary: false, listening: false, reading: false, speaking: false, writing: false };
+        data.forEach((row: { task_key: string; is_completed: boolean }) => {
+          if (row.task_key in saved) saved[row.task_key as LessonTaskKey] = row.is_completed;
+        });
 
-          data.forEach((row: { task_key: string; is_completed: boolean }) => {
-            if (row.task_key in loadedProgress) {
-              (loadedProgress as any)[row.task_key] = row.is_completed;
-            }
-          });
+        // データベースの「完了」は、このページの値（最初はすべて false）で上書きしない
+        const merged = { ...saved };
+        TASK_KEYS.forEach((k) => {
+          if (externalTaskStatus[k]) merged[k] = true;
+        });
 
-          const merged = {
-            ...loadedProgress,
-            ...externalTaskStatus,
-          };
-
-          setTaskProgress(merged);
-          const allDone = Object.values(merged).every(Boolean);
-          if (onAllCompletedChange) {
-            onAllCompletedChange(allDone);
-          }
+        // このページで新しく完了したタスクを保存する（次に開いたときに完了済みとして扱うため）
+        // ライティングはサーバー（api）が保存するので、ここでは保存しない
+        const newlyCompleted = TASK_KEYS.filter((k) => k !== "writing" && externalTaskStatus[k] && !saved[k]);
+        if (newlyCompleted.length > 0) {
+          const now = new Date().toISOString();
+          const { error: upsertError } = await supabase.from("edu_student_progress").upsert(
+            newlyCompleted.map((k) => ({ user_id: userId, lesson_id: lessonId, task_key: k, is_completed: true, updated_at: now })),
+            { onConflict: "user_id,lesson_id,task_key" }
+          );
+          if (upsertError) console.error("Failed to save task completion:", upsertError);
         }
+
+        if (cancelled) return;
+        setTaskProgress(merged);
+        publishProgress(merged);
       } catch (err) {
         console.error("Failed to fetch student progress:", err);
       }
     }
 
     fetchProgress();
-  }, [lessonId, userId, externalTaskStatus]);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId, userId, externalKey]);
 
   const updateTaskStatus = async (taskKey: keyof typeof taskProgress, isCompleted: boolean) => {
     const updated = {
@@ -96,11 +123,7 @@ export function EduLessonTaskManager({
     };
     
     setTaskProgress(updated);
-    
-    const allDone = Object.values(updated).every(Boolean);
-    if (onAllCompletedChange) {
-      onAllCompletedChange(allDone);
-    }
+    publishProgress(updated);
 
     if (userId) {
       setIsLoading(true);

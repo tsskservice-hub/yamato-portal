@@ -140,7 +140,13 @@ export default function FaqPage() {
   }, [faqs]);
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!loading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load FAQ from Supabase (kl_app)."
+      onRetry={loadData}
+    >
       {faqJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       )}

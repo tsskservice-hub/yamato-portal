@@ -205,6 +205,10 @@ export const EduGenkoyoshiCanvas = forwardRef<GenkoyoshiCanvasHandle>(function E
 
   return (
     <div className="space-y-3">
+      {/* 書く前にルールを確認できるよう、原稿用紙より上に置く */}
+      <p className="text-xs text-slate-500 dark:text-slate-400">
+        Write from left to right, one character per square. A stylus or your finger works best; writing with a mouse is hard.
+      </p>
       <div className="flex flex-wrap items-center gap-2">
         {toolButton("pen", "Pen", "✏️")}
         {toolButton("eraser", "Eraser", "🧽")}
@@ -238,12 +242,9 @@ export const EduGenkoyoshiCanvas = forwardRef<GenkoyoshiCanvasHandle>(function E
           onPointerMove={handlePointerMove}
           onPointerUp={finishStroke}
           onPointerCancel={finishStroke}
-          aria-label="Digital genkouyoushi writing area"
+          aria-label="Digital genkoyoshi writing area"
         />
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        Write from left to right, one character per square. A stylus or your finger works best; writing with a mouse is hard.
-      </p>
     </div>
   );
 });

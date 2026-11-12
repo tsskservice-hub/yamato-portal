@@ -64,7 +64,13 @@ export default function TextTypesComponent() {
   const textTypeEntries = data ? Object.entries(data) : [];
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!loading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load TEXTTYPES from Supabase (kl_app)."
+      onRetry={loadData}
+    >
       {data && textTypeEntries.length > 0 && (
         <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">

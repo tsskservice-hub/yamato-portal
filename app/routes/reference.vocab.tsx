@@ -2,6 +2,7 @@
  * @file reference.vocab.tsx
  * @description AI Yamato Japanese Hub - Vocabulary Reference & Search (Schema Matched Version)
  */
+import { DataErrorState } from '~/components/DataErrorState';
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
@@ -220,9 +221,11 @@ export default function VocabIndexPage() {
           {loading ? (
             <div className="text-center py-20 text-slate-500 text-sm">Loading vocabulary data from Supabase...</div>
           ) : error ? (
-            <div className="text-center py-20 text-red-500 text-sm font-bold">
-              Failed to load vocabulary records: {errorMessage}
-            </div>
+            <DataErrorState
+              title="Unable to Load Data"
+              errorMessage={`Failed to load vocabulary (kl_vocabulary): ${errorMessage}`}
+              onRetry={loadVocabData}
+            />
           ) : filteredVocabularies.length === 0 ? (
             <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
               <p className="text-slate-500 dark:text-slate-400 text-sm">No vocabulary terms found in the `kl_vocabulary` table.</p>

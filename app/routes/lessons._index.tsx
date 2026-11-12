@@ -72,7 +72,7 @@ export default function LessonsHubIndex() {
   return (
     <ToolPageWrapper 
       breadcrumbTitle="Japanese Lessons Hub"
-      hasError={false}
+      hasError={!!errorMessage}
       errorTitle="Failed to Load Lessons Content"
       errorMessage={errorMessage || ""}
     >
