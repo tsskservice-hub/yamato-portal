@@ -440,6 +440,19 @@ export function YamatoChatCommon({
           }
         }
 
+        // 🔐 ログインが必要（401）
+        if (response.status === 401) {
+          setIsTutorLoading(false);
+          setTutorMessages([
+            ...newMessages,
+            {
+              role: "assistant",
+              content: `🔐 **[Login Required]**\n\nPlease log in to chat with AI Yamato.`,
+            },
+          ]);
+          return;
+        }
+
         // 💡 2. プロンプト未設定エラー（UNREGISTERED_APP_PROMPT / 400）
         if (data?.error === "UNREGISTERED_APP_PROMPT") {
           setIsTutorLoading(false);

@@ -278,6 +278,19 @@ export function useYamatoChat2Logic({
           return;
         }
 
+        // 🔐 ログインが必要（401）
+        if (response.status === 401) {
+          setIsTutorLoading(false);
+          setTutorMessages([
+            ...newMessages,
+            {
+              role: "assistant",
+              content: `🔐 **[Login Required]**\n\nPlease log in to chat with AI Yamato.`,
+            },
+          ]);
+          return;
+        }
+
         if (data?.error === "UNREGISTERED_APP_PROMPT") {
           setIsTutorLoading(false);
           setTutorMessages([
