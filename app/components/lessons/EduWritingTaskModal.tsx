@@ -61,7 +61,7 @@ interface WritingFeedback {
   next_step_en: string;
 }
 
-type Phase = "loading" | "no_task" | "compose" | "reading" | "confirm" | "feedback_loading" | "feedback" | "locked" | "finished";
+type Phase = "loading" | "load_error" | "no_task" | "compose" | "reading" | "confirm" | "feedback_loading" | "feedback" | "locked" | "finished";
 type InputMethod = "photo" | "upload" | "canvas";
 
 interface PreparedFile {
@@ -88,15 +88,26 @@ const MAX_PDF_BYTES = 5 * 1024 * 1024;
 async function apiFetch(init?: RequestInit & { query?: string }) {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  const res = await fetch(`${API_PATH}${init?.query ?? ""}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
-  const body = await res.json().catch(() => ({}));
+  let res: Response;
+  try {
+    res = await fetch(`${API_PATH}${init?.query ?? ""}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+  } catch {
+    // ネットワークエラー（オフラインなど）でも画面が止まらないようにする
+    return { ok: false, status: 0, body: { message: "Could not connect to the server. Please check your connection and try again." } as any };
+  }
+  const body: any = await res.json().catch(() => null);
+  if (body === null) {
+    // JSON 以外が返った = API が動いていない（例: npm run dev では functions/ が実行されず 404 の HTML が返る）
+    console.error(`[EduWritingTaskModal] ${API_PATH} returned a non-JSON response (HTTP ${res.status}).`);
+    return { ok: false, status: res.status, body: { message: `The writing task service is not available (HTTP ${res.status}). Please try again later.` } as any };
+  }
   return { ok: res.ok, status: res.status, body };
 }
 
@@ -230,9 +241,10 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
     setMessage(null);
     const { ok, body } = await apiFetch({ method: "GET", query: `?lessonId=${encodeURIComponent(lessonId)}` });
     if (!ok) {
+      // 課題データがないので compose 画面は出せない → 専用のエラー画面を表示する
       setStatus(null);
-      setPhase("compose");
-      setMessage({ tone: "error", text: body.message || "Could not load this task. Please close and try again." });
+      setPhase("load_error");
+      setMessage({ tone: "error", text: body.message || "Could not load this task. Please try again." });
       return;
     }
     if (!body.task) {
@@ -447,6 +459,32 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
 
         {phase === "loading" && (
           <p className="text-center py-16 font-bold text-slate-500 dark:text-slate-400 animate-pulse">Loading your writing task...</p>
+        )}
+
+        {/* 課題の読み込みに失敗（API エラー・ネットワークエラーなど） */}
+        {phase === "load_error" && (
+          <div className="text-center space-y-4 py-10">
+            <div className="text-5xl">⚠️</div>
+            <p className="text-sm font-bold rounded-xl p-3 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 max-w-md mx-auto">
+              {message?.text || "Could not load this task. Please try again."}
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => void loadStatus()}
+                className="py-3 px-8 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow cursor-pointer"
+              >
+                Try again
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="py-3 px-8 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-black text-sm cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         )}
 
         {phase === "no_task" && (

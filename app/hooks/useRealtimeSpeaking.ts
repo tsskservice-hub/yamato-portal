@@ -2,6 +2,7 @@
  * @file app/hooks/useRealtimeSpeaking.ts
  * @description OpenAI Realtime API (WebRTC GA仕様) を用いた日本語スピーキング対話管理カスタムフック
  */
+import { yamatoFetch } from '~/lib/yamatoApi';
 import { useState, useCallback, useRef } from 'react';
 
 interface UseRealtimeSpeakingProps {
@@ -65,7 +66,7 @@ export function useRealtimeSpeaking({
 
       // 2. バックエンドから一時トークン（client_secrets）を取得
       const endpoint = `${apiBaseUrl}/api/realtime/session`;
-      const tokenRes = await fetch(endpoint, {
+      const tokenRes = await yamatoFetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

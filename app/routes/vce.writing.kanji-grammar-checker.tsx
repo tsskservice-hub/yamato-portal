@@ -2,6 +2,7 @@
  * @file kanji-grammar-checker.tsx
  * @description VCE Kanji & Grammar Checker 独立ページ（Supabase共通メタヘルパー対応版・AI Vision自動文字起こし・クレジット表示対応）
  */
+import { yamatoFetch } from '~/lib/yamatoApi';
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
@@ -141,7 +142,7 @@ export default function KanjiGrammarCheckerPage() {
       // 💡 常に本番用APIの絶対URLを使用するように修正
       const apiBaseUrl = "https://api.jptutoraiyamato.com";
 
-      const response = await fetch(`${apiBaseUrl}/chat`, {
+      const response = await yamatoFetch(`${apiBaseUrl}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

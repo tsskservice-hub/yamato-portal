@@ -1,3 +1,4 @@
+import { yamatoFetch } from '~/lib/yamatoApi';
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import React, { useState, useRef, useEffect } from "react";
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
@@ -93,7 +94,7 @@ export default function TestAudioPage() {
     appendLog(`Payload: speakText="${ttsText}", speed=${ttsSpeed}`);
 
     try {
-      const response = await fetch(apiEndpoint, {
+      const response = await yamatoFetch(apiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -199,7 +200,7 @@ export default function TestAudioPage() {
     formData.append("pace", "normal");
 
     try {
-      const response = await fetch(apiEndpoint, {
+      const response = await yamatoFetch(apiEndpoint, {
         method: "POST",
         body: formData,
       });

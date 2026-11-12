@@ -1,3 +1,4 @@
+import { yamatoFetch } from '~/lib/yamatoApi';
 import React, { useState, useEffect } from "react";
 import { OralExamQuestionItem } from "../../data/oral-exam-questions";
 import useOralAudioRecorder from "./OralAudioRecorder";
@@ -79,7 +80,7 @@ export const OralQuestionPracticeCard: React.FC<OralQuestionPracticeCardProps> =
       formData.append("appType", appType);
       formData.append("isVoiceMode", isVoiceMode);
 
-      const response = await fetch(apiEndpoint, { method: "POST", body: formData });
+      const response = await yamatoFetch(apiEndpoint, { method: "POST", body: formData });
       if (!response.ok) throw new Error(`API response error: ${response.status}`);
 
       const data = (await response.json()) as any;
