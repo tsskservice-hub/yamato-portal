@@ -135,6 +135,139 @@ function getAudioUrl(path: string): string {
   return supabase.storage.from(AUDIO_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
+// ---------- 会話イラスト ----------
+
+type Speaker = "A" | "B" | null;
+
+/** しっぽ付きの吹き出しパス */
+function bubblePath(x: number, y: number, w: number, h: number, r: number, tailX: number, tipX: number, tipY: number) {
+  return [
+    `M ${x + r} ${y}`,
+    `H ${x + w - r}`,
+    `Q ${x + w} ${y} ${x + w} ${y + r}`,
+    `V ${y + h - r}`,
+    `Q ${x + w} ${y + h} ${x + w - r} ${y + h}`,
+    `H ${tailX + 10}`,
+    `L ${tipX} ${tipY}`,
+    `L ${tailX - 6} ${y + h}`,
+    `H ${x + r}`,
+    `Q ${x} ${y + h} ${x} ${y + h - r}`,
+    `V ${y + r}`,
+    `Q ${x} ${y} ${x + r} ${y}`,
+    "Z",
+  ].join(" ");
+}
+
+interface PersonProps {
+  cx: number;
+  /** 視線の向き（相手の方を向く） */
+  lookDx: number;
+  hair: "short" | "long";
+  shirtClass: string;
+  isSpeaking: boolean;
+}
+
+const Person: React.FC<PersonProps> = ({ cx, lookDx, hair, shirtClass, isSpeaking }) => {
+  const cy = 128;
+  return (
+    <g>
+      {/* 長い髪（頭の後ろ） */}
+      {hair === "long" && (
+        <path
+          d={`M ${cx - 31} 154 C ${cx - 38} 80, ${cx + 38} 80, ${cx + 31} 154 Z`}
+          className="fill-amber-900 dark:fill-amber-800"
+        />
+      )}
+      {/* 体 */}
+      <path
+        d={`M ${cx - 46} 220 C ${cx - 46} 172, ${cx - 26} 156, ${cx} 156 C ${cx + 26} 156, ${cx + 46} 172, ${cx + 46} 220 Z`}
+        className={shirtClass}
+      />
+      {/* 顔 */}
+      <circle cx={cx} cy={cy} r={26} className="fill-[#f6d5b8]" />
+      {/* 前髪 */}
+      {hair === "short" ? (
+        <path
+          d={`M ${cx - 27} ${cy - 2} C ${cx - 28} ${cy - 40}, ${cx + 28} ${cy - 40}, ${cx + 27} ${cy - 2} C ${cx + 18} ${cy - 16}, ${cx - 14} ${cy - 18}, ${cx - 27} ${cy - 2} Z`}
+          className="fill-slate-800 dark:fill-slate-600"
+        />
+      ) : (
+        <path
+          d={`M ${cx - 26} ${cy - 4} C ${cx - 27} ${cy - 39}, ${cx + 27} ${cy - 39}, ${cx + 26} ${cy - 4} C ${cx + 10} ${cy - 14}, ${cx - 10} ${cy - 14}, ${cx - 26} ${cy - 4} Z`}
+          className="fill-amber-900 dark:fill-amber-800"
+        />
+      )}
+      {/* 目 */}
+      <circle cx={cx - 9 + lookDx} cy={cy + 2} r={2.6} className="fill-slate-800" />
+      <circle cx={cx + 9 + lookDx} cy={cy + 2} r={2.6} className="fill-slate-800" />
+      {/* 口：話している時は開く */}
+      {isSpeaking ? (
+        <ellipse cx={cx + lookDx} cy={cy + 13} rx={4.5} ry={3.5} className="fill-rose-700" />
+      ) : (
+        <path
+          d={`M ${cx - 6 + lookDx} ${cy + 11} Q ${cx + lookDx} ${cy + 16} ${cx + 6 + lookDx} ${cy + 11}`}
+          className="fill-none stroke-slate-700"
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
+      )}
+    </g>
+  );
+};
+
+interface SpeechBubbleProps {
+  d: string;
+  cx: number;
+  isActive: boolean;
+  content: "question" | "answer";
+}
+
+const SpeechBubble: React.FC<SpeechBubbleProps> = ({ d, cx, isActive, content }) => {
+  const textClass = isActive ? "fill-orange-500" : "fill-slate-300 dark:fill-slate-600";
+  return (
+    <g className={`transition-opacity duration-300 ${isActive ? "opacity-100 motion-safe:animate-pulse" : "opacity-60"}`}>
+      <path
+        d={d}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+        className={
+          isActive
+            ? "fill-orange-50 stroke-orange-500 dark:fill-orange-950"
+            : "fill-white stroke-slate-300 dark:fill-slate-900 dark:stroke-slate-600"
+        }
+      />
+      {content === "question" ? (
+        <text x={cx} y={56} textAnchor="middle" fontSize={34} fontWeight={900} className={textClass}>
+          ？
+        </text>
+      ) : (
+        [-16, 0, 16].map((dx) => <circle key={dx} cx={cx + dx} cy={42} r={5} className={textClass} />)
+      )}
+    </g>
+  );
+};
+
+/** 会話している二人のイラスト。話している人の吹き出しが光り、口が開く */
+const DialogueIllustration: React.FC<{ activeSpeaker: Speaker }> = ({ activeSpeaker }) => (
+  <svg
+    viewBox="0 0 360 220"
+    className="w-full max-w-sm mx-auto h-auto"
+    role="img"
+    aria-label={
+      activeSpeaker === "A"
+        ? "Person A is asking a question"
+        : activeSpeaker === "B"
+        ? "Person B is answering"
+        : "Two people having a conversation"
+    }
+  >
+    <SpeechBubble d={bubblePath(25, 12, 140, 60, 18, 105, 98, 90)} cx={95} isActive={activeSpeaker === "A"} content="question" />
+    <SpeechBubble d={bubblePath(195, 12, 140, 60, 18, 255, 262, 90)} cx={265} isActive={activeSpeaker === "B"} content="answer" />
+    <Person cx={95} lookDx={3} hair="short" shirtClass="fill-sky-500" isSpeaking={activeSpeaker === "A"} />
+    <Person cx={265} lookDx={-3} hair="long" shirtClass="fill-rose-400" isSpeaking={activeSpeaker === "B"} />
+  </svg>
+);
+
 // ---------- コンポーネント ----------
 
 export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
@@ -153,6 +286,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
   const [firstTryCorrect, setFirstTryCorrect] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [activeSpeaker, setActiveSpeaker] = useState<Speaker>(null); // イラストの話し手
   const isPlayingRef = useRef(false); // キー操作で同期的に再生中かを判定するため
   isPlayingRef.current = isPlaying;
   const [audioError, setAudioError] = useState("");
@@ -206,6 +340,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
       audioRef.current = null;
     }
     setIsPlaying(false);
+    setActiveSpeaker(null);
   };
 
   const resetQuestionState = () => {
@@ -270,15 +405,19 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
       if (index >= playlist.length) {
         audioRef.current = null;
         setIsPlaying(false);
+        setActiveSpeaker(null);
         return;
       }
 
       const path = playlist[index];
       const audio = new Audio(getAudioUrl(path));
       audioRef.current = audio;
+      // 質問音声は A（左の人）、答え音声は B（右の人）が話している表示にする
+      setActiveSpeaker(path === currentQuestion.question_audio_path ? "A" : "B");
 
       audio.onended = () => {
         if (isStale()) return;
+        setActiveSpeaker(null);
         gapTimerRef.current = setTimeout(() => {
           gapTimerRef.current = null;
           playAt(index + 1);
@@ -287,11 +426,15 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
       audio.onerror = () => {
         if (isStale()) return;
         setIsPlaying(false);
+        setActiveSpeaker(null);
         setAudioError(`The audio file "${path}" could not be loaded.`);
       };
       audio.play().catch((err) => {
         console.warn("Audio playback failed:", err);
-        if (!isStale()) setIsPlaying(false);
+        if (!isStale()) {
+          setIsPlaying(false);
+          setActiveSpeaker(null);
+        }
       });
     };
 
@@ -413,9 +556,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
               <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
                 Question {currentIndex + 1}
               </p>
-              <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
-                なんにんかぞくですか。
-              </p>
+              <DialogueIllustration activeSpeaker={activeSpeaker} />
               <button
                 type="button"
                 onClick={(e) => {

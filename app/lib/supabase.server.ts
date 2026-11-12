@@ -7,7 +7,8 @@ import { createClient } from "@supabase/supabase-js";
 
 // Cloudflare環境およびビルド・ランタイムでのフォールバック用定数（機密情報は含めない）
 const DEFAULT_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
-const DEFAULT_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicXV3em9yZWVjeHhiZXdqcGRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2OTA5NDksImV4cCI6MjEwMjI2Njk0OX0.OHz5CEV9CLO02vzP4FOBCwPSs-aHuDOZtgobfiO5VM0";
+// 公開用キー（publishable key）。ブラウザ側の supabaseClient.ts と同じ値。秘密情報ではない。
+const DEFAULT_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
 
 const getEnv = (key: string, context?: any) => {
   const cfEnv = context?.cloudflare?.env || context?.env || context || {};
