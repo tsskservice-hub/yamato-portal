@@ -557,7 +557,7 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
                 {/* 原稿用紙を初めて使う生徒向けの案内（キャンバスのすぐ上に置く） */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/30 p-4">
                   <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                    <span className="font-black text-slate-900 dark:text-slate-100">What is genkoyoshi（原稿用紙）?</span> It is Japanese
+                    <span className="font-black text-slate-900 dark:text-slate-100">What is genkoyoshi（げんこうようし）?</span> It is Japanese
                     writing paper with one square for each character. Check how to use it before you start.
                   </p>
                   <button
@@ -612,7 +612,11 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
               {phase === "reading" ? (
                 <span className="animate-pulse">{task.recipient} is reading your message...</span>
               ) : (
-                <span>Send to {task.recipient} ✉️</span>
+                <>
+                  <span>Send to {task.recipient} ✉️</span>
+                  {/* 本当に相手に届くと思わないように、先生への提出であることを添える */}
+                  <span className="text-xs opacity-90 font-bold">(submit to your teacher)</span>
+                </>
               )}
             </button>
             {/* 書き直しのときだけ、あと何回送れるかを伝える */}
