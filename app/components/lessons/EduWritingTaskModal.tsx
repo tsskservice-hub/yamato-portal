@@ -614,8 +614,8 @@ export const EduWritingTaskModal: React.FC<EduWritingTaskModalProps> = ({ isOpen
               ) : (
                 <>
                   <span>Send to {task.recipient} ✉️</span>
-                  {/* 本当に相手に届くと思わないように、先生への提出であることを添える */}
-                  <span className="text-xs opacity-90 font-bold">(submit to your teacher)</span>
+                  {/* 本当に相手に届くと思わないように、AI ヤマトに送ることを添える */}
+                  <span className="text-xs opacity-90 font-bold">(send to AI Yamato)</span>
                 </>
               )}
             </button>
