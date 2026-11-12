@@ -106,7 +106,7 @@ export interface PortalModule {
   iconName: string;
   actionLabel: string;
   isComingSoon?: boolean;
-  creditRequirement?: number | null;
+  creditRequirement?: 'textAi' | 'imageAi' | null;
   accentColor?: string;
 }
 

@@ -5,7 +5,6 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowRight, ArrowDown, Send } from 'lucide-react';
-import { PORTAL_CONTENT as DEFAULT_PORTAL_CONTENT } from '../../data/portal-content';
 
 export interface HeroDemoChatProps {
   isDarkMode: boolean;
@@ -26,8 +25,8 @@ export function HeroDemoChat({
   validateFeatureCredits,
   portalContent,
 }: HeroDemoChatProps) {
-  // 💡 文言マスターデータの解決（props優先、フォールバックとして定数を使用）
-  const content = portalContent || DEFAULT_PORTAL_CONTENT;
+  // 💡 文言は Supabase kl_app (CONTENT_OTHER) から渡される。読み込み中・取得失敗時は空表示
+  const content = portalContent || {};
   const hero = content.hero;
   const quizBanner = content.dailyChallengeBanner;
   const demoWidget = content.aiDemoWidget;
