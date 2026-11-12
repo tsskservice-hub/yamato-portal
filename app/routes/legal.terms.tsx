@@ -64,7 +64,13 @@ export default function TermsOfService() {
   }, [loadData]);
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!loading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load LEGAL_CONTENTS (terms) from Supabase (kl_app)."
+      onRetry={loadData}
+    >
       {doc && (
         <div className="min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-2xl p-8 sm:p-12 border border-slate-200">

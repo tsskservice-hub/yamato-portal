@@ -118,7 +118,13 @@ export default function Prices() {
   const pricePlans = priceData?.pricePlans;
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!loading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load PRICE_PLANS from Supabase (kl_app)."
+      onRetry={loadData}
+    >
       {priceData && pricePlans && (
         <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
           <main className="flex-grow">

@@ -160,7 +160,13 @@ export default function OralExamQuestions() {
   const userNickname = user?.email ? user.email.split('@')[0] : "Student";
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!loading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load ORAL_EXAM_QUESTIONS from Supabase (kl_app)."
+      onRetry={loadData}
+    >
       {oralData && (
         <div className="bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between font-sans relative">
           <main className="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">

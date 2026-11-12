@@ -116,7 +116,13 @@ export default function MockOralMode() {
   };
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!isLoading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load ORAL_EXAM_QUESTIONS from Supabase (kl_app)."
+      onRetry={loadQuestions}
+    >
       {questionsData && (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
           {examPhase === "config" && (

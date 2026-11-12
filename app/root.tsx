@@ -8,9 +8,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  isRouteErrorResponse,
   useLoaderData,
   useRevalidator,
+  useRouteError,
 } from "@remix-run/react";
+import { DataErrorState } from "./components/DataErrorState";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { json } from "@remix-run/cloudflare";
 import React, { useEffect } from "react";
@@ -137,4 +140,35 @@ export default function App() {
   }, [data.user?.id, revalidator]);
 
   return <Outlet />;
+}
+
+/**
+ * 💡 どのページでも、loader の例外・描画中のクラッシュ・404 が起きたときはここに来る。
+ * Remix 既定の素のエラー画面の代わりに DataErrorState（報告ボタン付き）を表示する。
+ */
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  let title = "Something Went Wrong";
+  let detail = "Unknown error";
+  if (isRouteErrorResponse(error)) {
+    title = error.status === 404 ? "Page Not Found" : `Error ${error.status}`;
+    detail = `${error.status} ${error.statusText || ""} ${typeof error.data === "string" ? error.data : ""}`.trim();
+  } else if (error instanceof Error) {
+    detail = error.message;
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="w-full">
+        <DataErrorState
+          title={title}
+          errorMessage={`Unhandled page error: ${detail}`}
+        />
+        <p className="text-center text-sm">
+          <a href="/" className="text-indigo-600 hover:underline font-medium">Back to Home</a>
+        </p>
+      </div>
+    </div>
+  );
 }

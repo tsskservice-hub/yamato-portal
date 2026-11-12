@@ -2,6 +2,7 @@
  * @file reference.vce-grammar.tsx
  * @description VCE Grammar Reference 一覧ページ (ScrollTopButton統合・scrollUtils共通化対応版)
  */
+import { DataErrorState } from '~/components/DataErrorState';
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from '@remix-run/react';
@@ -201,9 +202,11 @@ export default function VceGrammarComponent() {
           {loading ? (
             <div className="text-center py-20 text-slate-500 text-sm">Loading grammar data from Supabase...</div>
           ) : error ? (
-            <div className="text-center py-20 text-red-500 text-sm font-bold">
-              Failed to load grammar records: {errorMessage}
-            </div>
+            <DataErrorState
+              title="Unable to Load Data"
+              errorMessage={`Failed to load VCE_GRAMMAR_LIST (kl_app): ${errorMessage}`}
+              onRetry={loadGrammarData}
+            />
           ) : categories.length === 0 ? (
             <div className="text-center py-20 bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm">
               No grammar records found in the kl_app table.

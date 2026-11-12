@@ -133,7 +133,13 @@ export default function Dashboard() {
   const activeWritingStyleData = activeStyleModal ? stylesData[activeStyleModal] : null;
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={!isLoading && error}
+      errorTitle="Unable to Load Data"
+      errorMessage="Failed to load EOY writing data (WRITING_EXAM_QUESTIONS / TEXTTYPES / WRITING_STYLES) from Supabase (kl_app)."
+      onRetry={loadDataFromSupabase}
+    >
       <div className="min-h-screen bg-white text-slate-800 font-sans relative">
         <main className="max-w-4xl mx-auto px-4 py-8 relative">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">

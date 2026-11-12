@@ -64,13 +64,24 @@ export default function Home() {
   const isTeacher = rootData?.isTeacher ?? false;
 
   // 💡 各分割コンテンツフックの呼び出し (CONTENT_OTHER を追加)
-  const { generalData } = useGeneralContent(supabase);
-  const { vceSpeakingData } = useVceSpeakingContent(supabase);
-  const { vceWritingData } = useVceWritingContent(supabase);
-  const { referenceData } = useReferenceContent(supabase);
-  const { juniorData } = useJuniorContent(supabase);
-  const { gamesData } = useGamesContent(supabase);
-  const { otherData } = useOtherContent(supabase);
+  const { generalData, isError: isGeneralError } = useGeneralContent(supabase);
+  const { vceSpeakingData, isError: isSpeakingError } = useVceSpeakingContent(supabase);
+  const { vceWritingData, isError: isWritingError } = useVceWritingContent(supabase);
+  const { referenceData, isError: isReferenceError } = useReferenceContent(supabase);
+  const { juniorData, isError: isJuniorError } = useJuniorContent(supabase);
+  const { gamesData, isError: isGamesError } = useGamesContent(supabase);
+  const { otherData, isError: isOtherError } = useOtherContent(supabase);
+
+  // 💡 どれか1つでも CONTENT_* の取得に失敗したら DataErrorState（報告ボタン付き）を表示する
+  const failedContentKeys = [
+    isOtherError && 'CONTENT_OTHER',
+    isGeneralError && 'CONTENT_GENERAL',
+    isSpeakingError && 'CONTENT_VCE_SPEAKING',
+    isWritingError && 'CONTENT_VCE_WRITING',
+    isReferenceError && 'CONTENT_REFERENCE',
+    isJuniorError && 'CONTENT_JUNIOR',
+    isGamesError && 'CONTENT_GAMES',
+  ].filter(Boolean);
 
   // 💡 先生がログインしている場合、トップページを開いた瞬間に教師ダッシュボードへ自動リダイレクト
   useEffect(() => {
@@ -308,7 +319,12 @@ export default function Home() {
   }
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+      layoutRef={layoutRef}
+      hasError={failedContentKeys.length > 0}
+      errorTitle="Unable to Load Data"
+      errorMessage={`Failed to load ${failedContentKeys.join(', ')} from Supabase (kl_app).`}
+    >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-950'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
           

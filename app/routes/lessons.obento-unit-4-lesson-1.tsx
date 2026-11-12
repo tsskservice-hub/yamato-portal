@@ -38,6 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let lessonData = null;
   let vocabData: any[] = [];
   let topicData = null;
+  let loadError: string | null = null;
 
   try {
     const { data: lessons } = await supabase
@@ -77,6 +78,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
   } catch (err) {
     console.warn("⚠️ [Loader] Failed to fetch Obento Unit 4 Lesson 1 data from Supabase:", err);
+    loadError = `Supabase error: ${(err as any)?.message || String(err)}`;
   }
 
   return json({
@@ -85,6 +87,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     lesson: lessonData,
     topic: topicData,
     vocabulary: vocabData,
+    loadError: loadError || (!lessonData ? "Obento Unit 4 Lesson 1 not found in edu_lessons." : null),
   });
 }
 
@@ -179,7 +182,12 @@ function LessonsObentoUnit4Lesson1Page() {
 
   if (isAuthLoading) {
     return (
-      <ToolPageWrapper layoutRef={layoutRef}>
+      <ToolPageWrapper
+        layoutRef={layoutRef}
+        hasError={!!loaderData.loadError}
+        errorTitle="Unable to Load Data"
+        errorMessage={loaderData.loadError || ""}
+      >
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
             Loading Obento Unit 4 - Lesson 1...
@@ -191,7 +199,12 @@ function LessonsObentoUnit4Lesson1Page() {
 
   if (!user) {
     return (
-      <ToolPageWrapper layoutRef={layoutRef}>
+      <ToolPageWrapper
+        layoutRef={layoutRef}
+        hasError={!!loaderData.loadError}
+        errorTitle="Unable to Load Data"
+        errorMessage={loaderData.loadError || ""}
+      >
         <div className="min-h-[70vh] bg-slate-50 dark:bg-slate-950 py-16 px-4 flex items-center justify-center">
           <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-900/50 rounded-3xl p-8 shadow-sm text-center space-y-6">
             <div className="w-16 h-16 bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
@@ -219,7 +232,12 @@ function LessonsObentoUnit4Lesson1Page() {
   }
 
   return (
-    <ToolPageWrapper layoutRef={layoutRef}>
+    <ToolPageWrapper
+        layoutRef={layoutRef}
+        hasError={!!loaderData.loadError}
+        errorTitle="Unable to Load Data"
+        errorMessage={loaderData.loadError || ""}
+      >
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative">
         <main className="max-w-5xl mx-auto space-y-8">
           
