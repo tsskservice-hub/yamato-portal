@@ -10,11 +10,13 @@
  * 4. 読み手からの反応＋伝わったかのチェック＋日本語の直しをフィードバック
  * 5. 課題に沿った提出でフィードバックを受けたら完了 → EduFinishedView
  *
- * 提出回数・画像の保存はすべてサーバー（/api/textbook-lesson-writing）で管理する
+ * 提出回数・画像の保存はすべてサーバーで管理する
+ * サーバー: api プロジェクト（Workers）の src/handlers/textbook-lesson-writing-handler.ts
+ *          https://api.jptutoraiyamato.com/api/textbook-lesson-writing
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "~/lib/supabaseClient";
+import { YAMATO_API_BASE, yamatoFetch } from "~/lib/yamatoApi";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 import { EduGenkoyoshiCanvas, type GenkoyoshiCanvasHandle } from "~/components/lessons/EduGenkoyoshiCanvas";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
@@ -79,23 +81,22 @@ interface EduWritingTaskModalProps {
   lessonId: string;
 }
 
-const API_PATH = "/api/textbook-lesson-writing"; // functions/api/textbook-lesson-writing.ts
+const API_URL = `${YAMATO_API_BASE}/api/textbook-lesson-writing`; // api: src/handlers/textbook-lesson-writing-handler.ts
 const MAX_IMAGE_EDGE = 1500; // 画像の費用は画素数に比例するので縮小してから送る
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 
 // ---------- ユーティリティ ----------
 
 async function apiFetch(init?: RequestInit & { query?: string }) {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
+  const { query, ...requestInit } = init ?? {};
   let res: Response;
   try {
-    res = await fetch(`${API_PATH}${init?.query ?? ""}`, {
-      ...init,
+    // yamatoFetch がログイン中のアクセストークンを Authorization ヘッダーに付ける
+    res = await yamatoFetch(`${API_URL}${query ?? ""}`, {
+      ...requestInit,
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(init?.headers ?? {}),
+        ...(requestInit.headers ?? {}),
       },
     });
   } catch {
@@ -104,8 +105,8 @@ async function apiFetch(init?: RequestInit & { query?: string }) {
   }
   const body: any = await res.json().catch(() => null);
   if (body === null) {
-    // JSON 以外が返った = API が動いていない（例: npm run dev では functions/ が実行されず 404 の HTML が返る）
-    console.error(`[EduWritingTaskModal] ${API_PATH} returned a non-JSON response (HTTP ${res.status}).`);
+    // JSON 以外が返った = API が正常に動いていない
+    console.error(`[EduWritingTaskModal] ${API_URL} returned a non-JSON response (HTTP ${res.status}).`);
     return { ok: false, status: res.status, body: { message: `The writing task service is not available (HTTP ${res.status}). Please try again later.` } as any };
   }
   return { ok: res.ok, status: res.status, body };
