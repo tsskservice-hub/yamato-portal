@@ -9,8 +9,10 @@ import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
+import { blockOnProduction } from '~/utils/developerOnly';
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  blockOnProduction(request); // 本番サイトでは非公開（404）
   const url = new URL(request.url);
   let portalContent = null;
   try {
