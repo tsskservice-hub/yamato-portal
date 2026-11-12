@@ -1,6 +1,6 @@
 /**
  * @file app/components/lessons/EduLessonTaskManager.tsx
- * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リスニング＆リーディング＆スピーキングドリル起動対応）
+ * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リスニング＆リーディング＆スピーキング＆ライティング起動対応）
  */
 
 import React, { useState, useEffect } from "react";
@@ -14,6 +14,7 @@ export interface EduLessonTaskManagerProps {
   onStartListeningDrill?: () => void; // 追加：リスニングタスク起動ハンドラー
   onStartReadingDrill?: () => void;  // リーディングドリル起動ハンドラー
   onStartSpeakingDrill?: () => void;  // スピーキングタスク起動ハンドラー
+  onStartWritingTask?: () => void;  // 追加：ライティングタスク起動ハンドラー
   externalTaskStatus?: {
     vocabulary?: boolean;
     listening?: boolean;
@@ -31,6 +32,7 @@ export function EduLessonTaskManager({
   onStartListeningDrill, // 追加
   onStartReadingDrill,
   onStartSpeakingDrill,
+  onStartWritingTask, // 追加
   externalTaskStatus = {}
 }: EduLessonTaskManagerProps) {
   const [taskProgress, setTaskProgress] = useState({
@@ -327,16 +329,26 @@ export function EduLessonTaskManager({
             ✍️ Writing Task & AI Feedback (作文・添削)
           </h4>
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-            上部のチャットで作文を提出し、Yamato Sensei から添削フィードバックを受けた際に自動で達成となります。
+            相手に伝えるためのメッセージを日本語で手書き（紙＋写真、またはデジタル原稿用紙）して提出します。読み手からの返事とフィードバックを受け取ると達成になります。
           </p>
 
-          <div className="mb-4">
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            {onStartWritingTask && (
+              <button
+                type="button"
+                onClick={onStartWritingTask}
+                className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+              >
+                <span>🚀</span>
+                <span>Start Writing Task (ライティング開始)</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => updateTaskStatus("writing", !taskProgress.writing)}
-              className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold underline"
+              className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
             >
-              [開発・テスト用] 状態を切り替える
+              [開発用] 状態切替
             </button>
           </div>
           
