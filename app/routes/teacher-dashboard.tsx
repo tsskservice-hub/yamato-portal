@@ -12,11 +12,20 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs, type 
 import React, { useRef } from 'react';
 import { useActionData, useLoaderData } from '@remix-run/react';
 import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
-import { generateJoinCode, getOwnedClass, getTeacherOrApplicant, getVerifiedSchoolEmails, requireTeacher } from '~/lib/teacher.server';
+import {
+  generateInviteCode,
+  generateJoinCode,
+  getOwnedClass,
+  getTeacherOrApplicant,
+  getVerifiedSchoolEmails,
+  requireTeacher,
+} from '~/lib/teacher.server';
 import { SchoolAccountLink } from '~/components/SchoolAccountLink';
 import {
   DEFAULT_HANDWRITING_RETENTION_DAYS,
   HANDWRITING_RETENTION_OPTIONS,
+  INVITE_CODE_DAYS,
+  INVITE_LABEL_MAX,
   LESSON_TASKS,
   TEACHER_LIMITS,
   allowedStudentDomains,
@@ -27,6 +36,7 @@ import {
   ClassBar,
   ClassSettingsCard,
   JoinRequestsCard,
+  InviteCodesCard,
   HandwritingCard,
   HomeworkCard,
   CompletionCard,
@@ -50,6 +60,12 @@ function parseTz(raw: unknown) {
 
 function toDateInput(d: Date, tzOffsetMinutes: number) {
   return new Date(d.getTime() - tzOffsetMinutes * 60_000).toISOString().slice(0, 10);
+}
+
+/** 生徒一覧の 2 行目（学校メール、なければ招待コードに付けたメモ） */
+function memberSubtitle(schoolEmail: string | null, inviteLabel: string | null) {
+  if (schoolEmail) return schoolEmail;
+  return inviteLabel ? `Invite code: ${inviteLabel}` : 'Joined with an invite code';
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -111,28 +127,46 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     progress: [],
     handwriting: [],
     joinRequests: [],
+    invites: [],
     retention: 'none',
   };
 
   if (!selected) return json(base);
 
-  // 生徒（先生には個人のメールではなく、承認したときの学校メールを見せる）
+  // 生徒（先生には個人のメールではなく、承認したときの学校メール、または招待コードに付けたメモを見せる）
   const { data: memberRows } = await admin
     .from('edu_class_members')
-    .select('user_id, school_email')
+    .select('user_id, school_email, invite_label')
     .eq('class_id', selected.id)
     .eq('role', 'student');
   const studentIds = (memberRows ?? []).map((m: any) => m.user_id as string);
-  const schoolEmailOf = new Map((memberRows ?? []).map((m: any) => [m.user_id as string, (m.school_email as string | null) ?? '']));
+  const schoolEmailOf = new Map(
+    (memberRows ?? []).map((m: any) => [m.user_id as string, memberSubtitle(m.school_email, m.invite_label)])
+  );
 
   // 参加申請（先生が承認するまで、生徒のデータは見えない）
   const { data: requestRows } = await admin
     .from('edu_class_join_requests')
-    .select('id, user_id, school_email, created_at')
+    .select('id, user_id, school_email, invite_id, created_at')
     .eq('class_id', selected.id)
     .order('created_at', { ascending: true });
 
-  const profileIds = [...studentIds, ...(requestRows ?? []).map((r: any) => r.user_id as string)];
+  // 生徒 1 人ずつの招待コード（新しい順）
+  const { data: inviteRows } = await admin
+    .from('edu_class_invites')
+    .select('id, code, label, expires_at, used_by, used_at, created_at')
+    .eq('class_id', selected.id)
+    .order('created_at', { ascending: false })
+    .limit(200);
+  const inviteOf = new Map((inviteRows ?? []).map((i: any) => [i.id as string, i]));
+
+  const profileIds = [
+    ...new Set([
+      ...studentIds,
+      ...(requestRows ?? []).map((r: any) => r.user_id as string),
+      ...(inviteRows ?? []).filter((i: any) => i.used_by).map((i: any) => i.used_by as string),
+    ]),
+  ];
   const { data: studentProfiles } = profileIds.length
     ? await admin.from('profiles').select('id, nickname').in('id', profileIds)
     : { data: [] as any[] };
@@ -141,11 +175,28 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const students = studentIds
     .map((id) => ({ id, nickname: nicknameOf.get(id) ?? null, email: schoolEmailOf.get(id) ?? '' }))
     .sort((a, b) => (a.nickname || a.email).localeCompare(b.nickname || b.email));
-  const joinRequests = (requestRows ?? []).map((r: any) => ({
-    id: r.id as string,
-    nickname: nicknameOf.get(r.user_id) ?? null,
-    schoolEmail: r.school_email as string,
-    createdAt: r.created_at as string,
+  const joinRequests = (requestRows ?? []).map((r: any) => {
+    const invite: any = r.invite_id ? inviteOf.get(r.invite_id) : null;
+    return {
+      id: r.id as string,
+      nickname: nicknameOf.get(r.user_id) ?? null,
+      schoolEmail: (r.school_email as string | null) ?? null,
+      inviteCode: (invite?.code as string | undefined) ?? null,
+      inviteLabel: (invite?.label as string | null | undefined) ?? null,
+      createdAt: r.created_at as string,
+    };
+  });
+  const nowMs = Date.now();
+  const invites = (inviteRows ?? []).map((i: any) => ({
+    id: i.id as string,
+    code: i.code as string,
+    label: (i.label as string | null) ?? null,
+    expiresAt: i.expires_at as string,
+    status: (i.used_by || i.used_at ? 'used' : new Date(i.expires_at).getTime() < nowMs ? 'expired' : 'unused') as
+      | 'used'
+      | 'expired'
+      | 'unused',
+    usedByName: i.used_by ? nicknameOf.get(i.used_by) ?? 'A student' : null,
   }));
 
   // 宿題（新しい締切順）
@@ -222,6 +273,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       allowedDomains: allowedStudentDomains(selected.school_domain),
     },
     joinRequests,
+    invites,
     students,
     homework,
     progress,
@@ -311,18 +363,27 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (intent === 'approve-request' || intent === 'decline-request') {
     const { data: req } = await admin
       .from('edu_class_join_requests')
-      .select('id, user_id, school_email')
+      .select('id, user_id, school_email, invite_id')
       .eq('id', String(form.get('requestId') ?? ''))
       .eq('class_id', cls.id)
       .maybeSingle();
     if (!req) return fail('Request not found.', 404);
 
     if (intent === 'approve-request') {
-      // 承認する時点でも、学校ドメインと人数をもう一度確認する
-      const { data: full } = await admin.from('edu_classes').select('school_domain').eq('id', cls.id).single();
-      const domain = String(req.school_email).split('@').pop() ?? '';
-      if (!full || !isStudentDomainAllowed(full.school_domain, domain)) {
-        return fail("This student's school account does not match your class.");
+      // 承認する時点でも、学校ドメイン（または このクラスの招待コード）と人数をもう一度確認する
+      let inviteLabel: string | null = null;
+      if (req.school_email) {
+        const { data: full } = await admin.from('edu_classes').select('school_domain').eq('id', cls.id).single();
+        const domain = String(req.school_email).split('@').pop() ?? '';
+        if (!full || !isStudentDomainAllowed(full.school_domain, domain)) {
+          return fail("This student's school account does not match your class.");
+        }
+      } else {
+        const { data: invite } = req.invite_id
+          ? await admin.from('edu_class_invites').select('code, label').eq('id', req.invite_id).eq('class_id', cls.id).maybeSingle()
+          : { data: null };
+        if (!invite) return fail('This request has no valid invite code for your class.');
+        inviteLabel = (invite.label as string | null) || `Invite ${invite.code}`;
       }
 
       const { count } = await admin
@@ -343,7 +404,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
       if (!existing) {
         const { error } = await admin
           .from('edu_class_members')
-          .insert({ class_id: cls.id, user_id: req.user_id, role: 'student', school_email: req.school_email });
+          .insert({
+            class_id: cls.id,
+            user_id: req.user_id,
+            role: 'student',
+            school_email: req.school_email ?? null,
+            invite_label: inviteLabel,
+          });
         if (error) {
           console.error('[teacher-dashboard] approve-request failed:', error.message);
           return fail('Could not add the student. Please try again.', 500);
@@ -351,6 +418,61 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
     }
     await admin.from('edu_class_join_requests').delete().eq('id', req.id);
+    return backTo(cls.id);
+  }
+
+  // 生徒 1 人ずつの使い捨て招待コードを作る（学校が Google を使っていない生徒のため）
+  //   1 行に 1 人分のメモ（先生にだけ見える）を書けば、その行数だけ作る。空なら「何枚」の数だけ作る
+  if (intent === 'create-invites') {
+    const labels = String(form.get('labels') ?? '')
+      .split(/\r?\n/)
+      .map((l) => l.trim().replace(/\s+/g, ' ').slice(0, INVITE_LABEL_MAX))
+      .filter(Boolean);
+    const count = labels.length || Math.floor(Number(form.get('count') ?? 0));
+    if (!Number.isFinite(count) || count < 1) return fail('Enter how many codes to make, or one student per line.');
+
+    const { count: members } = await admin
+      .from('edu_class_members')
+      .select('user_id', { count: 'exact', head: true })
+      .eq('class_id', cls.id)
+      .eq('role', 'student');
+    const { count: openInvites } = await admin
+      .from('edu_class_invites')
+      .select('id', { count: 'exact', head: true })
+      .eq('class_id', cls.id)
+      .is('used_by', null)
+      .is('used_at', null)
+      .gt('expires_at', new Date().toISOString());
+    const room = TEACHER_LIMITS.maxStudentsPerClass - (members ?? 0) - (openInvites ?? 0);
+    if (count > room) {
+      return fail(
+        room > 0
+          ? `You can make up to ${room} more code${room === 1 ? '' : 's'} (a class has up to ${TEACHER_LIMITS.maxStudentsPerClass} students, including unused codes).`
+          : 'This class has no room for more codes. Remove unused codes or students first.'
+      );
+    }
+
+    const expiresAt = new Date(Date.now() + INVITE_CODE_DAYS * DAY_MS).toISOString();
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const rows = Array.from({ length: count }, (_, i) => ({
+        class_id: cls.id,
+        code: generateInviteCode(),
+        label: labels[i] ?? null,
+        expires_at: expiresAt,
+      }));
+      const { error } = await admin.from('edu_class_invites').insert(rows);
+      if (!error) return backTo(cls.id);
+      if (error.code !== '23505') {
+        console.error('[teacher-dashboard] create-invites failed:', error.message);
+        break;
+      }
+    }
+    return fail('Could not make the codes. Please try again.', 500);
+  }
+
+  // 招待コードを取り消す（そのコードでの参加申請も消える。承認済みの生徒はクラスに残る）
+  if (intent === 'delete-invite') {
+    await admin.from('edu_class_invites').delete().eq('id', String(form.get('inviteId') ?? '')).eq('class_id', cls.id);
     return backTo(cls.id);
   }
 
@@ -454,7 +576,7 @@ export default function TeacherDashboardPage() {
                 Sign in with the Google or Microsoft account your school gave you. We approve teacher accounts with a verified school email,
                 and only students with an account from your school can ask to join your class.
               </p>
-              <SchoolAccountLink verifiedEmails={loaded.schoolEmails} returnPath="/teacher-dashboard" />
+              <SchoolAccountLink verifiedEmails={loaded.schoolEmails} returnPath="/teacher-dashboard" teacherHelp />
             </div>
             <p className="text-sm text-slate-700">
               It also helps if your <a href="/my-account" className="text-indigo-700 font-semibold hover:underline">My Account</a> page shows
@@ -494,6 +616,7 @@ export default function TeacherDashboardPage() {
           <>
             <JoinRequestsCard data={data} />
             <ClassSettingsCard data={data} />
+            <InviteCodesCard data={data} />
             <HomeworkCard data={data} />
             <CompletionCard data={data} />
             <HandwritingCard data={data} />

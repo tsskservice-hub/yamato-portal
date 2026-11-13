@@ -5,7 +5,7 @@
 import React, { useState } from "react";
 import { useFetcher } from "@remix-run/react";
 import { Users, ClipboardList, CheckCircle2, Circle } from "lucide-react";
-import { LESSON_TASKS } from "~/lib/teacher-config";
+import { INVITE_CODE_LENGTH, LESSON_TASKS } from "~/lib/teacher-config";
 import { SchoolAccountLink } from "~/components/SchoolAccountLink";
 
 export type StudentHomeworkItem = {
@@ -23,7 +23,7 @@ type Props = {
   /** 確認済みの学校メール（学校の Google / Microsoft アカウント） */
   verifiedSchoolEmails: Array<{ email: string }>;
   /** 先生の承認待ちの参加申請 */
-  joinRequest: { className: string; schoolEmail: string } | null;
+  joinRequest: { className: string; schoolEmail: string | null } | null;
 };
 
 type ActionResult = { intent?: string; success?: boolean; error?: string; message?: string };
@@ -37,6 +37,7 @@ function formatDue(iso: string) {
 export function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joinRequest }: Props) {
   const fetcher = useFetcher<ActionResult>();
   const [code, setCode] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const isBusy = fetcher.state !== "idle";
   const result = fetcher.data;
 
@@ -54,7 +55,7 @@ export function StudentClassSection({ studentClass, homework, verifiedSchoolEmai
           <div>
             <p className="text-sm font-bold text-amber-900">Waiting for your teacher to approve</p>
             <p className="text-xs text-amber-800">
-              You asked to join {joinRequest.className} with {joinRequest.schoolEmail}.
+              You asked to join {joinRequest.className} with {joinRequest.schoolEmail ?? "your invite code"}.
             </p>
           </div>
           <fetcher.Form method="post">
@@ -67,7 +68,8 @@ export function StudentClassSection({ studentClass, homework, verifiedSchoolEmai
       ) : !studentClass ? (
         <div className="space-y-4">
           <p className="text-xs text-gray-600">
-            Studying on your own? You don&apos;t need to do anything here. To join your school class, follow these two steps.
+            Studying on your own? You don&apos;t need to do anything here. To join your school class, follow these two steps
+            (or use a personal invite code from your teacher, below).
           </p>
 
           <div className="space-y-2">
@@ -104,12 +106,46 @@ export function StudentClassSection({ studentClass, homework, verifiedSchoolEmai
                 {isBusy ? "Sending..." : "Ask to Join"}
               </button>
             </div>
-            <p className="text-xs text-gray-500">
-              Your teacher approves your request. After that, your teacher can see your nickname, school email address, progress on AI Yamato lesson tasks and homework,
-              and your writing submissions (including handwriting photos if your class keeps them). You can leave the class at any time.{' '}
-              <a href="/legal/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>
-            </p>
           </fetcher.Form>
+
+          {/* 学校が Google を使っていない生徒：先生から手渡された 1 人用の招待コードで申請する */}
+          <details className="border border-gray-200 rounded-lg px-4 py-3">
+            <summary className="text-sm font-medium text-gray-700 cursor-pointer">
+              My school doesn&apos;t use Google accounts
+            </summary>
+            <fetcher.Form method="post" className="space-y-2 mt-3">
+              <input type="hidden" name="intent" value="redeem-invite" />
+              <label htmlFor="invite-code" className="block text-xs text-gray-600">
+                Ask your teacher for a <strong>personal invite code</strong> (8 letters and numbers, only for you). Enter it here instead of the two steps above.
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  id="invite-code"
+                  name="inviteCode"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                  placeholder="e.g. K7Q2-MXRT"
+                  maxLength={12}
+                  autoComplete="off"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 tracking-widest uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={isBusy || inviteCode.replace(/[^A-Za-z0-9]/g, "").length !== INVITE_CODE_LENGTH}
+                  className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
+                >
+                  {isBusy ? "Sending..." : "Ask to Join"}
+                </button>
+              </div>
+            </fetcher.Form>
+          </details>
+
+          <p className="text-xs text-gray-500">
+            Your teacher approves your request. After that, your teacher can see your nickname, your school email address (or the name your teacher
+            wrote for your invite code), your progress on AI Yamato lesson tasks and homework, and your writing submissions (including handwriting
+            photos if your class keeps them). You can leave the class at any time.{' '}
+            <a href="/legal/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>
+          </p>
         </div>
       ) : (
         <div className="space-y-5">

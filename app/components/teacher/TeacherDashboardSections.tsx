@@ -6,9 +6,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Form, Link, useNavigation } from '@remix-run/react';
 import {
   Users, KeyRound, RefreshCw, Trash2, ClipboardList, BarChart3, PenLine, Download, Image as ImageIcon, CheckCircle2, Circle,
-  UserPlus, Check, X,
+  UserPlus, Check, X, Ticket, Copy,
 } from 'lucide-react';
-import { HANDWRITING_RETENTION_OPTIONS, LESSON_TASKS } from '~/lib/teacher-config';
+import { HANDWRITING_RETENTION_OPTIONS, INVITE_CODE_DAYS, LESSON_TASKS, formatInviteCode } from '~/lib/teacher-config';
 import { SchoolAccountLink } from '~/components/SchoolAccountLink';
 
 export type DashboardData = {
@@ -23,7 +23,14 @@ export type DashboardData = {
   period: { from: string; to: string; tz: number };
   /** email は承認したときの生徒の学校メール（個人のメールではない） */
   students: Array<{ id: string; nickname: string | null; email: string }>;
-  joinRequests: Array<{ id: string; nickname: string | null; schoolEmail: string; createdAt: string }>;
+  /** schoolEmail か inviteCode のどちらかが入る（招待コードでの申請は学校メールがない） */
+  joinRequests: Array<{
+    id: string; nickname: string | null; schoolEmail: string | null; inviteCode: string | null; inviteLabel: string | null; createdAt: string;
+  }>;
+  /** 生徒 1 人ずつの使い捨て招待コード（label は先生にだけ見えるメモ） */
+  invites: Array<{
+    id: string; code: string; label: string | null; expiresAt: string; status: 'unused' | 'used' | 'expired'; usedByName: string | null;
+  }>;
   homework: Array<{ id: string; title: string; lessonId: string; taskKeys: string[]; dueAt: string; inPeriod: boolean }>;
   progress: Array<{ userId: string; lessonId: string; taskKey: string; completedAt: string | null }>;
   handwriting: Array<{
@@ -97,10 +104,10 @@ export function ClassBar({ data }: { data: DashboardData }) {
         <div className="space-y-2 bg-amber-50 border border-amber-200 rounded-lg p-4">
           <p className="text-sm font-semibold text-amber-900">Verify your school account to create a class</p>
           <p className="text-xs text-amber-800">
-            To keep students safe, a class is linked to your school&apos;s email domain. Only students who verify an account from your school
-            can ask to join, and you approve each one.
+            To keep students safe, a class is linked to your school&apos;s email domain. Students join with a school account from your school
+            or with a personal invite code you hand out in class, and you approve each one.
           </p>
-          <SchoolAccountLink verifiedEmails={[]} returnPath="/teacher-dashboard" />
+          <SchoolAccountLink verifiedEmails={[]} returnPath="/teacher-dashboard" teacherHelp />
         </div>
       ) : canCreate ? (
         <Form method="post" className="flex flex-col sm:flex-row gap-2">
@@ -135,15 +142,19 @@ export function JoinRequestsCard({ data }: { data: DashboardData }) {
     <section className={`${card} border-amber-300`} aria-label="Join requests">
       <h2 className={h2}><UserPlus className="w-5 h-5 text-amber-600" /> Join Requests ({data.joinRequests.length})</h2>
       <p className="text-xs text-slate-500">
-        Approve only students you teach. The school email has been verified by Google or Microsoft.
+        Approve only students you teach. A school email has been verified by Google or Microsoft. For an invite code, check that the
+        nickname matches the student you gave that code to.
       </p>
       <ul className="divide-y divide-slate-100 border border-slate-100 rounded-lg">
-        {data.joinRequests.map((r) => (
+        {data.joinRequests.map((r) => {
+          const proof = r.schoolEmail
+            ?? `Invite code ${r.inviteCode ? formatInviteCode(r.inviteCode) : ''}${r.inviteLabel ? ` (${r.inviteLabel})` : ''}`;
+          return (
           <li key={r.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-800 truncate">{r.nickname || r.schoolEmail}</p>
+              <p className="text-sm font-semibold text-slate-800 truncate">{r.nickname || proof}</p>
               <p className="text-[11px] text-slate-500 truncate" suppressHydrationWarning>
-                {r.schoolEmail} · {formatDate(r.createdAt)}
+                {proof} · {formatDate(r.createdAt)}
               </p>
             </div>
             <div className="flex gap-2 shrink-0">
@@ -161,8 +172,103 @@ export function JoinRequestsCard({ data }: { data: DashboardData }) {
               </Form>
             </div>
           </li>
-        ))}
+          );
+        })}
       </ul>
+    </section>
+  );
+}
+
+// ---------- 生徒 1 人ずつの使い捨て招待コード（学校が Google を使っていない生徒のため） ----------
+
+export function InviteCodesCard({ data }: { data: DashboardData }) {
+  const cls = data.selectedClass!;
+  const nav = useNavigation();
+  const unused = data.invites.filter((i) => i.status === 'unused');
+  const [copied, setCopied] = useState(false);
+
+  const copyUnused = async () => {
+    const text = unused.map((i) => `${i.label ? `${i.label}\t` : ''}${formatInviteCode(i.code)}`).join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt('Copy these codes:', text);
+    }
+  };
+
+  const statusText = (i: DashboardData['invites'][number]) =>
+    i.status === 'used' ? `Used by ${i.usedByName ?? 'a student'}` : i.status === 'expired' ? 'Expired' : `Unused · expires ${formatDate(i.expiresAt)}`;
+
+  return (
+    <section className={card} aria-label="Personal invite codes">
+      <h2 className={h2}><Ticket className="w-5 h-5 text-indigo-600" /> Personal Invite Codes</h2>
+      <p className="text-xs text-slate-500">
+        For students whose school doesn&apos;t use Google accounts. Each code works <strong>once</strong>, for one student, and expires
+        after {INVITE_CODE_DAYS} days. Hand them out in class (for example on a slip of paper). Don&apos;t post them online. Students enter
+        the code in <strong>My Account</strong>, and you still approve each request.
+      </p>
+
+      <Form method="post" className="space-y-2 bg-slate-50 border border-slate-200 rounded-lg p-4">
+        <input type="hidden" name="intent" value="create-invites" />
+        <input type="hidden" name="classId" value={cls.id} />
+        <label className="block text-xs font-semibold text-slate-600 space-y-1">
+          <span>One student per line: a name or note so you know whose code is whose (only you can see it)</span>
+          <textarea name="labels" rows={3} maxLength={3000} placeholder={'Aiko S.\nBen T.'} className={`${input} w-full`} />
+        </label>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <label className="text-xs font-semibold text-slate-600 inline-flex items-center gap-2">
+            Or just make
+            <input type="number" name="count" min={1} max={data.limits.maxStudentsPerClass} defaultValue={1} className={`${input} w-20`} />
+            codes
+          </label>
+          <button type="submit" className={`${btn} sm:ml-auto`} disabled={nav.state !== 'idle'}>Make Codes</button>
+        </div>
+      </Form>
+
+      {data.invites.length === 0 ? (
+        <p className="text-xs text-slate-500">No invite codes yet.</p>
+      ) : (
+        <div className="space-y-2">
+          {unused.length > 0 && (
+            <button type="button" onClick={copyUnused} className={btnGhost}>
+              <Copy className="w-3.5 h-3.5" /> {copied ? 'Copied!' : `Copy ${unused.length} unused code${unused.length === 1 ? '' : 's'}`}
+            </button>
+          )}
+          <ul className="divide-y divide-slate-100 border border-slate-100 rounded-lg">
+            {data.invites.map((i) => (
+              <li key={i.id} className="px-3 py-2 flex items-center justify-between gap-2">
+                <div className="min-w-0 flex items-center gap-3">
+                  <span className={`font-mono font-bold tracking-widest text-sm ${i.status === 'unused' ? 'text-indigo-700' : 'text-slate-400 line-through'}`}>
+                    {formatInviteCode(i.code)}
+                  </span>
+                  <span className="min-w-0">
+                    {i.label && <span className="block text-sm text-slate-800 truncate">{i.label}</span>}
+                    <span className="block text-[11px] text-slate-500 truncate" suppressHydrationWarning>{statusText(i)}</span>
+                  </span>
+                </div>
+                <Form
+                  method="post"
+                  onSubmit={(e) => {
+                    const msg = i.status === 'used'
+                      ? 'Remove this used code from the list? The student stays in your class (a pending request with this code is cancelled).'
+                      : 'Delete this code? It will stop working.';
+                    if (!window.confirm(msg)) e.preventDefault();
+                  }}
+                >
+                  <input type="hidden" name="intent" value="delete-invite" />
+                  <input type="hidden" name="classId" value={cls.id} />
+                  <input type="hidden" name="inviteId" value={i.id} />
+                  <button type="submit" className="text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1" aria-label={`Delete code ${formatInviteCode(i.code)}`}>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </Form>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
@@ -182,7 +288,8 @@ export function ClassSettingsCard({ data }: { data: DashboardData }) {
           <p className="text-xs text-slate-500">
             Students sign up for free, open <strong>My Account</strong>, verify their school account and enter this code under
             &quot;My Class &amp; Homework&quot;. Only school accounts ending in{' '}
-            <strong>{cls.allowedDomains.map((d) => `@${d}`).join(' or ')}</strong> can ask to join, and you approve each request below.
+            <strong>{cls.allowedDomains.map((d) => `@${d}`).join(' or ')}</strong> can ask to join, and you approve each request.
+            Students without a school Google account can use a personal invite code (below).
           </p>
           <Form method="post" onSubmit={(e) => { if (!window.confirm('Make a new code? The old code will stop working.')) e.preventDefault(); }}>
             <input type="hidden" name="intent" value="regenerate-code" />

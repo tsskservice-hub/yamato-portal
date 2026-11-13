@@ -81,6 +81,20 @@ export const HANDWRITING_RETENTION_OPTIONS = [
 
 export const DEFAULT_HANDWRITING_RETENTION_DAYS = 30;
 
+// ---------- 生徒 1 人ずつの使い捨て招待コード（学校が Google を使っていない生徒のため） ----------
+
+export const INVITE_CODE_DAYS = 14;
+export const INVITE_CODE_LENGTH = 8;
+export const INVITE_LABEL_MAX = 60;
+
+/** 表示用に 4 文字ずつ区切る（例: K7Q2-MXRT） */
+export function formatInviteCode(code: string) {
+  return code.length === INVITE_CODE_LENGTH ? `${code.slice(0, 4)}-${code.slice(4)}` : code;
+}
+
+// 学校が Google を使っていない先生に、学校のメールで Google アカウントを作ってもらうための案内
+export const GOOGLE_SIGNUP_URL = 'https://accounts.google.com/signup';
+
 // ---------- 学校アカウント（Google / Microsoft）での確認 ----------
 
 // 学校アカウントの確認に使えるサインイン方法（Supabase の provider 名）。

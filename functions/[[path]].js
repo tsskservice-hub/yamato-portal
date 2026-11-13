@@ -40716,7 +40716,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var stylesheet = "/assets/tailwind-fF4AUR5U.css";
+var stylesheet = "/assets/tailwind-DXbGOv2x.css";
 var links$1 = () => [
   { rel: "stylesheet", href: stylesheet },
   // 💡 ヤマトのアイコンをファビコンとして設定
@@ -40890,6 +40890,13 @@ var HANDWRITING_RETENTION_OPTIONS = [
   { value: "180", label: "Keep for 180 days" }
 ];
 var DEFAULT_HANDWRITING_RETENTION_DAYS = 30;
+var INVITE_CODE_DAYS = 14;
+var INVITE_CODE_LENGTH = 8;
+var INVITE_LABEL_MAX = 60;
+function formatInviteCode(code) {
+  return code.length === INVITE_CODE_LENGTH ? `${code.slice(0, 4)}-${code.slice(4)}` : code;
+}
+var GOOGLE_SIGNUP_URL = "https://accounts.google.com/signup";
 var SCHOOL_SSO_PROVIDERS = [
   { id: "google", label: "Google (school account)" },
   { id: "azure", label: "Microsoft (school account)" }
@@ -40975,6 +40982,9 @@ function generateJoinCode(length = 6) {
   const bytes = new Uint8Array(length);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (b) => JOIN_CODE_ALPHABET[b % JOIN_CODE_ALPHABET.length]).join("");
+}
+function generateInviteCode() {
+  return generateJoinCode(INVITE_CODE_LENGTH);
 }
 function normaliseJoinCode(raw) {
   return typeof raw === "string" ? raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, "") : "";
@@ -41253,7 +41263,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   }
   return Component;
 }
-var __iconData$Y = {
+var __iconData$Z = {
   name: "arrow-down-right",
   size: 24,
   node: [
@@ -41261,9 +41271,9 @@ var __iconData$Y = {
     ["path", { d: "M17 7v10H7", key: "6fjiku" }]
   ]
 };
-__iconData$Y.node;
-var ArrowDownRight = createLucideIcon(__iconData$Y);
-var __iconData$X = {
+__iconData$Z.node;
+var ArrowDownRight = createLucideIcon(__iconData$Z);
+var __iconData$Y = {
   name: "arrow-down",
   size: 24,
   node: [
@@ -41271,9 +41281,9 @@ var __iconData$X = {
     ["path", { d: "m19 12-7 7-7-7", key: "1idqje" }]
   ]
 };
-__iconData$X.node;
-var ArrowDown = createLucideIcon(__iconData$X);
-var __iconData$W = {
+__iconData$Y.node;
+var ArrowDown = createLucideIcon(__iconData$Y);
+var __iconData$X = {
   name: "arrow-right",
   size: 24,
   node: [
@@ -41281,9 +41291,9 @@ var __iconData$W = {
     ["path", { d: "m12 5 7 7-7 7", key: "xquz4c" }]
   ]
 };
-__iconData$W.node;
-var ArrowRight = createLucideIcon(__iconData$W);
-var __iconData$V = {
+__iconData$X.node;
+var ArrowRight = createLucideIcon(__iconData$X);
+var __iconData$W = {
   name: "arrow-up-right",
   size: 24,
   node: [
@@ -41291,9 +41301,9 @@ var __iconData$V = {
     ["path", { d: "M7 17 17 7", key: "1vkiza" }]
   ]
 };
-__iconData$V.node;
-var ArrowUpRight = createLucideIcon(__iconData$V);
-var __iconData$U = {
+__iconData$W.node;
+var ArrowUpRight = createLucideIcon(__iconData$W);
+var __iconData$V = {
   name: "book-open",
   size: 24,
   node: [
@@ -41307,9 +41317,9 @@ var __iconData$U = {
     ]
   ]
 };
-__iconData$U.node;
-var BookOpen = createLucideIcon(__iconData$U);
-var __iconData$T = {
+__iconData$V.node;
+var BookOpen = createLucideIcon(__iconData$V);
+var __iconData$U = {
   name: "brain",
   size: 24,
   node: [
@@ -41323,9 +41333,9 @@ var __iconData$T = {
     ["path", { d: "M6.004 5.125a4 4 0 00-2.526 5.77", key: "3cw1ss" }]
   ]
 };
-__iconData$T.node;
-var Brain = createLucideIcon(__iconData$T);
-var __iconData$S = {
+__iconData$U.node;
+var Brain = createLucideIcon(__iconData$U);
+var __iconData$T = {
   name: "chart-column",
   size: 24,
   node: [
@@ -41336,37 +41346,37 @@ var __iconData$S = {
   ],
   aliases: ["bar-chart-3"]
 };
-__iconData$S.node;
-var ChartColumn = createLucideIcon(__iconData$S);
-var __iconData$R = {
+__iconData$T.node;
+var ChartColumn = createLucideIcon(__iconData$T);
+var __iconData$S = {
   name: "check",
   size: 24,
   node: [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]
 };
-__iconData$R.node;
-var Check = createLucideIcon(__iconData$R);
-var __iconData$Q = {
+__iconData$S.node;
+var Check = createLucideIcon(__iconData$S);
+var __iconData$R = {
   name: "chevron-down",
   size: 24,
   node: [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]]
 };
-__iconData$Q.node;
-var ChevronDown = createLucideIcon(__iconData$Q);
-var __iconData$P = {
+__iconData$R.node;
+var ChevronDown = createLucideIcon(__iconData$R);
+var __iconData$Q = {
   name: "chevron-right",
   size: 24,
   node: [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]]
 };
-__iconData$P.node;
-var ChevronRight = createLucideIcon(__iconData$P);
-var __iconData$O = {
+__iconData$Q.node;
+var ChevronRight = createLucideIcon(__iconData$Q);
+var __iconData$P = {
   name: "chevron-up",
   size: 24,
   node: [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]
 };
-__iconData$O.node;
-var ChevronUp = createLucideIcon(__iconData$O);
-var __iconData$N = {
+__iconData$P.node;
+var ChevronUp = createLucideIcon(__iconData$P);
+var __iconData$O = {
   name: "circle-check",
   size: 24,
   node: [
@@ -41375,9 +41385,9 @@ var __iconData$N = {
   ],
   aliases: ["check-circle-2"]
 };
-__iconData$N.node;
-var CircleCheck = createLucideIcon(__iconData$N);
-var __iconData$M = {
+__iconData$O.node;
+var CircleCheck = createLucideIcon(__iconData$O);
+var __iconData$N = {
   name: "circle-question-mark",
   size: 24,
   node: [
@@ -41387,16 +41397,16 @@ var __iconData$M = {
   ],
   aliases: ["help-circle", "circle-help"]
 };
-__iconData$M.node;
-var CircleQuestionMark = createLucideIcon(__iconData$M);
-var __iconData$L = {
+__iconData$N.node;
+var CircleQuestionMark = createLucideIcon(__iconData$N);
+var __iconData$M = {
   name: "circle",
   size: 24,
   node: [["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]]
 };
-__iconData$L.node;
-var Circle = createLucideIcon(__iconData$L);
-var __iconData$K = {
+__iconData$M.node;
+var Circle = createLucideIcon(__iconData$M);
+var __iconData$L = {
   name: "clipboard-list",
   size: 24,
   node: [
@@ -41414,9 +41424,9 @@ var __iconData$K = {
     ["path", { d: "M8 16h.01", key: "18s6g9" }]
   ]
 };
-__iconData$K.node;
-var ClipboardList = createLucideIcon(__iconData$K);
-var __iconData$J = {
+__iconData$L.node;
+var ClipboardList = createLucideIcon(__iconData$L);
+var __iconData$K = {
   name: "coins",
   size: 24,
   node: [
@@ -41426,9 +41436,9 @@ var __iconData$J = {
     ["circle", { cx: "16", cy: "8", r: "6", key: "14bfc9" }]
   ]
 };
-__iconData$J.node;
-var Coins = createLucideIcon(__iconData$J);
-var __iconData$I = {
+__iconData$K.node;
+var Coins = createLucideIcon(__iconData$K);
+var __iconData$J = {
   name: "compass",
   size: 24,
   node: [
@@ -41442,9 +41452,9 @@ var __iconData$I = {
     ]
   ]
 };
-__iconData$I.node;
-var Compass = createLucideIcon(__iconData$I);
-var __iconData$H = {
+__iconData$J.node;
+var Compass = createLucideIcon(__iconData$J);
+var __iconData$I = {
   name: "copy",
   size: 24,
   node: [
@@ -41452,9 +41462,9 @@ var __iconData$H = {
     ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
   ]
 };
-__iconData$H.node;
-var Copy = createLucideIcon(__iconData$H);
-var __iconData$G = {
+__iconData$I.node;
+var Copy = createLucideIcon(__iconData$I);
+var __iconData$H = {
   name: "cpu",
   size: 24,
   node: [
@@ -41474,9 +41484,9 @@ var __iconData$G = {
     ["rect", { x: "8", y: "8", width: "8", height: "8", rx: "1", key: "z9xiuo" }]
   ]
 };
-__iconData$G.node;
-var Cpu = createLucideIcon(__iconData$G);
-var __iconData$F = {
+__iconData$H.node;
+var Cpu = createLucideIcon(__iconData$H);
+var __iconData$G = {
   name: "download",
   size: 24,
   node: [
@@ -41485,9 +41495,9 @@ var __iconData$F = {
     ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
   ]
 };
-__iconData$F.node;
-var Download = createLucideIcon(__iconData$F);
-var __iconData$E = {
+__iconData$G.node;
+var Download = createLucideIcon(__iconData$G);
+var __iconData$F = {
   name: "file-text",
   size: 24,
   node: [
@@ -41504,9 +41514,9 @@ var __iconData$E = {
     ["path", { d: "M16 17H8", key: "z1uh3a" }]
   ]
 };
-__iconData$E.node;
-var FileText = createLucideIcon(__iconData$E);
-var __iconData$D = {
+__iconData$F.node;
+var FileText = createLucideIcon(__iconData$F);
+var __iconData$E = {
   name: "fingerprint-pattern",
   size: 24,
   node: [
@@ -41522,9 +41532,9 @@ var __iconData$D = {
   ],
   aliases: ["fingerprint"]
 };
-__iconData$D.node;
-var FingerprintPattern = createLucideIcon(__iconData$D);
-var __iconData$C = {
+__iconData$E.node;
+var FingerprintPattern = createLucideIcon(__iconData$E);
+var __iconData$D = {
   name: "flame",
   size: 24,
   node: [
@@ -41537,9 +41547,9 @@ var __iconData$C = {
     ]
   ]
 };
-__iconData$C.node;
-var Flame = createLucideIcon(__iconData$C);
-var __iconData$B = {
+__iconData$D.node;
+var Flame = createLucideIcon(__iconData$D);
+var __iconData$C = {
   name: "gamepad-2",
   size: 24,
   node: [
@@ -41556,9 +41566,9 @@ var __iconData$B = {
     ]
   ]
 };
-__iconData$B.node;
-var Gamepad2 = createLucideIcon(__iconData$B);
-var __iconData$A = {
+__iconData$C.node;
+var Gamepad2 = createLucideIcon(__iconData$C);
+var __iconData$B = {
   name: "gauge",
   size: 24,
   node: [
@@ -41566,9 +41576,9 @@ var __iconData$A = {
     ["path", { d: "M3.34 19a10 10 0 1 1 17.32 0", key: "19p75a" }]
   ]
 };
-__iconData$A.node;
-var Gauge = createLucideIcon(__iconData$A);
-var __iconData$z = {
+__iconData$B.node;
+var Gauge = createLucideIcon(__iconData$B);
+var __iconData$A = {
   name: "graduation-cap",
   size: 24,
   node: [
@@ -41583,9 +41593,9 @@ var __iconData$z = {
     ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
   ]
 };
-__iconData$z.node;
-var GraduationCap = createLucideIcon(__iconData$z);
-var __iconData$y = {
+__iconData$A.node;
+var GraduationCap = createLucideIcon(__iconData$A);
+var __iconData$z = {
   name: "grid-3x3",
   size: 24,
   node: [
@@ -41597,9 +41607,9 @@ var __iconData$y = {
   ],
   aliases: ["grid", "grid-3-x-3"]
 };
-__iconData$y.node;
-var Grid3x3 = createLucideIcon(__iconData$y);
-var __iconData$x = {
+__iconData$z.node;
+var Grid3x3 = createLucideIcon(__iconData$z);
+var __iconData$y = {
   name: "heart",
   size: 24,
   node: [
@@ -41612,9 +41622,9 @@ var __iconData$x = {
     ]
   ]
 };
-__iconData$x.node;
-var Heart = createLucideIcon(__iconData$x);
-var __iconData$w = {
+__iconData$y.node;
+var Heart = createLucideIcon(__iconData$y);
+var __iconData$x = {
   name: "house",
   size: 24,
   node: [
@@ -41629,9 +41639,9 @@ var __iconData$w = {
   ],
   aliases: ["home"]
 };
-__iconData$w.node;
-var House = createLucideIcon(__iconData$w);
-var __iconData$v = {
+__iconData$x.node;
+var House = createLucideIcon(__iconData$x);
+var __iconData$w = {
   name: "image",
   size: 24,
   node: [
@@ -41640,9 +41650,9 @@ var __iconData$v = {
     ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21", key: "1xmnt7" }]
   ]
 };
-__iconData$v.node;
-var Image$1 = createLucideIcon(__iconData$v);
-var __iconData$u = {
+__iconData$w.node;
+var Image$1 = createLucideIcon(__iconData$w);
+var __iconData$v = {
   name: "key-round",
   size: 24,
   node: [
@@ -41656,9 +41666,9 @@ var __iconData$u = {
     ["circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor", key: "w0ekpg" }]
   ]
 };
-__iconData$u.node;
-var KeyRound = createLucideIcon(__iconData$u);
-var __iconData$t = {
+__iconData$v.node;
+var KeyRound = createLucideIcon(__iconData$v);
+var __iconData$u = {
   name: "lightbulb",
   size: 24,
   node: [
@@ -41673,17 +41683,17 @@ var __iconData$t = {
     ["path", { d: "M10 22h4", key: "ceow96" }]
   ]
 };
-__iconData$t.node;
-var Lightbulb = createLucideIcon(__iconData$t);
-var __iconData$s = {
+__iconData$u.node;
+var Lightbulb = createLucideIcon(__iconData$u);
+var __iconData$t = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData$s.node;
-var LoaderCircle = createLucideIcon(__iconData$s);
-var __iconData$r = {
+__iconData$t.node;
+var LoaderCircle = createLucideIcon(__iconData$t);
+var __iconData$s = {
   name: "lock",
   size: 24,
   node: [
@@ -41691,9 +41701,9 @@ var __iconData$r = {
     ["path", { d: "M7 11V7a5 5 0 0 1 10 0v4", key: "fwvmzm" }]
   ]
 };
-__iconData$r.node;
-var Lock = createLucideIcon(__iconData$r);
-var __iconData$q = {
+__iconData$s.node;
+var Lock = createLucideIcon(__iconData$s);
+var __iconData$r = {
   name: "log-out",
   size: 24,
   node: [
@@ -41702,9 +41712,9 @@ var __iconData$q = {
     ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
   ]
 };
-__iconData$q.node;
-var LogOut = createLucideIcon(__iconData$q);
-var __iconData$p = {
+__iconData$r.node;
+var LogOut = createLucideIcon(__iconData$r);
+var __iconData$q = {
   name: "mail",
   size: 24,
   node: [
@@ -41712,9 +41722,9 @@ var __iconData$p = {
     ["rect", { x: "2", y: "4", width: "20", height: "16", rx: "2", key: "izxlao" }]
   ]
 };
-__iconData$p.node;
-var Mail = createLucideIcon(__iconData$p);
-var __iconData$o = {
+__iconData$q.node;
+var Mail = createLucideIcon(__iconData$q);
+var __iconData$p = {
   name: "map-pin",
   size: 24,
   node: [
@@ -41728,9 +41738,9 @@ var __iconData$o = {
     ["circle", { cx: "12", cy: "10", r: "3", key: "ilqhr7" }]
   ]
 };
-__iconData$o.node;
-var MapPin = createLucideIcon(__iconData$o);
-var __iconData$n = {
+__iconData$p.node;
+var MapPin = createLucideIcon(__iconData$p);
+var __iconData$o = {
   name: "mic",
   size: 24,
   node: [
@@ -41739,9 +41749,9 @@ var __iconData$n = {
     ["rect", { x: "9", y: "2", width: "6", height: "13", rx: "3", key: "s6n7sd" }]
   ]
 };
-__iconData$n.node;
-var Mic = createLucideIcon(__iconData$n);
-var __iconData$m = {
+__iconData$o.node;
+var Mic = createLucideIcon(__iconData$o);
+var __iconData$n = {
   name: "pen-line",
   size: 24,
   node: [
@@ -41756,9 +41766,9 @@ var __iconData$m = {
   ],
   aliases: ["edit-3"]
 };
-__iconData$m.node;
-var PenLine = createLucideIcon(__iconData$m);
-var __iconData$l = {
+__iconData$n.node;
+var PenLine = createLucideIcon(__iconData$n);
+var __iconData$m = {
   name: "play",
   size: 24,
   node: [
@@ -41771,9 +41781,9 @@ var __iconData$l = {
     ]
   ]
 };
-__iconData$l.node;
-var Play = createLucideIcon(__iconData$l);
-var __iconData$k = {
+__iconData$m.node;
+var Play = createLucideIcon(__iconData$m);
+var __iconData$l = {
   name: "plus",
   size: 24,
   node: [
@@ -41781,9 +41791,9 @@ var __iconData$k = {
     ["path", { d: "M12 5v14", key: "s699le" }]
   ]
 };
-__iconData$k.node;
-var Plus = createLucideIcon(__iconData$k);
-var __iconData$j = {
+__iconData$l.node;
+var Plus = createLucideIcon(__iconData$l);
+var __iconData$k = {
   name: "printer",
   size: 24,
   node: [
@@ -41798,9 +41808,9 @@ var __iconData$j = {
     ["rect", { x: "6", y: "14", width: "12", height: "8", rx: "1", key: "1ue0tg" }]
   ]
 };
-__iconData$j.node;
-var Printer = createLucideIcon(__iconData$j);
-var __iconData$i = {
+__iconData$k.node;
+var Printer = createLucideIcon(__iconData$k);
+var __iconData$j = {
   name: "refresh-cw",
   size: 24,
   node: [
@@ -41810,9 +41820,9 @@ var __iconData$i = {
     ["path", { d: "M8 16H3v5", key: "1cv678" }]
   ]
 };
-__iconData$i.node;
-var RefreshCw = createLucideIcon(__iconData$i);
-var __iconData$h = {
+__iconData$j.node;
+var RefreshCw = createLucideIcon(__iconData$j);
+var __iconData$i = {
   name: "rotate-ccw-clock",
   size: 24,
   node: [
@@ -41822,9 +41832,9 @@ var __iconData$h = {
   ],
   aliases: ["history"]
 };
-__iconData$h.node;
-var RotateCcwClock = createLucideIcon(__iconData$h);
-var __iconData$g = {
+__iconData$i.node;
+var RotateCcwClock = createLucideIcon(__iconData$i);
+var __iconData$h = {
   name: "rotate-ccw",
   size: 24,
   node: [
@@ -41832,9 +41842,9 @@ var __iconData$g = {
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ]
 };
-__iconData$g.node;
-var RotateCcw = createLucideIcon(__iconData$g);
-var __iconData$f = {
+__iconData$h.node;
+var RotateCcw = createLucideIcon(__iconData$h);
+var __iconData$g = {
   name: "school",
   size: 24,
   node: [
@@ -41852,9 +41862,9 @@ var __iconData$f = {
     ["circle", { cx: "12", cy: "9", r: "2", key: "1092wv" }]
   ]
 };
-__iconData$f.node;
-var School = createLucideIcon(__iconData$f);
-var __iconData$e = {
+__iconData$g.node;
+var School = createLucideIcon(__iconData$g);
+var __iconData$f = {
   name: "search",
   size: 24,
   node: [
@@ -41862,9 +41872,9 @@ var __iconData$e = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData$e.node;
-var Search = createLucideIcon(__iconData$e);
-var __iconData$d = {
+__iconData$f.node;
+var Search = createLucideIcon(__iconData$f);
+var __iconData$e = {
   name: "send",
   size: 24,
   node: [
@@ -41878,9 +41888,9 @@ var __iconData$d = {
     ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
   ]
 };
-__iconData$d.node;
-var Send = createLucideIcon(__iconData$d);
-var __iconData$c = {
+__iconData$e.node;
+var Send = createLucideIcon(__iconData$e);
+var __iconData$d = {
   name: "shield-check",
   size: 24,
   node: [
@@ -41894,9 +41904,9 @@ var __iconData$c = {
     ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
   ]
 };
-__iconData$c.node;
-var ShieldCheck = createLucideIcon(__iconData$c);
-var __iconData$b = {
+__iconData$d.node;
+var ShieldCheck = createLucideIcon(__iconData$d);
+var __iconData$c = {
   name: "sliders-horizontal",
   size: 24,
   node: [
@@ -41911,9 +41921,9 @@ var __iconData$b = {
     ["path", { d: "M8 12H3", key: "a7s4jb" }]
   ]
 };
-__iconData$b.node;
-var SlidersHorizontal = createLucideIcon(__iconData$b);
-var __iconData$a = {
+__iconData$c.node;
+var SlidersHorizontal = createLucideIcon(__iconData$c);
+var __iconData$b = {
   name: "sparkles",
   size: 24,
   node: [
@@ -41930,9 +41940,9 @@ var __iconData$a = {
   ],
   aliases: ["stars"]
 };
-__iconData$a.node;
-var Sparkles = createLucideIcon(__iconData$a);
-var __iconData$9 = {
+__iconData$b.node;
+var Sparkles = createLucideIcon(__iconData$b);
+var __iconData$a = {
   name: "swords",
   size: 24,
   node: [
@@ -41958,9 +41968,9 @@ var __iconData$9 = {
     ["path", { d: "M7.5 16.5 4 20", key: "14nozp" }]
   ]
 };
-__iconData$9.node;
-var Swords = createLucideIcon(__iconData$9);
-var __iconData$8 = {
+__iconData$a.node;
+var Swords = createLucideIcon(__iconData$a);
+var __iconData$9 = {
   name: "target",
   size: 24,
   node: [
@@ -41969,9 +41979,9 @@ var __iconData$8 = {
     ["circle", { cx: "12", cy: "12", r: "2", key: "1c9p78" }]
   ]
 };
-__iconData$8.node;
-var Target = createLucideIcon(__iconData$8);
-var __iconData$7 = {
+__iconData$9.node;
+var Target = createLucideIcon(__iconData$9);
+var __iconData$8 = {
   name: "text-align-justify",
   size: 24,
   node: [
@@ -41981,9 +41991,9 @@ var __iconData$7 = {
   ],
   aliases: ["align-justify"]
 };
-__iconData$7.node;
-var TextAlignJustify = createLucideIcon(__iconData$7);
-var __iconData$6 = {
+__iconData$8.node;
+var TextAlignJustify = createLucideIcon(__iconData$8);
+var __iconData$7 = {
   name: "text-align-start",
   size: 24,
   node: [
@@ -41993,8 +42003,26 @@ var __iconData$6 = {
   ],
   aliases: ["text", "align-left"]
 };
+__iconData$7.node;
+var TextAlignStart = createLucideIcon(__iconData$7);
+var __iconData$6 = {
+  name: "ticket",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z",
+        key: "qn84l0"
+      }
+    ],
+    ["path", { d: "M13 5v2", key: "dyzc3o" }],
+    ["path", { d: "M13 17v2", key: "1ont0d" }],
+    ["path", { d: "M13 11v2", key: "1wjjxi" }]
+  ]
+};
 __iconData$6.node;
-var TextAlignStart = createLucideIcon(__iconData$6);
+var Ticket = createLucideIcon(__iconData$6);
 var __iconData$5 = {
   name: "trash",
   size: 24,
@@ -61974,7 +62002,7 @@ function enabledProviders() {
   const ids = raw.split(",").map((s2) => s2.trim()).filter(Boolean);
   return SCHOOL_SSO_PROVIDERS.filter((p2) => ids.includes(p2.id));
 }
-function SchoolAccountLink({ verifiedEmails, returnPath, className = "" }) {
+function SchoolAccountLink({ verifiedEmails, returnPath, teacherHelp = false, className = "" }) {
   const providers = enabledProviders();
   const [busy, setBusy] = reactExports.useState(null);
   const [error, setError] = reactExports.useState(null);
@@ -62013,7 +62041,32 @@ function SchoolAccountLink({ verifiedEmails, returnPath, className = "" }) {
       },
       p2.id
     )) }),
-    error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-red-600 font-medium", children: error })
+    error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-red-600 font-medium", children: error }),
+    teacherHelp && verifiedEmails.length === 0 && providers.some((p2) => p2.id === "google") && /* @__PURE__ */ jsxRuntimeExports.jsxs("details", { className: "text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("summary", { className: "font-semibold text-slate-700 cursor-pointer", children: "My school doesn't use Google accounts" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2", children: "You can create a free Google account with your school email address. It takes about 5 minutes:" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("ol", { className: "list-decimal pl-5 mt-1 space-y-0.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "Open",
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: GOOGLE_SIGNUP_URL, target: "_blank", rel: "noopener noreferrer", className: "text-indigo-700 font-semibold hover:underline", children: "Google's sign-up page" }),
+          " ",
+          "(a private browser window is easiest)."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "When asked for an email address, choose ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: '"Use your existing email"' }),
+          " and enter your school email."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Enter the code Google sends to your school inbox, then choose a password." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "Come back here and press ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: '"Verify with Google"' }),
+          ", signing in with that account."
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1", children: "Some schools have rules about using school email for other services, so check with your school if you are unsure." })
+    ] })
   ] });
 }
 var card = "bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4";
@@ -62063,8 +62116,8 @@ function ClassBar({ data: data2 }) {
     }) }),
     canCreate && data2.schoolEmails.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2 bg-amber-50 border border-amber-200 rounded-lg p-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-amber-900", children: "Verify your school account to create a class" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-amber-800", children: "To keep students safe, a class is linked to your school's email domain. Only students who verify an account from your school can ask to join, and you approve each one." }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolAccountLink, { verifiedEmails: [], returnPath: "/teacher-dashboard" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-amber-800", children: "To keep students safe, a class is linked to your school's email domain. Students join with a school account from your school or with a personal invite code you hand out in class, and you approve each one." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolAccountLink, { verifiedEmails: [], returnPath: "/teacher-dashboard", teacherHelp: true })
     ] }) : canCreate ? /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "flex flex-col sm:flex-row gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "create-class" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("input", { name: "name", required: true, maxLength: 60, placeholder: "New class name (e.g. Year 9 Japanese A)", className: `${input} flex-1` }),
@@ -62094,37 +62147,121 @@ function JoinRequestsCard({ data: data2 }) {
       data2.joinRequests.length,
       ")"
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Approve only students you teach. The school email has been verified by Google or Microsoft." }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: data2.joinRequests.map((r2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800 truncate", children: r2.nickname || r2.schoolEmail }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 truncate", suppressHydrationWarning: true, children: [
-          r2.schoolEmail,
-          " \xB7 ",
-          formatDate(r2.createdAt)
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 shrink-0", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "approve-request" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "requestId", value: r2.id }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: `${btn} inline-flex items-center gap-1`, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-4 h-4" }),
-            " Approve"
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Approve only students you teach. A school email has been verified by Google or Microsoft. For an invite code, check that the nickname matches the student you gave that code to." }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: data2.joinRequests.map((r2) => {
+      const proof = r2.schoolEmail ?? `Invite code ${r2.inviteCode ? formatInviteCode(r2.inviteCode) : ""}${r2.inviteLabel ? ` (${r2.inviteLabel})` : ""}`;
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800 truncate", children: r2.nickname || proof }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 truncate", suppressHydrationWarning: true, children: [
+            proof,
+            " \xB7 ",
+            formatDate(r2.createdAt)
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "decline-request" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "requestId", value: r2.id }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btnGhost, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "w-3.5 h-3.5" }),
-            " Decline"
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 shrink-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "approve-request" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "requestId", value: r2.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: `${btn} inline-flex items-center gap-1`, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-4 h-4" }),
+              " Approve"
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "decline-request" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "requestId", value: r2.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btnGhost, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "w-3.5 h-3.5" }),
+              " Decline"
+            ] })
           ] })
         ] })
+      ] }, r2.id);
+    }) })
+  ] });
+}
+function InviteCodesCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  const nav = useNavigation();
+  const unused = data2.invites.filter((i) => i.status === "unused");
+  const [copied, setCopied] = reactExports.useState(false);
+  const copyUnused = async () => {
+    const text = unused.map((i) => `${i.label ? `${i.label}	` : ""}${formatInviteCode(i.code)}`).join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2e3);
+    } catch {
+      window.prompt("Copy these codes:", text);
+    }
+  };
+  const statusText = (i) => i.status === "used" ? `Used by ${i.usedByName ?? "a student"}` : i.status === "expired" ? "Expired" : `Unused \xB7 expires ${formatDate(i.expiresAt)}`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Personal invite codes", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Ticket, { className: "w-5 h-5 text-indigo-600" }),
+      " Personal Invite Codes"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+      "For students whose school doesn't use Google accounts. Each code works ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "once" }),
+      ", for one student, and expires after ",
+      INVITE_CODE_DAYS,
+      " days. Hand them out in class (for example on a slip of paper). Don't post them online. Students enter the code in ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "My Account" }),
+      ", and you still approve each request."
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "space-y-2 bg-slate-50 border border-slate-200 rounded-lg p-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "create-invites" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "block text-xs font-semibold text-slate-600 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "One student per line: a name or note so you know whose code is whose (only you can see it)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("textarea", { name: "labels", rows: 3, maxLength: 3e3, placeholder: "Aiko S.\nBen T.", className: `${input} w-full` })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 inline-flex items-center gap-2", children: [
+          "Or just make",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "number", name: "count", min: 1, max: data2.limits.maxStudentsPerClass, defaultValue: 1, className: `${input} w-20` }),
+          "codes"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: `${btn} sm:ml-auto`, disabled: nav.state !== "idle", children: "Make Codes" })
       ] })
-    ] }, r2.id)) })
+    ] }),
+    data2.invites.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No invite codes yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+      unused.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "button", onClick: copyUnused, className: btnGhost, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "w-3.5 h-3.5" }),
+        " ",
+        copied ? "Copied!" : `Copy ${unused.length} unused code${unused.length === 1 ? "" : "s"}`
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: data2.invites.map((i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "px-3 py-2 flex items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `font-mono font-bold tracking-widest text-sm ${i.status === "unused" ? "text-indigo-700" : "text-slate-400 line-through"}`, children: formatInviteCode(i.code) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "min-w-0", children: [
+            i.label && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-sm text-slate-800 truncate", children: i.label }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-[11px] text-slate-500 truncate", suppressHydrationWarning: true, children: statusText(i) })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Form,
+          {
+            method: "post",
+            onSubmit: (e) => {
+              const msg = i.status === "used" ? "Remove this used code from the list? The student stays in your class (a pending request with this code is cancelled)." : "Delete this code? It will stop working.";
+              if (!window.confirm(msg))
+                e.preventDefault();
+            },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "delete-invite" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "inviteId", value: i.id }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1", "aria-label": `Delete code ${formatInviteCode(i.code)}`, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash, { className: "w-4 h-4" }) })
+            ]
+          }
+        )
+      ] }, i.id)) })
+    ] })
   ] });
 }
 function ClassSettingsCard({ data: data2 }) {
@@ -62144,7 +62281,7 @@ function ClassSettingsCard({ data: data2 }) {
           ', verify their school account and enter this code under "My Class & Homework". Only school accounts ending in',
           " ",
           /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: cls.allowedDomains.map((d) => `@${d}`).join(" or ") }),
-          " can ask to join, and you approve each request below."
+          " can ask to join, and you approve each request. Students without a school Google account can use a personal invite code (below)."
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", onSubmit: (e) => {
           if (!window.confirm("Make a new code? The old code will stop working."))
@@ -62509,6 +62646,11 @@ function parseTz(raw) {
 function toDateInput(d, tzOffsetMinutes) {
   return new Date(d.getTime() - tzOffsetMinutes * 6e4).toISOString().slice(0, 10);
 }
+function memberSubtitle(schoolEmail, inviteLabel) {
+  if (schoolEmail)
+    return schoolEmail;
+  return inviteLabel ? `Invite code: ${inviteLabel}` : "Joined with an invite code";
+}
 async function loader$k({ request, context }) {
   const { user, profile, admin } = await getTeacherOrApplicant(request, context);
   const url = new URL(request.url);
@@ -62551,23 +62693,48 @@ async function loader$k({ request, context }) {
     progress: [],
     handwriting: [],
     joinRequests: [],
+    invites: [],
     retention: "none"
   };
   if (!selected)
     return dist$1.json(base);
-  const { data: memberRows } = await admin.from("edu_class_members").select("user_id, school_email").eq("class_id", selected.id).eq("role", "student");
+  const { data: memberRows } = await admin.from("edu_class_members").select("user_id, school_email, invite_label").eq("class_id", selected.id).eq("role", "student");
   const studentIds = (memberRows ?? []).map((m2) => m2.user_id);
-  const schoolEmailOf = new Map((memberRows ?? []).map((m2) => [m2.user_id, m2.school_email ?? ""]));
-  const { data: requestRows } = await admin.from("edu_class_join_requests").select("id, user_id, school_email, created_at").eq("class_id", selected.id).order("created_at", { ascending: true });
-  const profileIds = [...studentIds, ...(requestRows ?? []).map((r2) => r2.user_id)];
+  const schoolEmailOf = new Map(
+    (memberRows ?? []).map((m2) => [m2.user_id, memberSubtitle(m2.school_email, m2.invite_label)])
+  );
+  const { data: requestRows } = await admin.from("edu_class_join_requests").select("id, user_id, school_email, invite_id, created_at").eq("class_id", selected.id).order("created_at", { ascending: true });
+  const { data: inviteRows } = await admin.from("edu_class_invites").select("id, code, label, expires_at, used_by, used_at, created_at").eq("class_id", selected.id).order("created_at", { ascending: false }).limit(200);
+  const inviteOf = new Map((inviteRows ?? []).map((i) => [i.id, i]));
+  const profileIds = [
+    .../* @__PURE__ */ new Set([
+      ...studentIds,
+      ...(requestRows ?? []).map((r2) => r2.user_id),
+      ...(inviteRows ?? []).filter((i) => i.used_by).map((i) => i.used_by)
+    ])
+  ];
   const { data: studentProfiles } = profileIds.length ? await admin.from("profiles").select("id, nickname").in("id", profileIds) : { data: [] };
   const nicknameOf = new Map((studentProfiles ?? []).map((p2) => [p2.id, p2.nickname ?? null]));
   const students = studentIds.map((id2) => ({ id: id2, nickname: nicknameOf.get(id2) ?? null, email: schoolEmailOf.get(id2) ?? "" })).sort((a, b) => (a.nickname || a.email).localeCompare(b.nickname || b.email));
-  const joinRequests = (requestRows ?? []).map((r2) => ({
-    id: r2.id,
-    nickname: nicknameOf.get(r2.user_id) ?? null,
-    schoolEmail: r2.school_email,
-    createdAt: r2.created_at
+  const joinRequests = (requestRows ?? []).map((r2) => {
+    const invite = r2.invite_id ? inviteOf.get(r2.invite_id) : null;
+    return {
+      id: r2.id,
+      nickname: nicknameOf.get(r2.user_id) ?? null,
+      schoolEmail: r2.school_email ?? null,
+      inviteCode: (invite == null ? void 0 : invite.code) ?? null,
+      inviteLabel: (invite == null ? void 0 : invite.label) ?? null,
+      createdAt: r2.created_at
+    };
+  });
+  const nowMs = Date.now();
+  const invites = (inviteRows ?? []).map((i) => ({
+    id: i.id,
+    code: i.code,
+    label: i.label ?? null,
+    expiresAt: i.expires_at,
+    status: i.used_by || i.used_at ? "used" : new Date(i.expires_at).getTime() < nowMs ? "expired" : "unused",
+    usedByName: i.used_by ? nicknameOf.get(i.used_by) ?? "A student" : null
   }));
   const { data: homeworkRows } = await admin.from("edu_homework").select("id, title, lesson_id, task_keys, due_at, created_at").eq("class_id", selected.id).order("due_at", { ascending: false }).limit(100);
   const homework = (homeworkRows ?? []).map((h) => ({
@@ -62609,6 +62776,7 @@ async function loader$k({ request, context }) {
       allowedDomains: allowedStudentDomains(selected.school_domain)
     },
     joinRequests,
+    invites,
     students,
     homework,
     progress,
@@ -62688,14 +62856,22 @@ async function action$2({ request, context }) {
     return backTo();
   }
   if (intent === "approve-request" || intent === "decline-request") {
-    const { data: req } = await admin.from("edu_class_join_requests").select("id, user_id, school_email").eq("id", String(form.get("requestId") ?? "")).eq("class_id", cls.id).maybeSingle();
+    const { data: req } = await admin.from("edu_class_join_requests").select("id, user_id, school_email, invite_id").eq("id", String(form.get("requestId") ?? "")).eq("class_id", cls.id).maybeSingle();
     if (!req)
       return fail("Request not found.", 404);
     if (intent === "approve-request") {
-      const { data: full } = await admin.from("edu_classes").select("school_domain").eq("id", cls.id).single();
-      const domain = String(req.school_email).split("@").pop() ?? "";
-      if (!full || !isStudentDomainAllowed(full.school_domain, domain)) {
-        return fail("This student's school account does not match your class.");
+      let inviteLabel = null;
+      if (req.school_email) {
+        const { data: full } = await admin.from("edu_classes").select("school_domain").eq("id", cls.id).single();
+        const domain = String(req.school_email).split("@").pop() ?? "";
+        if (!full || !isStudentDomainAllowed(full.school_domain, domain)) {
+          return fail("This student's school account does not match your class.");
+        }
+      } else {
+        const { data: invite } = req.invite_id ? await admin.from("edu_class_invites").select("code, label").eq("id", req.invite_id).eq("class_id", cls.id).maybeSingle() : { data: null };
+        if (!invite)
+          return fail("This request has no valid invite code for your class.");
+        inviteLabel = invite.label || `Invite ${invite.code}`;
       }
       const { count } = await admin.from("edu_class_members").select("user_id", { count: "exact", head: true }).eq("class_id", cls.id).eq("role", "student");
       if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
@@ -62703,7 +62879,13 @@ async function action$2({ request, context }) {
       }
       const { data: existing } = await admin.from("edu_class_members").select("class_id").eq("user_id", req.user_id).eq("role", "student").limit(1).maybeSingle();
       if (!existing) {
-        const { error } = await admin.from("edu_class_members").insert({ class_id: cls.id, user_id: req.user_id, role: "student", school_email: req.school_email });
+        const { error } = await admin.from("edu_class_members").insert({
+          class_id: cls.id,
+          user_id: req.user_id,
+          role: "student",
+          school_email: req.school_email ?? null,
+          invite_label: inviteLabel
+        });
         if (error) {
           console.error("[teacher-dashboard] approve-request failed:", error.message);
           return fail("Could not add the student. Please try again.", 500);
@@ -62711,6 +62893,41 @@ async function action$2({ request, context }) {
       }
     }
     await admin.from("edu_class_join_requests").delete().eq("id", req.id);
+    return backTo(cls.id);
+  }
+  if (intent === "create-invites") {
+    const labels = String(form.get("labels") ?? "").split(/\r?\n/).map((l2) => l2.trim().replace(/\s+/g, " ").slice(0, INVITE_LABEL_MAX)).filter(Boolean);
+    const count = labels.length || Math.floor(Number(form.get("count") ?? 0));
+    if (!Number.isFinite(count) || count < 1)
+      return fail("Enter how many codes to make, or one student per line.");
+    const { count: members } = await admin.from("edu_class_members").select("user_id", { count: "exact", head: true }).eq("class_id", cls.id).eq("role", "student");
+    const { count: openInvites } = await admin.from("edu_class_invites").select("id", { count: "exact", head: true }).eq("class_id", cls.id).is("used_by", null).is("used_at", null).gt("expires_at", (/* @__PURE__ */ new Date()).toISOString());
+    const room = TEACHER_LIMITS.maxStudentsPerClass - (members ?? 0) - (openInvites ?? 0);
+    if (count > room) {
+      return fail(
+        room > 0 ? `You can make up to ${room} more code${room === 1 ? "" : "s"} (a class has up to ${TEACHER_LIMITS.maxStudentsPerClass} students, including unused codes).` : "This class has no room for more codes. Remove unused codes or students first."
+      );
+    }
+    const expiresAt2 = new Date(Date.now() + INVITE_CODE_DAYS * DAY_MS).toISOString();
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const rows = Array.from({ length: count }, (_, i) => ({
+        class_id: cls.id,
+        code: generateInviteCode(),
+        label: labels[i] ?? null,
+        expires_at: expiresAt2
+      }));
+      const { error } = await admin.from("edu_class_invites").insert(rows);
+      if (!error)
+        return backTo(cls.id);
+      if (error.code !== "23505") {
+        console.error("[teacher-dashboard] create-invites failed:", error.message);
+        break;
+      }
+    }
+    return fail("Could not make the codes. Please try again.", 500);
+  }
+  if (intent === "delete-invite") {
+    await admin.from("edu_class_invites").delete().eq("id", String(form.get("inviteId") ?? "")).eq("class_id", cls.id);
     return backTo(cls.id);
   }
   if (intent === "remove-student") {
@@ -62796,7 +63013,7 @@ function TeacherDashboardPage() {
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-3 space-y-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800", children: "Verify your school account" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700", children: "Sign in with the Google or Microsoft account your school gave you. We approve teacher accounts with a verified school email, and only students with an account from your school can ask to join your class." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolAccountLink, { verifiedEmails: loaded.schoolEmails, returnPath: "/teacher-dashboard" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolAccountLink, { verifiedEmails: loaded.schoolEmails, returnPath: "/teacher-dashboard", teacherHelp: true })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-700", children: [
         "It also helps if your ",
@@ -62825,6 +63042,7 @@ function TeacherDashboardPage() {
     data2.selectedClass && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(JoinRequestsCard, { data: data2 }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(ClassSettingsCard, { data: data2 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(InviteCodesCard, { data: data2 }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(HomeworkCard, { data: data2 }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(CompletionCard, { data: data2 }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(HandwritingCard, { data: data2 })
@@ -68741,6 +68959,7 @@ function formatDue(iso) {
 function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joinRequest }) {
   const fetcher = useFetcher();
   const [code, setCode] = reactExports.useState("");
+  const [inviteCode, setInviteCode] = reactExports.useState("");
   const isBusy = fetcher.state !== "idle";
   const result = fetcher.data;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-5", children: [
@@ -68760,7 +68979,7 @@ function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joi
           "You asked to join ",
           joinRequest.className,
           " with ",
-          joinRequest.schoolEmail,
+          joinRequest.schoolEmail ?? "your invite code",
           "."
         ] })
       ] }),
@@ -68769,7 +68988,7 @@ function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joi
         /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: isBusy, className: "text-xs font-semibold text-slate-600 border border-slate-300 rounded-md px-3 py-1.5 bg-white cursor-pointer disabled:opacity-50", children: "Cancel request" })
       ] })
     ] }) : !studentClass ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-600", children: "Studying on your own? You don't need to do anything here. To join your school class, follow these two steps." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-600", children: "Studying on your own? You don't need to do anything here. To join your school class, follow these two steps (or use a personal invite code from your teacher, below)." }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-medium text-gray-700", children: "1. Verify your school account" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500", children: "Sign in with the Google or Microsoft account your school gave you. This makes sure only students from your school can join your class. We only read your school email address." }),
@@ -68802,12 +69021,47 @@ function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joi
               children: isBusy ? "Sending..." : "Ask to Join"
             }
           )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-gray-500", children: [
-          "Your teacher approves your request. After that, your teacher can see your nickname, school email address, progress on AI Yamato lesson tasks and homework, and your writing submissions (including handwriting photos if your class keeps them). You can leave the class at any time.",
-          " ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/legal/privacy", className: "text-blue-600 hover:underline", children: "Privacy Policy" })
         ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("details", { className: "border border-gray-200 rounded-lg px-4 py-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("summary", { className: "text-sm font-medium text-gray-700 cursor-pointer", children: "My school doesn't use Google accounts" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(fetcher.Form, { method: "post", className: "space-y-2 mt-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "redeem-invite" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "invite-code", className: "block text-xs text-gray-600", children: [
+            "Ask your teacher for a ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "personal invite code" }),
+            " (8 letters and numbers, only for you). Enter it here instead of the two steps above."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                id: "invite-code",
+                name: "inviteCode",
+                value: inviteCode,
+                onChange: (e) => setInviteCode(e.target.value.toUpperCase()),
+                placeholder: "e.g. K7Q2-MXRT",
+                maxLength: 12,
+                autoComplete: "off",
+                className: "flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 tracking-widest uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "submit",
+                disabled: isBusy || inviteCode.replace(/[^A-Za-z0-9]/g, "").length !== INVITE_CODE_LENGTH,
+                className: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50",
+                children: isBusy ? "Sending..." : "Ask to Join"
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-gray-500", children: [
+        "Your teacher approves your request. After that, your teacher can see your nickname, your school email address (or the name your teacher wrote for your invite code), your progress on AI Yamato lesson tasks and homework, and your writing submissions (including handwriting photos if your class keeps them). You can leave the class at any time.",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/legal/privacy", className: "text-blue-600 hover:underline", children: "Privacy Policy" })
       ] })
     ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-5", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blue-50 border border-blue-100 rounded-lg p-4", children: [
@@ -68921,7 +69175,7 @@ async function loader$7({ request, context }) {
           verifiedSchoolEmails = await getVerifiedSchoolEmails(admin, user.id);
           const { data: req } = await admin.from("edu_class_join_requests").select("school_email, edu_classes(name)").eq("user_id", user.id).maybeSingle();
           if (req) {
-            joinRequest = { className: ((_a = req.edu_classes) == null ? void 0 : _a.name) ?? "your class", schoolEmail: req.school_email };
+            joinRequest = { className: ((_a = req.edu_classes) == null ? void 0 : _a.name) ?? "your class", schoolEmail: req.school_email ?? null };
           }
         }
       } catch (err) {
@@ -68951,6 +69205,7 @@ async function loader$7({ request, context }) {
   });
 }
 async function action$1({ request, context }) {
+  var _a;
   const formData = await request.formData();
   const intent = formData.get("intent");
   const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
@@ -69006,7 +69261,7 @@ async function action$1({ request, context }) {
     if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
       return dist$1.json({ intent, error: "This class is full. Please ask your teacher.", success: false }, { status: 400 });
     }
-    await admin.from("edu_class_join_requests").delete().eq("user_id", user.id);
+    await removeJoinRequest(admin, user.id);
     const { error: requestError } = await admin.from("edu_class_join_requests").insert({ class_id: cls.id, user_id: user.id, school_email: match.email });
     if (requestError) {
       console.error("join-class request failed:", requestError.message);
@@ -69014,9 +69269,48 @@ async function action$1({ request, context }) {
     }
     return dist$1.json({ intent, success: true, message: `Request sent to ${cls.name}. Your teacher needs to approve it.` });
   }
+  if (intent === "redeem-invite") {
+    const code = normaliseJoinCode(formData.get("inviteCode"));
+    if (code.length !== INVITE_CODE_LENGTH) {
+      return dist$1.json({ intent, error: "Please enter the 8-character invite code from your teacher.", success: false }, { status: 400 });
+    }
+    const admin = createAdminSupabaseClient(context);
+    const { data: me2 } = await admin.from("profiles").select("is_teacher, teacher_status").eq("id", user.id).maybeSingle();
+    if ((me2 == null ? void 0 : me2.is_teacher) || (me2 == null ? void 0 : me2.teacher_status) === "pending") {
+      return dist$1.json({ intent, error: "Teacher accounts cannot join a class as a student.", success: false }, { status: 400 });
+    }
+    if (await getStudentClass(admin, user.id)) {
+      return dist$1.json({ intent, error: "You are already in a class. Leave it first to join another one.", success: false }, { status: 400 });
+    }
+    const { data: invite } = await admin.from("edu_class_invites").select("id, class_id, edu_classes(name)").eq("code", code).is("used_by", null).is("used_at", null).gt("expires_at", (/* @__PURE__ */ new Date()).toISOString()).maybeSingle();
+    if (!invite) {
+      return dist$1.json({
+        intent,
+        error: "That invite code is not valid, has already been used, or has expired. Please ask your teacher for a new one.",
+        success: false
+      }, { status: 404 });
+    }
+    const { count } = await admin.from("edu_class_members").select("user_id", { count: "exact", head: true }).eq("class_id", invite.class_id).eq("role", "student");
+    if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
+      return dist$1.json({ intent, error: "This class is full. Please ask your teacher.", success: false }, { status: 400 });
+    }
+    await removeJoinRequest(admin, user.id);
+    const { data: claimed } = await admin.from("edu_class_invites").update({ used_by: user.id, used_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("id", invite.id).is("used_by", null).is("used_at", null).select("id");
+    if (!claimed || claimed.length === 0) {
+      return dist$1.json({ intent, error: "That invite code has already been used. Please ask your teacher for a new one.", success: false }, { status: 409 });
+    }
+    const { error: requestError } = await admin.from("edu_class_join_requests").insert({ class_id: invite.class_id, user_id: user.id, school_email: null, invite_id: invite.id });
+    if (requestError) {
+      console.error("redeem-invite request failed:", requestError.message);
+      await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", invite.id);
+      return dist$1.json({ intent, error: "Could not send your request. Please try again.", success: false }, { status: 500 });
+    }
+    const className = ((_a = invite.edu_classes) == null ? void 0 : _a.name) ?? "your class";
+    return dist$1.json({ intent, success: true, message: `Request sent to ${className}. Your teacher needs to approve it.` });
+  }
   if (intent === "cancel-request") {
     const admin = createAdminSupabaseClient(context);
-    await admin.from("edu_class_join_requests").delete().eq("user_id", user.id);
+    await removeJoinRequest(admin, user.id);
     return dist$1.json({ intent, success: true, message: "Your request was cancelled." });
   }
   if (intent === "leave-class") {
@@ -69028,6 +69322,13 @@ async function action$1({ request, context }) {
     return dist$1.json({ intent, success: true, message: "You left the class." });
   }
   return dist$1.json({ error: "Invalid intent.", success: false }, { status: 400 });
+}
+async function removeJoinRequest(admin, userId) {
+  const { data: old } = await admin.from("edu_class_join_requests").select("invite_id").eq("user_id", userId).maybeSingle();
+  await admin.from("edu_class_join_requests").delete().eq("user_id", userId);
+  if (old == null ? void 0 : old.invite_id) {
+    await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", old.invite_id).eq("used_by", userId);
+  }
 }
 async function loadStudentHomework(admin, classId, userId) {
   const { data: rows } = await admin.from("edu_homework").select("id, title, lesson_id, task_keys, due_at").eq("class_id", classId).order("due_at", { ascending: false }).limit(30);
@@ -71604,7 +71905,7 @@ var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-l-V5Trv2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-C6aTN1nT.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-CQfNYrcx.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-CapRXnJb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/pen-line-cDwFYdyU.js", "/assets/PageLayout-99qWXlus.js", "/assets/check-BHcVv_9U.js", "/assets/book-open-7TKPp1u6.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-DTlsTjyZ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-DQnWZS6x.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-ChI22TZa.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-BkHSWvKD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-99qWXlus.js", "/assets/trash-DpvI77A4.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-DIP31QYH.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/nickname-rNkZOoYh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-D5-rx0ts.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-TwGtSOaP.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-S03XfUIY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-CpB8mqj-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-CQfNYrcx.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-99qWXlus.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-DhYPUDit.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-ZjyJkzIY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-BMjZQOJ2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-DBvKYUcT.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-DZ_SPkVc.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-BWwybJ9k.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-Bl_KMeQM.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-jtqPAOhY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-CDKckl4g.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-Wt1wgitS.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-99qWXlus.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-Dh8kpjov.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-8ZO6OD0G.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-CAIdhFNJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CITZDDSY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-Cf032OlR.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-B0Tfvkdr.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-qi3T-wAG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-BCQK1CGP.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-CzuNzsY-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-99qWXlus.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-wLGSjEnC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-D-Nxiwko.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-99qWXlus.js", "/assets/SchoolAccountLink-D9ReNyBQ.js", "/assets/users-Ywgb24d_.js", "/assets/check-BHcVv_9U.js", "/assets/pen-line-cDwFYdyU.js", "/assets/trash-DpvI77A4.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-DoeMZLuY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-C7ILaQ03.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-wqdIt6Hi.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-DF1UCOSh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-B0NCzLa4.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-YxWCSVqE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-CsrFqTgh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-BfAn3Yz3.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/content-games-xRyfE8TB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-CYPU_qWY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/PageLayout-99qWXlus.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-Bi-zN9u_.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-ifEPesKx.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-Bvlkn-JW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/SchoolAccountLink-D9ReNyBQ.js", "/assets/users-Ywgb24d_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-BE7ipGAf.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-CVSuwj-f.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-le6GCbzD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-BQ6cDZkf.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-D5-rx0ts.js", "/assets/PageLayout-99qWXlus.js", "/assets/flame-hp_taxeX.js", "/assets/check-BHcVv_9U.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-DYI7cOtv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-hp_taxeX.js", "/assets/PageLayout-99qWXlus.js", "/assets/check-BHcVv_9U.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/loader-circle-DQnWZS6x.js", "/assets/book-open-7TKPp1u6.js", "/assets/content-games-xRyfE8TB.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-jHrvXxA2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-99qWXlus.js", "/assets/book-open-7TKPp1u6.js", "/assets/users-Ywgb24d_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DInPRXRM.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-5v3FPjNh.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-99qWXlus.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-fe92ec78.js", "version": "fe92ec78" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-B2xlyUIV.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-B9fFpjlR.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-CQfNYrcx.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-BZOX5YlC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/pen-line-CNVCN8QD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/check-CpGJA7zU.js", "/assets/book-open-CaB86rW0.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-CBR5SnwG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-DuVegklX.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CeCmVU0a.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-BbmR20Oe.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/trash-Ck-Cwldf.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-Cisn-hrW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/nickname-rNkZOoYh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-D5-rx0ts.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-DksMtV5O.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-BNR6Cc4P.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-hT6qvCnw.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-CQfNYrcx.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-DtkQtt03.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-Dk2ZTyHO.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-rGCSCX0n.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-DtEfvWuy.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-DsDBx-o4.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-D-Pu3DZA.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-Bl_KMeQM.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-CB4Stb5Q.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-DpIoTEO_.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-r39LtO6M.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-CsOw-NKn.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-DjrT0x68.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-BM4JODA6.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-CwOWR5uQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-Cn_SeNOj.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-QLS6Uc5n.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-Dmz396De.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-CJH49Z6Y.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-Cp-wABNl.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-DGpEm9uW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-CsOw-NKn.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-peMW6Nge.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-B6gRY1A2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/SchoolAccountLink-DaE-Hgsq.js", "/assets/users-TPi0ZrL9.js", "/assets/check-CpGJA7zU.js", "/assets/pen-line-CNVCN8QD.js", "/assets/trash-Ck-Cwldf.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-BvnZbBOZ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-dEzv7M0s.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-py_bhqUo.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-lFTIzxnz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-DgTA3VBI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-3AchjLxf.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-D51t4VA0.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-ZniaDa2G.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/content-games-O_6H70p2.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-D6D0JIbJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-D_klnujF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-Bn9EqMb-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-aoHPp8RQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/SchoolAccountLink-DaE-Hgsq.js", "/assets/users-TPi0ZrL9.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CK95gNLn.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-DjDCarSA.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-BXQdT4BB.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-DAgIscuQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-D5-rx0ts.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/flame-CMQWGIsZ.js", "/assets/check-CpGJA7zU.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-NPTmSuFb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-CMQWGIsZ.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/check-CpGJA7zU.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/loader-circle-DuVegklX.js", "/assets/book-open-CaB86rW0.js", "/assets/content-games-O_6H70p2.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-BIZJ3u59.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/book-open-CaB86rW0.js", "/assets/users-TPi0ZrL9.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DM7YldyP.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DPLM8Vaa.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-CsOw-NKn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-f26fa99f.js", "version": "f26fa99f" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";

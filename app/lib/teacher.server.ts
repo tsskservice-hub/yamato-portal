@@ -8,7 +8,7 @@
 import { redirect } from '@remix-run/cloudflare';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
-import { emailDomain, isFreeEmailDomain } from '~/lib/teacher-config';
+import { INVITE_CODE_LENGTH, emailDomain, isFreeEmailDomain } from '~/lib/teacher-config';
 
 /** ログイン中のユーザー（Cookie のセッション）を返す。未ログインなら null */
 export async function getSessionUser(request: Request, context: any) {
@@ -64,6 +64,12 @@ export function generateJoinCode(length = 6) {
   return Array.from(bytes, (b) => JOIN_CODE_ALPHABET[b % JOIN_CODE_ALPHABET.length]).join('');
 }
 
+/** 生徒 1 人ずつの招待コード（8 文字・使い捨て） */
+export function generateInviteCode() {
+  return generateJoinCode(INVITE_CODE_LENGTH);
+}
+
+/** 参加コード・招待コードの入力から、区切りのハイフンや空白を取り除く */
 export function normaliseJoinCode(raw: unknown) {
   return typeof raw === 'string' ? raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
 }

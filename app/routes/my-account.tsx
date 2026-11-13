@@ -18,7 +18,7 @@ import { CreditTransactionsSection } from '~/components/CreditTransactionsSectio
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
 import { StudentClassSection, type StudentHomeworkItem } from '~/components/StudentClassSection';
 import { getStudentClass, getVerifiedSchoolEmails, normaliseJoinCode, type VerifiedSchoolEmail } from '~/lib/teacher.server';
-import { TEACHER_LIMITS, allowedStudentDomains, isStudentDomainAllowed } from '~/lib/teacher-config';
+import { INVITE_CODE_LENGTH, TEACHER_LIMITS, allowedStudentDomains, isStudentDomainAllowed } from '~/lib/teacher-config';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -43,7 +43,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let studentClass: Awaited<ReturnType<typeof getStudentClass>> = null;
   let homework: StudentHomeworkItem[] = [];
   let verifiedSchoolEmails: VerifiedSchoolEmail[] = [];
-  let joinRequest: { className: string; schoolEmail: string } | null = null;
+  let joinRequest: { className: string; schoolEmail: string | null } | null = null;
 
   if (user) {
     const { data: profile } = await serverSupabase
@@ -78,7 +78,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
             .eq("user_id", user.id)
             .maybeSingle();
           if (req) {
-            joinRequest = { className: (req as any).edu_classes?.name ?? "your class", schoolEmail: req.school_email };
+            joinRequest = { className: (req as any).edu_classes?.name ?? "your class", schoolEmail: req.school_email ?? null };
           }
         }
       } catch (err) {
@@ -186,7 +186,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     }
 
     // 前の申請があれば置き換える（1人1件）
-    await admin.from("edu_class_join_requests").delete().eq("user_id", user.id);
+    await removeJoinRequest(admin, user.id);
     const { error: requestError } = await admin
       .from("edu_class_join_requests")
       .insert({ class_id: cls.id, user_id: user.id, school_email: match.email });
@@ -197,10 +197,78 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     return json({ intent, success: true, message: `Request sent to ${cls.name}. Your teacher needs to approve it.` });
   }
 
+  // 💡 生徒：先生から手渡された 1 人用の招待コードで参加を申請する（学校が Google を使っていない生徒のため）
+  //    コードは 1 回だけ使える。先生が承認するとクラスに入れる
+  if (intent === "redeem-invite") {
+    const code = normaliseJoinCode(formData.get("inviteCode"));
+    if (code.length !== INVITE_CODE_LENGTH) {
+      return json({ intent, error: "Please enter the 8-character invite code from your teacher.", success: false }, { status: 400 });
+    }
+    const admin = createAdminSupabaseClient(context);
+
+    const { data: me } = await admin.from("profiles").select("is_teacher, teacher_status").eq("id", user.id).maybeSingle();
+    if (me?.is_teacher || me?.teacher_status === "pending") {
+      return json({ intent, error: "Teacher accounts cannot join a class as a student.", success: false }, { status: 400 });
+    }
+    if (await getStudentClass(admin, user.id)) {
+      return json({ intent, error: "You are already in a class. Leave it first to join another one.", success: false }, { status: 400 });
+    }
+
+    const { data: invite } = await admin
+      .from("edu_class_invites")
+      .select("id, class_id, edu_classes(name)")
+      .eq("code", code)
+      .is("used_by", null)
+      .is("used_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (!invite) {
+      return json({
+        intent,
+        error: "That invite code is not valid, has already been used, or has expired. Please ask your teacher for a new one.",
+        success: false,
+      }, { status: 404 });
+    }
+
+    const { count } = await admin
+      .from("edu_class_members")
+      .select("user_id", { count: "exact", head: true })
+      .eq("class_id", invite.class_id)
+      .eq("role", "student");
+    if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
+      return json({ intent, error: "This class is full. Please ask your teacher.", success: false }, { status: 400 });
+    }
+
+    await removeJoinRequest(admin, user.id);
+
+    // 同時に 2 人が同じコードを使っても、1 人だけが取れるようにする
+    const { data: claimed } = await admin
+      .from("edu_class_invites")
+      .update({ used_by: user.id, used_at: new Date().toISOString() })
+      .eq("id", invite.id)
+      .is("used_by", null)
+      .is("used_at", null)
+      .select("id");
+    if (!claimed || claimed.length === 0) {
+      return json({ intent, error: "That invite code has already been used. Please ask your teacher for a new one.", success: false }, { status: 409 });
+    }
+
+    const { error: requestError } = await admin
+      .from("edu_class_join_requests")
+      .insert({ class_id: invite.class_id, user_id: user.id, school_email: null, invite_id: invite.id });
+    if (requestError) {
+      console.error("redeem-invite request failed:", requestError.message);
+      await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", invite.id);
+      return json({ intent, error: "Could not send your request. Please try again.", success: false }, { status: 500 });
+    }
+    const className = (invite as any).edu_classes?.name ?? "your class";
+    return json({ intent, success: true, message: `Request sent to ${className}. Your teacher needs to approve it.` });
+  }
+
   // 💡 生徒：参加申請を取り消す
   if (intent === "cancel-request") {
     const admin = createAdminSupabaseClient(context);
-    await admin.from("edu_class_join_requests").delete().eq("user_id", user.id);
+    await removeJoinRequest(admin, user.id);
     return json({ intent, success: true, message: "Your request was cancelled." });
   }
 
@@ -219,6 +287,18 @@ export async function action({ request, context }: LoaderFunctionArgs) {
   }
 
   return json({ error: "Invalid intent.", success: false }, { status: 400 });
+}
+
+/**
+ * 生徒の参加申請を消す。招待コードで出した申請なら、そのコードをもう一度使えるように戻す
+ * （先生が断った申請のコードは戻さない。断られたときは先生の操作で申請ごと消える）
+ */
+async function removeJoinRequest(admin: any, userId: string) {
+  const { data: old } = await admin.from("edu_class_join_requests").select("invite_id").eq("user_id", userId).maybeSingle();
+  await admin.from("edu_class_join_requests").delete().eq("user_id", userId);
+  if (old?.invite_id) {
+    await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", old.invite_id).eq("used_by", userId);
+  }
 }
 
 /** 生徒の宿題一覧（新しい締切順）と、それぞれのタスクが終わったかどうか */
