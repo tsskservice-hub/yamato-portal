@@ -63,6 +63,7 @@ export const LESSON_TASKS = [
   { key: 'reading', label: 'Reading' },
   { key: 'speaking', label: 'Speaking' },
   { key: 'writing', label: 'Writing' },
+  { key: 'culture', label: 'Culture' },
 ] as const;
 
 export type LessonTaskKey = (typeof LESSON_TASKS)[number]['key'];

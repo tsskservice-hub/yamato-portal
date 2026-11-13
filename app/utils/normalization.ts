@@ -46,28 +46,117 @@ export const normalizeJapanese = (str: string): string => {
   return s;
 };
 
+// 英語の数詞 → 数値
+const NUMBER_WORDS: Record<string, number> = {
+  zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9,
+  ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16,
+  seventeen: 17, eighteen: 18, nineteen: 19,
+  twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+};
+const SCALE_WORDS: Record<string, number> = { hundred: 100, thousand: 1000 };
+
+const isNumberWord = (w: string) => w in NUMBER_WORDS || w in SCALE_WORDS;
+
 /**
- * 英語の数字スペル（one〜ten）とアラビア数字の相互変換、句読点ゆれを正規化する関数
+ * 文中の英語の数詞の並びを算用数字に変換する。
+ * 例: "eight people" → "8 people", "twenty-one" → "21", "one hundred and five yen" → "105 yen"
+ */
+export const numberWordsToDigits = (input: string): string => {
+  // twenty-one のようなハイフンつなぎを分割（数詞どうしの場合のみ）
+  const s = input.replace(/\b([a-z]+)-([a-z]+)\b/g, (m, a, b) =>
+    isNumberWord(a) && isNumberWord(b) ? `${a} ${b}` : m
+  );
+
+  const tokens = s.split(" ");
+  const out: string[] = [];
+  let i = 0;
+  while (i < tokens.length) {
+    if (!isNumberWord(tokens[i])) {
+      out.push(tokens[i]);
+      i++;
+      continue;
+    }
+    let total = 0;
+    let current = 0;
+    while (i < tokens.length) {
+      const t = tokens[i];
+      if (t in NUMBER_WORDS) {
+        current += NUMBER_WORDS[t];
+      } else if (t === "hundred") {
+        current = (current || 1) * 100;
+      } else if (t === "thousand") {
+        total += (current || 1) * 1000;
+        current = 0;
+      } else if (t === "and" && i + 1 < tokens.length && tokens[i + 1] in NUMBER_WORDS && (total > 0 || current >= 100)) {
+        // "one hundred and five" の and は読み飛ばす
+      } else {
+        break;
+      }
+      i++;
+    }
+    out.push(String(total + current));
+  }
+  return out.join(" ");
+};
+
+/** カタカナ → ひらがな（ー などの記号はそのまま） */
+export const katakanaToHiragana = (str: string): string =>
+  (str || "").replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+
+/** 日本語の答えの比較用：全角半角・空白・句読点・〜 のゆれを取り除く */
+const cleanJapaneseAnswer = (str: string): string =>
+  (str || "").normalize("NFKC").trim().replace(/[\s。、.,!?！？〜~]/g, "");
+
+/** ローマ字の答えの比較用：大文字小文字・空白・ハイフン・アポストロフィのゆれを取り除く */
+const cleanRomajiAnswer = (str: string): string =>
+  (str || "").normalize("NFKC").trim().toLowerCase().replace(/[\s'’\-.,!?]/g, "");
+
+/**
+ * 日本語で答える問題の正誤判定（全レッスン共通）
+ * 次のどれかと一致すれば正解：
+ * - jp_text（漢字・かな表記。例：二人）
+ * - jp_kana（読み。例：ふたり）／その読みをひらがなにしたもの（ロクニン → ろくにん）
+ * - romaji（"rei / zero" のように / 区切りの別解にも対応）
+ * ※ ペット のようなカタカナ語は、ひらがな（ぺっと）では正解にしない
+ */
+export const matchesJapaneseAnswer = (
+  input: string,
+  item: { jp_text?: string | null; jp_kana?: string | null; romaji?: string | null }
+): boolean => {
+  const jp = cleanJapaneseAnswer(input);
+  if (!jp) return false;
+
+  const kanaCandidates = [item.jp_text, item.jp_kana, katakanaToHiragana(item.jp_kana || "")]
+    .map((c) => cleanJapaneseAnswer(c || ""))
+    .filter(Boolean);
+  if (kanaCandidates.includes(jp)) return true;
+
+  const romaji = cleanRomajiAnswer(input);
+  const romajiCandidates = (item.romaji || "")
+    .split("/")
+    .map(cleanRomajiAnswer)
+    .filter(Boolean);
+  return romajiCandidates.includes(romaji);
+};
+
+/**
+ * 英語の答えの表記ゆれを正規化する関数（全レッスン共通）
+ * - 大文字小文字・末尾の句読点・空白／ハイフンのゆれを吸収
+ * - 桁区切りカンマを除去（3,000 → 3000）
+ * - 英語の数詞を算用数字にそろえる（eight people ⇔ 8 people、twenty-one ⇔ 21、three thousand ⇔ 3000）
  */
 export const normalizeEnglish = (str: string): string => {
   if (!str) return "";
   let s = str.trim().toLowerCase();
-  
+
   // 末尾のピリオド、クエスチョンマーク、カンマを除去
   s = s.replace(/[?.!,]+$/, "");
-  // 余分なスペースを単一スペースに
-  s = s.replace(/[\s\-_]+/g, " ");
-
-  // 数字のスペルとアラビア数字の相互統一マップ
-  const numMap: { [key: string]: string } = {
-    "one": "1", "two": "2", "three": "3", "four": "4", "five": "5",
-    "six": "6", "seven": "7", "eight": "8", "nine": "9", "ten": "10"
-  };
-
-  for (const [word, digit] of Object.entries(numMap)) {
-    const regex = new RegExp(`\\b${word}\\b`, "g");
-    s = s.replace(regex, digit);
-  }
+  // 桁区切りカンマを除去
+  s = s.replace(/(\d),(?=\d{3}\b)/g, "$1");
+  // 余分なスペース・ハイフン・アンダースコアを単一スペースに
+  s = s.replace(/[\s\-_]+/g, " ").trim();
+  // 英語の数詞 → 算用数字
+  s = numberWordsToDigits(s);
 
   return s.trim();
 };

@@ -4,6 +4,9 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
+import { useSoundEffect } from "~/hooks/useSoundEffect";
+import { normalizeEnglish, matchesJapaneseAnswer, katakanaToHiragana } from "~/utils/normalization";
+import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
 interface EduVocabularyDrillModalProps {
   vocabulary: any[];
@@ -13,6 +16,7 @@ interface EduVocabularyDrillModalProps {
 }
 
 type DrillMode = "jp_to_en" | "audio_to_en" | "en_to_jp" | "en_to_voice";
+
 
 export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = ({
   vocabulary = [],
@@ -32,10 +36,25 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
   // 音声認識用・音声合成・音声再生用の参照
   const [isListening, setIsListening] = useState(false);
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
+  // 認識された文字（判定前）。意図と違えば、判定せずに録音し直せる
+  const [pendingSpoken, setPendingSpoken] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
   // 再生中のHTMLAudioElementを保持して重複再生（反響）を防ぐためのref
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 効果音（正解音・完了音）。ほかのタスクと同じ useSoundEffect を使う
+  const { playSound, playCompleteSound } = useSoundEffect();
+
+  // 完了処理（完了音＋onCompleted）。タイピングと発声のどちらで完了しても1回だけ行う
+  const completedRef = useRef(false);
+  const finishDrill = () => {
+    setIsFinished(true);
+    if (completedRef.current) return;
+    completedRef.current = true;
+    playCompleteSound(); // 🎉 完了音
+    onCompleted();
+  };
 
   // 目標スコア（vocabulary の数×2、または最低5問）
   const targetScore = Math.max(vocabulary.length * 2, 5);
@@ -49,7 +68,10 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       setScore(0);
       setUserInput("");
       setFeedback(null);
+      setPendingSpoken(null);
+      setSpeechStatusMessage("");
       setIsFinished(false);
+      completedRef.current = false;
       setCurrentMode("jp_to_en");
     }
     // クリーンアップ：モーダル閉時に音声があれば停止
@@ -98,15 +120,22 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       window.speechSynthesis.cancel();
     }
 
-    // 1. 自作音声URLが登録されている場合は、そのMP3ファイルのみを再生（フォールバックなし）
+    // 1. 自作音声URLが登録されている場合は、そのMP3ファイルを再生する。
+    //    ファイルが見つからない・読み込めない時は、無音にせず音声合成で読み上げる
     if (vocab?.audio_url && vocab.audio_url.trim() !== "") {
       const audio = new Audio(vocab.audio_url);
       activeAudioRef.current = audio;
 
-      audio.play().catch((err) => {
-        console.warn("Custom audio playback failed:", err);
+      let fellBack = false;
+      const fallback = (reason: unknown) => {
+        if (fellBack || activeAudioRef.current !== audio) return; // 別の音声に切り替わっていたら何もしない
+        fellBack = true;
+        console.warn(`[EduVocabularyDrill] Audio file could not be played, using speech synthesis instead: ${vocab.audio_url}`, reason);
         activeAudioRef.current = null;
-      });
+        playFallbackSpeech(vocab?.jp_text);
+      };
+      audio.onerror = () => fallback(audio.error);
+      audio.play().catch(fallback);
       return;
     }
 
@@ -119,36 +148,15 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     setCurrentMode(mode);
     setUserInput("");
     setFeedback(null);
+    setPendingSpoken(null);
+    setSpeechStatusMessage("");
     if (mode === "audio_to_en") {
       playVocabAudio(currentItem);
     }
   };
 
-  // 表記ゆれや数字・句読点を正規化するヘルパー関数
-  const normalizeAnswer = (str: string): string => {
-    if (!str) return "";
-    let s = str.trim().toLowerCase();
-    
-    // 末尾の句読点（? . ! ,）を取り除く
-    s = s.replace(/[?.!,]+$/, "");
-    
-    // 数字とスペルの相互変換対応（1 ⇔ one など）
-    s = s.replace(/\b1\b/g, "one");
-    s = s.replace(/\bone\b/g, "1");
-    s = s.replace(/\b2\b/g, "two");
-    s = s.replace(/\btwo\b/g, "2");
-    s = s.replace(/\b3\b/g, "three");
-    s = s.replace(/\bthree\b/g, "3");
-    s = s.replace(/\b4\b/g, "four");
-    s = s.replace(/\bfour\b/g, "4");
-    s = s.replace(/\b5\b/g, "five");
-    s = s.replace(/\bfive\b/g, "5");
-    
-    // 連続する空白を1つにまとめる
-    s = s.replace(/\s+/g, " ");
-    
-    return s;
-  };
+  // 表記ゆれや数字・句読点を正規化（全レッスン共通の normalizeEnglish を使う）
+  const normalizeAnswer = (str: string): string => normalizeEnglish(str);
 
   // タイピング回答の判定
   const handleSubmit = (e: React.FormEvent) => {
@@ -162,14 +170,13 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       const correctEn = normalizeAnswer(currentItem.english_text || "");
       isCorrect = cleanInput === correctEn;
     } else if (currentMode === "en_to_jp") {
-      const correctJp = (currentItem.jp_text || "").trim();
-      const correctRomaji = (currentItem.romaji || "").trim().toLowerCase();
-      const cleanUserJp = userInput.trim();
-      isCorrect = cleanUserJp === correctJp || cleanUserJp.toLowerCase() === correctRomaji;
+      // 漢字表記・ひらがなの読み（jp_kana）・ローマ字のどれでも正解（全レッスン共通の判定）
+      isCorrect = matchesJapaneseAnswer(userInput, currentItem);
     }
 
     if (isCorrect) {
       setFeedback("correct");
+      playSound(); // ✅ 正解音
       const nextScore = score + 1;
       setScore(nextScore);
 
@@ -177,8 +184,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
         setUserInput("");
         setFeedback(null);
         if (nextScore >= targetScore) {
-          setIsFinished(true);
-          onCompleted();
+          finishDrill();
         } else {
           const nextIdx = currentIndex + 1;
           // リストの最後まで行ったら、再度シャッフルし直してランダム性を維持する
@@ -219,39 +225,17 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
     recognition.onstart = () => {
       setIsListening(true);
+      setPendingSpoken(null);
+      setFeedback(null);
       setSpeechStatusMessage("Listening... Please speak clearly in Japanese.");
     };
 
     recognition.onresult = (event: any) => {
-      const speechResult = event.results[0][0].transcript;
-      const targetJp = currentItem.jp_text.trim();
-      
-      if (speechResult.includes(targetJp) || targetJp.includes(speechResult)) {
-        setFeedback("correct");
-        setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
-        const nextScore = score + 1;
-        setScore(nextScore);
-
-        setTimeout(() => {
-          setFeedback(null);
-          setSpeechStatusMessage("");
-          setIsListening(false);
-          if (nextScore >= targetScore) {
-            setIsFinished(true);
-            onCompleted();
-          } else {
-            setCurrentIndex((prev) => prev + 1);
-          }
-        }, 1200);
-      } else {
-        setFeedback("incorrect");
-        setSpeechStatusMessage(`Recognised: "${speechResult}" - Try again!`);
-        setTimeout(() => {
-          setFeedback(null);
-          setSpeechStatusMessage("");
-          setIsListening(false);
-        }, 1500);
-      }
+      const speechResult = String(event.results[0][0].transcript || "").trim();
+      if (!speechResult) return;
+      // すぐには判定せず、生徒に「この文字でいいか」を確認してもらう
+      setPendingSpoken(speechResult);
+      setSpeechStatusMessage("Is this what you said? If not, record again. If yes, press Check.");
     };
 
     recognition.onerror = () => {
@@ -267,6 +251,46 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       recognition.start();
     } catch (err) {
       setIsListening(false);
+    }
+  };
+
+  // ✅ 生徒が「この文字でOK」と確認した時に判定する
+  const confirmSpoken = () => {
+    const speechResult = pendingSpoken;
+    if (!speechResult || feedback !== null) return;
+    setPendingSpoken(null);
+    // 漢字表記に加えて、読み（jp_kana をひらがなにしたもの）でも正解にする
+    // （音声認識が 二人 を「ふたり」と書き出すことがあるため）
+    const targets = [currentItem.jp_text, katakanaToHiragana(currentItem.jp_kana || "")]
+      .map((t) => (t || "").trim())
+      .filter(Boolean);
+    const spokenHira = katakanaToHiragana(speechResult);
+
+    if (
+      matchesJapaneseAnswer(speechResult, currentItem) ||
+      targets.some((t) => speechResult.includes(t) || spokenHira.includes(t) || t.includes(speechResult))
+    ) {
+      setFeedback("correct");
+      playSound(); // ✅ 正解音
+      setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
+      const nextScore = score + 1;
+      setScore(nextScore);
+
+      setTimeout(() => {
+        setFeedback(null);
+        setSpeechStatusMessage("");
+        if (nextScore >= targetScore) {
+          finishDrill();
+        } else {
+          setCurrentIndex((prev) => prev + 1);
+        }
+      }, 1200);
+    } else {
+      setFeedback("incorrect");
+      setSpeechStatusMessage(`Recognised: "${speechResult}" - Try again!`);
+      setTimeout(() => {
+        setFeedback(null);
+      }, 1500);
     }
   };
 
@@ -432,25 +456,64 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
                 )}
                 {feedback === "incorrect" && (
                   <p className="text-center text-sm font-bold text-rose-600 dark:text-rose-400">
-                    ❌ Incorrect. Correct answer: <span className="underline">{currentMode === "en_to_jp" ? currentItem.jp_text : currentItem.english_text}</span>
+                    ❌ Incorrect. Correct answer: <span className="underline">
+                      {currentMode === "en_to_jp"
+                        ? currentItem.jp_kana && katakanaToHiragana(currentItem.jp_kana) !== currentItem.jp_text
+                          ? `${currentItem.jp_text}（${katakanaToHiragana(currentItem.jp_kana)}）`
+                          : currentItem.jp_text
+                        : currentItem.english_text}
+                    </span>
                   </p>
                 )}
               </form>
             ) : (
               <div className="text-center space-y-4 py-2">
-                <button
-                  type="button"
-                  onClick={startSpeechRecognition}
-                  disabled={isListening}
-                  className={`w-full py-5 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-3 ${
-                    isListening
-                      ? "bg-amber-500 animate-pulse"
-                      : "bg-orange-500 hover:bg-orange-600 active:scale-95"
-                  }`}
-                >
-                  <span className="text-2xl">🎤</span>
-                  <span>{isListening ? "Listening... Speak now!" : "Click to Speak in Japanese"}</span>
-                </button>
+                {pendingSpoken === null ? (
+                  <button
+                    type="button"
+                    onClick={startSpeechRecognition}
+                    disabled={isListening || feedback === "correct"}
+                    className={`w-full py-5 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-3 ${
+                      isListening
+                        ? "bg-amber-500 animate-pulse"
+                        : "bg-orange-500 hover:bg-orange-600 active:scale-95"
+                    }`}
+                  >
+                    <span className="text-2xl">🎤</span>
+                    <span>{isListening ? "Listening... Speak now!" : "Click to Speak in Japanese"}</span>
+                  </button>
+                ) : (
+                  // 判定前の確認：意図と違う文字なら判定せずに録音し直せる
+                  <div className="space-y-3">
+                    <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1">
+                        Your Spoken Text (認識されたあなたの発音):
+                      </span>
+                      <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
+                        "{pendingSpoken}"
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={startSpeechRecognition}
+                        disabled={isListening}
+                        className="py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                      >
+                        <span>🔁 Record Again</span>
+                        <span className="text-xs font-bold opacity-75">Not what I said</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={confirmSpoken}
+                        className="py-3 px-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                      >
+                        <span>✅ Check</span>
+                        <span className="text-xs font-bold opacity-90">This is what I said</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {speechStatusMessage && (
                   <p className={`text-sm font-bold ${feedback === "correct" ? "text-emerald-600" : "text-slate-600 dark:text-slate-400"}`}>
                     {speechStatusMessage}
@@ -461,26 +524,8 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
           </div>
         ) : (
-          <div className="text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center">
-            <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner">
-              🏆
-            </div>
-            <div className="space-y-2 max-w-md">
-              <h4 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
-                Vocabulary Drill Mastered!
-              </h4>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                You successfully completed all required drills. The Vocabulary Task is now marked as completed in your lesson progress!
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="py-4 px-10 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-base transition shadow-md cursor-pointer"
-            >
-              Return to Lesson
-            </button>
-          </div>
+          // ほかのタスクと共通の完了画面
+          <EduFinishedView taskName="vocabulary drills" onClose={onClose} />
         )}
 
       </div>

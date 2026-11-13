@@ -23,6 +23,11 @@ import { EduListeningTaskModal } from "~/components/lessons/EduListeningTaskModa
 import { EduReadingDrillModal } from "~/components/lessons/EduReadingDrillModal";
 import { EduSpeakingTaskModal } from "~/components/lessons/EduSpeakingTaskModal";
 import { EduWritingTaskModal } from "~/components/lessons/EduWritingTaskModal"; // 追加：ライティング課題モーダル
+import { EduCultureTaskModal } from "~/components/lessons/EduCultureTaskModal";
+import { CULTURE_TASKS } from "~/data/culture-tasks";
+
+// このレッスンの slug（文化タスクの内容などを引くキー）
+const LESSON_SLUG = "obento-unit-4-lesson-1";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -103,6 +108,7 @@ const COMPLETED_TASK_NAMES: Record<LessonTaskKey, string> = {
   reading: "reading tasks",
   speaking: "speaking practice rounds",
   writing: "writing tasks",
+  culture: "culture tasks",
 };
 
 function LessonsObentoUnit4Lesson1Page() {
@@ -134,7 +140,12 @@ function LessonsObentoUnit4Lesson1Page() {
   const [isWritingTaskOpen, setIsWritingTaskOpen] = useState(false);
   const [writingTaskCompleted, setWritingTaskCompleted] = useState(false);
 
-  // 6. 保存済みの完了状態（EduLessonTaskManager から受け取る）と、「完了済み」メッセージの表示
+  // 6. 文化タスクモーダルの開閉状態と完了状態の管理
+  const [isCultureTaskOpen, setIsCultureTaskOpen] = useState(false);
+  const [cultureTaskCompleted, setCultureTaskCompleted] = useState(false);
+  const cultureTask = CULTURE_TASKS[LESSON_SLUG];
+
+  // 7. 保存済みの完了状態（EduLessonTaskManager から受け取る）と、「完了済み」メッセージの表示
   //    完了済みのタスクはモーダルを開かずにメッセージを出す（ライティングはモーダル自身がサーバーの記録で判断する）
   const [savedProgress, setSavedProgress] = useState<LessonTaskProgress | null>(null);
   const [completedNotice, setCompletedNotice] = useState<LessonTaskKey | null>(null);
@@ -303,12 +314,14 @@ function LessonsObentoUnit4Lesson1Page() {
             onStartReadingDrill={() => startTask("reading", () => setIsReadingDrillOpen(true))}
             onStartSpeakingDrill={() => startTask("speaking", () => setIsSpeakingModalOpen(true))}
             onStartWritingTask={() => setIsWritingTaskOpen(true)}
+            onStartCultureTask={cultureTask ? () => startTask("culture", () => setIsCultureTaskOpen(true)) : undefined}
             externalTaskStatus={{
               vocabulary: vocabTaskCompleted,
               listening: listeningTaskCompleted,
               reading: readingTaskCompleted,
               speaking: speakingTaskCompleted,
               writing: writingTaskCompleted,
+              culture: cultureTaskCompleted,
             }}
           />
 
@@ -350,6 +363,16 @@ function LessonsObentoUnit4Lesson1Page() {
           setSpeakingTaskCompleted(true);
         }}
       />
+
+      {/* 9b. Culture Task Modal（紙芝居＋字幕 → Quick Check） */}
+      {cultureTask && (
+        <EduCultureTaskModal
+          task={cultureTask}
+          isOpen={isCultureTaskOpen}
+          onClose={() => setIsCultureTaskOpen(false)}
+          onCompleted={() => setCultureTaskCompleted(true)}
+        />
+      )}
 
       {/* 10. 完了済みのタスクを開こうとしたときのメッセージ（ライティング課題の完了画面と同じ見た目） */}
       {completedNotice && (

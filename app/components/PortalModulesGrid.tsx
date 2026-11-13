@@ -108,7 +108,7 @@ export function PortalModulesGrid({
       </div>
 
       {/* VCE セクション全体のラッパー */}
-      <div id="section-vce" className="space-y-8 pt-6">
+      <div id="section-vce" className="space-y-8 pt-6 scroll-mt-20">
         <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
           <span className="text-xl">🇦🇺🐨🦘</span>
           <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
@@ -144,7 +144,7 @@ export function PortalModulesGrid({
 
         {/* 4. VCE References & Guides (CONTENT_REFERENCE) - 語彙リストカードが Supabase から読み込まれてここに自動展開されます */}
         {referenceModules.length > 0 && (
-          <div className="space-y-4 pt-4">
+          <div id="section-references" className="space-y-4 pt-4 scroll-mt-20">
             <div className="flex items-center space-x-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
               <span>📚</span>
               <h4>VCE Writing References & Guides</h4>
@@ -155,8 +155,8 @@ export function PortalModulesGrid({
           </div>
         )}
 
-        {/* 🌟 4.5. Lessons & Interactive Units (lessons._index.tsxへの誘導カード) */}
-        <div className="space-y-4 pt-4">
+        {/* 🌟 4.5. Lessons & Interactive Units (lessons._index.tsxへの誘導カード) — Junior 向け。ヘッダーの Junior ボタンのジャンプ先 */}
+        <div id="section-junior" className="space-y-4 pt-4 scroll-mt-20">
           <div className="flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400">
             <span>🍱</span>
             <h4>Japanese Lessons & Textbook Hub</h4>
@@ -180,21 +180,8 @@ export function PortalModulesGrid({
           </div>
         </div>
 
-        {/* 5. Years 7–10 Japanese (CONTENT_JUNIOR) */}
-        {juniorModules.length > 0 && (
-          <div className="space-y-4 pt-4">
-            <div className="flex items-center space-x-2 text-sm font-bold text-indigo-600 dark:text-indigo-400">
-              <span>📖</span>
-              <h4>Years 7–10 Japanese</h4>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {juniorModules.map((mod) => renderCard(mod, 'indigo'))}
-            </div>
-          </div>
-        )}
-
         {/* 6. 🎮 ゲームズ・アーケード総合ポータル誘導カード */}
-        <div className="space-y-4 pt-6">
+        <div id="section-games" className="space-y-4 pt-6 scroll-mt-20">
           <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
             <span className="text-xl">🎮</span>
             <h4 className="font-extrabold text-base text-red-600 dark:text-red-400">
@@ -224,7 +211,7 @@ export function PortalModulesGrid({
 
       {/* 1. 一般セクション (CONTENT_GENERAL) - ゲームズ・アーケードの下に移動 */}
       {generalModules.length > 0 && (
-        <div className="space-y-4 pt-6">
+        <div id="section-general" className="space-y-4 pt-6 scroll-mt-20">
           <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
             <span className="text-xl">🌍</span>
             <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">

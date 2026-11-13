@@ -12,6 +12,8 @@ export type CreditTransaction = {
   description?: string;
   created_at: string;
   expires_at?: string;
+  /** この増減のあとの残高（Supabase の関数が記録。07_credit_balance_history.sql） */
+  balance_after?: number | null;
 };
 
 export type CreditTransactionsSectionProps = {
@@ -51,6 +53,7 @@ export function CreditTransactionsSection({
                 <th className="py-2.5 px-3 font-semibold">Feature / Type</th>
                 <th className="py-2.5 px-3 font-semibold">Description</th>
                 <th className="py-2.5 px-3 font-semibold text-right">Amount</th>
+                <th className="py-2.5 px-3 font-semibold text-right">Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -87,6 +90,9 @@ export function CreditTransactionsSection({
                         )}
                         {isPositive ? `+${tx.amount}` : tx.amount} pts
                       </span>
+                    </td>
+                    <td className="py-3 px-3 text-right whitespace-nowrap font-semibold text-gray-900 tabular-nums">
+                      {typeof tx.balance_after === "number" ? `${tx.balance_after} pts` : "-"}
                     </td>
                   </tr>
                 );

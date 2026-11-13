@@ -85,7 +85,8 @@ create index if not exists edu_class_join_requests_class_idx on public.edu_class
 alter table public.edu_class_members add column if not exists school_email text;
 
 -- 4. 宿題（レッスンのタスクをクラスに出す）
---    task_keys: vocabulary / listening / reading / speaking / writing のうち出すもの
+--    task_keys: vocabulary / listening / reading / speaking / writing / culture のうち出すもの
+--    （culture は 15_culture_task.sql で追加）
 --    完了かどうかは既存の edu_student_progress（user_id, lesson_id, task_key）で判定する
 create table if not exists public.edu_homework (
   id uuid primary key default gen_random_uuid(),
