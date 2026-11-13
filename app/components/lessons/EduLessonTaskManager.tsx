@@ -1,14 +1,15 @@
 /**
  * @file app/components/lessons/EduLessonTaskManager.tsx
- * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リスニング＆リーディング＆スピーキング＆ライティング起動対応）
+ * @description レッスン内の各自習タスクの自動判定・進捗管理コンポーネント（タスクカード背景白版・リスニング＆リーディング＆スピーキング＆ライティング＆文化タスク起動対応）
  */
 
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "~/lib/supabaseClient";
 
-const TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing"] as const;
+// 全レッスン共通の6タスク（edu_student_progress.task_key と同じ値）。表示順もこの順
+const TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing", "culture"] as const;
 
-export type LessonTaskKey = "vocabulary" | "listening" | "reading" | "speaking" | "writing";
+export type LessonTaskKey = (typeof TASK_KEYS)[number];
 export type LessonTaskProgress = Record<LessonTaskKey, boolean>;
 
 export interface EduLessonTaskManagerProps {
@@ -22,12 +23,14 @@ export interface EduLessonTaskManagerProps {
   onStartReadingDrill?: () => void;  // リーディングドリル起動ハンドラー
   onStartSpeakingDrill?: () => void;  // スピーキングタスク起動ハンドラー
   onStartWritingTask?: () => void;  // 追加：ライティングタスク起動ハンドラー
+  onStartCultureTask?: () => void;  // 文化タスク起動ハンドラー
   externalTaskStatus?: {
     vocabulary?: boolean;
     listening?: boolean;
     reading?: boolean;
     speaking?: boolean;
     writing?: boolean;
+    culture?: boolean;
   };
 }
 
@@ -41,14 +44,16 @@ export function EduLessonTaskManager({
   onStartReadingDrill,
   onStartSpeakingDrill,
   onStartWritingTask, // 追加
+  onStartCultureTask,
   externalTaskStatus = {}
 }: EduLessonTaskManagerProps) {
-  const [taskProgress, setTaskProgress] = useState({
+  const [taskProgress, setTaskProgress] = useState<LessonTaskProgress>({
     vocabulary: false,
     listening: false,
     reading: false,
     speaking: false,
     writing: false,
+    culture: false,
   });
 
   const onProgressChangeRef = useRef(onProgressChange);
@@ -76,7 +81,7 @@ export function EduLessonTaskManager({
           .eq("lesson_id", lessonId);
         if (error || !data || cancelled) return;
 
-        const saved: LessonTaskProgress = { vocabulary: false, listening: false, reading: false, speaking: false, writing: false };
+        const saved: LessonTaskProgress = { vocabulary: false, listening: false, reading: false, speaking: false, writing: false, culture: false };
         data.forEach((row: { task_key: string; is_completed: boolean }) => {
           if (row.task_key in saved) saved[row.task_key as LessonTaskKey] = row.is_completed;
         });
@@ -271,50 +276,81 @@ export function EduLessonTaskManager({
             </div>
           </div>
 
+          {/* Task 5: ライティングタスク */}
+          <div className={`p-6 rounded-2xl border transition ${taskProgress.writing ? 'bg-emerald-50/95 border-emerald-400 shadow-md' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg">
+                Task 5
+              </span>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                {taskProgress.writing ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+              </span>
+            </div>
+            <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
+              ✍️ Writing Task & AI Feedback (作文・添削)
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              相手に伝えるためのメッセージを日本語で手書き（紙＋写真、またはデジタル原稿用紙）して提出します。読み手からの返事とフィードバックを受け取ると達成になります。
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {onStartWritingTask && (
+                <button
+                  type="button"
+                  onClick={onStartWritingTask}
+                  className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+                >
+                  <span>🚀</span>
+                  <span>Start Writing Task (ライティング開始)</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Task 6: 文化タスク */}
+          <div className={`p-6 rounded-2xl border transition ${taskProgress.culture ? 'bg-emerald-50/95 border-emerald-400 shadow-md' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-rose-100 text-rose-800 rounded-lg">
+                Task 6
+              </span>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.culture ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                {taskProgress.culture ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+              </span>
+            </div>
+            <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
+              🎎 Culture Task (日本の文化)
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              ナレーションと字幕つきの紙芝居で日本の文化を学び、Quick Check（選択式クイズ）に全問正解すると完了になります。
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {onStartCultureTask && (
+                <button
+                  type="button"
+                  onClick={onStartCultureTask}
+                  className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+                >
+                  <span>🚀</span>
+                  <span>Start Culture Task (文化タスク開始)</span>
+                </button>
+              )}
+            </div>
+          </div>
+
         </div>
 
-        {/* Task 5: ライティングタスク（ワイド表示） */}
-        <div className={`p-6 rounded-2xl border transition relative z-10 ${taskProgress.writing ? 'bg-emerald-50/95 border-emerald-400 shadow-md' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm'}`}>
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg">
-              Task 5
-            </span>
-            <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-              {taskProgress.writing ? '✅ 達成済み (Completed)' : '🔒 未達成'}
-            </span>
-          </div>
-          <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-            ✍️ Writing Task & AI Feedback (作文・添削)
-          </h4>
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-            相手に伝えるためのメッセージを日本語で手書き（紙＋写真、またはデジタル原稿用紙）して提出します。読み手からの返事とフィードバックを受け取ると達成になります。
-          </p>
-
-          <div className="flex flex-wrap items-center gap-4 mb-4">
-            {onStartWritingTask && (
-              <button
-                type="button"
-                onClick={onStartWritingTask}
-                className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
-              >
-                <span>🚀</span>
-                <span>Start Writing Task (ライティング開始)</span>
-              </button>
-            )}
-          </div>
-          
-          {allTasksCompleted && (
-            <div className="p-4 bg-amber-400 text-slate-950 rounded-2xl flex items-center justify-between shadow-lg animate-bounce mt-4">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🏆</span>
-                <div>
-                  <h5 className="font-black text-sm">おめでとうございます！ユニット修了バッジ獲得！</h5>
-                  <p className="text-xs text-slate-900 font-medium">すべての学習タスクをシステム判定によりクリアしました。</p>
-                </div>
+        {allTasksCompleted && (
+          <div className="p-4 bg-amber-400 text-slate-950 rounded-2xl flex items-center justify-between shadow-lg animate-bounce relative z-10">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🏆</span>
+              <div>
+                <h5 className="font-black text-sm">おめでとうございます！ユニット修了バッジ獲得！</h5>
+                <p className="text-xs text-slate-900 font-medium">すべての学習タスクをシステム判定によりクリアしました。</p>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
       </div>
     </section>

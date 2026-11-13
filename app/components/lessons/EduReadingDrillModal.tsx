@@ -256,13 +256,22 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       window.speechSynthesis.cancel();
     }
 
+    // 音声ファイルが見つからない・読み込めない時は、無音にせず音声合成で読み上げる
     if (currentItem?.audio_url && currentItem.audio_url.trim() !== "") {
-      const audio = new Audio(currentItem.audio_url);
+      const item = currentItem;
+      const audio = new Audio(item.audio_url);
       activeAudioRef.current = audio;
-      audio.play().catch((err) => {
-        console.warn("Audio playback failed:", err);
+
+      let fellBack = false;
+      const fallback = (reason: unknown) => {
+        if (fellBack || activeAudioRef.current !== audio) return; // 別の音声に切り替わっていたら何もしない
+        fellBack = true;
+        console.warn(`[EduReadingDrill] Audio file could not be played, using speech synthesis instead: ${item.audio_url}`, reason);
         activeAudioRef.current = null;
-      });
+        playFallbackSpeech(item.jp_text);
+      };
+      audio.onerror = () => fallback(audio.error);
+      audio.play().catch(fallback);
       return;
     }
 

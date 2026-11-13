@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
-import { normalizeEnglish } from "~/utils/normalization";
+import { normalizeEnglish, matchesJapaneseAnswer, katakanaToHiragana } from "~/utils/normalization";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
 interface EduVocabularyDrillModalProps {
@@ -120,15 +120,22 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       window.speechSynthesis.cancel();
     }
 
-    // 1. 自作音声URLが登録されている場合は、そのMP3ファイルのみを再生（フォールバックなし）
+    // 1. 自作音声URLが登録されている場合は、そのMP3ファイルを再生する。
+    //    ファイルが見つからない・読み込めない時は、無音にせず音声合成で読み上げる
     if (vocab?.audio_url && vocab.audio_url.trim() !== "") {
       const audio = new Audio(vocab.audio_url);
       activeAudioRef.current = audio;
 
-      audio.play().catch((err) => {
-        console.warn("Custom audio playback failed:", err);
+      let fellBack = false;
+      const fallback = (reason: unknown) => {
+        if (fellBack || activeAudioRef.current !== audio) return; // 別の音声に切り替わっていたら何もしない
+        fellBack = true;
+        console.warn(`[EduVocabularyDrill] Audio file could not be played, using speech synthesis instead: ${vocab.audio_url}`, reason);
         activeAudioRef.current = null;
-      });
+        playFallbackSpeech(vocab?.jp_text);
+      };
+      audio.onerror = () => fallback(audio.error);
+      audio.play().catch(fallback);
       return;
     }
 
@@ -163,10 +170,8 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       const correctEn = normalizeAnswer(currentItem.english_text || "");
       isCorrect = cleanInput === correctEn;
     } else if (currentMode === "en_to_jp") {
-      const correctJp = (currentItem.jp_text || "").trim();
-      const correctRomaji = (currentItem.romaji || "").trim().toLowerCase();
-      const cleanUserJp = userInput.trim();
-      isCorrect = cleanUserJp === correctJp || cleanUserJp.toLowerCase() === correctRomaji;
+      // 漢字表記・ひらがなの読み（jp_kana）・ローマ字のどれでも正解（全レッスン共通の判定）
+      isCorrect = matchesJapaneseAnswer(userInput, currentItem);
     }
 
     if (isCorrect) {
@@ -254,9 +259,17 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     const speechResult = pendingSpoken;
     if (!speechResult || feedback !== null) return;
     setPendingSpoken(null);
-    const targetJp = currentItem.jp_text.trim();
+    // 漢字表記に加えて、読み（jp_kana をひらがなにしたもの）でも正解にする
+    // （音声認識が 二人 を「ふたり」と書き出すことがあるため）
+    const targets = [currentItem.jp_text, katakanaToHiragana(currentItem.jp_kana || "")]
+      .map((t) => (t || "").trim())
+      .filter(Boolean);
+    const spokenHira = katakanaToHiragana(speechResult);
 
-    if (speechResult.includes(targetJp) || targetJp.includes(speechResult)) {
+    if (
+      matchesJapaneseAnswer(speechResult, currentItem) ||
+      targets.some((t) => speechResult.includes(t) || spokenHira.includes(t) || t.includes(speechResult))
+    ) {
       setFeedback("correct");
       playSound(); // ✅ 正解音
       setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
@@ -443,7 +456,13 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
                 )}
                 {feedback === "incorrect" && (
                   <p className="text-center text-sm font-bold text-rose-600 dark:text-rose-400">
-                    ❌ Incorrect. Correct answer: <span className="underline">{currentMode === "en_to_jp" ? currentItem.jp_text : currentItem.english_text}</span>
+                    ❌ Incorrect. Correct answer: <span className="underline">
+                      {currentMode === "en_to_jp"
+                        ? currentItem.jp_kana && katakanaToHiragana(currentItem.jp_kana) !== currentItem.jp_text
+                          ? `${currentItem.jp_text}（${katakanaToHiragana(currentItem.jp_kana)}）`
+                          : currentItem.jp_text
+                        : currentItem.english_text}
+                    </span>
                   </p>
                 )}
               </form>

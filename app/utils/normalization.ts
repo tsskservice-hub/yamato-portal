@@ -99,6 +99,46 @@ export const numberWordsToDigits = (input: string): string => {
   return out.join(" ");
 };
 
+/** カタカナ → ひらがな（ー などの記号はそのまま） */
+export const katakanaToHiragana = (str: string): string =>
+  (str || "").replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+
+/** 日本語の答えの比較用：全角半角・空白・句読点・〜 のゆれを取り除く */
+const cleanJapaneseAnswer = (str: string): string =>
+  (str || "").normalize("NFKC").trim().replace(/[\s。、.,!?！？〜~]/g, "");
+
+/** ローマ字の答えの比較用：大文字小文字・空白・ハイフン・アポストロフィのゆれを取り除く */
+const cleanRomajiAnswer = (str: string): string =>
+  (str || "").normalize("NFKC").trim().toLowerCase().replace(/[\s'’\-.,!?]/g, "");
+
+/**
+ * 日本語で答える問題の正誤判定（全レッスン共通）
+ * 次のどれかと一致すれば正解：
+ * - jp_text（漢字・かな表記。例：二人）
+ * - jp_kana（読み。例：ふたり）／その読みをひらがなにしたもの（ロクニン → ろくにん）
+ * - romaji（"rei / zero" のように / 区切りの別解にも対応）
+ * ※ ペット のようなカタカナ語は、ひらがな（ぺっと）では正解にしない
+ */
+export const matchesJapaneseAnswer = (
+  input: string,
+  item: { jp_text?: string | null; jp_kana?: string | null; romaji?: string | null }
+): boolean => {
+  const jp = cleanJapaneseAnswer(input);
+  if (!jp) return false;
+
+  const kanaCandidates = [item.jp_text, item.jp_kana, katakanaToHiragana(item.jp_kana || "")]
+    .map((c) => cleanJapaneseAnswer(c || ""))
+    .filter(Boolean);
+  if (kanaCandidates.includes(jp)) return true;
+
+  const romaji = cleanRomajiAnswer(input);
+  const romajiCandidates = (item.romaji || "")
+    .split("/")
+    .map(cleanRomajiAnswer)
+    .filter(Boolean);
+  return romajiCandidates.includes(romaji);
+};
+
 /**
  * 英語の答えの表記ゆれを正規化する関数（全レッスン共通）
  * - 大文字小文字・末尾の句読点・空白／ハイフンのゆれを吸収
