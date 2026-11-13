@@ -52,21 +52,26 @@ export default function Header({
           </Link>
 
           {isHome && (
-            <div className="hidden md:flex items-center space-x-2">
-              <a 
-                href="/#section-general" 
-                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
-              >
-                <span>🌐</span>
-                <span>General</span>
-              </a>
-              <a 
-                href="/#section-vce" 
-                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 bg-red-500/10 text-red-600 hover:bg-red-500/20"
-              >
-                <span>🇦🇺</span>
-                <span>VCE</span>
-              </a>
+            <div className="hidden md:flex items-center space-x-1.5">
+              {/* ページ内ジャンプ（左から VCE, Junior, References, Games, General。色は各セクションに合わせて全て別色） */}
+              {[
+                { href: '/#section-vce', label: 'VCE', color: 'bg-red-500/10 text-red-600 hover:bg-red-500/20' },
+                { href: '/#section-junior', label: 'Junior', color: 'bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20' },
+                // 幅を節約するため References / Games / General は絵文字のみ（名前は title と aria-label で補う）
+                { href: '/#section-references', label: '📚', title: 'References', color: 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' },
+                { href: '/#section-games', label: '🎮', title: 'Games', color: 'bg-purple-500/10 text-purple-600 hover:bg-purple-500/20' },
+                { href: '/#section-general', label: '🌍', title: 'General', color: 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20' },
+              ].map(({ href, label, title, color }) => (
+                <a
+                  key={href}
+                  href={href}
+                  title={title}
+                  aria-label={title}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center ${color}`}
+                >
+                  {label}
+                </a>
+              ))}
             </div>
           )}
         </div>
