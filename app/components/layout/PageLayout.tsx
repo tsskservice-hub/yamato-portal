@@ -73,6 +73,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
     nickname?: string;  
     learningPace?: "steady" | "normal" | "accelerated"; 
     isTeacher?: boolean; // 💡 ルートデータからの教師フラグ
+    isTeacherPending?: boolean; // 💡 先生の申請が審査中
   } | undefined;
 
   const location = useLocation();
@@ -81,6 +82,7 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   const [credits, setCredits] = useState<number>(propCredits !== undefined ? propCredits : (rootData?.credits ?? 10));
   const [nickname, setNickname] = useState<string>(propNickname !== undefined ? propNickname : (rootData?.nickname ?? ""));
   const isTeacher = rootData?.isTeacher ?? false; // 💡 教師判定フラグの取得
+  const isTeacherPending = rootData?.isTeacherPending ?? false;
 
   const rawLearningPace = propLearningPace !== undefined ? propLearningPace : rootData?.learningPace;
   const learningPace: "steady" | "normal" | "accelerated" = 
@@ -268,8 +270,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
         user={user} 
         credits={credits} 
         nickname={resolvedNickname} 
-        isTeacher={isTeacher} 
-        onOpenAuth={handleOpenAuthModal} 
+        isTeacher={isTeacher}
+        isTeacherPending={isTeacherPending}
+        onOpenAuth={handleOpenAuthModal}
         onSignOut={handleSignOut} 
       />
 

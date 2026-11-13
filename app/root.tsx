@@ -49,12 +49,13 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let plan = "Free Plan";
   let learningPace: "steady" | "normal" | "accelerated" = "normal"; // デフォルト値
   let isTeacher = false; // 💡 初期値
+  let isTeacherPending = false; // 💡 先生として申請済みで、まだ承認されていない（ヘッダーに審査中のボタンを出す）
 
   if (user) {
     // 💡 profiles テーブルから nickname, credits, learning_pace, is_teacher を取得
     const { data: profile, error } = await serverSupabase
       .from("profiles")
-      .select("nickname, credits, learning_pace, is_teacher")
+      .select("nickname, credits, learning_pace, is_teacher, teacher_status")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -63,7 +64,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       credits = (profile as any).credits ?? 10;
       
       // 💡 データベースの is_teacher カラムの値を正しく反映させる
-      isTeacher = Boolean((profile as any).is_teacher); 
+      isTeacher = Boolean((profile as any).is_teacher);
+      isTeacherPending = !isTeacher && (profile as any).teacher_status === "pending";
       
       // データベースの値が有効な形式であれば反映、そうでなければデフォルト
       const dbPace = (profile as any).learning_pace;
@@ -82,6 +84,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       plan,
       learningPace,
       isTeacher, // ★ここでデータベース上の教師判定フラグをルートデータとして全体に共有する
+      isTeacherPending,
     },
     {
       headers: {
