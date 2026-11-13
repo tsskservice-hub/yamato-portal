@@ -38,7 +38,8 @@ export function FeedbackPdfModal({
 
   // 💡 印刷プレビューウィンドウの生成と実行
   const handleExecutePdfExport = () => {
-    const printWindow = window.open("", "_blank");
+    // about:blank だとタブにサイトのアイコンが出ないため、サイト内の空ページ（/print-report）を開き、読み込み後に書き込む
+    const printWindow = window.open("/print-report", "_blank");
     if (!printWindow) {
       alert("ポップアップがブロックされました。ブラウザのポップアップ許可をご確認ください。");
       return;
@@ -51,7 +52,7 @@ export function FeedbackPdfModal({
     const safeSectionTitle = escapeHtml(sectionTitle);
     const safeStudentName = escapeHtml(studentName || "Student");
 
-    printWindow.document.write(`
+    const reportHtml = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -128,17 +129,40 @@ export function FeedbackPdfModal({
           `
               : ""
           }
-          <script>
-            window.onload = () => { 
-              setTimeout(() => { 
-                window.print(); 
-              }, 400); 
-            };
-          </script>
         </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
+
+    // /print-report の読み込みが終わるのを待ってから、レポートを書き込んで印刷する
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (printWindow.closed) {
+        window.clearInterval(timer);
+        return;
+      }
+      let ready = false;
+      try {
+        ready =
+          printWindow.location.pathname === "/print-report" &&
+          printWindow.document.readyState === "complete";
+      } catch {
+        // 読み込み途中は一時的にアクセスできないことがある。次の回でもう一度確かめる
+      }
+      if (ready) {
+        window.clearInterval(timer);
+        printWindow.document.open();
+        printWindow.document.write(reportHtml);
+        printWindow.document.close();
+        window.setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+        }, 400);
+      } else if (Date.now() - startedAt > 15000) {
+        window.clearInterval(timer);
+        alert("印刷用ページの読み込みに時間がかかっています。もう一度お試しください。");
+      }
+    }, 100);
+
     onClose();
   };
 

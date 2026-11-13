@@ -45213,6 +45213,7 @@ function YamatoChatCommon({
   assignedQuestion = "",
   customWidget,
   onExportPdf,
+  canExportPdf,
   calculateCreditCost,
   baseCreditCost = 2,
   image1CreditCost = 4,
@@ -45722,7 +45723,7 @@ Please log in to chat with AI Yamato.`
                                       onClick: () => setModalImageSrc(msg.imageUrl || null)
                                     }
                                   ) }),
-                                  onExportPdf && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-2 mt-2 border-t border-slate-100 flex items-center justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                                  onExportPdf && (!canExportPdf || canExportPdf(msg.content)) && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-2 mt-2 border-t border-slate-100 flex items-center justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
                                     "button",
                                     {
                                       type: "button",
@@ -46518,7 +46519,7 @@ async function loader$P({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$M = ({ data: data2 }) => {
+var meta$N = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceSpeakingEoyOralAcceleratedPage() {
@@ -46698,7 +46699,7 @@ var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: VceSpeakingEoyOralAcceleratedPage,
   loader: loader$P,
-  meta: meta$M
+  meta: meta$N
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoGenkoyoshiEditorVce = ({
   defaultOpen = false,
@@ -47129,7 +47130,7 @@ async function loader$O({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$L = ({ data: data2 }) => {
+var meta$M = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function GenkoyoshiEditorVce() {
@@ -47387,7 +47388,7 @@ var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   default: GenkoyoshiEditorVce,
   links,
   loader: loader$O,
-  meta: meta$L
+  meta: meta$M
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoKanjiGrammarCheckerVce = ({
   defaultOpen = false,
@@ -48049,14 +48050,14 @@ function KanjiGrammarCheckerPage() {
     ) })
   ] }) });
 }
-var meta$K = ({ data: data2 }) => {
+var meta$L = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiGrammarCheckerPage,
   loader: loader$N,
-  meta: meta$K
+  meta: meta$L
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoOralExamQuestions = ({
   systemPrompt = "",
@@ -48138,7 +48139,7 @@ async function loader$M({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$J = ({ data: data2 }) => {
+var meta$K = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OralExamQuestions() {
@@ -48345,7 +48346,7 @@ var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: OralExamQuestions,
   loader: loader$M,
-  meta: meta$J
+  meta: meta$K
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoEoyOralElaborate = ({
   systemPrompt = "",
@@ -49111,7 +49112,7 @@ async function loader$L({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$I = ({ data: data2 }) => {
+var meta$J = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralElaboratePage() {
@@ -49745,7 +49746,7 @@ var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: EoyOralElaboratePage,
   loader: loader$L,
-  meta: meta$I
+  meta: meta$J
 }, Symbol.toStringTag, { value: "Module" }));
 function useYamatoChat2Logic({
   initialGreeting,
@@ -55569,7 +55570,7 @@ async function loader$K({ request }) {
     loadError: loadError || (!lessonData ? "Obento Unit 4 Lesson 1 not found in edu_lessons." : null)
   });
 }
-var meta$H = ({ data: data2 }) => {
+var meta$I = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var COMPLETED_TASK_NAMES = {
@@ -55826,7 +55827,7 @@ var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: LessonsObentoUnit4Lesson1Page,
   loader: loader$K,
-  meta: meta$H
+  meta: meta$I
 }, Symbol.toStringTag, { value: "Module" }));
 function FeedbackPdfModal({
   initialContent,
@@ -55841,7 +55842,7 @@ function FeedbackPdfModal({
   const [teacherNotesInput, setTeacherNotesInput] = reactExports.useState("\u3088\u304F\u9811\u5F35\u308A\u307E\u3057\u305F\uFF01");
   const [isPdfFullscreen, setIsPdfFullscreen] = reactExports.useState(false);
   const handleExecutePdfExport = () => {
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open("/print-report", "_blank");
     if (!printWindow) {
       alert("\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u304C\u30D6\u30ED\u30C3\u30AF\u3055\u308C\u307E\u3057\u305F\u3002\u30D6\u30E9\u30A6\u30B6\u306E\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8A31\u53EF\u3092\u3054\u78BA\u8A8D\u304F\u3060\u3055\u3044\u3002");
       return;
@@ -55851,7 +55852,7 @@ function FeedbackPdfModal({
     const sanitizedNotes = escapeHtml(teacherNotesInput.trim());
     const safeSectionTitle = escapeHtml(sectionTitle);
     const safeStudentName = escapeHtml(studentName2 || "Student");
-    printWindow.document.write(`
+    const reportHtml = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -55924,17 +55925,34 @@ function FeedbackPdfModal({
               <div class="teacher-notes-text">${sanitizedNotes}</div>
             </div>
           ` : ""}
-          <script>
-            window.onload = () => { 
-              setTimeout(() => { 
-                window.print(); 
-              }, 400); 
-            };
-          <\/script>
         </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (printWindow.closed) {
+        window.clearInterval(timer);
+        return;
+      }
+      let ready = false;
+      try {
+        ready = printWindow.location.pathname === "/print-report" && printWindow.document.readyState === "complete";
+      } catch {
+      }
+      if (ready) {
+        window.clearInterval(timer);
+        printWindow.document.open();
+        printWindow.document.write(reportHtml);
+        printWindow.document.close();
+        window.setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+        }, 400);
+      } else if (Date.now() - startedAt > 15e3) {
+        window.clearInterval(timer);
+        alert("\u5370\u5237\u7528\u30DA\u30FC\u30B8\u306E\u8AAD\u307F\u8FBC\u307F\u306B\u6642\u9593\u304C\u304B\u304B\u3063\u3066\u3044\u307E\u3059\u3002\u3082\u3046\u4E00\u5EA6\u304A\u8A66\u3057\u304F\u3060\u3055\u3044\u3002");
+      }
+    }, 100);
     onClose();
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -56111,6 +56129,7 @@ function ChatYamatoEoyWritingCustom({
         customWidget: sectionSelectWidget,
         assignedQuestion,
         onExportPdf: (content) => setPdfTargetContent(content),
+        canExportPdf: (content) => content.includes("[VCE-Aligned Estimation Band]"),
         ...restProps
       }
     ),
@@ -56139,7 +56158,7 @@ async function loader$J({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$G = ({ data: data2 }) => {
+var meta$H = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CustomDashboard() {
@@ -56484,7 +56503,7 @@ var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: CustomDashboard,
   loader: loader$J,
-  meta: meta$G
+  meta: meta$H
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$I({ request }) {
   const url = new URL(request.url);
@@ -56499,7 +56518,7 @@ async function loader$I({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$F = ({ data: data2 }) => {
+var meta$G = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function HiraganaMemoryMatchFrameView({ userId }) {
@@ -56563,7 +56582,7 @@ var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: HiraganaMemoryMatchRoute,
   loader: loader$I,
-  meta: meta$F
+  meta: meta$G
 }, Symbol.toStringTag, { value: "Module" }));
 var OralUserAnswerList = ({
   questions,
@@ -56699,7 +56718,7 @@ async function loader$H({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$E = ({ data: data2 }) => {
+var meta$F = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralDrillPage() {
@@ -57099,7 +57118,7 @@ var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: EoyOralDrillPage,
   loader: loader$H,
-  meta: meta$E
+  meta: meta$F
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$G({ request }) {
   blockOnProduction(request);
@@ -57115,7 +57134,7 @@ async function loader$G({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$D = ({ data: data2 }) => {
+var meta$E = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var sportsColorTemplates = [
@@ -57643,7 +57662,7 @@ var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TestYamatoNotePage,
   loader: loader$G,
-  meta: meta$D
+  meta: meta$E
 }, Symbol.toStringTag, { value: "Module" }));
 var OralMockConfig = ({
   onStartExam,
@@ -58427,14 +58446,14 @@ function MockOralMode() {
     }
   );
 }
-var meta$C = ({ data: data2 }) => {
+var meta$D = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MockOralMode,
   loader: loader$F,
-  meta: meta$C
+  meta: meta$D
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$b = "WRITING_STYLES";
 async function fetchWritingStylesData(supabaseClient) {
@@ -58467,7 +58486,7 @@ async function loader$E({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$B = ({ data: data2 }) => {
+var meta$C = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function WritingStylesGuide() {
@@ -58596,7 +58615,7 @@ var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: WritingStylesGuide,
   loader: loader$E,
-  meta: meta$B
+  meta: meta$C
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$D({ request }) {
   const url = new URL(request.url);
@@ -58611,7 +58630,7 @@ async function loader$D({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$A = ({ data: data2 }) => {
+var meta$B = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function PrefecturePuzzleFrameView({ userId }) {
@@ -58678,7 +58697,7 @@ var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: PrefecturePuzzleRoute,
   loader: loader$D,
-  meta: meta$A
+  meta: meta$B
 }, Symbol.toStringTag, { value: "Module" }));
 var STAGES = [
   [["\u3042", "a"], ["\u3044", "i"], ["\u3046", "u"], ["\u3048", "e"], ["\u304A", "o"], ["\u304B", "ka"], ["\u304D", "ki"], ["\u304F", "ku"], ["\u3051", "ke"], ["\u3053", "ko"]],
@@ -58704,7 +58723,7 @@ async function loader$C({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var meta$z = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var meta$A = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function RollingCharacterPage() {
   const layoutRef = reactExports.useRef(null);
   const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
@@ -59188,7 +59207,7 @@ var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: RollingCharacterPage,
   loader: loader$C,
-  meta: meta$z
+  meta: meta$A
 }, Symbol.toStringTag, { value: "Module" }));
 function renderGrammarText(text, modalKey) {
   const grammarLinks = {
@@ -59888,20 +59907,20 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
     }
   );
 }
-var meta$y = ({ data: data2 }) => {
+var meta$z = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
   loader: loader$B,
-  meta: meta$y
+  meta: meta$z
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$A({ request }) {
   blockOnProduction(request);
   return null;
 }
-var meta$x = () => {
+var meta$y = () => {
   return [
     { title: "AI Yamato \u72EC\u7ACBAPI\u30C6\u30B9\u30C8\u753B\u9762" },
     { name: "description", content: "\u72EC\u7ACBAPI\u30B5\u30FC\u30D0\u30FC\u3068\u9023\u643A\u3059\u308B\u30E4\u30DE\u30C8\u306E\u30C6\u30B9\u30C8\u30DA\u30FC\u30B8\u3067\u3059\u3002" }
@@ -60288,7 +60307,7 @@ var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TestYamatoPage,
   loader: loader$A,
-  meta: meta$x
+  meta: meta$y
 }, Symbol.toStringTag, { value: "Module" }));
 var ENEMY_POOL = [
   { char: "\u3042", romaji: "a" },
@@ -60322,7 +60341,7 @@ async function loader$z({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$w = ({ data: data2 }) => {
+var meta$x = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OgreStarSwordPage() {
@@ -60636,7 +60655,7 @@ var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: OgreStarSwordPage,
   loader: loader$z,
-  meta: meta$w
+  meta: meta$x
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$y({ request }) {
   const url = new URL(request.url);
@@ -60679,7 +60698,7 @@ async function loader$y({ request }) {
     loadError: loadError || (lessonsData.length === 0 ? "No Obento Unit 4 lessons found in edu_lessons." : null)
   });
 }
-var meta$v = ({ data: data2 }) => {
+var meta$w = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsObentoUnit4Page() {
@@ -60839,7 +60858,7 @@ var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: LessonsObentoUnit4Page,
   loader: loader$y,
-  meta: meta$v
+  meta: meta$w
 }, Symbol.toStringTag, { value: "Module" }));
 var handleScrollToSection = (e, anchorId) => {
   e.preventDefault();
@@ -60877,7 +60896,7 @@ async function loader$x({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$u = ({ data: data2 }) => {
+var meta$v = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceGrammarComponent() {
@@ -61030,7 +61049,7 @@ var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: VceGrammarComponent,
   loader: loader$x,
-  meta: meta$u
+  meta: meta$v
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$w() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405 });
@@ -61157,14 +61176,14 @@ function ImageTestPage() {
     ] })
   ] }) });
 }
-var meta$t = ({ data: data2 }) => {
+var meta$u = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ImageTestPage,
   loader: loader$v,
-  meta: meta$t
+  meta: meta$u
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$u({ request }) {
   blockOnProduction(request);
@@ -61180,7 +61199,7 @@ async function loader$u({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$s = ({ data: data2 }) => {
+var meta$t = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TestAudioPage() {
@@ -61529,7 +61548,7 @@ var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TestAudioPage,
   loader: loader$u,
-  meta: meta$s
+  meta: meta$t
 }, Symbol.toStringTag, { value: "Module" }));
 var MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -61637,7 +61656,7 @@ async function loader$t({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$r = ({ data: data2 }) => {
+var meta$s = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CharacterMazePage() {
@@ -62077,7 +62096,7 @@ var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: CharacterMazePage,
   loader: loader$t,
-  meta: meta$r
+  meta: meta$s
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$s({ request }) {
   const url = new URL(request.url);
@@ -62092,7 +62111,7 @@ async function loader$s({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$q = ({ data: data2 }) => {
+var meta$r = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TextTypesComponent() {
@@ -62189,7 +62208,7 @@ var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TextTypesComponent,
   loader: loader$s,
-  meta: meta$q
+  meta: meta$r
 }, Symbol.toStringTag, { value: "Module" }));
 var CHAR_POOL = [
   { char: "\u3042", kana: "\u30A2", romaji: "a" },
@@ -62221,7 +62240,7 @@ async function loader$r({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$p = ({ data: data2 }) => {
+var meta$q = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function StudentTunnelEscapePage() {
@@ -62457,7 +62476,7 @@ var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: StudentTunnelEscapePage,
   loader: loader$r,
-  meta: meta$p
+  meta: meta$q
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$8 = "CONTENT_VCE_SPEAKING";
 async function fetchVceSpeakingContentData(supabase2) {
@@ -62589,14 +62608,14 @@ function VceSpeakingIndex() {
     }
   );
 }
-var meta$o = ({ data: data2 }) => {
+var meta$p = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingIndex,
   loader: loader$q,
-  meta: meta$o
+  meta: meta$p
 }, Symbol.toStringTag, { value: "Module" }));
 function parseEnglishAnswers(rawEnglishText) {
   if (!rawEnglishText)
@@ -62973,7 +62992,7 @@ async function loader$o({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$n = ({ data: data2 }) => {
+var meta$o = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function KanjiSudokuFrameView({ userId }) {
@@ -63039,7 +63058,7 @@ var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: KanjiSudokuRoute,
   loader: loader$o,
-  meta: meta$n
+  meta: meta$o
 }, Symbol.toStringTag, { value: "Module" }));
 var DEFAULT_CATEGORY = "Miscellaneous";
 var CATEGORY_ORDER$1 = [
@@ -63487,7 +63506,7 @@ async function loader$n({ request }) {
     kanjiReadingAvailable
   });
 }
-var meta$m = ({
+var meta$n = ({
   data: data2
 }) => {
   return generateModuleMeta(
@@ -64008,7 +64027,7 @@ var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: MemoryMatchPage,
   loader: loader$n,
-  meta: meta$m
+  meta: meta$n
 }, Symbol.toStringTag, { value: "Module" }));
 var CATEGORY_ORDER = [
   "Numbers",
@@ -64050,7 +64069,7 @@ async function loader$m({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$l = ({ data: data2 }) => {
+var meta$m = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Kanji200Component() {
@@ -64205,7 +64224,7 @@ var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: Kanji200Component,
   loader: loader$m,
-  meta: meta$l
+  meta: meta$m
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$7 = "CONTENT_VCE_WRITING";
 async function fetchVceWritingContentData(supabase2) {
@@ -64334,14 +64353,14 @@ function VceWritingIndex() {
     }
   );
 }
-var meta$k = ({ data: data2 }) => {
+var meta$l = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceWritingIndex,
   loader: loader$l,
-  meta: meta$k
+  meta: meta$l
 }, Symbol.toStringTag, { value: "Module" }));
 async function action$3({ request, context }) {
   try {
@@ -65425,7 +65444,7 @@ function TeacherDashboardPage() {
     ] })
   ] }) });
 }
-var meta$j = () => [
+var meta$k = () => [
   { title: "Teacher Dashboard | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
@@ -65434,7 +65453,7 @@ var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   action: action$2,
   default: TeacherDashboardPage,
   loader: loader$k,
-  meta: meta$j
+  meta: meta$k
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$6 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
@@ -65462,7 +65481,7 @@ async function loader$j({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$i = ({ data: data2 }) => {
+var meta$j = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Disclaimer() {
@@ -65564,7 +65583,7 @@ var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: Disclaimer,
   loader: loader$j,
-  meta: meta$i
+  meta: meta$j
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$5 = "CONTENT_REFERENCE";
 async function fetchReferenceContentData(supabase2) {
@@ -65765,14 +65784,14 @@ function ReferenceIndex() {
     }
   );
 }
-var meta$h = ({ data: data2 }) => {
+var meta$i = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ReferenceIndex,
   loader: loader$i,
-  meta: meta$h
+  meta: meta$i
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$h({ request }) {
   const url = new URL(request.url);
@@ -65787,7 +65806,7 @@ async function loader$h({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$g = ({ data: data2 }) => {
+var meta$h = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VocabIndexPage() {
@@ -66004,7 +66023,7 @@ var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: VocabIndexPage,
   loader: loader$h,
-  meta: meta$g
+  meta: meta$h
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$g({ request }) {
   const url = new URL(request.url);
@@ -66019,7 +66038,7 @@ async function loader$g({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$f = ({ data: data2 }) => {
+var meta$g = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function HanafudaFrameView({ userId }) {
@@ -66085,7 +66104,7 @@ var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: HanafudaRoute,
   loader: loader$g,
-  meta: meta$f
+  meta: meta$g
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$f({ request }) {
   const url = new URL(request.url);
@@ -66124,7 +66143,7 @@ async function loader$f({ request }) {
     errorMessage: fetchError
   });
 }
-var meta$e = ({ data: data2 }) => {
+var meta$f = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsHubIndex() {
@@ -66240,7 +66259,7 @@ var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: LessonsHubIndex,
   loader: loader$f,
-  meta: meta$e
+  meta: meta$f
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$e({ request }) {
   const url = new URL(request.url);
@@ -66255,7 +66274,7 @@ async function loader$e({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$d = ({ data: data2 }) => {
+var meta$e = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function PrivacyPolicy() {
@@ -66323,7 +66342,7 @@ var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: PrivacyPolicy,
   loader: loader$e,
-  meta: meta$d
+  meta: meta$e
 }, Symbol.toStringTag, { value: "Module" }));
 var generatedRoutes = [
   "/about",
@@ -66422,7 +66441,7 @@ async function loader$c({ request, context }) {
     currentPath: url.pathname
   });
 }
-var meta$c = ({ data: data2 }) => {
+var meta$d = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VocabCreatorPage() {
@@ -66731,7 +66750,7 @@ var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: VocabCreatorPage,
   loader: loader$c,
-  meta: meta$c
+  meta: meta$d
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$4 = "CONTENT_GAMES";
 async function fetchGamesContentData(supabase2) {
@@ -66906,14 +66925,14 @@ function GamesHubIndex() {
     }
   );
 }
-var meta$b = ({ data: data2 }) => {
+var meta$c = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: GamesHubIndex,
   loader: loader$b,
-  meta: meta$b
+  meta: meta$c
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$a({ request }) {
   const url = new URL(request.url);
@@ -67005,13 +67024,25 @@ function LegalIndex() {
     }
   );
 }
-var meta$a = ({ data: data2 }) => {
+var meta$b = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LegalIndex,
   loader: loader$a,
+  meta: meta$b
+}, Symbol.toStringTag, { value: "Module" }));
+var meta$a = () => [
+  { title: "Preparing report..." },
+  { name: "robots", content: "noindex, nofollow" }
+];
+function PrintReport() {
+  return null;
+}
+var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: PrintReport,
   meta: meta$a
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$9({ request }) {
@@ -67089,7 +67120,7 @@ function ShogiRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ShogiFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ShogiRoute,
   loader: loader$9,
@@ -67172,7 +67203,7 @@ function TermsOfService() {
 var meta$8 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TermsOfService,
   loader: loader$8,
@@ -71886,7 +71917,7 @@ function AccountSettingsRoute() {
 var meta$7 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
   default: AccountSettingsRoute,
@@ -72018,7 +72049,7 @@ function VceHubIndex() {
 var meta$6 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceHubIndex,
   loader: loader$6,
@@ -72099,7 +72130,7 @@ function IgoRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(IgoFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: IgoRoute,
   loader: loader$5,
@@ -72280,7 +72311,7 @@ function Contact() {
     }
   );
 }
-var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action,
   default: Contact,
@@ -72654,7 +72685,7 @@ function Prices() {
     }
   );
 }
-var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Prices,
   loader: loader$3,
@@ -73885,7 +73916,7 @@ function Home() {
 var meta$2 = ({ data: data2 }) => {
   return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Home,
   loader: loader$2,
@@ -74031,7 +74062,7 @@ function AboutPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
   ] }) });
 }
-var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: AboutPage,
   loader: loader$1,
@@ -74276,13 +74307,13 @@ function FaqPage() {
     }
   );
 }
-var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: FaqPage,
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-CdEq6oZm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-DIrrQ7Uz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-Bpn420Cu.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-DhJOtU2d.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/pen-line-Ca6UZK-Z.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/check-DeG_DXdq.js", "/assets/book-open-BcSBe34I.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-fiFuCPts.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-DzQa_WkA.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CIbJ70qX.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-bZiaHnFC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/trash-M8IYY5u8.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-Ds4dD2xE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-3jrkQqFG.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-DhQ9vAY3.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-Ci39Dwa4.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-jJlvEqAY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-DUoCPsoe.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-Bpn420Cu.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-BzFD6SBD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-CB2xsvA5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-TwxOdT-E.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-DZT4cpWG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-D9hn3j1C.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-D-XVQD4U.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-ULxVQPWc.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-BrnmjzYu.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-DCkQ8bXv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-BGlXAalN.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-BRcXcBmS.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-CpBac_h2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-DI2NMdc-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CqcCmJwI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-CLYNB9eI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-BMK4vq9H.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-DsXux5xD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-XGvPASZs.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-Dztk1nzq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BXQMMu_0.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CJ9Y5LSQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/SchoolAccountLink-C3TwCRTt.js", "/assets/users-CCf68Szi.js", "/assets/check-DeG_DXdq.js", "/assets/pen-line-Ca6UZK-Z.js", "/assets/trash-M8IYY5u8.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-D4_LXmIb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-BCQKxdz8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-C5mkBKy7.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-DyHg80gB.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-UFsLp3Gr.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-BPQAety-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-bQqgUs75.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-UaImBRj5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-games-i27JyUCW.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BnJ-RnFM.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-BTgTlJHr.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-pYJnRXmV.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-ePS9ylww.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/SchoolAccountLink-C3TwCRTt.js", "/assets/users-CCf68Szi.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CP8glOkJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-Cxlhd92B.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-C3-Y_VQt.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-6xqVBodH.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/flame-DuUwGVD5.js", "/assets/check-DeG_DXdq.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CrYDY-xY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-DuUwGVD5.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/check-DeG_DXdq.js", "/assets/yamato-configs-Br_y5R3E.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-DzQa_WkA.js", "/assets/book-open-BcSBe34I.js", "/assets/content-games-i27JyUCW.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-3jrkQqFG.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-lvXs3jX6.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/book-open-BcSBe34I.js", "/assets/users-CCf68Szi.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DSWBzrjQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-725fb981.js", "version": "725fb981" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-CdEq6oZm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-De3RudM-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-BlIBLTKh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-Br4Dnj8g.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/pen-line-Ca6UZK-Z.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/check-DeG_DXdq.js", "/assets/book-open-BcSBe34I.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-Dob3JAMQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-DzQa_WkA.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-QjKSbo_q.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-DJVg_dmh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/trash-M8IYY5u8.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-Ds4dD2xE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-3jrkQqFG.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-DhQ9vAY3.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-BWWPMBLF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-jJlvEqAY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-XBSS10Qb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-BlIBLTKh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-BzFD6SBD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-CSyyda1-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-TwxOdT-E.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-DZT4cpWG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-D9hn3j1C.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-BfKyiN2J.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-DPluzo_4.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-BrnmjzYu.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-DCkQ8bXv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-BGlXAalN.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-BRcXcBmS.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-CpBac_h2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-DI2NMdc-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CqcCmJwI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-CLYNB9eI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-BMK4vq9H.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-DsXux5xD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-XGvPASZs.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-Dztk1nzq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BXQMMu_0.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CJ9Y5LSQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/SchoolAccountLink-C3TwCRTt.js", "/assets/users-CCf68Szi.js", "/assets/check-DeG_DXdq.js", "/assets/pen-line-Ca6UZK-Z.js", "/assets/trash-M8IYY5u8.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-D4_LXmIb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-BCQKxdz8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-C5mkBKy7.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-DyHg80gB.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-UFsLp3Gr.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-BPQAety-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-bQqgUs75.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-UaImBRj5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-games-i27JyUCW.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BnJ-RnFM.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-BTgTlJHr.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-pYJnRXmV.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-ePS9ylww.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/SchoolAccountLink-C3TwCRTt.js", "/assets/users-CCf68Szi.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CP8glOkJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-Cxlhd92B.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-C3-Y_VQt.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-6xqVBodH.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/flame-DuUwGVD5.js", "/assets/check-DeG_DXdq.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-Y-6JBQka.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-gTHwmm15.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-DuUwGVD5.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/check-DeG_DXdq.js", "/assets/yamato-configs-D4DEBW9-.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-DzQa_WkA.js", "/assets/book-open-BcSBe34I.js", "/assets/content-games-i27JyUCW.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-3jrkQqFG.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-lvXs3jX6.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/book-open-BcSBe34I.js", "/assets/users-CCf68Szi.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DSWBzrjQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-gTHwmm15.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-B2vsdFVO.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-d2e2e135.js", "version": "d2e2e135" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
@@ -74651,13 +74682,21 @@ var routes = {
     caseSensitive: void 0,
     module: route44
   },
+  "routes/print-report": {
+    id: "routes/print-report",
+    parentId: "root",
+    path: "print-report",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route45
+  },
   "routes/games.shogi": {
     id: "routes/games.shogi",
     parentId: "root",
     path: "games/shogi",
     index: void 0,
     caseSensitive: void 0,
-    module: route45
+    module: route46
   },
   "routes/legal.terms": {
     id: "routes/legal.terms",
@@ -74665,7 +74704,7 @@ var routes = {
     path: "legal/terms",
     index: void 0,
     caseSensitive: void 0,
-    module: route46
+    module: route47
   },
   "routes/my-account": {
     id: "routes/my-account",
@@ -74673,7 +74712,7 @@ var routes = {
     path: "my-account",
     index: void 0,
     caseSensitive: void 0,
-    module: route47
+    module: route48
   },
   "routes/vce._index": {
     id: "routes/vce._index",
@@ -74681,7 +74720,7 @@ var routes = {
     path: "vce",
     index: true,
     caseSensitive: void 0,
-    module: route48
+    module: route49
   },
   "routes/games.igo": {
     id: "routes/games.igo",
@@ -74689,7 +74728,7 @@ var routes = {
     path: "games/igo",
     index: void 0,
     caseSensitive: void 0,
-    module: route49
+    module: route50
   },
   "routes/contact": {
     id: "routes/contact",
@@ -74697,7 +74736,7 @@ var routes = {
     path: "contact",
     index: void 0,
     caseSensitive: void 0,
-    module: route50
+    module: route51
   },
   "routes/prices": {
     id: "routes/prices",
@@ -74705,7 +74744,7 @@ var routes = {
     path: "prices",
     index: void 0,
     caseSensitive: void 0,
-    module: route51
+    module: route52
   },
   "routes/_index": {
     id: "routes/_index",
@@ -74713,7 +74752,7 @@ var routes = {
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route52
+    module: route53
   },
   "routes/about": {
     id: "routes/about",
@@ -74721,7 +74760,7 @@ var routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route53
+    module: route54
   },
   "routes/faq": {
     id: "routes/faq",
@@ -74729,7 +74768,7 @@ var routes = {
     path: "faq",
     index: void 0,
     caseSensitive: void 0,
-    module: route54
+    module: route55
   }
 };
 

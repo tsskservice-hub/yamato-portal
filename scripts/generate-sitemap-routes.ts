@@ -34,7 +34,8 @@ function getRoutes(dir: string, base = ""): string[] {
         name === "vocab-drill.$listId" ||
         name === "api.teacher-register" ||
         name === "teacher-dashboard" ||
-        name === "teacher-handwriting.$submissionId" 
+        name === "teacher-handwriting.$submissionId" ||
+        name === "print-report"
       ) {
         continue;
       }

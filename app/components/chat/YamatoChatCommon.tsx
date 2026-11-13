@@ -103,6 +103,8 @@ export type YamatoChatCommonProps = {
   assignedQuestion?: string;
   customWidget?: React.ReactNode;
   onExportPdf?: (content: string) => void;
+  /** AI の返答ごとに Export PDF ボタンを出すかを決める（未指定なら onExportPdf があるとき全返答に出す） */
+  canExportPdf?: (content: string) => boolean;
   // 動的クレジット計算プロパティ
   calculateCreditCost?: (imageCount: number) => number;
   baseCreditCost?: number;
@@ -136,6 +138,7 @@ export function YamatoChatCommon({
   assignedQuestion = "",
   customWidget,
   onExportPdf,
+  canExportPdf,
   calculateCreditCost,
   baseCreditCost = 2,
   image1CreditCost = 4,
@@ -763,7 +766,7 @@ export function YamatoChatCommon({
                               )}
 
                               {/* Export PDF ボタン */}
-                              {onExportPdf && (
+                              {onExportPdf && (!canExportPdf || canExportPdf(msg.content)) && (
                                 <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-end">
                                   <button
                                     type="button"
