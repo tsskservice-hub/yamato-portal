@@ -95,6 +95,10 @@ export function formatInviteCode(code: string) {
 // 学校が Google を使っていない先生に、学校のメールで Google アカウントを作ってもらうための案内
 export const GOOGLE_SIGNUP_URL = 'https://accounts.google.com/signup';
 
+// Google の同意画面に「〜 will be allowed to access…」と表示されるログイン用サーバー（Supabase）のドメイン。
+// Supabase のカスタムドメインに切り替えたら、ここも書き換える
+export const SIGN_IN_SERVER_HOST = 'ybquwzoreecxxbewjpdn.supabase.co';
+
 // ---------- 学校アカウント（Google / Microsoft）での確認 ----------
 
 // 学校アカウントの確認に使えるサインイン方法（Supabase の provider 名）。
