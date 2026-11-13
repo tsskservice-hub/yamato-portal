@@ -72,6 +72,8 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
   const [firstTryCorrect, setFirstTryCorrect] = useState(0);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [shakeOption, setShakeOption] = useState<number | null>(null);
+  // 矢印キーで選んでいる選択肢（表示上の位置 0〜3）。null = まだ選んでいない
+  const [activePos, setActivePos] = useState<number | null>(null);
 
   const { playSound, playCompleteSound } = useSoundEffect();
   const completedRef = useRef(false);
@@ -107,6 +109,7 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
     setSolved(false);
     setFirstTryCorrect(0);
     setReviewOpen(false);
+    setActivePos(null);
     completedRef.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -311,14 +314,46 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
     setWrongPicks([]);
     setSolved(false);
     setReviewOpen(false);
+    setActivePos(null);
+  };
+
+  /**
+   * 矢印キーで選択肢を移動する。選択肢は画面幅が広い時は2列、狭い時は1列に並ぶので、
+   * ←→ は1つずつ、↑↓ は1行ずつ動く。まちがえた選択肢（選べないもの）は飛ばす。
+   */
+  const moveActive = (key: string) => {
+    const n = currentOrder.length;
+    if (n === 0) return;
+    const cols =
+      typeof window !== "undefined" && window.matchMedia("(min-width: 640px)").matches ? 2 : 1;
+    const step = key === "ArrowLeft" ? -1 : key === "ArrowRight" ? 1 : key === "ArrowUp" ? -cols : cols;
+    const selectable = (pos: number) => !wrongPicks.includes(currentOrder[pos]);
+
+    // まだ何も選んでいなければ、↓→ は最初、↑← は最後の選べる選択肢から
+    if (activePos === null) {
+      const order = step > 0 ? [...Array(n).keys()] : [...Array(n).keys()].reverse();
+      const first = order.find(selectable);
+      if (first !== undefined) setActivePos(first);
+      return;
+    }
+    let pos = activePos;
+    for (let i = 0; i < n; i++) {
+      pos = (((pos + step) % n) + n) % n;
+      if (selectable(pos)) {
+        setActivePos(pos);
+        return;
+      }
+    }
   };
 
   // ---------- キーボード操作 ----------
-  const keyStateRef = useRef({ phase, solved, currentOrder, togglePlay, nextFromStory, chooseOption, nextQuestion, heard: false });
+  const keyStateRef = useRef({ phase, solved, currentOrder, activePos, moveActive, togglePlay, nextFromStory, chooseOption, nextQuestion, heard: false });
   keyStateRef.current = {
     phase,
     solved,
     currentOrder,
+    activePos,
+    moveActive,
     togglePlay,
     nextFromStory,
     chooseOption,
@@ -358,6 +393,21 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
         if (e.key === "Enter" && s.solved) {
           e.preventDefault();
           s.nextQuestion();
+          return;
+        }
+        if (s.solved) return;
+
+        // ↑↓←→ で選択肢を移動
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+          e.preventDefault();
+          s.moveActive(e.key);
+          return;
+        }
+        // Enter / Space で、矢印キーで選んでいる選択肢に答える
+        if ((e.key === "Enter" || e.code === "Space") && s.activePos !== null) {
+          e.preventDefault();
+          if (el instanceof HTMLElement && el.tagName === "BUTTON") el.blur();
+          s.chooseOption(s.currentOrder[s.activePos]);
           return;
         }
         const pos = OPTION_LABELS.indexOf(e.key.toUpperCase());
@@ -630,12 +680,17 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
                 const isCorrect = originalIndex === currentQuestion.answerIndex;
                 const isWrong = wrongPicks.includes(originalIndex);
                 const showCorrect = solved && isCorrect;
+                const isActive = !solved && !isWrong && activePos === pos;
                 return (
                   <button
                     key={originalIndex}
                     type="button"
-                    onClick={() => chooseOption(originalIndex)}
+                    onClick={() => {
+                      setActivePos(pos);
+                      chooseOption(originalIndex);
+                    }}
                     disabled={solved || isWrong}
+                    aria-pressed={isActive}
                     className={`text-left p-4 rounded-2xl border-2 font-bold text-sm sm:text-base transition flex items-start gap-3 ${
                       showCorrect
                         ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200"
@@ -643,6 +698,8 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
                         ? "border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/30 text-rose-400 dark:text-rose-500 line-through cursor-not-allowed"
                         : solved
                         ? "border-slate-200 dark:border-slate-700 text-slate-400 cursor-default"
+                        : isActive
+                        ? "border-orange-500 ring-4 ring-orange-200 dark:ring-orange-900/60 bg-orange-50 dark:bg-orange-950/30 text-slate-900 dark:text-slate-100 cursor-pointer"
                         : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:border-orange-500 hover:bg-orange-50/60 dark:hover:bg-orange-950/20 cursor-pointer active:scale-[0.98]"
                     } ${shakeOption === originalIndex ? "animate-shake" : ""}`}
                   >
@@ -652,6 +709,8 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
                           ? "bg-emerald-500 text-white"
                           : isWrong
                           ? "bg-rose-200 dark:bg-rose-900 text-rose-600 dark:text-rose-300"
+                          : isActive
+                          ? "bg-orange-500 text-white"
                           : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                       }`}
                     >
@@ -665,7 +724,8 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
 
             {!solved && (
               <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-                Click an answer, or press {OPTION_LABELS.slice(0, currentOrder.length).join(" / ")} on your keyboard.
+                Click an answer, or use the arrow keys (↑ ↓ ← →) and press Enter. You can also press{" "}
+                {OPTION_LABELS.slice(0, currentOrder.length).join(" / ")}.
               </p>
             )}
 
