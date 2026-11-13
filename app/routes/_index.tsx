@@ -6,7 +6,7 @@ import { yamatoFetch } from '~/lib/yamatoApi';
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useRouteLoaderData } from '@remix-run/react';
+import { useLocation, useNavigate, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
@@ -84,12 +84,24 @@ export default function Home() {
     isGamesError && 'CONTENT_GAMES',
   ].filter(Boolean);
 
+  // 💡 ヘッダーのセクションボタン（/#section-xxx）から来た場合は、そのセクションを見たいという明示的な操作
+  const location = useLocation();
+  const sectionHash = location.hash.startsWith('#section-') ? location.hash.slice(1) : '';
+
   // 💡 先生がログインしている場合、トップページを開いた瞬間に教師ダッシュボードへ自動リダイレクト
+  //    （ただしヘッダーのセクションボタンから来たときは LP を表示する）
   useEffect(() => {
-    if (user && isTeacher) {
+    if (user && isTeacher && !sectionHash) {
       navigate('/teacher-dashboard', { replace: true });
     }
-  }, [user, isTeacher, navigate]);
+  }, [user, isTeacher, sectionHash, navigate]);
+
+  // 💡 セクションへのスクロール。各セクションは Supabase から後で読み込まれ、読み込みのたびに位置がずれるので、
+  //    ボタンを押した時（location.key が変わる）と各コンテンツが届いた時に、もう一度スクロールし直す
+  useEffect(() => {
+    if (!sectionHash) return;
+    document.getElementById(sectionHash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [location.key, sectionHash, generalData, vceSpeakingData, vceWritingData, referenceData, gamesData, otherData]);
 
   // 料金プランの動的取得ステート
   const [isPriceLoading, setIsPriceLoading] = useState<boolean>(true);
@@ -310,7 +322,7 @@ export default function Home() {
   };
 
   // 教師判定中でリダイレクト待機中の場合のローディング表示
-  if (user && isTeacher) {
+  if (user && isTeacher && !sectionHash) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />

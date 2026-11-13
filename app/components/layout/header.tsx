@@ -3,7 +3,7 @@
  * @description ポータル共通ヘッダー（教師ダッシュボードボタンをニックネームの左隣に追加版）
  */
 import React from 'react';
-import { Link, useLocation } from '@remix-run/react';
+import { Link } from '@remix-run/react';
 import { Coins, KeyRound, ShieldCheck, LogOut, User, HelpCircle, GraduationCap } from 'lucide-react';
 
 type HeaderProps = {
@@ -27,9 +27,6 @@ export default function Header({
   onOpenAuth,
   onSignOut 
 }: HeaderProps) {
-  const location = useLocation();
-  const isHome = location.pathname === '/';
-
   const trimmedNickname = nickname ? nickname.trim() : "";
   const displayNickname = trimmedNickname !== "" ? trimmedNickname : "Set Nickname";
 
@@ -51,9 +48,9 @@ export default function Header({
             </span>
           </Link>
 
-          {isHome && (
-            <div className="hidden md:flex items-center space-x-1.5">
-              {/* ページ内ジャンプ（左から VCE, Junior, References, Games, General。色は各セクションに合わせて全て別色） */}
+          {/* どのページからでも LP（/）の該当セクションへ飛ぶ。スクロールは _index.tsx がハッシュを見て行う */}
+          <div className="hidden md:flex items-center space-x-1.5">
+              {/* ジャンプ先（左から VCE, Junior, References, Games, General。色は全て別色） */}
               {[
                 { href: '/#section-vce', label: 'VCE', color: 'bg-red-500/10 text-red-600 hover:bg-red-500/20' },
                 { href: '/#section-junior', label: 'Junior', color: 'bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20' },
@@ -62,18 +59,17 @@ export default function Header({
                 { href: '/#section-games', label: '🎮', title: 'Games', color: 'bg-purple-500/10 text-purple-600 hover:bg-purple-500/20' },
                 { href: '/#section-general', label: '🌍', title: 'General', color: 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20' },
               ].map(({ href, label, title, color }) => (
-                <a
+                <Link
                   key={href}
-                  href={href}
+                  to={href}
                   title={title}
                   aria-label={title}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center ${color}`}
                 >
                   {label}
-                </a>
+                </Link>
               ))}
-            </div>
-          )}
+          </div>
         </div>
 
         {/* 右側グループ：ユーザー情報、プラン、FAQ、My Account、認証ボタン */}
