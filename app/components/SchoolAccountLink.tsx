@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { supabase } from '~/lib/supabaseClient';
-import { GOOGLE_SIGNUP_URL, SCHOOL_SSO_PROVIDERS, type SchoolSsoProvider } from '~/lib/teacher-config';
+import { GOOGLE_SIGNUP_URL, SCHOOL_SSO_PROVIDERS, SIGN_IN_SERVER_HOST, type SchoolSsoProvider } from '~/lib/teacher-config';
 
 function enabledProviders() {
   const raw = String((import.meta as any).env?.VITE_SCHOOL_SSO_PROVIDERS ?? '');
@@ -81,6 +81,14 @@ export function SchoolAccountLink({ verifiedEmails, returnPath, teacherHelp = fa
       )}
 
       {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
+
+      {/* Google の同意画面に見慣れないドメインが出て不安にならないよう、先に伝えておく */}
+      {providers.length > 0 && (
+        <p className="text-[11px] text-slate-500">
+          Google&apos;s sign-in screen will mention <span className="font-mono break-all">{SIGN_IN_SERVER_HOST}</span>. This is AI Yamato&apos;s
+          secure sign-in server, so it&apos;s safe to continue. We only use your email address, to confirm your school.
+        </p>
+      )}
 
       {/* 学校が Google を使っていない先生：学校のメールのまま Google アカウントを作れば、同じボタンで確認できる */}
       {teacherHelp && verifiedEmails.length === 0 && providers.some((p) => p.id === 'google') && (

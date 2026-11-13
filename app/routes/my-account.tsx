@@ -516,6 +516,9 @@ export default function AccountSettingsRoute() {
               We check every teacher account before classes can be created. Adding your state and school below helps us confirm it.
               You can keep using AI Yamato as usual in the meantime.
             </p>
+            <a href="/teacher-dashboard" className="inline-block mt-2 text-xs font-semibold text-indigo-700 hover:underline">
+              Open your Teacher Dashboard to verify your school Google account →
+            </a>
           </div>
         )}
 

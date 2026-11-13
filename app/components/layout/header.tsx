@@ -12,6 +12,7 @@ type HeaderProps = {
   credits?: number;
   nickname?: string;
   isTeacher?: boolean; // 💡 教師フラグを受け取るプロパティ
+  isTeacherPending?: boolean; // 💡 先生の申請が審査中（控えめな「in review」ボタンを出す）
   onOpenAuth?: (mode: 'signin' | 'signup') => void;
   onSignOut?: () => void;
 };
@@ -22,7 +23,8 @@ export default function Header({
   credits = 10, 
   nickname = "",
   isTeacher = false, // 💡 デフォルトは false
-  onOpenAuth, 
+  isTeacherPending = false,
+  onOpenAuth,
   onSignOut 
 }: HeaderProps) {
   const location = useLocation();
@@ -80,6 +82,17 @@ export default function Header({
             >
               <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
               <span>Teacher Panel</span>
+            </Link>
+          )}
+          {/* 💡 審査中の先生：学校アカウントの確認に戻れるよう、控えめな見た目で出す（ページ側は審査中の案内だけを表示する） */}
+          {user && !isTeacher && isTeacherPending && (
+            <Link
+              to="/teacher-dashboard"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-dashed transition-all cursor-pointer bg-white border-slate-300 text-slate-500 hover:bg-slate-50"
+              title="Your teacher account is being reviewed"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+              <span>Teacher Panel (in review)</span>
             </Link>
           )}
 
