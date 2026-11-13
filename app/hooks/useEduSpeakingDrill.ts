@@ -246,6 +246,14 @@ export function useEduSpeakingDrill({
   const [isListening, setIsListening] = useState(false);
   const [spokenText, setSpokenText] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  // 録音停止後、判定の前に「この文字でいいか」を生徒が確認するステップ
+  // （意図と違う文字に変換されたら、判定せず・試行回数を減らさずに録音し直せる）
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
+  const awaitingConfirmRef = useRef(false);
+  const setAwaiting = useCallback((v: boolean) => {
+    awaitingConfirmRef.current = v;
+    setAwaitingConfirm(v);
+  }, []);
   const [attempts, setAttempts] = useState(0);
   const [result, setResult] = useState<"correct" | "revealed" | null>(null);
   const [shownModel, setShownModel] = useState<Model | null>(null);
@@ -345,7 +353,8 @@ export function useEduSpeakingDrill({
     setSpokenText(""); spokenTextRef.current = "";
     setTypedAnswer(""); setAttempts(0); attemptsRef.current = 0;
     setResult(null); resultRef.current = null; setShownModel(null); finalizedRef.current = false;
-  }, []);
+    setAwaiting(false);
+  }, [setAwaiting]);
 
   const finishSession = useCallback(() => {
     setStatusMessage("Session completed! Saying goodbye...");
@@ -492,6 +501,13 @@ export function useEduSpeakingDrill({
     const spoken = spokenTextRef.current.trim();
     if (!spoken) { setStatusMessage("No speech detected."); return; }
 
+    // すぐには判定せず、生徒に「この文字でいいか」を確認してもらう
+    setAwaiting(true);
+    setStatusMessage("Is this what you said? If not, press 'Record Again' (Space). If yes, press 'Check' (Enter).");
+  }, [setAwaiting]);
+
+  /** 認識された文字を判定する（生徒が「この文字でOK」と確認した後に呼ばれる） */
+  const judgeSpoken = useCallback((spoken: string) => {
     const round = currentRoundRef.current;
     if (round && round.mode === "ask" && askStepRef.current === "question") {
       const ok = isStrictMatch(normQuestion(spoken), normQuestion(round.dialogue.prompt_text), JP_SIMILARITY_THRESHOLD);
@@ -530,6 +546,15 @@ export function useEduSpeakingDrill({
     }
   }, [goNext, startReply]);
 
+  /** ✅ 生徒が「この文字でOK」と確認した */
+  const confirmSpoken = useCallback(() => {
+    if (!awaitingConfirmRef.current || resultRef.current || isListeningRef.current) return;
+    setAwaiting(false);
+    const spoken = spokenTextRef.current.trim();
+    if (!spoken) return;
+    judgeSpoken(spoken);
+  }, [judgeSpoken, setAwaiting]);
+
   const startRecording = useCallback(() => {
     if (isListeningRef.current || isAIPlayingRef.current || resultRef.current) return;
     if (currentRoundRef.current?.mode === "ask" && askStepRef.current === "typing") return;
@@ -552,6 +577,7 @@ export function useEduSpeakingDrill({
       recognition.onstart = () => {
         if (recognitionRef.current !== recognition) return;
         isListeningRef.current = true; setIsListening(true); setSpokenText("");
+        setAwaiting(false);
         setStatusMessage("🔴 Recording... (Spacebar to Stop)");
       };
       recognition.onresult = (event: any) => {
@@ -578,7 +604,7 @@ export function useEduSpeakingDrill({
       isListeningRef.current = false; setIsListening(false);
       setStatusMessage("Could not start recording. Please check microphone permissions.");
     }
-  }, [finalizeVerification]);
+  }, [finalizeVerification, setAwaiting]);
 
   const stopRecordingAndVerify = useCallback(() => {
     if (!isListeningRef.current) return;
@@ -645,7 +671,7 @@ export function useEduSpeakingDrill({
   return {
     loadState, totalItems: dialogues.length, isStarted, sessionFinished, isFullscreen, setIsFullscreen,
     currentIndex, currentRound, askStep, typedAnswer, setTypedAnswer, requiredCount, isAIPlaying,
-    isListening, spokenText, statusMessage, attempts, result, shownModel, score, inputRef,
+    isListening, spokenText, statusMessage, awaitingConfirm, confirmSpoken, attempts, result, shownModel, score, inputRef,
     startSession, stopSession, startRecording, stopRecordingAndVerify, restartRecording,
     replayQuestion, replyAgain, submitTypedAnswer, goNext, clearTimers, stopAllMedia,
   };

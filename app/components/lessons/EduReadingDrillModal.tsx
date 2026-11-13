@@ -87,6 +87,15 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const [userInput, setUserInput] = useState("");
   const [userSpokenText, setUserSpokenText] = useState(""); // 認識されたテキスト
 
+  // 録音停止後、判定の前に「この文字でいいか」を生徒が確認するステップ
+  // （意図と違う文字に変換されたら、判定せずに録音し直せる）
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
+  const awaitingConfirmRef = useRef(false);
+  const setAwaiting = (v: boolean) => {
+    awaitingConfirmRef.current = v;
+    setAwaitingConfirm(v);
+  };
+
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
@@ -152,6 +161,10 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     });
   };
 
+  const resetSpokenEdit = () => {
+    setAwaiting(false);
+  };
+
   const stopAllMedia = () => {
     if (activeAudioRef.current) {
       activeAudioRef.current.pause();
@@ -193,6 +206,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     setUserInput("");
     setUserSpokenText("");
     spokenTextRef.current = "";
+    resetSpokenEdit();
     setFeedback(null);
     setIsFinished(false);
     setIsListening(false);
@@ -274,6 +288,24 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
       return;
     }
 
+    // すぐには判定せず、生徒に「この文字でいいか」を確認してもらう
+    setAwaiting(true);
+    setSpeechStatusMessage(
+      "Is this what you said? If not, press 'Record Again' (Space). If yes, press 'Check' (Enter)."
+    );
+  }, []);
+
+  // ✅ 生徒が「この文字でOK」と確認した時に判定する
+  const confirmSpokenText = useCallback(() => {
+    if (!awaitingConfirmRef.current || speechVerifiedRef.current) return;
+    const spoken = spokenTextRef.current.trim();
+    setAwaiting(false);
+    if (!spoken) return;
+    verifySpokenText(spoken);
+  }, []);
+
+  /** 発話テキストを判定する */
+  const verifySpokenText = (spoken: string) => {
     const target = currentItemRef.current.jp_text;
     const targetClean = normalizeJapanese(target);
     const spokenClean = normalizeJapanese(spoken);
@@ -289,7 +321,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     } else {
       setSpeechStatusMessage(`Heard: "${spoken}" (Target: ${target}). Try recording again!`);
     }
-  }, []);
+  };
 
   // 🎙️ 録音開始
   const startRecording = useCallback(() => {
@@ -327,6 +359,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         isListeningRef.current = true;
         setIsListening(true);
         setUserSpokenText("");
+        setAwaiting(false);
         setSpeechStatusMessage("🔴 Recording... Speak clearly, or press Spacebar to Stop & Verify.");
       };
 
@@ -424,6 +457,18 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen, isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
 
+  // ⏎ 確認待ちの時は Enter で判定
+  useEffect(() => {
+    if (!isOpen || !awaitingConfirm) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Enter" || e.repeat) return;
+      e.preventDefault();
+      confirmSpokenText();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, awaitingConfirm, confirmSpokenText]);
+
   // 英語意味タイピング判定
   const handleTypingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -443,6 +488,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
         setUserInput("");
         setUserSpokenText("");
         spokenTextRef.current = "";
+        resetSpokenEdit();
         setFeedback(null);
         setSpeechVerified(false);
         speechVerifiedRef.current = false;
@@ -601,6 +647,28 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
                   >
                     {speechStatusMessage}
                   </p>
+                )}
+
+                {/* 判定前の確認：意図と違う文字なら判定せずに録音し直せる */}
+                {awaitingConfirm && !speechVerified && !isListening && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      className="py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                    >
+                      <span>🔁 Record Again (Space)</span>
+                      <span className="text-xs font-bold opacity-75">Not what I said</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={confirmSpokenText}
+                      className="py-3 px-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                    >
+                      <span>✅ Check (Enter)</span>
+                      <span className="text-xs font-bold opacity-90">This is what I said</span>
+                    </button>
+                  </div>
                 )}
               </div>
 

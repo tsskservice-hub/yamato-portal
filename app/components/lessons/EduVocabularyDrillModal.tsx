@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
+import { normalizeEnglish } from "~/utils/normalization";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
 interface EduVocabularyDrillModalProps {
@@ -15,6 +16,7 @@ interface EduVocabularyDrillModalProps {
 }
 
 type DrillMode = "jp_to_en" | "audio_to_en" | "en_to_jp" | "en_to_voice";
+
 
 export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = ({
   vocabulary = [],
@@ -34,6 +36,8 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
   // 音声認識用・音声合成・音声再生用の参照
   const [isListening, setIsListening] = useState(false);
   const [speechStatusMessage, setSpeechStatusMessage] = useState("");
+  // 認識された文字（判定前）。意図と違えば、判定せずに録音し直せる
+  const [pendingSpoken, setPendingSpoken] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
   // 再生中のHTMLAudioElementを保持して重複再生（反響）を防ぐためのref
@@ -64,6 +68,8 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       setScore(0);
       setUserInput("");
       setFeedback(null);
+      setPendingSpoken(null);
+      setSpeechStatusMessage("");
       setIsFinished(false);
       completedRef.current = false;
       setCurrentMode("jp_to_en");
@@ -135,36 +141,15 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     setCurrentMode(mode);
     setUserInput("");
     setFeedback(null);
+    setPendingSpoken(null);
+    setSpeechStatusMessage("");
     if (mode === "audio_to_en") {
       playVocabAudio(currentItem);
     }
   };
 
-  // 表記ゆれや数字・句読点を正規化するヘルパー関数
-  const normalizeAnswer = (str: string): string => {
-    if (!str) return "";
-    let s = str.trim().toLowerCase();
-    
-    // 末尾の句読点（? . ! ,）を取り除く
-    s = s.replace(/[?.!,]+$/, "");
-    
-    // 数字とスペルの相互変換対応（1 ⇔ one など）
-    s = s.replace(/\b1\b/g, "one");
-    s = s.replace(/\bone\b/g, "1");
-    s = s.replace(/\b2\b/g, "two");
-    s = s.replace(/\btwo\b/g, "2");
-    s = s.replace(/\b3\b/g, "three");
-    s = s.replace(/\bthree\b/g, "3");
-    s = s.replace(/\b4\b/g, "four");
-    s = s.replace(/\bfour\b/g, "4");
-    s = s.replace(/\b5\b/g, "five");
-    s = s.replace(/\bfive\b/g, "5");
-    
-    // 連続する空白を1つにまとめる
-    s = s.replace(/\s+/g, " ");
-    
-    return s;
-  };
+  // 表記ゆれや数字・句読点を正規化（全レッスン共通の normalizeEnglish を使う）
+  const normalizeAnswer = (str: string): string => normalizeEnglish(str);
 
   // タイピング回答の判定
   const handleSubmit = (e: React.FormEvent) => {
@@ -235,39 +220,17 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
     recognition.onstart = () => {
       setIsListening(true);
+      setPendingSpoken(null);
+      setFeedback(null);
       setSpeechStatusMessage("Listening... Please speak clearly in Japanese.");
     };
 
     recognition.onresult = (event: any) => {
-      const speechResult = event.results[0][0].transcript;
-      const targetJp = currentItem.jp_text.trim();
-      
-      if (speechResult.includes(targetJp) || targetJp.includes(speechResult)) {
-        setFeedback("correct");
-        playSound(); // ✅ 正解音
-        setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
-        const nextScore = score + 1;
-        setScore(nextScore);
-
-        setTimeout(() => {
-          setFeedback(null);
-          setSpeechStatusMessage("");
-          setIsListening(false);
-          if (nextScore >= targetScore) {
-            finishDrill();
-          } else {
-            setCurrentIndex((prev) => prev + 1);
-          }
-        }, 1200);
-      } else {
-        setFeedback("incorrect");
-        setSpeechStatusMessage(`Recognised: "${speechResult}" - Try again!`);
-        setTimeout(() => {
-          setFeedback(null);
-          setSpeechStatusMessage("");
-          setIsListening(false);
-        }, 1500);
-      }
+      const speechResult = String(event.results[0][0].transcript || "").trim();
+      if (!speechResult) return;
+      // すぐには判定せず、生徒に「この文字でいいか」を確認してもらう
+      setPendingSpoken(speechResult);
+      setSpeechStatusMessage("Is this what you said? If not, record again. If yes, press Check.");
     };
 
     recognition.onerror = () => {
@@ -283,6 +246,38 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       recognition.start();
     } catch (err) {
       setIsListening(false);
+    }
+  };
+
+  // ✅ 生徒が「この文字でOK」と確認した時に判定する
+  const confirmSpoken = () => {
+    const speechResult = pendingSpoken;
+    if (!speechResult || feedback !== null) return;
+    setPendingSpoken(null);
+    const targetJp = currentItem.jp_text.trim();
+
+    if (speechResult.includes(targetJp) || targetJp.includes(speechResult)) {
+      setFeedback("correct");
+      playSound(); // ✅ 正解音
+      setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
+      const nextScore = score + 1;
+      setScore(nextScore);
+
+      setTimeout(() => {
+        setFeedback(null);
+        setSpeechStatusMessage("");
+        if (nextScore >= targetScore) {
+          finishDrill();
+        } else {
+          setCurrentIndex((prev) => prev + 1);
+        }
+      }, 1200);
+    } else {
+      setFeedback("incorrect");
+      setSpeechStatusMessage(`Recognised: "${speechResult}" - Try again!`);
+      setTimeout(() => {
+        setFeedback(null);
+      }, 1500);
     }
   };
 
@@ -454,19 +449,52 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
               </form>
             ) : (
               <div className="text-center space-y-4 py-2">
-                <button
-                  type="button"
-                  onClick={startSpeechRecognition}
-                  disabled={isListening}
-                  className={`w-full py-5 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-3 ${
-                    isListening
-                      ? "bg-amber-500 animate-pulse"
-                      : "bg-orange-500 hover:bg-orange-600 active:scale-95"
-                  }`}
-                >
-                  <span className="text-2xl">🎤</span>
-                  <span>{isListening ? "Listening... Speak now!" : "Click to Speak in Japanese"}</span>
-                </button>
+                {pendingSpoken === null ? (
+                  <button
+                    type="button"
+                    onClick={startSpeechRecognition}
+                    disabled={isListening || feedback === "correct"}
+                    className={`w-full py-5 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-3 ${
+                      isListening
+                        ? "bg-amber-500 animate-pulse"
+                        : "bg-orange-500 hover:bg-orange-600 active:scale-95"
+                    }`}
+                  >
+                    <span className="text-2xl">🎤</span>
+                    <span>{isListening ? "Listening... Speak now!" : "Click to Speak in Japanese"}</span>
+                  </button>
+                ) : (
+                  // 判定前の確認：意図と違う文字なら判定せずに録音し直せる
+                  <div className="space-y-3">
+                    <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1">
+                        Your Spoken Text (認識されたあなたの発音):
+                      </span>
+                      <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
+                        "{pendingSpoken}"
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={startSpeechRecognition}
+                        disabled={isListening}
+                        className="py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                      >
+                        <span>🔁 Record Again</span>
+                        <span className="text-xs font-bold opacity-75">Not what I said</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={confirmSpoken}
+                        className="py-3 px-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                      >
+                        <span>✅ Check</span>
+                        <span className="text-xs font-bold opacity-90">This is what I said</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {speechStatusMessage && (
                   <p className={`text-sm font-bold ${feedback === "correct" ? "text-emerald-600" : "text-slate-600 dark:text-slate-400"}`}>
                     {speechStatusMessage}

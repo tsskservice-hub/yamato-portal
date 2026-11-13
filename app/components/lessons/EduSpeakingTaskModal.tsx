@@ -103,6 +103,13 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
         return;
       }
 
+      // Enter: 確認待ちの時に「この文字で判定」
+      if (e.key === "Enter" && d.awaitingConfirm && !d.isListening && !isTextField(document.activeElement)) {
+        e.preventDefault();
+        if (!e.repeat) d.confirmSpoken();
+        return;
+      }
+
       if (e.code === "KeyR" && d.isListening && !isTextField(document.activeElement)) {
         e.preventDefault();
         if (!e.repeat) d.restartRecording();
@@ -261,6 +268,28 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
                 <span>🔄</span>
                 <span>Restart Recording (R) — the text is wrong, start over</span>
               </button>
+            )}
+
+            {/* 判定前の確認：意図と違う文字なら、判定せず・試行回数を減らさずに録音し直せる */}
+            {drill.awaitingConfirm && !drill.isListening && !drill.result && (
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={drill.startRecording}
+                  className="py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-indigo-500 hover:text-indigo-600 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                >
+                  <span>🔁 Record Again (Space)</span>
+                  <span className="text-xs font-bold opacity-75">Not what I said</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={drill.confirmSpoken}
+                  className="py-3 px-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm transition shadow flex flex-col items-center justify-center cursor-pointer active:scale-95"
+                >
+                  <span>✅ Check (Enter)</span>
+                  <span className="text-xs font-bold opacity-90">This is what I said</span>
+                </button>
+              </div>
             )}
 
             {drill.result === "correct" && (
