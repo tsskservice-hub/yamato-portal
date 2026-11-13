@@ -5,6 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { isProductionHost } from '../utils/developerOnly';
 
 export interface PlanConfig {
   id: string; // Stripe の Price ID または 'free'
@@ -65,15 +66,30 @@ export const CAMPAIGN_NOTICE: CampaignNotice = {
 };
 
 // Supabase kl_app のキー名
-const KNOWLEDGE_KEY = 'PRICE_PLANS';
+// 本番（jptutoraiyamato.com）は公開用の Price ID、プレビュー（*.pages.dev）・localhost は Stripe sandbox 用の Price ID を使う
+export const LIVE_PRICE_PLANS_KEY = 'PRICE_PLANS';
+export const SANDBOX_PRICE_PLANS_KEY = 'PRICE_PLANS_SANDBOX';
 
 /**
- * Supabase 'kl_app' テーブルから PRICE_PLANS データを取得します。
+ * どのプラン一覧（公開用 / sandbox 用）を使うかを、開いているドメインで決める
+ * ※ サーバー側（create-checkout-session）も同じ関数で判定するので、画面と決済で食い違わない
+ */
+export function getPricePlansKey(hostname: string): string {
+  return isProductionHost(hostname) ? LIVE_PRICE_PLANS_KEY : SANDBOX_PRICE_PLANS_KEY;
+}
+
+/**
+ * Supabase 'kl_app' テーブルからプランデータを取得します。
+ * hostname を省略するとブラウザの現在のドメインで判定します（サーバー側では必ず渡すこと）。
  * 取得失敗・データ不在時は null を返し、PageLayout 経由で DataErrorState を表示させます。
  */
 export async function fetchPricePlansData(
-  supabaseClient: SupabaseClient
+  supabaseClient: SupabaseClient,
+  hostname?: string
 ): Promise<PricePlansKnowledge | null> {
+  const host = hostname ?? (typeof window !== 'undefined' ? window.location.hostname : '');
+  // ドメインが分からないときは安全側（公開用）にする
+  const KNOWLEDGE_KEY = host ? getPricePlansKey(host) : LIVE_PRICE_PLANS_KEY;
   try {
     const { data: row, error } = await supabaseClient
       .from('kl_app')

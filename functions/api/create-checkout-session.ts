@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { getPlanByPriceId } from '../../app/data/price-plans';
+import { getPlanByPriceId, fetchPricePlansData, PlanConfig } from '../../app/data/price-plans';
+import { isProductionHost } from '../../app/utils/developerOnly';
 
 // 公開しても安全な値（ブラウザ側と同じ publishable key）。ログイン情報の確認だけに使う
 const DEFAULT_SUPABASE_URL = 'https://ybquwzoreecxxbewjpdn.supabase.co';
@@ -37,13 +38,26 @@ export const onRequestPost = async (context: any) => {
       return json({ error: 'Server configuration error' }, 500);
     }
 
-    // priceId に一致するプラン情報を取得
-    const plan = getPlanByPriceId(priceId);
-    if (!plan) {
-      return json({ error: 'Invalid price ID' }, 400);
+    const url = new URL(request.url);
+
+    // 🧪 本番は公開用（live）、プレビュー・localhost は sandbox（test）の Stripe を使う
+    // 鍵と環境が食い違っていたら止める（プレビューで本物の支払いが起きる／本番でテスト決済になる、を防ぐ）
+    const isProduction = isProductionHost(url.hostname);
+    const keyIsLive = env.STRIPE_SECRET_KEY.includes('_live_');
+    if (isProduction !== keyIsLive) {
+      console.error(`Stripe key mode mismatch: host=${url.hostname}, liveKey=${keyIsLive}`);
+      return json({ error: 'Server configuration error' }, 500);
     }
 
-    const url = new URL(request.url);
+    // priceId に一致するプラン情報を、サーバー側で Supabase（kl_app）から取得する
+    // ※ クレジット数はブラウザから受け取らず、必ずここで決める
+    const pricePlans = await fetchPricePlansData(supabase as any, url.hostname);
+    const plan = pricePlans?.pricePlans
+      ? getPlanByPriceId(pricePlans.pricePlans as Record<string, PlanConfig>, priceId)
+      : undefined;
+    if (!plan || plan.id === 'free' || plan.regularCredits + plan.bonusCredits <= 0) {
+      return json({ error: 'Invalid price ID' }, 400);
+    }
     const origin = `${url.protocol}//${url.host}`;
 
     const stripeParams = new URLSearchParams();
