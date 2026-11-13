@@ -155,8 +155,8 @@ export function PortalModulesGrid({
           </div>
         )}
 
-        {/* 🌟 4.5. Lessons & Interactive Units (lessons._index.tsxへの誘導カード) */}
-        <div className="space-y-4 pt-4">
+        {/* 🌟 4.5. Lessons & Interactive Units (lessons._index.tsxへの誘導カード) — Junior 向け。ヘッダーの Junior ボタンのジャンプ先 */}
+        <div id="section-junior" className="space-y-4 pt-4 scroll-mt-20">
           <div className="flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400">
             <span>🍱</span>
             <h4>Japanese Lessons & Textbook Hub</h4>
@@ -179,19 +179,6 @@ export function PortalModulesGrid({
             )}
           </div>
         </div>
-
-        {/* 5. Years 7–10 Japanese (CONTENT_JUNIOR) */}
-        {juniorModules.length > 0 && (
-          <div id="section-junior" className="space-y-4 pt-4 scroll-mt-20">
-            <div className="flex items-center space-x-2 text-sm font-bold text-indigo-600 dark:text-indigo-400">
-              <span>📖</span>
-              <h4>Years 7–10 Japanese</h4>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {juniorModules.map((mod) => renderCard(mod, 'indigo'))}
-            </div>
-          </div>
-        )}
 
         {/* 6. 🎮 ゲームズ・アーケード総合ポータル誘導カード */}
         <div id="section-games" className="space-y-4 pt-6 scroll-mt-20">

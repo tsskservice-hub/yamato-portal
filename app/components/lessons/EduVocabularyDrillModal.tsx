@@ -4,6 +4,8 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
+import { useSoundEffect } from "~/hooks/useSoundEffect";
+import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
 interface EduVocabularyDrillModalProps {
   vocabulary: any[];
@@ -37,6 +39,19 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
   // 再生中のHTMLAudioElementを保持して重複再生（反響）を防ぐためのref
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  // 効果音（正解音・完了音）。ほかのタスクと同じ useSoundEffect を使う
+  const { playSound, playCompleteSound } = useSoundEffect();
+
+  // 完了処理（完了音＋onCompleted）。タイピングと発声のどちらで完了しても1回だけ行う
+  const completedRef = useRef(false);
+  const finishDrill = () => {
+    setIsFinished(true);
+    if (completedRef.current) return;
+    completedRef.current = true;
+    playCompleteSound(); // 🎉 完了音
+    onCompleted();
+  };
+
   // 目標スコア（vocabulary の数×2、または最低5問）
   const targetScore = Math.max(vocabulary.length * 2, 5);
 
@@ -50,6 +65,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       setUserInput("");
       setFeedback(null);
       setIsFinished(false);
+      completedRef.current = false;
       setCurrentMode("jp_to_en");
     }
     // クリーンアップ：モーダル閉時に音声があれば停止
@@ -170,6 +186,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
     if (isCorrect) {
       setFeedback("correct");
+      playSound(); // ✅ 正解音
       const nextScore = score + 1;
       setScore(nextScore);
 
@@ -177,8 +194,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
         setUserInput("");
         setFeedback(null);
         if (nextScore >= targetScore) {
-          setIsFinished(true);
-          onCompleted();
+          finishDrill();
         } else {
           const nextIdx = currentIndex + 1;
           // リストの最後まで行ったら、再度シャッフルし直してランダム性を維持する
@@ -228,6 +244,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
       
       if (speechResult.includes(targetJp) || targetJp.includes(speechResult)) {
         setFeedback("correct");
+        playSound(); // ✅ 正解音
         setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
         const nextScore = score + 1;
         setScore(nextScore);
@@ -237,8 +254,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
           setSpeechStatusMessage("");
           setIsListening(false);
           if (nextScore >= targetScore) {
-            setIsFinished(true);
-            onCompleted();
+            finishDrill();
           } else {
             setCurrentIndex((prev) => prev + 1);
           }
@@ -461,26 +477,8 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
 
           </div>
         ) : (
-          <div className="text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center">
-            <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner">
-              🏆
-            </div>
-            <div className="space-y-2 max-w-md">
-              <h4 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
-                Vocabulary Drill Mastered!
-              </h4>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                You successfully completed all required drills. The Vocabulary Task is now marked as completed in your lesson progress!
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="py-4 px-10 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-base transition shadow-md cursor-pointer"
-            >
-              Return to Lesson
-            </button>
-          </div>
+          // ほかのタスクと共通の完了画面
+          <EduFinishedView taskName="vocabulary drills" onClose={onClose} />
         )}
 
       </div>

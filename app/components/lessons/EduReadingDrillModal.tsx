@@ -5,6 +5,8 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { normalizeJapanese, normalizeEnglish } from "~/utils/normalization";
+import { useSoundEffect } from "~/hooks/useSoundEffect";
+import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
 interface ReadingItem {
   id?: string | number;
@@ -118,6 +120,11 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 効果音（正解音・完了音）。ほかのタスクと同じ useSoundEffect を使う
+  const { playSound, playCompleteSound } = useSoundEffect();
+  const playCompleteSoundRef = useRef(playCompleteSound);
+  playCompleteSoundRef.current = playCompleteSound;
+
   // 毎レンダーで最新値を ref に反映
   onCompletedRef.current = onCompleted;
   itemsRef.current = items;
@@ -205,10 +212,11 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     };
   }, [isOpen]);
 
-  // 完了時に onCompleted を1回だけ呼ぶ
+  // 完了時に完了音を鳴らし、onCompleted を1回だけ呼ぶ
   useEffect(() => {
     if (isFinished && !completedRef.current) {
       completedRef.current = true;
+      playCompleteSoundRef.current(); // 🎉 完了音
       onCompletedRef.current();
     }
   }, [isFinished]);
@@ -426,6 +434,7 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
 
     if (isStrictMatch(cleanInput, correctEn, EN_SIMILARITY_THRESHOLD)) {
       setFeedback("correct");
+      playSound(); // ✅ 正解音
       setScore((prev) => prev + 1);
 
       if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
@@ -647,29 +656,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
             </div>
           </div>
         ) : (
-          <div className="text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center animate-fade-in">
-            <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner">
-              🎉
-            </div>
-            <div className="space-y-3 max-w-md">
-              <h4 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                Congratulations!
-              </h4>
-              <p className="text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400">
-                You have successfully mastered all reading and comprehension items!
-              </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Fantastic effort. Your progress has been saved and this task is now marked as complete.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="py-4 px-12 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow-lg hover:shadow-orange-500/25 active:scale-95 cursor-pointer"
-            >
-              Complete & Return to Lesson ➔
-            </button>
-          </div>
+          // ほかのタスクと共通の完了画面
+          <EduFinishedView taskName="reading and comprehension items" onClose={onClose} />
         )}
       </div>
     </div>
