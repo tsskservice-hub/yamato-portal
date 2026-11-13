@@ -19,7 +19,7 @@ import {
   UserPlus,
   GraduationCap
 } from "lucide-react";
-import { SCHOOL_PURPOSE_TEXT, TEACHER_LIMITS } from "../../lib/teacher-config";
+import { GOOGLE_SIGNUP_URL, SCHOOL_PURPOSE_TEXT, TEACHER_LIMITS, emailDomain, isFreeEmailDomain } from "../../lib/teacher-config";
 import { SchoolPicker, type SchoolValue } from "../SchoolPicker";
 import Header from "./header";
 import Footer from "./Footer";
@@ -218,6 +218,10 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
           throw new Error('Please enter your email address for passkey registration.');
         }
         const asTeacher = isTeacherSignup;
+        // 先生は学校のメールで登録する（あとで同じ学校のメールの Google アカウントで確認するため）
+        if (asTeacher && isFreeEmailDomain(emailDomain(emailInput))) {
+          throw new Error('Please sign up with your school email address, not a personal email.');
+        }
         await signUpAndRegisterPasskey(emailInput, {
           asTeacher,
           state: teacherSchool.state,
@@ -403,8 +407,24 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                       <p className="text-[10px] text-slate-500">
                         Free plan: {TEACHER_LIMITS.maxClasses} class with up to {TEACHER_LIMITS.maxStudentsPerClass} students. Need more classes? Ask us about a school plan.
                       </p>
+                      <div className="rounded-lg bg-white border border-indigo-200 p-3 space-y-1.5">
+                        <p className="text-[11px] font-bold text-indigo-800">Before you sign up</p>
+                        <ol className="text-[11px] text-slate-700 space-y-1 list-decimal pl-4">
+                          <li>Sign up with your <strong>school email address</strong> (not a personal email).</li>
+                          <li>
+                            You will need a <strong>Google account with that school email</strong>. If your school uses Google, you already have one.
+                            If not, first create a free one on{' '}
+                            <a href={GOOGLE_SIGNUP_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-700 underline">
+                              Google&apos;s sign-up page
+                            </a>
+                            : choose <strong>&quot;Use your existing email&quot;</strong> and enter your school email.
+                          </li>
+                          <li>After signing up, verify that Google account on your Teacher Dashboard. We then review your teacher account.</li>
+                        </ol>
+                      </div>
                       <p className="text-[10px] text-slate-500">
-                        To protect students, you&apos;ll verify your school Google or Microsoft account and we check every teacher account before you can create a class. Only students from your school can ask to join, and you approve each one. Teacher accounts do not include extra AI credits.
+                        To protect students, every teacher account is checked before you can create a class. Students join with an account from
+                        your school or a personal invite code you hand out, and you approve each one. Teacher accounts do not include extra AI credits.
                       </p>
                       <button
                         type="button"
@@ -505,15 +525,25 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                 <form onSubmit={handlePasskeyAuth} className="space-y-4">
                   {authMode === 'signup' && (
                     <div className="space-y-1.5 text-left">
-                      <label className="text-xs font-semibold text-slate-500">Email Address</label>
-                      <input 
+                      <label className="text-xs font-semibold text-slate-500">{isTeacherSignup ? 'School Email Address' : 'Email Address'}</label>
+                      <input
                         type="email"
                         required
-                        placeholder="your.email@school.vic.edu.au"
+                        placeholder={isTeacherSignup ? 'your.name@yourschool.edu.au' : 'your.email@school.vic.edu.au'}
                         value={emailInput}
                         onChange={(e) => setEmailInput(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900"
                       />
+                      {isTeacherSignup && (
+                        <p className="text-[10px] text-slate-500">
+                          Use your school email. You&apos;ll verify a Google account with this email on your Teacher Dashboard. No Google account
+                          for it yet?{' '}
+                          <a href={GOOGLE_SIGNUP_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-700 underline">
+                            Create one first
+                          </a>{' '}
+                          (choose &quot;Use your existing email&quot;).
+                        </p>
+                      )}
                     </div>
                   )}
 
