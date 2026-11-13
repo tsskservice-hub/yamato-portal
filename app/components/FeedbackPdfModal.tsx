@@ -56,6 +56,7 @@ export function FeedbackPdfModal({
       <html>
         <head>
           <title>VCE Japanese Writing Feedback Report</title>
+          <link rel="icon" href="${window.location.origin}/jptutoraiyamato.png" type="image/png">
           <style>
             body { 
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
