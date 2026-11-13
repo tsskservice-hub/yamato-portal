@@ -16,6 +16,9 @@ import { TutorPreferencesSection } from '~/components/TutorPreferencesSection';
 import { RegistrationDetails } from '~/components/RegistrationDetails';
 import { CreditTransactionsSection } from '~/components/CreditTransactionsSection';
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
+import { StudentClassSection, type StudentHomeworkItem } from '~/components/StudentClassSection';
+import { getStudentClass, getVerifiedSchoolEmails, normaliseJoinCode, type VerifiedSchoolEmail } from '~/lib/teacher.server';
+import { INVITE_CODE_LENGTH, TEACHER_LIMITS, allowedStudentDomains, isStudentDomainAllowed } from '~/lib/teacher-config';
 
 // Loader: 基本的な骨組みを安全に返す
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -32,11 +35,20 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   let initialPace = "normal";
   let initialPlan = "Free Plan";
   let initialCredits = 10;
+  let initialState: string | null = null;
+  let initialSchoolName: string | null = null;
+  let initialSchoolRefId: number | null = null;
+  let isTeacher = false;
+  let teacherStatus: string | null = null;
+  let studentClass: Awaited<ReturnType<typeof getStudentClass>> = null;
+  let homework: StudentHomeworkItem[] = [];
+  let verifiedSchoolEmails: VerifiedSchoolEmail[] = [];
+  let joinRequest: { className: string; schoolEmail: string | null } | null = null;
 
   if (user) {
     const { data: profile } = await serverSupabase
       .from("profiles")
-      .select("credits, nickname, learning_pace")
+      .select("credits, nickname, learning_pace, state, school_name, school_ref_id, is_teacher, teacher_status")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -44,6 +56,34 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       initialCredits = (profile as any).credits ?? 10;
       initialNickname = (profile as any).nickname ?? "";
       initialPace = (profile as any).learning_pace ?? "normal";
+      initialState = (profile as any).state ?? null;
+      initialSchoolName = (profile as any).school_name ?? null;
+      initialSchoolRefId = (profile as any).school_ref_id ?? null;
+      isTeacher = Boolean((profile as any).is_teacher);
+      teacherStatus = (profile as any).teacher_status ?? null;
+    }
+
+    // 💡 生徒：参加しているクラスと宿題（クラス・宿題テーブルはブラウザから読めないのでサーバーで取得）
+    if (!isTeacher && teacherStatus !== "pending") {
+      try {
+        const admin = createAdminSupabaseClient(context);
+        studentClass = await getStudentClass(admin, user.id);
+        if (studentClass) {
+          homework = await loadStudentHomework(admin, studentClass.id, user.id);
+        } else {
+          verifiedSchoolEmails = await getVerifiedSchoolEmails(admin, user.id);
+          const { data: req } = await admin
+            .from("edu_class_join_requests")
+            .select("school_email, edu_classes(name)")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (req) {
+            joinRequest = { className: (req as any).edu_classes?.name ?? "your class", schoolEmail: req.school_email ?? null };
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load class/homework:", err);
+      }
     }
   }
 
@@ -54,6 +94,15 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     credits: initialCredits,
     nickname: initialNickname,
     learningPace: initialPace,
+    state: initialState,
+    schoolName: initialSchoolName,
+    schoolRefId: initialSchoolRefId,
+    isTeacher,
+    teacherStatus,
+    studentClass,
+    homework,
+    verifiedSchoolEmails,
+    joinRequest,
     createdAt: user?.created_at ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
     portalContent: portalData?.content ?? null,
     currentPath: url.pathname,
@@ -94,7 +143,200 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     });
   }
 
+  // 💡 生徒：参加コードでクラスへの参加を申請する（1人1クラス・先生が承認すると入れる）
+  //    学校の外の子どもが入れないよう、クラスの学校ドメインに合う学校アカウント（Google / Microsoft）を確認した生徒だけが申請できる
+  if (intent === "join-class") {
+    const code = normaliseJoinCode(formData.get("joinCode"));
+    if (code.length < 4) {
+      return json({ intent, error: "Please enter the class code from your teacher.", success: false }, { status: 400 });
+    }
+    const admin = createAdminSupabaseClient(context);
+
+    const { data: me } = await admin.from("profiles").select("is_teacher, teacher_status").eq("id", user.id).maybeSingle();
+    if (me?.is_teacher || me?.teacher_status === "pending") {
+      return json({ intent, error: "Teacher accounts cannot join a class as a student.", success: false }, { status: 400 });
+    }
+    if (await getStudentClass(admin, user.id)) {
+      return json({ intent, error: "You are already in a class. Leave it first to join another one.", success: false }, { status: 400 });
+    }
+
+    const { data: cls } = await admin.from("edu_classes").select("id, name, school_domain").eq("join_code", code).maybeSingle();
+    if (!cls) {
+      return json({ intent, error: "That class code was not found. Please check it with your teacher.", success: false }, { status: 404 });
+    }
+
+    const schoolEmails = await getVerifiedSchoolEmails(admin, user.id);
+    const match = schoolEmails.find((e) => isStudentDomainAllowed(cls.school_domain, e.domain));
+    if (!match) {
+      const allowed = allowedStudentDomains(cls.school_domain).map((d) => `@${d}`).join(" or ");
+      return json({
+        intent,
+        error: `To join this class, verify a school account ending in ${allowed} first.`,
+        success: false,
+      }, { status: 403 });
+    }
+
+    const { count } = await admin
+      .from("edu_class_members")
+      .select("user_id", { count: "exact", head: true })
+      .eq("class_id", cls.id)
+      .eq("role", "student");
+    if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
+      return json({ intent, error: "This class is full. Please ask your teacher.", success: false }, { status: 400 });
+    }
+
+    // 前の申請があれば置き換える（1人1件）
+    await removeJoinRequest(admin, user.id);
+    const { error: requestError } = await admin
+      .from("edu_class_join_requests")
+      .insert({ class_id: cls.id, user_id: user.id, school_email: match.email });
+    if (requestError) {
+      console.error("join-class request failed:", requestError.message);
+      return json({ intent, error: "Could not send your request. Please try again.", success: false }, { status: 500 });
+    }
+    return json({ intent, success: true, message: `Request sent to ${cls.name}. Your teacher needs to approve it.` });
+  }
+
+  // 💡 生徒：先生から手渡された 1 人用の招待コードで参加を申請する（学校が Google を使っていない生徒のため）
+  //    コードは 1 回だけ使える。先生が承認するとクラスに入れる
+  if (intent === "redeem-invite") {
+    const code = normaliseJoinCode(formData.get("inviteCode"));
+    if (code.length !== INVITE_CODE_LENGTH) {
+      return json({ intent, error: "Please enter the 8-character invite code from your teacher.", success: false }, { status: 400 });
+    }
+    const admin = createAdminSupabaseClient(context);
+
+    const { data: me } = await admin.from("profiles").select("is_teacher, teacher_status").eq("id", user.id).maybeSingle();
+    if (me?.is_teacher || me?.teacher_status === "pending") {
+      return json({ intent, error: "Teacher accounts cannot join a class as a student.", success: false }, { status: 400 });
+    }
+    if (await getStudentClass(admin, user.id)) {
+      return json({ intent, error: "You are already in a class. Leave it first to join another one.", success: false }, { status: 400 });
+    }
+
+    const { data: invite } = await admin
+      .from("edu_class_invites")
+      .select("id, class_id, edu_classes(name)")
+      .eq("code", code)
+      .is("used_by", null)
+      .is("used_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (!invite) {
+      return json({
+        intent,
+        error: "That invite code is not valid, has already been used, or has expired. Please ask your teacher for a new one.",
+        success: false,
+      }, { status: 404 });
+    }
+
+    const { count } = await admin
+      .from("edu_class_members")
+      .select("user_id", { count: "exact", head: true })
+      .eq("class_id", invite.class_id)
+      .eq("role", "student");
+    if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
+      return json({ intent, error: "This class is full. Please ask your teacher.", success: false }, { status: 400 });
+    }
+
+    await removeJoinRequest(admin, user.id);
+
+    // 同時に 2 人が同じコードを使っても、1 人だけが取れるようにする
+    const { data: claimed } = await admin
+      .from("edu_class_invites")
+      .update({ used_by: user.id, used_at: new Date().toISOString() })
+      .eq("id", invite.id)
+      .is("used_by", null)
+      .is("used_at", null)
+      .select("id");
+    if (!claimed || claimed.length === 0) {
+      return json({ intent, error: "That invite code has already been used. Please ask your teacher for a new one.", success: false }, { status: 409 });
+    }
+
+    const { error: requestError } = await admin
+      .from("edu_class_join_requests")
+      .insert({ class_id: invite.class_id, user_id: user.id, school_email: null, invite_id: invite.id });
+    if (requestError) {
+      console.error("redeem-invite request failed:", requestError.message);
+      await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", invite.id);
+      return json({ intent, error: "Could not send your request. Please try again.", success: false }, { status: 500 });
+    }
+    const className = (invite as any).edu_classes?.name ?? "your class";
+    return json({ intent, success: true, message: `Request sent to ${className}. Your teacher needs to approve it.` });
+  }
+
+  // 💡 生徒：参加申請を取り消す
+  if (intent === "cancel-request") {
+    const admin = createAdminSupabaseClient(context);
+    await removeJoinRequest(admin, user.id);
+    return json({ intent, success: true, message: "Your request was cancelled." });
+  }
+
+  // 💡 生徒：クラスから抜ける
+  if (intent === "leave-class") {
+    const admin = createAdminSupabaseClient(context);
+    const { error: leaveError } = await admin
+      .from("edu_class_members")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("role", "student");
+    if (leaveError) {
+      return json({ intent, error: "Could not leave the class. Please try again.", success: false }, { status: 500 });
+    }
+    return json({ intent, success: true, message: "You left the class." });
+  }
+
   return json({ error: "Invalid intent.", success: false }, { status: 400 });
+}
+
+/**
+ * 生徒の参加申請を消す。招待コードで出した申請なら、そのコードをもう一度使えるように戻す
+ * （先生が断った申請のコードは戻さない。断られたときは先生の操作で申請ごと消える）
+ */
+async function removeJoinRequest(admin: any, userId: string) {
+  const { data: old } = await admin.from("edu_class_join_requests").select("invite_id").eq("user_id", userId).maybeSingle();
+  await admin.from("edu_class_join_requests").delete().eq("user_id", userId);
+  if (old?.invite_id) {
+    await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", old.invite_id).eq("used_by", userId);
+  }
+}
+
+/** 生徒の宿題一覧（新しい締切順）と、それぞれのタスクが終わったかどうか */
+async function loadStudentHomework(admin: any, classId: string, userId: string): Promise<StudentHomeworkItem[]> {
+  const { data: rows } = await admin
+    .from("edu_homework")
+    .select("id, title, lesson_id, task_keys, due_at")
+    .eq("class_id", classId)
+    .order("due_at", { ascending: false })
+    .limit(30);
+  if (!rows || rows.length === 0) return [];
+
+  const lessonIds = [...new Set(rows.map((r: any) => String(r.lesson_id)))];
+  const [{ data: lessons }, { data: progress }] = await Promise.all([
+    admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds),
+    admin
+      .from("edu_student_progress")
+      .select("lesson_id, task_key, is_completed")
+      .eq("user_id", userId)
+      .in("lesson_id", lessonIds),
+  ]);
+
+  const lessonMap = new Map((lessons ?? []).map((l: any) => [String(l.id), l]));
+  const done = new Set(
+    (progress ?? []).filter((p: any) => p.is_completed).map((p: any) => `${p.lesson_id}:${p.task_key}`)
+  );
+
+  return rows.map((r: any) => {
+    const lesson: any = lessonMap.get(String(r.lesson_id));
+    return {
+      id: r.id,
+      title: r.title,
+      dueAt: r.due_at,
+      lessonTitle: lesson?.title_en ?? "Lesson",
+      lessonUrl: lesson?.slug ? `/lessons/${lesson.slug}` : "/lessons",
+      tasks: (r.task_keys as string[]).map((key) => ({ key, done: done.has(`${r.lesson_id}:${key}`) })),
+    };
+  });
 }
 
 export default function AccountSettingsRoute() {
@@ -260,8 +502,32 @@ export default function AccountSettingsRoute() {
           userId={user?.id}
           initialNickname={nicknameInput}
           initialPace={paceInput}
+          initialState={initialData.state}
+          initialSchoolName={initialData.schoolName}
+          initialSchoolRefId={initialData.schoolRefId}
           onSaved={() => revalidator.revalidate()}
         />
+
+        {/* 1a. 先生アカウントの審査中のお知らせ */}
+        {initialData.teacherStatus === "pending" && (
+          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-sm text-indigo-900">
+            <p className="font-semibold">Your teacher account is being reviewed.</p>
+            <p className="text-xs text-indigo-800 mt-1">
+              We check every teacher account before classes can be created. Adding your state and school below helps us confirm it.
+              You can keep using AI Yamato as usual in the meantime.
+            </p>
+          </div>
+        )}
+
+        {/* 1b. クラス参加・宿題（生徒のみ） */}
+        {!initialData.isTeacher && initialData.teacherStatus !== "pending" && user?.id && (
+          <StudentClassSection
+            studentClass={initialData.studentClass}
+            homework={initialData.homework}
+            verifiedSchoolEmails={initialData.verifiedSchoolEmails}
+            joinRequest={initialData.joinRequest}
+          />
+        )}
 
         {/* 2. 総合的なアカウント情報セクション（モジュール化） */}
         <RegistrationDetails

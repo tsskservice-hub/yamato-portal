@@ -41,7 +41,40 @@ async function syncSessionToServer(): Promise<boolean> {
 /**
  * 新規登録フロー：アカウント作成 ➔ パスキー登録 ➔ サーバーCookie同期 ➔ アカウント設定画面へリダイレクト
  */
-export async function signUpAndRegisterPasskey(email: string): Promise<boolean> {
+export type SignUpOptions = {
+  /** 先生用アカウントとして登録する */
+  asTeacher?: boolean;
+  /** オーストラリアの州（任意） */
+  state?: string;
+  /** 学校名（任意） */
+  schoolName?: string;
+  /** 学校一覧から選んだときの学校 ID（任意） */
+  schoolRefId?: number | null;
+};
+
+/**
+ * 教師フラグはブラウザから書き換えられないため、サーバー（/api/teacher-register）に本人のトークンを送って設定してもらう
+ */
+async function registerAsTeacher(accessToken: string, options: SignUpOptions) {
+  const response = await fetch("/api/teacher-register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      state: options.state ?? "",
+      schoolName: options.schoolName ?? "",
+      schoolRefId: options.schoolRefId ?? null,
+    }),
+  });
+  if (!response.ok) {
+    const result = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(result.error || "Your account was created, but your teacher account request could not be sent. Please contact us.");
+  }
+}
+
+export async function signUpAndRegisterPasskey(email: string, options: SignUpOptions = {}): Promise<boolean> {
   const trimmedEmail = email.trim();
   if (!trimmedEmail) {
     throw new Error("Please enter your email address.");
@@ -73,6 +106,11 @@ export async function signUpAndRegisterPasskey(email: string): Promise<boolean> 
   if (profileError) {
     console.error("Failed to save profile:", profileError);
     throw new Error("Failed to save user profile to database.");
+  }
+
+  // 💡 先生用アカウント: パスキー登録より前に、先生アカウントの申請（と州・学校名）をサーバーに送る（承認は管理者が手動で行う）
+  if (options.asTeacher) {
+    await registerAsTeacher(signUpData.session.access_token, options);
   }
 
   // 💡 パスキーが無効な環境（ローカルやプレビュー）では登録処理をスキップ

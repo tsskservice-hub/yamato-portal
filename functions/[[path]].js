@@ -2625,8 +2625,8 @@ function hd$1(a, b, c, d, e) {
   Jb$2(function() {
     var d2 = f2, e2 = xb$2(c), g2 = [];
     a: {
-      var h2 = df.get(a);
-      if (void 0 !== h2) {
+      var h3 = df.get(a);
+      if (void 0 !== h3) {
         var k3 = td, n2 = a;
         switch (a) {
           case "keypress":
@@ -2706,7 +2706,7 @@ function hd$1(a, b, c, d, e) {
           case "pointerup":
             k3 = Td;
         }
-        var t2 = 0 !== (b & 4), J2 = !t2 && "scroll" === a, x2 = t2 ? null !== h2 ? h2 + "Capture" : null : h2;
+        var t2 = 0 !== (b & 4), J2 = !t2 && "scroll" === a, x2 = t2 ? null !== h3 ? h3 + "Capture" : null : h3;
         t2 = [];
         for (var w2 = d2, u2; null !== w2; ) {
           u2 = w2;
@@ -2716,17 +2716,17 @@ function hd$1(a, b, c, d, e) {
             break;
           w2 = w2.return;
         }
-        0 < t2.length && (h2 = new k3(h2, n2, null, c, e2), g2.push({ event: h2, listeners: t2 }));
+        0 < t2.length && (h3 = new k3(h3, n2, null, c, e2), g2.push({ event: h3, listeners: t2 }));
       }
     }
     if (0 === (b & 7)) {
       a: {
-        h2 = "mouseover" === a || "pointerover" === a;
+        h3 = "mouseover" === a || "pointerover" === a;
         k3 = "mouseout" === a || "pointerout" === a;
-        if (h2 && c !== wb$2 && (n2 = c.relatedTarget || c.fromElement) && (Wc$1(n2) || n2[uf]))
+        if (h3 && c !== wb$2 && (n2 = c.relatedTarget || c.fromElement) && (Wc$1(n2) || n2[uf]))
           break a;
-        if (k3 || h2) {
-          h2 = e2.window === e2 ? e2 : (h2 = e2.ownerDocument) ? h2.defaultView || h2.parentWindow : window;
+        if (k3 || h3) {
+          h3 = e2.window === e2 ? e2 : (h3 = e2.ownerDocument) ? h3.defaultView || h3.parentWindow : window;
           if (k3) {
             if (n2 = c.relatedTarget || c.toElement, k3 = d2, n2 = n2 ? Wc$1(n2) : null, null !== n2 && (J2 = Vb$1(n2), n2 !== J2 || 5 !== n2.tag && 6 !== n2.tag))
               n2 = null;
@@ -2739,11 +2739,11 @@ function hd$1(a, b, c, d, e) {
             w2 = "mouse";
             if ("pointerout" === a || "pointerover" === a)
               t2 = Td, F2 = "onPointerLeave", x2 = "onPointerEnter", w2 = "pointer";
-            J2 = null == k3 ? h2 : ue(k3);
-            u2 = null == n2 ? h2 : ue(n2);
-            h2 = new t2(F2, w2 + "leave", k3, c, e2);
-            h2.target = J2;
-            h2.relatedTarget = u2;
+            J2 = null == k3 ? h3 : ue(k3);
+            u2 = null == n2 ? h3 : ue(n2);
+            h3 = new t2(F2, w2 + "leave", k3, c, e2);
+            h3.target = J2;
+            h3.relatedTarget = u2;
             F2 = null;
             Wc$1(e2) === d2 && (t2 = new t2(x2, w2 + "enter", n2, c, e2), t2.target = u2, t2.relatedTarget = J2, F2 = t2);
             J2 = F2;
@@ -2771,17 +2771,17 @@ function hd$1(a, b, c, d, e) {
               }
             else
               t2 = null;
-            null !== k3 && wf(g2, h2, k3, t2, false);
+            null !== k3 && wf(g2, h3, k3, t2, false);
             null !== n2 && null !== J2 && wf(g2, J2, n2, t2, true);
           }
         }
       }
       a: {
-        h2 = d2 ? ue(d2) : window;
-        k3 = h2.nodeName && h2.nodeName.toLowerCase();
-        if ("select" === k3 || "input" === k3 && "file" === h2.type)
+        h3 = d2 ? ue(d2) : window;
+        k3 = h3.nodeName && h3.nodeName.toLowerCase();
+        if ("select" === k3 || "input" === k3 && "file" === h3.type)
           var na2 = ve;
-        else if (me(h2))
+        else if (me(h3))
           if (we)
             na2 = Fe;
           else {
@@ -2789,13 +2789,13 @@ function hd$1(a, b, c, d, e) {
             var xa2 = Ce;
           }
         else
-          (k3 = h2.nodeName) && "input" === k3.toLowerCase() && ("checkbox" === h2.type || "radio" === h2.type) && (na2 = Ee);
+          (k3 = h3.nodeName) && "input" === k3.toLowerCase() && ("checkbox" === h3.type || "radio" === h3.type) && (na2 = Ee);
         if (na2 && (na2 = na2(a, d2))) {
           ne(g2, na2, c, e2);
           break a;
         }
-        xa2 && xa2(a, h2, d2);
-        "focusout" === a && (xa2 = h2._wrapperState) && xa2.controlled && "number" === h2.type && cb$2(h2, "number", h2.value);
+        xa2 && xa2(a, h3, d2);
+        "focusout" === a && (xa2 = h3._wrapperState) && xa2.controlled && "number" === h3.type && cb$2(h3, "number", h3.value);
       }
       xa2 = d2 ? ue(d2) : window;
       switch (a) {
@@ -3417,10 +3417,10 @@ function Og(a) {
     }
     return null;
   }
-  function n2(e2, g2, h2, k3) {
-    for (var l3 = null, m3 = null, u2 = g2, w2 = g2 = 0, x2 = null; null !== u2 && w2 < h2.length; w2++) {
+  function n2(e2, g2, h3, k3) {
+    for (var l3 = null, m3 = null, u2 = g2, w2 = g2 = 0, x2 = null; null !== u2 && w2 < h3.length; w2++) {
       u2.index > w2 ? (x2 = u2, u2 = null) : x2 = u2.sibling;
-      var n3 = r2(e2, u2, h2[w2], k3);
+      var n3 = r2(e2, u2, h3[w2], k3);
       if (null === n3) {
         null === u2 && (u2 = x2);
         break;
@@ -3431,30 +3431,30 @@ function Og(a) {
       m3 = n3;
       u2 = x2;
     }
-    if (w2 === h2.length)
+    if (w2 === h3.length)
       return c(e2, u2), I$2 && tg(e2, w2), l3;
     if (null === u2) {
-      for (; w2 < h2.length; w2++)
-        u2 = q2(e2, h2[w2], k3), null !== u2 && (g2 = f2(u2, g2, w2), null === m3 ? l3 = u2 : m3.sibling = u2, m3 = u2);
+      for (; w2 < h3.length; w2++)
+        u2 = q2(e2, h3[w2], k3), null !== u2 && (g2 = f2(u2, g2, w2), null === m3 ? l3 = u2 : m3.sibling = u2, m3 = u2);
       I$2 && tg(e2, w2);
       return l3;
     }
-    for (u2 = d(e2, u2); w2 < h2.length; w2++)
-      x2 = y2(u2, e2, w2, h2[w2], k3), null !== x2 && (a && null !== x2.alternate && u2.delete(null === x2.key ? w2 : x2.key), g2 = f2(x2, g2, w2), null === m3 ? l3 = x2 : m3.sibling = x2, m3 = x2);
+    for (u2 = d(e2, u2); w2 < h3.length; w2++)
+      x2 = y2(u2, e2, w2, h3[w2], k3), null !== x2 && (a && null !== x2.alternate && u2.delete(null === x2.key ? w2 : x2.key), g2 = f2(x2, g2, w2), null === m3 ? l3 = x2 : m3.sibling = x2, m3 = x2);
     a && u2.forEach(function(a2) {
       return b(e2, a2);
     });
     I$2 && tg(e2, w2);
     return l3;
   }
-  function t2(e2, g2, h2, k3) {
-    var l3 = Ka$2(h2);
+  function t2(e2, g2, h3, k3) {
+    var l3 = Ka$2(h3);
     if ("function" !== typeof l3)
       throw Error(p$2(150));
-    h2 = l3.call(h2);
-    if (null == h2)
+    h3 = l3.call(h3);
+    if (null == h3)
       throw Error(p$2(151));
-    for (var u2 = l3 = null, m3 = g2, w2 = g2 = 0, x2 = null, n3 = h2.next(); null !== m3 && !n3.done; w2++, n3 = h2.next()) {
+    for (var u2 = l3 = null, m3 = g2, w2 = g2 = 0, x2 = null, n3 = h3.next(); null !== m3 && !n3.done; w2++, n3 = h3.next()) {
       m3.index > w2 ? (x2 = m3, m3 = null) : x2 = m3.sibling;
       var t3 = r2(e2, m3, n3.value, k3);
       if (null === t3) {
@@ -3473,12 +3473,12 @@ function Og(a) {
         m3
       ), I$2 && tg(e2, w2), l3;
     if (null === m3) {
-      for (; !n3.done; w2++, n3 = h2.next())
+      for (; !n3.done; w2++, n3 = h3.next())
         n3 = q2(e2, n3.value, k3), null !== n3 && (g2 = f2(n3, g2, w2), null === u2 ? l3 = n3 : u2.sibling = n3, u2 = n3);
       I$2 && tg(e2, w2);
       return l3;
     }
-    for (m3 = d(e2, m3); !n3.done; w2++, n3 = h2.next())
+    for (m3 = d(e2, m3); !n3.done; w2++, n3 = h3.next())
       n3 = y2(m3, e2, w2, n3.value, k3), null !== n3 && (a && null !== n3.alternate && m3.delete(null === n3.key ? w2 : n3.key), g2 = f2(n3, g2, w2), null === u2 ? l3 = n3 : u2.sibling = n3, u2 = n3);
     a && m3.forEach(function(a2) {
       return b(e2, a2);
@@ -3486,7 +3486,7 @@ function Og(a) {
     I$2 && tg(e2, w2);
     return l3;
   }
-  function J2(a2, d2, f3, h2) {
+  function J2(a2, d2, f3, h3) {
     "object" === typeof f3 && null !== f3 && f3.type === ya$2 && null === f3.key && (f3 = f3.props.children);
     if ("object" === typeof f3 && null !== f3) {
       switch (f3.$$typeof) {
@@ -3517,7 +3517,7 @@ function Og(a) {
                 b(a2, l3);
               l3 = l3.sibling;
             }
-            f3.type === ya$2 ? (d2 = Tg(f3.props.children, a2.mode, h2, f3.key), d2.return = a2, a2 = d2) : (h2 = Rg(f3.type, f3.key, f3.props, null, a2.mode, h2), h2.ref = Lg(a2, d2, f3), h2.return = a2, a2 = h2);
+            f3.type === ya$2 ? (d2 = Tg(f3.props.children, a2.mode, h3, f3.key), d2.return = a2, a2 = d2) : (h3 = Rg(f3.type, f3.key, f3.props, null, a2.mode, h3), h3.ref = Lg(a2, d2, f3), h3.return = a2, a2 = h3);
           }
           return g(a2);
         case wa$2:
@@ -3538,21 +3538,21 @@ function Og(a) {
                 b(a2, d2);
               d2 = d2.sibling;
             }
-            d2 = Sg(f3, a2.mode, h2);
+            d2 = Sg(f3, a2.mode, h3);
             d2.return = a2;
             a2 = d2;
           }
           return g(a2);
         case Ha$2:
-          return l3 = f3._init, J2(a2, d2, l3(f3._payload), h2);
+          return l3 = f3._init, J2(a2, d2, l3(f3._payload), h3);
       }
       if (eb$2(f3))
-        return n2(a2, d2, f3, h2);
+        return n2(a2, d2, f3, h3);
       if (Ka$2(f3))
-        return t2(a2, d2, f3, h2);
+        return t2(a2, d2, f3, h3);
       Mg(a2, f3);
     }
-    return "string" === typeof f3 && "" !== f3 || "number" === typeof f3 ? (f3 = "" + f3, null !== d2 && 6 === d2.tag ? (c(a2, d2.sibling), d2 = e(d2, f3), d2.return = a2, a2 = d2) : (c(a2, d2), d2 = Qg(f3, a2.mode, h2), d2.return = a2, a2 = d2), g(a2)) : c(a2, d2);
+    return "string" === typeof f3 && "" !== f3 || "number" === typeof f3 ? (f3 = "" + f3, null !== d2 && 6 === d2.tag ? (c(a2, d2.sibling), d2 = e(d2, f3), d2.return = a2, a2 = d2) : (c(a2, d2), d2 = Qg(f3, a2.mode, h3), d2.return = a2, a2 = d2), g(a2)) : c(a2, d2);
   }
   return J2;
 }
@@ -11540,47 +11540,47 @@ var TYPE_SET = "S";
 var TYPE_SYMBOL = "Y";
 var TYPE_URL = "U";
 var TYPE_PREVIOUS_RESOLVED = "Z";
-function flatten(input) {
+function flatten(input2) {
   const { indices } = this;
-  const existing = indices.get(input);
+  const existing = indices.get(input2);
   if (existing)
     return [existing];
-  if (input === void 0)
+  if (input2 === void 0)
     return UNDEFINED;
-  if (input === null)
+  if (input2 === null)
     return NULL;
-  if (Number.isNaN(input))
+  if (Number.isNaN(input2))
     return NAN;
-  if (input === Number.POSITIVE_INFINITY)
+  if (input2 === Number.POSITIVE_INFINITY)
     return POSITIVE_INFINITY;
-  if (input === Number.NEGATIVE_INFINITY)
+  if (input2 === Number.NEGATIVE_INFINITY)
     return NEGATIVE_INFINITY;
-  if (input === 0 && 1 / input < 0)
+  if (input2 === 0 && 1 / input2 < 0)
     return NEGATIVE_ZERO;
   const index = this.index++;
-  indices.set(input, index);
-  stringify.call(this, input, index);
+  indices.set(input2, index);
+  stringify.call(this, input2, index);
   return index;
 }
-function stringify(input, index) {
+function stringify(input2, index) {
   const { deferred, plugins, postPlugins } = this;
   const str = this.stringified;
-  const stack = [[input, index]];
+  const stack = [[input2, index]];
   while (stack.length > 0) {
-    const [input2, index2] = stack.pop();
+    const [input22, index2] = stack.pop();
     const partsForObj = (obj) => Object.keys(obj).map((k2) => `"_${flatten.call(this, k2)}":${flatten.call(this, obj[k2])}`).join(",");
     let error = null;
-    switch (typeof input2) {
+    switch (typeof input22) {
       case "boolean":
       case "number":
       case "string":
-        str[index2] = JSON.stringify(input2);
+        str[index2] = JSON.stringify(input22);
         break;
       case "bigint":
-        str[index2] = `["${TYPE_BIGINT}","${input2}"]`;
+        str[index2] = `["${TYPE_BIGINT}","${input22}"]`;
         break;
       case "symbol": {
-        const keyFor = Symbol.keyFor(input2);
+        const keyFor = Symbol.keyFor(input22);
         if (!keyFor) {
           error = new Error(
             "Cannot encode symbol unless created with Symbol.for()"
@@ -11591,15 +11591,15 @@ function stringify(input, index) {
         break;
       }
       case "object": {
-        if (!input2) {
+        if (!input22) {
           str[index2] = `${NULL}`;
           break;
         }
-        const isArray = Array.isArray(input2);
+        const isArray = Array.isArray(input22);
         let pluginHandled = false;
         if (!isArray && plugins) {
           for (const plugin of plugins) {
-            const pluginResult = plugin(input2);
+            const pluginResult = plugin(input22);
             if (Array.isArray(pluginResult)) {
               pluginHandled = true;
               const [pluginIdentifier, ...rest] = pluginResult;
@@ -11615,45 +11615,45 @@ function stringify(input, index) {
         if (!pluginHandled) {
           let result = isArray ? "[" : "{";
           if (isArray) {
-            for (let i = 0; i < input2.length; i++)
-              result += (i ? "," : "") + (i in input2 ? flatten.call(this, input2[i]) : HOLE);
+            for (let i = 0; i < input22.length; i++)
+              result += (i ? "," : "") + (i in input22 ? flatten.call(this, input22[i]) : HOLE);
             str[index2] = `${result}]`;
-          } else if (input2 instanceof Date) {
-            str[index2] = `["${TYPE_DATE}",${input2.getTime()}]`;
-          } else if (input2 instanceof URL) {
-            str[index2] = `["${TYPE_URL}",${JSON.stringify(input2.href)}]`;
-          } else if (input2 instanceof RegExp) {
+          } else if (input22 instanceof Date) {
+            str[index2] = `["${TYPE_DATE}",${input22.getTime()}]`;
+          } else if (input22 instanceof URL) {
+            str[index2] = `["${TYPE_URL}",${JSON.stringify(input22.href)}]`;
+          } else if (input22 instanceof RegExp) {
             str[index2] = `["${TYPE_REGEXP}",${JSON.stringify(
-              input2.source
-            )},${JSON.stringify(input2.flags)}]`;
-          } else if (input2 instanceof Set) {
-            if (input2.size > 0) {
-              str[index2] = `["${TYPE_SET}",${[...input2].map((val) => flatten.call(this, val)).join(",")}]`;
+              input22.source
+            )},${JSON.stringify(input22.flags)}]`;
+          } else if (input22 instanceof Set) {
+            if (input22.size > 0) {
+              str[index2] = `["${TYPE_SET}",${[...input22].map((val) => flatten.call(this, val)).join(",")}]`;
             } else {
               str[index2] = `["${TYPE_SET}"]`;
             }
-          } else if (input2 instanceof Map) {
-            if (input2.size > 0) {
-              str[index2] = `["${TYPE_MAP}",${[...input2].flatMap(([k2, v2]) => [
+          } else if (input22 instanceof Map) {
+            if (input22.size > 0) {
+              str[index2] = `["${TYPE_MAP}",${[...input22].flatMap(([k2, v2]) => [
                 flatten.call(this, k2),
                 flatten.call(this, v2)
               ]).join(",")}]`;
             } else {
               str[index2] = `["${TYPE_MAP}"]`;
             }
-          } else if (input2 instanceof Promise) {
+          } else if (input22 instanceof Promise) {
             str[index2] = `["${TYPE_PROMISE}",${index2}]`;
-            deferred[index2] = input2;
-          } else if (input2 instanceof Error) {
-            str[index2] = `["${TYPE_ERROR}",${JSON.stringify(input2.message)}`;
-            if (input2.name !== "Error") {
-              str[index2] += `,${JSON.stringify(input2.name)}`;
+            deferred[index2] = input22;
+          } else if (input22 instanceof Error) {
+            str[index2] = `["${TYPE_ERROR}",${JSON.stringify(input22.message)}`;
+            if (input22.name !== "Error") {
+              str[index2] += `,${JSON.stringify(input22.name)}`;
             }
             str[index2] += "]";
-          } else if (Object.getPrototypeOf(input2) === null) {
-            str[index2] = `["${TYPE_NULL_OBJECT}",{${partsForObj(input2)}}]`;
-          } else if (isPlainObject$1(input2)) {
-            str[index2] = `{${partsForObj(input2)}}`;
+          } else if (Object.getPrototypeOf(input22) === null) {
+            str[index2] = `["${TYPE_NULL_OBJECT}",{${partsForObj(input22)}}]`;
+          } else if (isPlainObject$1(input22)) {
+            str[index2] = `{${partsForObj(input22)}}`;
           } else {
             error = new Error("Cannot encode object with prototype");
           }
@@ -11661,11 +11661,11 @@ function stringify(input, index) {
         break;
       }
       default: {
-        const isArray = Array.isArray(input2);
+        const isArray = Array.isArray(input22);
         let pluginHandled = false;
         if (!isArray && plugins) {
           for (const plugin of plugins) {
-            const pluginResult = plugin(input2);
+            const pluginResult = plugin(input22);
             if (Array.isArray(pluginResult)) {
               pluginHandled = true;
               const [pluginIdentifier, ...rest] = pluginResult;
@@ -11687,7 +11687,7 @@ function stringify(input, index) {
       let pluginHandled = false;
       if (postPlugins) {
         for (const plugin of postPlugins) {
-          const pluginResult = plugin(input2);
+          const pluginResult = plugin(input22);
           if (Array.isArray(pluginResult)) {
             pluginHandled = true;
             const [pluginIdentifier, ...rest] = pluginResult;
@@ -11711,7 +11711,7 @@ function isPlainObject$1(thing) {
   const proto = Object.getPrototypeOf(thing);
   return proto === Object.prototype || proto === null || Object.getOwnPropertyNames(proto).sort().join("\0") === objectProtoNames;
 }
-function encode(input, options) {
+function encode(input2, options) {
   const { plugins, postPlugins, signal } = options ?? {};
   const encoder2 = {
     deferred: {},
@@ -11726,7 +11726,7 @@ function encode(input, options) {
   let lastSentIndex = 0;
   const readable = new ReadableStream({
     async start(controller) {
-      const id2 = flatten.call(encoder2, input);
+      const id2 = flatten.call(encoder2, input2);
       if (Array.isArray(id2)) {
         throw new Error("This should never happen");
       }
@@ -11917,42 +11917,42 @@ function parseNameValuePair(nameValuePairStr) {
   }
   return { name, value };
 }
-function parse$1(input, options) {
+function parse$1(input2, options) {
   options = options ? Object.assign({}, defaultParseOptions, options) : defaultParseOptions;
-  if (!input) {
+  if (!input2) {
     if (!options.map) {
       return [];
     } else {
       return createNullObj();
     }
   }
-  if (input.headers) {
-    if (typeof input.headers.getSetCookie === "function") {
-      input = input.headers.getSetCookie();
-    } else if (input.headers["set-cookie"]) {
-      input = input.headers["set-cookie"];
+  if (input2.headers) {
+    if (typeof input2.headers.getSetCookie === "function") {
+      input2 = input2.headers.getSetCookie();
+    } else if (input2.headers["set-cookie"]) {
+      input2 = input2.headers["set-cookie"];
     } else {
-      var sch = input.headers[Object.keys(input.headers).find(function(key) {
+      var sch = input2.headers[Object.keys(input2.headers).find(function(key) {
         return key.toLowerCase() === "set-cookie";
       })];
-      if (!sch && input.headers.cookie && !options.silent) {
+      if (!sch && input2.headers.cookie && !options.silent) {
         console.warn(
           "Warning: set-cookie-parser appears to have been called on a request object. It is designed to parse Set-Cookie headers from responses, not Cookie headers from requests. Set the option {silent: true} to suppress this warning."
         );
       }
-      input = sch;
+      input2 = sch;
     }
   }
-  if (!Array.isArray(input)) {
-    input = [input];
+  if (!Array.isArray(input2)) {
+    input2 = [input2];
   }
   if (!options.map) {
-    return input.filter(isNonEmptyString).map(function(str) {
+    return input2.filter(isNonEmptyString).map(function(str) {
       return parseString(str, options);
     }).filter(Boolean);
   } else {
     var cookies = createNullObj();
-    return input.filter(isNonEmptyString).reduce(function(cookies2, str) {
+    return input2.filter(isNonEmptyString).reduce(function(cookies2, str) {
       var cookie = parseString(str, options);
       if (cookie && !isForbiddenKey(cookie.name)) {
         cookies2[cookie.name] = cookie;
@@ -22647,26 +22647,26 @@ var PostgrestClient = class PostgrestClient2 {
     this.urlLengthLimit = urlLengthLimit;
     const originalFetch = fetch$1 !== null && fetch$1 !== void 0 ? fetch$1 : globalThis.fetch;
     if (timeout !== void 0 && timeout > 0)
-      this.fetch = (input, init) => {
+      this.fetch = (input2, init) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
         const existingSignal = init === null || init === void 0 ? void 0 : init.signal;
         if (existingSignal) {
           if (existingSignal.aborted) {
             clearTimeout(timeoutId);
-            return originalFetch(input, init);
+            return originalFetch(input2, init);
           }
           const abortHandler = () => {
             clearTimeout(timeoutId);
             controller.abort();
           };
           existingSignal.addEventListener("abort", abortHandler, { once: true });
-          return originalFetch(input, _objectSpread2$2(_objectSpread2$2({}, init), {}, { signal: controller.signal })).finally(() => {
+          return originalFetch(input2, _objectSpread2$2(_objectSpread2$2({}, init), {}, { signal: controller.signal })).finally(() => {
             clearTimeout(timeoutId);
             existingSignal.removeEventListener("abort", abortHandler);
           });
         }
-        return originalFetch(input, _objectSpread2$2(_objectSpread2$2({}, init), {}, { signal: controller.signal })).finally(() => clearTimeout(timeoutId));
+        return originalFetch(input2, _objectSpread2$2(_objectSpread2$2({}, init), {}, { signal: controller.signal })).finally(() => clearTimeout(timeoutId));
       };
     else
       this.fetch = originalFetch;
@@ -38964,7 +38964,7 @@ var fetchWithAuth = (supabaseKey, supabaseUrl, getAccessToken2, customFetch, tra
   const respectSampling = (tracePropagationOptions === null || tracePropagationOptions === void 0 ? void 0 : tracePropagationOptions.respectSamplingDecision) !== false;
   const traceTargets = traceEnabled ? getDefaultPropagationTargets(supabaseUrl) : null;
   const allowKeyAsBearer = !((options === null || options === void 0 ? void 0 : options.omitApiKeyAsBearer) && isNewApiKey(supabaseKey));
-  return async (input, init) => {
+  return async (input2, init) => {
     const realToken = await getAccessToken2();
     let headers = new HeadersConstructor(init === null || init === void 0 ? void 0 : init.headers);
     if (!headers.has("apikey"))
@@ -38975,7 +38975,7 @@ var fetchWithAuth = (supabaseKey, supabaseUrl, getAccessToken2, customFetch, tra
         headers.set("Authorization", `Bearer ${bearer}`);
     }
     if (traceTargets) {
-      const traceHeaders = getTraceHeaders(input, traceTargets, respectSampling);
+      const traceHeaders = getTraceHeaders(input2, traceTargets, respectSampling);
       if (traceHeaders) {
         if (traceHeaders.traceparent && !headers.has("traceparent"))
           headers.set("traceparent", traceHeaders.traceparent);
@@ -38985,12 +38985,12 @@ var fetchWithAuth = (supabaseKey, supabaseUrl, getAccessToken2, customFetch, tra
           headers.set("baggage", traceHeaders.baggage);
       }
     }
-    return fetch$1(input, _objectSpread2(_objectSpread2({}, init), {}, { headers }));
+    return fetch$1(input2, _objectSpread2(_objectSpread2({}, init), {}, { headers }));
   };
 };
 var warnedMissingTracingRuntime = false;
 var warnedNonW3CPropagator = false;
-function getTraceHeaders(input, targets, respectSampling) {
+function getTraceHeaders(input2, targets, respectSampling) {
   const extractTraceContext = getTraceContextExtractor();
   if (!extractTraceContext) {
     if (!warnedMissingTracingRuntime) {
@@ -38999,7 +38999,7 @@ function getTraceHeaders(input, targets, respectSampling) {
     }
     return null;
   }
-  if (!shouldPropagateToTarget(typeof input === "string" ? input : input instanceof URL ? input : input.url, targets))
+  if (!shouldPropagateToTarget(typeof input2 === "string" ? input2 : input2 instanceof URL ? input2 : input2.url, targets))
     return null;
   const traceContext = extractTraceContext();
   if (!traceContext || !traceContext.traceparent) {
@@ -39560,7 +39560,7 @@ function shouldShowDeprecationWarning() {
 }
 if (shouldShowDeprecationWarning())
   console.warn("\u26A0\uFE0F  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715");
-var __vite_import_meta_env__ = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": true, "VITE_SUPABASE_URL": "https://ybquwzoreecxxbewjpdn.supabase.co" };
+var __vite_import_meta_env__$1 = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": true, "VITE_SUPABASE_URL": "https://ybquwzoreecxxbewjpdn.supabase.co" };
 var define_process_env_default$2 = {};
 var cachedSupabase = null;
 var FALLBACK_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
@@ -39572,7 +39572,7 @@ var getSupabase = () => {
   let envUrl = "";
   let envKey = "";
   try {
-    if (typeof import.meta !== "undefined" && __vite_import_meta_env__) {
+    if (typeof import.meta !== "undefined" && __vite_import_meta_env__$1) {
       envUrl = "https://ybquwzoreecxxbewjpdn.supabase.co";
       envKey = "";
     }
@@ -40716,7 +40716,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var stylesheet = "/assets/tailwind-DP61AyRe.css";
+var stylesheet = "/assets/tailwind-DXbGOv2x.css";
 var links$1 = () => [
   { rel: "stylesheet", href: stylesheet },
   // 💡 ヤマトのアイコンをファビコンとして設定
@@ -40732,7 +40732,7 @@ var links$1 = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
   }
 ];
-async function loader$O({ request, context }) {
+async function loader$R({ request, context }) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
   let nickname = "";
@@ -40837,7 +40837,216 @@ var route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   Layout,
   default: App,
   links: links$1,
-  loader: loader$O
+  loader: loader$R
+}, Symbol.toStringTag, { value: "Module" }));
+var OUTSIDE_AU = "OUTSIDE_AU";
+var AU_STATES = [
+  { value: "ACT", label: "Australian Capital Territory (ACT)" },
+  { value: "NSW", label: "New South Wales (NSW)" },
+  { value: "NT", label: "Northern Territory (NT)" },
+  { value: "QLD", label: "Queensland (QLD)" },
+  { value: "SA", label: "South Australia (SA)" },
+  { value: "TAS", label: "Tasmania (TAS)" },
+  { value: "VIC", label: "Victoria (VIC)" },
+  { value: "WA", label: "Western Australia (WA)" }
+];
+var SCHOOL_NAME_MAX = 100;
+var SCHOOL_PURPOSE_TEXT = "Optional. We use your state and school only to improve AI Yamato features for schools, such as teacher dashboards. See our Privacy Policy.";
+function isAuState(value) {
+  return typeof value === "string" && AU_STATES.some((s2) => s2.value === value);
+}
+function isStateValue(value) {
+  return value === OUTSIDE_AU || isAuState(value);
+}
+function normaliseSchoolInfo(stateRaw, schoolRaw, schoolRefIdRaw) {
+  const state = isStateValue(stateRaw) ? stateRaw : null;
+  const school = state && typeof schoolRaw === "string" ? schoolRaw.trim().replace(/\s+/g, " ") : "";
+  if (school.length > SCHOOL_NAME_MAX) {
+    return { error: `School name must be ${SCHOOL_NAME_MAX} characters or less.` };
+  }
+  const refId = Number(schoolRefIdRaw);
+  const schoolRefId = isAuState(state) && school && Number.isInteger(refId) && refId > 0 ? refId : null;
+  return { state, schoolName: school === "" ? null : school, schoolRefId };
+}
+var TEACHER_LIMITS = {
+  maxClasses: 1,
+  maxStudentsPerClass: 40,
+  maxActiveHomeworkPerClass: 20
+};
+var LESSON_TASKS = [
+  { key: "vocabulary", label: "Vocabulary" },
+  { key: "listening", label: "Listening" },
+  { key: "reading", label: "Reading" },
+  { key: "speaking", label: "Speaking" },
+  { key: "writing", label: "Writing" }
+];
+function isLessonTaskKey(value) {
+  return typeof value === "string" && LESSON_TASKS.some((t2) => t2.key === value);
+}
+var HANDWRITING_RETENTION_OPTIONS = [
+  { value: "none", label: "Don't keep images (transcriptions only)" },
+  { value: "30", label: "Keep for 30 days" },
+  { value: "90", label: "Keep for 90 days" },
+  { value: "180", label: "Keep for 180 days" }
+];
+var DEFAULT_HANDWRITING_RETENTION_DAYS = 30;
+var INVITE_CODE_DAYS = 14;
+var INVITE_CODE_LENGTH = 8;
+var INVITE_LABEL_MAX = 60;
+function formatInviteCode(code) {
+  return code.length === INVITE_CODE_LENGTH ? `${code.slice(0, 4)}-${code.slice(4)}` : code;
+}
+var GOOGLE_SIGNUP_URL = "https://accounts.google.com/signup";
+var SCHOOL_SSO_PROVIDERS = [
+  { id: "google", label: "Google (school account)" },
+  { id: "azure", label: "Microsoft (school account)" }
+];
+var FREE_EMAIL_DOMAINS = [
+  "gmail.com",
+  "googlemail.com",
+  "outlook.com",
+  "outlook.com.au",
+  "hotmail.com",
+  "hotmail.com.au",
+  "live.com",
+  "live.com.au",
+  "msn.com",
+  "yahoo.com",
+  "yahoo.com.au",
+  "icloud.com",
+  "me.com",
+  "mac.com",
+  "aol.com",
+  "proton.me",
+  "protonmail.com",
+  "bigpond.com",
+  "bigpond.net.au",
+  "optusnet.com.au",
+  "gmx.com",
+  "zoho.com"
+];
+var SCHOOL_DOMAIN_GROUPS = [
+  { label: "Victorian government schools", teacher: "education.vic.gov.au", students: ["schools.vic.edu.au"] }
+];
+function emailDomain(email) {
+  const at = (email ?? "").lastIndexOf("@");
+  return at > 0 ? email.slice(at + 1).trim().toLowerCase() : "";
+}
+function isFreeEmailDomain(domain) {
+  return FREE_EMAIL_DOMAINS.includes(domain.toLowerCase());
+}
+var sameOrSubdomain = (domain, base) => domain === base || domain.endsWith(`.${base}`);
+function isStudentDomainAllowed(classDomain, studentDomain) {
+  const c = classDomain.toLowerCase();
+  const s2 = studentDomain.toLowerCase();
+  if (!c || !s2 || isFreeEmailDomain(s2))
+    return false;
+  if (sameOrSubdomain(s2, c))
+    return true;
+  const group = SCHOOL_DOMAIN_GROUPS.find((g) => g.teacher === c);
+  return Boolean(group == null ? void 0 : group.students.some((d) => sameOrSubdomain(s2, d)));
+}
+function allowedStudentDomains(classDomain) {
+  const group = SCHOOL_DOMAIN_GROUPS.find((g) => g.teacher === classDomain);
+  return [...(group == null ? void 0 : group.students) ?? [], classDomain];
+}
+async function getSessionUser(request, context) {
+  const { supabase: supabase2, headers } = createServerSupabaseClient(request, context);
+  const { data: { user } } = await supabase2.auth.getUser();
+  return { user, headers };
+}
+async function requireTeacher(request, context) {
+  const result = await getTeacherOrApplicant(request, context);
+  if (!result.profile.is_teacher)
+    throw dist$1.redirect("/", { headers: result.headers });
+  return result;
+}
+async function getTeacherOrApplicant(request, context) {
+  const { user, headers } = await getSessionUser(request, context);
+  if (!user)
+    throw dist$1.redirect("/", { headers });
+  const admin = createAdminSupabaseClient(context);
+  const { data: profile } = await admin.from("profiles").select("is_teacher, teacher_status, nickname, school_name, state").eq("id", user.id).maybeSingle();
+  if (!profile || !profile.is_teacher && profile.teacher_status !== "pending")
+    throw dist$1.redirect("/", { headers });
+  return { user, profile, admin, headers };
+}
+async function getOwnedClass(admin, teacherId, classId) {
+  if (typeof classId !== "string" || !classId)
+    return null;
+  const { data: data2 } = await admin.from("edu_classes").select("id, name, join_code, created_at").eq("id", classId).eq("teacher_id", teacherId).maybeSingle();
+  return data2;
+}
+var JOIN_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function generateJoinCode(length = 6) {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => JOIN_CODE_ALPHABET[b % JOIN_CODE_ALPHABET.length]).join("");
+}
+function generateInviteCode() {
+  return generateJoinCode(INVITE_CODE_LENGTH);
+}
+function normaliseJoinCode(raw) {
+  return typeof raw === "string" ? raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, "") : "";
+}
+async function getStudentClass(admin, userId) {
+  const { data: member } = await admin.from("edu_class_members").select("class_id").eq("user_id", userId).eq("role", "student").limit(1).maybeSingle();
+  if (!(member == null ? void 0 : member.class_id))
+    return null;
+  const { data: cls } = await admin.from("edu_classes").select("id, name, teacher_id").eq("id", member.class_id).maybeSingle();
+  if (!cls)
+    return null;
+  const { data: teacher } = await admin.from("profiles").select("nickname, school_name").eq("id", cls.teacher_id).maybeSingle();
+  return {
+    id: cls.id,
+    name: cls.name,
+    teacherName: (teacher == null ? void 0 : teacher.nickname) ?? null,
+    schoolName: (teacher == null ? void 0 : teacher.school_name) ?? null
+  };
+}
+async function getVerifiedSchoolEmails(admin, userId) {
+  const { data: data2, error } = await admin.auth.admin.getUserById(userId);
+  if (error || !(data2 == null ? void 0 : data2.user))
+    return [];
+  const list2 = [];
+  for (const identity of data2.user.identities ?? []) {
+    if (identity.provider !== "google" && identity.provider !== "azure")
+      continue;
+    const info = identity.identity_data ?? {};
+    const email = typeof info.email === "string" ? info.email.toLowerCase() : "";
+    const verified = info.email_verified === true || info.email_verified === "true";
+    const domain = emailDomain(email);
+    if (email && verified && domain && !isFreeEmailDomain(domain)) {
+      list2.push({ provider: identity.provider, email, domain });
+    }
+  }
+  return list2;
+}
+var IMAGE_BUCKET = "writing-submissions";
+var SIGNED_URL_SECONDS = 300;
+async function loader$Q({ request, context, params }) {
+  const { user, admin } = await requireTeacher(request, context);
+  const notFound = () => new Response("Image not found or no longer kept.", { status: 404 });
+  const { data: submission } = await admin.from("edu_writing_submissions").select("user_id, image_path, image_deleted_at, image_delete_after").eq("id", params.submissionId ?? "").maybeSingle();
+  if (!(submission == null ? void 0 : submission.image_path) || submission.image_deleted_at)
+    return notFound();
+  if (submission.image_delete_after && new Date(submission.image_delete_after).getTime() < Date.now())
+    return notFound();
+  const { data: classes } = await admin.from("edu_classes").select("id").eq("teacher_id", user.id);
+  const classIds = (classes ?? []).map((c) => c.id);
+  if (classIds.length === 0)
+    return notFound();
+  const { data: member } = await admin.from("edu_class_members").select("class_id").eq("user_id", submission.user_id).eq("role", "student").in("class_id", classIds).limit(1).maybeSingle();
+  if (!member)
+    return notFound();
+  const { data: signed, error } = await admin.storage.from(IMAGE_BUCKET).createSignedUrl(submission.image_path, SIGNED_URL_SECONDS);
+  if (error || !(signed == null ? void 0 : signed.signedUrl))
+    return notFound();
+  return dist$1.redirect(signed.signedUrl, { headers: { "Cache-Control": "no-store" } });
+}
+var route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  loader: loader$Q
 }, Symbol.toStringTag, { value: "Module" }));
 function generateModuleMeta(portalContent, currentPath) {
   var _a, _b;
@@ -41054,7 +41263,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   }
   return Component;
 }
-var __iconData$R = {
+var __iconData$Z = {
   name: "arrow-down-right",
   size: 24,
   node: [
@@ -41062,9 +41271,9 @@ var __iconData$R = {
     ["path", { d: "M17 7v10H7", key: "6fjiku" }]
   ]
 };
-__iconData$R.node;
-var ArrowDownRight = createLucideIcon(__iconData$R);
-var __iconData$Q = {
+__iconData$Z.node;
+var ArrowDownRight = createLucideIcon(__iconData$Z);
+var __iconData$Y = {
   name: "arrow-down",
   size: 24,
   node: [
@@ -41072,9 +41281,9 @@ var __iconData$Q = {
     ["path", { d: "m19 12-7 7-7-7", key: "1idqje" }]
   ]
 };
-__iconData$Q.node;
-var ArrowDown = createLucideIcon(__iconData$Q);
-var __iconData$P = {
+__iconData$Y.node;
+var ArrowDown = createLucideIcon(__iconData$Y);
+var __iconData$X = {
   name: "arrow-right",
   size: 24,
   node: [
@@ -41082,9 +41291,9 @@ var __iconData$P = {
     ["path", { d: "m12 5 7 7-7 7", key: "xquz4c" }]
   ]
 };
-__iconData$P.node;
-var ArrowRight = createLucideIcon(__iconData$P);
-var __iconData$O = {
+__iconData$X.node;
+var ArrowRight = createLucideIcon(__iconData$X);
+var __iconData$W = {
   name: "arrow-up-right",
   size: 24,
   node: [
@@ -41092,9 +41301,9 @@ var __iconData$O = {
     ["path", { d: "M7 17 17 7", key: "1vkiza" }]
   ]
 };
-__iconData$O.node;
-var ArrowUpRight = createLucideIcon(__iconData$O);
-var __iconData$N = {
+__iconData$W.node;
+var ArrowUpRight = createLucideIcon(__iconData$W);
+var __iconData$V = {
   name: "book-open",
   size: 24,
   node: [
@@ -41108,9 +41317,9 @@ var __iconData$N = {
     ]
   ]
 };
-__iconData$N.node;
-var BookOpen = createLucideIcon(__iconData$N);
-var __iconData$M = {
+__iconData$V.node;
+var BookOpen = createLucideIcon(__iconData$V);
+var __iconData$U = {
   name: "brain",
   size: 24,
   node: [
@@ -41124,37 +41333,50 @@ var __iconData$M = {
     ["path", { d: "M6.004 5.125a4 4 0 00-2.526 5.77", key: "3cw1ss" }]
   ]
 };
-__iconData$M.node;
-var Brain = createLucideIcon(__iconData$M);
-var __iconData$L = {
+__iconData$U.node;
+var Brain = createLucideIcon(__iconData$U);
+var __iconData$T = {
+  name: "chart-column",
+  size: 24,
+  node: [
+    ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
+    ["path", { d: "M18 17V9", key: "2bz60n" }],
+    ["path", { d: "M13 17V5", key: "1frdt8" }],
+    ["path", { d: "M8 17v-3", key: "17ska0" }]
+  ],
+  aliases: ["bar-chart-3"]
+};
+__iconData$T.node;
+var ChartColumn = createLucideIcon(__iconData$T);
+var __iconData$S = {
   name: "check",
   size: 24,
   node: [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]
 };
-__iconData$L.node;
-var Check = createLucideIcon(__iconData$L);
-var __iconData$K = {
+__iconData$S.node;
+var Check = createLucideIcon(__iconData$S);
+var __iconData$R = {
   name: "chevron-down",
   size: 24,
   node: [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]]
 };
-__iconData$K.node;
-var ChevronDown = createLucideIcon(__iconData$K);
-var __iconData$J = {
+__iconData$R.node;
+var ChevronDown = createLucideIcon(__iconData$R);
+var __iconData$Q = {
   name: "chevron-right",
   size: 24,
   node: [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]]
 };
-__iconData$J.node;
-var ChevronRight = createLucideIcon(__iconData$J);
-var __iconData$I = {
+__iconData$Q.node;
+var ChevronRight = createLucideIcon(__iconData$Q);
+var __iconData$P = {
   name: "chevron-up",
   size: 24,
   node: [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]
 };
-__iconData$I.node;
-var ChevronUp = createLucideIcon(__iconData$I);
-var __iconData$H = {
+__iconData$P.node;
+var ChevronUp = createLucideIcon(__iconData$P);
+var __iconData$O = {
   name: "circle-check",
   size: 24,
   node: [
@@ -41163,9 +41385,9 @@ var __iconData$H = {
   ],
   aliases: ["check-circle-2"]
 };
-__iconData$H.node;
-var CircleCheck = createLucideIcon(__iconData$H);
-var __iconData$G = {
+__iconData$O.node;
+var CircleCheck = createLucideIcon(__iconData$O);
+var __iconData$N = {
   name: "circle-question-mark",
   size: 24,
   node: [
@@ -41175,9 +41397,36 @@ var __iconData$G = {
   ],
   aliases: ["help-circle", "circle-help"]
 };
-__iconData$G.node;
-var CircleQuestionMark = createLucideIcon(__iconData$G);
-var __iconData$F = {
+__iconData$N.node;
+var CircleQuestionMark = createLucideIcon(__iconData$N);
+var __iconData$M = {
+  name: "circle",
+  size: 24,
+  node: [["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]]
+};
+__iconData$M.node;
+var Circle = createLucideIcon(__iconData$M);
+var __iconData$L = {
+  name: "clipboard-list",
+  size: 24,
+  node: [
+    ["rect", { width: "8", height: "4", x: "8", y: "2", rx: "1", ry: "1", key: "tgr4d6" }],
+    [
+      "path",
+      {
+        d: "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2",
+        key: "116196"
+      }
+    ],
+    ["path", { d: "M12 11h4", key: "1jrz19" }],
+    ["path", { d: "M12 16h4", key: "n85exb" }],
+    ["path", { d: "M8 11h.01", key: "1dfujw" }],
+    ["path", { d: "M8 16h.01", key: "18s6g9" }]
+  ]
+};
+__iconData$L.node;
+var ClipboardList = createLucideIcon(__iconData$L);
+var __iconData$K = {
   name: "coins",
   size: 24,
   node: [
@@ -41187,9 +41436,9 @@ var __iconData$F = {
     ["circle", { cx: "16", cy: "8", r: "6", key: "14bfc9" }]
   ]
 };
-__iconData$F.node;
-var Coins = createLucideIcon(__iconData$F);
-var __iconData$E = {
+__iconData$K.node;
+var Coins = createLucideIcon(__iconData$K);
+var __iconData$J = {
   name: "compass",
   size: 24,
   node: [
@@ -41203,9 +41452,9 @@ var __iconData$E = {
     ]
   ]
 };
-__iconData$E.node;
-var Compass = createLucideIcon(__iconData$E);
-var __iconData$D = {
+__iconData$J.node;
+var Compass = createLucideIcon(__iconData$J);
+var __iconData$I = {
   name: "copy",
   size: 24,
   node: [
@@ -41213,9 +41462,9 @@ var __iconData$D = {
     ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
   ]
 };
-__iconData$D.node;
-var Copy = createLucideIcon(__iconData$D);
-var __iconData$C = {
+__iconData$I.node;
+var Copy = createLucideIcon(__iconData$I);
+var __iconData$H = {
   name: "cpu",
   size: 24,
   node: [
@@ -41235,9 +41484,9 @@ var __iconData$C = {
     ["rect", { x: "8", y: "8", width: "8", height: "8", rx: "1", key: "z9xiuo" }]
   ]
 };
-__iconData$C.node;
-var Cpu = createLucideIcon(__iconData$C);
-var __iconData$B = {
+__iconData$H.node;
+var Cpu = createLucideIcon(__iconData$H);
+var __iconData$G = {
   name: "download",
   size: 24,
   node: [
@@ -41246,9 +41495,9 @@ var __iconData$B = {
     ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
   ]
 };
-__iconData$B.node;
-var Download = createLucideIcon(__iconData$B);
-var __iconData$A = {
+__iconData$G.node;
+var Download = createLucideIcon(__iconData$G);
+var __iconData$F = {
   name: "file-text",
   size: 24,
   node: [
@@ -41265,9 +41514,9 @@ var __iconData$A = {
     ["path", { d: "M16 17H8", key: "z1uh3a" }]
   ]
 };
-__iconData$A.node;
-var FileText = createLucideIcon(__iconData$A);
-var __iconData$z = {
+__iconData$F.node;
+var FileText = createLucideIcon(__iconData$F);
+var __iconData$E = {
   name: "fingerprint-pattern",
   size: 24,
   node: [
@@ -41283,9 +41532,9 @@ var __iconData$z = {
   ],
   aliases: ["fingerprint"]
 };
-__iconData$z.node;
-var FingerprintPattern = createLucideIcon(__iconData$z);
-var __iconData$y = {
+__iconData$E.node;
+var FingerprintPattern = createLucideIcon(__iconData$E);
+var __iconData$D = {
   name: "flame",
   size: 24,
   node: [
@@ -41298,9 +41547,9 @@ var __iconData$y = {
     ]
   ]
 };
-__iconData$y.node;
-var Flame = createLucideIcon(__iconData$y);
-var __iconData$x = {
+__iconData$D.node;
+var Flame = createLucideIcon(__iconData$D);
+var __iconData$C = {
   name: "gamepad-2",
   size: 24,
   node: [
@@ -41317,9 +41566,9 @@ var __iconData$x = {
     ]
   ]
 };
-__iconData$x.node;
-var Gamepad2 = createLucideIcon(__iconData$x);
-var __iconData$w = {
+__iconData$C.node;
+var Gamepad2 = createLucideIcon(__iconData$C);
+var __iconData$B = {
   name: "gauge",
   size: 24,
   node: [
@@ -41327,9 +41576,9 @@ var __iconData$w = {
     ["path", { d: "M3.34 19a10 10 0 1 1 17.32 0", key: "19p75a" }]
   ]
 };
-__iconData$w.node;
-var Gauge = createLucideIcon(__iconData$w);
-var __iconData$v = {
+__iconData$B.node;
+var Gauge = createLucideIcon(__iconData$B);
+var __iconData$A = {
   name: "graduation-cap",
   size: 24,
   node: [
@@ -41344,9 +41593,9 @@ var __iconData$v = {
     ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
   ]
 };
-__iconData$v.node;
-var GraduationCap = createLucideIcon(__iconData$v);
-var __iconData$u = {
+__iconData$A.node;
+var GraduationCap = createLucideIcon(__iconData$A);
+var __iconData$z = {
   name: "grid-3x3",
   size: 24,
   node: [
@@ -41358,9 +41607,9 @@ var __iconData$u = {
   ],
   aliases: ["grid", "grid-3-x-3"]
 };
-__iconData$u.node;
-var Grid3x3 = createLucideIcon(__iconData$u);
-var __iconData$t = {
+__iconData$z.node;
+var Grid3x3 = createLucideIcon(__iconData$z);
+var __iconData$y = {
   name: "heart",
   size: 24,
   node: [
@@ -41373,9 +41622,9 @@ var __iconData$t = {
     ]
   ]
 };
-__iconData$t.node;
-var Heart = createLucideIcon(__iconData$t);
-var __iconData$s = {
+__iconData$y.node;
+var Heart = createLucideIcon(__iconData$y);
+var __iconData$x = {
   name: "house",
   size: 24,
   node: [
@@ -41390,9 +41639,20 @@ var __iconData$s = {
   ],
   aliases: ["home"]
 };
-__iconData$s.node;
-var House = createLucideIcon(__iconData$s);
-var __iconData$r = {
+__iconData$x.node;
+var House = createLucideIcon(__iconData$x);
+var __iconData$w = {
+  name: "image",
+  size: 24,
+  node: [
+    ["rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", ry: "2", key: "1m3agn" }],
+    ["circle", { cx: "9", cy: "9", r: "2", key: "af1f0g" }],
+    ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21", key: "1xmnt7" }]
+  ]
+};
+__iconData$w.node;
+var Image$1 = createLucideIcon(__iconData$w);
+var __iconData$v = {
   name: "key-round",
   size: 24,
   node: [
@@ -41406,9 +41666,9 @@ var __iconData$r = {
     ["circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor", key: "w0ekpg" }]
   ]
 };
-__iconData$r.node;
-var KeyRound = createLucideIcon(__iconData$r);
-var __iconData$q = {
+__iconData$v.node;
+var KeyRound = createLucideIcon(__iconData$v);
+var __iconData$u = {
   name: "lightbulb",
   size: 24,
   node: [
@@ -41423,17 +41683,17 @@ var __iconData$q = {
     ["path", { d: "M10 22h4", key: "ceow96" }]
   ]
 };
-__iconData$q.node;
-var Lightbulb = createLucideIcon(__iconData$q);
-var __iconData$p = {
+__iconData$u.node;
+var Lightbulb = createLucideIcon(__iconData$u);
+var __iconData$t = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData$p.node;
-var LoaderCircle = createLucideIcon(__iconData$p);
-var __iconData$o = {
+__iconData$t.node;
+var LoaderCircle = createLucideIcon(__iconData$t);
+var __iconData$s = {
   name: "lock",
   size: 24,
   node: [
@@ -41441,9 +41701,9 @@ var __iconData$o = {
     ["path", { d: "M7 11V7a5 5 0 0 1 10 0v4", key: "fwvmzm" }]
   ]
 };
-__iconData$o.node;
-var Lock = createLucideIcon(__iconData$o);
-var __iconData$n = {
+__iconData$s.node;
+var Lock = createLucideIcon(__iconData$s);
+var __iconData$r = {
   name: "log-out",
   size: 24,
   node: [
@@ -41452,9 +41712,9 @@ var __iconData$n = {
     ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
   ]
 };
-__iconData$n.node;
-var LogOut = createLucideIcon(__iconData$n);
-var __iconData$m = {
+__iconData$r.node;
+var LogOut = createLucideIcon(__iconData$r);
+var __iconData$q = {
   name: "mail",
   size: 24,
   node: [
@@ -41462,9 +41722,25 @@ var __iconData$m = {
     ["rect", { x: "2", y: "4", width: "20", height: "16", rx: "2", key: "izxlao" }]
   ]
 };
-__iconData$m.node;
-var Mail = createLucideIcon(__iconData$m);
-var __iconData$l = {
+__iconData$q.node;
+var Mail = createLucideIcon(__iconData$q);
+var __iconData$p = {
+  name: "map-pin",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0",
+        key: "1r0f0z"
+      }
+    ],
+    ["circle", { cx: "12", cy: "10", r: "3", key: "ilqhr7" }]
+  ]
+};
+__iconData$p.node;
+var MapPin = createLucideIcon(__iconData$p);
+var __iconData$o = {
   name: "mic",
   size: 24,
   node: [
@@ -41473,9 +41749,9 @@ var __iconData$l = {
     ["rect", { x: "9", y: "2", width: "6", height: "13", rx: "3", key: "s6n7sd" }]
   ]
 };
-__iconData$l.node;
-var Mic = createLucideIcon(__iconData$l);
-var __iconData$k = {
+__iconData$o.node;
+var Mic = createLucideIcon(__iconData$o);
+var __iconData$n = {
   name: "pen-line",
   size: 24,
   node: [
@@ -41490,9 +41766,9 @@ var __iconData$k = {
   ],
   aliases: ["edit-3"]
 };
-__iconData$k.node;
-var PenLine = createLucideIcon(__iconData$k);
-var __iconData$j = {
+__iconData$n.node;
+var PenLine = createLucideIcon(__iconData$n);
+var __iconData$m = {
   name: "play",
   size: 24,
   node: [
@@ -41505,9 +41781,9 @@ var __iconData$j = {
     ]
   ]
 };
-__iconData$j.node;
-var Play = createLucideIcon(__iconData$j);
-var __iconData$i = {
+__iconData$m.node;
+var Play = createLucideIcon(__iconData$m);
+var __iconData$l = {
   name: "plus",
   size: 24,
   node: [
@@ -41515,9 +41791,9 @@ var __iconData$i = {
     ["path", { d: "M12 5v14", key: "s699le" }]
   ]
 };
-__iconData$i.node;
-var Plus = createLucideIcon(__iconData$i);
-var __iconData$h = {
+__iconData$l.node;
+var Plus = createLucideIcon(__iconData$l);
+var __iconData$k = {
   name: "printer",
   size: 24,
   node: [
@@ -41532,9 +41808,21 @@ var __iconData$h = {
     ["rect", { x: "6", y: "14", width: "12", height: "8", rx: "1", key: "1ue0tg" }]
   ]
 };
-__iconData$h.node;
-var Printer = createLucideIcon(__iconData$h);
-var __iconData$g = {
+__iconData$k.node;
+var Printer = createLucideIcon(__iconData$k);
+var __iconData$j = {
+  name: "refresh-cw",
+  size: 24,
+  node: [
+    ["path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", key: "v9h5vc" }],
+    ["path", { d: "M21 3v5h-5", key: "1q7to0" }],
+    ["path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", key: "3uifl3" }],
+    ["path", { d: "M8 16H3v5", key: "1cv678" }]
+  ]
+};
+__iconData$j.node;
+var RefreshCw = createLucideIcon(__iconData$j);
+var __iconData$i = {
   name: "rotate-ccw-clock",
   size: 24,
   node: [
@@ -41544,9 +41832,9 @@ var __iconData$g = {
   ],
   aliases: ["history"]
 };
-__iconData$g.node;
-var RotateCcwClock = createLucideIcon(__iconData$g);
-var __iconData$f = {
+__iconData$i.node;
+var RotateCcwClock = createLucideIcon(__iconData$i);
+var __iconData$h = {
   name: "rotate-ccw",
   size: 24,
   node: [
@@ -41554,9 +41842,29 @@ var __iconData$f = {
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ]
 };
-__iconData$f.node;
-var RotateCcw = createLucideIcon(__iconData$f);
-var __iconData$e = {
+__iconData$h.node;
+var RotateCcw = createLucideIcon(__iconData$h);
+var __iconData$g = {
+  name: "school",
+  size: 24,
+  node: [
+    ["path", { d: "M14 21v-3a2 2 0 0 0-4 0v3", key: "1rgiei" }],
+    ["path", { d: "M18 4.933V21", key: "tjwmp4" }],
+    ["path", { d: "m4 6 7.106-3.79a2 2 0 0 1 1.788 0L20 6", key: "zywc2d" }],
+    [
+      "path",
+      {
+        d: "m6 11-3.52 2.147a1 1 0 0 0-.48.854V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a1 1 0 0 0-.48-.853L18 11",
+        key: "1d4ql0"
+      }
+    ],
+    ["path", { d: "M6 4.933V21", key: "1ufz1j" }],
+    ["circle", { cx: "12", cy: "9", r: "2", key: "1092wv" }]
+  ]
+};
+__iconData$g.node;
+var School = createLucideIcon(__iconData$g);
+var __iconData$f = {
   name: "search",
   size: 24,
   node: [
@@ -41564,9 +41872,9 @@ var __iconData$e = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData$e.node;
-var Search = createLucideIcon(__iconData$e);
-var __iconData$d = {
+__iconData$f.node;
+var Search = createLucideIcon(__iconData$f);
+var __iconData$e = {
   name: "send",
   size: 24,
   node: [
@@ -41580,9 +41888,9 @@ var __iconData$d = {
     ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
   ]
 };
-__iconData$d.node;
-var Send = createLucideIcon(__iconData$d);
-var __iconData$c = {
+__iconData$e.node;
+var Send = createLucideIcon(__iconData$e);
+var __iconData$d = {
   name: "shield-check",
   size: 24,
   node: [
@@ -41596,9 +41904,9 @@ var __iconData$c = {
     ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
   ]
 };
-__iconData$c.node;
-var ShieldCheck = createLucideIcon(__iconData$c);
-var __iconData$b = {
+__iconData$d.node;
+var ShieldCheck = createLucideIcon(__iconData$d);
+var __iconData$c = {
   name: "sliders-horizontal",
   size: 24,
   node: [
@@ -41613,9 +41921,9 @@ var __iconData$b = {
     ["path", { d: "M8 12H3", key: "a7s4jb" }]
   ]
 };
-__iconData$b.node;
-var SlidersHorizontal = createLucideIcon(__iconData$b);
-var __iconData$a = {
+__iconData$c.node;
+var SlidersHorizontal = createLucideIcon(__iconData$c);
+var __iconData$b = {
   name: "sparkles",
   size: 24,
   node: [
@@ -41632,9 +41940,9 @@ var __iconData$a = {
   ],
   aliases: ["stars"]
 };
-__iconData$a.node;
-var Sparkles = createLucideIcon(__iconData$a);
-var __iconData$9 = {
+__iconData$b.node;
+var Sparkles = createLucideIcon(__iconData$b);
+var __iconData$a = {
   name: "swords",
   size: 24,
   node: [
@@ -41660,9 +41968,9 @@ var __iconData$9 = {
     ["path", { d: "M7.5 16.5 4 20", key: "14nozp" }]
   ]
 };
-__iconData$9.node;
-var Swords = createLucideIcon(__iconData$9);
-var __iconData$8 = {
+__iconData$a.node;
+var Swords = createLucideIcon(__iconData$a);
+var __iconData$9 = {
   name: "target",
   size: 24,
   node: [
@@ -41671,9 +41979,9 @@ var __iconData$8 = {
     ["circle", { cx: "12", cy: "12", r: "2", key: "1c9p78" }]
   ]
 };
-__iconData$8.node;
-var Target = createLucideIcon(__iconData$8);
-var __iconData$7 = {
+__iconData$9.node;
+var Target = createLucideIcon(__iconData$9);
+var __iconData$8 = {
   name: "text-align-justify",
   size: 24,
   node: [
@@ -41683,9 +41991,9 @@ var __iconData$7 = {
   ],
   aliases: ["align-justify"]
 };
-__iconData$7.node;
-var TextAlignJustify = createLucideIcon(__iconData$7);
-var __iconData$6 = {
+__iconData$8.node;
+var TextAlignJustify = createLucideIcon(__iconData$8);
+var __iconData$7 = {
   name: "text-align-start",
   size: 24,
   node: [
@@ -41695,8 +42003,26 @@ var __iconData$6 = {
   ],
   aliases: ["text", "align-left"]
 };
+__iconData$7.node;
+var TextAlignStart = createLucideIcon(__iconData$7);
+var __iconData$6 = {
+  name: "ticket",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z",
+        key: "qn84l0"
+      }
+    ],
+    ["path", { d: "M13 5v2", key: "dyzc3o" }],
+    ["path", { d: "M13 17v2", key: "1ont0d" }],
+    ["path", { d: "M13 11v2", key: "1wjjxi" }]
+  ]
+};
 __iconData$6.node;
-var TextAlignStart = createLucideIcon(__iconData$6);
+var Ticket = createLucideIcon(__iconData$6);
 var __iconData$5 = {
   name: "trash",
   size: 24,
@@ -41766,6 +42092,150 @@ var __iconData = {
 };
 __iconData.node;
 var X = createLucideIcon(__iconData);
+function cleanQuery(q2) {
+  return q2.replace(/[%_,()\\]/g, " ").trim().replace(/\s+/g, " ");
+}
+function SchoolPicker({
+  value,
+  onChange,
+  labelClassName = "block text-sm font-medium text-gray-700 mb-1",
+  inputClassName = "w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none",
+  stateLabel = "State",
+  schoolLabel = "School name",
+  className = "grid grid-cols-1 md:grid-cols-2 gap-4"
+}) {
+  const baseId = reactExports.useId();
+  const listId = `${baseId}-schools`;
+  const [results, setResults] = reactExports.useState([]);
+  const [open, setOpen] = reactExports.useState(false);
+  const [active, setActive] = reactExports.useState(-1);
+  const blurTimer = reactExports.useRef(null);
+  const canSearch = isAuState(value.state);
+  const query = cleanQuery(value.schoolName);
+  reactExports.useEffect(() => {
+    if (!canSearch || query.length < 2 || value.schoolRefId) {
+      setResults([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const { data: data2, error } = await supabase.from("ref_au_schools").select("id, name, suburb, postcode").eq("state", value.state).ilike("name", `%${query}%`).order("name").limit(8);
+      if (cancelled)
+        return;
+      if (error) {
+        setResults([]);
+        return;
+      }
+      setResults(data2 ?? []);
+      setActive(-1);
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [canSearch, query, value.state, value.schoolRefId]);
+  const choose = (row) => {
+    onChange({ ...value, schoolName: row.name, schoolRefId: row.id });
+    setOpen(false);
+    setResults([]);
+  };
+  const showList = open && results.length > 0;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: `${baseId}-state`, className: labelClassName, children: stateLabel }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "select",
+        {
+          id: `${baseId}-state`,
+          value: value.state,
+          onChange: (e) => onChange({ state: e.target.value, schoolName: e.target.value ? value.schoolName : "", schoolRefId: null }),
+          className: inputClassName,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "", children: "Prefer not to say" }),
+            AU_STATES.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: s2.value, children: s2.label }, s2.value)),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: OUTSIDE_AU, children: "Outside Australia" })
+          ]
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: `${baseId}-school`, className: labelClassName, children: schoolLabel }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "input",
+        {
+          id: `${baseId}-school`,
+          type: "text",
+          role: "combobox",
+          "aria-autocomplete": "list",
+          "aria-expanded": showList,
+          "aria-controls": listId,
+          "aria-activedescendant": showList && active >= 0 ? `${listId}-${active}` : void 0,
+          autoComplete: "off",
+          value: value.schoolName,
+          maxLength: SCHOOL_NAME_MAX,
+          disabled: !value.state,
+          placeholder: !value.state ? "Choose your state first" : canSearch ? "Start typing your school name" : "Your school name",
+          onChange: (e) => {
+            onChange({ ...value, schoolName: e.target.value, schoolRefId: null });
+            setOpen(true);
+          },
+          onFocus: () => setOpen(true),
+          onBlur: () => {
+            blurTimer.current = setTimeout(() => setOpen(false), 150);
+          },
+          onKeyDown: (e) => {
+            if (!showList)
+              return;
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setActive((i) => Math.min(i + 1, results.length - 1));
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setActive((i) => Math.max(i - 1, 0));
+            } else if (e.key === "Enter" && active >= 0) {
+              e.preventDefault();
+              choose(results[active]);
+            } else if (e.key === "Escape") {
+              setOpen(false);
+            }
+          },
+          className: `${inputClassName} disabled:bg-gray-100 disabled:text-gray-400`
+        }
+      ),
+      value.schoolRefId && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "absolute right-2 top-[2.1rem] text-[10px] font-bold text-emerald-600 pointer-events-none", children: "\u2713 listed" }),
+      showList && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "ul",
+        {
+          id: listId,
+          role: "listbox",
+          className: "absolute z-20 mt-1 w-full max-h-64 overflow-auto bg-white border border-gray-200 rounded-md shadow-lg text-left",
+          onMouseDown: () => blurTimer.current && clearTimeout(blurTimer.current),
+          children: [
+            results.map((row, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "li",
+              {
+                id: `${listId}-${i}`,
+                role: "option",
+                "aria-selected": i === active,
+                onMouseDown: (e) => {
+                  e.preventDefault();
+                  choose(row);
+                },
+                className: `px-3 py-2 cursor-pointer text-sm ${i === active ? "bg-blue-50" : "hover:bg-gray-50"}`,
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-900", children: row.name }),
+                  (row.suburb || row.postcode) && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-[11px] text-gray-500", children: [row.suburb, row.postcode].filter(Boolean).join(" ") })
+                ]
+              },
+              row.id
+            )),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "px-3 py-1.5 text-[10px] text-gray-400 border-t border-gray-100", children: "Not listed? Just keep typing your school name." })
+          ]
+        }
+      )
+    ] })
+  ] });
+}
 function Header({
   title = "AI Yamato Japanese Hub",
   user,
@@ -42070,7 +42540,25 @@ async function syncSessionToServer() {
     return false;
   }
 }
-async function signUpAndRegisterPasskey(email) {
+async function registerAsTeacher(accessToken, options) {
+  const response = await fetch("/api/teacher-register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      state: options.state ?? "",
+      schoolName: options.schoolName ?? "",
+      schoolRefId: options.schoolRefId ?? null
+    })
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.error || "Your account was created, but your teacher account request could not be sent. Please contact us.");
+  }
+}
+async function signUpAndRegisterPasskey(email, options = {}) {
   const trimmedEmail = email.trim();
   if (!trimmedEmail) {
     throw new Error("Please enter your email address.");
@@ -42095,6 +42583,9 @@ async function signUpAndRegisterPasskey(email) {
   if (profileError) {
     console.error("Failed to save profile:", profileError);
     throw new Error("Failed to save user profile to database.");
+  }
+  if (options.asTeacher) {
+    await registerAsTeacher(signUpData.session.access_token, options);
   }
   {
     console.warn("Passkey registration is disabled in this environment.");
@@ -42204,11 +42695,17 @@ var PageLayout = reactExports.forwardRef(({
   const [emailInput, setEmailInput] = reactExports.useState("");
   const [authLoading, setAuthLoading] = reactExports.useState(false);
   const [authError, setAuthError] = reactExports.useState(null);
+  const [isTeacherInfoOpen, setIsTeacherInfoOpen] = reactExports.useState(false);
+  const [isTeacherSignup, setIsTeacherSignup] = reactExports.useState(false);
+  const [teacherSchool, setTeacherSchool] = reactExports.useState({ state: "", schoolName: "", schoolRefId: null });
   const handleOpenAuthModal = (mode2) => {
     setAuthMode(mode2 === "signup" ? "signup" : "signin");
     setAuthError(null);
     setEmailInput("");
     setIsToggleOpen(false);
+    setIsTeacherInfoOpen(false);
+    setIsTeacherSignup(false);
+    setTeacherSchool({ state: "", schoolName: "", schoolRefId: null });
     if (mode2 === "signup") {
       setIsGuideStep(true);
     } else {
@@ -42231,8 +42728,21 @@ var PageLayout = reactExports.forwardRef(({
         if (!emailInput) {
           throw new Error("Please enter your email address for passkey registration.");
         }
-        await signUpAndRegisterPasskey(emailInput);
-        alert("Passkey registration successful! Welcome to AI Yamato.");
+        const asTeacher = isTeacherSignup;
+        if (asTeacher && isFreeEmailDomain(emailDomain(emailInput))) {
+          throw new Error("Please sign up with your school email address, not a personal email.");
+        }
+        await signUpAndRegisterPasskey(emailInput, {
+          asTeacher,
+          state: teacherSchool.state,
+          schoolName: teacherSchool.schoolName,
+          schoolRefId: teacherSchool.schoolRefId
+        });
+        alert(asTeacher ? "Thanks! Your teacher account request has been sent. We check every teacher account before classes can be created. You can use AI Yamato as usual in the meantime." : "Passkey registration successful! Welcome to AI Yamato.");
+        if (asTeacher) {
+          window.location.href = "/teacher-dashboard";
+          return;
+        }
       } else {
         await signInWithPasskey();
         alert("Passkey sign in successful!");
@@ -42343,6 +42853,81 @@ var PageLayout = reactExports.forwardRef(({
             ]
           }
         ) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl border border-indigo-200 bg-indigo-50/70", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => setIsTeacherInfoOpen(!isTeacherInfoOpen),
+              "aria-expanded": isTeacherInfoOpen,
+              className: "w-full flex items-center justify-between gap-2 px-4 py-3 text-left bg-transparent border-none cursor-pointer",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-2 text-xs font-bold text-indigo-700", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(GraduationCap, { className: "w-4 h-4" }),
+                  " Are you a Japanese teacher?"
+                ] }),
+                isTeacherInfoOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "w-4 h-4 text-indigo-600" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "w-4 h-4 text-indigo-600" })
+              ]
+            }
+          ),
+          isTeacherInfoOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "px-4 pb-4 space-y-3 text-left animate-fadeIn", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-700 leading-relaxed", children: [
+              "We have a ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "free teacher account" }),
+              " (limited features) with its own Teacher Dashboard:"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "text-[11px] text-slate-700 space-y-1 list-disc pl-4", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Set lesson tasks on AI Yamato as homework for your class" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Track each student's progress on every task" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "See what percentage of homework each student completed over any period" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "View your students' handwritten writing submissions" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-slate-500", children: [
+              "Free plan: ",
+              TEACHER_LIMITS.maxClasses,
+              " class with up to ",
+              TEACHER_LIMITS.maxStudentsPerClass,
+              " students. Need more classes? Ask us about a school plan."
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-lg bg-white border border-indigo-200 p-3 space-y-1.5", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] font-bold text-indigo-800", children: "Before you sign up" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("ol", { className: "text-[11px] text-slate-700 space-y-1 list-decimal pl-4", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                  "Sign up with your ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "school email address" }),
+                  " (not a personal email)."
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                  "You will need a ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Google account with that school email" }),
+                  ". If your school uses Google, you already have one. If not, first create a free one on",
+                  " ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: GOOGLE_SIGNUP_URL, target: "_blank", rel: "noopener noreferrer", className: "font-semibold text-indigo-700 underline", children: "Google's sign-up page" }),
+                  ": choose ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: '"Use your existing email"' }),
+                  " and enter your school email."
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "After signing up, verify that Google account on your Teacher Dashboard. We then review your teacher account." })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] text-slate-500", children: "To protect students, every teacher account is checked before you can create a class. Students join with an account from your school or a personal invite code you hand out, and you approve each one. Teacher accounts do not include extra AI credits." }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: () => {
+                  setIsTeacherSignup(true);
+                  setIsGuideStep(false);
+                },
+                className: "w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Create a Free Teacher Account" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowRight, { className: "w-4 h-4" })
+                ]
+              }
+            )
+          ] })
+        ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-200 pt-4", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "button",
@@ -42395,24 +42980,54 @@ var PageLayout = reactExports.forwardRef(({
       ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30", children: /* @__PURE__ */ jsxRuntimeExports.jsx(KeyRound, { className: "w-6 h-6" }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-extrabold tracking-tight", children: authMode === "signup" ? "Create Account with Passkey" : "Sign In with Passkey" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: authMode === "signup" ? "Register securely using biometrics, Touch ID, Face ID, or a security key." : "Authenticate instantly with your registered biometric passkey." })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-extrabold tracking-tight", children: authMode === "signup" ? isTeacherSignup ? "Create a Free Teacher Account" : "Create Account with Passkey" : "Sign In with Passkey" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: authMode === "signup" ? "Register securely using biometrics, Touch ID, Face ID, or a security key." : "Authenticate instantly with your registered biometric passkey." }),
+          authMode === "signup" && isTeacherSignup && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-indigo-700", children: [
+            "Not a teacher?",
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setIsTeacherSignup(false), className: "font-semibold underline bg-transparent border-none p-0 cursor-pointer text-indigo-700", children: "Create a student account instead" })
+          ] })
         ] }),
         authError && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium", children: authError }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasskeyAuth, className: "space-y-4", children: [
           authMode === "signup" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1.5 text-left", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-xs font-semibold text-slate-500", children: "Email Address" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-xs font-semibold text-slate-500", children: isTeacherSignup ? "School Email Address" : "Email Address" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               "input",
               {
                 type: "email",
                 required: true,
-                placeholder: "your.email@school.vic.edu.au",
+                placeholder: isTeacherSignup ? "your.name@yourschool.edu.au" : "your.email@school.vic.edu.au",
                 value: emailInput,
                 onChange: (e) => setEmailInput(e.target.value),
                 className: "w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900"
               }
-            )
+            ),
+            isTeacherSignup && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-slate-500", children: [
+              "Use your school email. You'll verify a Google account with this email on your Teacher Dashboard. No Google account for it yet?",
+              " ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: GOOGLE_SIGNUP_URL, target: "_blank", rel: "noopener noreferrer", className: "font-semibold text-indigo-700 underline", children: "Create one first" }),
+              " ",
+              '(choose "Use your existing email").'
+            ] })
+          ] }),
+          authMode === "signup" && isTeacherSignup && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1.5 text-left", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              SchoolPicker,
+              {
+                value: teacherSchool,
+                onChange: setTeacherSchool,
+                className: "grid grid-cols-1 sm:grid-cols-2 gap-3",
+                labelClassName: "block text-xs font-semibold text-slate-500 mb-1.5",
+                inputClassName: "w-full px-3 py-2.5 rounded-xl border text-sm outline-none bg-slate-50 border-slate-200 focus:border-blue-500 text-slate-900",
+                stateLabel: "State",
+                schoolLabel: "School"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-slate-500", children: [
+              "Your school helps us confirm your teacher account. ",
+              SCHOOL_PURPOSE_TEXT
+            ] })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "button",
@@ -42676,14 +43291,14 @@ async function getAccessToken() {
     return null;
   }
 }
-async function yamatoFetch(input, init = {}) {
+async function yamatoFetch(input2, init = {}) {
   const headers = new Headers(init.headers);
   if (!headers.has("Authorization")) {
     const token = await getAccessToken();
     if (token)
       headers.set("Authorization", `Bearer ${token}`);
   }
-  return fetch(input, { ...init, headers });
+  return fetch(input2, { ...init, headers });
 }
 var themeStyles = {
   red: {
@@ -44578,7 +45193,7 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
     sendAnswerMessage
   };
 }
-async function loader$N({ request }) {
+async function loader$P({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -44591,7 +45206,7 @@ async function loader$N({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$L = ({ data: data2 }) => {
+var meta$M = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceSpeakingEoyOralAcceleratedPage() {
@@ -44767,11 +45382,11 @@ function VceSpeakingEoyOralAcceleratedPage() {
     )
   ] }) }) });
 }
-var route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingEoyOralAcceleratedPage,
-  loader: loader$N,
-  meta: meta$L
+  loader: loader$P,
+  meta: meta$M
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoGenkoyoshiEditorVce = ({
   defaultOpen = false,
@@ -45189,7 +45804,7 @@ var genkoStyles = "/assets/genkoyoshi-DYYOnZeq.css";
 var links = () => [
   { rel: "stylesheet", href: genkoStyles }
 ];
-async function loader$M({ request }) {
+async function loader$O({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -45202,7 +45817,7 @@ async function loader$M({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$K = ({ data: data2 }) => {
+var meta$L = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function GenkoyoshiEditorVce() {
@@ -45455,12 +46070,12 @@ function GenkoyoshiEditorVce() {
     )
   ] });
 }
-var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: GenkoyoshiEditorVce,
   links,
-  loader: loader$M,
-  meta: meta$K
+  loader: loader$O,
+  meta: meta$L
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoKanjiGrammarCheckerVce = ({
   defaultOpen = false,
@@ -45811,7 +46426,7 @@ var VCE_GRAMMAR_LIST = [
   "\u3066\u3044\u307E\u3059",
   "\u3067\u3044\u307E\u3059"
 ];
-async function loader$L({ request }) {
+async function loader$N({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -46122,14 +46737,14 @@ function KanjiGrammarCheckerPage() {
     ) })
   ] }) });
 }
-var meta$J = ({ data: data2 }) => {
+var meta$K = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiGrammarCheckerPage,
-  loader: loader$L,
-  meta: meta$J
+  loader: loader$N,
+  meta: meta$K
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoOralExamQuestions = ({
   systemPrompt = "",
@@ -46198,7 +46813,7 @@ async function fetchOralExamQuestionsData(supabaseClient) {
     return null;
   }
 }
-async function loader$K({ request }) {
+async function loader$M({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -46211,7 +46826,7 @@ async function loader$K({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$I = ({ data: data2 }) => {
+var meta$J = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OralExamQuestions() {
@@ -46414,11 +47029,11 @@ function OralExamQuestions() {
     }
   );
 }
-var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OralExamQuestions,
-  loader: loader$K,
-  meta: meta$I
+  loader: loader$M,
+  meta: meta$J
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoEoyOralElaborate = ({
   systemPrompt = "",
@@ -47171,7 +47786,7 @@ var ElaborateHintModal = ({
     ) })
   ] }) });
 };
-async function loader$J({ request }) {
+async function loader$L({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -47184,7 +47799,7 @@ async function loader$J({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$H = ({ data: data2 }) => {
+var meta$I = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralElaboratePage() {
@@ -47814,11 +48429,11 @@ function EoyOralElaboratePage() {
     )
   ] });
 }
-var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralElaboratePage,
-  loader: loader$J,
-  meta: meta$H
+  loader: loader$L,
+  meta: meta$I
 }, Symbol.toStringTag, { value: "Module" }));
 function useYamatoChat2Logic({
   initialGreeting,
@@ -48606,10 +49221,12 @@ var EduVocabularySidebar = ({
     ] }, vocab.id || vIdx)) })
   ] });
 };
+var TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing"];
 function EduLessonTaskManager({
   lessonId,
   userId,
   onAllCompletedChange,
+  onProgressChange,
   onStartVocabularyDrill,
   onStartListeningDrill,
   // 追加
@@ -48626,72 +49243,58 @@ function EduLessonTaskManager({
     speaking: false,
     writing: false
   });
-  const [isLoading, setIsLoading] = reactExports.useState(false);
+  const onProgressChangeRef = reactExports.useRef(onProgressChange);
+  onProgressChangeRef.current = onProgressChange;
+  const onAllCompletedChangeRef = reactExports.useRef(onAllCompletedChange);
+  onAllCompletedChangeRef.current = onAllCompletedChange;
+  const externalKey = TASK_KEYS.map((k2) => externalTaskStatus[k2] ? "1" : "0").join("");
+  const publishProgress = (progress) => {
+    var _a, _b;
+    (_a = onProgressChangeRef.current) == null ? void 0 : _a.call(onProgressChangeRef, progress);
+    (_b = onAllCompletedChangeRef.current) == null ? void 0 : _b.call(onAllCompletedChangeRef, Object.values(progress).every(Boolean));
+  };
   reactExports.useEffect(() => {
+    let cancelled = false;
     async function fetchProgress() {
       if (!userId)
         return;
       try {
         const { data: data2, error } = await supabase.from("edu_student_progress").select("task_key, is_completed").eq("user_id", userId).eq("lesson_id", lessonId);
-        if (!error && data2) {
-          const loadedProgress = {
-            vocabulary: false,
-            listening: false,
-            reading: false,
-            speaking: false,
-            writing: false
-          };
-          data2.forEach((row) => {
-            if (row.task_key in loadedProgress) {
-              loadedProgress[row.task_key] = row.is_completed;
-            }
-          });
-          const merged = {
-            ...loadedProgress,
-            ...externalTaskStatus
-          };
-          setTaskProgress(merged);
-          const allDone = Object.values(merged).every(Boolean);
-          if (onAllCompletedChange) {
-            onAllCompletedChange(allDone);
-          }
+        if (error || !data2 || cancelled)
+          return;
+        const saved = { vocabulary: false, listening: false, reading: false, speaking: false, writing: false };
+        data2.forEach((row) => {
+          if (row.task_key in saved)
+            saved[row.task_key] = row.is_completed;
+        });
+        const merged = { ...saved };
+        TASK_KEYS.forEach((k2) => {
+          if (externalTaskStatus[k2])
+            merged[k2] = true;
+        });
+        const newlyCompleted = TASK_KEYS.filter((k2) => k2 !== "writing" && externalTaskStatus[k2] && !saved[k2]);
+        if (newlyCompleted.length > 0) {
+          const now = (/* @__PURE__ */ new Date()).toISOString();
+          const { error: upsertError } = await supabase.from("edu_student_progress").upsert(
+            newlyCompleted.map((k2) => ({ user_id: userId, lesson_id: lessonId, task_key: k2, is_completed: true, updated_at: now })),
+            { onConflict: "user_id,lesson_id,task_key" }
+          );
+          if (upsertError)
+            console.error("Failed to save task completion:", upsertError);
         }
+        if (cancelled)
+          return;
+        setTaskProgress(merged);
+        publishProgress(merged);
       } catch (err) {
         console.error("Failed to fetch student progress:", err);
       }
     }
     fetchProgress();
-  }, [lessonId, userId, externalTaskStatus]);
-  const updateTaskStatus = async (taskKey, isCompleted) => {
-    const updated = {
-      ...taskProgress,
-      [taskKey]: isCompleted
+    return () => {
+      cancelled = true;
     };
-    setTaskProgress(updated);
-    const allDone = Object.values(updated).every(Boolean);
-    if (onAllCompletedChange) {
-      onAllCompletedChange(allDone);
-    }
-    if (userId) {
-      setIsLoading(true);
-      try {
-        await supabase.from("edu_student_progress").upsert(
-          {
-            user_id: userId,
-            lesson_id: lessonId,
-            task_key: taskKey,
-            is_completed: isCompleted,
-            updated_at: (/* @__PURE__ */ new Date()).toISOString()
-          },
-          { onConflict: "user_id,lesson_id,task_key" }
-        );
-      } catch (err) {
-        console.error("Exception during progress upsert:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+  }, [lessonId, userId, externalKey]);
   const allTasksCompleted = Object.values(taskProgress).every(Boolean);
   return /* @__PURE__ */ jsxRuntimeExports.jsx("section", { "aria-label": "Lesson Tasks and Drills", className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-[#23533b] dark:bg-[#1a3e2c] border-4 border-[#a06532] dark:border-[#744720] rounded-3xl p-6 sm:p-8 shadow-xl text-slate-50 space-y-6 relative overflow-hidden", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-emerald-600/40 pb-6 relative z-10", children: [
@@ -48702,10 +49305,7 @@ function EduLessonTaskManager({
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-emerald-100/90 mt-1", children: "\u5404\u30C9\u30EA\u30EB\u3078\u306E\u6311\u6226\u3001\u30AF\u30A4\u30BA\u306E\u5408\u683C\u3001\u304A\u3088\u3073 Yamato Sensei \u3068\u306E\u6DFB\u524A\u5B8C\u4E86\u6642\u306B\u81EA\u52D5\u3067\u9032\u6357\u304C\u8A18\u9332\u3055\u308C\u307E\u3059\u3002" })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-right flex items-center gap-3", children: [
-        isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-emerald-200 animate-pulse", children: "Syncing..." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-4 py-2 rounded-xl border shadow-sm ${allTasksCompleted ? "bg-emerald-300 text-slate-950 border-emerald-200" : "bg-amber-400 text-slate-950 border-amber-300"}`, children: allTasksCompleted ? "\u{1F389} All Tasks Completed!" : "\u23F3 \u5B66\u7FD2\u9032\u884C\u4E2D" })
-      ] })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-right flex items-center gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-4 py-2 rounded-xl border shadow-sm ${allTasksCompleted ? "bg-emerald-300 text-slate-950 border-emerald-200" : "bg-amber-400 text-slate-950 border-amber-300"}`, children: allTasksCompleted ? "\u{1F389} All Tasks Completed!" : "\u23F3 \u5B66\u7FD2\u9032\u884C\u4E2D" }) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.vocabulary ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
@@ -48715,29 +49315,18 @@ function EduLessonTaskManager({
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F4D6} Vocabulary Drill (\u8A9E\u5F59\u78BA\u8A8D)" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "4\u3064\u306E\u30E2\u30FC\u30C9\uFF08\u65E5\u2192\u82F1\u3001\u97F3\u58F0\u2192\u82F1\u3001\u82F1\u2192\u65E5\u3001\u767A\u58F0\u7DF4\u7FD2\uFF09\u306E\u8A9E\u5F59\u30C9\u30EA\u30EB\u3092\u30AF\u30EA\u30A2\u3059\u308B\u3068\u81EA\u52D5\u3067\u5B8C\u4E86\u306B\u306A\u308A\u307E\u3059\u3002" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-4", children: [
-          onStartVocabularyDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: onStartVocabularyDrill,
-              className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Vocab Drill (\u30C9\u30EA\u30EB\u958B\u59CB)" })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: () => updateTaskStatus("vocabulary", !taskProgress.vocabulary),
-              className: "text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold",
-              children: "[\u958B\u767A\u7528] \u72B6\u614B\u5207\u66FF"
-            }
-          )
-        ] })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartVocabularyDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: onStartVocabularyDrill,
+            className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Vocab Drill (\u30C9\u30EA\u30EB\u958B\u59CB)" })
+            ]
+          }
+        ) })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.listening ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
@@ -48746,29 +49335,18 @@ function EduLessonTaskManager({
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F3A7} Listening Task (\u30EA\u30B9\u30CB\u30F3\u30B0\u78BA\u8A8D)" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "\u300C\u4F55\u4EBA\u5BB6\u65CF\u3067\u3059\u304B\u300D\u306E\u4F1A\u8A71\u3092\u805E\u3044\u3066\u3001\u4EBA\u6570\u3092\u30BF\u30A4\u30D4\u30F3\u30B0\u3067\u7B54\u3048\u308B\u554F\u984C\u30925\u554F\u30AF\u30EA\u30A2\u3059\u308B\u3068\u5B8C\u4E86\u306B\u306A\u308A\u307E\u3059\u3002" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-4", children: [
-          onStartListeningDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: onStartListeningDrill,
-              className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Listening Task (\u30EA\u30B9\u30CB\u30F3\u30B0\u958B\u59CB)" })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: () => updateTaskStatus("listening", !taskProgress.listening),
-              className: "text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold",
-              children: "[\u958B\u767A\u7528] \u72B6\u614B\u5207\u66FF"
-            }
-          )
-        ] })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartListeningDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: onStartListeningDrill,
+            className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Listening Task (\u30EA\u30B9\u30CB\u30F3\u30B0\u958B\u59CB)" })
+            ]
+          }
+        ) })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.reading ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
@@ -48777,29 +49355,18 @@ function EduLessonTaskManager({
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F4DA} Reading Task (\u30EA\u30FC\u30C7\u30A3\u30F3\u30B0\u8AAD\u89E3\u30FB\u767A\u8A71\u78BA\u8A8D)" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "\u753B\u9762\u306E\u65E5\u672C\u8A9E\u3092\u30DE\u30A4\u30AF\u306B\u5411\u304B\u3063\u3066\u767A\u58F0\u3057\u3001\u610F\u5473\u3092\u82F1\u8A9E\u3067\u30BF\u30A4\u30D4\u30F3\u30B0\u5165\u529B\u3059\u308B\u30C7\u30E5\u30A2\u30EB\u30C1\u30A7\u30C3\u30AF\u30C9\u30EA\u30EB\u3092\u30AF\u30EA\u30A2\u3059\u308B\u3068\u5B8C\u4E86\u306B\u306A\u308A\u307E\u3059\u3002" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-4", children: [
-          onStartReadingDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: onStartReadingDrill,
-              className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Reading Drill (\u30EA\u30FC\u30C7\u30A3\u30F3\u30B0\u958B\u59CB)" })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: () => updateTaskStatus("reading", !taskProgress.reading),
-              className: "text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold",
-              children: "[\u958B\u767A\u7528] \u72B6\u614B\u5207\u66FF"
-            }
-          )
-        ] })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartReadingDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: onStartReadingDrill,
+            className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Reading Drill (\u30EA\u30FC\u30C7\u30A3\u30F3\u30B0\u958B\u59CB)" })
+            ]
+          }
+        ) })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.speaking ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
@@ -48808,29 +49375,18 @@ function EduLessonTaskManager({
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F3A4} Speaking Task (AI\u97F3\u58F0\u4F1A\u8A71)" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "AI Yamato \u3068\u306E\u4E00\u554F\u4E00\u7B54\u97F3\u58F0\u4F1A\u8A71\u30BB\u30C3\u30B7\u30E7\u30F3\uFF08\u30E2\u30FC\u30C0\u30EB\uFF09\u3092\u5B8C\u4E86\u3059\u308B\u3068\u81EA\u52D5\u3067\u8A18\u9332\u3055\u308C\u307E\u3059\u3002" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-4", children: [
-          onStartSpeakingDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: onStartSpeakingDrill,
-              className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Speaking Task (\u30B9\u30D4\u30FC\u30AD\u30F3\u30B0\u958B\u59CB)" })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: () => updateTaskStatus("speaking", !taskProgress.speaking),
-              className: "text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold",
-              children: "[\u958B\u767A\u7528] \u72B6\u614B\u5207\u66FF"
-            }
-          )
-        ] })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartSpeakingDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: onStartSpeakingDrill,
+            className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Speaking Task (\u30B9\u30D4\u30FC\u30AD\u30F3\u30B0\u958B\u59CB)" })
+            ]
+          }
+        ) })
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition relative z-10 ${taskProgress.writing ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
@@ -48840,29 +49396,18 @@ function EduLessonTaskManager({
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u270D\uFE0F Writing Task & AI Feedback (\u4F5C\u6587\u30FB\u6DFB\u524A)" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "\u76F8\u624B\u306B\u4F1D\u3048\u308B\u305F\u3081\u306E\u30E1\u30C3\u30BB\u30FC\u30B8\u3092\u65E5\u672C\u8A9E\u3067\u624B\u66F8\u304D\uFF08\u7D19\uFF0B\u5199\u771F\u3001\u307E\u305F\u306F\u30C7\u30B8\u30BF\u30EB\u539F\u7A3F\u7528\u7D19\uFF09\u3057\u3066\u63D0\u51FA\u3057\u307E\u3059\u3002\u8AAD\u307F\u624B\u304B\u3089\u306E\u8FD4\u4E8B\u3068\u30D5\u30A3\u30FC\u30C9\u30D0\u30C3\u30AF\u3092\u53D7\u3051\u53D6\u308B\u3068\u9054\u6210\u306B\u306A\u308A\u307E\u3059\u3002" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-4 mb-4", children: [
-        onStartWritingTask && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            type: "button",
-            onClick: onStartWritingTask,
-            className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Writing Task (\u30E9\u30A4\u30C6\u30A3\u30F3\u30B0\u958B\u59CB)" })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => updateTaskStatus("writing", !taskProgress.writing),
-            className: "text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold",
-            children: "[\u958B\u767A\u7528] \u72B6\u614B\u5207\u66FF"
-          }
-        )
-      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4 mb-4", children: onStartWritingTask && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          onClick: onStartWritingTask,
+          className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Writing Task (\u30E9\u30A4\u30C6\u30A3\u30F3\u30B0\u958B\u59CB)" })
+          ]
+        }
+      ) }),
       allTasksCompleted && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-amber-400 text-slate-950 rounded-2xl flex items-center justify-between shadow-lg animate-bounce mt-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl", children: "\u{1F3C6}" }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
@@ -48873,6 +49418,33 @@ function EduLessonTaskManager({
     ] })
   ] }) });
 }
+var EduFinishedView = ({
+  taskName = "practice rounds",
+  description = "Fantastic effort. Your progress has been saved and this task is now marked as complete.",
+  onClose
+}) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center animate-fade-in", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner", children: "\u{1F389}" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 max-w-md", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight", children: "Congratulations!" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400", children: [
+        "You have successfully mastered all ",
+        taskName,
+        "!"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: description })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: onClose,
+        className: "py-4 px-12 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow-lg hover:shadow-orange-500/25 active:scale-95 cursor-pointer",
+        children: "Complete & Return to Lesson \u2794"
+      }
+    )
+  ] });
+};
 var EduVocabularyDrillModal = ({
   vocabulary = [],
   isOpen,
@@ -49260,33 +49832,6 @@ var EduVocabularyDrillModal = ({
     ] })
   ] }) });
 };
-var EduFinishedView = ({
-  taskName = "practice rounds",
-  description = "Fantastic effort. Your progress has been saved and this task is now marked as complete.",
-  onClose
-}) => {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center animate-fade-in", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner", children: "\u{1F389}" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 max-w-md", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight", children: "Congratulations!" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400", children: [
-        "You have successfully mastered all ",
-        taskName,
-        "!"
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: description })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "button",
-      {
-        type: "button",
-        onClick: onClose,
-        className: "py-4 px-12 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow-lg hover:shadow-orange-500/25 active:scale-95 cursor-pointer",
-        children: "Complete & Return to Lesson \u2794"
-      }
-    )
-  ] });
-};
 var BUCKET = "sound-effect-audio";
 var DEFAULT_FILE = "correct-answer-1.mp3";
 var COMPLETE_FILE = "completed-sound-2.mp3";
@@ -49451,8 +49996,8 @@ function buildAcceptedAnswers(n2) {
     accepted.add("\u4E8C\u4EBA");
   return accepted;
 }
-function isCorrectAnswer(input, answerCount) {
-  const clean2 = normalizeAnswer(input);
+function isCorrectAnswer(input2, answerCount) {
+  const clean2 = normalizeAnswer(input2);
   if (!clean2)
     return false;
   return buildAcceptedAnswers(answerCount).has(clean2);
@@ -50041,14 +50586,14 @@ function similarity$1(a, b) {
 var JP_SIMILARITY_THRESHOLD$1 = 0.8;
 var EN_SIMILARITY_THRESHOLD = 0.85;
 var SHORT_TEXT_LENGTH$1 = 3;
-function isStrictMatch$1(input, target, threshold) {
-  if (!input || !target)
+function isStrictMatch$1(input2, target, threshold) {
+  if (!input2 || !target)
     return false;
-  if (input === target)
+  if (input2 === target)
     return true;
-  if (Math.max(input.length, target.length) <= SHORT_TEXT_LENGTH$1)
+  if (Math.max(input2.length, target.length) <= SHORT_TEXT_LENGTH$1)
     return false;
-  return similarity$1(input, target) >= threshold;
+  return similarity$1(input2, target) >= threshold;
 }
 var EduReadingDrillModal = ({
   items = [],
@@ -50576,8 +51121,8 @@ function norm(s2) {
 function normQuestion(s2) {
   return norm(s2).replace(/[。、．.,？?！!\s]/g, "");
 }
-function parseCount(input) {
-  const s2 = input.normalize("NFKC").replace(/\s/g, "").replace(/人$/, "");
+function parseCount(input2) {
+  const s2 = input2.normalize("NFKC").replace(/\s/g, "").replace(/人$/, "");
   if (!s2)
     return null;
   if (/^\d+$/.test(s2))
@@ -50610,16 +51155,16 @@ function similarity(a, b) {
     return 1;
   return 1 - levenshtein(a, b) / maxLen;
 }
-function isStrictMatch(input, target, threshold) {
-  if (!input || !target)
+function isStrictMatch(input2, target, threshold) {
+  if (!input2 || !target)
     return false;
-  if (input === target)
+  if (input2 === target)
     return true;
   if (threshold >= 1)
     return false;
-  if (Math.max(input.length, target.length) <= SHORT_TEXT_LENGTH)
+  if (Math.max(input2.length, target.length) <= SHORT_TEXT_LENGTH)
     return false;
-  return similarity(input, target) >= threshold;
+  return similarity(input2, target) >= threshold;
 }
 function slotCue(v2) {
   if (v2.cue)
@@ -52098,7 +52643,7 @@ async function prepareFile(file) {
     URL.revokeObjectURL(objectUrl);
   }
 }
-function formatDate(iso) {
+function formatDate$1(iso) {
   return new Date(iso).toLocaleDateString(void 0, { year: "numeric", month: "long", day: "numeric" });
 }
 function TranscriptionText({ text }) {
@@ -52434,7 +52979,7 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
         ] }),
         (status == null ? void 0 : status.retention.deleteAfter) && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-xl p-3", children: [
           "\u{1F512} Your image will be kept privately so your teacher can check it, and will be deleted on ",
-          formatDate(status.retention.deleteAfter),
+          formatDate$1(status.retention.deleteAfter),
           "."
         ] }),
         message && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -52654,7 +53199,7 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
     /* @__PURE__ */ jsxRuntimeExports.jsx(GenkoyoshiModal, { isOpen: isGuideOpen, onClose: () => setIsGuideOpen(false) })
   ] });
 };
-async function loader$I({ request }) {
+async function loader$K({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -52695,8 +53240,15 @@ async function loader$I({ request }) {
     loadError: loadError || (!lessonData ? "Obento Unit 4 Lesson 1 not found in edu_lessons." : null)
   });
 }
-var meta$G = ({ data: data2 }) => {
+var meta$H = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+};
+var COMPLETED_TASK_NAMES = {
+  vocabulary: "vocabulary drills",
+  listening: "listening tasks",
+  reading: "reading tasks",
+  speaking: "speaking practice rounds",
+  writing: "writing tasks"
 };
 function LessonsObentoUnit4Lesson1Page() {
   const layoutRef = reactExports.useRef(null);
@@ -52715,6 +53267,16 @@ function LessonsObentoUnit4Lesson1Page() {
   const [speakingTaskCompleted, setSpeakingTaskCompleted] = reactExports.useState(false);
   const [isWritingTaskOpen, setIsWritingTaskOpen] = reactExports.useState(false);
   const [writingTaskCompleted, setWritingTaskCompleted] = reactExports.useState(false);
+  const [savedProgress, setSavedProgress] = reactExports.useState(null);
+  const [completedNotice, setCompletedNotice] = reactExports.useState(null);
+  const startTask = (key, open) => {
+    if (savedProgress == null ? void 0 : savedProgress[key]) {
+      setCompletedNotice(key);
+      return;
+    }
+    open();
+  };
+  const startVocabularyDrill = () => startTask("vocabulary", () => setIsDrillOpen(true));
   const loaderData = useLoaderData() || {};
   const { lesson, topic, vocabulary = [] } = loaderData;
   const readingItems = vocabulary.map((v2) => ({
@@ -52830,7 +53392,7 @@ function LessonsObentoUnit4Lesson1Page() {
               EduVocabularySidebar,
               {
                 vocabulary,
-                onStartDrill: () => setIsDrillOpen(true)
+                onStartDrill: startVocabularyDrill
               }
             ) })
           ] }),
@@ -52839,10 +53401,11 @@ function LessonsObentoUnit4Lesson1Page() {
             {
               lessonId: (lesson == null ? void 0 : lesson.id) || "obento-unit-4-lesson-1",
               userId: user == null ? void 0 : user.id,
-              onStartVocabularyDrill: () => setIsDrillOpen(true),
-              onStartListeningDrill: () => setIsListeningTaskOpen(true),
-              onStartReadingDrill: () => setIsReadingDrillOpen(true),
-              onStartSpeakingDrill: () => setIsSpeakingModalOpen(true),
+              onProgressChange: setSavedProgress,
+              onStartVocabularyDrill: startVocabularyDrill,
+              onStartListeningDrill: () => startTask("listening", () => setIsListeningTaskOpen(true)),
+              onStartReadingDrill: () => startTask("reading", () => setIsReadingDrillOpen(true)),
+              onStartSpeakingDrill: () => startTask("speaking", () => setIsSpeakingModalOpen(true)),
               onStartWritingTask: () => setIsWritingTaskOpen(true),
               externalTaskStatus: {
                 vocabulary: vocabTaskCompleted,
@@ -52894,6 +53457,14 @@ function LessonsObentoUnit4Lesson1Page() {
             }
           }
         ),
+        completedNotice && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl p-5 sm:p-10 shadow-2xl my-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          EduFinishedView,
+          {
+            taskName: COMPLETED_TASK_NAMES[completedNotice],
+            description: "You have already completed this task. Your progress has been saved.",
+            onClose: () => setCompletedNotice(null)
+          }
+        ) }) }),
         (lesson == null ? void 0 : lesson.id) && /* @__PURE__ */ jsxRuntimeExports.jsx(
           EduWritingTaskModal,
           {
@@ -52907,17 +53478,17 @@ function LessonsObentoUnit4Lesson1Page() {
     }
   );
 }
-var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsObentoUnit4Lesson1Page,
-  loader: loader$I,
-  meta: meta$G
+  loader: loader$K,
+  meta: meta$H
 }, Symbol.toStringTag, { value: "Module" }));
 function FeedbackPdfModal({
   initialContent,
   themeColor = "#06b6d4",
   sectionTitle = "VCE WRITING",
-  studentName = "Student",
+  studentName: studentName2 = "Student",
   onClose
 }) {
   const cleanInitialText = initialContent.replace(/<br\s*[\/]?>/gi, "\n").replace(/<\/p>/gi, "\n\n").replace(/<[^>]*>?/gm, "");
@@ -52997,7 +53568,7 @@ function FeedbackPdfModal({
         <body>
           <div class="header">
             <h1>\u{1F31F} VCE Japanese Writing Feedback Report (${sectionTitle})</h1>
-            <div class="meta">Student: ${studentName || "Student"} | Date: ${(/* @__PURE__ */ new Date()).toLocaleDateString()}</div>
+            <div class="meta">Student: ${studentName2 || "Student"} | Date: ${(/* @__PURE__ */ new Date()).toLocaleDateString()}</div>
           </div>
           <div class="content">${cleanContent}</div>
           ${sanitizedNotes ? `
@@ -53208,7 +53779,7 @@ function ChatYamatoEoyWritingCustom({
     )
   ] });
 }
-async function loader$H({ request }) {
+async function loader$J({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -53221,7 +53792,7 @@ async function loader$H({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$F = ({ data: data2 }) => {
+var meta$G = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CustomDashboard() {
@@ -53562,13 +54133,13 @@ Details: ${assignedQuestionText}` : "";
     )
   ] }) }) });
 }
-var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CustomDashboard,
-  loader: loader$H,
-  meta: meta$F
+  loader: loader$J,
+  meta: meta$G
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$G({ request }) {
+async function loader$I({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -53581,7 +54152,7 @@ async function loader$G({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$E = ({ data: data2 }) => {
+var meta$F = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function HiraganaMemoryMatchFrameView({ userId }) {
@@ -53641,11 +54212,11 @@ function HiraganaMemoryMatchRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HiraganaMemoryMatchFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HiraganaMemoryMatchRoute,
-  loader: loader$G,
-  meta: meta$E
+  loader: loader$I,
+  meta: meta$F
 }, Symbol.toStringTag, { value: "Module" }));
 var OralUserAnswerList = ({
   questions,
@@ -53768,7 +54339,7 @@ var OralUserAnswerList = ({
     ] })
   ] });
 };
-async function loader$F({ request }) {
+async function loader$H({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -53781,7 +54352,7 @@ async function loader$F({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$D = ({ data: data2 }) => {
+var meta$E = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralDrillPage() {
@@ -54177,11 +54748,11 @@ Please enter at least 10 characters for your drill response. (Current: ${current
     )
   ] }) }) });
 }
-var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralDrillPage,
-  loader: loader$F,
-  meta: meta$D
+  loader: loader$H,
+  meta: meta$E
 }, Symbol.toStringTag, { value: "Module" }));
 var PRODUCTION_HOSTS = ["jptutoraiyamato.com", "www.jptutoraiyamato.com"];
 function blockOnProduction(request) {
@@ -54190,7 +54761,7 @@ function blockOnProduction(request) {
     throw new Response("Not Found", { status: 404 });
   }
 }
-async function loader$E({ request }) {
+async function loader$G({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -54204,7 +54775,7 @@ async function loader$E({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$C = ({ data: data2 }) => {
+var meta$D = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var sportsColorTemplates = [
@@ -54728,18 +55299,18 @@ function TestYamatoNotePage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { style: { textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\xA9 2026 JPTutor AI Yamato." }) })
   ] }) });
 }
-var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoNotePage,
-  loader: loader$E,
-  meta: meta$C
+  loader: loader$G,
+  meta: meta$D
 }, Symbol.toStringTag, { value: "Module" }));
 var OralMockConfig = ({
   onStartExam,
   defaultStudentName = "VCE Student",
   themeColor = "#ef4444"
 }) => {
-  const [studentName, setStudentName] = reactExports.useState(defaultStudentName);
+  const [studentName2, setStudentName] = reactExports.useState(defaultStudentName);
   const [learningPace, setLearningPace] = reactExports.useState("normal");
   const [examSection, setExamSection] = reactExports.useState("both");
   const [imagePreview, setImagePreview] = reactExports.useState(null);
@@ -54758,7 +55329,7 @@ var OralMockConfig = ({
   };
   const handleStart = () => {
     onStartExam({
-      studentName,
+      studentName: studentName2,
       learningPace,
       examSection,
       supportMaterialUrl: imagePreview,
@@ -54777,7 +55348,7 @@ var OralMockConfig = ({
         "input",
         {
           type: "text",
-          value: studentName,
+          value: studentName2,
           onChange: (e) => setStudentName(e.target.value),
           placeholder: "Enter your name",
           className: "w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-medium focus:outline-hidden focus:ring-2",
@@ -55387,7 +55958,7 @@ var ChatYamatoEoyOralMock = ({
     }
   );
 };
-async function loader$D({ request }) {
+async function loader$F({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55516,14 +56087,14 @@ function MockOralMode() {
     }
   );
 }
-var meta$B = ({ data: data2 }) => {
+var meta$C = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MockOralMode,
-  loader: loader$D,
-  meta: meta$B
+  loader: loader$F,
+  meta: meta$C
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$b = "WRITING_STYLES";
 async function fetchWritingStylesData(supabaseClient) {
@@ -55543,7 +56114,7 @@ async function fetchWritingStylesData(supabaseClient) {
     return null;
   }
 }
-async function loader$C({ request }) {
+async function loader$E({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55556,7 +56127,7 @@ async function loader$C({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$A = ({ data: data2 }) => {
+var meta$B = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function WritingStylesGuide() {
@@ -55681,13 +56252,13 @@ function WritingStylesGuide() {
     }
   );
 }
-var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: WritingStylesGuide,
-  loader: loader$C,
-  meta: meta$A
+  loader: loader$E,
+  meta: meta$B
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$B({ request }) {
+async function loader$D({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55700,7 +56271,7 @@ async function loader$B({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$z = ({ data: data2 }) => {
+var meta$A = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function PrefecturePuzzleFrameView({ userId }) {
@@ -55763,11 +56334,11 @@ function PrefecturePuzzleRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(PrefecturePuzzleFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrefecturePuzzleRoute,
-  loader: loader$B,
-  meta: meta$z
+  loader: loader$D,
+  meta: meta$A
 }, Symbol.toStringTag, { value: "Module" }));
 var STAGES = [
   [["\u3042", "a"], ["\u3044", "i"], ["\u3046", "u"], ["\u3048", "e"], ["\u304A", "o"], ["\u304B", "ka"], ["\u304D", "ki"], ["\u304F", "ku"], ["\u3051", "ke"], ["\u3053", "ko"]],
@@ -55784,7 +56355,7 @@ var RINGS_DATA = STAGES.map((s2, i) => [
   ...RING_OK[i].map((j) => [...s2[j], true]),
   ...RING_BAD[i].map(([k2, r2]) => [k2, r2, false])
 ]);
-async function loader$A({ request }) {
+async function loader$C({ request }) {
   let portalContent = null;
   try {
     const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
@@ -55793,7 +56364,7 @@ async function loader$A({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var meta$y = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var meta$z = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function RollingCharacterPage() {
   const layoutRef = reactExports.useRef(null);
   const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
@@ -56273,11 +56844,11 @@ function RollingCharacterArena() {
     ] })
   ] });
 }
-var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: RollingCharacterPage,
-  loader: loader$A,
-  meta: meta$y
+  loader: loader$C,
+  meta: meta$z
 }, Symbol.toStringTag, { value: "Module" }));
 function renderGrammarText(text, modalKey) {
   const grammarLinks = {
@@ -56586,7 +57157,7 @@ async function fetchTextTypesData(supabaseClient) {
     return null;
   }
 }
-async function loader$z({ request }) {
+async function loader$B({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -56977,20 +57548,20 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
     }
   );
 }
-var meta$x = ({ data: data2 }) => {
+var meta$y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
-  loader: loader$z,
-  meta: meta$x
+  loader: loader$B,
+  meta: meta$y
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$y({ request }) {
+async function loader$A({ request }) {
   blockOnProduction(request);
   return null;
 }
-var meta$w = () => {
+var meta$x = () => {
   return [
     { title: "AI Yamato \u72EC\u7ACBAPI\u30C6\u30B9\u30C8\u753B\u9762" },
     { name: "description", content: "\u72EC\u7ACBAPI\u30B5\u30FC\u30D0\u30FC\u3068\u9023\u643A\u3059\u308B\u30E4\u30DE\u30C8\u306E\u30C6\u30B9\u30C8\u30DA\u30FC\u30B8\u3067\u3059\u3002" }
@@ -57373,11 +57944,11 @@ function TestYamatoPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { style: { textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\xA9 2026 JPTutor AI Yamato." }) })
   ] });
 }
-var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoPage,
-  loader: loader$y,
-  meta: meta$w
+  loader: loader$A,
+  meta: meta$x
 }, Symbol.toStringTag, { value: "Module" }));
 var ENEMY_POOL = [
   { char: "\u3042", romaji: "a" },
@@ -57398,7 +57969,7 @@ var ENEMY_POOL = [
   { char: "\u65E5", romaji: "nichi" },
   { char: "\u672C", romaji: "hon" }
 ];
-async function loader$x({ request }) {
+async function loader$z({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -57411,7 +57982,7 @@ async function loader$x({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$v = ({ data: data2 }) => {
+var meta$w = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OgreStarSwordPage() {
@@ -57721,13 +58292,13 @@ function OgreStarSwordArena() {
     ] })
   ] });
 }
-var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OgreStarSwordPage,
-  loader: loader$x,
-  meta: meta$v
+  loader: loader$z,
+  meta: meta$w
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$w({ request }) {
+async function loader$y({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -57768,7 +58339,7 @@ async function loader$w({ request }) {
     loadError: loadError || (lessonsData.length === 0 ? "No Obento Unit 4 lessons found in edu_lessons." : null)
   });
 }
-var meta$u = ({ data: data2 }) => {
+var meta$v = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsObentoUnit4Page() {
@@ -57924,11 +58495,11 @@ function LessonsObentoUnit4Page() {
     }
   );
 }
-var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsObentoUnit4Page,
-  loader: loader$w,
-  meta: meta$u
+  loader: loader$y,
+  meta: meta$v
 }, Symbol.toStringTag, { value: "Module" }));
 var handleScrollToSection = (e, anchorId) => {
   e.preventDefault();
@@ -57940,7 +58511,7 @@ var handleScrollToSection = (e, anchorId) => {
 var getAnchorId = (text) => {
   return `cat-${text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 };
-async function loader$v({ request }) {
+async function loader$x({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   let grammarCategories = [];
@@ -57966,7 +58537,7 @@ async function loader$v({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$t = ({ data: data2 }) => {
+var meta$u = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceGrammarComponent() {
@@ -58115,13 +58686,67 @@ function VceGrammarComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" })
   ] }) });
 }
-var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceGrammarComponent,
-  loader: loader$v,
-  meta: meta$t
+  loader: loader$x,
+  meta: meta$u
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$u({ request, context }) {
+async function loader$w() {
+  return dist$1.json({ error: "Method not allowed." }, { status: 405 });
+}
+async function action$5({ request, context }) {
+  var _a;
+  if (request.method !== "POST") {
+    return dist$1.json({ error: "Method not allowed." }, { status: 405 });
+  }
+  const token = (_a = request.headers.get("Authorization")) == null ? void 0 : _a.replace(/^Bearer\s+/i, "").trim();
+  if (!token) {
+    return dist$1.json({ error: "Please sign in first." }, { status: 401 });
+  }
+  const admin = createAdminSupabaseClient(context);
+  const { data: { user }, error: userError } = await admin.auth.getUser(token);
+  if (userError || !user) {
+    return dist$1.json({ error: "Please sign in first." }, { status: 401 });
+  }
+  const body = await request.json().catch(() => ({}));
+  const info = normaliseSchoolInfo(body.state, body.schoolName, body.schoolRefId);
+  if ("error" in info) {
+    return dist$1.json({ error: info.error }, { status: 400 });
+  }
+  const { data: current } = await admin.from("profiles").select("is_teacher, teacher_status").eq("id", user.id).maybeSingle();
+  let schoolRefId = info.schoolRefId;
+  if (schoolRefId) {
+    const { data: school } = await admin.from("ref_au_schools").select("id").eq("id", schoolRefId).eq("state", info.state).maybeSingle();
+    if (!school)
+      schoolRefId = null;
+  }
+  const update = {};
+  if (info.state)
+    update.state = info.state;
+  if (info.schoolName) {
+    update.school_name = info.schoolName;
+    update.school_ref_id = schoolRefId;
+  }
+  if (!(current == null ? void 0 : current.is_teacher) && !(current == null ? void 0 : current.teacher_status)) {
+    update.teacher_status = "pending";
+    update.teacher_requested_at = (/* @__PURE__ */ new Date()).toISOString();
+  }
+  if (Object.keys(update).length > 0) {
+    const { error } = await admin.from("profiles").update(update).eq("id", user.id);
+    if (error) {
+      console.error("[teacher-register] profile update failed:", error.message);
+      return dist$1.json({ error: "Could not send your teacher account request. Please try again." }, { status: 500 });
+    }
+  }
+  return dist$1.json({ success: true, status: (current == null ? void 0 : current.is_teacher) ? "approved" : (current == null ? void 0 : current.teacher_status) ?? "pending" });
+}
+var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  action: action$5,
+  loader: loader$w
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$v({ request, context }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -58192,16 +58817,16 @@ function ImageTestPage() {
     ] })
   ] }) });
 }
-var meta$s = ({ data: data2 }) => {
+var meta$t = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ImageTestPage,
-  loader: loader$u,
-  meta: meta$s
+  loader: loader$v,
+  meta: meta$t
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$t({ request }) {
+async function loader$u({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -58215,7 +58840,7 @@ async function loader$t({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$r = ({ data: data2 }) => {
+var meta$s = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TestAudioPage() {
@@ -58560,11 +59185,11 @@ function TestAudioPage() {
     ] })
   ] }) }) });
 }
-var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestAudioPage,
-  loader: loader$t,
-  meta: meta$r
+  loader: loader$u,
+  meta: meta$s
 }, Symbol.toStringTag, { value: "Module" }));
 var MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -58659,7 +59284,7 @@ var CHARACTER_POOLS = {
     { char: "\u685C", romaji: "sakura" }
   ]
 };
-async function loader$s({ request }) {
+async function loader$t({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -58672,7 +59297,7 @@ async function loader$s({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$q = ({ data: data2 }) => {
+var meta$r = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CharacterMazePage() {
@@ -59108,13 +59733,13 @@ function CharacterMazeArena() {
     ] })
   ] });
 }
-var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CharacterMazePage,
-  loader: loader$s,
-  meta: meta$q
+  loader: loader$t,
+  meta: meta$r
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$r({ request }) {
+async function loader$s({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -59127,7 +59752,7 @@ async function loader$r({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$p = ({ data: data2 }) => {
+var meta$q = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TextTypesComponent() {
@@ -59220,11 +59845,11 @@ function TextTypesComponent() {
     }
   );
 }
-var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TextTypesComponent,
-  loader: loader$r,
-  meta: meta$p
+  loader: loader$s,
+  meta: meta$q
 }, Symbol.toStringTag, { value: "Module" }));
 var CHAR_POOL = [
   { char: "\u3042", kana: "\u30A2", romaji: "a" },
@@ -59243,7 +59868,7 @@ var CHAR_POOL = [
   { char: "\u305B", kana: "\u30BB", romaji: "se" },
   { char: "\u305D", kana: "\u30BD", romaji: "so" }
 ];
-async function loader$q({ request }) {
+async function loader$r({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -59256,7 +59881,7 @@ async function loader$q({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$o = ({ data: data2 }) => {
+var meta$p = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function StudentTunnelEscapePage() {
@@ -59488,11 +60113,11 @@ function GameArena() {
     )
   ] });
 }
-var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: StudentTunnelEscapePage,
-  loader: loader$q,
-  meta: meta$o
+  loader: loader$r,
+  meta: meta$p
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$8 = "CONTENT_VCE_SPEAKING";
 async function fetchVceSpeakingContentData(supabase2) {
@@ -59554,7 +60179,7 @@ function useVceSpeakingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$p({ request }) {
+async function loader$q({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -59624,21 +60249,21 @@ function VceSpeakingIndex() {
     }
   );
 }
-var meta$n = ({ data: data2 }) => {
+var meta$o = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingIndex,
-  loader: loader$p,
-  meta: meta$n
+  loader: loader$q,
+  meta: meta$o
 }, Symbol.toStringTag, { value: "Module" }));
 function parseEnglishAnswers(rawEnglishText) {
   if (!rawEnglishText)
     return [];
   return rawEnglishText.replace(/、/g, ",").split(",").map((s2) => s2.trim().toLowerCase()).filter(Boolean);
 }
-async function loader$o({ request, params, context }) {
+async function loader$p({ request, params, context }) {
   const { listId } = params;
   const { supabase: supabase2 } = createServerSupabaseClient(request, context);
   const { data: listMeta, error: metaError } = await supabase2.from("edu_vocab_lists").select("*").eq("id", listId).single();
@@ -59694,7 +60319,7 @@ async function loader$o({ request, params, context }) {
   const vocabularies = listItems.map((item) => item.kl_vocabulary).filter(Boolean);
   return dist$1.json({ listMeta, taskId: (taskData == null ? void 0 : taskData.id) || null, vocabularies });
 }
-async function action$3({ request, context }) {
+async function action$4({ request, context }) {
   const { supabase: supabase2 } = createServerSupabaseClient(request, context);
   const { data: { user }, error: userError } = await supabase2.auth.getUser();
   if (userError || !user) {
@@ -59989,13 +60614,13 @@ function DrillSessionPage() {
     ] })
   ] }) }) });
 }
-var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$3,
+  action: action$4,
   default: DrillSessionPage,
-  loader: loader$o
+  loader: loader$p
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$n({ request }) {
+async function loader$o({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -60008,7 +60633,7 @@ async function loader$n({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$m = ({ data: data2 }) => {
+var meta$n = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function KanjiSudokuFrameView({ userId }) {
@@ -60070,11 +60695,11 @@ function KanjiSudokuRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(KanjiSudokuFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiSudokuRoute,
-  loader: loader$n,
-  meta: meta$m
+  loader: loader$o,
+  meta: meta$n
 }, Symbol.toStringTag, { value: "Module" }));
 var DEFAULT_CATEGORY = "Miscellaneous";
 var CATEGORY_ORDER$1 = [
@@ -60479,7 +61104,7 @@ function buildPools(rows) {
   kanjiMeaning.sort(byCategoryThenSortOrder);
   return { hiragana, katakana, kanjiReading, kanjiMeaning };
 }
-async function loader$m({ request }) {
+async function loader$n({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -60522,7 +61147,7 @@ async function loader$m({ request }) {
     kanjiReadingAvailable
   });
 }
-var meta$l = ({
+var meta$m = ({
   data: data2
 }) => {
   return generateModuleMeta(
@@ -60707,25 +61332,25 @@ function MemoryMatchGame({
       setDifficulty(next.difficulty);
     setRound((r2) => r2 + 1);
   };
-  const flipCard = (card) => {
+  const flipCard = (card2) => {
     if (locked || won)
       return;
-    if (matchedIds.has(card.pairId))
+    if (matchedIds.has(card2.pairId))
       return;
-    if (openKeys.includes(card.key))
+    if (openKeys.includes(card2.key))
       return;
     if (openKeys.length >= 2)
       return;
     if (!started)
       setStarted(true);
-    const nextOpen = [...openKeys, card.key];
+    const nextOpen = [...openKeys, card2.key];
     setOpenKeys(nextOpen);
     if (nextOpen.length < 2)
       return;
     setMoves((m2) => m2 + 1);
     const first = deck.find((c) => c.key === nextOpen[0]);
-    if (first && first.pairId === card.pairId) {
-      setMatchedIds((prev) => new Set(prev).add(card.pairId));
+    if (first && first.pairId === card2.pairId) {
+      setMatchedIds((prev) => new Set(prev).add(card2.pairId));
       setOpenKeys([]);
     } else {
       setLocked(true);
@@ -60905,15 +61530,15 @@ function MemoryMatchGame({
           maxWidth: "100%",
           gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`
         },
-        children: deck.map((card) => {
-          const isMatched = matchedIds.has(card.pairId);
-          const isOpen = isMatched || openKeys.includes(card.key);
+        children: deck.map((card2) => {
+          const isMatched = matchedIds.has(card2.pairId);
+          const isOpen = isMatched || openKeys.includes(card2.key);
           return /* @__PURE__ */ jsxRuntimeExports.jsx(
             "button",
             {
               type: "button",
-              onClick: () => flipCard(card),
-              "aria-label": isOpen ? card.text : "Face-down card",
+              onClick: () => flipCard(card2),
+              "aria-label": isOpen ? card2.text : "Face-down card",
               className: "klmm-card aspect-square",
               children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
                 "span",
@@ -60929,11 +61554,11 @@ function MemoryMatchGame({
                           /* @__PURE__ */ jsxRuntimeExports.jsx(
                             "span",
                             {
-                              className: card.kind === "front" ? "klmm-char" : card.text.length > 6 ? "klmm-word-sm" : "klmm-word",
-                              children: card.text
+                              className: card2.kind === "front" ? "klmm-char" : card2.text.length > 6 ? "klmm-word-sm" : "klmm-word",
+                              children: card2.text
                             }
                           ),
-                          card.sub && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "klmm-sub", children: card.sub })
+                          card2.sub && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "klmm-sub", children: card2.sub })
                         ]
                       }
                     )
@@ -60941,7 +61566,7 @@ function MemoryMatchGame({
                 }
               )
             },
-            card.key
+            card2.key
           );
         })
       }
@@ -61039,11 +61664,11 @@ function MemoryMatchGame({
       ` })
   ] });
 }
-var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MemoryMatchPage,
-  loader: loader$m,
-  meta: meta$l
+  loader: loader$n,
+  meta: meta$m
 }, Symbol.toStringTag, { value: "Module" }));
 var CATEGORY_ORDER = [
   "Numbers",
@@ -61072,7 +61697,7 @@ var CATEGORY_ORDER = [
   "Repeat sign",
   "Miscellaneous"
 ];
-async function loader$l({ request }) {
+async function loader$m({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -61085,7 +61710,7 @@ async function loader$l({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$k = ({ data: data2 }) => {
+var meta$l = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Kanji200Component() {
@@ -61236,11 +61861,11 @@ function Kanji200Component() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" })
   ] }) });
 }
-var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Kanji200Component,
-  loader: loader$l,
-  meta: meta$k
+  loader: loader$m,
+  meta: meta$l
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$7 = "CONTENT_VCE_WRITING";
 async function fetchVceWritingContentData(supabase2) {
@@ -61302,7 +61927,7 @@ function useVceWritingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$k({ request }) {
+async function loader$l({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -61369,16 +61994,16 @@ function VceWritingIndex() {
     }
   );
 }
-var meta$j = ({ data: data2 }) => {
+var meta$k = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceWritingIndex,
-  loader: loader$k,
-  meta: meta$j
+  loader: loader$l,
+  meta: meta$k
 }, Symbol.toStringTag, { value: "Module" }));
-async function action$2({ request, context }) {
+async function action$3({ request, context }) {
   try {
     const body = await request.json().catch(() => ({}));
     const { accessToken, refreshToken } = body;
@@ -61398,9 +62023,1073 @@ async function action$2({ request, context }) {
     return dist$1.json({ success: false, error: err.message || "Internal Error" }, { status: 500 });
   }
 }
-var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$2
+  action: action$3
+}, Symbol.toStringTag, { value: "Module" }));
+var __vite_import_meta_env__ = {};
+function enabledProviders() {
+  const raw = String((__vite_import_meta_env__ == null ? void 0 : __vite_import_meta_env__.VITE_SCHOOL_SSO_PROVIDERS) ?? "");
+  const ids = raw.split(",").map((s2) => s2.trim()).filter(Boolean);
+  return SCHOOL_SSO_PROVIDERS.filter((p2) => ids.includes(p2.id));
+}
+function SchoolAccountLink({ verifiedEmails, returnPath, teacherHelp = false, className = "" }) {
+  const providers = enabledProviders();
+  const [busy, setBusy] = reactExports.useState(null);
+  const [error, setError] = reactExports.useState(null);
+  const link = async (provider) => {
+    setBusy(provider);
+    setError(null);
+    const { error: linkError } = await supabase.auth.linkIdentity({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}${returnPath}`,
+        // Microsoft はメールアドレスを受け取るために email スコープが必要
+        ...provider === "azure" ? { scopes: "email" } : {}
+      }
+    });
+    if (linkError) {
+      setBusy(null);
+      setError(
+        /already/i.test(linkError.message) ? "This school account is already linked to another AI Yamato account." : "Could not start school account sign-in. Please try again later."
+      );
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `space-y-2 ${className}`, children: [
+    verifiedEmails.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-emerald-700 font-semibold flex items-center gap-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldCheck, { className: "w-4 h-4" }),
+      " Verified school account: ",
+      verifiedEmails.map((e) => e.email).join(", ")
+    ] }),
+    providers.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "School account sign-in is not available yet. Please check back soon." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col sm:flex-row gap-2", children: providers.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        disabled: busy !== null,
+        onClick: () => link(p2.id),
+        className: "px-4 py-2 text-sm font-semibold rounded-md border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 cursor-pointer disabled:opacity-50",
+        children: busy === p2.id ? "Opening\u2026" : `${verifiedEmails.length > 0 ? "Link another" : "Verify with"} ${p2.label}`
+      },
+      p2.id
+    )) }),
+    error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-red-600 font-medium", children: error }),
+    teacherHelp && verifiedEmails.length === 0 && providers.some((p2) => p2.id === "google") && /* @__PURE__ */ jsxRuntimeExports.jsxs("details", { className: "text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("summary", { className: "font-semibold text-slate-700 cursor-pointer", children: "My school doesn't use Google accounts" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2", children: "You can create a free Google account with your school email address. It takes about 5 minutes:" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("ol", { className: "list-decimal pl-5 mt-1 space-y-0.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "Open",
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: GOOGLE_SIGNUP_URL, target: "_blank", rel: "noopener noreferrer", className: "text-indigo-700 font-semibold hover:underline", children: "Google's sign-up page" }),
+          " ",
+          "(a private browser window is easiest)."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "When asked for an email address, choose ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: '"Use your existing email"' }),
+          " and enter your school email."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Enter the code Google sends to your school inbox, then choose a password." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "Come back here and press ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: '"Verify with Google"' }),
+          ", signing in with that account."
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1", children: "Some schools have rules about using school email for other services, so check with your school if you are unsure." })
+    ] })
+  ] });
+}
+var card = "bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4";
+var h2 = "text-base font-bold text-slate-800 flex items-center gap-2";
+var input = "px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none";
+var btn = "px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition cursor-pointer disabled:opacity-50";
+var btnGhost = "text-xs font-semibold text-slate-600 border border-slate-300 rounded-md px-3 py-1.5 bg-white hover:bg-slate-50 cursor-pointer inline-flex items-center gap-1";
+var taskLabel$1 = (key) => {
+  var _a;
+  return ((_a = LESSON_TASKS.find((t2) => t2.key === key)) == null ? void 0 : _a.label) ?? key;
+};
+var studentName = (s2) => s2.nickname || s2.email || "Student";
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+}
+function useTzOffset() {
+  const [tz, setTz] = reactExports.useState(0);
+  reactExports.useEffect(() => setTz((/* @__PURE__ */ new Date()).getTimezoneOffset()), []);
+  return tz;
+}
+function useDoneSet(progress) {
+  return reactExports.useMemo(() => new Set(progress.map((p2) => `${p2.userId}:${p2.lessonId}:${p2.taskKey}`)), [progress]);
+}
+function classHref(data2, classId) {
+  const q2 = new URLSearchParams({ class: classId, from: data2.period.from, to: data2.period.to, tz: String(data2.period.tz) });
+  return `/teacher-dashboard?${q2}`;
+}
+function ClassBar({ data: data2 }) {
+  const nav = useNavigation();
+  const canCreate = data2.classes.length < data2.limits.maxClasses;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Classes", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "w-5 h-5 text-indigo-600" }),
+      " Your Classes"
+    ] }),
+    data2.classes.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600", children: "Create your first class. You will get a class code to share with your students." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: data2.classes.map((c) => {
+      var _a;
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Link,
+        {
+          to: classHref(data2, c.id),
+          className: `px-3 py-1.5 rounded-full text-xs font-bold border no-underline ${((_a = data2.selectedClass) == null ? void 0 : _a.id) === c.id ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"}`,
+          children: c.name
+        },
+        c.id
+      );
+    }) }),
+    canCreate && data2.schoolEmails.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2 bg-amber-50 border border-amber-200 rounded-lg p-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-amber-900", children: "Verify your school account to create a class" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-amber-800", children: "To keep students safe, a class is linked to your school's email domain. Students join with a school account from your school or with a personal invite code you hand out in class, and you approve each one." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolAccountLink, { verifiedEmails: [], returnPath: "/teacher-dashboard", teacherHelp: true })
+    ] }) : canCreate ? /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "flex flex-col sm:flex-row gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "create-class" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { name: "name", required: true, maxLength: 60, placeholder: "New class name (e.g. Year 9 Japanese A)", className: `${input} flex-1` }),
+      data2.schoolEmails.length > 1 ? /* @__PURE__ */ jsxRuntimeExports.jsx("select", { name: "schoolDomain", className: input, "aria-label": "School email domain for this class", children: data2.schoolEmails.map((e) => /* @__PURE__ */ jsxRuntimeExports.jsxs("option", { value: e.domain, children: [
+        "@",
+        e.domain
+      ] }, e.domain)) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "schoolDomain", value: data2.schoolEmails[0].domain }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, disabled: nav.state !== "idle", children: "Create Class" })
+    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+      "The free teacher plan includes ",
+      data2.limits.maxClasses,
+      " class. Need more classes?",
+      " ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/contact", className: "text-indigo-700 font-semibold hover:underline", children: "Ask us about a school plan" }),
+      "."
+    ] })
+  ] });
+}
+function JoinRequestsCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  if (data2.joinRequests.length === 0)
+    return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: `${card} border-amber-300`, "aria-label": "Join requests", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(UserPlus, { className: "w-5 h-5 text-amber-600" }),
+      " Join Requests (",
+      data2.joinRequests.length,
+      ")"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Approve only students you teach. A school email has been verified by Google or Microsoft. For an invite code, check that the nickname matches the student you gave that code to." }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: data2.joinRequests.map((r2) => {
+      const proof = r2.schoolEmail ?? `Invite code ${r2.inviteCode ? formatInviteCode(r2.inviteCode) : ""}${r2.inviteLabel ? ` (${r2.inviteLabel})` : ""}`;
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800 truncate", children: r2.nickname || proof }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 truncate", suppressHydrationWarning: true, children: [
+            proof,
+            " \xB7 ",
+            formatDate(r2.createdAt)
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 shrink-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "approve-request" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "requestId", value: r2.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: `${btn} inline-flex items-center gap-1`, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-4 h-4" }),
+              " Approve"
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "decline-request" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "requestId", value: r2.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btnGhost, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "w-3.5 h-3.5" }),
+              " Decline"
+            ] })
+          ] })
+        ] })
+      ] }, r2.id);
+    }) })
+  ] });
+}
+function InviteCodesCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  const nav = useNavigation();
+  const unused = data2.invites.filter((i) => i.status === "unused");
+  const [copied, setCopied] = reactExports.useState(false);
+  const copyUnused = async () => {
+    const text = unused.map((i) => `${i.label ? `${i.label}	` : ""}${formatInviteCode(i.code)}`).join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2e3);
+    } catch {
+      window.prompt("Copy these codes:", text);
+    }
+  };
+  const statusText = (i) => i.status === "used" ? `Used by ${i.usedByName ?? "a student"}` : i.status === "expired" ? "Expired" : `Unused \xB7 expires ${formatDate(i.expiresAt)}`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Personal invite codes", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Ticket, { className: "w-5 h-5 text-indigo-600" }),
+      " Personal Invite Codes"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+      "For students whose school doesn't use Google accounts. Each code works ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "once" }),
+      ", for one student, and expires after ",
+      INVITE_CODE_DAYS,
+      " days. Hand them out in class (for example on a slip of paper). Don't post them online. Students enter the code in ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "My Account" }),
+      ", and you still approve each request."
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "space-y-2 bg-slate-50 border border-slate-200 rounded-lg p-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "create-invites" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "block text-xs font-semibold text-slate-600 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "One student per line: a name or note so you know whose code is whose (only you can see it)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("textarea", { name: "labels", rows: 3, maxLength: 3e3, placeholder: "Aiko S.\nBen T.", className: `${input} w-full` })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 inline-flex items-center gap-2", children: [
+          "Or just make",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "number", name: "count", min: 1, max: data2.limits.maxStudentsPerClass, defaultValue: 1, className: `${input} w-20` }),
+          "codes"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: `${btn} sm:ml-auto`, disabled: nav.state !== "idle", children: "Make Codes" })
+      ] })
+    ] }),
+    data2.invites.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No invite codes yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+      unused.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "button", onClick: copyUnused, className: btnGhost, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { className: "w-3.5 h-3.5" }),
+        " ",
+        copied ? "Copied!" : `Copy ${unused.length} unused code${unused.length === 1 ? "" : "s"}`
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: data2.invites.map((i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "px-3 py-2 flex items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `font-mono font-bold tracking-widest text-sm ${i.status === "unused" ? "text-indigo-700" : "text-slate-400 line-through"}`, children: formatInviteCode(i.code) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "min-w-0", children: [
+            i.label && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-sm text-slate-800 truncate", children: i.label }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-[11px] text-slate-500 truncate", suppressHydrationWarning: true, children: statusText(i) })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Form,
+          {
+            method: "post",
+            onSubmit: (e) => {
+              const msg = i.status === "used" ? "Remove this used code from the list? The student stays in your class (a pending request with this code is cancelled)." : "Delete this code? It will stop working.";
+              if (!window.confirm(msg))
+                e.preventDefault();
+            },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "delete-invite" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "inviteId", value: i.id }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1", "aria-label": `Delete code ${formatInviteCode(i.code)}`, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash, { className: "w-4 h-4" }) })
+            ]
+          }
+        )
+      ] }, i.id)) })
+    ] })
+  ] });
+}
+function ClassSettingsCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  const [confirmName, setConfirmName] = reactExports.useState("");
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Class settings", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(KeyRound, { className: "w-5 h-5 text-indigo-600" }),
+          " Class Code"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-3xl font-black tracking-[0.3em] text-indigo-700 font-mono", children: cls.joinCode }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+          "Students sign up for free, open ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "My Account" }),
+          ', verify their school account and enter this code under "My Class & Homework". Only school accounts ending in',
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: cls.allowedDomains.map((d) => `@${d}`).join(" or ") }),
+          " can ask to join, and you approve each request. Students without a school Google account can use a personal invite code (below)."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", onSubmit: (e) => {
+          if (!window.confirm("Make a new code? The old code will stop working."))
+            e.preventDefault();
+        }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "regenerate-code" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btnGhost, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(RefreshCw, { className: "w-3.5 h-3.5" }),
+            " New code"
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(PenLine, { className: "w-5 h-5 text-indigo-600" }),
+          " Handwriting Images"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "How long to keep photos of students' handwritten writing so you can check them. Students are told how long their image is kept." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "flex flex-col sm:flex-row gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "update-retention" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("select", { name: "retention", defaultValue: data2.retention, className: `${input} flex-1`, children: HANDWRITING_RETENTION_OPTIONS.map((o) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: o.value, children: o.label }, o.value)) }, data2.retention),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, children: "Save" })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-4 space-y-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-bold text-slate-700", children: [
+        "Students (",
+        data2.students.length,
+        "/",
+        data2.limits.maxStudentsPerClass,
+        ")"
+      ] }),
+      data2.students.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No students yet. Share the class code above." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: data2.students.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800 truncate", children: studentName(s2) }),
+          s2.nickname && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-500 truncate", children: s2.email })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", onSubmit: (e) => {
+          if (!window.confirm(`Remove ${studentName(s2)} from this class?`))
+            e.preventDefault();
+        }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "remove-student" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "studentId", value: s2.id }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1", "aria-label": `Remove ${studentName(s2)}`, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash, { className: "w-4 h-4" }) })
+        ] })
+      ] }, s2.id)) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("details", { className: "border-t border-slate-100 pt-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("summary", { className: "text-xs font-semibold text-red-600 cursor-pointer", children: "Delete this class" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "mt-2 flex flex-col sm:flex-row gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "delete-class" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            name: "confirmName",
+            value: confirmName,
+            onChange: (e) => setConfirmName(e.target.value),
+            placeholder: `Type "${cls.name}" to confirm`,
+            className: `${input} flex-1`
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: confirmName !== cls.name, className: "px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-md cursor-pointer disabled:opacity-40", children: "Delete class & homework" })
+      ] })
+    ] })
+  ] });
+}
+function HomeworkCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  const tz = useTzOffset();
+  const done = useDoneSet(data2.progress);
+  const [openId, setOpenId] = reactExports.useState(null);
+  const lessonTitle = (id2) => {
+    var _a;
+    return ((_a = data2.lessons.find((l2) => l2.id === id2)) == null ? void 0 : _a.title) ?? "Lesson";
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Homework", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ClipboardList, { className: "w-5 h-5 text-indigo-600" }),
+      " Homework"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "space-y-3 bg-slate-50 border border-slate-200 rounded-lg p-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "assign-homework" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "tz", value: tz }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1 md:col-span-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Lesson" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("select", { name: "lessonId", required: true, className: `${input} w-full`, defaultValue: "", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "", disabled: true, children: "Choose a lesson\u2026" }),
+            data2.lessons.map((l2) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: l2.id, children: l2.title }, l2.id))
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Due date" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "date", name: "dueDate", required: true, className: `${input} w-full` })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("fieldset", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("legend", { className: "text-xs font-semibold text-slate-600 mb-1", children: "Tasks" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-3", children: LESSON_TASKS.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "inline-flex items-center gap-1.5 text-sm text-slate-700", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", name: "taskKeys", value: t2.key, defaultChecked: true }),
+          " ",
+          t2.label
+        ] }, t2.key)) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { name: "title", maxLength: 100, placeholder: "Title (optional, e.g. Week 3 homework)", className: `${input} flex-1` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, children: "Set Homework" })
+      ] })
+    ] }),
+    data2.homework.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No homework yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: data2.homework.map((hw) => {
+      const total = hw.taskKeys.length;
+      const finished = data2.students.filter((s2) => hw.taskKeys.every((k2) => done.has(`${s2.id}:${hw.lessonId}:${k2}`))).length;
+      const isOpen = openId === hw.id;
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => setOpenId(isOpen ? null : hw.id),
+              className: "text-left bg-transparent border-none p-0 cursor-pointer min-w-0",
+              "aria-expanded": isOpen,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800", children: hw.title }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", suppressHydrationWarning: true, children: [
+                  lessonTitle(hw.lessonId),
+                  " \xB7 ",
+                  hw.taskKeys.map(taskLabel$1).join(", "),
+                  " \xB7 Due ",
+                  formatDate(hw.dueAt)
+                ] })
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3 shrink-0", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-slate-700", children: [
+              finished,
+              "/",
+              data2.students.length,
+              " students finished"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", onSubmit: (e) => {
+              if (!window.confirm("Delete this homework?"))
+                e.preventDefault();
+            }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "delete-homework" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "homeworkId", value: hw.id }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1", "aria-label": "Delete homework", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash, { className: "w-4 h-4" }) })
+            ] })
+          ] })
+        ] }),
+        isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "min-w-full text-xs", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-slate-500", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-1 pr-3", children: "Student" }),
+            hw.taskKeys.map((k2) => /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold px-2 py-1", children: taskLabel$1(k2) }, k2)),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold px-2 py-1", children: "Done" })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: data2.students.map((s2) => {
+            const n2 = hw.taskKeys.filter((k2) => done.has(`${s2.id}:${hw.lessonId}:${k2}`)).length;
+            return /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-t border-slate-100", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1 pr-3 text-slate-800 whitespace-nowrap", children: studentName(s2) }),
+              hw.taskKeys.map((k2) => /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center", children: done.has(`${s2.id}:${hw.lessonId}:${k2}`) ? /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { className: "w-4 h-4 text-emerald-600 inline", "aria-label": "done" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Circle, { className: "w-4 h-4 text-slate-300 inline", "aria-label": "not done" }) }, k2)),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "px-2 py-1 text-center font-semibold text-slate-700", children: [
+                n2,
+                "/",
+                total
+              ] })
+            ] }, s2.id);
+          }) })
+        ] }) })
+      ] }, hw.id);
+    }) })
+  ] });
+}
+function CompletionCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  const tz = useTzOffset();
+  const done = useDoneSet(data2.progress);
+  const inPeriod = data2.homework.filter((h) => h.inPeriod);
+  const totalTasks = inPeriod.reduce((sum, h) => sum + h.taskKeys.length, 0);
+  const rows = data2.students.map((s2) => {
+    const doneTasks = inPeriod.reduce(
+      (sum, h) => sum + h.taskKeys.filter((k2) => done.has(`${s2.id}:${h.lessonId}:${k2}`)).length,
+      0
+    );
+    const fullHomework = inPeriod.filter((h) => h.taskKeys.every((k2) => done.has(`${s2.id}:${h.lessonId}:${k2}`))).length;
+    const percent = totalTasks === 0 ? null : Math.round(doneTasks / totalTasks * 100);
+    return { student: s2, doneTasks, fullHomework, percent };
+  });
+  const scored = rows.filter((r2) => r2.percent !== null);
+  const average = scored.length ? Math.round(scored.reduce((a, r2) => a + (r2.percent ?? 0), 0) / scored.length) : null;
+  const downloadCsv = () => {
+    const header = ["Student", "Email", "Completion %", "Tasks done", "Tasks set", "Homework fully done", "Homework set"];
+    const lines = rows.map((r2) => [
+      r2.student.nickname ?? "",
+      r2.student.email,
+      r2.percent ?? "",
+      r2.doneTasks,
+      totalTasks,
+      r2.fullHomework,
+      inPeriod.length
+    ]);
+    const csv = [header, ...lines].map((line) => line.map((v2) => `"${String(v2).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${cls.name}-homework-${data2.period.from}-to-${data2.period.to}.csv`.replace(/[^\w.-]+/g, "_");
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Homework completion", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(ChartColumn, { className: "w-5 h-5 text-indigo-600" }),
+        " Homework Completion"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "button", onClick: downloadCsv, className: btnGhost, disabled: rows.length === 0, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "w-3.5 h-3.5" }),
+        " Download CSV"
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "get", className: "flex flex-col sm:flex-row sm:items-end gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "class", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "tz", value: tz }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "From" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "date", name: "from", defaultValue: data2.period.from, className: input }, `f-${data2.period.from}`)
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "To" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "date", name: "to", defaultValue: data2.period.to, className: input }, `t-${data2.period.to}`)
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, children: "Show" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+      "Counts homework due between these dates (",
+      inPeriod.length,
+      " homework, ",
+      totalTasks,
+      " tasks). A task counts as done when the student has completed it on AI Yamato.",
+      average !== null && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        " Class average: ",
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { className: "text-slate-800", children: [
+          average,
+          "%"
+        ] }),
+        "."
+      ] })
+    ] }),
+    data2.students.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No students yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "min-w-full text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-xs text-slate-500 border-b border-slate-200", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-2 pr-3", children: "Student" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-2 px-2 w-1/2", children: "Completion" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold py-2 px-2", children: "Tasks" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold py-2 px-2", children: "Homework done" })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: rows.map((r2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-slate-100", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-2 pr-3 text-slate-800 whitespace-nowrap", children: studentName(r2.student) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-2 px-2", children: r2.percent === null ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-400", children: "No homework in this period" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 h-2 bg-slate-100 rounded-full overflow-hidden min-w-[80px]", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: `h-full rounded-full ${r2.percent >= 80 ? "bg-emerald-500" : r2.percent >= 50 ? "bg-amber-400" : "bg-red-400"}`,
+              style: { width: `${r2.percent}%` }
+            }
+          ) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-slate-800 w-10 text-right", children: [
+            r2.percent,
+            "%"
+          ] })
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-2 px-2 text-center text-xs text-slate-700", children: [
+          r2.doneTasks,
+          "/",
+          totalTasks
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-2 px-2 text-center text-xs text-slate-700", children: [
+          r2.fullHomework,
+          "/",
+          inPeriod.length
+        ] })
+      ] }, r2.student.id)) })
+    ] }) })
+  ] });
+}
+var CLASSIFICATION_LABEL = {
+  on_task: "On task",
+  off_task: "Off task",
+  blank: "Blank",
+  not_japanese: "Not Japanese",
+  pending: "Checking",
+  photo_issue: "Photo issue"
+};
+function HandwritingCard({ data: data2 }) {
+  const [studentFilter, setStudentFilter] = reactExports.useState("");
+  const nameOf = (id2) => {
+    const s2 = data2.students.find((x2) => x2.id === id2);
+    return s2 ? studentName(s2) : "Student";
+  };
+  const lessonTitle = (id2) => {
+    var _a;
+    return ((_a = data2.lessons.find((l2) => l2.id === id2)) == null ? void 0 : _a.title) ?? "Lesson";
+  };
+  const items = data2.handwriting.filter((h) => !studentFilter || h.userId === studentFilter);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Handwritten writing", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(PenLine, { className: "w-5 h-5 text-indigo-600" }),
+        " Handwritten Writing"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("select", { value: studentFilter, onChange: (e) => setStudentFilter(e.target.value), className: input, "aria-label": "Filter by student", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "", children: "All students" }),
+        data2.students.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: s2.id, children: studentName(s2) }, s2.id))
+      ] })
+    ] }),
+    data2.retention === "none" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2", children: 'Handwriting images are not being kept for this class. Change "Handwriting Images" above to see new submissions as images.' }),
+    items.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No writing submissions yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: items.map((h) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 space-y-1.5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800", children: nameOf(h.userId) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", suppressHydrationWarning: true, children: [
+            lessonTitle(h.lessonId),
+            " \xB7 ",
+            formatDate(h.createdAt),
+            h.attemptNo ? ` \xB7 Attempt ${h.attemptNo}` : "",
+            " \xB7 ",
+            CLASSIFICATION_LABEL[h.classification] ?? h.classification
+          ] })
+        ] }),
+        h.hasImage ? /* @__PURE__ */ jsxRuntimeExports.jsxs("a", { href: `/teacher-handwriting/${h.id}`, target: "_blank", rel: "noopener noreferrer", className: btnGhost, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Image$1, { className: "w-3.5 h-3.5" }),
+          " View handwriting"
+        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[11px] text-slate-400", children: "Image not kept" })
+      ] }),
+      h.transcription && /* @__PURE__ */ jsxRuntimeExports.jsxs("details", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("summary", { className: "text-xs text-indigo-700 cursor-pointer", children: "AI transcription" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-slate-800 whitespace-pre-wrap bg-slate-50 rounded-md p-2", children: h.transcription })
+      ] })
+    ] }, h.id)) })
+  ] });
+}
+var DAY_MS = 864e5;
+function localDayStart(date, tzOffsetMinutes) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+    return null;
+  const utcMidnight = Date.parse(`${date}T00:00:00Z`);
+  if (Number.isNaN(utcMidnight))
+    return null;
+  return new Date(utcMidnight + tzOffsetMinutes * 6e4);
+}
+function parseTz(raw) {
+  const n2 = Number(raw);
+  return Number.isFinite(n2) && Math.abs(n2) <= 14 * 60 ? n2 : 0;
+}
+function toDateInput(d, tzOffsetMinutes) {
+  return new Date(d.getTime() - tzOffsetMinutes * 6e4).toISOString().slice(0, 10);
+}
+function memberSubtitle(schoolEmail, inviteLabel) {
+  if (schoolEmail)
+    return schoolEmail;
+  return inviteLabel ? `Invite code: ${inviteLabel}` : "Joined with an invite code";
+}
+async function loader$k({ request, context }) {
+  const { user, profile, admin } = await getTeacherOrApplicant(request, context);
+  const url = new URL(request.url);
+  const tz = parseTz(url.searchParams.get("tz"));
+  const schoolEmails = (await getVerifiedSchoolEmails(admin, user.id)).map((e) => ({ email: e.email, domain: e.domain }));
+  if (!profile.is_teacher) {
+    return dist$1.json({
+      pending: true,
+      teacher: { email: user.email ?? "", nickname: profile.nickname ?? null, schoolName: profile.school_name ?? null },
+      schoolEmails
+    });
+  }
+  const { data: classes } = await admin.from("edu_classes").select("id, name, join_code, school_domain, created_at").eq("teacher_id", user.id).order("created_at", { ascending: true });
+  const classList = classes ?? [];
+  const selected = classList.find((c) => c.id === url.searchParams.get("class")) ?? classList[0] ?? null;
+  const now = /* @__PURE__ */ new Date();
+  const defaultTo = toDateInput(now, tz);
+  const defaultFrom = toDateInput(new Date(now.getTime() - 27 * DAY_MS), tz);
+  const fromParam = url.searchParams.get("from") || defaultFrom;
+  const toParam = url.searchParams.get("to") || defaultTo;
+  const periodStart = localDayStart(fromParam, tz) ?? localDayStart(defaultFrom, tz);
+  const periodEndDayStart = localDayStart(toParam, tz) ?? localDayStart(defaultTo, tz);
+  const periodEnd = new Date(periodEndDayStart.getTime() + DAY_MS - 1);
+  const { data: lessonRows } = await admin.from("edu_lessons").select("id, slug, title_en, title_jp, lesson_order").order("slug", { ascending: true });
+  const lessons = (lessonRows ?? []).map((l2) => ({
+    id: String(l2.id),
+    slug: l2.slug,
+    title: `${l2.title_en}${l2.title_jp ? ` (${l2.title_jp})` : ""}`
+  }));
+  const base = {
+    teacher: { email: user.email ?? "", nickname: profile.nickname ?? null, schoolName: profile.school_name ?? null },
+    limits: TEACHER_LIMITS,
+    schoolEmails,
+    classes: classList.map((c) => ({ id: c.id, name: c.name })),
+    selectedClass: null,
+    lessons,
+    period: { from: toDateInput(periodStart, tz), to: toDateInput(periodEndDayStart, tz), tz },
+    students: [],
+    homework: [],
+    progress: [],
+    handwriting: [],
+    joinRequests: [],
+    invites: [],
+    retention: "none"
+  };
+  if (!selected)
+    return dist$1.json(base);
+  const { data: memberRows } = await admin.from("edu_class_members").select("user_id, school_email, invite_label").eq("class_id", selected.id).eq("role", "student");
+  const studentIds = (memberRows ?? []).map((m2) => m2.user_id);
+  const schoolEmailOf = new Map(
+    (memberRows ?? []).map((m2) => [m2.user_id, memberSubtitle(m2.school_email, m2.invite_label)])
+  );
+  const { data: requestRows } = await admin.from("edu_class_join_requests").select("id, user_id, school_email, invite_id, created_at").eq("class_id", selected.id).order("created_at", { ascending: true });
+  const { data: inviteRows } = await admin.from("edu_class_invites").select("id, code, label, expires_at, used_by, used_at, created_at").eq("class_id", selected.id).order("created_at", { ascending: false }).limit(200);
+  const inviteOf = new Map((inviteRows ?? []).map((i) => [i.id, i]));
+  const profileIds = [
+    .../* @__PURE__ */ new Set([
+      ...studentIds,
+      ...(requestRows ?? []).map((r2) => r2.user_id),
+      ...(inviteRows ?? []).filter((i) => i.used_by).map((i) => i.used_by)
+    ])
+  ];
+  const { data: studentProfiles } = profileIds.length ? await admin.from("profiles").select("id, nickname").in("id", profileIds) : { data: [] };
+  const nicknameOf = new Map((studentProfiles ?? []).map((p2) => [p2.id, p2.nickname ?? null]));
+  const students = studentIds.map((id2) => ({ id: id2, nickname: nicknameOf.get(id2) ?? null, email: schoolEmailOf.get(id2) ?? "" })).sort((a, b) => (a.nickname || a.email).localeCompare(b.nickname || b.email));
+  const joinRequests = (requestRows ?? []).map((r2) => {
+    const invite = r2.invite_id ? inviteOf.get(r2.invite_id) : null;
+    return {
+      id: r2.id,
+      nickname: nicknameOf.get(r2.user_id) ?? null,
+      schoolEmail: r2.school_email ?? null,
+      inviteCode: (invite == null ? void 0 : invite.code) ?? null,
+      inviteLabel: (invite == null ? void 0 : invite.label) ?? null,
+      createdAt: r2.created_at
+    };
+  });
+  const nowMs = Date.now();
+  const invites = (inviteRows ?? []).map((i) => ({
+    id: i.id,
+    code: i.code,
+    label: i.label ?? null,
+    expiresAt: i.expires_at,
+    status: i.used_by || i.used_at ? "used" : new Date(i.expires_at).getTime() < nowMs ? "expired" : "unused",
+    usedByName: i.used_by ? nicknameOf.get(i.used_by) ?? "A student" : null
+  }));
+  const { data: homeworkRows } = await admin.from("edu_homework").select("id, title, lesson_id, task_keys, due_at, created_at").eq("class_id", selected.id).order("due_at", { ascending: false }).limit(100);
+  const homework = (homeworkRows ?? []).map((h) => ({
+    id: h.id,
+    title: h.title,
+    lessonId: String(h.lesson_id),
+    taskKeys: h.task_keys,
+    dueAt: h.due_at,
+    inPeriod: new Date(h.due_at) >= periodStart && new Date(h.due_at) <= periodEnd
+  }));
+  const lessonIds = [...new Set(homework.map((h) => h.lessonId))];
+  const { data: progressRows } = studentIds.length && lessonIds.length ? await admin.from("edu_student_progress").select("user_id, lesson_id, task_key, is_completed, updated_at").in("user_id", studentIds).in("lesson_id", lessonIds).eq("is_completed", true) : { data: [] };
+  const progress = (progressRows ?? []).map((p2) => ({
+    userId: p2.user_id,
+    lessonId: String(p2.lesson_id),
+    taskKey: p2.task_key,
+    completedAt: p2.updated_at ?? null
+  }));
+  const { data: writingRows } = studentIds.length ? await admin.from("edu_writing_submissions").select("id, user_id, lesson_id, attempt_no, transcription, classification, created_at, image_path, image_delete_after, image_deleted_at").in("user_id", studentIds).eq("kind", "submission").order("created_at", { ascending: false }).limit(50) : { data: [] };
+  const handwriting = (writingRows ?? []).map((w2) => ({
+    id: w2.id,
+    userId: w2.user_id,
+    lessonId: String(w2.lesson_id),
+    attemptNo: w2.attempt_no ?? null,
+    transcription: w2.transcription ?? "",
+    classification: w2.classification,
+    createdAt: w2.created_at,
+    hasImage: Boolean(w2.image_path) && !w2.image_deleted_at,
+    imageDeleteAfter: w2.image_delete_after ?? null
+  }));
+  const { data: settings } = await admin.from("edu_class_writing_settings").select("image_retention_mode, image_retention_days").eq("class_id", selected.id).maybeSingle();
+  const retention = (settings == null ? void 0 : settings.image_retention_mode) === "days" && settings.image_retention_days ? String(settings.image_retention_days) : "none";
+  return dist$1.json({
+    ...base,
+    selectedClass: {
+      id: selected.id,
+      name: selected.name,
+      joinCode: selected.join_code,
+      allowedDomains: allowedStudentDomains(selected.school_domain)
+    },
+    joinRequests,
+    invites,
+    students,
+    homework,
+    progress,
+    handwriting,
+    retention
+  });
+}
+async function action$2({ request, context }) {
+  const { user, admin } = await requireTeacher(request, context);
+  const form = await request.formData();
+  const intent = String(form.get("intent") ?? "");
+  const fail = (error, status = 400) => dist$1.json({ intent, ok: false, error }, { status });
+  const backTo = (classId) => {
+    const back = new URL(request.url);
+    if (classId)
+      back.searchParams.set("class", classId);
+    return dist$1.redirect(`${back.pathname}${back.search}`);
+  };
+  if (intent === "create-class") {
+    const name = String(form.get("name") ?? "").trim().replace(/\s+/g, " ");
+    if (!name || name.length > 60)
+      return fail("Class name must be 1 to 60 characters.");
+    const schoolEmails = await getVerifiedSchoolEmails(admin, user.id);
+    const chosen = schoolEmails.find((e) => e.domain === String(form.get("schoolDomain") ?? "")) ?? schoolEmails[0];
+    if (!chosen)
+      return fail("Verify your school Google or Microsoft account before creating a class.");
+    const { count } = await admin.from("edu_classes").select("id", { count: "exact", head: true }).eq("teacher_id", user.id);
+    if ((count ?? 0) >= TEACHER_LIMITS.maxClasses) {
+      return fail(`The free teacher plan includes ${TEACHER_LIMITS.maxClasses} class. Please contact us about a school plan for more classes.`);
+    }
+    for (let i = 0; i < 5; i++) {
+      const { data: created, error } = await admin.from("edu_classes").insert({ teacher_id: user.id, name, join_code: generateJoinCode(), school_domain: chosen.domain }).select("id").single();
+      if (created) {
+        await admin.from("edu_class_writing_settings").upsert(
+          {
+            class_id: created.id,
+            image_retention_mode: "days",
+            image_retention_days: DEFAULT_HANDWRITING_RETENTION_DAYS,
+            image_retention_until: null,
+            max_resubmissions: 2,
+            max_photo_retakes: 3,
+            updated_at: (/* @__PURE__ */ new Date()).toISOString(),
+            updated_by: user.id
+          },
+          { onConflict: "class_id" }
+        );
+        return backTo(created.id);
+      }
+      if (error && error.code !== "23505") {
+        console.error("[teacher-dashboard] create-class failed:", error.message);
+        return fail("Could not create the class. Please try again.", 500);
+      }
+    }
+    return fail("Could not create the class. Please try again.", 500);
+  }
+  const cls = await getOwnedClass(admin, user.id, form.get("classId"));
+  if (!cls)
+    return fail("Class not found.", 404);
+  if (intent === "regenerate-code") {
+    for (let i = 0; i < 5; i++) {
+      const { error } = await admin.from("edu_classes").update({ join_code: generateJoinCode() }).eq("id", cls.id);
+      if (!error)
+        return backTo(cls.id);
+      if (error.code !== "23505")
+        break;
+    }
+    return fail("Could not make a new code. Please try again.", 500);
+  }
+  if (intent === "delete-class") {
+    if (String(form.get("confirmName") ?? "") !== cls.name)
+      return fail("Type the class name exactly to delete it.");
+    await admin.from("edu_class_members").delete().eq("class_id", cls.id);
+    await admin.from("edu_class_writing_settings").delete().eq("class_id", cls.id);
+    const { error } = await admin.from("edu_classes").delete().eq("id", cls.id);
+    if (error)
+      return fail("Could not delete the class.", 500);
+    return backTo();
+  }
+  if (intent === "approve-request" || intent === "decline-request") {
+    const { data: req } = await admin.from("edu_class_join_requests").select("id, user_id, school_email, invite_id").eq("id", String(form.get("requestId") ?? "")).eq("class_id", cls.id).maybeSingle();
+    if (!req)
+      return fail("Request not found.", 404);
+    if (intent === "approve-request") {
+      let inviteLabel = null;
+      if (req.school_email) {
+        const { data: full } = await admin.from("edu_classes").select("school_domain").eq("id", cls.id).single();
+        const domain = String(req.school_email).split("@").pop() ?? "";
+        if (!full || !isStudentDomainAllowed(full.school_domain, domain)) {
+          return fail("This student's school account does not match your class.");
+        }
+      } else {
+        const { data: invite } = req.invite_id ? await admin.from("edu_class_invites").select("code, label").eq("id", req.invite_id).eq("class_id", cls.id).maybeSingle() : { data: null };
+        if (!invite)
+          return fail("This request has no valid invite code for your class.");
+        inviteLabel = invite.label || `Invite ${invite.code}`;
+      }
+      const { count } = await admin.from("edu_class_members").select("user_id", { count: "exact", head: true }).eq("class_id", cls.id).eq("role", "student");
+      if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
+        return fail(`A class can have up to ${TEACHER_LIMITS.maxStudentsPerClass} students.`);
+      }
+      const { data: existing } = await admin.from("edu_class_members").select("class_id").eq("user_id", req.user_id).eq("role", "student").limit(1).maybeSingle();
+      if (!existing) {
+        const { error } = await admin.from("edu_class_members").insert({
+          class_id: cls.id,
+          user_id: req.user_id,
+          role: "student",
+          school_email: req.school_email ?? null,
+          invite_label: inviteLabel
+        });
+        if (error) {
+          console.error("[teacher-dashboard] approve-request failed:", error.message);
+          return fail("Could not add the student. Please try again.", 500);
+        }
+      }
+    }
+    await admin.from("edu_class_join_requests").delete().eq("id", req.id);
+    return backTo(cls.id);
+  }
+  if (intent === "create-invites") {
+    const labels = String(form.get("labels") ?? "").split(/\r?\n/).map((l2) => l2.trim().replace(/\s+/g, " ").slice(0, INVITE_LABEL_MAX)).filter(Boolean);
+    const count = labels.length || Math.floor(Number(form.get("count") ?? 0));
+    if (!Number.isFinite(count) || count < 1)
+      return fail("Enter how many codes to make, or one student per line.");
+    const { count: members } = await admin.from("edu_class_members").select("user_id", { count: "exact", head: true }).eq("class_id", cls.id).eq("role", "student");
+    const { count: openInvites } = await admin.from("edu_class_invites").select("id", { count: "exact", head: true }).eq("class_id", cls.id).is("used_by", null).is("used_at", null).gt("expires_at", (/* @__PURE__ */ new Date()).toISOString());
+    const room = TEACHER_LIMITS.maxStudentsPerClass - (members ?? 0) - (openInvites ?? 0);
+    if (count > room) {
+      return fail(
+        room > 0 ? `You can make up to ${room} more code${room === 1 ? "" : "s"} (a class has up to ${TEACHER_LIMITS.maxStudentsPerClass} students, including unused codes).` : "This class has no room for more codes. Remove unused codes or students first."
+      );
+    }
+    const expiresAt2 = new Date(Date.now() + INVITE_CODE_DAYS * DAY_MS).toISOString();
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const rows = Array.from({ length: count }, (_, i) => ({
+        class_id: cls.id,
+        code: generateInviteCode(),
+        label: labels[i] ?? null,
+        expires_at: expiresAt2
+      }));
+      const { error } = await admin.from("edu_class_invites").insert(rows);
+      if (!error)
+        return backTo(cls.id);
+      if (error.code !== "23505") {
+        console.error("[teacher-dashboard] create-invites failed:", error.message);
+        break;
+      }
+    }
+    return fail("Could not make the codes. Please try again.", 500);
+  }
+  if (intent === "delete-invite") {
+    await admin.from("edu_class_invites").delete().eq("id", String(form.get("inviteId") ?? "")).eq("class_id", cls.id);
+    return backTo(cls.id);
+  }
+  if (intent === "remove-student") {
+    const studentId = String(form.get("studentId") ?? "");
+    await admin.from("edu_class_members").delete().eq("class_id", cls.id).eq("user_id", studentId).eq("role", "student");
+    return backTo(cls.id);
+  }
+  if (intent === "update-retention") {
+    const value = String(form.get("retention") ?? "");
+    if (!HANDWRITING_RETENTION_OPTIONS.some((o) => o.value === value))
+      return fail("Invalid option.");
+    const days = value === "none" ? null : Number(value);
+    const { error } = await admin.from("edu_class_writing_settings").upsert(
+      {
+        class_id: cls.id,
+        image_retention_mode: days ? "days" : "none",
+        image_retention_days: days,
+        image_retention_until: null,
+        max_resubmissions: 2,
+        max_photo_retakes: 3,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_by: user.id
+      },
+      { onConflict: "class_id" }
+    );
+    if (error)
+      return fail("Could not save the setting.", 500);
+    return backTo(cls.id);
+  }
+  if (intent === "assign-homework") {
+    const lessonId = String(form.get("lessonId") ?? "");
+    const taskKeys = [...new Set(form.getAll("taskKeys").map(String))].filter(isLessonTaskKey);
+    const title = String(form.get("title") ?? "").trim().replace(/\s+/g, " ");
+    const due = localDayStart(String(form.get("dueDate") ?? ""), parseTz(form.get("tz")));
+    if (!lessonId)
+      return fail("Choose a lesson.");
+    if (taskKeys.length === 0)
+      return fail("Choose at least one task.");
+    if (!due)
+      return fail("Choose a due date.");
+    const { data: lesson } = await admin.from("edu_lessons").select("id, title_en").eq("id", lessonId).maybeSingle();
+    if (!lesson)
+      return fail("Lesson not found.");
+    const finalTitle = (title || `${lesson.title_en} homework`).slice(0, 100);
+    const { count } = await admin.from("edu_homework").select("id", { count: "exact", head: true }).eq("class_id", cls.id).gte("due_at", (/* @__PURE__ */ new Date()).toISOString());
+    if ((count ?? 0) >= TEACHER_LIMITS.maxActiveHomeworkPerClass) {
+      return fail(`Free teacher accounts can have up to ${TEACHER_LIMITS.maxActiveHomeworkPerClass} upcoming homework per class.`);
+    }
+    const dueAt = new Date(due.getTime() + DAY_MS - 1e3).toISOString();
+    const orderedKeys = LESSON_TASKS.map((t2) => t2.key).filter((k2) => taskKeys.includes(k2));
+    const { error } = await admin.from("edu_homework").insert({
+      class_id: cls.id,
+      teacher_id: user.id,
+      lesson_id: String(lesson.id),
+      task_keys: orderedKeys,
+      title: finalTitle,
+      due_at: dueAt
+    });
+    if (error) {
+      console.error("[teacher-dashboard] assign-homework failed:", error.message);
+      return fail("Could not set the homework. Please try again.", 500);
+    }
+    return backTo(cls.id);
+  }
+  if (intent === "delete-homework") {
+    await admin.from("edu_homework").delete().eq("id", String(form.get("homeworkId") ?? "")).eq("class_id", cls.id);
+    return backTo(cls.id);
+  }
+  return fail("Unknown action.");
+}
+function TeacherDashboardPage() {
+  const loaded = useLoaderData();
+  const actionData = useActionData();
+  const layoutRef = reactExports.useRef(null);
+  if ("pending" in loaded) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(PageLayout, { ref: layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-2xl mx-auto px-4 py-12", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-indigo-200 rounded-xl shadow-sm p-6 space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u{1F469}\u200D\u{1F3EB} Your teacher account is being reviewed" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-700", children: [
+        "Thanks for signing up as a teacher",
+        loaded.teacher.nickname ? `, ${loaded.teacher.nickname}` : "",
+        '! To protect students, we check every teacher account before classes can be created. Once approved, your Teacher Dashboard will open here and a "Teacher Panel" button will appear in the header.'
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-3 space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800", children: "Verify your school account" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700", children: "Sign in with the Google or Microsoft account your school gave you. We approve teacher accounts with a verified school email, and only students with an account from your school can ask to join your class." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolAccountLink, { verifiedEmails: loaded.schoolEmails, returnPath: "/teacher-dashboard", teacherHelp: true })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-700", children: [
+        "It also helps if your ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/my-account", className: "text-indigo-700 font-semibold hover:underline", children: "My Account" }),
+        " page shows your state and school. You can use AI Yamato as usual in the meantime."
+      ] })
+    ] }) }) });
+  }
+  const data2 = loaded;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PageLayout, { ref: layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-6xl mx-auto px-4 py-8 space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "bg-white border border-slate-200 p-5 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u{1F469}\u200D\u{1F3EB} Teacher Dashboard" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-0.5", children: [data2.teacher.nickname, data2.teacher.schoolName, data2.teacher.email].filter(Boolean).join(" \xB7 ") })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "self-start sm:self-auto text-[11px] font-bold px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700", children: [
+        "Free teacher plan \xB7 ",
+        data2.limits.maxClasses,
+        " class / up to ",
+        data2.limits.maxStudentsPerClass,
+        " students"
+      ] })
+    ] }),
+    (actionData == null ? void 0 : actionData.error) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { role: "alert", className: "text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3", children: actionData.error }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(ClassBar, { data: data2 }),
+    data2.selectedClass && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(JoinRequestsCard, { data: data2 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ClassSettingsCard, { data: data2 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(InviteCodesCard, { data: data2 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(HomeworkCard, { data: data2 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(CompletionCard, { data: data2 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(HandwritingCard, { data: data2 })
+    ] })
+  ] }) });
+}
+var meta$j = () => [
+  { title: "Teacher Dashboard | AI Yamato Japanese Hub" },
+  { name: "robots", content: "noindex, nofollow" }
+];
+var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  action: action$2,
+  default: TeacherDashboardPage,
+  loader: loader$k,
+  meta: meta$j
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$6 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
@@ -61526,7 +63215,7 @@ function Disclaimer() {
     }
   );
 }
-var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Disclaimer,
   loader: loader$j,
@@ -61734,7 +63423,7 @@ function ReferenceIndex() {
 var meta$h = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ReferenceIndex,
   loader: loader$i,
@@ -61966,7 +63655,7 @@ function VocabIndexPage() {
     ] }) })
   ] }) });
 }
-var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VocabIndexPage,
   loader: loader$h,
@@ -62047,7 +63736,7 @@ function HanafudaRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HanafudaFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HanafudaRoute,
   loader: loader$g,
@@ -62202,7 +63891,7 @@ function LessonsHubIndex() {
     }
   );
 }
-var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsHubIndex,
   loader: loader$f,
@@ -62285,7 +63974,7 @@ function PrivacyPolicy() {
     }
   );
 }
-var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrivacyPolicy,
   loader: loader$e,
@@ -62322,7 +64011,6 @@ var generatedRoutes = [
   "/reference.vce-grammar",
   "/reference.vocab",
   "/reference.writing-styles",
-  "/teacher/teacher-dashboard",
   "/vce._index",
   "/vce.speaking._index",
   "/vce.speaking.eoy-oral-accelerated",
@@ -62357,7 +64045,7 @@ ${routes2.map(
     }
   });
 }
-var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   loader: loader$d
 }, Symbol.toStringTag, { value: "Module" }));
@@ -62694,7 +64382,7 @@ function VocabCreatorPage() {
     ] })
   ] }) }) });
 }
-var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VocabCreatorPage,
   loader: loader$c,
@@ -62876,7 +64564,7 @@ function GamesHubIndex() {
 var meta$b = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: GamesHubIndex,
   loader: loader$b,
@@ -62975,7 +64663,7 @@ function LegalIndex() {
 var meta$a = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LegalIndex,
   loader: loader$a,
@@ -63056,7 +64744,7 @@ function ShogiRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ShogiFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ShogiRoute,
   loader: loader$9,
@@ -63139,7 +64827,7 @@ function TermsOfService() {
 var meta$8 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TermsOfService,
   loader: loader$8,
@@ -63680,41 +65368,41 @@ var ZodType = class {
   get description() {
     return this._def.description;
   }
-  _getType(input) {
-    return getParsedType(input.data);
+  _getType(input2) {
+    return getParsedType(input2.data);
   }
-  _getOrReturnCtx(input, ctx) {
+  _getOrReturnCtx(input2, ctx) {
     return ctx || {
-      common: input.parent.common,
-      data: input.data,
-      parsedType: getParsedType(input.data),
+      common: input2.parent.common,
+      data: input2.data,
+      parsedType: getParsedType(input2.data),
       schemaErrorMap: this._def.errorMap,
-      path: input.path,
-      parent: input.parent
+      path: input2.path,
+      parent: input2.parent
     };
   }
-  _processInputParams(input) {
+  _processInputParams(input2) {
     return {
       status: new ParseStatus(),
       ctx: {
-        common: input.parent.common,
-        data: input.data,
-        parsedType: getParsedType(input.data),
+        common: input2.parent.common,
+        data: input2.data,
+        parsedType: getParsedType(input2.data),
         schemaErrorMap: this._def.errorMap,
-        path: input.path,
-        parent: input.parent
+        path: input2.path,
+        parent: input2.parent
       }
     };
   }
-  _parseSync(input) {
-    const result = this._parse(input);
+  _parseSync(input2) {
+    const result = this._parse(input2);
     if (isAsync(result)) {
       throw new Error("Synchronous parse encountered promise.");
     }
     return result;
   }
-  _parseAsync(input) {
-    const result = this._parse(input);
+  _parseAsync(input2) {
+    const result = this._parse(input2);
     return Promise.resolve(result);
   }
   parse(data2, params) {
@@ -63951,13 +65639,13 @@ var ZodString = class extends ZodType {
       checks: [...this._def.checks, { kind: "toUpperCase" }]
     });
   }
-  _parse(input) {
+  _parse(input2) {
     if (this._def.coerce) {
-      input.data = String(input.data);
+      input2.data = String(input2.data);
     }
-    const parsedType = this._getType(input);
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.string) {
-      const ctx2 = this._getOrReturnCtx(input);
+      const ctx2 = this._getOrReturnCtx(input2);
       addIssueToContext(
         ctx2,
         {
@@ -63973,8 +65661,8 @@ var ZodString = class extends ZodType {
     let ctx = void 0;
     for (const check of this._def.checks) {
       if (check.kind === "min") {
-        if (input.data.length < check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (input2.data.length < check.value) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_small,
             minimum: check.value,
@@ -63986,8 +65674,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "max") {
-        if (input.data.length > check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (input2.data.length > check.value) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_big,
             maximum: check.value,
@@ -63999,10 +65687,10 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "length") {
-        const tooBig = input.data.length > check.value;
-        const tooSmall = input.data.length < check.value;
+        const tooBig = input2.data.length > check.value;
+        const tooSmall = input2.data.length < check.value;
         if (tooBig || tooSmall) {
-          ctx = this._getOrReturnCtx(input, ctx);
+          ctx = this._getOrReturnCtx(input2, ctx);
           if (tooBig) {
             addIssueToContext(ctx, {
               code: ZodIssueCode.too_big,
@@ -64025,8 +65713,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "email") {
-        if (!emailRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!emailRegex.test(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "email",
             code: ZodIssueCode.invalid_string,
@@ -64035,8 +65723,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "emoji") {
-        if (!emojiRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!emojiRegex.test(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "emoji",
             code: ZodIssueCode.invalid_string,
@@ -64045,8 +65733,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "uuid") {
-        if (!uuidRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!uuidRegex.test(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "uuid",
             code: ZodIssueCode.invalid_string,
@@ -64055,8 +65743,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "cuid") {
-        if (!cuidRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!cuidRegex.test(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "cuid",
             code: ZodIssueCode.invalid_string,
@@ -64065,8 +65753,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "cuid2") {
-        if (!cuid2Regex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!cuid2Regex.test(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "cuid2",
             code: ZodIssueCode.invalid_string,
@@ -64075,8 +65763,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "ulid") {
-        if (!ulidRegex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!ulidRegex.test(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "ulid",
             code: ZodIssueCode.invalid_string,
@@ -64086,9 +65774,9 @@ var ZodString = class extends ZodType {
         }
       } else if (check.kind === "url") {
         try {
-          new URL(input.data);
+          new URL(input2.data);
         } catch (_a) {
-          ctx = this._getOrReturnCtx(input, ctx);
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "url",
             code: ZodIssueCode.invalid_string,
@@ -64098,9 +65786,9 @@ var ZodString = class extends ZodType {
         }
       } else if (check.kind === "regex") {
         check.regex.lastIndex = 0;
-        const testResult = check.regex.test(input.data);
+        const testResult = check.regex.test(input2.data);
         if (!testResult) {
-          ctx = this._getOrReturnCtx(input, ctx);
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "regex",
             code: ZodIssueCode.invalid_string,
@@ -64109,10 +65797,10 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "trim") {
-        input.data = input.data.trim();
+        input2.data = input2.data.trim();
       } else if (check.kind === "includes") {
-        if (!input.data.includes(check.value, check.position)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!input2.data.includes(check.value, check.position)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: { includes: check.value, position: check.position },
@@ -64121,12 +65809,12 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "toLowerCase") {
-        input.data = input.data.toLowerCase();
+        input2.data = input2.data.toLowerCase();
       } else if (check.kind === "toUpperCase") {
-        input.data = input.data.toUpperCase();
+        input2.data = input2.data.toUpperCase();
       } else if (check.kind === "startsWith") {
-        if (!input.data.startsWith(check.value)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!input2.data.startsWith(check.value)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: { startsWith: check.value },
@@ -64135,8 +65823,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "endsWith") {
-        if (!input.data.endsWith(check.value)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!input2.data.endsWith(check.value)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: { endsWith: check.value },
@@ -64146,8 +65834,8 @@ var ZodString = class extends ZodType {
         }
       } else if (check.kind === "datetime") {
         const regex = datetimeRegex(check);
-        if (!regex.test(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!regex.test(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: "datetime",
@@ -64156,8 +65844,8 @@ var ZodString = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "ip") {
-        if (!isValidIP(input.data, check.version)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!isValidIP(input2.data, check.version)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             validation: "ip",
             code: ZodIssueCode.invalid_string,
@@ -64169,7 +65857,7 @@ var ZodString = class extends ZodType {
         util.assertNever(check);
       }
     }
-    return { status: status.value, value: input.data };
+    return { status: status.value, value: input2.data };
   }
   _addCheck(check) {
     return new ZodString({
@@ -64340,13 +66028,13 @@ var ZodNumber = class extends ZodType {
     this.max = this.lte;
     this.step = this.multipleOf;
   }
-  _parse(input) {
+  _parse(input2) {
     if (this._def.coerce) {
-      input.data = Number(input.data);
+      input2.data = Number(input2.data);
     }
-    const parsedType = this._getType(input);
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.number) {
-      const ctx2 = this._getOrReturnCtx(input);
+      const ctx2 = this._getOrReturnCtx(input2);
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.number,
@@ -64358,8 +66046,8 @@ var ZodNumber = class extends ZodType {
     const status = new ParseStatus();
     for (const check of this._def.checks) {
       if (check.kind === "int") {
-        if (!util.isInteger(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!util.isInteger(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_type,
             expected: "integer",
@@ -64369,9 +66057,9 @@ var ZodNumber = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "min") {
-        const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
+        const tooSmall = check.inclusive ? input2.data < check.value : input2.data <= check.value;
         if (tooSmall) {
-          ctx = this._getOrReturnCtx(input, ctx);
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_small,
             minimum: check.value,
@@ -64383,9 +66071,9 @@ var ZodNumber = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "max") {
-        const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
+        const tooBig = check.inclusive ? input2.data > check.value : input2.data >= check.value;
         if (tooBig) {
-          ctx = this._getOrReturnCtx(input, ctx);
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_big,
             maximum: check.value,
@@ -64397,8 +66085,8 @@ var ZodNumber = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "multipleOf") {
-        if (floatSafeRemainder(input.data, check.value) !== 0) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (floatSafeRemainder(input2.data, check.value) !== 0) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.not_multiple_of,
             multipleOf: check.value,
@@ -64407,8 +66095,8 @@ var ZodNumber = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "finite") {
-        if (!Number.isFinite(input.data)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (!Number.isFinite(input2.data)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.not_finite,
             message: check.message
@@ -64419,7 +66107,7 @@ var ZodNumber = class extends ZodType {
         util.assertNever(check);
       }
     }
-    return { status: status.value, value: input.data };
+    return { status: status.value, value: input2.data };
   }
   gte(value, message) {
     return this.setLimit("min", value, true, errorUtil.toString(message));
@@ -64570,13 +66258,13 @@ var ZodBigInt = class extends ZodType {
     this.min = this.gte;
     this.max = this.lte;
   }
-  _parse(input) {
+  _parse(input2) {
     if (this._def.coerce) {
-      input.data = BigInt(input.data);
+      input2.data = BigInt(input2.data);
     }
-    const parsedType = this._getType(input);
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.bigint) {
-      const ctx2 = this._getOrReturnCtx(input);
+      const ctx2 = this._getOrReturnCtx(input2);
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.bigint,
@@ -64588,9 +66276,9 @@ var ZodBigInt = class extends ZodType {
     const status = new ParseStatus();
     for (const check of this._def.checks) {
       if (check.kind === "min") {
-        const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
+        const tooSmall = check.inclusive ? input2.data < check.value : input2.data <= check.value;
         if (tooSmall) {
-          ctx = this._getOrReturnCtx(input, ctx);
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_small,
             type: "bigint",
@@ -64601,9 +66289,9 @@ var ZodBigInt = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "max") {
-        const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
+        const tooBig = check.inclusive ? input2.data > check.value : input2.data >= check.value;
         if (tooBig) {
-          ctx = this._getOrReturnCtx(input, ctx);
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_big,
             type: "bigint",
@@ -64614,8 +66302,8 @@ var ZodBigInt = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "multipleOf") {
-        if (input.data % check.value !== BigInt(0)) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (input2.data % check.value !== BigInt(0)) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.not_multiple_of,
             multipleOf: check.value,
@@ -64627,7 +66315,7 @@ var ZodBigInt = class extends ZodType {
         util.assertNever(check);
       }
     }
-    return { status: status.value, value: input.data };
+    return { status: status.value, value: input2.data };
   }
   gte(value, message) {
     return this.setLimit("min", value, true, errorUtil.toString(message));
@@ -64731,13 +66419,13 @@ ZodBigInt.create = (params) => {
   });
 };
 var ZodBoolean = class extends ZodType {
-  _parse(input) {
+  _parse(input2) {
     if (this._def.coerce) {
-      input.data = Boolean(input.data);
+      input2.data = Boolean(input2.data);
     }
-    const parsedType = this._getType(input);
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.boolean) {
-      const ctx = this._getOrReturnCtx(input);
+      const ctx = this._getOrReturnCtx(input2);
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.boolean,
@@ -64745,7 +66433,7 @@ var ZodBoolean = class extends ZodType {
       });
       return INVALID;
     }
-    return OK(input.data);
+    return OK(input2.data);
   }
 };
 ZodBoolean.create = (params) => {
@@ -64756,13 +66444,13 @@ ZodBoolean.create = (params) => {
   });
 };
 var ZodDate = class extends ZodType {
-  _parse(input) {
+  _parse(input2) {
     if (this._def.coerce) {
-      input.data = new Date(input.data);
+      input2.data = new Date(input2.data);
     }
-    const parsedType = this._getType(input);
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.date) {
-      const ctx2 = this._getOrReturnCtx(input);
+      const ctx2 = this._getOrReturnCtx(input2);
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.date,
@@ -64770,8 +66458,8 @@ var ZodDate = class extends ZodType {
       });
       return INVALID;
     }
-    if (isNaN(input.data.getTime())) {
-      const ctx2 = this._getOrReturnCtx(input);
+    if (isNaN(input2.data.getTime())) {
+      const ctx2 = this._getOrReturnCtx(input2);
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_date
       });
@@ -64781,8 +66469,8 @@ var ZodDate = class extends ZodType {
     let ctx = void 0;
     for (const check of this._def.checks) {
       if (check.kind === "min") {
-        if (input.data.getTime() < check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (input2.data.getTime() < check.value) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_small,
             message: check.message,
@@ -64794,8 +66482,8 @@ var ZodDate = class extends ZodType {
           status.dirty();
         }
       } else if (check.kind === "max") {
-        if (input.data.getTime() > check.value) {
-          ctx = this._getOrReturnCtx(input, ctx);
+        if (input2.data.getTime() > check.value) {
+          ctx = this._getOrReturnCtx(input2, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.too_big,
             message: check.message,
@@ -64812,7 +66500,7 @@ var ZodDate = class extends ZodType {
     }
     return {
       status: status.value,
-      value: new Date(input.data.getTime())
+      value: new Date(input2.data.getTime())
     };
   }
   _addCheck(check) {
@@ -64865,10 +66553,10 @@ ZodDate.create = (params) => {
   });
 };
 var ZodSymbol = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.symbol) {
-      const ctx = this._getOrReturnCtx(input);
+      const ctx = this._getOrReturnCtx(input2);
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.symbol,
@@ -64876,7 +66564,7 @@ var ZodSymbol = class extends ZodType {
       });
       return INVALID;
     }
-    return OK(input.data);
+    return OK(input2.data);
   }
 };
 ZodSymbol.create = (params) => {
@@ -64886,10 +66574,10 @@ ZodSymbol.create = (params) => {
   });
 };
 var ZodUndefined = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.undefined) {
-      const ctx = this._getOrReturnCtx(input);
+      const ctx = this._getOrReturnCtx(input2);
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.undefined,
@@ -64897,7 +66585,7 @@ var ZodUndefined = class extends ZodType {
       });
       return INVALID;
     }
-    return OK(input.data);
+    return OK(input2.data);
   }
 };
 ZodUndefined.create = (params) => {
@@ -64907,10 +66595,10 @@ ZodUndefined.create = (params) => {
   });
 };
 var ZodNull = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.null) {
-      const ctx = this._getOrReturnCtx(input);
+      const ctx = this._getOrReturnCtx(input2);
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.null,
@@ -64918,7 +66606,7 @@ var ZodNull = class extends ZodType {
       });
       return INVALID;
     }
-    return OK(input.data);
+    return OK(input2.data);
   }
 };
 ZodNull.create = (params) => {
@@ -64932,8 +66620,8 @@ var ZodAny = class extends ZodType {
     super(...arguments);
     this._any = true;
   }
-  _parse(input) {
-    return OK(input.data);
+  _parse(input2) {
+    return OK(input2.data);
   }
 };
 ZodAny.create = (params) => {
@@ -64947,8 +66635,8 @@ var ZodUnknown = class extends ZodType {
     super(...arguments);
     this._unknown = true;
   }
-  _parse(input) {
-    return OK(input.data);
+  _parse(input2) {
+    return OK(input2.data);
   }
 };
 ZodUnknown.create = (params) => {
@@ -64958,8 +66646,8 @@ ZodUnknown.create = (params) => {
   });
 };
 var ZodNever = class extends ZodType {
-  _parse(input) {
-    const ctx = this._getOrReturnCtx(input);
+  _parse(input2) {
+    const ctx = this._getOrReturnCtx(input2);
     addIssueToContext(ctx, {
       code: ZodIssueCode.invalid_type,
       expected: ZodParsedType.never,
@@ -64975,10 +66663,10 @@ ZodNever.create = (params) => {
   });
 };
 var ZodVoid = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.undefined) {
-      const ctx = this._getOrReturnCtx(input);
+      const ctx = this._getOrReturnCtx(input2);
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.void,
@@ -64986,7 +66674,7 @@ var ZodVoid = class extends ZodType {
       });
       return INVALID;
     }
-    return OK(input.data);
+    return OK(input2.data);
   }
 };
 ZodVoid.create = (params) => {
@@ -64996,8 +66684,8 @@ ZodVoid.create = (params) => {
   });
 };
 var ZodArray = class extends ZodType {
-  _parse(input) {
-    const { ctx, status } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx, status } = this._processInputParams(input2);
     const def = this._def;
     if (ctx.parsedType !== ZodParsedType.array) {
       addIssueToContext(ctx, {
@@ -65136,10 +66824,10 @@ var ZodObject = class extends ZodType {
     const keys = util.objectKeys(shape);
     return this._cached = { shape, keys };
   }
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.object) {
-      const ctx2 = this._getOrReturnCtx(input);
+      const ctx2 = this._getOrReturnCtx(input2);
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.object,
@@ -65147,7 +66835,7 @@ var ZodObject = class extends ZodType {
       });
       return INVALID;
     }
-    const { status, ctx } = this._processInputParams(input);
+    const { status, ctx } = this._processInputParams(input2);
     const { shape, keys: shapeKeys } = this._getCached();
     const extraKeys = [];
     if (!(this._def.catchall instanceof ZodNever && this._def.unknownKeys === "strip")) {
@@ -65461,8 +67149,8 @@ ZodObject.lazycreate = (shape, params) => {
   });
 };
 var ZodUnion = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     const options = this._def.options;
     function handleResults(results) {
       for (const result of results) {
@@ -65573,8 +67261,8 @@ var getDiscriminator = (type) => {
   }
 };
 var ZodDiscriminatedUnion = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     if (ctx.parsedType !== ZodParsedType.object) {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
@@ -65687,8 +67375,8 @@ function mergeValues(a, b) {
   }
 }
 var ZodIntersection = class extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { status, ctx } = this._processInputParams(input2);
     const handleParsed = (parsedLeft, parsedRight) => {
       if (isAborted(parsedLeft) || isAborted(parsedRight)) {
         return INVALID;
@@ -65740,8 +67428,8 @@ ZodIntersection.create = (left, right, params) => {
   });
 };
 var ZodTuple = class extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { status, ctx } = this._processInputParams(input2);
     if (ctx.parsedType !== ZodParsedType.array) {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
@@ -65813,8 +67501,8 @@ var ZodRecord = class extends ZodType {
   get valueSchema() {
     return this._def.valueType;
   }
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { status, ctx } = this._processInputParams(input2);
     if (ctx.parsedType !== ZodParsedType.object) {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
@@ -65865,8 +67553,8 @@ var ZodMap = class extends ZodType {
   get valueSchema() {
     return this._def.valueType;
   }
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { status, ctx } = this._processInputParams(input2);
     if (ctx.parsedType !== ZodParsedType.map) {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
@@ -65925,8 +67613,8 @@ ZodMap.create = (keyType, valueType, params) => {
   });
 };
 var ZodSet = class extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { status, ctx } = this._processInputParams(input2);
     if (ctx.parsedType !== ZodParsedType.set) {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
@@ -66014,8 +67702,8 @@ var ZodFunction = class extends ZodType {
     super(...arguments);
     this.validate = this.implement;
   }
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     if (ctx.parsedType !== ZodParsedType.function) {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
@@ -66128,8 +67816,8 @@ var ZodLazy = class extends ZodType {
   get schema() {
     return this._def.getter();
   }
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     const lazySchema = this._def.getter();
     return lazySchema._parse({ data: ctx.data, path: ctx.path, parent: ctx });
   }
@@ -66142,9 +67830,9 @@ ZodLazy.create = (getter, params) => {
   });
 };
 var ZodLiteral = class extends ZodType {
-  _parse(input) {
-    if (input.data !== this._def.value) {
-      const ctx = this._getOrReturnCtx(input);
+  _parse(input2) {
+    if (input2.data !== this._def.value) {
+      const ctx = this._getOrReturnCtx(input2);
       addIssueToContext(ctx, {
         received: ctx.data,
         code: ZodIssueCode.invalid_literal,
@@ -66152,7 +67840,7 @@ var ZodLiteral = class extends ZodType {
       });
       return INVALID;
     }
-    return { status: "valid", value: input.data };
+    return { status: "valid", value: input2.data };
   }
   get value() {
     return this._def.value;
@@ -66173,9 +67861,9 @@ function createZodEnum(values, params) {
   });
 }
 var ZodEnum = class extends ZodType {
-  _parse(input) {
-    if (typeof input.data !== "string") {
-      const ctx = this._getOrReturnCtx(input);
+  _parse(input2) {
+    if (typeof input2.data !== "string") {
+      const ctx = this._getOrReturnCtx(input2);
       const expectedValues = this._def.values;
       addIssueToContext(ctx, {
         expected: util.joinValues(expectedValues),
@@ -66184,8 +67872,8 @@ var ZodEnum = class extends ZodType {
       });
       return INVALID;
     }
-    if (this._def.values.indexOf(input.data) === -1) {
-      const ctx = this._getOrReturnCtx(input);
+    if (this._def.values.indexOf(input2.data) === -1) {
+      const ctx = this._getOrReturnCtx(input2);
       const expectedValues = this._def.values;
       addIssueToContext(ctx, {
         received: ctx.data,
@@ -66194,7 +67882,7 @@ var ZodEnum = class extends ZodType {
       });
       return INVALID;
     }
-    return OK(input.data);
+    return OK(input2.data);
   }
   get options() {
     return this._def.values;
@@ -66229,9 +67917,9 @@ var ZodEnum = class extends ZodType {
 };
 ZodEnum.create = createZodEnum;
 var ZodNativeEnum = class extends ZodType {
-  _parse(input) {
+  _parse(input2) {
     const nativeEnumValues = util.getValidEnumValues(this._def.values);
-    const ctx = this._getOrReturnCtx(input);
+    const ctx = this._getOrReturnCtx(input2);
     if (ctx.parsedType !== ZodParsedType.string && ctx.parsedType !== ZodParsedType.number) {
       const expectedValues = util.objectValues(nativeEnumValues);
       addIssueToContext(ctx, {
@@ -66241,7 +67929,7 @@ var ZodNativeEnum = class extends ZodType {
       });
       return INVALID;
     }
-    if (nativeEnumValues.indexOf(input.data) === -1) {
+    if (nativeEnumValues.indexOf(input2.data) === -1) {
       const expectedValues = util.objectValues(nativeEnumValues);
       addIssueToContext(ctx, {
         received: ctx.data,
@@ -66250,7 +67938,7 @@ var ZodNativeEnum = class extends ZodType {
       });
       return INVALID;
     }
-    return OK(input.data);
+    return OK(input2.data);
   }
   get enum() {
     return this._def.values;
@@ -66267,8 +67955,8 @@ var ZodPromise = class extends ZodType {
   unwrap() {
     return this._def.type;
   }
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     if (ctx.parsedType !== ZodParsedType.promise && ctx.common.async === false) {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
@@ -66300,8 +67988,8 @@ var ZodEffects = class extends ZodType {
   sourceType() {
     return this._def.schema._def.typeName === ZodFirstPartyTypeKind.ZodEffects ? this._def.schema.sourceType() : this._def.schema;
   }
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { status, ctx } = this._processInputParams(input2);
     const effect = this._def.effect || null;
     const checkCtx = {
       addIssue: (arg) => {
@@ -66418,12 +68106,12 @@ ZodEffects.createWithPreprocess = (preprocess, schema, params) => {
   });
 };
 var ZodOptional = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType === ZodParsedType.undefined) {
       return OK(void 0);
     }
-    return this._def.innerType._parse(input);
+    return this._def.innerType._parse(input2);
   }
   unwrap() {
     return this._def.innerType;
@@ -66437,12 +68125,12 @@ ZodOptional.create = (type, params) => {
   });
 };
 var ZodNullable = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType === ZodParsedType.null) {
       return OK(null);
     }
-    return this._def.innerType._parse(input);
+    return this._def.innerType._parse(input2);
   }
   unwrap() {
     return this._def.innerType;
@@ -66456,8 +68144,8 @@ ZodNullable.create = (type, params) => {
   });
 };
 var ZodDefault = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     let data2 = ctx.data;
     if (ctx.parsedType === ZodParsedType.undefined) {
       data2 = this._def.defaultValue();
@@ -66481,8 +68169,8 @@ ZodDefault.create = (type, params) => {
   });
 };
 var ZodCatch = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     const newCtx = {
       ...ctx,
       common: {
@@ -66534,10 +68222,10 @@ ZodCatch.create = (type, params) => {
   });
 };
 var ZodNaN = class extends ZodType {
-  _parse(input) {
-    const parsedType = this._getType(input);
+  _parse(input2) {
+    const parsedType = this._getType(input2);
     if (parsedType !== ZodParsedType.nan) {
-      const ctx = this._getOrReturnCtx(input);
+      const ctx = this._getOrReturnCtx(input2);
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.nan,
@@ -66545,7 +68233,7 @@ var ZodNaN = class extends ZodType {
       });
       return INVALID;
     }
-    return { status: "valid", value: input.data };
+    return { status: "valid", value: input2.data };
   }
 };
 ZodNaN.create = (params) => {
@@ -66556,8 +68244,8 @@ ZodNaN.create = (params) => {
 };
 var BRAND = Symbol("zod_brand");
 var ZodBranded = class extends ZodType {
-  _parse(input) {
-    const { ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { ctx } = this._processInputParams(input2);
     const data2 = ctx.data;
     return this._def.type._parse({
       data: data2,
@@ -66570,8 +68258,8 @@ var ZodBranded = class extends ZodType {
   }
 };
 var ZodPipeline = class extends ZodType {
-  _parse(input) {
-    const { status, ctx } = this._processInputParams(input);
+  _parse(input2) {
+    const { status, ctx } = this._processInputParams(input2);
     if (ctx.common.async) {
       const handleAsync = async () => {
         const inResult = await this._def.in._parseAsync({
@@ -66625,8 +68313,8 @@ var ZodPipeline = class extends ZodType {
   }
 };
 var ZodReadonly = class extends ZodType {
-  _parse(input) {
-    const result = this._def.innerType._parse(input);
+  _parse(input2) {
+    const result = this._def.innerType._parse(input2);
     if (isValid(result)) {
       result.value = Object.freeze(result.value);
     }
@@ -67014,11 +68702,19 @@ function TutorPreferencesSection({
   userId,
   initialNickname,
   initialPace,
+  initialState = null,
+  initialSchoolName = null,
+  initialSchoolRefId = null,
   onSaved,
   className = ""
 }) {
   const [nicknameInput, setNicknameInput] = reactExports.useState(initialNickname);
   const [paceInput, setPaceInput] = reactExports.useState(initialPace);
+  const [school, setSchool] = reactExports.useState({
+    state: initialState ?? "",
+    schoolName: initialSchoolName ?? "",
+    schoolRefId: initialSchoolRefId ?? null
+  });
   const [isSaving, setIsSaving] = reactExports.useState(false);
   const [saveError, setSaveError] = reactExports.useState(null);
   const [showSavedIndicator, setShowSavedIndicator] = reactExports.useState(false);
@@ -67031,13 +68727,21 @@ function TutorPreferencesSection({
       setSaveError(result.error.errors[0].message);
       return;
     }
+    const schoolInfo = normaliseSchoolInfo(school.state, school.schoolName, school.schoolRefId);
+    if ("error" in schoolInfo) {
+      setSaveError(schoolInfo.error ?? "Invalid school name.");
+      return;
+    }
     setIsSaving(true);
     try {
       if (!userId)
         throw new Error("User not authenticated.");
       const { error: updateError } = await supabase.from("profiles").update({
         nickname: result.data,
-        learning_pace: paceInput
+        learning_pace: paceInput,
+        state: schoolInfo.state,
+        school_name: schoolInfo.schoolName,
+        school_ref_id: schoolInfo.schoolRefId
       }).eq("id", userId);
       if (updateError) {
         throw new Error(updateError.message);
@@ -67094,6 +68798,31 @@ function TutorPreferencesSection({
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500 mt-1", children: "Let Yamato know whether you want to learn at a steady, normal, or accelerated pace." })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-gray-100 pt-6 space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SchoolPicker,
+          {
+            value: school,
+            onChange: setSchool,
+            stateLabel: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-1.5", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(MapPin, { className: "w-4 h-4 text-blue-600" }),
+              " State ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-gray-400 font-normal", children: "(optional)" })
+            ] }),
+            schoolLabel: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-1.5", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(School, { className: "w-4 h-4 text-blue-600" }),
+              " School Name ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-gray-400 font-normal", children: "(optional)" })
+            ] }),
+            labelClassName: "block text-sm font-medium text-gray-700 mb-1",
+            className: "grid grid-cols-1 md:grid-cols-2 gap-6"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-gray-500", children: [
+          SCHOOL_PURPOSE_TEXT.replace(" See our Privacy Policy.", " "),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/legal/privacy", className: "text-blue-600 hover:underline", children: "See our Privacy Policy." })
         ] })
       ] }),
       saveError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-red-600 font-medium", children: saveError }),
@@ -67251,7 +68980,193 @@ function DeleteAccountModal({ className = "" }) {
     ] }) })
   ] });
 }
+var taskLabel = (key) => {
+  var _a;
+  return ((_a = LESSON_TASKS.find((t2) => t2.key === key)) == null ? void 0 : _a.label) ?? key;
+};
+function formatDue(iso) {
+  return new Date(iso).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+}
+function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joinRequest }) {
+  const fetcher = useFetcher();
+  const [code, setCode] = reactExports.useState("");
+  const [inviteCode, setInviteCode] = reactExports.useState("");
+  const isBusy = fetcher.state !== "idle";
+  const result = fetcher.data;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "w-5 h-5 text-blue-600" }),
+      " My Class & Homework"
+    ] }),
+    (result == null ? void 0 : result.error) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-red-600 font-medium", children: result.error }),
+    (result == null ? void 0 : result.success) && result.message && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-emerald-600 font-semibold", children: [
+      "\u2713 ",
+      result.message
+    ] }),
+    !studentClass && joinRequest ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-lg p-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-amber-900", children: "Waiting for your teacher to approve" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-amber-800", children: [
+          "You asked to join ",
+          joinRequest.className,
+          " with ",
+          joinRequest.schoolEmail ?? "your invite code",
+          "."
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(fetcher.Form, { method: "post", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "cancel-request" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: isBusy, className: "text-xs font-semibold text-slate-600 border border-slate-300 rounded-md px-3 py-1.5 bg-white cursor-pointer disabled:opacity-50", children: "Cancel request" })
+      ] })
+    ] }) : !studentClass ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-600", children: "Studying on your own? You don't need to do anything here. To join your school class, follow these two steps (or use a personal invite code from your teacher, below)." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-medium text-gray-700", children: "1. Verify your school account" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500", children: "Sign in with the Google or Microsoft account your school gave you. This makes sure only students from your school can join your class. We only read your school email address." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolAccountLink, { verifiedEmails: verifiedSchoolEmails, returnPath: "/my-account" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(fetcher.Form, { method: "post", className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "join-class" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "join-code", className: "block text-sm font-medium text-gray-700", children: "2. Enter the class code from your teacher" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              id: "join-code",
+              name: "joinCode",
+              value: code,
+              onChange: (e) => setCode(e.target.value.toUpperCase()),
+              placeholder: "e.g. K7Q2MX",
+              maxLength: 12,
+              autoComplete: "off",
+              disabled: verifiedSchoolEmails.length === 0,
+              className: "flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 tracking-widest uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "submit",
+              disabled: isBusy || code.trim().length < 4 || verifiedSchoolEmails.length === 0,
+              className: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50",
+              children: isBusy ? "Sending..." : "Ask to Join"
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("details", { className: "border border-gray-200 rounded-lg px-4 py-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("summary", { className: "text-sm font-medium text-gray-700 cursor-pointer", children: "My school doesn't use Google accounts" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(fetcher.Form, { method: "post", className: "space-y-2 mt-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "redeem-invite" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "invite-code", className: "block text-xs text-gray-600", children: [
+            "Ask your teacher for a ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "personal invite code" }),
+            " (8 letters and numbers, only for you). Enter it here instead of the two steps above."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                id: "invite-code",
+                name: "inviteCode",
+                value: inviteCode,
+                onChange: (e) => setInviteCode(e.target.value.toUpperCase()),
+                placeholder: "e.g. K7Q2-MXRT",
+                maxLength: 12,
+                autoComplete: "off",
+                className: "flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm text-slate-900 tracking-widest uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "submit",
+                disabled: isBusy || inviteCode.replace(/[^A-Za-z0-9]/g, "").length !== INVITE_CODE_LENGTH,
+                className: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50",
+                children: isBusy ? "Sending..." : "Ask to Join"
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-gray-500", children: [
+        "Your teacher approves your request. After that, your teacher can see your nickname, your school email address (or the name your teacher wrote for your invite code), your progress on AI Yamato lesson tasks and homework, and your writing submissions (including handwriting photos if your class keeps them). You can leave the class at any time.",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/legal/privacy", className: "text-blue-600 hover:underline", children: "Privacy Policy" })
+      ] })
+    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blue-50 border border-blue-100 rounded-lg p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-blue-900", children: studentClass.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-blue-700", children: [studentClass.teacherName && `Teacher: ${studentClass.teacherName}`, studentClass.schoolName].filter(Boolean).join(" \xB7 ") || "Your class" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          fetcher.Form,
+          {
+            method: "post",
+            onSubmit: (e) => {
+              if (!window.confirm("Leave this class? Your teacher will no longer see your progress."))
+                e.preventDefault();
+            },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "leave-class" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  type: "submit",
+                  disabled: isBusy,
+                  className: "text-xs font-semibold text-slate-600 hover:text-red-600 border border-slate-300 rounded-md px-3 py-1.5 bg-white cursor-pointer disabled:opacity-50",
+                  children: "Leave class"
+                }
+              )
+            ]
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-gray-800 flex items-center gap-1.5 mb-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ClipboardList, { className: "w-4 h-4 text-blue-600" }),
+          " Homework"
+        ] }),
+        homework.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500", children: "No homework yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-gray-100 border border-gray-100 rounded-lg", children: homework.map((hw) => {
+          const doneCount = hw.tasks.filter((t2) => t2.done).length;
+          const allDone = doneCount === hw.tasks.length;
+          const overdue = !allDone && new Date(hw.dueAt).getTime() < Date.now();
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: hw.lessonUrl, className: "text-sm font-semibold text-blue-700 hover:underline", children: hw.title }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-gray-500", children: [
+                hw.lessonTitle,
+                " \xB7 Due ",
+                formatDue(hw.dueAt),
+                overdue && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "ml-1 font-semibold text-red-600", children: "(overdue)" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5 mt-1.5", children: hw.tasks.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "span",
+                {
+                  className: `inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border ${t2.done ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-gray-50 border-gray-200 text-gray-600"}`,
+                  children: [
+                    t2.done ? /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { className: "w-3 h-3" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Circle, { className: "w-3 h-3" }),
+                    taskLabel(t2.key)
+                  ]
+                },
+                t2.key
+              )) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: `text-xs font-bold shrink-0 ${allDone ? "text-emerald-600" : "text-gray-600"}`, children: [
+              doneCount,
+              "/",
+              hw.tasks.length,
+              " done"
+            ] })
+          ] }, hw.id);
+        }) })
+      ] })
+    ] })
+  ] });
+}
 async function loader$7({ request, context }) {
+  var _a;
   const url = new URL(request.url);
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: portalData } = await serverSupabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
@@ -67260,12 +69175,43 @@ async function loader$7({ request, context }) {
   let initialPace = "normal";
   let initialPlan = "Free Plan";
   let initialCredits = 10;
+  let initialState = null;
+  let initialSchoolName = null;
+  let initialSchoolRefId = null;
+  let isTeacher = false;
+  let teacherStatus = null;
+  let studentClass = null;
+  let homework = [];
+  let verifiedSchoolEmails = [];
+  let joinRequest = null;
   if (user) {
-    const { data: profile } = await serverSupabase.from("profiles").select("credits, nickname, learning_pace").eq("id", user.id).maybeSingle();
+    const { data: profile } = await serverSupabase.from("profiles").select("credits, nickname, learning_pace, state, school_name, school_ref_id, is_teacher, teacher_status").eq("id", user.id).maybeSingle();
     if (profile) {
       initialCredits = profile.credits ?? 10;
       initialNickname = profile.nickname ?? "";
       initialPace = profile.learning_pace ?? "normal";
+      initialState = profile.state ?? null;
+      initialSchoolName = profile.school_name ?? null;
+      initialSchoolRefId = profile.school_ref_id ?? null;
+      isTeacher = Boolean(profile.is_teacher);
+      teacherStatus = profile.teacher_status ?? null;
+    }
+    if (!isTeacher && teacherStatus !== "pending") {
+      try {
+        const admin = createAdminSupabaseClient(context);
+        studentClass = await getStudentClass(admin, user.id);
+        if (studentClass) {
+          homework = await loadStudentHomework(admin, studentClass.id, user.id);
+        } else {
+          verifiedSchoolEmails = await getVerifiedSchoolEmails(admin, user.id);
+          const { data: req } = await admin.from("edu_class_join_requests").select("school_email, edu_classes(name)").eq("user_id", user.id).maybeSingle();
+          if (req) {
+            joinRequest = { className: ((_a = req.edu_classes) == null ? void 0 : _a.name) ?? "your class", schoolEmail: req.school_email ?? null };
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load class/homework:", err);
+      }
     }
   }
   return dist$1.json({
@@ -67275,12 +69221,22 @@ async function loader$7({ request, context }) {
     credits: initialCredits,
     nickname: initialNickname,
     learningPace: initialPace,
+    state: initialState,
+    schoolName: initialSchoolName,
+    schoolRefId: initialSchoolRefId,
+    isTeacher,
+    teacherStatus,
+    studentClass,
+    homework,
+    verifiedSchoolEmails,
+    joinRequest,
     createdAt: (user == null ? void 0 : user.created_at) ? new Date(user.created_at).toLocaleDateString("en-AU") : "-",
     portalContent: (portalData == null ? void 0 : portalData.content) ?? null,
     currentPath: url.pathname
   });
 }
 async function action$1({ request, context }) {
+  var _a;
   const formData = await request.formData();
   const intent = formData.get("intent");
   const { supabase: serverSupabase, headers } = createServerSupabaseClient(request, context);
@@ -67305,7 +69261,130 @@ async function action$1({ request, context }) {
       }
     });
   }
+  if (intent === "join-class") {
+    const code = normaliseJoinCode(formData.get("joinCode"));
+    if (code.length < 4) {
+      return dist$1.json({ intent, error: "Please enter the class code from your teacher.", success: false }, { status: 400 });
+    }
+    const admin = createAdminSupabaseClient(context);
+    const { data: me2 } = await admin.from("profiles").select("is_teacher, teacher_status").eq("id", user.id).maybeSingle();
+    if ((me2 == null ? void 0 : me2.is_teacher) || (me2 == null ? void 0 : me2.teacher_status) === "pending") {
+      return dist$1.json({ intent, error: "Teacher accounts cannot join a class as a student.", success: false }, { status: 400 });
+    }
+    if (await getStudentClass(admin, user.id)) {
+      return dist$1.json({ intent, error: "You are already in a class. Leave it first to join another one.", success: false }, { status: 400 });
+    }
+    const { data: cls } = await admin.from("edu_classes").select("id, name, school_domain").eq("join_code", code).maybeSingle();
+    if (!cls) {
+      return dist$1.json({ intent, error: "That class code was not found. Please check it with your teacher.", success: false }, { status: 404 });
+    }
+    const schoolEmails = await getVerifiedSchoolEmails(admin, user.id);
+    const match = schoolEmails.find((e) => isStudentDomainAllowed(cls.school_domain, e.domain));
+    if (!match) {
+      const allowed = allowedStudentDomains(cls.school_domain).map((d) => `@${d}`).join(" or ");
+      return dist$1.json({
+        intent,
+        error: `To join this class, verify a school account ending in ${allowed} first.`,
+        success: false
+      }, { status: 403 });
+    }
+    const { count } = await admin.from("edu_class_members").select("user_id", { count: "exact", head: true }).eq("class_id", cls.id).eq("role", "student");
+    if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
+      return dist$1.json({ intent, error: "This class is full. Please ask your teacher.", success: false }, { status: 400 });
+    }
+    await removeJoinRequest(admin, user.id);
+    const { error: requestError } = await admin.from("edu_class_join_requests").insert({ class_id: cls.id, user_id: user.id, school_email: match.email });
+    if (requestError) {
+      console.error("join-class request failed:", requestError.message);
+      return dist$1.json({ intent, error: "Could not send your request. Please try again.", success: false }, { status: 500 });
+    }
+    return dist$1.json({ intent, success: true, message: `Request sent to ${cls.name}. Your teacher needs to approve it.` });
+  }
+  if (intent === "redeem-invite") {
+    const code = normaliseJoinCode(formData.get("inviteCode"));
+    if (code.length !== INVITE_CODE_LENGTH) {
+      return dist$1.json({ intent, error: "Please enter the 8-character invite code from your teacher.", success: false }, { status: 400 });
+    }
+    const admin = createAdminSupabaseClient(context);
+    const { data: me2 } = await admin.from("profiles").select("is_teacher, teacher_status").eq("id", user.id).maybeSingle();
+    if ((me2 == null ? void 0 : me2.is_teacher) || (me2 == null ? void 0 : me2.teacher_status) === "pending") {
+      return dist$1.json({ intent, error: "Teacher accounts cannot join a class as a student.", success: false }, { status: 400 });
+    }
+    if (await getStudentClass(admin, user.id)) {
+      return dist$1.json({ intent, error: "You are already in a class. Leave it first to join another one.", success: false }, { status: 400 });
+    }
+    const { data: invite } = await admin.from("edu_class_invites").select("id, class_id, edu_classes(name)").eq("code", code).is("used_by", null).is("used_at", null).gt("expires_at", (/* @__PURE__ */ new Date()).toISOString()).maybeSingle();
+    if (!invite) {
+      return dist$1.json({
+        intent,
+        error: "That invite code is not valid, has already been used, or has expired. Please ask your teacher for a new one.",
+        success: false
+      }, { status: 404 });
+    }
+    const { count } = await admin.from("edu_class_members").select("user_id", { count: "exact", head: true }).eq("class_id", invite.class_id).eq("role", "student");
+    if ((count ?? 0) >= TEACHER_LIMITS.maxStudentsPerClass) {
+      return dist$1.json({ intent, error: "This class is full. Please ask your teacher.", success: false }, { status: 400 });
+    }
+    await removeJoinRequest(admin, user.id);
+    const { data: claimed } = await admin.from("edu_class_invites").update({ used_by: user.id, used_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("id", invite.id).is("used_by", null).is("used_at", null).select("id");
+    if (!claimed || claimed.length === 0) {
+      return dist$1.json({ intent, error: "That invite code has already been used. Please ask your teacher for a new one.", success: false }, { status: 409 });
+    }
+    const { error: requestError } = await admin.from("edu_class_join_requests").insert({ class_id: invite.class_id, user_id: user.id, school_email: null, invite_id: invite.id });
+    if (requestError) {
+      console.error("redeem-invite request failed:", requestError.message);
+      await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", invite.id);
+      return dist$1.json({ intent, error: "Could not send your request. Please try again.", success: false }, { status: 500 });
+    }
+    const className = ((_a = invite.edu_classes) == null ? void 0 : _a.name) ?? "your class";
+    return dist$1.json({ intent, success: true, message: `Request sent to ${className}. Your teacher needs to approve it.` });
+  }
+  if (intent === "cancel-request") {
+    const admin = createAdminSupabaseClient(context);
+    await removeJoinRequest(admin, user.id);
+    return dist$1.json({ intent, success: true, message: "Your request was cancelled." });
+  }
+  if (intent === "leave-class") {
+    const admin = createAdminSupabaseClient(context);
+    const { error: leaveError } = await admin.from("edu_class_members").delete().eq("user_id", user.id).eq("role", "student");
+    if (leaveError) {
+      return dist$1.json({ intent, error: "Could not leave the class. Please try again.", success: false }, { status: 500 });
+    }
+    return dist$1.json({ intent, success: true, message: "You left the class." });
+  }
   return dist$1.json({ error: "Invalid intent.", success: false }, { status: 400 });
+}
+async function removeJoinRequest(admin, userId) {
+  const { data: old } = await admin.from("edu_class_join_requests").select("invite_id").eq("user_id", userId).maybeSingle();
+  await admin.from("edu_class_join_requests").delete().eq("user_id", userId);
+  if (old == null ? void 0 : old.invite_id) {
+    await admin.from("edu_class_invites").update({ used_by: null, used_at: null }).eq("id", old.invite_id).eq("used_by", userId);
+  }
+}
+async function loadStudentHomework(admin, classId, userId) {
+  const { data: rows } = await admin.from("edu_homework").select("id, title, lesson_id, task_keys, due_at").eq("class_id", classId).order("due_at", { ascending: false }).limit(30);
+  if (!rows || rows.length === 0)
+    return [];
+  const lessonIds = [...new Set(rows.map((r2) => String(r2.lesson_id)))];
+  const [{ data: lessons }, { data: progress }] = await Promise.all([
+    admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds),
+    admin.from("edu_student_progress").select("lesson_id, task_key, is_completed").eq("user_id", userId).in("lesson_id", lessonIds)
+  ]);
+  const lessonMap = new Map((lessons ?? []).map((l2) => [String(l2.id), l2]));
+  const done = new Set(
+    (progress ?? []).filter((p2) => p2.is_completed).map((p2) => `${p2.lesson_id}:${p2.task_key}`)
+  );
+  return rows.map((r2) => {
+    const lesson = lessonMap.get(String(r2.lesson_id));
+    return {
+      id: r2.id,
+      title: r2.title,
+      dueAt: r2.due_at,
+      lessonTitle: (lesson == null ? void 0 : lesson.title_en) ?? "Lesson",
+      lessonUrl: (lesson == null ? void 0 : lesson.slug) ? `/lessons/${lesson.slug}` : "/lessons",
+      tasks: r2.task_keys.map((key) => ({ key, done: done.has(`${r2.lesson_id}:${key}`) }))
+    };
+  });
 }
 function AccountSettingsRoute() {
   const layoutRef = reactExports.useRef(null);
@@ -67418,7 +69497,23 @@ function AccountSettingsRoute() {
         userId: user == null ? void 0 : user.id,
         initialNickname: nicknameInput,
         initialPace: paceInput,
+        initialState: initialData.state,
+        initialSchoolName: initialData.schoolName,
+        initialSchoolRefId: initialData.schoolRefId,
         onSaved: () => revalidator.revalidate()
+      }
+    ),
+    initialData.teacherStatus === "pending" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-sm text-indigo-900", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-semibold", children: "Your teacher account is being reviewed." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-indigo-800 mt-1", children: "We check every teacher account before classes can be created. Adding your state and school below helps us confirm it. You can keep using AI Yamato as usual in the meantime." })
+    ] }),
+    !initialData.isTeacher && initialData.teacherStatus !== "pending" && (user == null ? void 0 : user.id) && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      StudentClassSection,
+      {
+        studentClass: initialData.studentClass,
+        homework: initialData.homework,
+        verifiedSchoolEmails: initialData.verifiedSchoolEmails,
+        joinRequest: initialData.joinRequest
       }
     ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -67443,7 +69538,7 @@ function AccountSettingsRoute() {
 var meta$7 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
   default: AccountSettingsRoute,
@@ -67575,7 +69670,7 @@ function VceHubIndex() {
 var meta$6 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceHubIndex,
   loader: loader$6,
@@ -67656,7 +69751,7 @@ function IgoRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(IgoFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: IgoRoute,
   loader: loader$5,
@@ -67837,7 +69932,7 @@ function Contact() {
     }
   );
 }
-var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action,
   default: Contact,
@@ -68214,7 +70309,7 @@ function Prices() {
     }
   );
 }
-var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Prices,
   loader: loader$3,
@@ -69444,7 +71539,7 @@ function Home() {
 var meta$2 = ({ data: data2 }) => {
   return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Home,
   loader: loader$2,
@@ -69590,7 +71685,7 @@ function AboutPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
   ] }) });
 }
-var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: AboutPage,
   loader: loader$1,
@@ -69835,13 +71930,13 @@ function FaqPage() {
     }
   );
 }
-var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: FaqPage,
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-DQ0FH9K8.js", "imports": ["/assets/components-CXrMrLPc.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-Cd3t7JrW.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-CD0e1UI-.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/ChatYamatoEoyOralDrill-DtZ_Z0sX.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-DzDfT3NV.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-CXLXOJes.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/check-CNZ2w1kT.js", "/assets/book-open-ChvvrgQB.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-DOqXh2OW.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-hkzU2yfX.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CjZl5bag.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-DzURYtk9.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-D4zn1OyI.js", "/assets/OralPracticeHooks-DzDfT3NV.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-DnPrbEQO.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/nickname-Co6DH_40.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/price-plans-D5-rx0ts.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-C1LydpPP.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-BnINXrEf.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-D6JwIlQo.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/ChatYamatoEoyOralDrill-DtZ_Z0sX.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-D4zn1OyI.js", "/assets/OralPracticeHooks-DzDfT3NV.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-BKycJp38.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-BhYlmLfI.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-fZ_A8eu0.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-CzClUf3I.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-C2kZBd1l.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BlFl_QQd.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-B1DjDMVk.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-jA7KWDi8.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-GFIznnxn.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-Cnon6S3I.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-C-ckxXl2.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-CioKLM-_.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js"], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-CZwII6em.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-DUePn8Zm.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-D9Go9ecP.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-DbvYwUWw.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-Ddh1ka5J.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-C2GLneYy.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-vce-speaking-DQz2Y_Jl.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmNzcT1m.js", "imports": ["/assets/components-CXrMrLPc.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-C_SmHxR8.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-Dlgg6DW_.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-BzZkjQnn.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BYWKhCLt.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-vce-writing-Dv7b1DSk.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-BlzGbj-v.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-Duxi7gK8.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-reference-BlUSpM3v.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-Btn-yBiD.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-C8GosHYz.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BJU3PFZs.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-C_wxN72-.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-CDpv3Wsd.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-SwZ2NTt0.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-C8GosHYz.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-DRAR0vFf.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-games-DUd7J3tZ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BAUbUrmX.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-B56C-zb1.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-CwOAmGj-.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-uVAHz7WP.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-DyDo-XC0.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/content-vce-speaking-DQz2Y_Jl.js", "/assets/content-vce-writing-Dv7b1DSk.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-B34wFhjS.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-C4x5Wyh3.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-E5FqaFGk.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-D5-rx0ts.js", "/assets/flame-f2xpM8mt.js", "/assets/check-CNZ2w1kT.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CcYD0LHA.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-f2xpM8mt.js", "/assets/check-CNZ2w1kT.js", "/assets/yamato-configs-BOLnMrcl.js", "/assets/price-plans-D5-rx0ts.js", "/assets/loader-circle-hkzU2yfX.js", "/assets/book-open-ChvvrgQB.js", "/assets/content-games-DUd7J3tZ.js", "/assets/content-vce-speaking-DQz2Y_Jl.js", "/assets/content-vce-writing-Dv7b1DSk.js", "/assets/content-reference-BlUSpM3v.js", "/assets/DataErrorState-BtiK5NAs.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-Co6DH_40.js", "/assets/ScrollTopButton-BgRnTb35.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-D_nk7GoW.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/book-open-ChvvrgQB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-3AddBZxo.js", "imports": ["/assets/components-CXrMrLPc.js", "/assets/seoMeta-C8GosHYz.js", "/assets/ScrollTopButton-BgRnTb35.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/DataErrorState-BtiK5NAs.js"], "css": [] } }, "url": "/assets/manifest-edac45f9.js", "version": "edac45f9" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-B2xlyUIV.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-Ds1ug07o.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-CQfNYrcx.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-Bw7F4RTq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/pen-line-CD7BuZEg.js", "/assets/PageLayout-CtcVrnce.js", "/assets/check-B0wiq4Dk.js", "/assets/book-open-D1LA2DO0.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-B7i1gDSY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DW_BDztD.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-BdL0byfm.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-B87eQlES.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-C979cU3y.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CtcVrnce.js", "/assets/trash-Dn4545t2.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-BL1TRzKG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/nickname-rNkZOoYh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-D5-rx0ts.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-CRX4v3yQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-D8B0cBAF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-DvRqXrvA.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-CQfNYrcx.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CtcVrnce.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-BpbF5Ufh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-TfzY4063.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-DiPHd0bZ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-Cl2MTjWR.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-CAzTUxSc.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-qY7R2pW1.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-Bl_KMeQM.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-JpGPPh45.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-DhfmQ0dm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-LFP0kMI4.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DW_BDztD.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-CtcVrnce.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-Cin-alrF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-aTS2Q3Pk.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-BhxC9uzt.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CiYO2tdE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-DljxZKNC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-CghxuqrI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-CM2U16d2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match--ulyyvX8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-Ca5svC5P.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DW_BDztD.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-CtcVrnce.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-Bdw3OCce.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-DZXXUW0j.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-CtcVrnce.js", "/assets/SchoolAccountLink-D6rGwBHH.js", "/assets/users-BQzbJJkm.js", "/assets/check-B0wiq4Dk.js", "/assets/pen-line-CD7BuZEg.js", "/assets/trash-Dn4545t2.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-BWqjutF2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-D05BKiJc.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-DvmuLGLg.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-CiZ2q0-E.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-CFmKG9R9.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-CeMm3noj.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-mZv_Oul3.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-3v3tBjoB.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/content-games-UlC5zhV1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BrirLI5h.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-COYYJQXk.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-B58klnJb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-DFTBWSuE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/SchoolAccountLink-D6rGwBHH.js", "/assets/users-BQzbJJkm.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-BUdHREXv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-xR5EFxKD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-CerIWC2S.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-mzAdJgsH.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-D5-rx0ts.js", "/assets/PageLayout-CtcVrnce.js", "/assets/flame-BY602TK0.js", "/assets/check-B0wiq4Dk.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-DIFeBcNI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-BY602TK0.js", "/assets/PageLayout-CtcVrnce.js", "/assets/check-B0wiq4Dk.js", "/assets/yamato-configs-eH3URIAh.js", "/assets/price-plans-D5-rx0ts.js", "/assets/loader-circle-BdL0byfm.js", "/assets/book-open-D1LA2DO0.js", "/assets/content-games-UlC5zhV1.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-rNkZOoYh.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-D7tUn7P6.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-CtcVrnce.js", "/assets/book-open-D1LA2DO0.js", "/assets/users-BQzbJJkm.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-CgzBu-9F.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DW_BDztD.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-CtcVrnce.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-b219bc68.js", "version": "b219bc68" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
@@ -69858,13 +71953,21 @@ var routes = {
     caseSensitive: void 0,
     module: route0
   },
+  "routes/teacher-handwriting.$submissionId": {
+    id: "routes/teacher-handwriting.$submissionId",
+    parentId: "root",
+    path: "teacher-handwriting/:submissionId",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route1
+  },
   "routes/vce.speaking.eoy-oral-accelerated": {
     id: "routes/vce.speaking.eoy-oral-accelerated",
     parentId: "root",
     path: "vce/speaking/eoy-oral-accelerated",
     index: void 0,
     caseSensitive: void 0,
-    module: route1
+    module: route2
   },
   "routes/vce.writing.genkoyoshi-editor-vce": {
     id: "routes/vce.writing.genkoyoshi-editor-vce",
@@ -69872,7 +71975,7 @@ var routes = {
     path: "vce/writing/genkoyoshi-editor-vce",
     index: void 0,
     caseSensitive: void 0,
-    module: route2
+    module: route3
   },
   "routes/vce.writing.kanji-grammar-checker": {
     id: "routes/vce.writing.kanji-grammar-checker",
@@ -69880,7 +71983,7 @@ var routes = {
     path: "vce/writing/kanji-grammar-checker",
     index: void 0,
     caseSensitive: void 0,
-    module: route3
+    module: route4
   },
   "routes/vce.speaking.oral-exam-questions": {
     id: "routes/vce.speaking.oral-exam-questions",
@@ -69888,7 +71991,7 @@ var routes = {
     path: "vce/speaking/oral-exam-questions",
     index: void 0,
     caseSensitive: void 0,
-    module: route4
+    module: route5
   },
   "routes/vce.speaking.eoy-oral-elaborate": {
     id: "routes/vce.speaking.eoy-oral-elaborate",
@@ -69896,7 +71999,7 @@ var routes = {
     path: "vce/speaking/eoy-oral-elaborate",
     index: void 0,
     caseSensitive: void 0,
-    module: route5
+    module: route6
   },
   "routes/lessons.obento-unit-4-lesson-1": {
     id: "routes/lessons.obento-unit-4-lesson-1",
@@ -69904,7 +72007,7 @@ var routes = {
     path: "lessons/obento-unit-4-lesson-1",
     index: void 0,
     caseSensitive: void 0,
-    module: route6
+    module: route7
   },
   "routes/vce.writing.eoy-writing-custom": {
     id: "routes/vce.writing.eoy-writing-custom",
@@ -69912,7 +72015,7 @@ var routes = {
     path: "vce/writing/eoy-writing-custom",
     index: void 0,
     caseSensitive: void 0,
-    module: route7
+    module: route8
   },
   "routes/games.hiragana-memory-match": {
     id: "routes/games.hiragana-memory-match",
@@ -69920,7 +72023,7 @@ var routes = {
     path: "games/hiragana-memory-match",
     index: void 0,
     caseSensitive: void 0,
-    module: route8
+    module: route9
   },
   "routes/vce.speaking.eoy-oral-drill": {
     id: "routes/vce.speaking.eoy-oral-drill",
@@ -69928,7 +72031,7 @@ var routes = {
     path: "vce/speaking/eoy-oral-drill",
     index: void 0,
     caseSensitive: void 0,
-    module: route9
+    module: route10
   },
   "routes/developer.test-yamato-note": {
     id: "routes/developer.test-yamato-note",
@@ -69936,7 +72039,7 @@ var routes = {
     path: "developer/test-yamato-note",
     index: void 0,
     caseSensitive: void 0,
-    module: route10
+    module: route11
   },
   "routes/vce.speaking.eoy-oral-mock": {
     id: "routes/vce.speaking.eoy-oral-mock",
@@ -69944,7 +72047,7 @@ var routes = {
     path: "vce/speaking/eoy-oral-mock",
     index: void 0,
     caseSensitive: void 0,
-    module: route11
+    module: route12
   },
   "routes/reference.writing-styles": {
     id: "routes/reference.writing-styles",
@@ -69952,7 +72055,7 @@ var routes = {
     path: "reference/writing-styles",
     index: void 0,
     caseSensitive: void 0,
-    module: route12
+    module: route13
   },
   "routes/games.prefecture-puzzle": {
     id: "routes/games.prefecture-puzzle",
@@ -69960,7 +72063,7 @@ var routes = {
     path: "games/prefecture-puzzle",
     index: void 0,
     caseSensitive: void 0,
-    module: route13
+    module: route14
   },
   "routes/games.rolling-character": {
     id: "routes/games.rolling-character",
@@ -69968,7 +72071,7 @@ var routes = {
     path: "games/rolling-character",
     index: void 0,
     caseSensitive: void 0,
-    module: route14
+    module: route15
   },
   "routes/vce.writing.eoy-writing": {
     id: "routes/vce.writing.eoy-writing",
@@ -69976,7 +72079,7 @@ var routes = {
     path: "vce/writing/eoy-writing",
     index: void 0,
     caseSensitive: void 0,
-    module: route15
+    module: route16
   },
   "routes/developer.test-yamato": {
     id: "routes/developer.test-yamato",
@@ -69984,7 +72087,7 @@ var routes = {
     path: "developer/test-yamato",
     index: void 0,
     caseSensitive: void 0,
-    module: route16
+    module: route17
   },
   "routes/games.ogre-star-sword": {
     id: "routes/games.ogre-star-sword",
@@ -69992,7 +72095,7 @@ var routes = {
     path: "games/ogre-star-sword",
     index: void 0,
     caseSensitive: void 0,
-    module: route17
+    module: route18
   },
   "routes/lessons.obento-unit-4": {
     id: "routes/lessons.obento-unit-4",
@@ -70000,7 +72103,7 @@ var routes = {
     path: "lessons/obento-unit-4",
     index: void 0,
     caseSensitive: void 0,
-    module: route18
+    module: route19
   },
   "routes/reference.vce-grammar": {
     id: "routes/reference.vce-grammar",
@@ -70008,7 +72111,15 @@ var routes = {
     path: "reference/vce-grammar",
     index: void 0,
     caseSensitive: void 0,
-    module: route19
+    module: route20
+  },
+  "routes/api.teacher-register": {
+    id: "routes/api.teacher-register",
+    parentId: "root",
+    path: "api/teacher-register",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route21
   },
   "routes/developer.image-test": {
     id: "routes/developer.image-test",
@@ -70016,7 +72127,7 @@ var routes = {
     path: "developer/image-test",
     index: void 0,
     caseSensitive: void 0,
-    module: route20
+    module: route22
   },
   "routes/developer.test-audio": {
     id: "routes/developer.test-audio",
@@ -70024,7 +72135,7 @@ var routes = {
     path: "developer/test-audio",
     index: void 0,
     caseSensitive: void 0,
-    module: route21
+    module: route23
   },
   "routes/games.character-maze": {
     id: "routes/games.character-maze",
@@ -70032,7 +72143,7 @@ var routes = {
     path: "games/character-maze",
     index: void 0,
     caseSensitive: void 0,
-    module: route22
+    module: route24
   },
   "routes/reference.text-types": {
     id: "routes/reference.text-types",
@@ -70040,7 +72151,7 @@ var routes = {
     path: "reference/text-types",
     index: void 0,
     caseSensitive: void 0,
-    module: route23
+    module: route25
   },
   "routes/games.tunnel-escape": {
     id: "routes/games.tunnel-escape",
@@ -70048,7 +72159,7 @@ var routes = {
     path: "games/tunnel-escape",
     index: void 0,
     caseSensitive: void 0,
-    module: route24
+    module: route26
   },
   "routes/vce.speaking._index": {
     id: "routes/vce.speaking._index",
@@ -70056,7 +72167,7 @@ var routes = {
     path: "vce/speaking",
     index: true,
     caseSensitive: void 0,
-    module: route25
+    module: route27
   },
   "routes/vocab-drill.$listId": {
     id: "routes/vocab-drill.$listId",
@@ -70064,7 +72175,7 @@ var routes = {
     path: "vocab-drill/:listId",
     index: void 0,
     caseSensitive: void 0,
-    module: route26
+    module: route28
   },
   "routes/games.kanji-sudoku": {
     id: "routes/games.kanji-sudoku",
@@ -70072,7 +72183,7 @@ var routes = {
     path: "games/kanji-sudoku",
     index: void 0,
     caseSensitive: void 0,
-    module: route27
+    module: route29
   },
   "routes/games.memory-match": {
     id: "routes/games.memory-match",
@@ -70080,7 +72191,7 @@ var routes = {
     path: "games/memory-match",
     index: void 0,
     caseSensitive: void 0,
-    module: route28
+    module: route30
   },
   "routes/reference.200kanji": {
     id: "routes/reference.200kanji",
@@ -70088,7 +72199,7 @@ var routes = {
     path: "reference/200kanji",
     index: void 0,
     caseSensitive: void 0,
-    module: route29
+    module: route31
   },
   "routes/vce.writing._index": {
     id: "routes/vce.writing._index",
@@ -70096,7 +72207,7 @@ var routes = {
     path: "vce/writing",
     index: true,
     caseSensitive: void 0,
-    module: route30
+    module: route32
   },
   "routes/api.auth.callback": {
     id: "routes/api.auth.callback",
@@ -70104,7 +72215,15 @@ var routes = {
     path: "api/auth/callback",
     index: void 0,
     caseSensitive: void 0,
-    module: route31
+    module: route33
+  },
+  "routes/teacher-dashboard": {
+    id: "routes/teacher-dashboard",
+    parentId: "root",
+    path: "teacher-dashboard",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route34
   },
   "routes/legal.disclaimer": {
     id: "routes/legal.disclaimer",
@@ -70112,7 +72231,7 @@ var routes = {
     path: "legal/disclaimer",
     index: void 0,
     caseSensitive: void 0,
-    module: route32
+    module: route35
   },
   "routes/reference._index": {
     id: "routes/reference._index",
@@ -70120,7 +72239,7 @@ var routes = {
     path: "reference",
     index: true,
     caseSensitive: void 0,
-    module: route33
+    module: route36
   },
   "routes/reference.vocab": {
     id: "routes/reference.vocab",
@@ -70128,7 +72247,7 @@ var routes = {
     path: "reference/vocab",
     index: void 0,
     caseSensitive: void 0,
-    module: route34
+    module: route37
   },
   "routes/games.hanafuda": {
     id: "routes/games.hanafuda",
@@ -70136,7 +72255,7 @@ var routes = {
     path: "games/hanafuda",
     index: void 0,
     caseSensitive: void 0,
-    module: route35
+    module: route38
   },
   "routes/lessons._index": {
     id: "routes/lessons._index",
@@ -70144,7 +72263,7 @@ var routes = {
     path: "lessons",
     index: true,
     caseSensitive: void 0,
-    module: route36
+    module: route39
   },
   "routes/legal.privacy": {
     id: "routes/legal.privacy",
@@ -70152,7 +72271,7 @@ var routes = {
     path: "legal/privacy",
     index: void 0,
     caseSensitive: void 0,
-    module: route37
+    module: route40
   },
   "routes/sitemap[.]xml": {
     id: "routes/sitemap[.]xml",
@@ -70160,7 +72279,7 @@ var routes = {
     path: "sitemap.xml",
     index: void 0,
     caseSensitive: void 0,
-    module: route38
+    module: route41
   },
   "routes/vocab-creator": {
     id: "routes/vocab-creator",
@@ -70168,7 +72287,7 @@ var routes = {
     path: "vocab-creator",
     index: void 0,
     caseSensitive: void 0,
-    module: route39
+    module: route42
   },
   "routes/games._index": {
     id: "routes/games._index",
@@ -70176,7 +72295,7 @@ var routes = {
     path: "games",
     index: true,
     caseSensitive: void 0,
-    module: route40
+    module: route43
   },
   "routes/legal._index": {
     id: "routes/legal._index",
@@ -70184,7 +72303,7 @@ var routes = {
     path: "legal",
     index: true,
     caseSensitive: void 0,
-    module: route41
+    module: route44
   },
   "routes/games.shogi": {
     id: "routes/games.shogi",
@@ -70192,7 +72311,7 @@ var routes = {
     path: "games/shogi",
     index: void 0,
     caseSensitive: void 0,
-    module: route42
+    module: route45
   },
   "routes/legal.terms": {
     id: "routes/legal.terms",
@@ -70200,7 +72319,7 @@ var routes = {
     path: "legal/terms",
     index: void 0,
     caseSensitive: void 0,
-    module: route43
+    module: route46
   },
   "routes/my-account": {
     id: "routes/my-account",
@@ -70208,7 +72327,7 @@ var routes = {
     path: "my-account",
     index: void 0,
     caseSensitive: void 0,
-    module: route44
+    module: route47
   },
   "routes/vce._index": {
     id: "routes/vce._index",
@@ -70216,7 +72335,7 @@ var routes = {
     path: "vce",
     index: true,
     caseSensitive: void 0,
-    module: route45
+    module: route48
   },
   "routes/games.igo": {
     id: "routes/games.igo",
@@ -70224,7 +72343,7 @@ var routes = {
     path: "games/igo",
     index: void 0,
     caseSensitive: void 0,
-    module: route46
+    module: route49
   },
   "routes/contact": {
     id: "routes/contact",
@@ -70232,7 +72351,7 @@ var routes = {
     path: "contact",
     index: void 0,
     caseSensitive: void 0,
-    module: route47
+    module: route50
   },
   "routes/prices": {
     id: "routes/prices",
@@ -70240,7 +72359,7 @@ var routes = {
     path: "prices",
     index: void 0,
     caseSensitive: void 0,
-    module: route48
+    module: route51
   },
   "routes/_index": {
     id: "routes/_index",
@@ -70248,7 +72367,7 @@ var routes = {
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route49
+    module: route52
   },
   "routes/about": {
     id: "routes/about",
@@ -70256,7 +72375,7 @@ var routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route50
+    module: route53
   },
   "routes/faq": {
     id: "routes/faq",
@@ -70264,7 +72383,7 @@ var routes = {
     path: "faq",
     index: void 0,
     caseSensitive: void 0,
-    module: route51
+    module: route54
   }
 };
 

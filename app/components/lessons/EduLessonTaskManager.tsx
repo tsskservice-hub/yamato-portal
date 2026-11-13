@@ -51,8 +51,6 @@ export function EduLessonTaskManager({
     writing: false,
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const onProgressChangeRef = useRef(onProgressChange);
   onProgressChangeRef.current = onProgressChange;
   const onAllCompletedChangeRef = useRef(onAllCompletedChange);
@@ -116,38 +114,6 @@ export function EduLessonTaskManager({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonId, userId, externalKey]);
 
-  const updateTaskStatus = async (taskKey: keyof typeof taskProgress, isCompleted: boolean) => {
-    const updated = {
-      ...taskProgress,
-      [taskKey]: isCompleted,
-    };
-    
-    setTaskProgress(updated);
-    publishProgress(updated);
-
-    if (userId) {
-      setIsLoading(true);
-      try {
-        await supabase
-          .from("edu_student_progress")
-          .upsert(
-            {
-              user_id: userId,
-              lesson_id: lessonId,
-              task_key: taskKey,
-              is_completed: isCompleted,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "user_id,lesson_id,task_key" }
-          );
-      } catch (err) {
-        console.error("Exception during progress upsert:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   const allTasksCompleted = Object.values(taskProgress).every(Boolean);
 
   return (
@@ -168,9 +134,6 @@ export function EduLessonTaskManager({
             </p>
           </div>
           <div className="text-right flex items-center gap-3">
-            {isLoading && (
-              <span className="text-xs text-emerald-200 animate-pulse">Syncing...</span>
-            )}
             <span className={`text-xs font-bold px-4 py-2 rounded-xl border shadow-sm ${
               allTasksCompleted 
                 ? "bg-emerald-300 text-slate-950 border-emerald-200" 
@@ -212,13 +175,6 @@ export function EduLessonTaskManager({
                   <span>Start Vocab Drill (ドリル開始)</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => updateTaskStatus("vocabulary", !taskProgress.vocabulary)}
-                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
-              >
-                [開発用] 状態切替
-              </button>
             </div>
           </div>
 
@@ -250,13 +206,6 @@ export function EduLessonTaskManager({
                   <span>Start Listening Task (リスニング開始)</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => updateTaskStatus("listening", !taskProgress.listening)}
-                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
-              >
-                [開発用] 状態切替
-              </button>
             </div>
           </div>
 
@@ -288,13 +237,6 @@ export function EduLessonTaskManager({
                   <span>Start Reading Drill (リーディング開始)</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => updateTaskStatus("reading", !taskProgress.reading)}
-                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
-              >
-                [開発用] 状態切替
-              </button>
             </div>
           </div>
 
@@ -326,13 +268,6 @@ export function EduLessonTaskManager({
                   <span>Start Speaking Task (スピーキング開始)</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => updateTaskStatus("speaking", !taskProgress.speaking)}
-                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
-              >
-                [開発用] 状態切替
-              </button>
             </div>
           </div>
 
@@ -366,13 +301,6 @@ export function EduLessonTaskManager({
                 <span>Start Writing Task (ライティング開始)</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => updateTaskStatus("writing", !taskProgress.writing)}
-              className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-semibold"
-            >
-              [開発用] 状態切替
-            </button>
           </div>
           
           {allTasksCompleted && (
