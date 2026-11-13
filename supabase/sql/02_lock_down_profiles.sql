@@ -3,6 +3,10 @@
 -- 実行先: 本番 ybquwzoreecxxbewjpdn（SQL Editor）
 -- 実行タイミング: クイズを RPC に変えたポータルを本番に公開した「後」
 -- ※ Worker・Stripe Webhook は管理者キー（service_role）を使うため、影響を受けない
+-- ⚠️ 再実行しないこと。下の revoke が、後から 10_teacher_accounts.sql で追加した
+--    state / school_name / school_ref_id の更新権限も消してしまう（マイアカウントの保存が失敗する）。
+--    権限の確認だけなら、末尾の「確認用」SELECT だけを実行する。
+--    うっかり再実行したら: grant update (state, school_name, school_ref_id) on public.profiles to authenticated;
 -- =====================================================================
 
 -- profiles: いったん書き込み権限をすべて外し、ブラウザが使う列だけ戻す

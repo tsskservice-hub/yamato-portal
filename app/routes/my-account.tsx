@@ -402,7 +402,7 @@ export default function AccountSettingsRoute() {
         // クレジット履歴（加算・減算両方）の取得
         const { data: txData, error: txError } = await supabase
           .from("credit_transactions")
-          .select("id, amount, feature_used, description, created_at, expires_at")
+          .select("id, amount, feature_used, description, created_at, expires_at, balance_after")
           .eq("user_id", activeUser.id)
           .order("created_at", { ascending: false });
 

@@ -40716,7 +40716,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var stylesheet = "/assets/tailwind-CijUdC9S.css";
+var stylesheet = "/assets/tailwind-8SBx4Q62.css";
 var links$1 = () => [
   { rel: "stylesheet", href: stylesheet },
   // 💡 ヤマトのアイコンをファビコンとして設定
@@ -40881,7 +40881,8 @@ var LESSON_TASKS = [
   { key: "listening", label: "Listening" },
   { key: "reading", label: "Reading" },
   { key: "speaking", label: "Speaking" },
-  { key: "writing", label: "Writing" }
+  { key: "writing", label: "Writing" },
+  { key: "culture", label: "Culture" }
 ];
 function isLessonTaskKey(value) {
   return typeof value === "string" && LESSON_TASKS.some((t2) => t2.key === value);
@@ -42268,30 +42269,24 @@ function Header({
         ) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-extrabold tracking-tight text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hidden sm:inline", children: "JP Tutor AI Yamato" })
       ] }),
-      isHome && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "hidden md:flex items-center space-x-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "a",
-          {
-            href: "/#section-general",
-            className: "px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F310}" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "General" })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "a",
-          {
-            href: "/#section-vce",
-            className: "px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center space-x-1 bg-red-500/10 text-red-600 hover:bg-red-500/20",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F1E6}\u{1F1FA}" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "VCE" })
-            ]
-          }
-        )
-      ] })
+      isHome && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "hidden md:flex items-center space-x-1.5", children: [
+        { href: "/#section-vce", label: "VCE", color: "bg-red-500/10 text-red-600 hover:bg-red-500/20" },
+        { href: "/#section-junior", label: "Junior", color: "bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20" },
+        // 幅を節約するため References / Games / General は絵文字のみ（名前は title と aria-label で補う）
+        { href: "/#section-references", label: "\u{1F4DA}", title: "References", color: "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20" },
+        { href: "/#section-games", label: "\u{1F3AE}", title: "Games", color: "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20" },
+        { href: "/#section-general", label: "\u{1F30D}", title: "General", color: "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20" }
+      ].map(({ href, label, title: title2, color }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "a",
+        {
+          href,
+          title: title2,
+          "aria-label": title2,
+          className: `px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer inline-flex items-center ${color}`,
+          children: label
+        },
+        href
+      )) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-3", children: [
       user && isTeacher && /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -44768,26 +44763,26 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
         if (response.ok) {
           const audioBlob = await response.blob();
           const audioUrl = URL.createObjectURL(audioBlob);
-          const audio = new Audio(audioUrl);
-          audio.playbackRate = speechSpeed || 1;
+          const audio2 = new Audio(audioUrl);
+          audio2.playbackRate = speechSpeed || 1;
           const estimatedDurationMs = Math.max(cleanedText.length * 200, 2e3) / (speechSpeed || 1) + 1500;
           const estimatedTimer = setTimeout(() => {
             console.warn("\u23F1\uFE0F [DEBUG] Estimated duration reached. Forcing audio pause & resolve.");
-            audio.pause();
+            audio2.pause();
             safeResolve("estimated-timer");
           }, estimatedDurationMs);
-          audio.onended = () => {
+          audio2.onended = () => {
             console.log("\u{1F50A} [DEBUG] audio.onended event fired.");
             clearTimeout(estimatedTimer);
             safeResolve("onended");
           };
-          audio.onerror = (e) => {
+          audio2.onerror = (e) => {
             console.error("\u274C [DEBUG] audio.onerror event fired:", e);
             clearTimeout(estimatedTimer);
             fallbackWebSpeech(cleanedText, speechSpeed);
             safeResolve("onerror");
           };
-          await audio.play().catch((playErr) => {
+          await audio2.play().catch((playErr) => {
             console.warn("\u26A0\uFE0F [DEBUG] audio.play() was blocked or failed:", playErr);
             clearTimeout(estimatedTimer);
             fallbackWebSpeech(cleanedText, speechSpeed);
@@ -46938,14 +46933,14 @@ function OralExamQuestions() {
   };
   const handlePlayAudio = (item, index) => {
     if (item.audio) {
-      const audio = new Audio(item.audio);
+      const audio2 = new Audio(item.audio);
       setPlayingIndex(index);
-      audio.play().catch(() => {
+      audio2.play().catch(() => {
         alert("\u97F3\u58F0\u30D5\u30A1\u30A4\u30EB\u306E\u518D\u751F\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002");
         setPlayingIndex(null);
       });
-      audio.onended = () => setPlayingIndex(null);
-      audio.onerror = () => setPlayingIndex(null);
+      audio2.onended = () => setPlayingIndex(null);
+      audio2.onerror = () => setPlayingIndex(null);
       return;
     }
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -49256,7 +49251,7 @@ var EduVocabularySidebar = ({
     ] }, vocab.id || vIdx)) })
   ] });
 };
-var TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing"];
+var TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing", "culture"];
 function EduLessonTaskManager({
   lessonId,
   userId,
@@ -49269,6 +49264,7 @@ function EduLessonTaskManager({
   onStartSpeakingDrill,
   onStartWritingTask,
   // 追加
+  onStartCultureTask,
   externalTaskStatus = {}
 }) {
   const [taskProgress, setTaskProgress] = reactExports.useState({
@@ -49276,7 +49272,8 @@ function EduLessonTaskManager({
     listening: false,
     reading: false,
     speaking: false,
-    writing: false
+    writing: false,
+    culture: false
   });
   const onProgressChangeRef = reactExports.useRef(onProgressChange);
   onProgressChangeRef.current = onProgressChange;
@@ -49297,7 +49294,7 @@ function EduLessonTaskManager({
         const { data: data2, error } = await supabase.from("edu_student_progress").select("task_key, is_completed").eq("user_id", userId).eq("lesson_id", lessonId);
         if (error || !data2 || cancelled)
           return;
-        const saved = { vocabulary: false, listening: false, reading: false, speaking: false, writing: false };
+        const saved = { vocabulary: false, listening: false, reading: false, speaking: false, writing: false, culture: false };
         data2.forEach((row) => {
           if (row.task_key in saved)
             saved[row.task_key] = row.is_completed;
@@ -49422,35 +49419,55 @@ function EduLessonTaskManager({
             ]
           }
         ) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.writing ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg", children: "Task 5" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.writing ? "\u2705 \u9054\u6210\u6E08\u307F (Completed)" : "\u{1F512} \u672A\u9054\u6210" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u270D\uFE0F Writing Task & AI Feedback (\u4F5C\u6587\u30FB\u6DFB\u524A)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "\u76F8\u624B\u306B\u4F1D\u3048\u308B\u305F\u3081\u306E\u30E1\u30C3\u30BB\u30FC\u30B8\u3092\u65E5\u672C\u8A9E\u3067\u624B\u66F8\u304D\uFF08\u7D19\uFF0B\u5199\u771F\u3001\u307E\u305F\u306F\u30C7\u30B8\u30BF\u30EB\u539F\u7A3F\u7528\u7D19\uFF09\u3057\u3066\u63D0\u51FA\u3057\u307E\u3059\u3002\u8AAD\u307F\u624B\u304B\u3089\u306E\u8FD4\u4E8B\u3068\u30D5\u30A3\u30FC\u30C9\u30D0\u30C3\u30AF\u3092\u53D7\u3051\u53D6\u308B\u3068\u9054\u6210\u306B\u306A\u308A\u307E\u3059\u3002" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartWritingTask && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: onStartWritingTask,
+            className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Writing Task (\u30E9\u30A4\u30C6\u30A3\u30F3\u30B0\u958B\u59CB)" })
+            ]
+          }
+        ) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.culture ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-rose-100 text-rose-800 rounded-lg", children: "Task 6" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.culture ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.culture ? "\u2705 \u9054\u6210\u6E08\u307F (Completed)" : "\u{1F512} \u672A\u9054\u6210" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F38E} Culture Task (\u65E5\u672C\u306E\u6587\u5316)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "\u30CA\u30EC\u30FC\u30B7\u30E7\u30F3\u3068\u5B57\u5E55\u3064\u304D\u306E\u7D19\u829D\u5C45\u3067\u65E5\u672C\u306E\u6587\u5316\u3092\u5B66\u3073\u3001Quick Check\uFF08\u9078\u629E\u5F0F\u30AF\u30A4\u30BA\uFF09\u306B\u5168\u554F\u6B63\u89E3\u3059\u308B\u3068\u5B8C\u4E86\u306B\u306A\u308A\u307E\u3059\u3002" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartCultureTask && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: onStartCultureTask,
+            className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Culture Task (\u6587\u5316\u30BF\u30B9\u30AF\u958B\u59CB)" })
+            ]
+          }
+        ) })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition relative z-10 ${taskProgress.writing ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg", children: "Task 5" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.writing ? "\u2705 \u9054\u6210\u6E08\u307F (Completed)" : "\u{1F512} \u672A\u9054\u6210" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u270D\uFE0F Writing Task & AI Feedback (\u4F5C\u6587\u30FB\u6DFB\u524A)" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "\u76F8\u624B\u306B\u4F1D\u3048\u308B\u305F\u3081\u306E\u30E1\u30C3\u30BB\u30FC\u30B8\u3092\u65E5\u672C\u8A9E\u3067\u624B\u66F8\u304D\uFF08\u7D19\uFF0B\u5199\u771F\u3001\u307E\u305F\u306F\u30C7\u30B8\u30BF\u30EB\u539F\u7A3F\u7528\u7D19\uFF09\u3057\u3066\u63D0\u51FA\u3057\u307E\u3059\u3002\u8AAD\u307F\u624B\u304B\u3089\u306E\u8FD4\u4E8B\u3068\u30D5\u30A3\u30FC\u30C9\u30D0\u30C3\u30AF\u3092\u53D7\u3051\u53D6\u308B\u3068\u9054\u6210\u306B\u306A\u308A\u307E\u3059\u3002" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4 mb-4", children: onStartWritingTask && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "button",
-        {
-          type: "button",
-          onClick: onStartWritingTask,
-          className: "py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F680}" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Start Writing Task (\u30E9\u30A4\u30C6\u30A3\u30F3\u30B0\u958B\u59CB)" })
-          ]
-        }
-      ) }),
-      allTasksCompleted && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-amber-400 text-slate-950 rounded-2xl flex items-center justify-between shadow-lg animate-bounce mt-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl", children: "\u{1F3C6}" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h5", { className: "font-black text-sm", children: "\u304A\u3081\u3067\u3068\u3046\u3054\u3056\u3044\u307E\u3059\uFF01\u30E6\u30CB\u30C3\u30C8\u4FEE\u4E86\u30D0\u30C3\u30B8\u7372\u5F97\uFF01" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-900 font-medium", children: "\u3059\u3079\u3066\u306E\u5B66\u7FD2\u30BF\u30B9\u30AF\u3092\u30B7\u30B9\u30C6\u30E0\u5224\u5B9A\u306B\u3088\u308A\u30AF\u30EA\u30A2\u3057\u307E\u3057\u305F\u3002" })
-        ] })
-      ] }) })
-    ] })
+    allTasksCompleted && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 bg-amber-400 text-slate-950 rounded-2xl flex items-center justify-between shadow-lg animate-bounce relative z-10", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl", children: "\u{1F3C6}" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h5", { className: "font-black text-sm", children: "\u304A\u3081\u3067\u3068\u3046\u3054\u3056\u3044\u307E\u3059\uFF01\u30E6\u30CB\u30C3\u30C8\u4FEE\u4E86\u30D0\u30C3\u30B8\u7372\u5F97\uFF01" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-900 font-medium", children: "\u3059\u3079\u3066\u306E\u5B66\u7FD2\u30BF\u30B9\u30AF\u3092\u30B7\u30B9\u30C6\u30E0\u5224\u5B9A\u306B\u3088\u308A\u30AF\u30EA\u30A2\u3057\u307E\u3057\u305F\u3002" })
+      ] })
+    ] }) })
   ] }) });
 }
 var EduFinishedView = ({
@@ -49480,6 +49497,266 @@ var EduFinishedView = ({
     )
   ] });
 };
+var BUCKET = "sound-effect-audio";
+var DEFAULT_FILE = "correct-answer-1.mp3";
+var COMPLETE_FILE = "completed-sound-2.mp3";
+function getSupabaseUrl() {
+  const fromVite = "https://ybquwzoreecxxbewjpdn.supabase.co";
+  const winEnv = typeof window !== "undefined" ? window.ENV : void 0;
+  (winEnv == null ? void 0 : winEnv.SUPABASE_URL) || (winEnv == null ? void 0 : winEnv.VITE_SUPABASE_URL);
+  const url = fromVite;
+  return url.replace(/\/$/, "");
+}
+function buildSoundUrl(fileName) {
+  const base = getSupabaseUrl();
+  return base ? `${base}/storage/v1/object/public/${BUCKET}/${fileName}` : "";
+}
+var sharedAudioCtx = null;
+function getAudioContext() {
+  if (typeof window === "undefined")
+    return null;
+  if (!sharedAudioCtx) {
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if (!Ctor)
+      return null;
+    sharedAudioCtx = new Ctor();
+  }
+  return sharedAudioCtx;
+}
+function useSoundEffect(customSoundUrl) {
+  const audioCacheRef = reactExports.useRef({});
+  const playUrl = reactExports.useCallback((targetUrl) => {
+    if (!targetUrl) {
+      console.error(
+        "[useSoundEffect] Supabase URL is not set. Set VITE_SUPABASE_URL (or window.ENV.SUPABASE_URL) and redeploy."
+      );
+      playFallbackBeep();
+      return;
+    }
+    try {
+      let audio2 = audioCacheRef.current[targetUrl];
+      if (!audio2) {
+        audio2 = new Audio(targetUrl);
+        audio2.preload = "auto";
+        audioCacheRef.current[targetUrl] = audio2;
+      }
+      audio2.currentTime = 0;
+      audio2.play().catch((e) => {
+        console.warn("[useSoundEffect] audio.play failed, falling back to beep:", targetUrl, e);
+        playFallbackBeep();
+      });
+    } catch (e) {
+      console.error("[useSoundEffect] sound effect error:", e);
+      playFallbackBeep();
+    }
+  }, []);
+  const playSound = reactExports.useCallback(
+    (overrideUrl) => {
+      const override = typeof overrideUrl === "string" ? overrideUrl : void 0;
+      const targetUrl = override || customSoundUrl || buildSoundUrl(DEFAULT_FILE);
+      playUrl(targetUrl);
+    },
+    [customSoundUrl, playUrl]
+  );
+  const playCompleteSound = reactExports.useCallback(() => {
+    playUrl(buildSoundUrl(COMPLETE_FILE));
+  }, [playUrl]);
+  return { playSound, playCompleteSound };
+}
+function playFallbackBeep() {
+  try {
+    const audioCtx = getAudioContext();
+    if (!audioCtx)
+      return;
+    if (audioCtx.state === "suspended") {
+      void audioCtx.resume();
+    }
+    const now = audioCtx.currentTime;
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(523.25, now);
+    gain1.gain.setValueAtTime(0.1, now);
+    gain1.gain.exponentialRampToValueAtTime(1e-3, now + 0.15);
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.15);
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(659.25, now + 0.1);
+    gain2.gain.setValueAtTime(0.1, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(1e-3, now + 0.35);
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start(now + 0.1);
+    osc2.stop(now + 0.35);
+  } catch (e) {
+    console.error("[useSoundEffect] fallback sound error:", e);
+  }
+}
+var normalizeJapanese = (str) => {
+  if (!str)
+    return "";
+  let s2 = str.trim().toLowerCase();
+  s2 = s2.replace(/[?.!,。、・\s]+/g, "");
+  const map = {
+    // 疑問詞の正確な表記ゆれ（「何に」などの誤認は含めない）
+    "\u4F55\u4EBA": "\u306A\u3093\u306B\u3093",
+    "\u306A\u3093\u4EBA": "\u306A\u3093\u306B\u3093",
+    "\u4F55": "\u306A\u3093",
+    // 数字・漢数字
+    "\uFF11": "1",
+    "\u4E00": "1",
+    "\u3072\u3068": "1",
+    "\u3044\u3061": "1",
+    "\uFF12": "2",
+    "\u4E8C": "2",
+    "\u3075\u305F": "2",
+    "\u306B": "2",
+    "\uFF13": "3",
+    "\u4E09": "3",
+    "\u307F\u3063": "3",
+    "\u3055\u3093": "3",
+    "\uFF14": "4",
+    "\u56DB": "4",
+    "\u3088\u3093": "4",
+    "\u3057": "4",
+    "\u3088": "4",
+    "\uFF15": "5",
+    "\u4E94": "5",
+    "\u3044\u3064": "5",
+    "\u3054": "5",
+    "\uFF16": "6",
+    "\u516D": "6",
+    "\u3080\u3063": "6",
+    "\u308D\u304F": "6",
+    "\uFF17": "7",
+    "\u4E03": "7",
+    "\u306A\u306A": "7",
+    "\u3057\u3061": "7",
+    "\uFF18": "8",
+    "\u516B": "8",
+    "\u3084\u3063": "8",
+    "\u306F\u3061": "8",
+    "\uFF19": "9",
+    "\u4E5D": "9",
+    "\u3053\u3053\u306E": "9",
+    "\u304D\u3085\u3046": "9",
+    "\u304F": "9",
+    "\uFF11\uFF10": "10",
+    "\u5341": "10",
+    "\u3068\u304A": "10",
+    "\u3058\u3085\u3046": "10",
+    // カウンター
+    "\u4EBA": "\u306B\u3093",
+    "\u30CB\u30F3": "\u306B\u3093",
+    "\u5339": "\u3072\u304D",
+    "\u624D": "\u3055\u3044",
+    "\u6B73": "\u3055\u3044",
+    "\u672C": "\u307B\u3093",
+    "\u500B": "\u3053"
+  };
+  for (const [key, val] of Object.entries(map)) {
+    s2 = s2.split(key).join(val);
+  }
+  s2 = s2.replace(/ひとり/g, "1\u4EBA");
+  s2 = s2.replace(/ふたり/g, "2\u4EBA");
+  return s2;
+};
+var NUMBER_WORDS = {
+  zero: 0,
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10,
+  eleven: 11,
+  twelve: 12,
+  thirteen: 13,
+  fourteen: 14,
+  fifteen: 15,
+  sixteen: 16,
+  seventeen: 17,
+  eighteen: 18,
+  nineteen: 19,
+  twenty: 20,
+  thirty: 30,
+  forty: 40,
+  fifty: 50,
+  sixty: 60,
+  seventy: 70,
+  eighty: 80,
+  ninety: 90
+};
+var SCALE_WORDS = { hundred: 100, thousand: 1e3 };
+var isNumberWord = (w2) => w2 in NUMBER_WORDS || w2 in SCALE_WORDS;
+var numberWordsToDigits = (input2) => {
+  const s2 = input2.replace(
+    /\b([a-z]+)-([a-z]+)\b/g,
+    (m2, a, b) => isNumberWord(a) && isNumberWord(b) ? `${a} ${b}` : m2
+  );
+  const tokens = s2.split(" ");
+  const out = [];
+  let i = 0;
+  while (i < tokens.length) {
+    if (!isNumberWord(tokens[i])) {
+      out.push(tokens[i]);
+      i++;
+      continue;
+    }
+    let total = 0;
+    let current = 0;
+    while (i < tokens.length) {
+      const t2 = tokens[i];
+      if (t2 in NUMBER_WORDS) {
+        current += NUMBER_WORDS[t2];
+      } else if (t2 === "hundred") {
+        current = (current || 1) * 100;
+      } else if (t2 === "thousand") {
+        total += (current || 1) * 1e3;
+        current = 0;
+      } else if (t2 === "and" && i + 1 < tokens.length && tokens[i + 1] in NUMBER_WORDS && (total > 0 || current >= 100))
+        ;
+      else {
+        break;
+      }
+      i++;
+    }
+    out.push(String(total + current));
+  }
+  return out.join(" ");
+};
+var katakanaToHiragana = (str) => (str || "").replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 96));
+var cleanJapaneseAnswer = (str) => (str || "").normalize("NFKC").trim().replace(/[\s。、.,!?！？〜~]/g, "");
+var cleanRomajiAnswer = (str) => (str || "").normalize("NFKC").trim().toLowerCase().replace(/[\s'’\-.,!?]/g, "");
+var matchesJapaneseAnswer = (input2, item) => {
+  const jp = cleanJapaneseAnswer(input2);
+  if (!jp)
+    return false;
+  const kanaCandidates = [item.jp_text, item.jp_kana, katakanaToHiragana(item.jp_kana || "")].map((c) => cleanJapaneseAnswer(c || "")).filter(Boolean);
+  if (kanaCandidates.includes(jp))
+    return true;
+  const romaji = cleanRomajiAnswer(input2);
+  const romajiCandidates = (item.romaji || "").split("/").map(cleanRomajiAnswer).filter(Boolean);
+  return romajiCandidates.includes(romaji);
+};
+var normalizeEnglish = (str) => {
+  if (!str)
+    return "";
+  let s2 = str.trim().toLowerCase();
+  s2 = s2.replace(/[?.!,]+$/, "");
+  s2 = s2.replace(/(\d),(?=\d{3}\b)/g, "$1");
+  s2 = s2.replace(/[\s\-_]+/g, " ").trim();
+  s2 = numberWordsToDigits(s2);
+  return s2.trim();
+};
 var EduVocabularyDrillModal = ({
   vocabulary = [],
   isOpen,
@@ -49496,8 +49773,19 @@ var EduVocabularyDrillModal = ({
   const [isFullscreen, setIsFullscreen] = reactExports.useState(false);
   const [isListening, setIsListening] = reactExports.useState(false);
   const [speechStatusMessage, setSpeechStatusMessage] = reactExports.useState("");
+  const [pendingSpoken, setPendingSpoken] = reactExports.useState(null);
   const inputRef = reactExports.useRef(null);
   const activeAudioRef = reactExports.useRef(null);
+  const { playSound, playCompleteSound } = useSoundEffect();
+  const completedRef = reactExports.useRef(false);
+  const finishDrill = () => {
+    setIsFinished(true);
+    if (completedRef.current)
+      return;
+    completedRef.current = true;
+    playCompleteSound();
+    onCompleted();
+  };
   const targetScore = Math.max(vocabulary.length * 2, 5);
   reactExports.useEffect(() => {
     if (isOpen && vocabulary.length > 0) {
@@ -49507,7 +49795,10 @@ var EduVocabularyDrillModal = ({
       setScore(0);
       setUserInput("");
       setFeedback(null);
+      setPendingSpoken(null);
+      setSpeechStatusMessage("");
       setIsFinished(false);
+      completedRef.current = false;
       setCurrentMode("jp_to_en");
     }
     return () => {
@@ -49547,12 +49838,19 @@ var EduVocabularyDrillModal = ({
       window.speechSynthesis.cancel();
     }
     if ((vocab == null ? void 0 : vocab.audio_url) && vocab.audio_url.trim() !== "") {
-      const audio = new Audio(vocab.audio_url);
-      activeAudioRef.current = audio;
-      audio.play().catch((err) => {
-        console.warn("Custom audio playback failed:", err);
+      const audio2 = new Audio(vocab.audio_url);
+      activeAudioRef.current = audio2;
+      let fellBack = false;
+      const fallback = (reason) => {
+        if (fellBack || activeAudioRef.current !== audio2)
+          return;
+        fellBack = true;
+        console.warn(`[EduVocabularyDrill] Audio file could not be played, using speech synthesis instead: ${vocab.audio_url}`, reason);
         activeAudioRef.current = null;
-      });
+        playFallbackSpeech(vocab == null ? void 0 : vocab.jp_text);
+      };
+      audio2.onerror = () => fallback(audio2.error);
+      audio2.play().catch(fallback);
       return;
     }
     playFallbackSpeech(vocab == null ? void 0 : vocab.jp_text);
@@ -49561,28 +49859,13 @@ var EduVocabularyDrillModal = ({
     setCurrentMode(mode2);
     setUserInput("");
     setFeedback(null);
+    setPendingSpoken(null);
+    setSpeechStatusMessage("");
     if (mode2 === "audio_to_en") {
       playVocabAudio(currentItem);
     }
   };
-  const normalizeAnswer2 = (str) => {
-    if (!str)
-      return "";
-    let s2 = str.trim().toLowerCase();
-    s2 = s2.replace(/[?.!,]+$/, "");
-    s2 = s2.replace(/\b1\b/g, "one");
-    s2 = s2.replace(/\bone\b/g, "1");
-    s2 = s2.replace(/\b2\b/g, "two");
-    s2 = s2.replace(/\btwo\b/g, "2");
-    s2 = s2.replace(/\b3\b/g, "three");
-    s2 = s2.replace(/\bthree\b/g, "3");
-    s2 = s2.replace(/\b4\b/g, "four");
-    s2 = s2.replace(/\bfour\b/g, "4");
-    s2 = s2.replace(/\b5\b/g, "five");
-    s2 = s2.replace(/\bfive\b/g, "5");
-    s2 = s2.replace(/\s+/g, " ");
-    return s2;
-  };
+  const normalizeAnswer2 = (str) => normalizeEnglish(str);
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null)
@@ -49593,21 +49876,18 @@ var EduVocabularyDrillModal = ({
       const correctEn = normalizeAnswer2(currentItem.english_text || "");
       isCorrect = cleanInput === correctEn;
     } else if (currentMode === "en_to_jp") {
-      const correctJp = (currentItem.jp_text || "").trim();
-      const correctRomaji = (currentItem.romaji || "").trim().toLowerCase();
-      const cleanUserJp = userInput.trim();
-      isCorrect = cleanUserJp === correctJp || cleanUserJp.toLowerCase() === correctRomaji;
+      isCorrect = matchesJapaneseAnswer(userInput, currentItem);
     }
     if (isCorrect) {
       setFeedback("correct");
+      playSound();
       const nextScore = score + 1;
       setScore(nextScore);
       setTimeout(() => {
         setUserInput("");
         setFeedback(null);
         if (nextScore >= targetScore) {
-          setIsFinished(true);
-          onCompleted();
+          finishDrill();
         } else {
           const nextIdx = currentIndex + 1;
           if (nextIdx % shuffledVocab.length === 0) {
@@ -49644,36 +49924,16 @@ var EduVocabularyDrillModal = ({
     recognition.maxAlternatives = 1;
     recognition.onstart = () => {
       setIsListening(true);
+      setPendingSpoken(null);
+      setFeedback(null);
       setSpeechStatusMessage("Listening... Please speak clearly in Japanese.");
     };
     recognition.onresult = (event) => {
-      const speechResult = event.results[0][0].transcript;
-      const targetJp = currentItem.jp_text.trim();
-      if (speechResult.includes(targetJp) || targetJp.includes(speechResult)) {
-        setFeedback("correct");
-        setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
-        const nextScore = score + 1;
-        setScore(nextScore);
-        setTimeout(() => {
-          setFeedback(null);
-          setSpeechStatusMessage("");
-          setIsListening(false);
-          if (nextScore >= targetScore) {
-            setIsFinished(true);
-            onCompleted();
-          } else {
-            setCurrentIndex((prev) => prev + 1);
-          }
-        }, 1200);
-      } else {
-        setFeedback("incorrect");
-        setSpeechStatusMessage(`Recognised: "${speechResult}" - Try again!`);
-        setTimeout(() => {
-          setFeedback(null);
-          setSpeechStatusMessage("");
-          setIsListening(false);
-        }, 1500);
-      }
+      const speechResult = String(event.results[0][0].transcript || "").trim();
+      if (!speechResult)
+        return;
+      setPendingSpoken(speechResult);
+      setSpeechStatusMessage("Is this what you said? If not, record again. If yes, press Check.");
     };
     recognition.onerror = () => {
       setIsListening(false);
@@ -49686,6 +49946,36 @@ var EduVocabularyDrillModal = ({
       recognition.start();
     } catch (err) {
       setIsListening(false);
+    }
+  };
+  const confirmSpoken = () => {
+    const speechResult = pendingSpoken;
+    if (!speechResult || feedback !== null)
+      return;
+    setPendingSpoken(null);
+    const targets = [currentItem.jp_text, katakanaToHiragana(currentItem.jp_kana || "")].map((t2) => (t2 || "").trim()).filter(Boolean);
+    const spokenHira = katakanaToHiragana(speechResult);
+    if (matchesJapaneseAnswer(speechResult, currentItem) || targets.some((t2) => speechResult.includes(t2) || spokenHira.includes(t2) || t2.includes(speechResult))) {
+      setFeedback("correct");
+      playSound();
+      setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
+      const nextScore = score + 1;
+      setScore(nextScore);
+      setTimeout(() => {
+        setFeedback(null);
+        setSpeechStatusMessage("");
+        if (nextScore >= targetScore) {
+          finishDrill();
+        } else {
+          setCurrentIndex((prev) => prev + 1);
+        }
+      }, 1200);
+    } else {
+      setFeedback("incorrect");
+      setSpeechStatusMessage(`Recognised: "${speechResult}" - Try again!`);
+      setTimeout(() => {
+        setFeedback(null);
+      }, 1500);
     }
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full p-6 sm:p-10 shadow-2xl space-y-6 transition-all duration-300 ${isFullscreen ? "max-w-full min-h-screen sm:min-h-[90vh] flex flex-col justify-between rounded-none sm:rounded-3xl" : "max-w-2xl"}`, children: [
@@ -49831,141 +50121,69 @@ var EduVocabularyDrillModal = ({
         feedback === "correct" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm font-bold text-emerald-600 dark:text-emerald-400 animate-pulse", children: "\u2728 Correct! Great job!" }),
         feedback === "incorrect" && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-sm font-bold text-rose-600 dark:text-rose-400", children: [
           "\u274C Incorrect. Correct answer: ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "underline", children: currentMode === "en_to_jp" ? currentItem.jp_text : currentItem.english_text })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "underline", children: currentMode === "en_to_jp" ? currentItem.jp_kana && katakanaToHiragana(currentItem.jp_kana) !== currentItem.jp_text ? `${currentItem.jp_text}\uFF08${katakanaToHiragana(currentItem.jp_kana)}\uFF09` : currentItem.jp_text : currentItem.english_text })
         ] })
       ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-4 py-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        pendingSpoken === null ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             type: "button",
             onClick: startSpeechRecognition,
-            disabled: isListening,
+            disabled: isListening || feedback === "correct",
             className: `w-full py-5 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-3 ${isListening ? "bg-amber-500 animate-pulse" : "bg-orange-500 hover:bg-orange-600 active:scale-95"}`,
             children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl", children: "\u{1F3A4}" }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isListening ? "Listening... Speak now!" : "Click to Speak in Japanese" })
             ]
           }
+        ) : (
+          // 判定前の確認：意図と違う文字なら判定せずに録音し直せる
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 dark:text-slate-400 block font-bold mb-1", children: "Your Spoken Text (\u8A8D\u8B58\u3055\u308C\u305F\u3042\u306A\u305F\u306E\u767A\u97F3):" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100", children: [
+                '"',
+                pendingSpoken,
+                '"'
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "button",
+                {
+                  type: "button",
+                  onClick: startSpeechRecognition,
+                  disabled: isListening,
+                  className: "py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F501} Record Again" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold opacity-75", children: "Not what I said" })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "button",
+                {
+                  type: "button",
+                  onClick: confirmSpoken,
+                  className: "py-3 px-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow flex flex-col items-center justify-center cursor-pointer active:scale-95",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2705 Check" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold opacity-90", children: "This is what I said" })
+                  ]
+                }
+              )
+            ] })
+          ] })
         ),
         speechStatusMessage && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-sm font-bold ${feedback === "correct" ? "text-emerald-600" : "text-slate-600 dark:text-slate-400"}`, children: speechStatusMessage })
       ] })
-    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner", children: "\u{1F3C6}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2 max-w-md", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100", children: "Vocabulary Drill Mastered!" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 dark:text-slate-400", children: "You successfully completed all required drills. The Vocabulary Task is now marked as completed in your lesson progress!" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: onClose,
-          className: "py-4 px-10 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-base transition shadow-md cursor-pointer",
-          children: "Return to Lesson"
-        }
-      )
-    ] })
+    ] }) : (
+      // ほかのタスクと共通の完了画面
+      /* @__PURE__ */ jsxRuntimeExports.jsx(EduFinishedView, { taskName: "vocabulary drills", onClose })
+    )
   ] }) });
 };
-var BUCKET = "sound-effect-audio";
-var DEFAULT_FILE = "correct-answer-1.mp3";
-var COMPLETE_FILE = "completed-sound-2.mp3";
-function getSupabaseUrl() {
-  const fromVite = "https://ybquwzoreecxxbewjpdn.supabase.co";
-  const winEnv = typeof window !== "undefined" ? window.ENV : void 0;
-  (winEnv == null ? void 0 : winEnv.SUPABASE_URL) || (winEnv == null ? void 0 : winEnv.VITE_SUPABASE_URL);
-  const url = fromVite;
-  return url.replace(/\/$/, "");
-}
-function buildSoundUrl(fileName) {
-  const base = getSupabaseUrl();
-  return base ? `${base}/storage/v1/object/public/${BUCKET}/${fileName}` : "";
-}
-var sharedAudioCtx = null;
-function getAudioContext() {
-  if (typeof window === "undefined")
-    return null;
-  if (!sharedAudioCtx) {
-    const Ctor = window.AudioContext || window.webkitAudioContext;
-    if (!Ctor)
-      return null;
-    sharedAudioCtx = new Ctor();
-  }
-  return sharedAudioCtx;
-}
-function useSoundEffect(customSoundUrl) {
-  const audioCacheRef = reactExports.useRef({});
-  const playUrl = reactExports.useCallback((targetUrl) => {
-    if (!targetUrl) {
-      console.error(
-        "[useSoundEffect] Supabase URL is not set. Set VITE_SUPABASE_URL (or window.ENV.SUPABASE_URL) and redeploy."
-      );
-      playFallbackBeep();
-      return;
-    }
-    try {
-      let audio = audioCacheRef.current[targetUrl];
-      if (!audio) {
-        audio = new Audio(targetUrl);
-        audio.preload = "auto";
-        audioCacheRef.current[targetUrl] = audio;
-      }
-      audio.currentTime = 0;
-      audio.play().catch((e) => {
-        console.warn("[useSoundEffect] audio.play failed, falling back to beep:", targetUrl, e);
-        playFallbackBeep();
-      });
-    } catch (e) {
-      console.error("[useSoundEffect] sound effect error:", e);
-      playFallbackBeep();
-    }
-  }, []);
-  const playSound = reactExports.useCallback(
-    (overrideUrl) => {
-      const override = typeof overrideUrl === "string" ? overrideUrl : void 0;
-      const targetUrl = override || customSoundUrl || buildSoundUrl(DEFAULT_FILE);
-      playUrl(targetUrl);
-    },
-    [customSoundUrl, playUrl]
-  );
-  const playCompleteSound = reactExports.useCallback(() => {
-    playUrl(buildSoundUrl(COMPLETE_FILE));
-  }, [playUrl]);
-  return { playSound, playCompleteSound };
-}
-function playFallbackBeep() {
-  try {
-    const audioCtx = getAudioContext();
-    if (!audioCtx)
-      return;
-    if (audioCtx.state === "suspended") {
-      void audioCtx.resume();
-    }
-    const now = audioCtx.currentTime;
-    const osc1 = audioCtx.createOscillator();
-    const gain1 = audioCtx.createGain();
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(523.25, now);
-    gain1.gain.setValueAtTime(0.1, now);
-    gain1.gain.exponentialRampToValueAtTime(1e-3, now + 0.15);
-    osc1.connect(gain1);
-    gain1.connect(audioCtx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.15);
-    const osc2 = audioCtx.createOscillator();
-    const gain2 = audioCtx.createGain();
-    osc2.type = "sine";
-    osc2.frequency.setValueAtTime(659.25, now + 0.1);
-    gain2.gain.setValueAtTime(0.1, now + 0.1);
-    gain2.gain.exponentialRampToValueAtTime(1e-3, now + 0.35);
-    osc2.connect(gain2);
-    gain2.connect(audioCtx.destination);
-    osc2.start(now + 0.1);
-    osc2.stop(now + 0.35);
-  } catch (e) {
-    console.error("[useSoundEffect] fallback sound error:", e);
-  }
-}
 var AUDIO_BUCKET = "dialogue-audio";
 var QUESTIONS_PER_TASK = 5;
 var MAX_ATTEMPTS_BEFORE_REVEAL = 2;
@@ -50272,10 +50490,10 @@ var EduListeningTaskModal = ({
         return;
       }
       const path = playlist[index];
-      const audio = new Audio(getAudioUrl(path));
-      audioRef.current = audio;
+      const audio2 = new Audio(getAudioUrl(path));
+      audioRef.current = audio2;
       setActiveSpeaker(path === currentQuestion.question_audio_path ? "A" : "B");
-      audio.onended = () => {
+      audio2.onended = () => {
         if (isStale())
           return;
         setActiveSpeaker(null);
@@ -50284,14 +50502,14 @@ var EduListeningTaskModal = ({
           playAt(index + 1);
         }, GAP_BETWEEN_AUDIO_MS);
       };
-      audio.onerror = () => {
+      audio2.onerror = () => {
         if (isStale())
           return;
         setIsPlaying(false);
         setActiveSpeaker(null);
         setAudioError(`The audio file "${path}" could not be loaded.`);
       };
-      audio.play().catch((err) => {
+      audio2.play().catch((err) => {
         console.warn("Audio playback failed:", err);
         if (!isStale()) {
           setIsPlaying(false);
@@ -50493,99 +50711,6 @@ var EduListeningTaskModal = ({
     )
   ] }) });
 };
-var normalizeJapanese = (str) => {
-  if (!str)
-    return "";
-  let s2 = str.trim().toLowerCase();
-  s2 = s2.replace(/[?.!,。、・\s]+/g, "");
-  const map = {
-    // 疑問詞の正確な表記ゆれ（「何に」などの誤認は含めない）
-    "\u4F55\u4EBA": "\u306A\u3093\u306B\u3093",
-    "\u306A\u3093\u4EBA": "\u306A\u3093\u306B\u3093",
-    "\u4F55": "\u306A\u3093",
-    // 数字・漢数字
-    "\uFF11": "1",
-    "\u4E00": "1",
-    "\u3072\u3068": "1",
-    "\u3044\u3061": "1",
-    "\uFF12": "2",
-    "\u4E8C": "2",
-    "\u3075\u305F": "2",
-    "\u306B": "2",
-    "\uFF13": "3",
-    "\u4E09": "3",
-    "\u307F\u3063": "3",
-    "\u3055\u3093": "3",
-    "\uFF14": "4",
-    "\u56DB": "4",
-    "\u3088\u3093": "4",
-    "\u3057": "4",
-    "\u3088": "4",
-    "\uFF15": "5",
-    "\u4E94": "5",
-    "\u3044\u3064": "5",
-    "\u3054": "5",
-    "\uFF16": "6",
-    "\u516D": "6",
-    "\u3080\u3063": "6",
-    "\u308D\u304F": "6",
-    "\uFF17": "7",
-    "\u4E03": "7",
-    "\u306A\u306A": "7",
-    "\u3057\u3061": "7",
-    "\uFF18": "8",
-    "\u516B": "8",
-    "\u3084\u3063": "8",
-    "\u306F\u3061": "8",
-    "\uFF19": "9",
-    "\u4E5D": "9",
-    "\u3053\u3053\u306E": "9",
-    "\u304D\u3085\u3046": "9",
-    "\u304F": "9",
-    "\uFF11\uFF10": "10",
-    "\u5341": "10",
-    "\u3068\u304A": "10",
-    "\u3058\u3085\u3046": "10",
-    // カウンター
-    "\u4EBA": "\u306B\u3093",
-    "\u30CB\u30F3": "\u306B\u3093",
-    "\u5339": "\u3072\u304D",
-    "\u624D": "\u3055\u3044",
-    "\u6B73": "\u3055\u3044",
-    "\u672C": "\u307B\u3093",
-    "\u500B": "\u3053"
-  };
-  for (const [key, val] of Object.entries(map)) {
-    s2 = s2.split(key).join(val);
-  }
-  s2 = s2.replace(/ひとり/g, "1\u4EBA");
-  s2 = s2.replace(/ふたり/g, "2\u4EBA");
-  return s2;
-};
-var normalizeEnglish = (str) => {
-  if (!str)
-    return "";
-  let s2 = str.trim().toLowerCase();
-  s2 = s2.replace(/[?.!,]+$/, "");
-  s2 = s2.replace(/[\s\-_]+/g, " ");
-  const numMap = {
-    "one": "1",
-    "two": "2",
-    "three": "3",
-    "four": "4",
-    "five": "5",
-    "six": "6",
-    "seven": "7",
-    "eight": "8",
-    "nine": "9",
-    "ten": "10"
-  };
-  for (const [word, digit] of Object.entries(numMap)) {
-    const regex = new RegExp(`\\b${word}\\b`, "g");
-    s2 = s2.replace(regex, digit);
-  }
-  return s2.trim();
-};
 function shuffleArray(array) {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
@@ -50641,6 +50766,12 @@ var EduReadingDrillModal = ({
   const [speechVerified, setSpeechVerified] = reactExports.useState(false);
   const [userInput, setUserInput] = reactExports.useState("");
   const [userSpokenText, setUserSpokenText] = reactExports.useState("");
+  const [awaitingConfirm, setAwaitingConfirm] = reactExports.useState(false);
+  const awaitingConfirmRef = reactExports.useRef(false);
+  const setAwaiting = (v2) => {
+    awaitingConfirmRef.current = v2;
+    setAwaitingConfirm(v2);
+  };
   const [feedback, setFeedback] = reactExports.useState(null);
   const [score, setScore] = reactExports.useState(0);
   const [isFinished, setIsFinished] = reactExports.useState(false);
@@ -50664,6 +50795,9 @@ var EduReadingDrillModal = ({
   const nextTimerRef = reactExports.useRef(null);
   const feedbackTimerRef = reactExports.useRef(null);
   const focusTimerRef = reactExports.useRef(null);
+  const { playSound, playCompleteSound } = useSoundEffect();
+  const playCompleteSoundRef = reactExports.useRef(playCompleteSound);
+  playCompleteSoundRef.current = playCompleteSound;
   onCompletedRef.current = onCompleted;
   itemsRef.current = items;
   isFinishedRef.current = isFinished;
@@ -50683,6 +50817,9 @@ var EduReadingDrillModal = ({
         ref.current = null;
       }
     });
+  };
+  const resetSpokenEdit = () => {
+    setAwaiting(false);
   };
   const stopAllMedia = () => {
     if (activeAudioRef.current) {
@@ -50721,6 +50858,7 @@ var EduReadingDrillModal = ({
     setUserInput("");
     setUserSpokenText("");
     spokenTextRef.current = "";
+    resetSpokenEdit();
     setFeedback(null);
     setIsFinished(false);
     setIsListening(false);
@@ -50741,6 +50879,7 @@ var EduReadingDrillModal = ({
   reactExports.useEffect(() => {
     if (isFinished && !completedRef.current) {
       completedRef.current = true;
+      playCompleteSoundRef.current();
       onCompletedRef.current();
     }
   }, [isFinished]);
@@ -50763,12 +50902,20 @@ var EduReadingDrillModal = ({
       window.speechSynthesis.cancel();
     }
     if ((currentItem == null ? void 0 : currentItem.audio_url) && currentItem.audio_url.trim() !== "") {
-      const audio = new Audio(currentItem.audio_url);
-      activeAudioRef.current = audio;
-      audio.play().catch((err) => {
-        console.warn("Audio playback failed:", err);
+      const item = currentItem;
+      const audio2 = new Audio(item.audio_url);
+      activeAudioRef.current = audio2;
+      let fellBack = false;
+      const fallback = (reason) => {
+        if (fellBack || activeAudioRef.current !== audio2)
+          return;
+        fellBack = true;
+        console.warn(`[EduReadingDrill] Audio file could not be played, using speech synthesis instead: ${item.audio_url}`, reason);
         activeAudioRef.current = null;
-      });
+        playFallbackSpeech(item.jp_text);
+      };
+      audio2.onerror = () => fallback(audio2.error);
+      audio2.play().catch(fallback);
       return;
     }
     playFallbackSpeech(currentItem == null ? void 0 : currentItem.jp_text);
@@ -50788,6 +50935,21 @@ var EduReadingDrillModal = ({
       setSpeechStatusMessage("No speech detected. Please click 'Start Recording' and try speaking.");
       return;
     }
+    setAwaiting(true);
+    setSpeechStatusMessage(
+      "Is this what you said? If not, press 'Record Again' (Space). If yes, press 'Check' (Enter)."
+    );
+  }, []);
+  const confirmSpokenText = reactExports.useCallback(() => {
+    if (!awaitingConfirmRef.current || speechVerifiedRef.current)
+      return;
+    const spoken = spokenTextRef.current.trim();
+    setAwaiting(false);
+    if (!spoken)
+      return;
+    verifySpokenText(spoken);
+  }, []);
+  const verifySpokenText = (spoken) => {
     const target = currentItemRef.current.jp_text;
     const targetClean = normalizeJapanese(target);
     const spokenClean = normalizeJapanese(spoken);
@@ -50804,7 +50966,7 @@ var EduReadingDrillModal = ({
     } else {
       setSpeechStatusMessage(`Heard: "${spoken}" (Target: ${target}). Try recording again!`);
     }
-  }, []);
+  };
   const startRecording = reactExports.useCallback(() => {
     if (speechVerifiedRef.current || isListeningRef.current)
       return;
@@ -50839,6 +51001,7 @@ var EduReadingDrillModal = ({
         isListeningRef.current = true;
         setIsListening(true);
         setUserSpokenText("");
+        setAwaiting(false);
         setSpeechStatusMessage("\u{1F534} Recording... Speak clearly, or press Spacebar to Stop & Verify.");
       };
       recognition.onresult = (event) => {
@@ -50922,6 +51085,18 @@ var EduReadingDrillModal = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, isListening, speechVerified, isFinished, startRecording, stopRecordingAndVerify]);
+  reactExports.useEffect(() => {
+    if (!isOpen || !awaitingConfirm)
+      return;
+    const handleKeyDown = (e) => {
+      if (e.key !== "Enter" || e.repeat)
+        return;
+      e.preventDefault();
+      confirmSpokenText();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, awaitingConfirm, confirmSpokenText]);
   const handleTypingSubmit = (e) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null)
@@ -50930,6 +51105,7 @@ var EduReadingDrillModal = ({
     const correctEn = normalizeEnglish(currentItem.english_text || "");
     if (isStrictMatch$1(cleanInput, correctEn, EN_SIMILARITY_THRESHOLD)) {
       setFeedback("correct");
+      playSound();
       setScore((prev) => prev + 1);
       if (nextTimerRef.current)
         clearTimeout(nextTimerRef.current);
@@ -50938,6 +51114,7 @@ var EduReadingDrillModal = ({
         setUserInput("");
         setUserSpokenText("");
         spokenTextRef.current = "";
+        resetSpokenEdit();
         setFeedback(null);
         setSpeechVerified(false);
         speechVerifiedRef.current = false;
@@ -51076,7 +51253,33 @@ var EduReadingDrillModal = ({
                   className: `text-xs sm:text-sm font-bold text-center ${speechVerified ? "text-emerald-600" : "text-slate-600 dark:text-slate-400"}`,
                   children: speechStatusMessage
                 }
-              )
+              ),
+              awaitingConfirm && !speechVerified && !isListening && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: startRecording,
+                    className: "py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F501} Record Again (Space)" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold opacity-75", children: "Not what I said" })
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: confirmSpokenText,
+                    className: "py-3 px-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm transition shadow flex flex-col items-center justify-center cursor-pointer active:scale-95",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2705 Check (Enter)" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold opacity-90", children: "This is what I said" })
+                    ]
+                  }
+                )
+              ] })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleTypingSubmit, className: "space-y-3", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -51111,23 +51314,10 @@ var EduReadingDrillModal = ({
               ] })
             ] })
           ] })
-        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-6 py-12 flex-1 flex flex-col justify-center items-center animate-fade-in", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-24 h-24 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-3xl flex items-center justify-center text-5xl font-black shadow-inner", children: "\u{1F389}" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 max-w-md", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight", children: "Congratulations!" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400", children: "You have successfully mastered all reading and comprehension items!" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: "Fantastic effort. Your progress has been saved and this task is now marked as complete." })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: onClose,
-              className: "py-4 px-12 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow-lg hover:shadow-orange-500/25 active:scale-95 cursor-pointer",
-              children: "Complete & Return to Lesson \u2794"
-            }
-          )
-        ] })
+        ] }) : (
+          // ほかのタスクと共通の完了画面
+          /* @__PURE__ */ jsxRuntimeExports.jsx(EduFinishedView, { taskName: "reading and comprehension items", onClose })
+        )
       ]
     }
   ) });
@@ -51317,6 +51507,12 @@ function useEduSpeakingDrill({
   const [isListening, setIsListening] = reactExports.useState(false);
   const [spokenText, setSpokenText] = reactExports.useState("");
   const [statusMessage, setStatusMessage] = reactExports.useState("");
+  const [awaitingConfirm, setAwaitingConfirm] = reactExports.useState(false);
+  const awaitingConfirmRef = reactExports.useRef(false);
+  const setAwaiting = reactExports.useCallback((v2) => {
+    awaitingConfirmRef.current = v2;
+    setAwaitingConfirm(v2);
+  }, []);
   const [attempts, setAttempts] = reactExports.useState(0);
   const [result, setResult] = reactExports.useState(null);
   const [shownModel, setShownModel] = reactExports.useState(null);
@@ -51405,14 +51601,14 @@ function useEduSpeakingDrill({
         activeAudioRef.current = null;
         speak();
       };
-      const audio = new Audio(audioUrl);
-      activeAudioRef.current = audio;
-      audio.onended = () => {
+      const audio2 = new Audio(audioUrl);
+      activeAudioRef.current = audio2;
+      audio2.onended = () => {
         activeAudioRef.current = null;
         done();
       };
-      audio.onerror = fallback;
-      audio.play().catch(fallback);
+      audio2.onerror = fallback;
+      audio2.play().catch(fallback);
       return;
     }
     speak();
@@ -51442,7 +51638,8 @@ function useEduSpeakingDrill({
     resultRef.current = null;
     setShownModel(null);
     finalizedRef.current = false;
-  }, []);
+    setAwaiting(false);
+  }, [setAwaiting]);
   const finishSession = reactExports.useCallback(() => {
     setStatusMessage("Session completed! Saying goodbye...");
     isAIPlayingRef.current = true;
@@ -51635,6 +51832,10 @@ function useEduSpeakingDrill({
       setStatusMessage("No speech detected.");
       return;
     }
+    setAwaiting(true);
+    setStatusMessage("Is this what you said? If not, press 'Record Again' (Space). If yes, press 'Check' (Enter).");
+  }, [setAwaiting]);
+  const judgeSpoken = reactExports.useCallback((spoken) => {
     const round = currentRoundRef.current;
     if (round && round.mode === "ask" && askStepRef.current === "question") {
       const ok2 = isStrictMatch(normQuestion(spoken), normQuestion(round.dialogue.prompt_text), JP_SIMILARITY_THRESHOLD);
@@ -51681,6 +51882,15 @@ function useEduSpeakingDrill({
       setStatusMessage(`Heard: "${spoken}" \u2014 try again!`);
     }
   }, [goNext, startReply]);
+  const confirmSpoken = reactExports.useCallback(() => {
+    if (!awaitingConfirmRef.current || resultRef.current || isListeningRef.current)
+      return;
+    setAwaiting(false);
+    const spoken = spokenTextRef.current.trim();
+    if (!spoken)
+      return;
+    judgeSpoken(spoken);
+  }, [judgeSpoken, setAwaiting]);
   const startRecording = reactExports.useCallback(() => {
     var _a;
     if (isListeningRef.current || isAIPlayingRef.current || resultRef.current)
@@ -51717,6 +51927,7 @@ function useEduSpeakingDrill({
         isListeningRef.current = true;
         setIsListening(true);
         setSpokenText("");
+        setAwaiting(false);
         setStatusMessage("\u{1F534} Recording... (Spacebar to Stop)");
       };
       recognition.onresult = (event) => {
@@ -51753,7 +51964,7 @@ function useEduSpeakingDrill({
       setIsListening(false);
       setStatusMessage("Could not start recording. Please check microphone permissions.");
     }
-  }, [finalizeVerification]);
+  }, [finalizeVerification, setAwaiting]);
   const stopRecordingAndVerify = reactExports.useCallback(() => {
     if (!isListeningRef.current)
       return;
@@ -51840,6 +52051,8 @@ function useEduSpeakingDrill({
     isListening,
     spokenText,
     statusMessage,
+    awaitingConfirm,
+    confirmSpoken,
     attempts,
     result,
     shownModel,
@@ -52171,6 +52384,12 @@ var EduSpeakingTaskModal = ({
         }
         return;
       }
+      if (e.key === "Enter" && d.awaitingConfirm && !d.isListening && !isTextField(document.activeElement)) {
+        e.preventDefault();
+        if (!e.repeat)
+          d.confirmSpoken();
+        return;
+      }
       if (e.code === "KeyR" && d.isListening && !isTextField(document.activeElement)) {
         e.preventDefault();
         if (!e.repeat)
@@ -52307,6 +52526,32 @@ var EduSpeakingTaskModal = ({
               ]
             }
           ),
+          drill.awaitingConfirm && !drill.isListening && !drill.result && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: drill.startRecording,
+                className: "py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-indigo-500 hover:text-indigo-600 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F501} Record Again (Space)" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold opacity-75", children: "Not what I said" })
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: drill.confirmSpoken,
+                className: "py-3 px-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm transition shadow flex flex-col items-center justify-center cursor-pointer active:scale-95",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2705 Check (Enter)" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold opacity-90", children: "This is what I said" })
+                ]
+              }
+            )
+          ] }),
           drill.result === "correct" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-center space-y-0.5", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-emerald-700 dark:text-emerald-400", children: "\u2728 Correct!" }),
             drill.shownModel && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
@@ -53234,6 +53479,773 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
     /* @__PURE__ */ jsxRuntimeExports.jsx(GenkoyoshiModal, { isOpen: isGuideOpen, onClose: () => setIsGuideOpen(false) })
   ] });
 };
+var OPTION_LABELS = ["A", "B", "C", "D", "E", "F"];
+function shuffle$1(array) {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+function subtitleBreakpoints(lines) {
+  const total = lines.reduce((sum, l2) => sum + l2.length, 0) || 1;
+  let acc = 0;
+  return lines.map((l2) => {
+    acc += l2.length;
+    return acc / total;
+  });
+}
+var EduCultureTaskModal = ({
+  isOpen,
+  onClose,
+  onCompleted,
+  task
+}) => {
+  var _a;
+  const { cards, questions } = task;
+  const [phase, setPhase] = reactExports.useState("intro");
+  const [cardIndex, setCardIndex] = reactExports.useState(0);
+  const [isPlaying, setIsPlaying] = reactExports.useState(false);
+  const [subtitleIndex, setSubtitleIndex] = reactExports.useState(0);
+  const [heardCards, setHeardCards] = reactExports.useState([]);
+  const [showTranscript, setShowTranscript] = reactExports.useState(false);
+  const [usingSpeechFallback, setUsingSpeechFallback] = reactExports.useState(false);
+  const audioRef = reactExports.useRef(null);
+  const playTokenRef = reactExports.useRef(0);
+  const [questionIndex, setQuestionIndex] = reactExports.useState(0);
+  const [optionOrders, setOptionOrders] = reactExports.useState([]);
+  const [wrongPicks, setWrongPicks] = reactExports.useState([]);
+  const [solved, setSolved] = reactExports.useState(false);
+  const [firstTryCorrect, setFirstTryCorrect] = reactExports.useState(0);
+  const [reviewOpen, setReviewOpen] = reactExports.useState(false);
+  const [shakeOption, setShakeOption] = reactExports.useState(null);
+  const [activePos, setActivePos] = reactExports.useState(null);
+  const { playSound, playCompleteSound } = useSoundEffect();
+  const completedRef = reactExports.useRef(false);
+  const stopNarration = reactExports.useCallback(() => {
+    playTokenRef.current += 1;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
+  }, []);
+  reactExports.useEffect(() => {
+    if (!isOpen) {
+      stopNarration();
+      return;
+    }
+    setPhase("intro");
+    setCardIndex(0);
+    setSubtitleIndex(0);
+    setHeardCards(cards.map(() => false));
+    setShowTranscript(false);
+    setUsingSpeechFallback(false);
+    setQuestionIndex(0);
+    setOptionOrders(questions.map((q2) => shuffle$1(q2.options.map((_, i) => i))));
+    setWrongPicks([]);
+    setSolved(false);
+    setFirstTryCorrect(0);
+    setReviewOpen(false);
+    setActivePos(null);
+    completedRef.current = false;
+  }, [isOpen]);
+  reactExports.useEffect(() => stopNarration, [stopNarration]);
+  const markHeard = (index) => setHeardCards((prev) => prev.map((v2, i) => i === index ? true : v2));
+  const speakWithSynthesis = reactExports.useCallback((lines, token, onDone) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setIsPlaying(false);
+      setShowTranscript(true);
+      onDone();
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const speakLine = (lineIndex) => {
+      if (token !== playTokenRef.current)
+        return;
+      if (lineIndex >= lines.length) {
+        setIsPlaying(false);
+        onDone();
+        return;
+      }
+      setSubtitleIndex(lineIndex);
+      const text = lines[lineIndex].replace(/\s*\([^)]*[぀-ヿ㐀-鿿][^)]*\)/g, "").replace(/[぀-ヿ㐀-鿿]+/g, " ").replace(/\s+/g, " ").trim();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-AU";
+      utterance.rate = 0.95;
+      utterance.onend = () => speakLine(lineIndex + 1);
+      utterance.onerror = () => speakLine(lineIndex + 1);
+      window.speechSynthesis.speak(utterance);
+    };
+    setIsPlaying(true);
+    speakLine(0);
+  }, []);
+  const playNarration = reactExports.useCallback((audioUrl, lines, onDone) => {
+    stopNarration();
+    const token = playTokenRef.current;
+    setSubtitleIndex(0);
+    if (!audioUrl) {
+      speakWithSynthesis(lines, token, onDone);
+      return;
+    }
+    const breakpoints = subtitleBreakpoints(lines);
+    const audio2 = new Audio(audioUrl);
+    audioRef.current = audio2;
+    let fellBack = false;
+    const fallback = (reason) => {
+      if (fellBack || token !== playTokenRef.current)
+        return;
+      fellBack = true;
+      console.warn(`[EduCultureTask] Narration audio could not be played, using speech synthesis instead: ${audioUrl}`, reason);
+      audioRef.current = null;
+      setUsingSpeechFallback(true);
+      speakWithSynthesis(lines, token, onDone);
+    };
+    audio2.ontimeupdate = () => {
+      if (token !== playTokenRef.current || !audio2.duration || !isFinite(audio2.duration))
+        return;
+      const ratio = audio2.currentTime / audio2.duration;
+      const next = breakpoints.findIndex((b) => ratio < b);
+      setSubtitleIndex(next === -1 ? lines.length - 1 : next);
+    };
+    audio2.onended = () => {
+      if (token !== playTokenRef.current)
+        return;
+      setIsPlaying(false);
+      setSubtitleIndex(lines.length - 1);
+      audioRef.current = null;
+      onDone();
+    };
+    audio2.onerror = () => fallback(audio2.error);
+    setIsPlaying(true);
+    audio2.play().catch((err) => {
+      if ((err == null ? void 0 : err.name) === "NotAllowedError") {
+        if (token === playTokenRef.current)
+          setIsPlaying(false);
+        return;
+      }
+      fallback(err);
+    });
+  }, [stopNarration, speakWithSynthesis]);
+  const playCard = reactExports.useCallback((index) => {
+    const card22 = cards[index];
+    if (!card22)
+      return;
+    playNarration(card22.audioUrl, card22.narration, () => markHeard(index));
+  }, [cards, playNarration]);
+  const playThink = reactExports.useCallback(() => {
+    if (!task.thinkAbout)
+      return;
+    playNarration(task.thinkAbout.audioUrl, task.thinkAbout.lines, () => {
+    });
+  }, [task.thinkAbout, playNarration]);
+  const togglePlay = () => {
+    if (isPlaying) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        stopNarration();
+      }
+      return;
+    }
+    const audio2 = audioRef.current;
+    if (audio2 && !audio2.ended && audio2.currentTime > 0) {
+      setIsPlaying(true);
+      audio2.play().catch(() => setIsPlaying(false));
+      return;
+    }
+    if (phase === "think")
+      playThink();
+    else
+      playCard(cardIndex);
+  };
+  reactExports.useEffect(() => {
+    if (!isOpen || phase !== "story")
+      return;
+    setUsingSpeechFallback(false);
+    playCard(cardIndex);
+  }, [isOpen, phase, cardIndex]);
+  reactExports.useEffect(() => {
+    if (!isOpen || phase !== "think")
+      return;
+    setUsingSpeechFallback(false);
+    playThink();
+  }, [isOpen, phase]);
+  const goToCard = (index) => {
+    stopNarration();
+    setShowTranscript(false);
+    setCardIndex(index);
+  };
+  const nextFromStory = () => {
+    if (cardIndex < cards.length - 1) {
+      goToCard(cardIndex + 1);
+    } else {
+      stopNarration();
+      setPhase(task.thinkAbout ? "think" : "quiz");
+    }
+  };
+  const currentQuestion = questions[questionIndex];
+  const currentOrder = optionOrders[questionIndex] ?? (currentQuestion == null ? void 0 : currentQuestion.options.map((_, i) => i)) ?? [];
+  const finishTask = reactExports.useCallback(() => {
+    setPhase("finished");
+    if (completedRef.current)
+      return;
+    completedRef.current = true;
+    playCompleteSound();
+    onCompleted();
+  }, [playCompleteSound, onCompleted]);
+  const chooseOption = (originalIndex) => {
+    if (!currentQuestion || solved || wrongPicks.includes(originalIndex))
+      return;
+    if (originalIndex === currentQuestion.answerIndex) {
+      setSolved(true);
+      setReviewOpen(false);
+      playSound();
+      if (wrongPicks.length === 0)
+        setFirstTryCorrect((n2) => n2 + 1);
+    } else {
+      setWrongPicks((prev) => [...prev, originalIndex]);
+      setShakeOption(originalIndex);
+      setTimeout(() => setShakeOption(null), 500);
+    }
+  };
+  const nextQuestion = () => {
+    if (!solved)
+      return;
+    if (questionIndex >= questions.length - 1) {
+      finishTask();
+      return;
+    }
+    setQuestionIndex((i) => i + 1);
+    setWrongPicks([]);
+    setSolved(false);
+    setReviewOpen(false);
+    setActivePos(null);
+  };
+  const moveActive = (key) => {
+    const n2 = currentOrder.length;
+    if (n2 === 0)
+      return;
+    const cols = typeof window !== "undefined" && window.matchMedia("(min-width: 640px)").matches ? 2 : 1;
+    const step = key === "ArrowLeft" ? -1 : key === "ArrowRight" ? 1 : key === "ArrowUp" ? -cols : cols;
+    const selectable = (pos2) => !wrongPicks.includes(currentOrder[pos2]);
+    if (activePos === null) {
+      const order = step > 0 ? [...Array(n2).keys()] : [...Array(n2).keys()].reverse();
+      const first = order.find(selectable);
+      if (first !== void 0)
+        setActivePos(first);
+      return;
+    }
+    let pos = activePos;
+    for (let i = 0; i < n2; i++) {
+      pos = ((pos + step) % n2 + n2) % n2;
+      if (selectable(pos)) {
+        setActivePos(pos);
+        return;
+      }
+    }
+  };
+  const keyStateRef = reactExports.useRef({ phase, solved, currentOrder, activePos, moveActive, togglePlay, nextFromStory, chooseOption, nextQuestion, heard: false });
+  keyStateRef.current = {
+    phase,
+    solved,
+    currentOrder,
+    activePos,
+    moveActive,
+    togglePlay,
+    nextFromStory,
+    chooseOption,
+    nextQuestion,
+    heard: !!heardCards[cardIndex]
+  };
+  reactExports.useEffect(() => {
+    if (!isOpen)
+      return;
+    const handleKeyDown = (e) => {
+      const el2 = document.activeElement;
+      if ((el2 == null ? void 0 : el2.tagName) === "INPUT" || (el2 == null ? void 0 : el2.tagName) === "TEXTAREA")
+        return;
+      if (e.repeat)
+        return;
+      const s2 = keyStateRef.current;
+      if (s2.phase === "story") {
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (el2 instanceof HTMLElement && el2.tagName === "BUTTON")
+            el2.blur();
+          s2.togglePlay();
+        } else if (e.key === "Enter" && s2.heard) {
+          e.preventDefault();
+          s2.nextFromStory();
+        }
+        return;
+      }
+      if (s2.phase === "think" && e.code === "Space") {
+        e.preventDefault();
+        if (el2 instanceof HTMLElement && el2.tagName === "BUTTON")
+          el2.blur();
+        s2.togglePlay();
+        return;
+      }
+      if (s2.phase === "quiz") {
+        if (e.key === "Enter" && s2.solved) {
+          e.preventDefault();
+          s2.nextQuestion();
+          return;
+        }
+        if (s2.solved)
+          return;
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+          e.preventDefault();
+          s2.moveActive(e.key);
+          return;
+        }
+        if ((e.key === "Enter" || e.code === "Space") && s2.activePos !== null) {
+          e.preventDefault();
+          if (el2 instanceof HTMLElement && el2.tagName === "BUTTON")
+            el2.blur();
+          s2.chooseOption(s2.currentOrder[s2.activePos]);
+          return;
+        }
+        const pos = OPTION_LABELS.indexOf(e.key.toUpperCase());
+        const numPos = /^[1-6]$/.test(e.key) ? Number(e.key) - 1 : -1;
+        const p2 = pos !== -1 ? pos : numPos;
+        if (p2 !== -1 && p2 < s2.currentOrder.length) {
+          e.preventDefault();
+          s2.chooseOption(s2.currentOrder[p2]);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+  const handleClose = () => {
+    stopNarration();
+    onClose();
+  };
+  const totalSteps = cards.length + questions.length;
+  const doneSteps = reactExports.useMemo(() => {
+    if (phase === "intro")
+      return 0;
+    if (phase === "story")
+      return cardIndex + (heardCards[cardIndex] ? 1 : 0);
+    if (phase === "think")
+      return cards.length;
+    if (phase === "quiz")
+      return cards.length + questionIndex + (solved ? 1 : 0);
+    return totalSteps;
+  }, [phase, cardIndex, heardCards, questionIndex, solved, cards.length, totalSteps]);
+  if (!isOpen)
+    return null;
+  const card2 = cards[cardIndex];
+  const heard = !!heardCards[cardIndex];
+  const hintCard = currentQuestion ? cards[currentQuestion.hintCard - 1] : void 0;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl p-5 sm:p-8 shadow-2xl space-y-5 my-auto", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F38E}" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Culture: ",
+            task.title
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5", children: phase === "quiz" ? `Quick Check: question ${questionIndex + 1} of ${questions.length}` : phase === "story" ? `Picture story: card ${cardIndex + 1} of ${cards.length}` : "Watch the picture story, then answer the Quick Check." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: handleClose,
+          className: "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-sm p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0",
+          children: "\u2715 Close"
+        }
+      )
+    ] }),
+    phase !== "finished" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "bg-orange-500 h-full transition-all duration-300",
+        style: { width: `${Math.min(100, doneSteps / totalSteps * 100)}%` }
+      }
+    ) }),
+    phase === "intro" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-5 py-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-5xl", children: "\u{1F4D6}" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-2xl font-black text-slate-900 dark:text-slate-100", children: task.title }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto", children: [
+          "First, watch a picture story with ",
+          cards.length,
+          " cards. Listen to the narration and read the subtitles. Then answer ",
+          questions.length,
+          " Quick Check questions."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-500", children: "\u{1F50A} Turn your sound on." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => setPhase("story"),
+          className: "py-4 px-10 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base shadow-lg transition active:scale-95 cursor-pointer",
+          children: "\u25B6 Start the picture story"
+        }
+      )
+    ] }),
+    phase === "story" && card2 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "img",
+        {
+          src: card2.imageUrl,
+          alt: card2.imageAlt,
+          className: "w-full aspect-[3/2] object-contain animate-fade-in"
+        },
+        card2.imageUrl
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h4", { className: "text-center text-base sm:text-lg font-black text-slate-900 dark:text-slate-100", children: [
+        "Card ",
+        cardIndex + 1,
+        " | ",
+        card2.title
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "min-h-[88px] px-4 py-3 rounded-2xl bg-slate-900 dark:bg-black text-center flex items-center justify-center",
+          "aria-live": "polite",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base sm:text-lg font-bold text-white leading-relaxed", children: card2.narration[subtitleIndex] })
+        }
+      ),
+      usingSpeechFallback && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-xs text-slate-500 dark:text-slate-400", children: "(The narration audio could not be loaded, so your browser is reading the text aloud.)" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-3 gap-2 sm:gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => goToCard(cardIndex - 1),
+            disabled: cardIndex === 0,
+            className: "py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer",
+            children: "\u25C0 Back"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: togglePlay,
+            className: `py-3 rounded-2xl font-black text-xs sm:text-sm text-white transition active:scale-95 cursor-pointer ${isPlaying ? "bg-amber-500" : "bg-emerald-600 hover:bg-emerald-700"}`,
+            children: isPlaying ? "\u23F8 Pause (Space)" : heard ? "\u{1F501} Play again (Space)" : "\u25B6 Play (Space)"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: nextFromStory,
+            disabled: !heard,
+            title: heard ? void 0 : "Listen to the whole card first",
+            className: "py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs sm:text-sm transition disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed cursor-pointer",
+            children: cardIndex < cards.length - 1 ? "Next \u25B6 (Enter)" : "Finish \u25B6 (Enter)"
+          }
+        )
+      ] }),
+      !heard && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-xs text-slate-500 dark:text-slate-400", children: "Listen to the whole card to unlock the Next button." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => setShowTranscript((v2) => !v2),
+          className: "text-xs font-bold text-slate-500 hover:text-orange-600 underline cursor-pointer",
+          children: showTranscript ? "Hide full text" : "\u{1F4DC} Show full text"
+        }
+      ) }),
+      showTranscript && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1.5", children: card2.narration.map((line, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "p",
+        {
+          className: `text-sm leading-relaxed ${i === subtitleIndex && isPlaying ? "font-bold text-slate-900 dark:text-slate-100" : "text-slate-600 dark:text-slate-400"}`,
+          children: line
+        },
+        i
+      )) })
+    ] }),
+    phase === "think" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-5 py-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-5xl", children: "\u{1F4AD}" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-extrabold uppercase tracking-wider text-sky-700 dark:text-sky-400", children: "Think about it (not marked)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 max-w-xl mx-auto", "aria-live": "polite", children: (_a = task.thinkAbout) == null ? void 0 : _a.lines.map((line, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "p",
+          {
+            className: `text-lg sm:text-2xl font-black leading-snug transition-colors ${isPlaying && i !== subtitleIndex ? "text-slate-400 dark:text-slate-500" : "text-slate-900 dark:text-slate-100"}`,
+            children: line
+          },
+          i
+        )) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Take a moment to think, or ask someone in your family!" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: togglePlay,
+            className: `py-2 px-5 rounded-xl font-bold text-xs sm:text-sm text-white transition active:scale-95 cursor-pointer ${isPlaying ? "bg-amber-500" : "bg-emerald-600 hover:bg-emerald-700"}`,
+            children: isPlaying ? "\u23F8 Pause (Space)" : "\u{1F501} Listen again (Space)"
+          }
+        ),
+        usingSpeechFallback && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "(The narration audio could not be loaded, so your browser is reading the text aloud.)" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              stopNarration();
+              setPhase("story");
+              setCardIndex(0);
+            },
+            className: "py-3 px-6 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm transition hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer",
+            children: "\u25C0 Watch the story again"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              stopNarration();
+              setPhase("quiz");
+            },
+            className: "py-3 px-8 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm shadow-lg transition active:scale-95 cursor-pointer",
+            children: "Start Quick Check \u25B6"
+          }
+        )
+      ] })
+    ] }),
+    phase === "quiz" && currentQuestion && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs font-bold text-slate-500 dark:text-slate-400 mb-1", children: [
+          "Question ",
+          questionIndex + 1
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 leading-snug", children: currentQuestion.question })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", role: "group", "aria-label": "Answer choices", children: currentOrder.map((originalIndex, pos) => {
+        const isCorrect = originalIndex === currentQuestion.answerIndex;
+        const isWrong = wrongPicks.includes(originalIndex);
+        const showCorrect = solved && isCorrect;
+        const isActive = !solved && !isWrong && activePos === pos;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              setActivePos(pos);
+              chooseOption(originalIndex);
+            },
+            disabled: solved || isWrong,
+            "aria-pressed": isActive,
+            className: `text-left p-4 rounded-2xl border-2 font-bold text-sm sm:text-base transition flex items-start gap-3 ${showCorrect ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200" : isWrong ? "border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/30 text-rose-400 dark:text-rose-500 line-through cursor-not-allowed" : solved ? "border-slate-200 dark:border-slate-700 text-slate-400 cursor-default" : isActive ? "border-orange-500 ring-4 ring-orange-200 dark:ring-orange-900/60 bg-orange-50 dark:bg-orange-950/30 text-slate-900 dark:text-slate-100 cursor-pointer" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:border-orange-500 hover:bg-orange-50/60 dark:hover:bg-orange-950/20 cursor-pointer active:scale-[0.98]"} ${shakeOption === originalIndex ? "animate-shake" : ""}`,
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "span",
+                {
+                  className: `shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black ${showCorrect ? "bg-emerald-500 text-white" : isWrong ? "bg-rose-200 dark:bg-rose-900 text-rose-600 dark:text-rose-300" : isActive ? "bg-orange-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`,
+                  children: showCorrect ? "\u2713" : isWrong ? "\u2715" : OPTION_LABELS[pos]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: currentQuestion.options[originalIndex] })
+            ]
+          },
+          originalIndex
+        );
+      }) }),
+      !solved && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-xs text-slate-500 dark:text-slate-400", children: [
+        "Click an answer, or use the arrow keys (\u2191 \u2193 \u2190 \u2192) and press Enter. You can also press",
+        " ",
+        OPTION_LABELS.slice(0, currentOrder.length).join(" / "),
+        "."
+      ] }),
+      !solved && wrongPicks.length > 0 && hintCard && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-rose-700 dark:text-rose-300", children: [
+          "\u274C Not quite. Try again! Hint: look at Card ",
+          currentQuestion.hintCard,
+          "."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setReviewOpen((v2) => !v2),
+            className: "text-xs font-bold text-rose-700 dark:text-rose-300 underline cursor-pointer",
+            children: reviewOpen ? "Hide card" : `\u{1F440} Look at Card ${currentQuestion.hintCard} again`
+          }
+        ),
+        reviewOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "img",
+            {
+              src: hintCard.imageUrl,
+              alt: hintCard.imageAlt,
+              className: "w-full max-h-64 object-contain rounded-xl bg-white dark:bg-slate-900"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: hintCard.narration.map((line, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 leading-relaxed", children: line }, i)) })
+        ] })
+      ] }),
+      solved && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-black text-emerald-700 dark:text-emerald-300", children: "\u2728 Correct!" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed", children: currentQuestion.explanation }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: nextQuestion,
+            className: "w-full py-3.5 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm shadow transition active:scale-95 cursor-pointer",
+            children: questionIndex < questions.length - 1 ? "Next question \u2794 (Enter)" : "Finish \u2794 (Enter)"
+          }
+        )
+      ] })
+    ] }),
+    phase === "finished" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      EduFinishedView,
+      {
+        taskName: "culture tasks",
+        description: `You answered ${firstTryCorrect} of ${questions.length} questions correctly on the first try. Your progress has been saved and this task is now marked as complete.`,
+        onClose: handleClose
+      }
+    )
+  ] }) });
+};
+var PICTURE_STORY_AUDIO_BASE = "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/picture-story-audio";
+var audio = (file) => `${PICTURE_STORY_AUDIO_BASE}/${file}`;
+var CULTURE_TASKS = {
+  "obento-unit-4-lesson-1": {
+    title: "Japanese Names \u2013 Then and Now",
+    cards: [
+      {
+        title: "Names tell a story",
+        imageUrl: "/images/picture-story/U4-card-1.webp",
+        imageAlt: "Parents holding up the kanji \u540D (name) next to their new baby, with a timeline from 1912 to 2025",
+        audioUrl: audio("names_01.mp3"),
+        narration: [
+          "In Japan, most names are written in kanji.",
+          "Parents choose kanji for both their sound and their meaning.",
+          "Every year, a Japanese company publishes a list of the most popular baby names.",
+          "The list goes all the way back to 1912, so we can see how names have changed over 100 years."
+        ]
+      },
+      {
+        title: "Your great-grandparents' time (1910s\u20131930s)",
+        imageUrl: "/images/picture-story/U4-card-2.webp",
+        imageAlt: "Children in kimono and a school uniform in front of a Sh\u014Dwa-era house, with the kanji \u5B50, \u5E78 and \u6E05 (Kazuko, Sachiko, Kiyoshi)",
+        audioUrl: audio("names_02.mp3"),
+        narration: [
+          `Many girls' names ended in -ko (\u5B50), which means "child".`,
+          "Two of the most popular were Kazuko and Sachiko (\u5E78 = happiness).",
+          "Kazuko became very popular after 1926, when a new era called Sh\u014Dwa (\u662D\u548C) began.",
+          "Parents borrowed the kanji \u548C (peace) from the era's name.",
+          "Popular boys' names included Kiyoshi and Shigeru."
+        ]
+      },
+      {
+        title: "Your parents' time (1980s)",
+        imageUrl: "/images/picture-story/U4-card-3.webp",
+        imageAlt: "Two children in a 1980s room with a cassette player and an old TV, under a poster of the kanji \u611B (love) and a No.1 1983 badge",
+        audioUrl: audio("names_03.mp3"),
+        narration: [
+          "Names ending in -ko slowly became less common.",
+          `In 1983, Ai (\u611B = love) became the No.1 girls' name, and the "-ko era" came to an end.`,
+          "Popular names in the 1980s included Mai for girls and Kenta for boys."
+        ]
+      },
+      {
+        title: "Today",
+        imageUrl: "/images/picture-story/U4-card-4.webp",
+        imageAlt: "Banners with the kanji \u6E4A (harbour), \u7FE0 (jade green), \u7D50 (to connect) and \u7FD4 (to soar) above a baseball field by a harbour",
+        audioUrl: audio("names_04.mp3"),
+        narration: [
+          "Short, one-kanji names that come from nature are popular now.",
+          "In 2025, the top names were Minato (\u6E4A = harbour) for boys and Sui (\u7FE0 = jade green) for girls.",
+          "Big events also shape names:",
+          "After the 2011 earthquake, the kanji \u7D50 (to connect) became popular.",
+          "That year, the No.1 girls' name was Yua (\u7D50\u611B), which uses this kanji.",
+          "Since baseball star Shohei Ohtani won MVP in 2021, \u7FD4 (to soar) has been the most popular kanji in boys' names."
+        ]
+      }
+    ],
+    thinkAbout: {
+      lines: [
+        "What names were popular in your country in the past?",
+        "How are they different from popular names today?"
+      ],
+      audioUrl: audio("names_05.mp3")
+    },
+    questions: [
+      {
+        question: "What does the name ending -ko (\u5B50) mean?",
+        options: ["flower", "child", "beautiful", "sea"],
+        answerIndex: 1,
+        explanation: `\u5B50 (-ko) means "child". Many girls' names ended in -ko in your great-grandparents' time.`,
+        hintCard: 2
+      },
+      {
+        question: "Why did the name Kazuko become popular after 1926?",
+        options: [
+          "A famous singer had that name",
+          "A new era, Sh\u014Dwa, began, and \u548C comes from its name",
+          "It was the Emperor's name",
+          "It was easy to write"
+        ],
+        answerIndex: 1,
+        explanation: "The Sh\u014Dwa (\u662D\u548C) era began in 1926, and parents borrowed the kanji \u548C (peace) from its name.",
+        hintCard: 2
+      },
+      {
+        question: "Which name would most likely belong to a great-grandmother?",
+        options: ["Sui", "Yua", "Sachiko", "Ai"],
+        answerIndex: 2,
+        explanation: "Sachiko ends in -ko and was one of the most popular names in the 1910s\u20131930s.",
+        hintCard: 2
+      },
+      {
+        question: `Which girls' name became No.1 in 1983 and ended the "-ko era"?`,
+        options: ["Kazuko", "Ai", "Mai", "Sui"],
+        answerIndex: 1,
+        explanation: "In 1983, Ai (\u611B = love) became the No.1 girls' name.",
+        hintCard: 3
+      },
+      {
+        question: "Why has the kanji \u7FD4 (to soar) been so popular for boys recently?",
+        options: [
+          "It is the easiest kanji",
+          "Parents admire Shohei Ohtani",
+          "It was in a famous anime",
+          'It means "Japan"'
+        ],
+        answerIndex: 1,
+        explanation: "Since Shohei Ohtani (\u5927\u8C37\u7FD4\u5E73) won MVP in 2021, \u7FD4 has been the most popular kanji in boys' names.",
+        hintCard: 4
+      },
+      {
+        question: "Which statement best describes popular names today?",
+        options: [
+          "Most girls' names end in -ko",
+          "Short names inspired by nature are popular",
+          "Names are only written in hiragana",
+          "Names never change"
+        ],
+        answerIndex: 1,
+        explanation: "Short, one-kanji names from nature, like Minato (\u6E4A) and Sui (\u7FE0), are popular today.",
+        hintCard: 4
+      }
+    ]
+  }
+};
+var LESSON_SLUG = "obento-unit-4-lesson-1";
 async function loader$K({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
@@ -53283,7 +54295,8 @@ var COMPLETED_TASK_NAMES = {
   listening: "listening tasks",
   reading: "reading tasks",
   speaking: "speaking practice rounds",
-  writing: "writing tasks"
+  writing: "writing tasks",
+  culture: "culture tasks"
 };
 function LessonsObentoUnit4Lesson1Page() {
   const layoutRef = reactExports.useRef(null);
@@ -53302,6 +54315,9 @@ function LessonsObentoUnit4Lesson1Page() {
   const [speakingTaskCompleted, setSpeakingTaskCompleted] = reactExports.useState(false);
   const [isWritingTaskOpen, setIsWritingTaskOpen] = reactExports.useState(false);
   const [writingTaskCompleted, setWritingTaskCompleted] = reactExports.useState(false);
+  const [isCultureTaskOpen, setIsCultureTaskOpen] = reactExports.useState(false);
+  const [cultureTaskCompleted, setCultureTaskCompleted] = reactExports.useState(false);
+  const cultureTask = CULTURE_TASKS[LESSON_SLUG];
   const [savedProgress, setSavedProgress] = reactExports.useState(null);
   const [completedNotice, setCompletedNotice] = reactExports.useState(null);
   const startTask = (key, open) => {
@@ -53442,12 +54458,14 @@ function LessonsObentoUnit4Lesson1Page() {
               onStartReadingDrill: () => startTask("reading", () => setIsReadingDrillOpen(true)),
               onStartSpeakingDrill: () => startTask("speaking", () => setIsSpeakingModalOpen(true)),
               onStartWritingTask: () => setIsWritingTaskOpen(true),
+              onStartCultureTask: cultureTask ? () => startTask("culture", () => setIsCultureTaskOpen(true)) : void 0,
               externalTaskStatus: {
                 vocabulary: vocabTaskCompleted,
                 listening: listeningTaskCompleted,
                 reading: readingTaskCompleted,
                 speaking: speakingTaskCompleted,
-                writing: writingTaskCompleted
+                writing: writingTaskCompleted,
+                culture: cultureTaskCompleted
               }
             }
           )
@@ -53490,6 +54508,15 @@ function LessonsObentoUnit4Lesson1Page() {
             onCompleted: () => {
               setSpeakingTaskCompleted(true);
             }
+          }
+        ),
+        cultureTask && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          EduCultureTaskModal,
+          {
+            task: cultureTask,
+            isOpen: isCultureTaskOpen,
+            onClose: () => setIsCultureTaskOpen(false),
+            onCompleted: () => setCultureTaskCompleted(true)
           }
         ),
         completedNotice && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl p-5 sm:p-10 shadow-2xl my-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -58137,9 +59164,9 @@ function OgreStarSwordArena() {
   };
   const playVoiceCount = (count) => {
     try {
-      const audio = new Audio(`/audio/hit-${count}.mp3`);
-      audio.volume = 0.8;
-      audio.play().catch(() => {
+      const audio2 = new Audio(`/audio/hit-${count}.mp3`);
+      audio2.volume = 0.8;
+      audio2.play().catch(() => {
       });
     } catch (e) {
     }
@@ -58936,8 +59963,8 @@ function TestAudioPage() {
         const audioBlob = await response.blob();
         appendLog(`\u2705 Audio Blob received. Size: ${audioBlob.size} bytes, Type: ${audioBlob.type}`);
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        await audio.play();
+        const audio2 = new Audio(audioUrl);
+        await audio2.play();
         appendLog("\u{1F50A} Audio playback started successfully!");
       } else {
         const errText = await response.text();
@@ -68922,7 +69949,8 @@ function CreditTransactionsSection({
         /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Date / Time" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Feature / Type" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Description" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold text-right", children: "Amount" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold text-right", children: "Amount" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold text-right", children: "Balance" })
       ] }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { className: "divide-y divide-gray-100", children: transactions.map((tx) => {
         const isPositive = tx.amount > 0;
@@ -68944,7 +69972,8 @@ function CreditTransactionsSection({
                 " pts"
               ]
             }
-          ) })
+          ) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-right whitespace-nowrap font-semibold text-gray-900 tabular-nums", children: typeof tx.balance_after === "number" ? `${tx.balance_after} pts` : "-" })
         ] }, tx.id);
       }) })
     ] }) })
@@ -69454,7 +70483,7 @@ function AccountSettingsRoute() {
             setNicknameInput(profileData.nickname);
           }
         }
-        const { data: txData, error: txError } = await supabase.from("credit_transactions").select("id, amount, feature_used, description, created_at, expires_at").eq("user_id", activeUser.id).order("created_at", { ascending: false });
+        const { data: txData, error: txError } = await supabase.from("credit_transactions").select("id, amount, feature_used, description, created_at, expires_at, balance_after").eq("user_id", activeUser.id).order("created_at", { ascending: false });
         if (!txError && txData) {
           setTransactions(txData);
         }
@@ -70951,7 +71980,7 @@ function PortalModulesGrid({
       /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-extrabold tracking-tight", children: "Portal Pages & Modules" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`, children: "Direct access to all specialized exam prep modules, tools, and learning spaces." })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-vce", className: "space-y-8 pt-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-vce", className: "space-y-8 pt-6 scroll-mt-20", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl", children: "\u{1F1E6}\u{1F1FA}\u{1F428}\u{1F998}" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-extrabold text-lg text-slate-800 dark:text-slate-200", children: "Victorian Curriculum & VCE Students (Australia)" })
@@ -70970,14 +71999,14 @@ function PortalModulesGrid({
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", children: writingModules.map((mod) => renderCard(mod, "red")) })
       ] }),
-      referenceModules.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-4", children: [
+      referenceModules.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-references", className: "space-y-4 pt-4 scroll-mt-20", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 text-sm font-bold text-emerald-600 dark:text-emerald-400", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4DA}" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { children: "VCE Writing References & Guides" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", children: referenceModules.map((mod) => renderCard(mod, "emerald")) })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-junior", className: "space-y-4 pt-4 scroll-mt-20", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F371}" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { children: "Japanese Lessons & Textbook Hub" })
@@ -70998,14 +72027,7 @@ function PortalModulesGrid({
           "orange"
         ) })
       ] }),
-      juniorModules.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 text-sm font-bold text-indigo-600 dark:text-indigo-400", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F4D6}" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { children: "Years 7\u201310 Japanese" })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", children: juniorModules.map((mod) => renderCard(mod, "indigo")) })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-games", className: "space-y-4 pt-6 scroll-mt-20", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl", children: "\u{1F3AE}" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-extrabold text-base text-red-600 dark:text-red-400", children: "Interactive Learning Arcade & Games" })
@@ -71027,7 +72049,7 @@ function PortalModulesGrid({
         ) })
       ] })
     ] }),
-    generalModules.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-6", children: [
+    generalModules.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-general", className: "space-y-4 pt-6 scroll-mt-20", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl", children: "\u{1F30D}" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-extrabold text-lg text-slate-800 dark:text-slate-200", children: "Global & General Japanese Learners" })
@@ -71967,7 +72989,7 @@ var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-DqgCEXNE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-BoA1LoX0.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-b4rtY2Jm.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-CeCYO5oO.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/pen-line-yITCt4Cn.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/check-BaMMBr_0.js", "/assets/book-open-ChNR0X7A.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-Dtuixm3O.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-CyfyNPXN.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CtN88gLY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-D6IfHM8C.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/trash-NuoOEY3l.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-Dch9_HHu.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/nickname-3jrkQqFG.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-DhQ9vAY3.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-DCRx3dgJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-cBCAVOiR.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-BMdBVPsh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-b4rtY2Jm.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-Dixph23c.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-BhPujc9p.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-BmoU1ZVd.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-oO53nBuB.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-CAtDwptL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-C2nI-iUQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-CZtX-juS.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-dSccBuVv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-ir2xitBR.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-2atYbXBa.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dlo1iLQ_.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-B5qZlRa8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-Aun4MQJL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-BwtvIIZx.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-DGzoGZrZ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-Hlxfpqnz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-rcH5YDjS.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-j0b7D4SG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-DDE4M_JK.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-Ni2tUiox.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dlo1iLQ_.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-X0XqrJGW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-GyALrGPg.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/SchoolAccountLink-hsVOIWeR.js", "/assets/users-DW0UvvIm.js", "/assets/check-BaMMBr_0.js", "/assets/pen-line-yITCt4Cn.js", "/assets/trash-NuoOEY3l.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-DOPFLBNd.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-_l51wImb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-BgJr7jFa.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-CLdyI18l.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-lURq1Hm0.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-C_ZQsMJ9.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-B0dD5GNJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-Dvw1AFwP.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/content-games-CjF63-Rz.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-Buw81Umo.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-CK6Sd06S.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-DWN8xmTC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-ARqnByLY.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/SchoolAccountLink-hsVOIWeR.js", "/assets/users-DW0UvvIm.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-DF1rJFco.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-CksTzeUJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-D-k7AVWt.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-ZFsFrt0p.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/flame-Cp6odz9b.js", "/assets/check-BaMMBr_0.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-BJYUS1lf.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-Cp6odz9b.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/check-BaMMBr_0.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-CyfyNPXN.js", "/assets/book-open-ChNR0X7A.js", "/assets/content-games-CjF63-Rz.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-3jrkQqFG.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-B1ecPX7A.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/book-open-ChNR0X7A.js", "/assets/users-DW0UvvIm.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DZZtZDaQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DFr0GDKC.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dlo1iLQ_.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-bc25fcd6.js", "version": "bc25fcd6" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-CdEq6oZm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-8aqccNwQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-b4rtY2Jm.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-DlAeg_0G.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/pen-line-lN_0FCJp.js", "/assets/PageLayout-53TDSgNf.js", "/assets/check-CbyVbCpH.js", "/assets/book-open-Bv8Ze9So.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-D-U0WGW-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-tx-yw_VR.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CAi45xXJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-C-6n9C05.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-53TDSgNf.js", "/assets/trash-CG1nsWbZ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/lessons.obento-unit-4-lesson-1": { "id": "routes/lessons.obento-unit-4-lesson-1", "parentId": "root", "path": "lessons/obento-unit-4-lesson-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-lesson-1-C33qqGZJ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/nickname-3jrkQqFG.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-DhQ9vAY3.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-CbqIDW7e.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-DWZbDtm_.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-BNn1O00H.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-b4rtY2Jm.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-0Rq6dvdb.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-53TDSgNf.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-bbgdvvfu.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-C2LgPO07.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-BHzsGzad.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-DC9D7b1e.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BXto36aq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-CZahnIUq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DJ_4ELNH.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-CZtX-juS.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-3jrkQqFG.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-DcNRjhDh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.obento-unit-4": { "id": "routes/lessons.obento-unit-4", "parentId": "root", "path": "lessons/obento-unit-4", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.obento-unit-4-C12H9Qpj.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-CprA_whi.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-53TDSgNf.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-BojBvdfu.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-BrAuSyUe.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-t4xNQV5Q.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-TytZnzXK.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-DmksIfIl.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-CUZ0OwGk.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-CNuCuzAC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-CuEi1TTW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-C7uHNfEO.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-53TDSgNf.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-CqSOTnTh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-EMFCraJ9.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-53TDSgNf.js", "/assets/SchoolAccountLink-Be07VgiY.js", "/assets/users-yYjRc7Xn.js", "/assets/check-CbyVbCpH.js", "/assets/pen-line-lN_0FCJp.js", "/assets/trash-CG1nsWbZ.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-BiYzJ1Y_.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-Uh8ugxtM.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-CAE3Zuob.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BnjsP4V3.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-D3AbNBpP.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-B_Rv8Ds-.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-DR-EKtvu.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-awUVJr3n.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/content-games-aRUDI7y_.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BhTfN8b6.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/PageLayout-53TDSgNf.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-BqNZk7UH.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-CFuwBMGD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-B9cUaXsb.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/SchoolAccountLink-Be07VgiY.js", "/assets/users-yYjRc7Xn.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-C863TA-d.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-bW_LuvqK.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-CMnPVRMz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-CXFu7w4M.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-53TDSgNf.js", "/assets/flame-D7_oRIkn.js", "/assets/check-CbyVbCpH.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-C_mEpVXj.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-D7_oRIkn.js", "/assets/PageLayout-53TDSgNf.js", "/assets/check-CbyVbCpH.js", "/assets/yamato-configs-BTgtmgzB.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-tx-yw_VR.js", "/assets/book-open-Bv8Ze9So.js", "/assets/content-games-aRUDI7y_.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-3jrkQqFG.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-D435_kEq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-53TDSgNf.js", "/assets/book-open-Bv8Ze9So.js", "/assets/users-yYjRc7Xn.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-C_DuyhAm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-8uqtr3Xd.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-53TDSgNf.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-d10dca76.js", "version": "d10dca76" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
