@@ -8,6 +8,7 @@
  * 4. 印刷用スタイル（改ページ制御・装飾ヘッダー）を含む専用印刷ウィンドウを自動生成
  */
 import React, { useState } from "react";
+import { escapeHtml } from "~/utils/safeHtml";
 
 export type FeedbackPdfModalProps = {
   initialContent: string;
@@ -43,9 +44,12 @@ export function FeedbackPdfModal({
       return;
     }
 
-    const cleanContent = editablePdfContent.trim();
-    const sanitizedTitle = teacherNotesTitleInput.trim() || "P.S.";
-    const sanitizedNotes = teacherNotesInput.trim();
+    // 🔐 印刷ウィンドウはこのサイトと同じ扱いになるので、入力された文字は HTML として解釈させない（XSS 対策）
+    const cleanContent = escapeHtml(editablePdfContent.trim());
+    const sanitizedTitle = escapeHtml(teacherNotesTitleInput.trim() || "P.S.");
+    const sanitizedNotes = escapeHtml(teacherNotesInput.trim());
+    const safeSectionTitle = escapeHtml(sectionTitle);
+    const safeStudentName = escapeHtml(studentName || "Student");
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -109,8 +113,8 @@ export function FeedbackPdfModal({
         </head>
         <body>
           <div class="header">
-            <h1>🌟 VCE Japanese Writing Feedback Report (${sectionTitle})</h1>
-            <div class="meta">Student: ${studentName || "Student"} | Date: ${new Date().toLocaleDateString()}</div>
+            <h1>🌟 VCE Japanese Writing Feedback Report (${safeSectionTitle})</h1>
+            <div class="meta">Student: ${safeStudentName} | Date: ${new Date().toLocaleDateString()}</div>
           </div>
           <div class="content">${cleanContent}</div>
           ${

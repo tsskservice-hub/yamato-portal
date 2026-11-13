@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 import React, { useRef, useEffect } from "react";
 
 export type ChatMessage = {
@@ -108,7 +109,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none"
               }`}
               style={msg.role === "user" ? { backgroundColor: themeColor } : {}}
-              dangerouslySetInnerHTML={{ __html: msg.content }}
+              dangerouslySetInnerHTML={{ __html: safeHtml(msg.content) }}
             />
           </div>
         ))}

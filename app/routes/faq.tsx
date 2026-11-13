@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file faq.tsx
  * @description VCE Japanese Portal FAQ ページ (スムーズスクロール共通化・データエラーガード対応版)
@@ -240,7 +241,7 @@ export default function FaqPage() {
                                 <div className="px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4">
                                   <div
                                     className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none"
-                                    dangerouslySetInnerHTML={{ __html: faq.answer }}
+                                    dangerouslySetInnerHTML={{ __html: safeHtml(faq.answer) }}
                                   />
                                 </div>
                               )}

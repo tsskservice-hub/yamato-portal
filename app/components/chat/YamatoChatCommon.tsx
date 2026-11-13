@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file YamatoChatCommon.tsx
  * @description ポータル共通AIチャットウィジェット（ニックネームモジュール連携・プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）
@@ -749,7 +750,7 @@ export function YamatoChatCommon({
                             </div>
                           ) : (
                             <div className="space-y-2">
-                              <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                              <div dangerouslySetInnerHTML={{ __html: safeHtml(msg.content) }} />
                               {msg.imageUrl && (
                                 <div className="mt-2">
                                   <img

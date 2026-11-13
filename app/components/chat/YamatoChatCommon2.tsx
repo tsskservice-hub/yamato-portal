@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file YamatoChatCommon2.tsx
  * @description 教科書準拠レッスン専用メインクラスルーム・チャットコンポーネント（モジュール連携版・安定送信対応）
@@ -249,7 +250,7 @@ export function YamatoChatCommon2({
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                      <div dangerouslySetInnerHTML={{ __html: safeHtml(msg.content) }} />
                       
                       {/* 選択肢ボタンモジュール (valueを送信しつつ美しいlabelを表示) */}
                       <YCC2ChatOptionButtons
