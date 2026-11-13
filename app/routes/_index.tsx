@@ -1,3 +1,4 @@
+import { yamatoFetch } from '~/lib/yamatoApi';
 /**
  * @file _index.tsx
  * @description AI Yamato Portal のランディングページ
@@ -282,10 +283,11 @@ export default function Home() {
     try {
       setCheckoutLoadingPriceId(priceId);
 
-      const response = await fetch('/api/create-checkout-session', {
+      // 🔐 購入者はログイン情報（アクセストークン）でサーバー側が特定する
+      const response = await yamatoFetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId: user.id })
+        body: JSON.stringify({ priceId })
       });
 
       const data = await response.json() as any;

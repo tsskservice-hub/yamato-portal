@@ -1,3 +1,4 @@
+import { yamatoFetch } from '~/lib/yamatoApi';
 /**
  * @file prices.tsx
  * @description 料金プランページ（Supabase PRICE_PLANS 100%動的連動・PageLayoutデータエラーガード完全対応版）
@@ -92,13 +93,11 @@ export default function Prices() {
 
     try {
       setLoadingPriceId(priceId);
-      const res = await fetch('/api/create-checkout-session', {
+      // 🔐 購入者はログイン情報（アクセストークン）でサーバー側が特定する
+      const res = await yamatoFetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          priceId: priceId,
-          userId: user.id,
-        }),
+        body: JSON.stringify({ priceId }),
       });
 
       const data = (await res.json()) as any;
