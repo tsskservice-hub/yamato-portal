@@ -20,10 +20,9 @@ begin
     raise exception 'INVALID_AMOUNT';
   end if;
 
-  -- プロフィールがまだ無い場合の初期作成（これまでの Worker の動作と同じ 10 クレジット）
-  insert into public.profiles (id, credits) values (p_user_id, 10)
-  on conflict (id) do nothing;
-
+  -- ※ プロフィールは新規登録時にトリガーが作る。ここでは作らない
+  --   （profiles のチェック制約 nickname_length_check に引っかかるため）。
+  --   行が無い場合は下の update が 0 件になり、残高 0 として扱われる。
   update public.profiles
      set credits = credits - p_amount
    where id = p_user_id

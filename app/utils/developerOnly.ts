@@ -7,11 +7,16 @@
  * 使い方: 各 developer.* ページの loader の先頭で blockOnProduction(request) を呼ぶ。
  */
 
-const PRODUCTION_HOSTS = ["jptutoraiyamato.com", "www.jptutoraiyamato.com"];
+export const PRODUCTION_HOSTS = ["jptutoraiyamato.com", "www.jptutoraiyamato.com"];
+
+/** 本番ドメインかどうか（プレビュー *.pages.dev・localhost は false） */
+export function isProductionHost(hostname: string): boolean {
+  return PRODUCTION_HOSTS.includes(hostname);
+}
 
 export function blockOnProduction(request: Request): void {
   const host = new URL(request.url).hostname;
-  if (PRODUCTION_HOSTS.includes(host)) {
+  if (isProductionHost(host)) {
     throw new Response("Not Found", { status: 404 });
   }
 }
