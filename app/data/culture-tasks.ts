@@ -39,11 +39,18 @@ export interface CultureQuestion {
   hintCard: number;
 }
 
+export interface CultureThinkAbout {
+  /** 画面に出す問いかけ（1要素 = 1文。ナレーションに合わせて今の文を強調する） */
+  lines: string[];
+  /** ナレーション音声の URL。無い時は合成音声で lines を読み上げる */
+  audioUrl?: string;
+}
+
 export interface CultureTask {
   title: string;
   cards: CultureCard[];
   /** カードを見終わった後の「考えてみよう」（採点しない） */
-  thinkAbout?: string;
+  thinkAbout?: CultureThinkAbout;
   questions: CultureQuestion[];
 }
 
@@ -97,13 +104,20 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
         narration: [
           "Short, one-kanji names that come from nature are popular now.",
           "In 2025, the top names were Minato (湊 = harbour) for boys and Sui (翠 = jade green) for girls.",
-          "Big events also shape names.",
-          "After the 2011 earthquake, the kanji 結 (to connect) became popular, as in Yua.",
+          "Big events also shape names:",
+          "After the 2011 earthquake, the kanji 結 (to connect) became popular.",
+          "That year, the No.1 girls' name was Yua (結愛), which uses this kanji.",
           "Since baseball star Shohei Ohtani won MVP in 2021, 翔 (to soar) has been the most popular kanji in boys' names.",
         ],
       },
     ],
-    thinkAbout: "What names were popular when your grandparents were born?",
+    thinkAbout: {
+      lines: [
+        "What names were popular in your country in the past?",
+        "How are they different from popular names today?",
+      ],
+      audioUrl: audio("names_05.mp3"),
+    },
     questions: [
       {
         question: "What does the name ending -ko (子) mean?",

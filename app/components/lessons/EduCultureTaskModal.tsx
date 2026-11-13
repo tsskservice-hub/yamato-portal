@@ -117,23 +117,24 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
   const markHeard = (index: number) =>
     setHeardCards((prev) => prev.map((v, i) => (i === index ? true : v)));
 
-  /** 合成音声で1行ずつ読み上げる（音声ファイルが無い・読み込めない時の代わり） */
-  const speakWithSynthesis = useCallback((index: number, token: number) => {
-    const lines = cards[index].narration;
+  /**
+   * 合成音声で1行ずつ読み上げる（音声ファイルが無い・読み込めない時の代わり）
+   * onDone: 最後まで読み終えた時に呼ぶ
+   */
+  const speakWithSynthesis = useCallback((lines: string[], token: number, onDone: () => void) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       // 読み上げもできない環境では、字幕を全部見せて先に進めるようにする
       setIsPlaying(false);
       setShowTranscript(true);
-      markHeard(index);
+      onDone();
       return;
     }
-    setUsingSpeechFallback(true);
     window.speechSynthesis.cancel();
     const speakLine = (lineIndex: number) => {
       if (token !== playTokenRef.current) return;
       if (lineIndex >= lines.length) {
         setIsPlaying(false);
-        markHeard(index);
+        onDone();
         return;
       }
       setSubtitleIndex(lineIndex);
@@ -152,42 +153,48 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
     };
     setIsPlaying(true);
     speakLine(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cards]);
+  }, []);
 
-  /** カードのナレーションを最初から再生する */
-  const playCard = useCallback((index: number) => {
+  /**
+   * ナレーションを最初から再生する（カードと Think about it で共通）
+   * audioUrl が無い時は、はじめから合成音声で読み上げる
+   */
+  const playNarration = useCallback((audioUrl: string | undefined, lines: string[], onDone: () => void) => {
     stopNarration();
     const token = playTokenRef.current;
-    const card = cards[index];
-    if (!card) return;
     setSubtitleIndex(0);
 
-    const breakpoints = subtitleBreakpoints(card.narration);
-    const audio = new Audio(card.audioUrl);
+    if (!audioUrl) {
+      speakWithSynthesis(lines, token, onDone);
+      return;
+    }
+
+    const breakpoints = subtitleBreakpoints(lines);
+    const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
     let fellBack = false;
     const fallback = (reason: unknown) => {
       if (fellBack || token !== playTokenRef.current) return;
       fellBack = true;
-      console.warn(`[EduCultureTask] Narration audio could not be played, using speech synthesis instead: ${card.audioUrl}`, reason);
+      console.warn(`[EduCultureTask] Narration audio could not be played, using speech synthesis instead: ${audioUrl}`, reason);
       audioRef.current = null;
-      speakWithSynthesis(index, token);
+      setUsingSpeechFallback(true);
+      speakWithSynthesis(lines, token, onDone);
     };
 
     audio.ontimeupdate = () => {
       if (token !== playTokenRef.current || !audio.duration || !isFinite(audio.duration)) return;
       const ratio = audio.currentTime / audio.duration;
       const next = breakpoints.findIndex((b) => ratio < b);
-      setSubtitleIndex(next === -1 ? card.narration.length - 1 : next);
+      setSubtitleIndex(next === -1 ? lines.length - 1 : next);
     };
     audio.onended = () => {
       if (token !== playTokenRef.current) return;
       setIsPlaying(false);
-      setSubtitleIndex(card.narration.length - 1);
-      markHeard(index);
+      setSubtitleIndex(lines.length - 1);
       audioRef.current = null;
+      onDone();
     };
     audio.onerror = () => fallback(audio.error);
 
@@ -200,8 +207,21 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
       }
       fallback(err);
     });
+  }, [stopNarration, speakWithSynthesis]);
+
+  /** カードのナレーションを最初から再生する */
+  const playCard = useCallback((index: number) => {
+    const card = cards[index];
+    if (!card) return;
+    playNarration(card.audioUrl, card.narration, () => markHeard(index));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cards, stopNarration, speakWithSynthesis]);
+  }, [cards, playNarration]);
+
+  /** Think about it のナレーションを最初から再生する */
+  const playThink = useCallback(() => {
+    if (!task.thinkAbout) return;
+    playNarration(task.thinkAbout.audioUrl, task.thinkAbout.lines, () => {});
+  }, [task.thinkAbout, playNarration]);
 
   /** 再生中なら一時停止、止まっていれば再生（続きから／最初から） */
   const togglePlay = () => {
@@ -220,15 +240,25 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
       audio.play().catch(() => setIsPlaying(false));
       return;
     }
-    playCard(cardIndex);
+    if (phase === "think") playThink();
+    else playCard(cardIndex);
   };
 
   // カードが変わったら自動でナレーションを流す
   useEffect(() => {
     if (!isOpen || phase !== "story") return;
+    setUsingSpeechFallback(false);
     playCard(cardIndex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, phase, cardIndex]);
+
+  // Think about it の画面に来たら自動でナレーションを流す
+  useEffect(() => {
+    if (!isOpen || phase !== "think") return;
+    setUsingSpeechFallback(false);
+    playThink();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, phase]);
 
   const goToCard = (index: number) => {
     stopNarration();
@@ -314,6 +344,13 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
           e.preventDefault();
           s.nextFromStory();
         }
+        return;
+      }
+
+      if (s.phase === "think" && e.code === "Space") {
+        e.preventDefault();
+        if (el instanceof HTMLElement && el.tagName === "BUTTON") el.blur();
+        s.togglePlay();
         return;
       }
 
@@ -513,21 +550,48 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
         {phase === "think" && (
           <div className="text-center space-y-5 py-6">
             <div className="text-5xl">💭</div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-xs font-extrabold uppercase tracking-wider text-sky-700 dark:text-sky-400">
                 Think about it (not marked)
               </p>
-              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 max-w-lg mx-auto">
-                {task.thinkAbout}
-              </p>
+              {/* ナレーション中の文を強調する */}
+              <div className="space-y-2 max-w-xl mx-auto" aria-live="polite">
+                {task.thinkAbout?.lines.map((line, i) => (
+                  <p
+                    key={i}
+                    className={`text-lg sm:text-2xl font-black leading-snug transition-colors ${
+                      isPlaying && i !== subtitleIndex
+                        ? "text-slate-400 dark:text-slate-500"
+                        : "text-slate-900 dark:text-slate-100"
+                    }`}
+                  >
+                    {line}
+                  </p>
+                ))}
+              </div>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Take a moment to think, or ask someone in your family!
               </p>
+              <button
+                type="button"
+                onClick={togglePlay}
+                className={`py-2 px-5 rounded-xl font-bold text-xs sm:text-sm text-white transition active:scale-95 cursor-pointer ${
+                  isPlaying ? "bg-amber-500" : "bg-emerald-600 hover:bg-emerald-700"
+                }`}
+              >
+                {isPlaying ? "⏸ Pause (Space)" : "🔁 Listen again (Space)"}
+              </button>
+              {usingSpeechFallback && (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  (The narration audio could not be loaded, so your browser is reading the text aloud.)
+                </p>
+              )}
             </div>
             <div className="flex flex-wrap justify-center gap-3">
               <button
                 type="button"
                 onClick={() => {
+                  stopNarration();
                   setPhase("story");
                   setCardIndex(0);
                 }}
@@ -537,7 +601,10 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => setPhase("quiz")}
+                onClick={() => {
+                  stopNarration();
+                  setPhase("quiz");
+                }}
                 className="py-3 px-8 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm shadow-lg transition active:scale-95 cursor-pointer"
               >
                 Start Quick Check ▶
