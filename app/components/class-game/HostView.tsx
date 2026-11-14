@@ -5,9 +5,10 @@
  * ・生徒の本当の名前（学校メール・招待ラベル）は、プロジェクターに映らないよう最初は隠す。
  * ・点数はサーバーから届いたものを表示するだけ（この画面で計算しない）。
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Crown, Eye, EyeOff, Pencil, Play, Square, UserX, Users, Wifi, WifiOff } from 'lucide-react';
 import { HostYamato, type YamatoHostState } from './YamatoQuiz';
+import { preloadGameSounds } from './sounds';
 import { JigsawBoard, JigsawBoxPicture, progressPercent, type JigsawBoardInfo } from './Jigsaw';
 import { CLOSED_MESSAGES, QUESTION_SET_LABELS, formatClock, useCountdown, useLiveGameSocket } from './useLiveGameSocket';
 
@@ -31,6 +32,7 @@ type HostState = {
   config: {
     className: string;
     questionSet: string;
+    characterCount?: number | null;
     durationSec: number;
     nameMode: 'free' | 'preset';
     janken?: boolean;
@@ -50,6 +52,8 @@ type HostState = {
 
 export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () => void }) {
   const [state, setState] = useState<HostState | null>(null);
+  // 「問題です」の録音を前もって読み込む
+  useEffect(() => preloadGameSounds(), []);
   const [offset, setOffset] = useState(0);
   const [showLabels, setShowLabels] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -97,7 +101,8 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
           <p className="text-xs font-bold tracking-widest text-indigo-500">CLASS LIVE GAME</p>
           <h2 className="text-xl font-black text-slate-900 dark:text-white">{state.config.className}</h2>
           <p className="text-xs text-slate-500">
-            {QUESTION_SET_LABELS[state.config.questionSet]} · {state.config.durationSec / 60} min ·{' '}
+            {QUESTION_SET_LABELS[state.config.questionSet]}
+            {state.config.characterCount ? ` (${state.config.characterCount} characters chosen)` : ''} · {state.config.durationSec / 60} min ·{' '}
             {state.config.nameMode === 'free' ? 'Students choose their names' : 'Names chosen by AI Yamato'} ·{' '}
             {state.config.janken ? 'Janken battles on' : 'Janken battles off'} ·{' '}
             {state.config.speed ? 'Speed rounds on' : 'Speed rounds off'} ·{' '}

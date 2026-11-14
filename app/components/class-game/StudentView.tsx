@@ -14,12 +14,12 @@ import {
   JankenDuel,
   JankenTargetPicker,
   sayJankenPon,
-  preloadJankenSound,
   type DuelResult,
   type DuelStart,
   type JankenTarget,
 } from './JankenPanels';
 import { SpeedPanel, speedPanelKey, type SpeedResult, type SpeedStart } from './SpeedPanel';
+import { preloadGameSounds } from './sounds';
 import { StudentYamato, sayMondaiDesu, type YamatoAnswered, type YamatoEnd, type YamatoStart } from './YamatoQuiz';
 import { JigsawBoard, JigsawBoxPicture, progressPercent, type JigsawBoardInfo } from './Jigsaw';
 
@@ -124,8 +124,8 @@ export function StudentView({ gameId }: { gameId: string }) {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(setTimeout(fn, ms));
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
-  // じゃんけんの録音を前もって読み込む
-  useEffect(() => preloadJankenSound(), []);
+  // じゃんけん・「問題です」の録音を前もって読み込む
+  useEffect(() => preloadGameSounds(), []);
 
   const { status: socketStatus, closedCode, send } = useLiveGameSocket(gameId, (msg) => {
     switch (msg.t) {

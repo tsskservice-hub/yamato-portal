@@ -18,6 +18,7 @@ import { YAMATO_API_BASE, yamatoFetch } from '~/lib/yamatoApi';
 import { Box, HostView, Spinner, primaryBtn } from '~/components/class-game/HostView';
 import { StudentView } from '~/components/class-game/StudentView';
 import { QUESTION_SET_LABELS } from '~/components/class-game/useLiveGameSocket';
+import { CharacterPicker, MIN_CHARACTERS } from '~/components/class-game/CharacterPicker';
 import { JigsawSetup, type JigsawImage } from '~/components/class-game/JigsawSetup';
 import { cutJigsaw, gridFor } from '~/components/class-game/Jigsaw';
 
@@ -167,6 +168,9 @@ function TeacherSetup({
   const [mode, setMode] = useState<'coins' | 'jigsaw'>('coins');
   const [jigsawImage, setJigsawImage] = useState<JigsawImage | null>(null);
   const [pieceCount, setPieceCount] = useState(24);
+  // 出題する文字：全部／先生が選ぶ
+  const [chooseChars, setChooseChars] = useState(false);
+  const [chosenChars, setChosenChars] = useState<string[] | null>(null);
   const [busyText, setBusyText] = useState('Creating…');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -191,10 +195,15 @@ function TeacherSetup({
       setError('Choose a picture for the puzzle.');
       return;
     }
+    if (chooseChars && (!chosenChars || chosenChars.length < MIN_CHARACTERS)) {
+      setError(`Choose at least ${MIN_CHARACTERS} characters.`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       let body: Record<string, unknown> = { classId, questionSet, durationMin, nameMode, janken, speed, yamato: yamatoQuiz };
+      if (chooseChars && chosenChars) body.characters = chosenChars;
       if (mode === 'jigsaw' && jigsawImage) {
         // このブラウザで写真をピースに切り分けて、部屋に渡す（どこに入るかはサーバーだけが持つ）
         setBusyText('Cutting the picture…');
@@ -269,6 +278,15 @@ function TeacherSetup({
           ))}
         </div>
         {questionSet === 'kanji' && <p className="text-xs text-slate-500 mt-2">Readings and meanings are mixed.</p>}
+        <div className="flex flex-wrap gap-2 mt-3">
+          <button type="button" onClick={() => setChooseChars(false)} className={option(!chooseChars)}>
+            All characters
+          </button>
+          <button type="button" onClick={() => setChooseChars(true)} className={option(chooseChars)}>
+            Choose characters
+          </button>
+        </div>
+        {chooseChars && <CharacterPicker set={questionSet} onChange={setChosenChars} />}
       </Field>
 
       <Field label={`Time: ${durationMin} min`}>

@@ -7,6 +7,7 @@
  * 生徒用（StudentYamato）と、プロジェクター用（HostYamato）がある。
  */
 import React, { useEffect, useState } from 'react';
+import { playGameSound } from './sounds';
 
 export type YamatoQuestion = {
   qid: string;
@@ -31,21 +32,9 @@ export type YamatoEnd = { roundId: string; correctIndex: number; top: { name: st
 
 const MARK_SRC = '/jptutoraiyamato.png';
 
-/** 「問題です」の合図の音声（ブラウザの日本語読み上げ。無い端末では音なし） */
+/** 「問題です」の合図の録音を鳴らす */
 export function sayMondaiDesu() {
-  try {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    const u = new SpeechSynthesisUtterance('問題です');
-    u.lang = 'ja-JP';
-    u.rate = 0.9;
-    u.pitch = 0.8;
-    const ja = window.speechSynthesis.getVoices().find((v) => v.lang?.toLowerCase().startsWith('ja'));
-    if (ja) u.voice = ja;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  } catch {
-    // 音が出せなくてもゲームは続ける
-  }
+  playGameSound('mondai');
 }
 
 function useServerNow(offset: number) {

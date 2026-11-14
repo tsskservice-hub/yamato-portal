@@ -6,6 +6,7 @@
  * 「じゃんけんぽん！」の音声と両方の手を出すだけ。相手の手は、その時まで端末に届かない。
  */
 import React, { useEffect, useState } from 'react';
+import { playGameSound } from './sounds';
 
 export type Hand = 'rock' | 'scissors' | 'paper';
 export type JankenTarget = { pid: string; name: string; coins: number };
@@ -34,68 +35,12 @@ const HAND_LABEL: Record<Hand, string> = { rock: 'Guu', scissors: 'Choki', paper
 const HANDS: Hand[] = ['rock', 'scissors', 'paper'];
 
 /**
- * 「じゃんけんぽん！」の録音。public/live-game/sounds/jankenpon.mp3
+ * 「じゃんけんぽん！」の録音を鳴らす。
  * JANKEN_VOICE_LEAD_MS：再生を始めてから「ぽん」が鳴るまでの時間（手が開く瞬間にそろえる）
- * 録音が鳴らせないときは、ブラウザの読み上げにする
  */
-const JANKEN_SOUND_URL = '/live-game/sounds/jankenpon.mp3';
 export const JANKEN_VOICE_LEAD_MS = 1050;
-let jankenAudio: HTMLAudioElement | null = null;
-
-/** 前もって読み込む。iPhone などは、最初に画面をタップしたときに音を鳴らせるようにしておく */
-export function preloadJankenSound() {
-  if (typeof window === 'undefined' || jankenAudio) return;
-  try {
-    jankenAudio = new Audio(JANKEN_SOUND_URL);
-    jankenAudio.preload = 'auto';
-    jankenAudio.load();
-    const unlock = () => {
-      const a = jankenAudio;
-      if (!a) return;
-      a.muted = true;
-      a.play()
-        .then(() => {
-          a.pause();
-          a.currentTime = 0;
-          a.muted = false;
-        })
-        .catch(() => {
-          a.muted = false;
-        });
-    };
-    window.addEventListener('pointerdown', unlock, { once: true });
-  } catch {
-    jankenAudio = null;
-  }
-}
-
 export function sayJankenPon() {
-  if (jankenAudio) {
-    try {
-      jankenAudio.muted = false;
-      jankenAudio.currentTime = 0;
-      jankenAudio.play().catch(speakJankenPon);
-      return;
-    } catch {
-      // 読み上げにする
-    }
-  }
-  speakJankenPon();
-}
-
-function speakJankenPon() {
-  try {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    const u = new SpeechSynthesisUtterance('じゃんけんぽん！');
-    u.lang = 'ja-JP';
-    u.rate = 1.15;
-    const ja = window.speechSynthesis.getVoices().find((v) => v.lang?.toLowerCase().startsWith('ja'));
-    if (ja) u.voice = ja;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  } catch {
-    // 音が出せなくてもゲームは続ける
-  }
+  playGameSound('janken');
 }
 
 export function JankenTargetPicker({
