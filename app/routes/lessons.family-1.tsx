@@ -26,15 +26,13 @@ import { EduReadingDrillModal } from "~/components/lessons/EduReadingDrillModal"
 import { EduSpeakingTaskModal } from "~/components/lessons/EduSpeakingTaskModal";
 import { EduWritingTaskModal } from "~/components/lessons/EduWritingTaskModal"; // 追加：ライティング課題モーダル
 import { EduCultureTaskModal } from "~/components/lessons/EduCultureTaskModal";
-import { CULTURE_TASKS } from "~/data/culture-tasks";
+import { findCultureTaskForLesson } from "~/data/culture-tasks";
 import { slugCandidates } from "~/data/lesson-slugs";
 import { fetchTextbookRefs, type TextbookRef } from "~/lib/lessonTextbooks";
 
 // このページのレッスン（edu_lessons.slug）
 const LESSON_SLUG = "family-1";
 
-// このレッスンで使う文化タスク（app/data/culture-tasks.ts の ID）
-const CULTURE_TASK_ID = "japanese-names";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -144,7 +142,8 @@ function LessonsFamily1Page() {
   // 6. 文化タスクモーダルの開閉状態と完了状態の管理
   const [isCultureTaskOpen, setIsCultureTaskOpen] = useState(false);
   const [cultureTaskCompleted, setCultureTaskCompleted] = useState(false);
-  const cultureTask = CULTURE_TASKS[CULTURE_TASK_ID];
+  // このレッスンの文化タスク（app/data/culture-tasks.ts の lessons に family-1 と書いてあるもの）
+  const cultureTask = findCultureTaskForLesson(LESSON_SLUG)?.task;
 
   // 7. 保存済みの完了状態（EduLessonTaskManager から受け取る）と、「完了済み」メッセージの表示
   //    完了済みのタスクはモーダルを開かずにメッセージを出す（ライティングはモーダル自身がサーバーの記録で判断する）

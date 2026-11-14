@@ -14376,7 +14376,7 @@ function mergeRefs(...refs) {
     });
   };
 }
-var STORAGE_KEY$1 = "positions";
+var STORAGE_KEY$2 = "positions";
 function ScrollRestoration({
   getKey,
   ...props
@@ -14388,7 +14388,7 @@ function ScrollRestoration({
   let matches = useMatches();
   useScrollRestoration({
     getKey,
-    storageKey: STORAGE_KEY$1
+    storageKey: STORAGE_KEY$2
   });
   let key = reactExports.useMemo(
     () => {
@@ -14425,7 +14425,7 @@ function ScrollRestoration({
   return /* @__PURE__ */ reactExports.createElement("script", _extends({}, props, {
     suppressHydrationWarning: true,
     dangerouslySetInnerHTML: {
-      __html: `(${restoreScroll})(${escapeHtml$2(JSON.stringify(STORAGE_KEY$1))}, ${escapeHtml$2(JSON.stringify(key))})`
+      __html: `(${restoreScroll})(${escapeHtml$2(JSON.stringify(STORAGE_KEY$2))}, ${escapeHtml$2(JSON.stringify(key))})`
     }
   }));
 }
@@ -30702,7 +30702,7 @@ var AUTO_REFRESH_TICK_THRESHOLD = 3;
 var EXPIRY_MARGIN_MS = AUTO_REFRESH_TICK_THRESHOLD * AUTO_REFRESH_TICK_DURATION_MS;
 var REFRESH_FAILURE_COOLDOWN_MS = 2 * AUTO_REFRESH_TICK_DURATION_MS;
 var GOTRUE_URL = "http://localhost:9999";
-var STORAGE_KEY = "supabase.auth.token";
+var STORAGE_KEY$1 = "supabase.auth.token";
 var DEFAULT_HEADERS$1 = { "X-Client-Info": `gotrue-js/${version$1}` };
 var API_VERSION_HEADER_NAME = "X-Supabase-Api-Version";
 var API_VERSIONS = {
@@ -33404,7 +33404,7 @@ var WebAuthnApi = class {
 polyfillGlobalThis();
 var DEFAULT_OPTIONS = {
   url: GOTRUE_URL,
-  storageKey: STORAGE_KEY,
+  storageKey: STORAGE_KEY$1,
   autoRefreshToken: true,
   persistSession: true,
   detectSessionInUrl: true,
@@ -40716,7 +40716,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var stylesheet = "/assets/tailwind-B6MgIq_Z.css";
+var stylesheet = "/assets/tailwind-C6Gana4o.css";
 var links$1 = () => [
   { rel: "stylesheet", href: stylesheet },
   // 💡 ヤマトのアイコンをファビコンとして設定
@@ -46553,7 +46553,7 @@ async function loader$P({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$N = ({ data: data2 }) => {
+var meta$O = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceSpeakingEoyOralAcceleratedPage() {
@@ -46733,7 +46733,7 @@ var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: VceSpeakingEoyOralAcceleratedPage,
   loader: loader$P,
-  meta: meta$N
+  meta: meta$O
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoGenkoyoshiEditorVce = ({
   defaultOpen = false,
@@ -47164,7 +47164,7 @@ async function loader$O({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$M = ({ data: data2 }) => {
+var meta$N = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function GenkoyoshiEditorVce() {
@@ -47422,7 +47422,7 @@ var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   default: GenkoyoshiEditorVce,
   links,
   loader: loader$O,
-  meta: meta$M
+  meta: meta$N
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoKanjiGrammarCheckerVce = ({
   defaultOpen = false,
@@ -48084,14 +48084,14 @@ function KanjiGrammarCheckerPage() {
     ) })
   ] }) });
 }
-var meta$L = ({ data: data2 }) => {
+var meta$M = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiGrammarCheckerPage,
   loader: loader$N,
-  meta: meta$L
+  meta: meta$M
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoOralExamQuestions = ({
   systemPrompt = "",
@@ -48173,7 +48173,7 @@ async function loader$M({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$K = ({ data: data2 }) => {
+var meta$L = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OralExamQuestions() {
@@ -48380,7 +48380,7 @@ var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: OralExamQuestions,
   loader: loader$M,
-  meta: meta$K
+  meta: meta$L
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoEoyOralElaborate = ({
   systemPrompt = "",
@@ -49146,7 +49146,7 @@ async function loader$L({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$J = ({ data: data2 }) => {
+var meta$K = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralElaboratePage() {
@@ -49780,7 +49780,7 @@ var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: EoyOralElaboratePage,
   loader: loader$L,
-  meta: meta$J
+  meta: meta$K
 }, Symbol.toStringTag, { value: "Module" }));
 function FeedbackPdfModal({
   initialContent,
@@ -50111,7 +50111,7 @@ async function loader$K({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$I = ({ data: data2 }) => {
+var meta$J = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CustomDashboard() {
@@ -50456,7 +50456,7 @@ var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: CustomDashboard,
   loader: loader$K,
-  meta: meta$I
+  meta: meta$J
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$J({ request }) {
   const url = new URL(request.url);
@@ -50471,7 +50471,7 @@ async function loader$J({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$H = ({ data: data2 }) => {
+var meta$I = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function HiraganaMemoryMatchFrameView({ userId }) {
@@ -50535,7 +50535,7 @@ var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: HiraganaMemoryMatchRoute,
   loader: loader$J,
-  meta: meta$H
+  meta: meta$I
 }, Symbol.toStringTag, { value: "Module" }));
 var OralUserAnswerList = ({
   questions,
@@ -50671,7 +50671,7 @@ async function loader$I({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$G = ({ data: data2 }) => {
+var meta$H = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralDrillPage() {
@@ -51071,7 +51071,7 @@ var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: EoyOralDrillPage,
   loader: loader$I,
-  meta: meta$G
+  meta: meta$H
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$H({ request }) {
   blockOnProduction(request);
@@ -51087,7 +51087,7 @@ async function loader$H({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$F = ({ data: data2 }) => {
+var meta$G = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var sportsColorTemplates = [
@@ -51615,7 +51615,7 @@ var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TestYamatoNotePage,
   loader: loader$H,
-  meta: meta$F
+  meta: meta$G
 }, Symbol.toStringTag, { value: "Module" }));
 var OralMockConfig = ({
   onStartExam,
@@ -52399,14 +52399,14 @@ function MockOralMode() {
     }
   );
 }
-var meta$E = ({ data: data2 }) => {
+var meta$F = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MockOralMode,
   loader: loader$G,
-  meta: meta$E
+  meta: meta$F
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$b = "WRITING_STYLES";
 async function fetchWritingStylesData(supabaseClient) {
@@ -52439,7 +52439,7 @@ async function loader$F({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$D = ({ data: data2 }) => {
+var meta$E = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function WritingStylesGuide() {
@@ -52568,7 +52568,7 @@ var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: WritingStylesGuide,
   loader: loader$F,
-  meta: meta$D
+  meta: meta$E
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$E({ request }) {
   const url = new URL(request.url);
@@ -52583,7 +52583,7 @@ async function loader$E({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$C = ({ data: data2 }) => {
+var meta$D = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function PrefecturePuzzleFrameView({ userId }) {
@@ -52650,7 +52650,7 @@ var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: PrefecturePuzzleRoute,
   loader: loader$E,
-  meta: meta$C
+  meta: meta$D
 }, Symbol.toStringTag, { value: "Module" }));
 var STAGES = [
   [["\u3042", "a"], ["\u3044", "i"], ["\u3046", "u"], ["\u3048", "e"], ["\u304A", "o"], ["\u304B", "ka"], ["\u304D", "ki"], ["\u304F", "ku"], ["\u3051", "ke"], ["\u3053", "ko"]],
@@ -52676,7 +52676,7 @@ async function loader$D({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var meta$B = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var meta$C = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function RollingCharacterPage() {
   const layoutRef = reactExports.useRef(null);
   const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
@@ -53160,7 +53160,7 @@ var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: RollingCharacterPage,
   loader: loader$D,
-  meta: meta$B
+  meta: meta$C
 }, Symbol.toStringTag, { value: "Module" }));
 function renderGrammarText(text, modalKey) {
   const grammarLinks = {
@@ -53860,20 +53860,20 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
     }
   );
 }
-var meta$A = ({ data: data2 }) => {
+var meta$B = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
   loader: loader$C,
-  meta: meta$A
+  meta: meta$B
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$B({ request }) {
   blockOnProduction(request);
   return null;
 }
-var meta$z = () => {
+var meta$A = () => {
   return [
     { title: "AI Yamato \u72EC\u7ACBAPI\u30C6\u30B9\u30C8\u753B\u9762" },
     { name: "description", content: "\u72EC\u7ACBAPI\u30B5\u30FC\u30D0\u30FC\u3068\u9023\u643A\u3059\u308B\u30E4\u30DE\u30C8\u306E\u30C6\u30B9\u30C8\u30DA\u30FC\u30B8\u3067\u3059\u3002" }
@@ -54260,7 +54260,7 @@ var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TestYamatoPage,
   loader: loader$B,
-  meta: meta$z
+  meta: meta$A
 }, Symbol.toStringTag, { value: "Module" }));
 var ENEMY_POOL = [
   { char: "\u3042", romaji: "a" },
@@ -54294,7 +54294,7 @@ async function loader$A({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$y = ({ data: data2 }) => {
+var meta$z = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OgreStarSwordPage() {
@@ -54608,7 +54608,7 @@ var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: OgreStarSwordPage,
   loader: loader$A,
-  meta: meta$y
+  meta: meta$z
 }, Symbol.toStringTag, { value: "Module" }));
 var handleScrollToSection = (e, anchorId) => {
   e.preventDefault();
@@ -54646,7 +54646,7 @@ async function loader$z({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$x = ({ data: data2 }) => {
+var meta$y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceGrammarComponent() {
@@ -54799,7 +54799,7 @@ var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: VceGrammarComponent,
   loader: loader$z,
-  meta: meta$x
+  meta: meta$y
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$y() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405 });
@@ -54926,14 +54926,14 @@ function ImageTestPage() {
     ] })
   ] }) });
 }
-var meta$w = ({ data: data2 }) => {
+var meta$x = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ImageTestPage,
   loader: loader$x,
-  meta: meta$w
+  meta: meta$x
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$w({ request }) {
   blockOnProduction(request);
@@ -54949,7 +54949,7 @@ async function loader$w({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$v = ({ data: data2 }) => {
+var meta$w = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TestAudioPage() {
@@ -55298,7 +55298,7 @@ var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TestAudioPage,
   loader: loader$w,
-  meta: meta$v
+  meta: meta$w
 }, Symbol.toStringTag, { value: "Module" }));
 var MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -55406,7 +55406,7 @@ async function loader$v({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$u = ({ data: data2 }) => {
+var meta$v = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CharacterMazePage() {
@@ -55846,7 +55846,7 @@ var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: CharacterMazePage,
   loader: loader$v,
-  meta: meta$u
+  meta: meta$v
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$u({ request }) {
   const url = new URL(request.url);
@@ -55861,7 +55861,7 @@ async function loader$u({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$t = ({ data: data2 }) => {
+var meta$u = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TextTypesComponent() {
@@ -55958,7 +55958,7 @@ var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: TextTypesComponent,
   loader: loader$u,
-  meta: meta$t
+  meta: meta$u
 }, Symbol.toStringTag, { value: "Module" }));
 var CHAR_POOL = [
   { char: "\u3042", kana: "\u30A2", romaji: "a" },
@@ -55990,7 +55990,7 @@ async function loader$t({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$s = ({ data: data2 }) => {
+var meta$t = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function StudentTunnelEscapePage() {
@@ -56226,7 +56226,7 @@ var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: StudentTunnelEscapePage,
   loader: loader$t,
-  meta: meta$s
+  meta: meta$t
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$8 = "CONTENT_VCE_SPEAKING";
 async function fetchVceSpeakingContentData(supabase2) {
@@ -56358,14 +56358,14 @@ function VceSpeakingIndex() {
     }
   );
 }
-var meta$r = ({ data: data2 }) => {
+var meta$s = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingIndex,
   loader: loader$s,
-  meta: meta$r
+  meta: meta$s
 }, Symbol.toStringTag, { value: "Module" }));
 function parseEnglishAnswers(rawEnglishText) {
   if (!rawEnglishText)
@@ -56742,7 +56742,7 @@ async function loader$q({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$q = ({ data: data2 }) => {
+var meta$r = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function KanjiSudokuFrameView({ userId }) {
@@ -56808,7 +56808,7 @@ var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: KanjiSudokuRoute,
   loader: loader$q,
-  meta: meta$q
+  meta: meta$r
 }, Symbol.toStringTag, { value: "Module" }));
 var DEFAULT_CATEGORY = "Miscellaneous";
 var CATEGORY_ORDER$1 = [
@@ -57256,7 +57256,7 @@ async function loader$p({ request }) {
     kanjiReadingAvailable
   });
 }
-var meta$p = ({
+var meta$q = ({
   data: data2
 }) => {
   return generateModuleMeta(
@@ -57777,7 +57777,7 @@ var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: MemoryMatchPage,
   loader: loader$p,
-  meta: meta$p
+  meta: meta$q
 }, Symbol.toStringTag, { value: "Module" }));
 var CATEGORY_ORDER = [
   "Numbers",
@@ -57819,7 +57819,7 @@ async function loader$o({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$o = ({ data: data2 }) => {
+var meta$p = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Kanji200Component() {
@@ -57974,7 +57974,7 @@ var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: Kanji200Component,
   loader: loader$o,
-  meta: meta$o
+  meta: meta$p
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$7 = "CONTENT_VCE_WRITING";
 async function fetchVceWritingContentData(supabase2) {
@@ -58103,14 +58103,14 @@ function VceWritingIndex() {
     }
   );
 }
-var meta$n = ({ data: data2 }) => {
+var meta$o = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceWritingIndex,
   loader: loader$n,
-  meta: meta$n
+  meta: meta$o
 }, Symbol.toStringTag, { value: "Module" }));
 async function action$3({ request, context }) {
   try {
@@ -59194,7 +59194,7 @@ function TeacherDashboardPage() {
     ] })
   ] }) });
 }
-var meta$m = () => [
+var meta$n = () => [
   { title: "Teacher Dashboard | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
@@ -59203,7 +59203,7 @@ var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   action: action$2,
   default: TeacherDashboardPage,
   loader: loader$m,
-  meta: meta$m
+  meta: meta$n
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$6 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
@@ -59231,7 +59231,7 @@ async function loader$l({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$l = ({ data: data2 }) => {
+var meta$m = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Disclaimer() {
@@ -59333,7 +59333,7 @@ var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: Disclaimer,
   loader: loader$l,
-  meta: meta$l
+  meta: meta$m
 }, Symbol.toStringTag, { value: "Module" }));
 function useYamatoChat2Logic({
   initialGreeting,
@@ -65050,10 +65050,20 @@ var EduCultureTaskModal = ({
 };
 var PICTURE_STORY_AUDIO_BASE = "https://ybquwzoreecxxbewjpdn.supabase.co/storage/v1/object/public/picture-story-audio";
 var audio = (file) => `${PICTURE_STORY_AUDIO_BASE}/${file}`;
+function findCultureTaskForLesson(lessonSlug) {
+  var _a;
+  for (const [id2, task] of Object.entries(CULTURE_TASKS)) {
+    if ((_a = task.lessons) == null ? void 0 : _a.some((l2) => l2.slug === lessonSlug))
+      return { id: id2, task };
+  }
+  return null;
+}
 var CULTURE_TASKS = {
   // Unit 4 Lesson 1 で使用
   "japanese-names": {
     title: "Japanese Names \u2013 Then and Now",
+    summary: "How Japanese parents choose names, and how popular names have changed over 100 years \u2013 from Kazuko to Minato.",
+    lessons: [{ slug: "family-1", label: "Family 1: How many people are in your family?" }],
     cards: [
       {
         title: "Names tell a story",
@@ -65176,6 +65186,7 @@ var CULTURE_TASKS = {
   // まだどのレッスンページにもつないでいない
   "natural-disasters": {
     title: "Living with Natural Disasters in Japan",
+    summary: "Earthquakes, the rainy season, typhoons, an active volcano and the snowiest city in the world \u2013 and how people in Japan live with them.",
     cards: [
       {
         title: "Earthquakes \u5730\u9707 (jishin)",
@@ -65350,7 +65361,6 @@ function slugCandidates(slug) {
   return [slug, ...legacy];
 }
 var LESSON_SLUG = "family-1";
-var CULTURE_TASK_ID = "japanese-names";
 async function loader$k({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
@@ -65390,7 +65400,7 @@ async function loader$k({ request }) {
     loadError: loadError || (!lessonData ? `Lesson ${LESSON_SLUG} not found in edu_lessons.` : null)
   });
 }
-var meta$k = ({ data: data2 }) => {
+var meta$l = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var COMPLETED_TASK_NAMES = {
@@ -65402,6 +65412,7 @@ var COMPLETED_TASK_NAMES = {
   culture: "culture tasks"
 };
 function LessonsFamily1Page() {
+  var _a;
   const layoutRef = reactExports.useRef(null);
   const themeColor = "#f97316";
   const [user, setUser] = reactExports.useState(null);
@@ -65420,7 +65431,7 @@ function LessonsFamily1Page() {
   const [writingTaskCompleted, setWritingTaskCompleted] = reactExports.useState(false);
   const [isCultureTaskOpen, setIsCultureTaskOpen] = reactExports.useState(false);
   const [cultureTaskCompleted, setCultureTaskCompleted] = reactExports.useState(false);
-  const cultureTask = CULTURE_TASKS[CULTURE_TASK_ID];
+  const cultureTask = (_a = findCultureTaskForLesson(LESSON_SLUG)) == null ? void 0 : _a.task;
   const [savedProgress, setSavedProgress] = reactExports.useState(null);
   const [completedNotice, setCompletedNotice] = reactExports.useState(null);
   const startTask = (key, open) => {
@@ -65647,7 +65658,7 @@ var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: LessonsFamily1Page,
   loader: loader$k,
-  meta: meta$k
+  meta: meta$l
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$5 = "CONTENT_REFERENCE";
 async function fetchReferenceContentData(supabase2) {
@@ -65848,14 +65859,14 @@ function ReferenceIndex() {
     }
   );
 }
-var meta$j = ({ data: data2 }) => {
+var meta$k = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ReferenceIndex,
   loader: loader$j,
-  meta: meta$j
+  meta: meta$k
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$i({ request }) {
   const url = new URL(request.url);
@@ -65870,7 +65881,7 @@ async function loader$i({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$i = ({ data: data2 }) => {
+var meta$j = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VocabIndexPage() {
@@ -66087,6 +66098,232 @@ var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   default: VocabIndexPage,
   loader: loader$i,
+  meta: meta$j
+}, Symbol.toStringTag, { value: "Module" }));
+var PAGE_TITLE = "Japanese Culture";
+var PAGE_DESCRIPTION = "Picture stories about life in Japan, with narration and English subtitles. No Japanese needed \u2013 watch the story, then try a short quiz.";
+var meta$i = () => [
+  { title: `${PAGE_TITLE} | AI Yamato Portal` },
+  { name: "description", content: PAGE_DESCRIPTION },
+  { property: "og:title", content: `${PAGE_TITLE} | AI Yamato Portal` },
+  { property: "og:description", content: PAGE_DESCRIPTION },
+  { name: "twitter:card", content: "summary_large_image" }
+];
+var STORAGE_KEY = "culture-completed-v1";
+function readCompleted() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const list2 = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list2) ? list2.filter((v2) => typeof v2 === "string") : [];
+  } catch {
+    return [];
+  }
+}
+function writeCompleted(list2) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list2));
+  } catch {
+  }
+}
+var TASK_ENTRIES = Object.entries(CULTURE_TASKS);
+var ALL_LESSON_SLUGS = [...new Set(TASK_ENTRIES.flatMap(([, t2]) => (t2.lessons ?? []).map((l2) => l2.slug)))];
+function CultureHubPage() {
+  const [openTaskId, setOpenTaskId] = reactExports.useState(null);
+  const [completed, setCompleted] = reactExports.useState([]);
+  const [userId, setUserId] = reactExports.useState(null);
+  const [lessonIds, setLessonIds] = reactExports.useState({});
+  const [savedNotice, setSavedNotice] = reactExports.useState({});
+  const addCompleted = (ids) => setCompleted((prev) => {
+    const next = [.../* @__PURE__ */ new Set([...prev, ...ids])];
+    return next.length === prev.length ? prev : next;
+  });
+  reactExports.useEffect(() => {
+    addCompleted(readCompleted());
+  }, []);
+  reactExports.useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      var _a;
+      return setUserId(((_a = session == null ? void 0 : session.user) == null ? void 0 : _a.id) ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        var _a;
+        return setUserId(((_a = session == null ? void 0 : session.user) == null ? void 0 : _a.id) ?? null);
+      }
+    );
+    return () => subscription.unsubscribe();
+  }, []);
+  reactExports.useEffect(() => {
+    if (!userId || ALL_LESSON_SLUGS.length === 0)
+      return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: lessons, error } = await supabase.from("edu_lessons").select("id, slug").in("slug", ALL_LESSON_SLUGS.flatMap(slugCandidates));
+        if (error)
+          throw error;
+        const ids = {};
+        for (const l2 of lessons ?? [])
+          ids[newSlugFor(l2.slug) || l2.slug] = String(l2.id);
+        if (cancelled)
+          return;
+        setLessonIds(ids);
+        const idList = Object.values(ids);
+        if (idList.length === 0)
+          return;
+        const { data: progress, error: progressError } = await supabase.from("edu_student_progress").select("lesson_id, is_completed").eq("user_id", userId).eq("task_key", "culture").in("lesson_id", idList);
+        if (progressError)
+          throw progressError;
+        const doneLessonIds = new Set((progress ?? []).filter((p2) => p2.is_completed).map((p2) => String(p2.lesson_id)));
+        const doneTasks = TASK_ENTRIES.filter(
+          ([, t2]) => (t2.lessons ?? []).some((l2) => ids[l2.slug] && doneLessonIds.has(ids[l2.slug]))
+        ).map(([id2]) => id2);
+        if (!cancelled)
+          addCompleted(doneTasks);
+      } catch (err) {
+        console.error("[Culture] Failed to load lesson progress:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+  const handleCompleted = async (taskId) => {
+    var _a;
+    writeCompleted([.../* @__PURE__ */ new Set([...readCompleted(), taskId])]);
+    addCompleted([taskId]);
+    const task = CULTURE_TASKS[taskId];
+    if (!userId || !((_a = task == null ? void 0 : task.lessons) == null ? void 0 : _a.length))
+      return;
+    const targets = task.lessons.filter((l2) => lessonIds[l2.slug]);
+    if (targets.length === 0)
+      return;
+    try {
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const { error } = await supabase.from("edu_student_progress").upsert(
+        targets.map((l2) => ({
+          user_id: userId,
+          lesson_id: lessonIds[l2.slug],
+          task_key: "culture",
+          is_completed: true,
+          updated_at: now
+        })),
+        { onConflict: "user_id,lesson_id,task_key" }
+      );
+      if (error)
+        throw error;
+      setSavedNotice((prev) => ({
+        ...prev,
+        [taskId]: `Counted as the culture task in ${targets.map((l2) => l2.label.split(":")[0]).join(", ")}.`
+      }));
+    } catch (err) {
+      console.error("[Culture] Failed to save lesson progress:", err);
+    }
+  };
+  const openTask = openTaskId ? CULTURE_TASKS[openTaskId] : null;
+  const completedCount = completed.filter((id2) => id2 in CULTURE_TASKS).length;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(ToolPageWrapper, { breadcrumbTitle: PAGE_TITLE, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 sm:py-12 px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-6xl mx-auto space-y-8", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-rose-500 to-orange-500 text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider bg-white/20 w-fit px-3 py-1 rounded-full", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F38E} Culture" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u2022" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "No Japanese needed" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl font-extrabold", children: PAGE_TITLE }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-rose-50 leading-relaxed max-w-2xl", children: PAGE_DESCRIPTION }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs sm:text-sm text-rose-100", children: [
+          TASK_ENTRIES.length,
+          " ",
+          TASK_ENTRIES.length === 1 ? "story" : "stories",
+          " \xB7 ",
+          completedCount,
+          " completed",
+          userId ? " \xB7 Stories you finish here also count in your lessons." : " \xB7 Sign in to have the stories you finish count in your lessons."
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: TASK_ENTRIES.map(([taskId, task]) => {
+        const isDone = completed.includes(taskId);
+        const cover = task.cards[0];
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "article",
+          {
+            className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col",
+            children: [
+              cover && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => setOpenTaskId(taskId),
+                  className: "block bg-slate-100 dark:bg-slate-800 cursor-pointer",
+                  "aria-label": `Start: ${task.title}`,
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "img",
+                    {
+                      src: cover.imageUrl,
+                      alt: cover.imageAlt,
+                      loading: "lazy",
+                      className: "w-full aspect-[3/2] object-cover"
+                    }
+                  )
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-5 sm:p-6 flex flex-col gap-3 flex-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between gap-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 leading-snug", children: task.title }),
+                  isDone && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300", children: "\u2705 Completed" })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: task.summary }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs font-semibold text-slate-500 dark:text-slate-400", children: [
+                  "\u{1F5BC}\uFE0F ",
+                  task.cards.length,
+                  " picture cards \xB7 \u{1F50A} narration with subtitles \xB7 \u2753 ",
+                  task.questions.length,
+                  " quiz questions"
+                ] }),
+                task.lessons && task.lessons.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: [
+                  "Also in lesson:",
+                  " ",
+                  task.lessons.map((l2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(React.Fragment, { children: [
+                    i > 0 && ", ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: `/lessons/${l2.slug}`, className: "font-bold text-orange-600 dark:text-orange-400 underline", children: l2.label })
+                  ] }, l2.slug))
+                ] }),
+                savedNotice[taskId] && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs font-bold text-emerald-700 dark:text-emerald-300", role: "status", children: [
+                  "\u{1F389} ",
+                  savedNotice[taskId]
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-auto pt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => setOpenTaskId(taskId),
+                    className: "w-full py-3 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm shadow transition active:scale-95 cursor-pointer",
+                    children: isDone ? "\u{1F501} Watch again" : "\u25B6 Start the story"
+                  }
+                ) })
+              ] })
+            ]
+          },
+          taskId
+        );
+      }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 text-center", children: userId ? "Finishing a story here also completes the culture task in the lessons that use it." : "Completed marks are saved only in this browser. Sign in to save your progress to your lessons." })
+    ] }) }),
+    openTask && openTaskId && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      EduCultureTaskModal,
+      {
+        task: openTask,
+        isOpen: true,
+        onClose: () => setOpenTaskId(null),
+        onCompleted: () => handleCompleted(openTaskId)
+      }
+    )
+  ] });
+}
+var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: CultureHubPage,
   meta: meta$i
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$h({ request }) {
@@ -66164,7 +66401,7 @@ function HanafudaRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HanafudaFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HanafudaRoute,
   loader: loader$h,
@@ -66230,6 +66467,20 @@ function LessonsHubIndex() {
           /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl mb-4", children: "Japanese Lessons & Textbooks" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed", children: "Explore interactive lessons, vocabulary builders, and AI-guided conversational practice designed for learners worldwide." })
         ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Link,
+          {
+            to: "/culture",
+            className: "mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md hover:shadow-lg transition",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg sm:text-xl font-black", children: "\u{1F38E} Japanese Culture" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-50", children: "Picture stories about life in Japan, with narration and English subtitles. No Japanese needed." })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "shrink-0 font-black text-sm bg-white/20 px-4 py-2 rounded-xl", children: "Explore culture \u2192" })
+            ]
+          }
+        ),
         errorMessage && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 rounded-2xl text-xs", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Database Warning:" }),
           " ",
@@ -66318,7 +66569,7 @@ function LessonsHubIndex() {
     }
   );
 }
-var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsHubIndex,
   loader: loader$g,
@@ -66401,7 +66652,7 @@ function PrivacyPolicy() {
     }
   );
 }
-var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrivacyPolicy,
   loader: loader$f,
@@ -66626,7 +66877,7 @@ function LessonTopicHubPage() {
     }
   );
 }
-var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonTopicHubPage,
   loader: loader$e,
@@ -66635,6 +66886,7 @@ var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 var generatedRoutes = [
   "/about",
   "/contact",
+  "/culture._index",
   "/faq",
   "/games._index",
   "/games.character-maze",
@@ -66696,7 +66948,7 @@ ${routes2.map(
     }
   });
 }
-var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   loader: loader$d
 }, Symbol.toStringTag, { value: "Module" }));
@@ -67033,7 +67285,7 @@ function VocabCreatorPage() {
     ] })
   ] }) }) });
 }
-var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VocabCreatorPage,
   loader: loader$c,
@@ -67215,7 +67467,7 @@ function GamesHubIndex() {
 var meta$c = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: GamesHubIndex,
   loader: loader$b,
@@ -67314,7 +67566,7 @@ function LegalIndex() {
 var meta$b = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LegalIndex,
   loader: loader$a,
@@ -67327,7 +67579,7 @@ var meta$a = () => [
 function PrintReport() {
   return null;
 }
-var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrintReport,
   meta: meta$a
@@ -67407,7 +67659,7 @@ function ShogiRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ShogiFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ShogiRoute,
   loader: loader$9,
@@ -67490,7 +67742,7 @@ function TermsOfService() {
 var meta$8 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TermsOfService,
   loader: loader$8,
@@ -71915,6 +72167,7 @@ async function action$1({ request, context }) {
       return dist$1.json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
     }
     const supabaseAdmin = createAdminSupabaseClient(context);
+    await deleteHandwritingSubmissions(supabaseAdmin, user.id);
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
     if (deleteError) {
       return dist$1.json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
@@ -72018,6 +72271,22 @@ async function action$1({ request, context }) {
     return dist$1.json({ intent, success: true, message: "You left the class." });
   }
   return dist$1.json({ error: "Invalid intent.", success: false }, { status: 400 });
+}
+async function deleteHandwritingSubmissions(admin, userId) {
+  try {
+    const { data: rows } = await admin.from("edu_writing_submissions").select("image_path").eq("user_id", userId).not("image_path", "is", null);
+    const paths = (rows ?? []).map((r2) => r2.image_path).filter(Boolean);
+    if (paths.length > 0) {
+      const { error } = await admin.storage.from("writing-submissions").remove(paths);
+      if (error)
+        console.error("delete-account: could not delete handwriting images:", error.message);
+    }
+    const { error: rowError } = await admin.from("edu_writing_submissions").delete().eq("user_id", userId);
+    if (rowError)
+      console.error("delete-account: could not delete writing submissions:", rowError.message);
+  } catch (err) {
+    console.error("delete-account: handwriting cleanup failed:", err);
+  }
 }
 async function removeJoinRequest(admin, userId) {
   const { data: old } = await admin.from("edu_class_join_requests").select("invite_id").eq("user_id", userId).maybeSingle();
@@ -72204,7 +72473,7 @@ function AccountSettingsRoute() {
 var meta$7 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
   default: AccountSettingsRoute,
@@ -72336,7 +72605,7 @@ function VceHubIndex() {
 var meta$6 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceHubIndex,
   loader: loader$6,
@@ -72417,7 +72686,7 @@ function IgoRoute() {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(IgoFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
 }
-var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: IgoRoute,
   loader: loader$5,
@@ -72598,7 +72867,7 @@ function Contact() {
     }
   );
 }
-var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action,
   default: Contact,
@@ -72972,7 +73241,7 @@ function Prices() {
     }
   );
 }
-var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Prices,
   loader: loader$3,
@@ -74203,7 +74472,7 @@ function Home() {
 var meta$2 = ({ data: data2 }) => {
   return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Home,
   loader: loader$2,
@@ -74349,7 +74618,7 @@ function AboutPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
   ] }) });
 }
-var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: AboutPage,
   loader: loader$1,
@@ -74594,13 +74863,13 @@ function FaqPage() {
     }
   );
 }
-var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route56 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: FaqPage,
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-CXkDrmNG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-Od0ThH_Y.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-C7sF-437.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-DQvUan5A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-C7GS-vbP.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/pen-line-SqtTv1-d.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/check-Btlt0QhP.js", "/assets/book-open-Cv5MGmar.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-CegKwQfO.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C7sF-437.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-wXVPOSQo.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-B9sJyEYW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-C7sF-437.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-BhFFKi5U.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-C7sF-437.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/trash-BrCoXmSH.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-BJCY7CnC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-55ejhNrg.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-Dx0EgfJn.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-DQvUan5A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-C8RRAZLg.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-BKER23UA.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-KEy7Y29F.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-D6aUb3SX.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BwZegYNA.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-Dspi0hY7.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-C7sF-437.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-xxcrANoL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-DDJRVPKz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-Bz1mN-1Z.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-C7sF-437.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-Dt_MudZo.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-F3iziXYe.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-B-9SeSMo.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-B1P7Cl7N.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-BIwn6cpa.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-DUG8VG9t.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-C_a3BemL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-B01_HuGy.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-Cy39WWiF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/seoMeta-C7sF-437.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BWqWOut4.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CL8ANZ73.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/SchoolAccountLink-CDgvMnth.js", "/assets/users-CyFwdcnm.js", "/assets/check-Btlt0QhP.js", "/assets/pen-line-SqtTv1-d.js", "/assets/trash-BrCoXmSH.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-B9g-wtDL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-CQma7nKp.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-B5PdWvQt.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lessonTextbooks-DCWXsHMf.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-DhQ9vAY3.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-BgJeuYy0.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-DU1gQApy.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BZ3oyepT.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-DdcfX_CN.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/lesson-slugs-Dbg4mCEj.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-CqlVqNF6.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-Cr354_2A.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lesson-slugs-Dbg4mCEj.js", "/assets/lessonTextbooks-DCWXsHMf.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-DAl2w6Xo.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-Cy3b-D1g.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/content-games-Cy4e-Rb4.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-CFuDrkGv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-BqxfiNDD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-DITC2gpd.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-sHHZn10U.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/SchoolAccountLink-CDgvMnth.js", "/assets/users-CyFwdcnm.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-D4AKeg9G.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-C_AU4qMn.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-Ceb2mTG7.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-CGpiu9jI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/flame-CEKYSjVY.js", "/assets/check-Btlt0QhP.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CEwLcfAI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/seoMeta-C7sF-437.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-CEKYSjVY.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/check-Btlt0QhP.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-wXVPOSQo.js", "/assets/book-open-Cv5MGmar.js", "/assets/content-games-Cy4e-Rb4.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-B5PdWvQt.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-Cytbm2OD.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-C7sF-437.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/book-open-Cv5MGmar.js", "/assets/users-CyFwdcnm.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DqbCLscr.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-C7sF-437.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-7c506de1.js", "version": "7c506de1" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-Dqi0hWX5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-DKakX5ys.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-DQvUan5A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-BzayzAzT.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-SqtTv1-d.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/check-Btlt0QhP.js", "/assets/book-open-Cv5MGmar.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-B0QTHQO5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-wXVPOSQo.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-BDzn0A-3.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-CXZlCMhz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/trash-BrCoXmSH.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-BURSMOkC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-CXgPSCJQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-CaETJyUi.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-DQvUan5A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-yWUVpADL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-C8C4Qjkv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-DOQQRIrI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-DlOpPMR8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BjIMk7hh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-DaEK6Nv5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-xxcrANoL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-5KldfK0m.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-BQbsLGm9.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-Z3rjsHrW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-DP3R374s.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-Dyld_UEF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CHzQGuqV.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-BYkANnhR.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-CB7Y35zF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-DrRXdUba.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-CHKONd0e.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-fa2hGHcv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-fQiepOZv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CL8ANZ73.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/SchoolAccountLink-CDgvMnth.js", "/assets/users-CyFwdcnm.js", "/assets/check-Btlt0QhP.js", "/assets/pen-line-SqtTv1-d.js", "/assets/trash-BrCoXmSH.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-B5djLjGm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-DQH3CIAE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-B5PdWvQt.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lessonTextbooks-DCWXsHMf.js", "/assets/culture-tasks-D6IftfLJ.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-DhQ9vAY3.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-Cocaa_o9.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-CPjAd_pQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-Uu8aoQqv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/culture-tasks-D6IftfLJ.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-CYEz8bLn.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-Wq8PlXzk.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-C7w0kTIN.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-BoPsJpE_.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/lessonTextbooks-DCWXsHMf.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-qN4OGgZZ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-OzNsxILG.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-games-Cy4e-Rb4.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BT9UaJf8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-BCKFsblz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-B9TWO01m.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-BcWjs64V.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/SchoolAccountLink-CDgvMnth.js", "/assets/users-CyFwdcnm.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CwT6N0Lm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-DZbpoxbj.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-KwfRgkBC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-DKdWdmQK.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/flame-CEKYSjVY.js", "/assets/check-Btlt0QhP.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CGY2YV8N.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-CEKYSjVY.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/check-Btlt0QhP.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-wXVPOSQo.js", "/assets/book-open-Cv5MGmar.js", "/assets/content-games-Cy4e-Rb4.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-B5PdWvQt.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-0jahUKoq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/book-open-Cv5MGmar.js", "/assets/users-CyFwdcnm.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-BicQNGL2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-727cf956.js", "version": "727cf956" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
@@ -74905,13 +75174,21 @@ var routes = {
     caseSensitive: void 0,
     module: route36
   },
+  "routes/culture._index": {
+    id: "routes/culture._index",
+    parentId: "root",
+    path: "culture",
+    index: true,
+    caseSensitive: void 0,
+    module: route37
+  },
   "routes/games.hanafuda": {
     id: "routes/games.hanafuda",
     parentId: "root",
     path: "games/hanafuda",
     index: void 0,
     caseSensitive: void 0,
-    module: route37
+    module: route38
   },
   "routes/lessons._index": {
     id: "routes/lessons._index",
@@ -74919,7 +75196,7 @@ var routes = {
     path: "lessons",
     index: true,
     caseSensitive: void 0,
-    module: route38
+    module: route39
   },
   "routes/legal.privacy": {
     id: "routes/legal.privacy",
@@ -74927,7 +75204,7 @@ var routes = {
     path: "legal/privacy",
     index: void 0,
     caseSensitive: void 0,
-    module: route39
+    module: route40
   },
   "routes/lessons.$slug": {
     id: "routes/lessons.$slug",
@@ -74935,7 +75212,7 @@ var routes = {
     path: "lessons/:slug",
     index: void 0,
     caseSensitive: void 0,
-    module: route40
+    module: route41
   },
   "routes/sitemap[.]xml": {
     id: "routes/sitemap[.]xml",
@@ -74943,7 +75220,7 @@ var routes = {
     path: "sitemap.xml",
     index: void 0,
     caseSensitive: void 0,
-    module: route41
+    module: route42
   },
   "routes/vocab-creator": {
     id: "routes/vocab-creator",
@@ -74951,7 +75228,7 @@ var routes = {
     path: "vocab-creator",
     index: void 0,
     caseSensitive: void 0,
-    module: route42
+    module: route43
   },
   "routes/games._index": {
     id: "routes/games._index",
@@ -74959,7 +75236,7 @@ var routes = {
     path: "games",
     index: true,
     caseSensitive: void 0,
-    module: route43
+    module: route44
   },
   "routes/legal._index": {
     id: "routes/legal._index",
@@ -74967,7 +75244,7 @@ var routes = {
     path: "legal",
     index: true,
     caseSensitive: void 0,
-    module: route44
+    module: route45
   },
   "routes/print-report": {
     id: "routes/print-report",
@@ -74975,7 +75252,7 @@ var routes = {
     path: "print-report",
     index: void 0,
     caseSensitive: void 0,
-    module: route45
+    module: route46
   },
   "routes/games.shogi": {
     id: "routes/games.shogi",
@@ -74983,7 +75260,7 @@ var routes = {
     path: "games/shogi",
     index: void 0,
     caseSensitive: void 0,
-    module: route46
+    module: route47
   },
   "routes/legal.terms": {
     id: "routes/legal.terms",
@@ -74991,7 +75268,7 @@ var routes = {
     path: "legal/terms",
     index: void 0,
     caseSensitive: void 0,
-    module: route47
+    module: route48
   },
   "routes/my-account": {
     id: "routes/my-account",
@@ -74999,7 +75276,7 @@ var routes = {
     path: "my-account",
     index: void 0,
     caseSensitive: void 0,
-    module: route48
+    module: route49
   },
   "routes/vce._index": {
     id: "routes/vce._index",
@@ -75007,7 +75284,7 @@ var routes = {
     path: "vce",
     index: true,
     caseSensitive: void 0,
-    module: route49
+    module: route50
   },
   "routes/games.igo": {
     id: "routes/games.igo",
@@ -75015,7 +75292,7 @@ var routes = {
     path: "games/igo",
     index: void 0,
     caseSensitive: void 0,
-    module: route50
+    module: route51
   },
   "routes/contact": {
     id: "routes/contact",
@@ -75023,7 +75300,7 @@ var routes = {
     path: "contact",
     index: void 0,
     caseSensitive: void 0,
-    module: route51
+    module: route52
   },
   "routes/prices": {
     id: "routes/prices",
@@ -75031,7 +75308,7 @@ var routes = {
     path: "prices",
     index: void 0,
     caseSensitive: void 0,
-    module: route52
+    module: route53
   },
   "routes/_index": {
     id: "routes/_index",
@@ -75039,7 +75316,7 @@ var routes = {
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route53
+    module: route54
   },
   "routes/about": {
     id: "routes/about",
@@ -75047,7 +75324,7 @@ var routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route54
+    module: route55
   },
   "routes/faq": {
     id: "routes/faq",
@@ -75055,7 +75332,7 @@ var routes = {
     path: "faq",
     index: void 0,
     caseSensitive: void 0,
-    module: route55
+    module: route56
   }
 };
 

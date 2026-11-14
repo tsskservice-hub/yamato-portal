@@ -3,7 +3,7 @@
  * @description Supabase の各 content モジュール（General, Speaking, Writing, Reference, Lessons, Junior）および Games を統合して描画するグリッドコンポーネント
  */
 import React from 'react';
-import { ArrowRight, BookOpen, FileText, Gamepad2, Grid, Mic, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, FileText, Gamepad2, Grid, Landmark, Mic, Sparkles } from 'lucide-react';
 import type { PortalModule } from '~/data/content-other';
 
 interface PortalModulesGridProps {
@@ -38,6 +38,7 @@ export function PortalModulesGrid({
       case "FileText": return <FileText className={className} />;
       case "Gamepad2": return <Gamepad2 className={className} />;
       case "BookOpen": return <BookOpen className={className} />;
+      case "Landmark": return <Landmark className={className} />;
       default: return <FileText className={className} />;
     }
   };
@@ -166,11 +167,27 @@ export function PortalModulesGrid({
               {
                 id: 'lessons-hub',
                 name: 'Textbook Lessons & Units',
-                description: 'Explore interactive lessons such as Obento Deluxe Unit 4 (Family & Pets), vocabulary lists, and AI Yamato sensei guidance.',
+                description: 'Explore interactive lessons on everyday topics such as family and pets, with vocabulary, AI Yamato guidance and six self-study tasks.',
                 path: '/lessons',
                 category: 'Curriculum Hub',
                 iconName: 'BookOpen',
                 actionLabel: 'Explore Lessons',
+                isComingSoon: false,
+                creditRequirement: null,
+                accentColor: 'orange',
+              },
+              'orange'
+            )}
+            {/* 文化ページ（/culture）：日本語の力に関係なく、ログインなしで学べる */}
+            {renderCard(
+              {
+                id: 'culture-hub',
+                name: 'Japanese Culture',
+                description: 'Picture stories about life in Japan, with narration and English subtitles. No Japanese needed.',
+                path: '/culture',
+                category: 'Culture',
+                iconName: 'Landmark',
+                actionLabel: 'Explore Culture',
                 isComingSoon: false,
                 creditRequirement: null,
                 accentColor: 'orange',

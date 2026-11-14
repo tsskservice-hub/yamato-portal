@@ -2,8 +2,11 @@
  * @file app/data/culture-tasks.ts
  * @description 各レッスンの文化タスク（紙芝居カード＋ナレーション字幕＋選択式クイズ）の内容
  *
- * 新しい文化タスクを足すときは、CULTURE_TASKS にタスクの ID（例：natural-disasters）をキーにして追加し、
- * レッスンページで CULTURE_TASKS["そのID"] を EduCultureTaskModal に渡す。
+ * 新しい文化タスクを足すときは、CULTURE_TASKS にタスクの ID（例：natural-disasters）をキーにして追加する。
+ * - 追加したタスクは文化ページ（/culture）に自動で並ぶ
+ * - レッスンで使う時は、そのタスクの lessons にレッスンの slug を書く。
+ *   レッスンページは findCultureTaskForLesson(slug) で自分の文化タスクを見つける。
+ *   /culture でタスクを終えた生徒（ログイン中）は、lessons のレッスンの文化タスクも完了になる
  * （タスクの ID はレッスンと切り離しているので、レッスンページができる前に作っておける）
  * - カード画像：public/images/picture-story/ に置く
  * - ナレーション音声：Supabase Storage の picture-story-audio バケットに置く
@@ -50,6 +53,14 @@ export interface CultureThinkAbout {
 
 export interface CultureTask {
   title: string;
+  /** 文化ページ（/culture）の一覧に出す短い紹介（英語・1〜2文） */
+  summary: string;
+  /**
+   * このタスクを6つ目のタスク（文化）として使うレッスン（edu_lessons.slug と表示名）。
+   * ここが「どのレッスンでどの文化タスクを使うか」の唯一の情報源：
+   * レッスンページの文化タスクも、/culture で終えた時に完了にするレッスンも、ここで決まる。
+   */
+  lessons?: { slug: string; label: string }[];
   cards: CultureCard[];
   /** カードを見終わった後の「考えてみよう」（採点しない） */
   thinkAbout?: CultureThinkAbout;
@@ -58,10 +69,20 @@ export interface CultureTask {
 
 const audio = (file: string) => `${PICTURE_STORY_AUDIO_BASE}/${file}`;
 
+/** レッスン（slug）が6つ目のタスクとして使う文化タスクを返す（無ければ null） */
+export function findCultureTaskForLesson(lessonSlug: string): { id: string; task: CultureTask } | null {
+  for (const [id, task] of Object.entries(CULTURE_TASKS)) {
+    if (task.lessons?.some((l) => l.slug === lessonSlug)) return { id, task };
+  }
+  return null;
+}
+
 export const CULTURE_TASKS: Record<string, CultureTask> = {
   // Unit 4 Lesson 1 で使用
   "japanese-names": {
     title: "Japanese Names – Then and Now",
+    summary: "How Japanese parents choose names, and how popular names have changed over 100 years – from Kazuko to Minato.",
+    lessons: [{ slug: "family-1", label: "Family 1: How many people are in your family?" }],
     cards: [
       {
         title: "Names tell a story",
@@ -185,6 +206,7 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
   // まだどのレッスンページにもつないでいない
   "natural-disasters": {
     title: "Living with Natural Disasters in Japan",
+    summary: "Earthquakes, the rainy season, typhoons, an active volcano and the snowiest city in the world – and how people in Japan live with them.",
     cards: [
       {
         title: "Earthquakes 地震 (jishin)",

@@ -2,6 +2,7 @@
 export const generatedRoutes: string[] = [
   "/about",
   "/contact",
+  "/culture._index",
   "/faq",
   "/games._index",
   "/games.character-maze",
