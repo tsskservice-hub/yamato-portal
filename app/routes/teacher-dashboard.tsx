@@ -5,6 +5,7 @@
  *  - レッスンのタスク（vocabulary / listening / reading / speaking / writing）を宿題として出す
  *  - 宿題ごと・生徒ごとの進捗（edu_student_progress）と、期間内の宿題完了率（%）を見る
  *  - 生徒の手書きライティング（edu_writing_submissions と非公開バケットの画像）を見る
+ *  - ゲームをクラス全体でロック／ロック解除、生徒 1 人ずつロック解除する（判定は lib/game-access.server.ts）
  *
  * edu_classes / edu_homework はブラウザから触れないため、すべてこのサーバー側で担任かどうかを確認してから管理者キーで読み書きする。
  */
@@ -35,6 +36,7 @@ import {
 import {
   ClassBar,
   ClassSettingsCard,
+  GamesCard,
   JoinRequestsCard,
   InviteCodesCard,
   HandwritingCard,
@@ -87,7 +89,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const { data: classes } = await admin
     .from('edu_classes')
-    .select('id, name, join_code, school_domain, created_at')
+    .select('id, name, join_code, school_domain, games_locked, created_at')
     .eq('teacher_id', user.id)
     .order('created_at', { ascending: true });
 
@@ -265,6 +267,13 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       ? String(settings.image_retention_days)
       : 'none';
 
+  // ゲームのロック（クラス全体）と、ロック中に個別にロック解除した生徒（21_class_game_locks.sql）
+  const { data: unlockRows } = selected.games_locked
+    ? await admin.from('edu_class_game_unlocks').select('user_id').eq('class_id', selected.id)
+    : { data: [] as any[] };
+  const memberSet = new Set(studentIds);
+  const gameUnlockedIds = (unlockRows ?? []).map((u: any) => u.user_id as string).filter((id) => memberSet.has(id));
+
   return json({
     ...base,
     selectedClass: {
@@ -272,6 +281,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       name: selected.name,
       joinCode: selected.join_code,
       allowedDomains: allowedStudentDomains(selected.school_domain),
+      gamesLocked: Boolean(selected.games_locked),
+      gameUnlockedIds,
     },
     joinRequests,
     invites,
@@ -480,6 +491,47 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (intent === 'remove-student') {
     const studentId = String(form.get('studentId') ?? '');
     await admin.from('edu_class_members').delete().eq('class_id', cls.id).eq('user_id', studentId).eq('role', 'student');
+    await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+    return backTo(cls.id);
+  }
+
+  // ゲームのロック（授業中に生徒がゲームに夢中にならないように）
+  //   クラス全体をロック／ロック解除すると、個別のロック解除はリセットする（次の授業はまた全員ロックから始める）
+  if (intent === 'lock-games' || intent === 'unlock-games') {
+    const locked = intent === 'lock-games';
+    const { error } = await admin
+      .from('edu_classes')
+      .update({ games_locked: locked, games_locked_at: locked ? new Date().toISOString() : null })
+      .eq('id', cls.id);
+    if (error) {
+      console.error('[teacher-dashboard] game lock failed:', error.message);
+      return fail('Could not change the game lock. Please try again.', 500);
+    }
+    await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id);
+    return backTo(cls.id);
+  }
+
+  // ロック中のクラスで、生徒 1 人だけロック解除する（課題が早く終わった生徒など）／もう一度ロックする
+  if (intent === 'unlock-student-games' || intent === 'relock-student-games') {
+    const studentId = String(form.get('studentId') ?? '');
+    const { data: member } = await admin
+      .from('edu_class_members')
+      .select('user_id')
+      .eq('class_id', cls.id)
+      .eq('user_id', studentId)
+      .eq('role', 'student')
+      .maybeSingle();
+    if (!member) return fail('Student not found.', 404);
+
+    const { error } = intent === 'unlock-student-games'
+      ? await admin
+          .from('edu_class_game_unlocks')
+          .upsert({ class_id: cls.id, user_id: studentId, unlocked_at: new Date().toISOString() }, { onConflict: 'class_id,user_id' })
+      : await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+    if (error) {
+      console.error('[teacher-dashboard] student game lock failed:', error.message);
+      return fail('Could not change the game lock for this student. Please try again.', 500);
+    }
     return backTo(cls.id);
   }
 
@@ -615,6 +667,7 @@ export default function TeacherDashboardPage() {
 
         {data.selectedClass && (
           <>
+            <GamesCard data={data} />
             <JoinRequestsCard data={data} />
             <ClassSettingsCard data={data} />
             <InviteCodesCard data={data} />

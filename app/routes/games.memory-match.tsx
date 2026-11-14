@@ -2,7 +2,7 @@
  * @file games.memory-match.tsx
  * @description Memory Match — three concentration games (Hiragana,
  * Katakana and Kanji) whose cards are loaded live from the Supabase
- * table `kl_character`, featuring passcode/unlock protection matching character-maze.tsx.
+ * table `kl_character`. Login and the teacher's class lock are checked by GameAccessGate.
  */
 import { DataErrorState } from '~/components/DataErrorState';
 import {
@@ -23,6 +23,8 @@ import {
 } from "~/utils/characterChartUtils";
 import { ReferenceChartKana } from "~/components/ReferenceChartKana";
 import { ReferenceChartKanji } from "~/components/ReferenceChartKanji";
+import { GameAccessGate } from "~/components/games/GameAccessGate";
+import { shuffle } from "~/utils/shuffle";
 
 type GameMode = "hiragana" | "katakana" | "kanji";
 type KanjiPairMode = "reading" | "meaning";
@@ -237,15 +239,6 @@ const DIFFICULTIES: Record<
   hard: { label: "Hard", pairs: 18, cols: 6 },
 };
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 function uniqueByAnswer(items: PairSource[]): PairSource[] {
   const seen = new Set<string>();
   const out: PairSource[] = [];
@@ -294,29 +287,12 @@ function formatTime(totalSeconds: number): string {
 }
 
 // ------------------------------------------------------------------
-// Page Component with Passcode Protection Structure
+// Page Component (login + teacher's class lock via GameAccessGate)
 // ------------------------------------------------------------------
 
 export default function MemoryMatchPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const data = useLoaderData<typeof loader>() as unknown as LoaderDataShape;
-
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = useState(false);
-  const [inputPasscode, setInputPasscode] = useState('');
-
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputPasscode === '1111') {
-      setIsCodeUnlocked(true);
-      alert('✨ 認証に成功しました！ゲームが一時的にロック解除されました。');
-    } else {
-      alert('❌ パスコードが違います。');
-    }
-  };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Memory Match">
@@ -333,52 +309,25 @@ export default function MemoryMatchPage() {
           </p>
         </header>
 
-        {isAccessible ? (
-          data.loadError &&
-          data.pools.hiragana.length === 0 &&
-          data.pools.katakana.length === 0 &&
-          data.pools.kanji.length === 0 &&
-          data.pools.kanjiMeaning.length === 0 ? (
-            <DataErrorState
-              title="Unable to Load Data"
-              errorMessage={`Failed to load characters (kl_character): ${data.loadError}`}
-            />
-          ) : (
-            <MemoryMatchGame
-              pools={data.pools}
-              kanjiReadingAvailable={data.kanjiReadingAvailable}
-            />
-          )
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm dark:bg-slate-900 dark:border-slate-800">
-            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner dark:bg-slate-800 dark:border-slate-700">
-              🔒
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">このエリアは現在ロックされています</h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                課題を完了するか、先生から提供されたパスコードを入力してください。
-              </p>
-            </div>
-
-            <form onSubmit={handlePasscodeSubmit} className="flex gap-2 max-w-xs mx-auto">
-              <input
-                type="text"
-                maxLength={4}
-                placeholder="4桁のコード"
-                value={inputPasscode}
-                onChange={(e) => setInputPasscode(e.target.value)}
-                className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:border-indigo-500"
+        <GameAccessGate layoutRef={layoutRef}>
+          {() =>
+            data.loadError &&
+            data.pools.hiragana.length === 0 &&
+            data.pools.katakana.length === 0 &&
+            data.pools.kanji.length === 0 &&
+            data.pools.kanjiMeaning.length === 0 ? (
+              <DataErrorState
+                title="Unable to Load Data"
+                errorMessage={`Failed to load characters (kl_character): ${data.loadError}`}
               />
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
-              >
-                解除
-              </button>
-            </form>
-          </div>
-        )}
+            ) : (
+              <MemoryMatchGame
+                pools={data.pools}
+                kanjiReadingAvailable={data.kanjiReadingAvailable}
+              />
+            )
+          }
+        </GameAccessGate>
       </div>
     </ToolPageWrapper>
   );
@@ -456,10 +405,10 @@ function MemoryMatchGame({
 
   useEffect(() => {
     if (!started || won) return;
-    const t = setInterval(
-      () => setElapsed((e) => e + 1),
-      1000,
-    );
+    // The clock stops while the tab is hidden (you are not playing then).
+    const t = setInterval(() => {
+      if (!document.hidden) setElapsed((e) => e + 1);
+    }, 1000);
     return () => clearInterval(t);
   }, [started, won]);
 

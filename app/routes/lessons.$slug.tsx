@@ -2,6 +2,8 @@
  * @file app/routes/lessons.$slug.tsx
  * @description トピックの学習ハブページ（全トピック共通。例：/lessons/family）
  *   - 古い URL（/lessons/obento-unit-4 や /lessons/obento-unit-4-lesson-1）は新しい URL へ転送する
+ *   - トピックでない slug（例：/lessons/dates-1）は、edu_lessons にあればレッスンページ（EduLessonPage）を表示する。
+ *     新しいレッスンはデータベースに行を足すだけでページができる（ルートのファイルは要らない）
  *   - 個別のレッスンページ（例：lessons.family-1.tsx）はこのファイルより優先される
  *   - 各レッスンが対応する教科書・ユニットは edu_lesson_textbook_units から表示する
  */
@@ -15,6 +17,8 @@ import { type PageLayoutRef } from "~/components/layout/PageLayout";
 import { supabase } from "~/lib/supabaseClient";
 import { newSlugFor, slugCandidates } from "~/data/lesson-slugs";
 import { fetchTextbookRefs, formatTextbookRef, TEXTBOOK_DISCLAIMER, type TextbookRef } from "~/lib/lessonTextbooks";
+import { fetchLessonPageData, type LessonPageData } from "~/lib/lessonPageData";
+import { EduLessonPage } from "~/components/lessons/EduLessonPage";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -54,9 +58,19 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     console.warn(`⚠️ [Loader] Failed to fetch topic ${slug}:`, err);
   }
 
-  // トピックが無い URL は 404（個別ページがまだ無いレッスンの URL もここに来る）
+  // トピックでなければレッスンを探す（例：/lessons/family-2）。どちらも無ければ 404
   if (!topicData) {
-    throw new Response("Not Found", { status: 404 });
+    const lessonPage = await fetchLessonPageData(slug);
+    if (!lessonPage.lesson) {
+      throw new Response("Not Found", { status: 404 });
+    }
+    return json({
+      kind: "lesson" as const,
+      portalContent,
+      currentPath: url.pathname,
+      slug: String(lessonPage.lesson.slug),
+      ...lessonPage,
+    });
   }
 
   try {
@@ -84,6 +98,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }
 
   return json({
+    kind: "topic" as const,
     portalContent,
     currentPath: url.pathname,
     topic: topicData,
@@ -98,7 +113,15 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
-export default function LessonTopicHubPage() {
+export default function LessonSlugPage() {
+  const loaderData = useLoaderData<typeof loader>() as any;
+  if (loaderData?.kind === "lesson") {
+    return <EduLessonPage key={loaderData.slug} lessonSlug={loaderData.slug} data={loaderData as LessonPageData} />;
+  }
+  return <LessonTopicHubPage />;
+}
+
+function LessonTopicHubPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
 
   const [user, setUser] = useState<any>(null);

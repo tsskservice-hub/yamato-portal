@@ -42,10 +42,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
       fetchError = error.message;
     } else {
       // 各トピック内のレッスンを lesson_order 順に並べる
-      topicsData = (topics || []).map((topic: any) => ({
-        ...topic,
-        edu_lessons: (topic.edu_lessons || []).sort((a: any, b: any) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0))
-      }));
+      // レッスンがまだ1つも無いトピック（先に登録だけしてあるユニット）は一覧に出さない
+      topicsData = (topics || [])
+        .map((topic: any) => ({
+          ...topic,
+          edu_lessons: (topic.edu_lessons || []).sort((a: any, b: any) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0))
+        }))
+        .filter((topic: any) => topic.edu_lessons.length > 0);
     }
   } catch (err: any) {
     console.error("❌ [Loader Exception]:", err);

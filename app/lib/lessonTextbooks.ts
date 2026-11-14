@@ -1,7 +1,7 @@
 /**
  * @file app/lib/lessonTextbooks.ts
  * @description レッスンが対応する教科書・ユニット（edu_lesson_textbook_units）を読み込む
- *   レッスンページやトピックページで「Obento Deluxe (5th edition) · Unit 4 · P. 1-3」のように表示するために使う。
+ *   レッスンページやトピックページで「Obento Deluxe (5th edition) · Unit 4: Family · P. 1-3」のように表示するために使う。
  *   後で iiTomo などの対応を足しても、データベースに行を足すだけでここはそのまま使える。
  */
 
@@ -11,6 +11,7 @@ export interface TextbookRef {
   textbook: string;          // 例：Obento Deluxe
   edition: string | null;    // 例：5th edition
   unit: number;              // 例：4
+  unitTitle: string | null;  // 例：Family（英語のトピック名）
   coverage: "full" | "partial";
   pageRef: string | null;    // 例：P. 1-3
   note: string | null;
@@ -24,7 +25,7 @@ export async function fetchTextbookRefs(lessonIds: string[]): Promise<Record<str
   try {
     const { data, error } = await supabase
       .from("edu_lesson_textbook_units")
-      .select("lesson_id, coverage, page_ref, note, edu_textbook_units ( unit_number, edu_textbooks ( title, edition, sort_order ) )")
+      .select("lesson_id, coverage, page_ref, note, edu_textbook_units ( unit_number, title, edu_textbooks ( title, edition, sort_order ) )")
       .in("lesson_id", lessonIds);
     if (error) throw error;
 
@@ -37,6 +38,7 @@ export async function fetchTextbookRefs(lessonIds: string[]): Promise<Record<str
         textbook: book.title,
         edition: book.edition ?? null,
         unit: unit.unit_number,
+        unitTitle: unit.title ?? null,
         coverage: row.coverage === "partial" ? "partial" : "full",
         pageRef: row.page_ref ?? null,
         note: row.note ?? null,
@@ -50,12 +52,13 @@ export async function fetchTextbookRefs(lessonIds: string[]): Promise<Record<str
   return result;
 }
 
-/** 表示用の 1 行：Obento Deluxe (5th edition) · Unit 4 · P. 1-3 */
+/** 表示用の 1 行：Obento Deluxe (5th edition) · Unit 4: Family · P. 1-3 */
 export function formatTextbookRef(ref: TextbookRef): string {
   const book = ref.edition ? `${ref.textbook} (${ref.edition})` : ref.textbook;
   const page = ref.pageRef ? ` · ${ref.pageRef.replace(/^Unit \d+,\s*/, "")}` : "";
   const partial = ref.coverage === "partial" ? " · partly" : "";
-  return `${book} · Unit ${ref.unit}${page}${partial}`;
+  const unit = ref.unitTitle ? `Unit ${ref.unit}: ${ref.unitTitle}` : `Unit ${ref.unit}`;
+  return `${book} · ${unit}${page}${partial}`;
 }
 
 /** 教科書の出版社と関係がないことを示す一文（教科書名を出す場所に添える） */

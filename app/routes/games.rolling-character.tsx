@@ -13,7 +13,9 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/clo
 import React, { useEffect, useRef, useState } from 'react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
+import { GameAccessGate } from '~/components/games/GameAccessGate';
 import { generateModuleMeta } from '~/utils/seoMeta';
+import { shuffle } from '~/utils/shuffle';
 import { supabase } from '~/lib/supabaseClient';
 
 // ---- Character data (one source of truth) ----
@@ -63,18 +65,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) =>
 
 export default function RollingCharacterPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const [isCodeUnlocked, setIsCodeUnlocked] = useState(false);
-  const [inputPasscode, setInputPasscode] = useState('');
-
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputPasscode === '1111') {
-      setIsCodeUnlocked(true);
-      alert('✨ Authentication successful! The game has been temporarily unlocked.');
-    } else {
-      alert('❌ Incorrect passcode.');
-    }
-  };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Rolling Character">
@@ -84,25 +74,7 @@ export default function RollingCharacterPage() {
           <p className="text-xs text-slate-500 mt-0.5">Japanese Character Learning Retro Arcade Game</p>
         </header>
 
-        {isCodeUnlocked ? (
-          <RollingCharacterArena />
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">🔒</div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">This area is currently locked</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">Complete the lessons or enter the passcode provided by your teacher.</p>
-            </div>
-            <form onSubmit={handlePasscodeSubmit} className="flex gap-2 max-w-xs mx-auto">
-              <input
-                type="text" maxLength={4} placeholder="4-digit code" value={inputPasscode}
-                onChange={(e) => setInputPasscode(e.target.value)}
-                className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
-              />
-              <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition">Unlock</button>
-            </form>
-          </div>
-        )}
+        <GameAccessGate layoutRef={layoutRef}>{() => <RollingCharacterArena />}</GameAccessGate>
       </div>
     </ToolPageWrapper>
   );
@@ -143,7 +115,7 @@ function RollingCharacterArena() {
   const playSoundRef = useRef<((type: Sound) => void) | null>(null);
 
   const generateRandomKanaProblem = (st: number) =>
-    [...(STAGES[st - 1] || STAGES[0])].sort(() => 0.5 - Math.random()).slice(0, 3);
+    shuffle(STAGES[st - 1] || STAGES[0]).slice(0, 3);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -433,7 +405,7 @@ function RollingCharacterArena() {
       playSoundRef.current?.('damage');
       setGameState('PLAYING');
       setInputAnswers(['', '', '']);
-      setYamatoSpeech('Incorrect romaji! 振り出しに戻る (Back to start)!');
+      setYamatoSpeech('Incorrect romaji! Back to the start!');
     }
   };
 
@@ -464,8 +436,8 @@ function RollingCharacterArena() {
 
         {gameState === 'TYPING' && (
           <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-5 z-30 p-6 text-center">
-            <h2 className="text-2xl font-black text-[#ffcc00]">🎁 宝箱が開きました！</h2>
-            <p className="text-sm text-[#ccc]">次の仮名のローマ字を、それぞれの仮名の下にあるスペースに正しく入力してね</p>
+            <h2 className="text-2xl font-black text-[#ffcc00]">🎁 You reached the treasure chest!</h2>
+            <p className="text-sm text-[#ccc]">Type the romaji for each kana in the box under it.</p>
             <form onSubmit={handlePasswordSubmit} className="space-y-6">
               <div className="flex justify-center gap-6">
                 {targetKanaList.map(([kana], idx) => (
@@ -480,9 +452,9 @@ function RollingCharacterArena() {
                   </div>
                 ))}
               </div>
-              <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">答え合わせして鍵を開ける！ (Enter)</button>
+              <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">Check answers &amp; open the chest! (Enter)</button>
             </form>
-            <div className="text-xs text-[#ff5555]">※1つでも間違えると「振り出しに戻る」になるので気をつけて！</div>
+            <div className="text-xs text-[#ff5555]">Careful: if even one answer is wrong, you go back to the start!</div>
           </div>
         )}
 

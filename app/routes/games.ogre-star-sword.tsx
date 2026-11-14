@@ -4,9 +4,9 @@
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
+import { GameAccessGate } from '~/components/games/GameAccessGate';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { supabase } from '~/lib/supabaseClient';
 
@@ -71,22 +71,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
 
 export default function OgreStarSwordPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = useState(false);
-  const [inputPasscode, setInputPasscode] = useState('');
-
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputPasscode === '1111') {
-      setIsCodeUnlocked(true);
-      alert('✨ Authentication successful! The game has been temporarily unlocked.');
-    } else {
-      alert('❌ Incorrect passcode.');
-    }
-  };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Ogre Star Sword">
@@ -98,38 +82,7 @@ export default function OgreStarSwordPage() {
           </div>
         </header>
 
-        {isAccessible ? (
-          <OgreStarSwordArena />
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
-              🔒
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">This area is currently locked</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Please complete your class assignment or enter the passcode provided by your teacher.
-              </p>
-            </div>
-
-            <form onSubmit={handlePasscodeSubmit} className="flex gap-2 max-w-xs mx-auto">
-              <input
-                type="text"
-                maxLength={4}
-                placeholder="4-digit code"
-                value={inputPasscode}
-                onChange={(e) => setInputPasscode(e.target.value)}
-                className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
-              />
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
-              >
-                Unlock
-              </button>
-            </form>
-          </div>
-        )}
+        <GameAccessGate layoutRef={layoutRef}>{() => <OgreStarSwordArena />}</GameAccessGate>
       </div>
     </ToolPageWrapper>
   );

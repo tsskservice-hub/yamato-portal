@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Portal copy of the Shogi vs Computer library game plus an Open Fullscreen button, added 2026-11-10. Library original untouched. -->
+<!-- Portal copy of the Shogi vs Computer library game. Served by app/routes/game-frame.$name.ts (login + teacher lock); fullscreen is the portal's GameFrame toolbar. Library original untouched. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -233,7 +233,6 @@
     <div class="page">
       <div class="topbar">
         <button class="btn" id="rulesBtn" type="button">How to Play &amp; Rules</button>
-        <button class="btn" id="fullBtn" type="button">Open Fullscreen</button>
       </div>
 
       <section class="newgame" aria-label="New game">
@@ -1040,30 +1039,7 @@
 
       /* ---------- Init ---------- */
       startGame(0, 2);
-
-      /* Fullscreen (same pattern as the Prefecture Puzzle): the Fullscreen API
-         on the whole page. When embedded in the portal, the portal iframe needs
-         allowfullscreen for this to work. If fullscreen is blocked or unavailable,
-         open this page in a new tab instead. */
-      var FULL_BTN = document.getElementById("fullBtn");
-      function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
-      function updateFullBtn() { if (FULL_BTN) FULL_BTN.textContent = isFullscreen() ? "Exit Fullscreen" : "Open Fullscreen"; }
-      document.addEventListener("fullscreenchange", updateFullBtn);
-      document.addEventListener("webkitfullscreenchange", updateFullBtn);
-      if (FULL_BTN) FULL_BTN.addEventListener("click", function () {
-        if (isFullscreen()) {
-          var exit = document.exitFullscreen || document.webkitExitFullscreen;
-          if (exit) exit.call(document);
-          return;
-        }
-        var req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
-        if (req) {
-          var p = req.call(document.documentElement);
-          if (p && p.catch) p.catch(function () { window.open(location.href, "_blank", "noopener"); });
-        } else {
-          window.open(location.href, "_blank", "noopener");
-        }
-      });
+      /* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */
     </script>
   </body>
 </html>

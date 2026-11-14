@@ -49,6 +49,18 @@ export function createServerSupabaseClient(request: Request, context?: any) {
   return { supabase, headers };
 }
 
+/**
+ * 署名（HMAC）用の秘密の文字列。管理者キーから用途（purpose）ごとに作る。
+ * 新しい環境変数を増やさずに済み、管理者キーそのものはどこにも出さない（HMAC の鍵として使うだけ）。
+ */
+export function getDerivedSecret(context: any, purpose: string) {
+  const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", context);
+  if (!serviceKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.");
+  }
+  return `yamato:${purpose}:${serviceKey}`;
+}
+
 // 2. 特権権限（Service Role）を用いた管理者用クライアント（アカウント完全削除用など）
 export function createAdminSupabaseClient(context?: any) {
   const url = getEnv("SUPABASE_URL", context) || getEnv("VITE_SUPABASE_URL", context) || DEFAULT_URL;

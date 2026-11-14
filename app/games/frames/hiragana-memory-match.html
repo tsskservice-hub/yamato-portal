@@ -452,6 +452,8 @@
       function startTimer(){
         if (timerId) return;
         timerId = setInterval(function(){
+          // The clock stops while the tab is hidden (you are not playing then).
+          if (document.hidden) return;
           elapsed++;
           statTime.textContent = fmtTime(elapsed);
         }, 1000);
@@ -481,7 +483,12 @@
       // needed while playing. On narrow/portrait screens the board simply
       // takes the full width as before.
       function fitBoard(){
-        var isLandscapeDesktop = window.innerWidth > 640 && window.innerWidth >= window.innerHeight;
+        // Inside the portal the iframe grows to fit this page, so its own height can't be used
+        // (the board would keep growing). Fit the board to the portal window's height instead.
+        var embedded = document.documentElement.classList.contains('yg-embedded');
+        var viewH = window.innerHeight;
+        if (embedded){ try { viewH = window.parent.innerHeight; } catch (e) {} }
+        var isLandscapeDesktop = window.innerWidth > 640 && window.innerWidth >= viewH;
         if (!isLandscapeDesktop || !deck.length){
           boardEl.style.maxWidth = '';
           return;
@@ -489,7 +496,9 @@
         var cols = colsForViewport(DIFFS[difficulty].cols);
         var rows = Math.ceil(deck.length / cols);
         var gap = 9; // matches the landscape .board gap
-        var availH = window.innerHeight - boardEl.getBoundingClientRect().top - 26; // 26px breathing room below
+        var availH = embedded
+          ? viewH - 120 // whole board visible in the portal window, with room for the toolbar
+          : window.innerHeight - boardEl.getBoundingClientRect().top - 26; // 26px breathing room below
         if (availH < 200){ boardEl.style.maxWidth = ''; return; }
         // Card height = card width * 4/3 (aspect-ratio 3/4).
         // Solve board width W: rows * ((W - (cols-1)*gap)/cols) * 4/3 + (rows-1)*gap = availH

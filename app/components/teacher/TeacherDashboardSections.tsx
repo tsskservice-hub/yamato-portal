@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Form, Link, useNavigation } from '@remix-run/react';
 import {
   Users, KeyRound, RefreshCw, Trash2, ClipboardList, BarChart3, PenLine, Download, Image as ImageIcon, CheckCircle2, Circle,
-  UserPlus, Check, X, Ticket, Copy,
+  UserPlus, Check, X, Ticket, Copy, Gamepad2, Lock, Unlock,
 } from 'lucide-react';
 import { HANDWRITING_RETENTION_OPTIONS, INVITE_CODE_DAYS, LESSON_TASKS, formatInviteCode } from '~/lib/teacher-config';
 import { SchoolAccountLink } from '~/components/SchoolAccountLink';
@@ -17,8 +17,13 @@ export type DashboardData = {
   /** 先生の確認済みの学校メール（Google / Microsoft） */
   schoolEmails: Array<{ email: string; domain: string }>;
   classes: Array<{ id: string; name: string }>;
-  /** allowedDomains: このクラスに参加を申請できる生徒の学校メールのドメイン */
-  selectedClass: { id: string; name: string; joinCode: string; allowedDomains: string[] } | null;
+  /**
+   * allowedDomains: このクラスに参加を申請できる生徒の学校メールのドメイン
+   * gamesLocked: クラス全体のゲームのロック / gameUnlockedIds: ロック中に個別にロック解除した生徒
+   */
+  selectedClass: {
+    id: string; name: string; joinCode: string; allowedDomains: string[]; gamesLocked: boolean; gameUnlockedIds: string[];
+  } | null;
   lessons: Array<{ id: string; slug: string; title: string }>;
   period: { from: string; to: string; tz: number };
   /** email は承認したときの生徒の学校メール（個人のメールではない） */
@@ -127,6 +132,89 @@ export function ClassBar({ data }: { data: DashboardData }) {
           The free teacher plan includes {data.limits.maxClasses} class. Need more classes?{' '}
           <a href="/contact" className="text-indigo-700 font-semibold hover:underline">Ask us about a school plan</a>.
         </p>
+      )}
+    </section>
+  );
+}
+
+// ---------- ゲームのロック（授業中に生徒がゲームに夢中にならないように） ----------
+
+export function GamesCard({ data }: { data: DashboardData }) {
+  const cls = data.selectedClass!;
+  const nav = useNavigation();
+  const busy = nav.state !== 'idle';
+  const unlocked = new Set(cls.gameUnlockedIds);
+
+  return (
+    <section className={`${card} ${cls.gamesLocked ? 'border-amber-300' : ''}`} aria-label="Games">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h2 className={h2}><Gamepad2 className="w-5 h-5 text-indigo-600" /> Games</h2>
+          <p className="text-xs text-slate-500">
+            Lock the games on AI Yamato during your lesson so students stay with you. Students in this class see &quot;Games are
+            locked&quot; within about 30 seconds, even if a game is already open. Lessons, homework and the AI tutor are not affected.
+          </p>
+        </div>
+        <Form method="post" className="shrink-0">
+          <input type="hidden" name="intent" value={cls.gamesLocked ? 'unlock-games' : 'lock-games'} />
+          <input type="hidden" name="classId" value={cls.id} />
+          <button
+            type="submit"
+            disabled={busy}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-md transition cursor-pointer disabled:opacity-50 ${
+              cls.gamesLocked
+                ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
+                : 'bg-amber-500 text-white hover:bg-amber-600'
+            }`}
+          >
+            {cls.gamesLocked
+              ? <><Unlock className="w-4 h-4" /> Unlock games for the whole class</>
+              : <><Lock className="w-4 h-4" /> Lock games for the whole class</>}
+          </button>
+        </Form>
+      </div>
+
+      <p
+        role="status"
+        className={`text-sm font-semibold rounded-md px-3 py-2 border ${
+          cls.gamesLocked ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+        }`}
+      >
+        {cls.gamesLocked
+          ? `🔒 Games are locked for this class${unlocked.size ? ` (${unlocked.size} student${unlocked.size === 1 ? '' : 's'} unlocked individually)` : ''}.`
+          : '✅ Games are open for this class.'}
+      </p>
+
+      {cls.gamesLocked && data.students.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-bold text-slate-700">Unlock individual students</h3>
+          <p className="text-xs text-slate-500">
+            For example, a student who has finished their work early. Locking or unlocking the whole class resets these.
+          </p>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {data.students.map((s) => {
+              const canPlay = unlocked.has(s.id);
+              return (
+                <li key={s.id} className="flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{studentName(s)}</p>
+                    <p className={`text-[11px] font-semibold ${canPlay ? 'text-emerald-700' : 'text-slate-500'}`}>
+                      {canPlay ? 'Can play games' : 'Locked'}
+                    </p>
+                  </div>
+                  <Form method="post">
+                    <input type="hidden" name="intent" value={canPlay ? 'relock-student-games' : 'unlock-student-games'} />
+                    <input type="hidden" name="classId" value={cls.id} />
+                    <input type="hidden" name="studentId" value={s.id} />
+                    <button type="submit" disabled={busy} className={btnGhost} aria-label={`${canPlay ? 'Lock games again for' : 'Unlock games for'} ${studentName(s)}`}>
+                      {canPlay ? <><Lock className="w-3.5 h-3.5" /> Lock again</> : <><Unlock className="w-3.5 h-3.5" /> Unlock</>}
+                    </button>
+                  </Form>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </section>
   );
