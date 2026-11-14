@@ -1,6 +1,8 @@
 /**
- * @file app/routes/lessons.obento-unit-4-lesson-1.tsx
- * @description Obento Deluxe Unit 4 - Lesson 1 個別学習レッスンページ（語彙ドリル・リスニング課題・リーディングデュアルチェック・リアルタイムスピーキング課題・ライティング課題連携版）
+ * @file app/routes/lessons.family-1.tsx
+ * @description Family 1（何人家族ですか）個別学習レッスンページ。対応する教科書・ユニットは edu_lesson_textbook_units から表示する
+ *   （旧 URL /lessons/obento-unit-4-lesson-1 は lessons.$slug.tsx がここへ転送する）
+ *   タスク：語彙ドリル・リスニング・リーディング・スピーキング・ライティング・文化（全レッスン共通の6タスク）
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -25,9 +27,14 @@ import { EduSpeakingTaskModal } from "~/components/lessons/EduSpeakingTaskModal"
 import { EduWritingTaskModal } from "~/components/lessons/EduWritingTaskModal"; // 追加：ライティング課題モーダル
 import { EduCultureTaskModal } from "~/components/lessons/EduCultureTaskModal";
 import { CULTURE_TASKS } from "~/data/culture-tasks";
+import { slugCandidates } from "~/data/lesson-slugs";
+import { fetchTextbookRefs, type TextbookRef } from "~/lib/lessonTextbooks";
 
-// このレッスンの slug（文化タスクの内容などを引くキー）
-const LESSON_SLUG = "obento-unit-4-lesson-1";
+// このページのレッスン（edu_lessons.slug）
+const LESSON_SLUG = "family-1";
+
+// このレッスンで使う文化タスク（app/data/culture-tasks.ts の ID）
+const CULTURE_TASK_ID = "japanese-names";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -41,29 +48,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
     portalContent = portalData?.content || null;
   } catch (e) {}
 
-  let lessonData = null;
+  let lessonData: any = null;
   let vocabData: any[] = [];
   let topicData = null;
+  let textbookRefs: TextbookRef[] = [];
   let loadError: string | null = null;
 
   try {
+    // 新しい slug（family-1）と、データベース切り替え前の古い slug のどちらでも見つける
     const { data: lessons } = await supabase
       .from("edu_lessons")
       .select("*")
-      .ilike("slug", "%obento-unit-4-%")
-      .eq("lesson_order", 1)
+      .in("slug", slugCandidates(LESSON_SLUG))
       .limit(1);
-
-    if (lessons && lessons.length > 0) {
-      lessonData = lessons[0];
-    } else {
-      const { data: fallbackLesson } = await supabase
-        .from("edu_lessons")
-        .select("*")
-        .eq("lesson_order", 1)
-        .limit(1);
-      lessonData = fallbackLesson?.[0] || null;
-    }
+    lessonData = lessons?.[0] || null;
 
     if (lessonData) {
       if (lessonData.topic_id) {
@@ -81,9 +79,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         .eq("lesson_id", lessonData.id)
         .order("order_index", { ascending: true });
       vocabData = vocabs || [];
+
+      textbookRefs = (await fetchTextbookRefs([String(lessonData.id)]))[String(lessonData.id)] ?? [];
     }
   } catch (err) {
-    console.warn("⚠️ [Loader] Failed to fetch Obento Unit 4 Lesson 1 data from Supabase:", err);
+    console.warn(`⚠️ [Loader] Failed to fetch lesson ${LESSON_SLUG} from Supabase:`, err);
     loadError = `Supabase error: ${(err as any)?.message || String(err)}`;
   }
 
@@ -93,7 +93,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     lesson: lessonData,
     topic: topicData,
     vocabulary: vocabData,
-    loadError: loadError || (!lessonData ? "Obento Unit 4 Lesson 1 not found in edu_lessons." : null),
+    textbookRefs,
+    loadError: loadError || (!lessonData ? `Lesson ${LESSON_SLUG} not found in edu_lessons.` : null),
   });
 }
 
@@ -111,7 +112,7 @@ const COMPLETED_TASK_NAMES: Record<LessonTaskKey, string> = {
   culture: "culture tasks",
 };
 
-function LessonsObentoUnit4Lesson1Page() {
+function LessonsFamily1Page() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const themeColor = "#f97316";
 
@@ -143,7 +144,7 @@ function LessonsObentoUnit4Lesson1Page() {
   // 6. 文化タスクモーダルの開閉状態と完了状態の管理
   const [isCultureTaskOpen, setIsCultureTaskOpen] = useState(false);
   const [cultureTaskCompleted, setCultureTaskCompleted] = useState(false);
-  const cultureTask = CULTURE_TASKS[LESSON_SLUG];
+  const cultureTask = CULTURE_TASKS[CULTURE_TASK_ID];
 
   // 7. 保存済みの完了状態（EduLessonTaskManager から受け取る）と、「完了済み」メッセージの表示
   //    完了済みのタスクはモーダルを開かずにメッセージを出す（ライティングはモーダル自身がサーバーの記録で判断する）
@@ -160,7 +161,7 @@ function LessonsObentoUnit4Lesson1Page() {
   const startVocabularyDrill = () => startTask("vocabulary", () => setIsDrillOpen(true));
 
   const loaderData = useLoaderData<typeof loader>() || {};
-  const { lesson, topic, vocabulary = [] } = loaderData;
+  const { lesson, topic, vocabulary = [], textbookRefs = [] } = loaderData;
 
   // 語彙データからリーディング用アイテム（日本語文章・意味・音声）を生成
   const readingItems = vocabulary.map((v) => ({
@@ -225,7 +226,7 @@ function LessonsObentoUnit4Lesson1Page() {
       >
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
-            Loading Obento Unit 4 - Lesson 1...
+            Loading lesson...
           </div>
         </div>
       </ToolPageWrapper>
@@ -250,7 +251,7 @@ function LessonsObentoUnit4Lesson1Page() {
                 Sign In Required
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Obento Deluxe Unit 4 lessons and AI Yamato tutoring require you to sign in. Please sign in to access interactive lessons.
+                Lessons and AI Yamato tutoring require you to sign in. Please sign in to access interactive lessons.
               </p>
             </div>
             <button
@@ -277,24 +278,24 @@ function LessonsObentoUnit4Lesson1Page() {
         <main className="max-w-5xl mx-auto space-y-8">
           
           {/* 1. Header Card Module */}
-          <EduLessonHeader lesson={lesson} topic={topic} />
+          <EduLessonHeader lesson={lesson} topic={topic} textbookRefs={textbookRefs} />
 
           {/* 2. Top: Persistent Yamato AI Tutor */}
           <YamatoChatCommon2
             characterName="Yamato Sensei"
-            appType="obento-unit-4-lesson-1"
+            appType={LESSON_SLUG}
             themeColor={themeColor}
             userId={user?.id}
             userNickname={nickname}
             credits={credits}
             onOpenAuth={handleOpenAuth}
-            assignedQuestion={`Obento Deluxe Unit 4 Lesson 1: ${lesson?.title_en || "Family and Pets"}`}
+            assignedQuestion={`${topic?.title_en ? `${topic.title_en} – ` : ""}Lesson ${lesson?.lesson_order || 1}: ${lesson?.title_en || "How many people are in your family?"}`}
           />
 
           {/* 3. Main Content & Vocabulary Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
             <div className="md:col-span-2 space-y-6">
-              <EduLessonDetailsCard lesson={lesson} />
+              <EduLessonDetailsCard lesson={lesson} textbookRefs={textbookRefs} />
             </div>
             <div className="space-y-6">
               <EduVocabularySidebar 
@@ -306,7 +307,7 @@ function LessonsObentoUnit4Lesson1Page() {
 
           {/* 4. Bottom: Self-Study Task Section */}
           <EduLessonTaskManager 
-            lessonId={lesson?.id || "obento-unit-4-lesson-1"} 
+            lessonId={lesson?.id || LESSON_SLUG}
             userId={user?.id}
             onProgressChange={setSavedProgress}
             onStartVocabularyDrill={startVocabularyDrill}
@@ -357,8 +358,8 @@ function LessonsObentoUnit4Lesson1Page() {
         onClose={() => setIsSpeakingModalOpen(false)}
         title="Speaking Task: Practice Talking About Your Family Members"
         userId={user?.id}
-        appType="obento-unit-4-lesson-1"
-        lessonSlug="obento-unit-4-lesson-1"
+        appType={LESSON_SLUG}
+        lessonSlug={lesson?.slug || LESSON_SLUG} // スピーキングの会話データ（edu_lesson_dialogues.lesson_key）は edu_lessons.slug と同じ値
         onCompleted={() => {
           setSpeakingTaskCompleted(true);
         }}
@@ -400,4 +401,4 @@ function LessonsObentoUnit4Lesson1Page() {
   );
 }
 
-export default LessonsObentoUnit4Lesson1Page;
+export default LessonsFamily1Page;

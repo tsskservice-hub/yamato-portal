@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
@@ -235,7 +236,7 @@ export default function OralExamQuestions() {
                       </span>
                       <div 
                         className="question-text text-base sm:text-lg font-medium text-slate-900 pt-1 leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: item.text }}
+                        dangerouslySetInnerHTML={{ __html: safeHtml(item.text) }}
                       />
                     </div>
                     <button

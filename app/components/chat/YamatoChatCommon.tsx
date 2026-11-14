@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file YamatoChatCommon.tsx
  * @description ポータル共通AIチャットウィジェット（ニックネームモジュール連携・プロンプト未設定検知・カスタムウィジェット・PDF出力・動的クレジット計算対応版）
@@ -7,6 +8,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
 import { ScrollTopButton } from "../layout/ScrollTopButton";
 import { ImageModal } from "../ImageModal";
+import { addAiGeneratedLabel } from "~/utils/aiImageLabel";
 import { CreditCostFooter } from "../CreditCostFooter";
 import { useChatResize } from "../../hooks/useChatResize";
 import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
@@ -102,6 +104,8 @@ export type YamatoChatCommonProps = {
   assignedQuestion?: string;
   customWidget?: React.ReactNode;
   onExportPdf?: (content: string) => void;
+  /** AI の返答ごとに Export PDF ボタンを出すかを決める（未指定なら onExportPdf があるとき全返答に出す） */
+  canExportPdf?: (content: string) => boolean;
   // 動的クレジット計算プロパティ
   calculateCreditCost?: (imageCount: number) => number;
   baseCreditCost?: number;
@@ -135,6 +139,7 @@ export function YamatoChatCommon({
   assignedQuestion = "",
   customWidget,
   onExportPdf,
+  canExportPdf,
   calculateCreditCost,
   baseCreditCost = 2,
   image1CreditCost = 4,
@@ -470,7 +475,8 @@ export function YamatoChatCommon({
       }
 
       const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
-      const imageUrl = data.imageUrl;
+      // ヤマトが描いた絵には「AI-generated」のラベルを焼き込んでから表示する
+      const imageUrl = data.imageUrl ? await addAiGeneratedLabel(data.imageUrl) : undefined;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
       setIsTutorLoading(false);
@@ -749,7 +755,7 @@ export function YamatoChatCommon({
                             </div>
                           ) : (
                             <div className="space-y-2">
-                              <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                              <div dangerouslySetInnerHTML={{ __html: safeHtml(msg.content) }} />
                               {msg.imageUrl && (
                                 <div className="mt-2">
                                   <img
@@ -762,7 +768,7 @@ export function YamatoChatCommon({
                               )}
 
                               {/* Export PDF ボタン */}
-                              {onExportPdf && (
+                              {onExportPdf && (!canExportPdf || canExportPdf(msg.content)) && (
                                 <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-end">
                                   <button
                                     type="button"

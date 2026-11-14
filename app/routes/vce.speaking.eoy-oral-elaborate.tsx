@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
@@ -704,7 +705,7 @@ export default function EoyOralElaboratePage() {
                         </span>
                         <h3
                           className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100"
-                          dangerouslySetInnerHTML={{ __html: q.question }}
+                          dangerouslySetInnerHTML={{ __html: safeHtml(q.question) }}
                         />
                       </div>
 

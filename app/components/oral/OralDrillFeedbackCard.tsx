@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 import React from "react";
 
 export interface CorrectionDetail {
@@ -96,7 +97,7 @@ export const OralDrillFeedbackCard: React.FC<OralDrillFeedbackCardProps> = ({
           <span className="font-bold text-purple-700 dark:text-purple-300">💡 Feedback:</span>
           <div
             className="text-slate-700 dark:text-slate-300 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: evaluationHtml }}
+            dangerouslySetInnerHTML={{ __html: safeHtml(evaluationHtml) }}
           />
         </div>
       )}
@@ -106,7 +107,7 @@ export const OralDrillFeedbackCard: React.FC<OralDrillFeedbackCardProps> = ({
           <span className="font-bold text-amber-700 dark:text-amber-300">🔧 Improvements:</span>
           <div
             className="text-slate-700 dark:text-slate-300 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: correctionsHtml }}
+            dangerouslySetInnerHTML={{ __html: safeHtml(correctionsHtml) }}
           />
         </div>
       ) : corrections.length > 0 ? (
@@ -139,7 +140,7 @@ export const OralDrillFeedbackCard: React.FC<OralDrillFeedbackCardProps> = ({
           </span>
           <p
             className="text-xs font-semibold text-slate-800 dark:text-slate-100 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: refinedPolish || defaultRubyAnswer || "" }}
+            dangerouslySetInnerHTML={{ __html: safeHtml(refinedPolish || defaultRubyAnswer || "") }}
           />
         </div>
       )}

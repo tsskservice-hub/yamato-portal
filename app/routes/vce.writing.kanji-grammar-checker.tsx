@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file kanji-grammar-checker.tsx
  * @description VCE Kanji & Grammar Checker 独立ページ（Supabase共通メタヘルパー対応版・AI Vision自動文字起こし・クレジット表示対応）
@@ -376,7 +377,7 @@ export default function KanjiGrammarCheckerPage() {
                 {text ? (
                   <div
                     className="text-xl sm:text-2xl leading-relaxed text-slate-800"
-                    dangerouslySetInnerHTML={{ __html: html }}
+                    dangerouslySetInnerHTML={{ __html: safeHtml(html) }}
                   />
                 ) : (
                   <div className="text-slate-400 italic text-lg">

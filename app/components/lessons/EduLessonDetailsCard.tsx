@@ -5,12 +5,15 @@
 
 import React from "react";
 import { EduFlexibleDataRenderer } from "./EduFlexibleDataRenderer";
+import { formatTextbookRef, TEXTBOOK_DISCLAIMER, type TextbookRef } from "~/lib/lessonTextbooks";
 
 interface EduLessonDetailsCardProps {
   lesson: any;
+  /** このレッスンが対応する教科書・ユニット（edu_lesson_textbook_units） */
+  textbookRefs?: TextbookRef[];
 }
 
-export const EduLessonDetailsCard: React.FC<EduLessonDetailsCardProps> = ({ lesson }) => {
+export const EduLessonDetailsCard: React.FC<EduLessonDetailsCardProps> = ({ lesson, textbookRefs = [] }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
       <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
@@ -22,13 +25,22 @@ export const EduLessonDetailsCard: React.FC<EduLessonDetailsCardProps> = ({ less
         <p className="text-sm text-slate-500 italic">No lesson data found in database.</p>
       ) : (
         <div className="space-y-5">
-          {/* 教科書参照ページ */}
-          {lesson.obento_page_ref && (
-            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Textbook Reference:</span>
-              <span className="text-sm font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50 px-4 py-1.5 rounded-full border border-orange-200 dark:border-orange-900">
-                📚 {lesson.obento_page_ref}
-              </span>
+          {/* 対応する教科書・ユニット */}
+          {textbookRefs.length > 0 && (
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2">
+              <span className="block text-sm font-bold text-slate-600 dark:text-slate-400">Textbook Reference:</span>
+              <div className="flex flex-wrap gap-2">
+                {textbookRefs.map((ref, i) => (
+                  <span
+                    key={i}
+                    title={ref.note ?? undefined}
+                    className="text-sm font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50 px-4 py-1.5 rounded-full border border-orange-200 dark:border-orange-900"
+                  >
+                    📚 {formatTextbookRef(ref)}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">{TEXTBOOK_DISCLAIMER}</p>
             </div>
           )}
 

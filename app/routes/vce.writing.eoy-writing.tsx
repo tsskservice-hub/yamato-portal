@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file eoy-writing.tsx
  * @description EOY Writing Practice モジュール (PageLayout 統合型データエラーガード対応版)
@@ -321,7 +322,7 @@ export default function Dashboard() {
                   </div>
 
                   <p className="text-[20px] text-slate-800 mb-3 leading-relaxed font-medium">{q.english}</p>
-                  <div className="text-lg sm:text-[20px] text-slate-700 mb-4 border-l-4 border-slate-200 pl-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: q.japanese }} />
+                  <div className="text-lg sm:text-[20px] text-slate-700 mb-4 border-l-4 border-slate-200 pl-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: safeHtml(q.japanese) }} />
 
                   <button
                     onClick={() => {

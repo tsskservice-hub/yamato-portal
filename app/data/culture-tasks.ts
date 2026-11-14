@@ -2,7 +2,9 @@
  * @file app/data/culture-tasks.ts
  * @description 各レッスンの文化タスク（紙芝居カード＋ナレーション字幕＋選択式クイズ）の内容
  *
- * 新しいレッスンを足すときは CULTURE_TASKS にレッスンの slug をキーにして追加する。
+ * 新しい文化タスクを足すときは、CULTURE_TASKS にタスクの ID（例：natural-disasters）をキーにして追加し、
+ * レッスンページで CULTURE_TASKS["そのID"] を EduCultureTaskModal に渡す。
+ * （タスクの ID はレッスンと切り離しているので、レッスンページができる前に作っておける）
  * - カード画像：public/images/picture-story/ に置く
  * - ナレーション音声：Supabase Storage の picture-story-audio バケットに置く
  *   （音声ファイルが見つからない時は、ブラウザの合成音声で narration を読み上げる）
@@ -57,12 +59,13 @@ export interface CultureTask {
 const audio = (file: string) => `${PICTURE_STORY_AUDIO_BASE}/${file}`;
 
 export const CULTURE_TASKS: Record<string, CultureTask> = {
-  "obento-unit-4-lesson-1": {
+  // Unit 4 Lesson 1 で使用
+  "japanese-names": {
     title: "Japanese Names – Then and Now",
     cards: [
       {
         title: "Names tell a story",
-        imageUrl: "/images/picture-story/U4-card-1.webp",
+        imageUrl: "/images/picture-story/name-card-1.webp",
         imageAlt: "Parents holding up the kanji 名 (name) next to their new baby, with a timeline from 1912 to 2025",
         audioUrl: audio("names_01.mp3"),
         narration: [
@@ -74,8 +77,8 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
       },
       {
         title: "Your great-grandparents' time (1910s–1930s)",
-        imageUrl: "/images/picture-story/U4-card-2.webp",
-        imageAlt: "Children in kimono and a school uniform in front of a Shōwa-era house, with the kanji 子, 幸 and 清 (Kazuko, Sachiko, Kiyoshi)",
+        imageUrl: "/images/picture-story/name-card-2.webp",
+        imageAlt: "Children in kimono and a school uniform in front of a Shōwa-era house, with the kanji 和, 幸 and 清 (Kazuko, Sachiko, Kiyoshi)",
         audioUrl: audio("names_02.mp3"),
         narration: [
           "Many girls' names ended in -ko (子), which means \"child\".",
@@ -87,7 +90,7 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
       },
       {
         title: "Your parents' time (1980s)",
-        imageUrl: "/images/picture-story/U4-card-3.webp",
+        imageUrl: "/images/picture-story/name-card-3.webp",
         imageAlt: "Two children in a 1980s room with a cassette player and an old TV, under a poster of the kanji 愛 (love) and a No.1 1983 badge",
         audioUrl: audio("names_03.mp3"),
         narration: [
@@ -98,7 +101,7 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
       },
       {
         title: "Today",
-        imageUrl: "/images/picture-story/U4-card-4.webp",
+        imageUrl: "/images/picture-story/name-card-4.webp",
         imageAlt: "Banners with the kanji 湊 (harbour), 翠 (jade green), 結 (to connect) and 翔 (to soar) above a baseball field by a harbour",
         audioUrl: audio("names_04.mp3"),
         narration: [
@@ -174,6 +177,149 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
         ],
         answerIndex: 1,
         explanation: "Short, one-kanji names from nature, like Minato (湊) and Sui (翠), are popular today.",
+        hintCard: 4,
+      },
+    ],
+  },
+
+  // まだどのレッスンページにもつないでいない
+  "natural-disasters": {
+    title: "Living with Natural Disasters in Japan",
+    cards: [
+      {
+        title: "Earthquakes 地震 (jishin)",
+        imageUrl: "/images/picture-story/disaster-card-1.webp",
+        imageAlt: "A family taking cover under a strong wooden table while a phone shows an earthquake alarm, next to a shindo scale chart from 0 to 7",
+        audioUrl: audio("disaster_01.mp3"),
+        narration: [
+          "If you live in Japan, you will probably feel an earthquake.",
+          "Most are small, but sometimes a big one comes.",
+          "Japan measures shaking on its own scale called shindo, from 0 to 7.",
+          "Japanese buildings are built to be very strong against earthquakes.",
+          "Since 1981, new buildings have had to be designed so they do not fall down, even in shaking of shindo 6+ to 7.",
+          "When your phone sounds an earthquake alarm:",
+          "Drop, cover, and hold on under a strong table.",
+          "Stay away from windows, and don't run outside.",
+          "If you are near the sea after strong shaking, go to high ground quickly.",
+        ],
+      },
+      {
+        title: "Rainy season and typhoons 梅雨・台風 (tsuyu / taifū)",
+        imageUrl: "/images/picture-story/disaster-card-2.webp",
+        imageAlt: "A train running beside a stormy sea in heavy rain and wind, with hydrangeas and people walking with umbrellas",
+        audioUrl: audio("disaster_02.mp3"),
+        narration: [
+          "In most of Japan, the rainy season, tsuyu, comes in June and July.",
+          "Rain can fall for days, sometimes causing floods and landslides.",
+          "In summer and autumn, especially August and September, typhoons bring very strong winds and heavy rain.",
+          "Does taifū sound like \"typhoon\"? That's no accident!",
+          "The Japanese word is said to have been made to match the English word typhoon.",
+          "When a big typhoon is coming, trains may stop and schools sometimes close.",
+        ],
+      },
+      {
+        title: "Living next to a volcano: Sakurajima 桜島",
+        imageUrl: "/images/picture-story/disaster-card-3.webp",
+        imageAlt: "The volcano Sakurajima erupting across the bay from Kagoshima city, while people in masks collect ash in yellow kokuhai-bukuro bags",
+        audioUrl: audio("disaster_03.mp3"),
+        narration: [
+          "In Kagoshima, in the south of Japan, the city sits right across the bay from an active volcano, Sakurajima.",
+          "It erupts very often. In 2011, it had nearly 1,000 explosive eruptions!",
+          "When the wind blows toward the city, volcanic ash falls like grey snow.",
+          "The weather forecast even tells people which way the ash will blow.",
+          "People collect the ash in special yellow bags called kokuhai-bukuro and put them out for collection.",
+          "For people in Kagoshima, eruptions are part of everyday life.",
+        ],
+      },
+      {
+        title: "The snowiest city: Aomori 青森",
+        imageUrl: "/images/picture-story/disaster-card-4.webp",
+        imageAlt: "People clearing deep snow from a roof and a road in Aomori, with snowy mountains and a stormy sea behind them",
+        audioUrl: audio("disaster_04.mp3"),
+        narration: [
+          "In the north of Japan's main island is Aomori City.",
+          "It is known as the snowiest city in the world with more than 100,000 people.",
+          "About 7–8 metres of snow falls there every year!",
+          "Cold winds from the Sea of Japan bring huge amounts of snow.",
+          "Heavy snow can block roads, and the weight of snow on roofs can be dangerous,",
+          "so people clear snow from their roofs and roads almost every day in winter.",
+          "In the nearby mountains, snow and ice cover the trees and turn them into \"snow monsters\"!",
+        ],
+      },
+    ],
+    thinkAbout: {
+      lines: [
+        "Which natural disasters happen where you live?",
+        "How are they similar to or different from Japan's?",
+      ],
+      audioUrl: audio("disaster_05.mp3"),
+    },
+    questions: [
+      {
+        question: "Your phone sounds an earthquake alarm and the ground starts shaking. What should you do first?",
+        options: [
+          "Run outside quickly",
+          "Stand next to a window",
+          "Drop, cover, and hold on under a strong table",
+          "Go to the beach",
+        ],
+        answerIndex: 2,
+        explanation: "Drop, cover, and hold on under a strong table. Stay away from windows, and don't run outside.",
+        hintCard: 1,
+      },
+      {
+        question: "Since 1981, how must new buildings in Japan be designed?",
+        options: [
+          "They must be made of wood",
+          "They must stay standing even in very strong shaking",
+          "They must be lower than three floors",
+          "They must have a garden",
+        ],
+        answerIndex: 1,
+        explanation: "Since 1981, new buildings must be designed so they do not fall down, even in shaking of shindo 6+ to 7.",
+        hintCard: 1,
+      },
+      {
+        question: "When is tsuyu, the rainy season, in most of Japan?",
+        options: ["December and January", "March and April", "June and July", "October and November"],
+        answerIndex: 2,
+        explanation: "In most of Japan, tsuyu (梅雨) comes in June and July.",
+        hintCard: 2,
+      },
+      {
+        question: "Why does the Japanese word taifū sound like \"typhoon\"?",
+        options: [
+          "It is a coincidence",
+          "It is said to have been made to match the English word \"typhoon\"",
+          "English took it from a Japanese song",
+          "It is the name of a Japanese island",
+        ],
+        answerIndex: 1,
+        explanation: "That's no accident! The Japanese word taifū (台風) is said to have been made to match the English word typhoon.",
+        hintCard: 2,
+      },
+      {
+        question: "What do people in Kagoshima use kokuhai-bukuro for?",
+        options: [
+          "Carrying snow",
+          "Storing rainwater",
+          "Collecting volcanic ash from Sakurajima",
+          "Keeping food for emergencies",
+        ],
+        answerIndex: 2,
+        explanation: "Kokuhai-bukuro are special yellow bags for collecting the volcanic ash from Sakurajima.",
+        hintCard: 3,
+      },
+      {
+        question: "Why do people in Aomori clear snow from their roofs?",
+        options: [
+          "To make snowmen",
+          "Because heavy snow on roofs can be dangerous",
+          "To sell the snow",
+          "Because it is a festival",
+        ],
+        answerIndex: 1,
+        explanation: "The weight of snow on roofs can be dangerous, so people clear their roofs almost every day in winter.",
         hintCard: 4,
       },
     ],

@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 import { marked } from "marked";
 
 // propsの型定義を追加
@@ -15,7 +16,7 @@ export function MarkdownText({ content }: MarkdownTextProps) {
   return (
     <div
       // 安全にHTMLを描画するためのプロパティ
-      dangerouslySetInnerHTML={{ __html: htmlContent }}
+      dangerouslySetInnerHTML={{ __html: safeHtml(htmlContent) }}
     />
   );
 }

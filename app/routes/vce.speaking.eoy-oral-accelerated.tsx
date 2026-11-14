@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file app/routes/vce.speaking.eoy-oral-accelerated.tsx
  * @description VCE Japanese - EOY Oral Accelerated Practice (Cascade Hand-Free VAD Voice Edition with Mic Status Indicator)
@@ -284,7 +285,7 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
                     {msg.role === 'assistant' ? 'Yamato-sensei' : `${nickname} (You)`}
                   </div>
                   {msg.isHtml ? (
-                    <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                    <div dangerouslySetInnerHTML={{ __html: safeHtml(msg.content) }} />
                   ) : (
                     <p>{msg.content}</p>
                   )}

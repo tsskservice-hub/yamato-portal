@@ -137,6 +137,9 @@ export function ChatYamatoEoyWritingCustom({
         customWidget={sectionSelectWidget} // 💡 Select Writing Section バーを追加
         assignedQuestion={assignedQuestion}
         onExportPdf={(content: string) => setPdfTargetContent(content)} // 💡 チャットメッセージ内の Export PDF から連携
+        // 💡 PDF ボタンは添削フィードバックの返答だけに出す。
+        //    api/src/prompts/eoy-writing-custom.ts のフィードバック形式（全ペース共通）に必ず入る見出しで判定する
+        canExportPdf={(content: string) => content.includes("[VCE-Aligned Estimation Band]")}
         {...restProps}
       />
 

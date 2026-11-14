@@ -32,9 +32,11 @@ function getRoutes(dir: string, base = ""): string[] {
         name === "developer.test-yamato-note" ||
         name === "vocab-creator" ||
         name === "vocab-drill.$listId" ||
+        name === "lessons.$slug" ||
         name === "api.teacher-register" ||
         name === "teacher-dashboard" ||
-        name === "teacher-handwriting.$submissionId" 
+        name === "teacher-handwriting.$submissionId" ||
+        name === "print-report"
       ) {
         continue;
       }

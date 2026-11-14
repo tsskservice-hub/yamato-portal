@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 import React from "react";
 
 export interface QuestionItem {
@@ -71,7 +72,7 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
                   {/* 💡 問題文のフォントサイズを text-sm から text-base sm:text-lg へ拡大 */}
                   <h4 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex items-start gap-1.5 leading-snug">
                     <span className="shrink-0">Q{idx + 1}. </span>
-                    <span dangerouslySetInnerHTML={{ __html: item.question }} />
+                    <span dangerouslySetInnerHTML={{ __html: safeHtml(item.question) }} />
                   </h4>
                 </div>
                 {item.isCustom && onDeleteCustom && (

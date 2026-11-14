@@ -1,18 +1,31 @@
 /**
- * @file app/routes/lessons.obento-unit-4.tsx
- * @description Obento Deluxe Unit 4 (Family and Pets) の学習ハブページ（edu_lessons データベース完全連動版）
+ * @file app/routes/lessons.$slug.tsx
+ * @description トピックの学習ハブページ（全トピック共通。例：/lessons/family）
+ *   - 古い URL（/lessons/obento-unit-4 や /lessons/obento-unit-4-lesson-1）は新しい URL へ転送する
+ *   - 個別のレッスンページ（例：lessons.family-1.tsx）はこのファイルより優先される
+ *   - 各レッスンが対応する教科書・ユニットは edu_lesson_textbook_units から表示する
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
 import { generateModuleMeta } from "~/utils/seoMeta";
 import ToolPageWrapper from "~/components/layout/ToolPageWrapper";
 import { type PageLayoutRef } from "~/components/layout/PageLayout";
 import { supabase } from "~/lib/supabaseClient";
+import { newSlugFor, slugCandidates } from "~/data/lesson-slugs";
+import { fetchTextbookRefs, formatTextbookRef, TEXTBOOK_DISCLAIMER, type TextbookRef } from "~/lib/lessonTextbooks";
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const url = new URL(request.url);
+  const slug = String(params.slug || "");
+
+  // 古い URL は新しい URL へ転送する（ブックマークや宿題のリンクが切れないように）
+  const renamed = newSlugFor(slug);
+  if (renamed) {
+    return redirect(`/lessons/${renamed}${url.search}`, 301);
+  }
+
   let portalContent = null;
   try {
     const { data: portalData } = await supabase
@@ -23,42 +36,40 @@ export async function loader({ request }: LoaderFunctionArgs) {
     portalContent = portalData?.content || null;
   } catch (e) {}
 
-  let topicData = null;
+  let topicData: any = null;
   let lessonsData: any[] = [];
   let vocabData: any[] = [];
+  let textbookRefs: Record<string, TextbookRef[]> = {};
   let loadError: string | null = null;
 
+  // 1. トピック（新しい slug と、データベース切り替え前の古い slug のどちらでも見つける）
   try {
-    // 1. Obento Unit 4 のトピックデータを取得
-    const { data: topic } = await supabase
+    const { data: topics } = await supabase
       .from("edu_topics")
       .select("*")
-      .ilike("slug", "%obento-unit-4%")
-      .single();
+      .in("slug", slugCandidates(slug))
+      .limit(1);
+    topicData = topics?.[0] || null;
+  } catch (err) {
+    console.warn(`⚠️ [Loader] Failed to fetch topic ${slug}:`, err);
+  }
 
-    topicData = topic || null;
+  // トピックが無い URL は 404（個別ページがまだ無いレッスンの URL もここに来る）
+  if (!topicData) {
+    throw new Response("Not Found", { status: 404 });
+  }
 
-    if (topicData) {
-      // 2. 紐づくレッスンを edu_lessons から lesson_order 順に取得
-      const { data: lessons } = await supabase
-        .from("edu_lessons")
-        .select("*")
-        .eq("topic_id", topicData.id)
-        .order("lesson_order", { ascending: true });
-      lessonsData = lessons || [];
-    }
-
-    // フォールバック（もしtopic_idで結ばれていない場合のslug検索）
-    if (lessonsData.length === 0) {
-      const { data: fallbackLessons } = await supabase
-        .from("edu_lessons")
-        .select("*")
-        .ilike("slug", "obento-unit-4-%")
-        .order("lesson_order", { ascending: true });
-      lessonsData = fallbackLessons || [];
-    }
+  try {
+    // 2. 紐づくレッスンを lesson_order 順に取得
+    const { data: lessons } = await supabase
+      .from("edu_lessons")
+      .select("*")
+      .eq("topic_id", topicData.id)
+      .order("lesson_order", { ascending: true });
+    lessonsData = lessons || [];
 
     const lessonIds = lessonsData.map((l) => l.id);
+    textbookRefs = await fetchTextbookRefs(lessonIds.map(String));
     if (lessonIds.length > 0) {
       const { data: vocabs } = await supabase
         .from("kl_vocabulary")
@@ -68,7 +79,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       vocabData = vocabs || [];
     }
   } catch (err) {
-    console.warn("⚠️ [Loader] Failed to fetch Obento Unit 4 data from Supabase:", err);
+    console.warn(`⚠️ [Loader] Failed to fetch lessons for topic ${slug}:`, err);
     loadError = `Supabase error: ${(err as any)?.message || String(err)}`;
   }
 
@@ -78,7 +89,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     topic: topicData,
     lessons: lessonsData,
     vocabulary: vocabData,
-    loadError: loadError || (lessonsData.length === 0 ? "No Obento Unit 4 lessons found in edu_lessons." : null),
+    textbookRefs,
+    loadError,
   });
 }
 
@@ -86,14 +98,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
   return generateModuleMeta(data?.portalContent || null, data?.currentPath || "");
 };
 
-export default function LessonsObentoUnit4Page() {
+export default function LessonTopicHubPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
 
   const [user, setUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
 
   const loaderData = useLoaderData<typeof loader>() || {};
-  const { topic, lessons = [], vocabulary = [] } = loaderData;
+  const { topic, lessons = [], vocabulary = [], textbookRefs = {} } = loaderData as any;
 
   const handleOpenAuth = () => {
     window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
@@ -131,7 +143,7 @@ export default function LessonsObentoUnit4Page() {
       >
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 flex items-center justify-center">
           <div className="text-slate-600 dark:text-slate-300 font-bold text-lg animate-pulse">
-            Loading Obento Unit 4 Hub...
+            Loading lessons...
           </div>
         </div>
       </ToolPageWrapper>
@@ -156,7 +168,7 @@ export default function LessonsObentoUnit4Page() {
                 Sign In Required
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Obento Deluxe Unit 4 lessons require you to sign in. Please sign in to access the learning materials.
+                Lessons require you to sign in. Please sign in to access the learning materials.
               </p>
             </div>
             <button
@@ -185,12 +197,12 @@ export default function LessonsObentoUnit4Page() {
           {/* ヘッダーカード */}
           <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-3xl p-8 shadow-xl">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-white/20 w-fit px-3 py-1 rounded-full mb-3">
-              <span>Obento Deluxe</span>
+              <span>Topic</span>
               <span>•</span>
-              <span>Unit 4 Hub</span>
+              <span>{lessons.length} {lessons.length === 1 ? "Lesson" : "Lessons"}</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">
-              {topic?.title_en || "Obento Unit 4: Family and Pets"}
+              {topic?.title_en || "Lessons"}
             </h1>
             {topic?.title_jp && (
               <p className="text-orange-200 font-semibold text-sm mb-3">
@@ -198,7 +210,7 @@ export default function LessonsObentoUnit4Page() {
               </p>
             )}
             <p className="text-orange-100 text-sm sm:text-base leading-relaxed max-w-2xl">
-              {topic?.description || "Learn how to introduce your family members, count people correctly using Japanese counters, and talk about your pets!"}
+              {topic?.description || ""}
             </p>
           </div>
 
@@ -215,9 +227,10 @@ export default function LessonsObentoUnit4Page() {
                 ) : (
                   <div className="space-y-4">
                     {lessons.map((lesson: any, index: number) => {
-                      // レッスンごとの個別ページパスを生成（例: /lessons/obento-unit-4-lesson-1 など）
-                      const lessonSlug = lesson.slug || `obento-unit-4-lesson-${lesson.lesson_order || index + 1}`;
+                      // レッスンごとの個別ページ（例: /lessons/family-1）。古い slug でも新しい URL にする
+                      const lessonSlug = newSlugFor(lesson.slug) || lesson.slug;
                       const lessonPath = `/lessons/${lessonSlug}`;
+                      const refs: TextbookRef[] = textbookRefs[String(lesson.id)] ?? [];
 
                       return (
                         <div key={lesson.id || index} className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 transition hover:shadow-md space-y-3">
@@ -227,11 +240,16 @@ export default function LessonsObentoUnit4Page() {
                             <span className="text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-900 px-2.5 py-0.5 rounded-full">
                               Lesson {lesson.lesson_order || index + 1}
                             </span>
-                            {lesson.obento_page_ref && (
-                              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
-                                📚 {lesson.obento_page_ref}
-                              </span>
-                            )}
+                            <div className="flex flex-wrap justify-end gap-1.5">
+                              {refs.map((ref, i) => (
+                                <span
+                                  key={i}
+                                  className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full"
+                                >
+                                  📚 {formatTextbookRef(ref)}
+                                </span>
+                              ))}
+                            </div>
                           </div>
 
                           {/* 英語および日本語のレッスンタイトル */}
@@ -277,6 +295,9 @@ export default function LessonsObentoUnit4Page() {
                       );
                     })}
                   </div>
+                )}
+                {Object.keys(textbookRefs).length > 0 && (
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-4">{TEXTBOOK_DISCLAIMER}</p>
                 )}
               </div>
             </div>

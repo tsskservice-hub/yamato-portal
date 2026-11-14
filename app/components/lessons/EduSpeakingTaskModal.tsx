@@ -30,7 +30,7 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
   onClose,
   title,
   userId,
-  lessonSlug = "obento-unit-4-lesson-1",
+  lessonSlug = "family-1",
   roundsPerDynamicQuestion = 3,
   askRoundsPerDynamicQuestion = 3,
   questions,

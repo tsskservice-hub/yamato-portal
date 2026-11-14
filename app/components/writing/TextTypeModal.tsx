@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 import React from "react";
 import { Link } from "@remix-run/react";
 
@@ -32,7 +33,7 @@ function renderGrammarText(text: string, modalKey: string) {
     const parts = text.split(matchedKey);
     return (
       <span>
-        <span dangerouslySetInnerHTML={{ __html: parts[0] }} />
+        <span dangerouslySetInnerHTML={{ __html: safeHtml(parts[0]) }} />
         <Link
           to={grammarLinks[matchedKey]}
           className="text-blue-600 underline font-semibold hover:text-blue-800"
@@ -45,11 +46,11 @@ function renderGrammarText(text: string, modalKey: string) {
         >
           {matchedKey}
         </Link>
-        <span dangerouslySetInnerHTML={{ __html: parts[1] }} />
+        <span dangerouslySetInnerHTML={{ __html: safeHtml(parts[1]) }} />
       </span>
     );
   }
-  return <span dangerouslySetInnerHTML={{ __html: text }} />;
+  return <span dangerouslySetInnerHTML={{ __html: safeHtml(text) }} />;
 }
 
 export default function TextTypeModal({
@@ -71,7 +72,7 @@ export default function TextTypeModal({
       const parts = text.split(targetPhrase);
       return (
         <span>
-          <span dangerouslySetInnerHTML={{ __html: parts[0] }} />
+          <span dangerouslySetInnerHTML={{ __html: safeHtml(parts[0]) }} />
           {targetPhrase}
           <button
             onClick={(e) => {
@@ -94,11 +95,11 @@ export default function TextTypeModal({
           >
             ▶️
           </button>
-          {parts[1] && <span dangerouslySetInnerHTML={{ __html: parts[1] }} />}
+          {parts[1] && <span dangerouslySetInnerHTML={{ __html: safeHtml(parts[1]) }} />}
         </span>
       );
     }
-    return <span dangerouslySetInnerHTML={{ __html: text }} />;
+    return <span dangerouslySetInnerHTML={{ __html: safeHtml(text) }} />;
   };
 
   return (
@@ -121,7 +122,7 @@ export default function TextTypeModal({
         {/* タイトル文字を大きく (text-2xl) */}
         <h3
           className="mt-0 text-slate-800 text-2xl font-bold pr-8"
-          dangerouslySetInnerHTML={{ __html: title }}
+          dangerouslySetInnerHTML={{ __html: safeHtml(title) }}
         />
 
         {/* キーポイントセクション */}

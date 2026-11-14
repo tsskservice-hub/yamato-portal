@@ -1,3 +1,4 @@
+import { safeHtml } from '~/utils/safeHtml';
 /**
  * @file GenkoyoshiModal.tsx
  * @description VCE Japanese Genkoyoshi Usage Guide Modal Component
@@ -78,7 +79,7 @@ export function GenkoyoshiModal({
               <h3
                 id="genkoyoshi-modal-title"
                 className="text-lg sm:text-xl font-bold text-rose-900 m-0"
-                dangerouslySetInnerHTML={{ __html: title }}
+                dangerouslySetInnerHTML={{ __html: safeHtml(title) }}
               />
               <p className="text-xs text-rose-700 m-0 mt-0.5">
                 Standard formatting rules & conventions for VCE Japanese Writing

@@ -8,6 +8,7 @@
  * 4. 印刷用スタイル（改ページ制御・装飾ヘッダー）を含む専用印刷ウィンドウを自動生成
  */
 import React, { useState } from "react";
+import { escapeHtml } from "~/utils/safeHtml";
 
 export type FeedbackPdfModalProps = {
   initialContent: string;
@@ -37,21 +38,26 @@ export function FeedbackPdfModal({
 
   // 💡 印刷プレビューウィンドウの生成と実行
   const handleExecutePdfExport = () => {
-    const printWindow = window.open("", "_blank");
+    // about:blank だとタブにサイトのアイコンが出ないため、サイト内の空ページ（/print-report）を開き、読み込み後に書き込む
+    const printWindow = window.open("/print-report", "_blank");
     if (!printWindow) {
       alert("ポップアップがブロックされました。ブラウザのポップアップ許可をご確認ください。");
       return;
     }
 
-    const cleanContent = editablePdfContent.trim();
-    const sanitizedTitle = teacherNotesTitleInput.trim() || "P.S.";
-    const sanitizedNotes = teacherNotesInput.trim();
+    // 🔐 印刷ウィンドウはこのサイトと同じ扱いになるので、入力された文字は HTML として解釈させない（XSS 対策）
+    const cleanContent = escapeHtml(editablePdfContent.trim());
+    const sanitizedTitle = escapeHtml(teacherNotesTitleInput.trim() || "P.S.");
+    const sanitizedNotes = escapeHtml(teacherNotesInput.trim());
+    const safeSectionTitle = escapeHtml(sectionTitle);
+    const safeStudentName = escapeHtml(studentName || "Student");
 
-    printWindow.document.write(`
+    const reportHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <title>VCE Japanese Writing Feedback Report</title>
+          <link rel="icon" href="${window.location.origin}/jptutoraiyamato.png" type="image/png">
           <style>
             body { 
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
@@ -109,8 +115,8 @@ export function FeedbackPdfModal({
         </head>
         <body>
           <div class="header">
-            <h1>🌟 VCE Japanese Writing Feedback Report (${sectionTitle})</h1>
-            <div class="meta">Student: ${studentName || "Student"} | Date: ${new Date().toLocaleDateString()}</div>
+            <h1>🌟 VCE Japanese Writing Feedback Report (${safeSectionTitle})</h1>
+            <div class="meta">Student: ${safeStudentName} | Date: ${new Date().toLocaleDateString()}</div>
           </div>
           <div class="content">${cleanContent}</div>
           ${
@@ -123,17 +129,40 @@ export function FeedbackPdfModal({
           `
               : ""
           }
-          <script>
-            window.onload = () => { 
-              setTimeout(() => { 
-                window.print(); 
-              }, 400); 
-            };
-          </script>
         </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
+
+    // /print-report の読み込みが終わるのを待ってから、レポートを書き込んで印刷する
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (printWindow.closed) {
+        window.clearInterval(timer);
+        return;
+      }
+      let ready = false;
+      try {
+        ready =
+          printWindow.location.pathname === "/print-report" &&
+          printWindow.document.readyState === "complete";
+      } catch {
+        // 読み込み途中は一時的にアクセスできないことがある。次の回でもう一度確かめる
+      }
+      if (ready) {
+        window.clearInterval(timer);
+        printWindow.document.open();
+        printWindow.document.write(reportHtml);
+        printWindow.document.close();
+        window.setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+        }, 400);
+      } else if (Date.now() - startedAt > 15000) {
+        window.clearInterval(timer);
+        alert("印刷用ページの読み込みに時間がかかっています。もう一度お試しください。");
+      }
+    }, 100);
+
     onClose();
   };
 

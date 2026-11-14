@@ -9,6 +9,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { ToolPageWrapper } from "~/components/layout/ToolPageWrapper";
 import { generateModuleMeta } from "~/utils/seoMeta";
 import { supabase } from "~/lib/supabaseClient";
+import { newSlugFor } from "~/data/lesson-slugs";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -40,10 +41,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       console.error("❌ [Supabase Error] edu_topics fetch failed:", error);
       fetchError = error.message;
     } else {
-      // 各トピック内のレッスンも sort_order で昇順ソートしておく
+      // 各トピック内のレッスンを lesson_order 順に並べる
       topicsData = (topics || []).map((topic: any) => ({
         ...topic,
-        edu_lessons: (topic.edu_lessons || []).sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        edu_lessons: (topic.edu_lessons || []).sort((a: any, b: any) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0))
       }));
     }
   } catch (err: any) {
@@ -123,7 +124,8 @@ export default function LessonsHubIndex() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {topics.map((topic: any) => {
-                  const topicSlug = topic.slug || "obento-unit-4";
+                  // 古い slug（データベース切り替え前）でも新しい URL にする
+                  const topicSlug = newSlugFor(topic.slug) || topic.slug;
                   const baseLessonPath = `/lessons/${topicSlug}`;
                   const isComingSoon = Boolean(topic.is_coming_soon);
                   const lessonsList = topic.edu_lessons || [];
@@ -172,8 +174,9 @@ export default function LessonsHubIndex() {
                               Included Lessons:
                             </p>
                             {lessonsList.map((lesson: any, lIdx: number) => {
-                              // 例: /lessons/obento-unit-4#lesson-1 または個別ページがある場合は lesson.slug などにリンク可能
-                              const lessonTargetLink = lesson.slug ? `/lessons/${lesson.slug}` : `${baseLessonPath}#lesson-${lIdx + 1}`;
+                              // 例: /lessons/family-1（古い slug でも新しい URL にする）
+                              const lessonSlug = lesson.slug ? newSlugFor(lesson.slug) || lesson.slug : null;
+                              const lessonTargetLink = lessonSlug ? `/lessons/${lessonSlug}` : `${baseLessonPath}#lesson-${lIdx + 1}`;
 
                               return (
                                 <Link
@@ -183,7 +186,7 @@ export default function LessonsHubIndex() {
                                 >
                                   <div>
                                     <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                                      Lesson {lIdx + 1}: {lesson.title || `Lesson ${lIdx + 1}`}
+                                      Lesson {lIdx + 1}: {lesson.title_en || lesson.title || `Lesson ${lIdx + 1}`}
                                     </span>
                                     {lesson.learning_intention && (
                                       <span className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
@@ -192,7 +195,7 @@ export default function LessonsHubIndex() {
                                     )}
                                   </div>
                                   <span className="font-bold text-orange-600 dark:text-orange-400 text-[11px] whitespace-nowrap ml-2 group-hover/item:translate-x-0.5 transition-transform">
-                                    Start Unit {topic.slug.replace(/[^0-9]/g, '')} Lesson {lIdx + 1} &rarr;
+                                    Start Lesson {lIdx + 1} &rarr;
                                   </span>
                                 </Link>
                               );
