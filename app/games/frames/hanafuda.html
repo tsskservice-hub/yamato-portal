@@ -356,6 +356,7 @@
           <tr><td>Boar, Deer &amp; Butterfly</td><td>Boar (Bush Clover), Deer (Maple), Butterfly (Peony)</td><td>5 pts + 1 per extra Animal</td></tr>
           <tr><td>Red Ribbons</td><td>Ribbons of Pine, Plum Blossom &amp; Cherry Blossom</td><td>5 pts + 1 per extra Ribbon</td></tr>
           <tr><td>Blue Ribbons</td><td>Ribbons of Peony, Chrysanthemum &amp; Maple</td><td>5 pts + 1 per extra Ribbon</td></tr>
+          <tr><td>Red &amp; Blue Ribbons</td><td>All 6 ribbons of Red Ribbons and Blue Ribbons</td><td>10 pts + 1 per extra Ribbon</td></tr>
           <tr><td>Cherry Blossom Viewing</td><td>Cherry Blossom Bright + Sake Cup</td><td>3 pts</td></tr>
           <tr><td>Moon Viewing</td><td>Susuki Grass Moon Bright + Sake Cup</td><td>3 pts</td></tr>
           <tr><td>Animals</td><td>5 Animal cards</td><td>1 pt + 1 per card from the 6th</td></tr>
@@ -541,8 +542,11 @@ function evalYaku(captured){
   if(ino) list.push({name:"Boar, Deer & Butterfly", pts: 5 + Math.max(0, byKind.tane.length - 3)});
   var aka = [1,2,3].every(function(m){ return tanMonths.indexOf(m) >= 0; });
   var ao = [6,9,10].every(function(m){ return tanMonths.indexOf(m) >= 0; });
-  if(aka) list.push({name:"Red Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
-  if(ao) list.push({name:"Blue Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
+  /* Red and Blue Ribbons together are one combination worth 10 (+1 per ribbon from the 7th).
+     Scoring them separately counted every extra ribbon twice (e.g. 6 ribbons = 8 + 8 = 16). */
+  if(aka && ao) list.push({name:"Red & Blue Ribbons", pts: 10 + Math.max(0, byKind.tanzaku.length - 6)});
+  else if(aka) list.push({name:"Red Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
+  else if(ao) list.push({name:"Blue Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
   var hasSakura = hikariMonths.indexOf(3) >= 0, hasMoon = hikariMonths.indexOf(8) >= 0, hasCup = taneMonths.indexOf(9) >= 0;
   if(hasSakura && hasCup) list.push({name:"Cherry Blossom Viewing", pts:3});
   if(hasMoon && hasCup) list.push({name:"Moon Viewing", pts:3});
@@ -558,7 +562,24 @@ var P = "you", C = "cpu";
 var G = null;
 var settings = { months: 12, level: 2 };
 
+/* Changes every time a new match starts. Waits (delay) and timers from an older match stop when
+   they see a different number, so "Start Match" in the middle of a month can't let the old
+   month's moves run on into the new match. */
+var matchGen = 0;
+var CANCELLED = { cancelled: true };
+/** Run an async step (a turn) and ignore the "cancelled" signal from an old match */
+function run(promise){
+  promise.catch(function(e){ if(e !== CANCELLED) console.error(e); });
+}
+/** setTimeout that does nothing if a new match has started meanwhile */
+function later(fn, ms){
+  var gen = matchGen;
+  setTimeout(function(){ if(gen === matchGen) fn(); }, ms);
+}
+
 function newMatch(){
+  matchGen++;
+  busy = false; pendingPick = null;
   G = {
     round: 0, totalMonths: settings.months,
     score: { you: 0, cpu: 0 },
@@ -586,7 +607,9 @@ function startRound(){
   while(true){
     deck = shuffledDeck();
     var field = deck.slice(16, 24);
-    if(!monthOf4(field)) break; /* 場に4枚同月は配り直し */
+    /* 場に4枚同月は配り直し。両者とも手役（4枚同月）のときも配り直す（どちらの勝ちとも決められないため） */
+    var bothHandYaku = monthOf4(deck.slice(0, 8)) && monthOf4(deck.slice(8, 16));
+    if(!monthOf4(field) && !bothHandYaku) break;
     if(++tries > 50) break;
   }
   G.hand = { you: deck.slice(0, 8), cpu: deck.slice(8, 16) };
@@ -603,17 +626,23 @@ function startRound(){
   if(youT || cpuT){
     var winner = youT ? P : C;
     setStatus((winner===P ? "You were" : "The computer was") + " dealt all four " + MONTH_FLOWER[(youT||cpuT)-1] + " cards — a four-of-a-kind hand yaku.");
-    setTimeout(function(){ endRound(winner, [{name:"Hand Yaku (four of a month)", pts:6}], 6, false); }, 900);
+    later(function(){ endRound(winner, [{name:"Hand Yaku (four of a month)", pts:6}], 6, false); }, 900);
     G.phase = "over";
     return;
   }
   setStatus(G.turn === P ? "Your turn. Choose a card from your hand." : "Computer's turn.");
-  if(G.turn === C){ lock(true); setTimeout(cpuTurn, 900); }
+  if(G.turn === C){ lock(true); later(function(){ run(cpuTurn()); }, 900); }
   else lock(false);
 }
 
 /* ================= 進行 ================= */
-function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+/** Wait. If a new match starts during the wait, the turn stops here (rejects with CANCELLED). */
+function delay(ms){
+  var gen = matchGen;
+  return new Promise(function(resolve, reject){
+    setTimeout(function(){ if(gen === matchGen) resolve(); else reject(CANCELLED); }, ms);
+  });
+}
 function matchesInField(month){
   return G.field.filter(function(id){ return cardById(id).month === month; });
 }
@@ -676,7 +705,9 @@ async function afterTurn(who){
   var improved = ev.total > G.baseScore[who];
   if(improved && ev.total > 0){
     G.baseScore[who] = ev.total;
-    var noMore = G.hand.you.length === 0 && G.hand.cpu.length === 0;
+    /* No cards left in this player's hand: Koi-Koi could only lose points (they can't add to
+       their yaku any more), so the month ends with these points. */
+    var noMore = G.hand[who].length === 0;
     if(noMore){ endRoundWithScore(who, ev); return; }
     var cont;
     if(who === P){ cont = await askKoikoi(ev); }
@@ -697,7 +728,7 @@ async function afterTurn(who){
     lock(true);
     setStatus("Computer's turn.");
     await delay(500);
-    cpuTurn();
+    await cpuTurn(); // awaited, so a cancelled old match stops the whole chain
   } else {
     busy = false;
     lock(false);
@@ -762,24 +793,32 @@ function showFinal(){
 /* ================= あなたの操作 ================= */
 var pendingPick = null; /* {cardId, fromDraw, candidates, resolve} */
 function onHandCardClick(cardId){
-  if(!G || G.phase !== "play" || busy || G.turn !== P || pendingPick) return;
+  if(!G || G.phase !== "play" || busy || G.turn !== P) return;
+  if(pendingPick){
+    /* Choosing which of two field cards to take for a hand card: tapping the same hand card
+       cancels, tapping another hand card plays that one instead. (A drawn card's choice can't be undone.) */
+    if(pendingPick.fromDraw) return;
+    var same = pendingPick.cardId === cardId;
+    pendingPick = null;
+    if(same){ setStatus("Your turn. Choose a card from your hand."); render(); return; }
+  }
   var c = cardById(cardId);
   var m = matchesInField(c.month);
   if(m.length === 2){
     pendingPick = { cardId: cardId, candidates: m, fromDraw: false };
-    setStatus("There are two " + MONTH_FLOWER[c.month-1] + " cards on the field. Tap the one you want to take.");
+    setStatus("There are two " + MONTH_FLOWER[c.month-1] + " cards on the field. Tap the one you want to take (or tap your card again to choose another).");
     render();
     return;
   }
   busy = true; lock(true);
-  playFromHand(P, cardId, null);
+  run(playFromHand(P, cardId, null));
 }
 function onFieldCardClick(cardId){
   if(!pendingPick || pendingPick.candidates.indexOf(cardId) < 0) return;
   var pick = pendingPick; pendingPick = null;
   if(pick.fromDraw){ pick.resolve(cardId); render(); return; }
   busy = true; lock(true);
-  playFromHand(P, pick.cardId, cardId);
+  run(playFromHand(P, pick.cardId, cardId));
 }
 function askFieldChoice(drawnId, candidates){
   return new Promise(function(resolve){
@@ -822,9 +861,34 @@ function cpuChooseFieldCard(candidates, capturedBy){
   candidates.forEach(function(id){ var v = cardValue(cardById(id)); if(v > bv){ bv = v; best = id; } });
   return best;
 }
+/* 相手（あなた）の役を止める：その札を相手が取ると、相手の役点が増える／役まであと 1 枚になるか */
+var YAKU_SETS = [
+  { kind: "hikari", months: [1, 3, 8, 11, 12], need: 3 },  /* Brights */
+  { kind: "tane", months: [6, 7, 10], need: 3 },           /* Boar, Deer & Butterfly */
+  { kind: "tanzaku", months: [1, 2, 3], need: 3 },         /* Red Ribbons */
+  { kind: "tanzaku", months: [6, 9, 10], need: 3 }         /* Blue Ribbons */
+];
+function inYakuSet(c, set){ return c.kind === set.kind && set.months.indexOf(c.month) >= 0; }
+function opponentThreat(cardIds){
+  var mine = G.captured.you;
+  var t = (evalYaku(mine.concat(cardIds)).total - evalYaku(mine).total) * 30;
+  cardIds.forEach(function(id){
+    var c = cardById(id);
+    YAKU_SETS.forEach(function(set){
+      if(!inYakuSet(c, set)) return;
+      var have = mine.filter(function(x){ return inYakuSet(cardById(x), set); }).length;
+      if(have >= set.need - 1) t += 25;
+    });
+    /* Sake Cup when the opponent already has the Cherry Blossom Curtain or the Moon */
+    if(c.kind === "tane" && c.month === 9 && mine.some(function(x){ var k = cardById(x); return k.kind === "hikari" && (k.month === 3 || k.month === 8); })) t += 25;
+  });
+  return t;
+}
 function cpuPickPlay(){
   var hand = G.hand.cpu, best = null, bestScore = -1e9;
   var rnd = settings.level === 1 ? 14 : settings.level === 2 ? 5 : 0;
+  /* How much the computer cares about stopping your yaku: Beginner not at all, Normal a little, Strong fully */
+  var block = settings.level === 3 ? 1 : settings.level === 2 ? 0.5 : 0;
   hand.forEach(function(cardId){
     var c = cardById(cardId);
     var m = matchesInField(c.month);
@@ -834,12 +898,14 @@ function cpuPickPlay(){
       s += take.reduce(function(a,id){ return a + cardValue(cardById(id)); }, 0) + cardValue(c);
       s += captureGain(C, take.concat([cardId]));
       if(m.length >= 3) s += 25; /* 引きは大きい */
+      /* 相手が欲しい札を先に取る */
+      s += opponentThreat(take) * block;
     } else {
-      /* 取れない手：価値の低い札から捨てる。ただし役の材料・場に同月が多い札は温存 */
+      /* 取れない手：価値の低い札から捨てる。ただし役の材料は温存 */
       s -= cardValue(c) * 0.6;
       s += potentialBonus(C, cardId) * -1.5;
-      var sameOnField = 0;
-      s += sameOnField;
+      /* 場に出した札は次にあなたが取るかもしれない。あなたの役に効く札は出さない */
+      s -= opponentThreat([cardId]) * 0.5 * block;
     }
     if(s > bestScore){ bestScore = s; best = { cardId: cardId, choice: m.length === 2 ? cpuChooseFieldCard(m, G.captured.cpu) : null }; }
   });
@@ -976,6 +1042,12 @@ var YAKU_GUIDE = [
     desc: "The three blue ribbons of Peony, Chrysanthemum, and Maple. Worth 5 points, plus 1 extra point for every additional Ribbon card you hold."
   },
   {
+    jp: '<ruby>赤短<rt>あかたん</rt></ruby>・<ruby>青短<rt>あおたん</rt></ruby>', en: "Red & Blue Ribbons", pts: "10 pts + extras",
+    ids: [1, 5, 9, 21, 33, 37],
+    need: "All six ribbons of Red Ribbons and Blue Ribbons",
+    desc: "Collect both Red Ribbons and Blue Ribbons for 10 points, plus 1 extra point for every Ribbon card from the seventh onward. It is scored as one combination, in place of Red Ribbons and Blue Ribbons."
+  },
+  {
     jp: '<ruby>花見<rt>はなみ</rt></ruby>で<ruby>一杯<rt>いっぱい</rt></ruby>', en: "Cherry Blossom Viewing", pts: "3 pts",
     ids: [8, 32],
     need: "Cherry Blossom Curtain (Bright) + Sake Cup (Chrysanthemum)",
@@ -1074,7 +1146,14 @@ document.getElementById("rulesBtn").addEventListener("click", function(){ openOv
 document.getElementById("closeRulesBtn").addEventListener("click", function(){ closeOverlay("rulesOverlay"); });
 document.getElementById("rulesOverlay").addEventListener("click", function(e){ if(e.target === this) closeOverlay("rulesOverlay"); });
 document.addEventListener("keydown", function(e){
-  if(e.key === "Escape"){ closeOverlay("rulesOverlay"); closeOverlay("finalOverlay"); }
+  if(e.key !== "Escape") return;
+  closeOverlay("rulesOverlay"); closeOverlay("finalOverlay");
+  /* Cancel choosing a field card for a hand card (not for a drawn card) */
+  if(pendingPick && !pendingPick.fromDraw){
+    pendingPick = null;
+    setStatus("Your turn. Choose a card from your hand.");
+    render();
+  }
 });
 /* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */
 render();

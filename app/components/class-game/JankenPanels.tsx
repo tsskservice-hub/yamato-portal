@@ -33,9 +33,57 @@ export const HAND_EMOJI: Record<Hand, string> = { rock: '✊', scissors: '✌️
 const HAND_LABEL: Record<Hand, string> = { rock: 'Guu', scissors: 'Choki', paper: 'Paa' };
 const HANDS: Hand[] = ['rock', 'scissors', 'paper'];
 
-/** 「じゃんけんぽん！」の音声。ブラウザの読み上げ（日本語）を使う。読み上げがない端末では音なし */
-export const JANKEN_VOICE_LEAD_MS = 1200;
+/**
+ * 「じゃんけんぽん！」の録音。public/live-game/sounds/jankenpon.mp3
+ * JANKEN_VOICE_LEAD_MS：再生を始めてから「ぽん」が鳴るまでの時間（手が開く瞬間にそろえる）
+ * 録音が鳴らせないときは、ブラウザの読み上げにする
+ */
+const JANKEN_SOUND_URL = '/live-game/sounds/jankenpon.mp3';
+export const JANKEN_VOICE_LEAD_MS = 1050;
+let jankenAudio: HTMLAudioElement | null = null;
+
+/** 前もって読み込む。iPhone などは、最初に画面をタップしたときに音を鳴らせるようにしておく */
+export function preloadJankenSound() {
+  if (typeof window === 'undefined' || jankenAudio) return;
+  try {
+    jankenAudio = new Audio(JANKEN_SOUND_URL);
+    jankenAudio.preload = 'auto';
+    jankenAudio.load();
+    const unlock = () => {
+      const a = jankenAudio;
+      if (!a) return;
+      a.muted = true;
+      a.play()
+        .then(() => {
+          a.pause();
+          a.currentTime = 0;
+          a.muted = false;
+        })
+        .catch(() => {
+          a.muted = false;
+        });
+    };
+    window.addEventListener('pointerdown', unlock, { once: true });
+  } catch {
+    jankenAudio = null;
+  }
+}
+
 export function sayJankenPon() {
+  if (jankenAudio) {
+    try {
+      jankenAudio.muted = false;
+      jankenAudio.currentTime = 0;
+      jankenAudio.play().catch(speakJankenPon);
+      return;
+    } catch {
+      // 読み上げにする
+    }
+  }
+  speakJankenPon();
+}
+
+function speakJankenPon() {
   try {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     const u = new SpeechSynthesisUtterance('じゃんけんぽん！');
@@ -68,7 +116,7 @@ export function JankenTargetPicker({
       <p className="text-4xl">✊✌️✋</p>
       <h2 className="text-2xl font-black text-slate-900 dark:text-white">じゃんけん勝負！</h2>
       <p className="text-sm text-slate-600 dark:text-slate-300">
-        Choose someone to challenge. The loser gives <b>half of their coins</b> to the winner — that could be you, so choose
+        Choose someone to challenge. The loser gives <b>half of their coins (up to 10)</b> to the winner — that could be you, so choose
         carefully! A draw means nothing happens.
       </p>
       {failed && <p className="text-sm text-amber-600">That person can't be challenged right now. Choose someone else.</p>}

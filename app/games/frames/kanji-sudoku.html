@@ -170,6 +170,7 @@
       .cell.hinted .big{color:var(--good)}
       .cell.error{background:var(--error-bg)}
       .cell.error .big{color:var(--error)}
+      .cell.clash{box-shadow:inset 0 0 0 3px var(--error)}
       .cell.related{background:var(--related)}
       .cell.same{background:var(--same)}
       .cell.selected{background:var(--selected)}
@@ -327,7 +328,7 @@
         <div class="stat"><span class="label">Time</span><div class="value" id="stat-time">00:00</div></div>
         <div class="stat"><span class="label">Mistakes</span><div class="value" id="stat-mistakes">0</div></div>
         <div class="stat"><span class="label">Hints used</span><div class="value" id="stat-hints">0</div></div>
-        <div class="stat"><span class="label">Filled</span><div class="value" id="stat-filled">0 / 81</div></div>
+        <div class="stat"><span class="label">Filled</span><div class="value" id="stat-filled">0 / 0</div></div>
       </div>
 
       <div class="layout">
@@ -397,7 +398,8 @@
           <li><strong>The goal:</strong> fill the grid so that every row, every column, and every 3×3 box contains each of the nine kanji — <span class="kanji-font">一 二 三 四 五 六 七 八 九</span> — exactly once.</li>
           <li><strong>Placing a kanji:</strong> tap any empty cell to select it, then tap a kanji on the number pad, or press <kbd>1</kbd>–<kbd>9</kbd> on a keyboard. Use the arrow keys to move around the board.</li>
           <li><strong>Given clues</strong> are printed in bold black and cannot be changed. Your entries appear in blue; a hint-filled cell appears in green.</li>
-          <li><strong>Mistakes</strong> are checked instantly: a wrong kanji turns red and the mistake counter goes up. Fix it with Erase or by entering the right kanji.</li>
+          <li><strong>Mistakes</strong> are checked instantly: a wrong kanji turns red and the mistake counter goes up. If it repeats a kanji already in the same row, column, or box, that cell flashes red too. Fix it with Erase or by entering the right kanji. Undo puts the board back, but mistakes and hints already used still count.</li>
+          <li><strong>Difficulty:</strong> Easy can be solved by always finding a cell where only one kanji fits. Medium also needs “this kanji fits in only one place in this row, column, or box”. Hard and Expert give fewer clues and need deeper thinking.</li>
           <li><strong>Notes mode</strong> (pencil icon, or press <kbd>N</kbd>) lets you jot down small candidate kanji in an empty cell. Press <kbd>Backspace</kbd> to erase, <kbd>Ctrl</kbd>+<kbd>Z</kbd> to undo, and <kbd>H</kbd> for a hint.</li>
           <li><strong>Learning the kanji:</strong> keep “Small Arabic numbers” on while you learn — a tiny 1–9 appears in the corner of each filled cell. Turn it off for a real challenge once the kanji feel familiar.</li>
           <li><strong>Winning:</strong> the puzzle is complete when all 81 cells are filled correctly. Every puzzle here has exactly one solution.</li>
@@ -492,6 +494,71 @@
             if (total>=limit) break;
           }
           return total;
+        }
+        /* How far plain logic gets: "naked" = only one kanji fits a cell,
+           "hidden" = a kanji fits only one cell in its row, column or box.
+           Returns true when the puzzle is solved using only those steps. */
+        function solvesWithSingles(puzzle, allowHidden){
+          var g = puzzle.slice();
+          var progress = true;
+          while (progress){
+            progress = false;
+            for (var i=0;i<81;i++){
+              if (g[i]!==0) continue;
+              var cs = candidates(g,i);
+              if (cs.length===0) return false;
+              if (cs.length===1){ g[i]=cs[0]; progress=true; }
+            }
+            if (progress || !allowHidden) continue;
+            for (var u=0;u<27 && !progress;u++){
+              var cells = UNITS[u];
+              for (var n=1;n<=9 && !progress;n++){
+                var spot=-1, count=0;
+                for (var k=0;k<9;k++){
+                  var c = cells[k];
+                  if (g[c]===n){ count=-1; break; }
+                  if (g[c]===0 && candidates(g,c).indexOf(n)!==-1){ spot=c; count++; }
+                }
+                if (count===1){ g[spot]=n; progress=true; }
+              }
+            }
+          }
+          return g.indexOf(0)===-1;
+        }
+        var UNITS = (function(){
+          var out=[];
+          for (var r=0;r<9;r++){ var row=[]; for (var c=0;c<9;c++) row.push(r*9+c); out.push(row); }
+          for (var c2=0;c2<9;c2++){ var col=[]; for (var r2=0;r2<9;r2++) col.push(r2*9+c2); out.push(col); }
+          for (var b=0;b<9;b++){
+            var box=[], br=Math.floor(b/3)*3, bc=(b%3)*3;
+            for (var d=0;d<9;d++) box.push((br+Math.floor(d/3))*9+bc+d%3);
+            out.push(box);
+          }
+          return out;
+        })();
+        /* Easy: every step is "only one kanji fits this cell".
+           Medium: also needs "this kanji fits only one place".
+           Hard / Expert: fewer clues, and at least one step beyond those two. */
+        function fitsDifficulty(puzzle, diff){
+          if (diff==="easy") return solvesWithSingles(puzzle,false);
+          if (diff==="medium") return solvesWithSingles(puzzle,true) && !solvesWithSingles(puzzle,false);
+          return !solvesWithSingles(puzzle,true);
+        }
+        /* Try a few puzzles (within a short time budget) and keep the first one that
+           reaches the clue target and matches the difficulty; otherwise the closest one. */
+        function generateForDifficulty(diff){
+          var target = REMOVALS[diff];
+          var started = Date.now(), best = null, bestScore = -1;
+          for (var attempt=0; attempt<40; attempt++){
+            var g = generatePuzzle(target);
+            var removed = g.puzzle.filter(function(v){ return v===0; }).length;
+            var fits = fitsDifficulty(g.puzzle, diff);
+            if (removed>=target && fits) return g;
+            var score = removed + (fits ? 100 : 0);
+            if (score>bestScore){ best=g; bestScore=score; }
+            if (Date.now()-started > 1500) break;
+          }
+          return best;
         }
         function generatePuzzle(removalsTarget){
           var solution = new Array(81).fill(0);
@@ -622,10 +689,15 @@
           document.getElementById("stat-mistakes").textContent = state.mistakes;
           document.getElementById("stat-mistakes").classList.toggle("bad", state.mistakes>0);
           document.getElementById("stat-hints").textContent = state.hints;
-          var filled=0;
-          for (var k=0;k<81;k++) if (state.board[k]!==0 && !state.errors[k]) filled++;
-          document.getElementById("stat-filled").textContent = filled+" / 81";
-          var pct = Math.round(filled/81*100);
+          /* Progress counts only the cells you have to fill (given clues are excluded). */
+          var toFill=0, filled=0;
+          for (var k=0;k<81;k++){
+            if (state.given[k]) continue;
+            toFill++;
+            if (state.board[k]!==0 && !state.errors[k]) filled++;
+          }
+          document.getElementById("stat-filled").textContent = filled+" / "+toFill;
+          var pct = toFill ? Math.round(filled/toFill*100) : 0;
           document.getElementById("progress-fill").style.width = pct+"%";
           document.getElementById("progress-text").textContent = pct+"% complete";
         }
@@ -654,8 +726,7 @@
             board: state.board.slice(),
             hinted: state.hinted.slice(),
             errors: Object.assign({}, state.errors),
-            notes: state.notes.map(function(s){ return new Set(s); }),
-            mistakes: state.mistakes
+            notes: state.notes.map(function(s){ return new Set(s); })
           });
           if (state.history.length>200) state.history.shift();
         }
@@ -663,9 +734,10 @@
           if (state.finished || state.paused) return;
           var s = state.history.pop();
           if (!s){ setStatus("Nothing to undo yet.",""); return; }
-          state.board=s.board; state.hinted=s.hinted; state.errors=s.errors; state.notes=s.notes; state.mistakes=s.mistakes;
+          /* Mistakes and hints are a record of what happened, so Undo never changes them. */
+          state.board=s.board; state.hinted=s.hinted; state.errors=s.errors; state.notes=s.notes;
           render();
-          setStatus("Undid your last move.","");
+          setStatus("Undid your last move. (Mistakes and hints already used still count.)","");
         }
 
         /* ---------- Game flow ---------- */
@@ -676,7 +748,7 @@
           });
           setStatus("Generating a fresh "+DIFF_LABEL[state.difficulty]+" puzzle…","");
           setTimeout(function(){
-            var g = generatePuzzle(REMOVALS[state.difficulty]);
+            var g = generateForDifficulty(state.difficulty);
             state.solution=g.solution; state.puzzle=g.puzzle;
             state.board=g.puzzle.slice();
             state.given=g.puzzle.map(function(v){ return v!==0; });
@@ -730,7 +802,7 @@
             render();
             var el=cellEls[i]; el.classList.add("shake");
             setTimeout(function(){ el.classList.remove("shake"); }, 400);
-            setStatus("<strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") does not belong there — it breaks a row, column, or box rule. Try another kanji, or erase it.","err");
+            setStatus(mistakeMessage(i,n),"err");
           } else {
             delete state.errors[i];
             cleanNotesAround(i,n);
@@ -738,6 +810,29 @@
             setStatus("<strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") placed correctly.","ok");
             checkWin();
           }
+        }
+        /* Say why the kanji is wrong: either it repeats one already in the same
+           row / column / box (and flash that cell), or it does not clash with anything
+           yet but is still not the answer for this cell. */
+        function mistakeMessage(i, n){
+          var r=Math.floor(i/9), c=i%9, where=[], clashes=[];
+          for (var j=0;j<81;j++){
+            if (j===i || state.board[j]!==n || state.errors[j]) continue;
+            var rj=Math.floor(j/9), cj=j%9;
+            var sameBox = Math.floor(rj/3)===Math.floor(r/3) && Math.floor(cj/3)===Math.floor(c/3);
+            if (rj===r){ if (where.indexOf("row")===-1) where.push("row"); clashes.push(j); }
+            else if (cj===c){ if (where.indexOf("column")===-1) where.push("column"); clashes.push(j); }
+            else if (sameBox){ if (where.indexOf("box")===-1) where.push("box"); clashes.push(j); }
+          }
+          var label = "<strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+")";
+          if (clashes.length){
+            clashes.forEach(function(j){
+              var el=cellEls[j]; el.classList.add("clash");
+              setTimeout(function(){ el.classList.remove("clash"); }, 1200);
+            });
+            return label+" is already in this "+where.join(" and ")+" — the same kanji cannot appear twice. Try another kanji, or erase it.";
+          }
+          return label+" does not clash with anything yet, but it is not the right kanji for this cell. Try another kanji, or erase it.";
         }
         function eraseCell(){
           if (state.paused || state.finished) return;

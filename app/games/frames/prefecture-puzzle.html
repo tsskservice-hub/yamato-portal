@@ -81,6 +81,10 @@
   .piece-box .box-hint { font-size: 11px; color: #6d675c; text-align: center; margin-top: 2px; }
   #pieceHolder { margin-top: 6px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
   #pieceHolder:active { cursor: grabbing; }
+  #pieceHolder:focus-visible { outline: 3px solid #1e3a5f; outline-offset: 2px; border-radius: 8px; }
+  /* Tap-to-place: the piece box glows while a piece is picked up, and the map shows a crosshair. */
+  .piece-box.picked { border-color: #c9a227; box-shadow: 0 0 0 3px #c9a227, 0 6px 20px rgba(20, 40, 70, .35); }
+  .map-wrap.placing #mapSvg { cursor: crosshair; }
   #pieceHolder svg { width: 100%; max-height: 200px; height: auto; display: block; filter: drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
   .piece-box .tap-hint { font-size: 11px; color: #1e3a5f; text-align: center; margin-top: 4px; }
   .piece-box .tap-hint button { background: none; border: none; padding: 2px 6px; font-size: 11px; color: #1e3a5f; text-decoration: underline; font-weight: 600; }
@@ -172,7 +176,7 @@
   <header class="topbar">
     <div class="titles">
       <h1>Japan Prefecture Puzzle <span class="level-badge" id="levelBadge"></span><span class="jp">日本の都道府県パズル</span></h1>
-      <p class="subtitle" id="subtitleEl">Drag each prefecture onto the map and complete the Japanese archipelago — all 47 prefectures.</p>
+      <p class="subtitle" id="subtitleEl">Drag each prefecture onto the map (or tap the piece, then tap its place) and complete the Japanese archipelago — all 47 prefectures.</p>
     </div>
     <div class="top-actions">
       <button class="btn-ghost icon-btn" id="soundBtn" title="Sound on / off" aria-label="Toggle sound">🔊</button>
@@ -200,8 +204,8 @@
           </svg>
           <div class="piece-box" id="pieceBox">
             <div class="box-title">Next piece</div>
-            <div id="pieceHolder" title="Drag me onto the map"></div>
-            <div class="box-hint">Drag it onto the map</div>
+            <div id="pieceHolder" title="Drag me onto the map, or tap me and then tap the map" role="button" tabindex="0" aria-label="Next prefecture piece. Press Enter to pick it up, then tap its place on the map." aria-pressed="false"></div>
+            <div class="box-hint" id="boxHint">Drag it onto the map — or tap it, then tap the map</div>
             <div class="tap-hint"><button id="detailBtn" type="button">Tap for details</button></div>
           </div>
         </div>
@@ -219,7 +223,7 @@
             <span>✖ Mistakes <b id="mistakeEl">0</b></span>
             <span>⏭ Skipped <b id="skipEl">0</b></span>
           </div>
-          <div id="statusMsg">Drag the piece in the box onto the map. Tap the piece to see which prefecture it is.</div>
+          <div id="statusMsg">Drag the piece in the box onto the map, or tap it and then tap its place. Press “Tap for details” to see which prefecture it is.</div>
           <div class="btn-row">
             <button class="btn-primary" id="skipBtn">Skip this piece ⏭</button>
             <button class="btn-gold" id="newBtn">New Game</button>
@@ -241,7 +245,10 @@
     <button class="close-x" data-close="howOverlay" aria-label="Close">✕</button>
     <h2 id="howTitle">How to Play</h2>
     <ul>
-      <li>One prefecture piece at a time appears in the box over the Sea of Japan. Drag it onto the map and drop it in the right place. Tap a piece to see its details.</li>
+      <li>One prefecture piece at a time appears in the box over the Sea of Japan. Drag it onto the map and drop it in the right place.</li>
+      <li>On a phone or tablet you can also <b>tap the piece</b> (it glows gold), then <b>tap the place on the map</b>. Tap the piece again to put it back.</li>
+      <li>Press <b>Tap for details</b> under the piece to see its name, capital and coastline.</li>
+      <li>The clock starts when you first touch the piece, and stops while you are away from this tab.</li>
       <li>All prefecture pieces are prepared with <b>north at the top</b>. They are never rotated.</li>
       <li>If the shape in the pop-up has a <b style="color:#2563eb">blue line</b>, that part of the prefecture <b>faces the sea</b>. The pop-up also tells you which sea it is.</li>
       <li id="howColour" style="display:none">This is the <b>easy version</b>: each prefecture's outline is coloured by its region, and each piece has the colour of its region — match the colours to find where it goes!</li>
@@ -327,12 +334,27 @@ function distToRing(x, y, ring) {
   }
   return best;
 }
-function hitTest(pref, x, y) {
+// A drop counts if it lands inside the prefecture. A drop just outside it
+// also counts, but only in the sea (or a gap between outlines): a drop
+// inside a different prefecture is always wrong, so the tolerance never
+// lets a neighbour's place be accepted. "Just outside" is measured on
+// screen (about 10px), so small or island prefectures (Osaka, Kagawa,
+// Okinawa…) are as easy to hit on a phone as on a big screen; it is kept
+// between 6 and 14 map units.
+const HIT_PX = 10;
+function hitTolerance() {
+  const r = $('mapSvg').getBoundingClientRect();
+  const perPx = r.width > 0 ? VIEW_W / r.width : 1;
+  return Math.max(6, Math.min(14, HIT_PX * perPx));
+}
+function hitTest(pref, x, y, tol) {
+  if (tol === undefined) tol = 6;
   for (const ring of pref.rings) {
     if (pointInRing(x, y, ring)) return true;
   }
+  if (prefAtPoint(x, y)) return false;
   for (const ring of pref.rings) {
-    if (distToRing(x, y, ring) <= 6) return true;
+    if (distToRing(x, y, ring) <= tol) return true;
   }
   return false;
 }
@@ -459,7 +481,7 @@ function placeOnMap(p) {
   path.setAttribute('class', 'slot placed');
   path.setAttribute('data-id', p.id);
   path.style.cursor = 'pointer';
-  path.addEventListener('click', () => showDetails(p));
+  path.addEventListener('click', () => { if (!picked) showDetails(p); });
   g.appendChild(path);
   const slot = document.querySelector(`#slots .slot[data-id="${p.id}"]`);
   if (slot) slot.style.display = 'none';
@@ -487,12 +509,13 @@ function startGame() {
   startTime = null;
   if (timerInt) clearInterval(timerInt);
   timerInt = null;
+  setPicked(false);
   $('placedLayer').innerHTML = '';
   $('labelsLayer').innerHTML = '';
   document.querySelectorAll('#slots .slot').forEach(s => { s.style.display = ''; });
   updateProgress();
   nextPiece();
-  setStatus('Drag the piece in the box onto the map. Tap the piece to see which prefecture it is.');
+  setStatus('Drag the piece in the box onto the map, or tap it and then tap its place. Press “Tap for details” to see which prefecture it is.');
 }
 function startTimer() {
   if (timerInt || startTime !== null) return;
@@ -518,11 +541,13 @@ function onCorrectDrop(p) {
   queue = queue.filter(id => id !== p.id);
   placeOnMap(p);
   sfxCorrect();
-  startTimer();
   updateProgress();
   if (placed.size === 47) {
     won = true;
     if (timerInt) clearInterval(timerInt);
+    // Show the exact final time (the interval only ticks once a second).
+    if (startTime !== null) elapsed = Math.floor((Date.now() - startTime) / 1000);
+    $('timeEl').textContent = fmtTime(elapsed);
     sfxWin();
     $('winStats').innerHTML =
       `Time: <b>${fmtTime(elapsed)}</b> &nbsp;·&nbsp; Mistakes: <b>${mistakes}</b> &nbsp;·&nbsp; Skipped: <b>${skips}</b>`;
@@ -585,6 +610,7 @@ function clearHover() {
 holder.addEventListener('pointerdown', e => {
   if (!currentId || won) return;
   e.preventDefault();
+  startTimer();
   holder.setPointerCapture(e.pointerId);
   drag = { id: currentId, moved: false, startX: e.clientX, startY: e.clientY, startT: Date.now() };
 });
@@ -611,22 +637,61 @@ holder.addEventListener('pointerup', e => {
   clearHover();
   const p = BY_ID[d.id];
   if (!d.moved) {
-    // a tap: show details
-    if (Date.now() - d.startT < 600) showDetails(p);
+    // a tap: pick the piece up (then tap the map), or put it back
+    if (Date.now() - d.startT < 600) setPicked(!picked);
     return;
   }
+  setPicked(false);
   const mp = mapPointFromClient(e.clientX, e.clientY);
   if (mp.x < 0 || mp.x > VIEW_W || mp.y < 0 || mp.y > VIEW_H) {
     setStatus('That was outside the map — the piece is back in its box. Try again.');
     return;
   }
-  if (hitTest(p, mp.x, mp.y)) onCorrectDrop(p);
-  else onWrongDrop(p);
+  tryPlace(p, mp.x, mp.y);
 });
 holder.addEventListener('pointercancel', () => {
   drag = null;
   ghost.style.display = 'none';
   clearHover();
+});
+
+// ---------- tap to place ----------
+// Tap the piece to pick it up (the box glows), then tap the map to place it.
+// The same check as a drag drop is used. Tap the piece again (or Esc) to put it back.
+let picked = false;
+function setPicked(on) {
+  picked = !!on && !!currentId && !won;
+  $('pieceBox').classList.toggle('picked', picked);
+  $('mapWrap').classList.toggle('placing', picked);
+  holder.setAttribute('aria-pressed', picked ? 'true' : 'false');
+  if (!picked) clearHover();
+  if (picked) setStatus('Now tap the place on the map where this piece goes. Tap the piece again to put it back.');
+}
+function tryPlace(p, x, y) {
+  if (hitTest(p, x, y, hitTolerance())) { setPicked(false); onCorrectDrop(p); }
+  else onWrongDrop(p);
+}
+$('mapSvg').addEventListener('click', e => {
+  if (!picked || !currentId || won) return;
+  const mp = mapPointFromClient(e.clientX, e.clientY);
+  tryPlace(BY_ID[currentId], mp.x, mp.y);
+});
+$('mapSvg').addEventListener('pointermove', e => {
+  if (!picked || drag || e.pointerType !== 'mouse') return;
+  const mp = mapPointFromClient(e.clientX, e.clientY);
+  clearHover();
+  const under = prefAtPoint(mp.x, mp.y);
+  if (under) {
+    const el = document.querySelector(`#slots .slot[data-id="${under.id}"]`);
+    if (el) el.classList.add('hover');
+  }
+});
+holder.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  if (!currentId || won) return;
+  startTimer();
+  setPicked(!picked);
 });
 
 // ---------- modals ----------
@@ -639,7 +704,11 @@ document.querySelectorAll('.overlay').forEach(ov => {
   ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+  if (e.key === 'Escape') {
+    const open = document.querySelectorAll('.overlay.open');
+    if (open.length) open.forEach(o => o.classList.remove('open'));
+    else if (picked) { setPicked(false); setStatus('Piece put back in its box.'); }
+  }
 });
 $('howBtn').addEventListener('click', () => openOverlay('howOverlay'));
 $('detailBtn').addEventListener('click', () => { if (currentId) showDetails(BY_ID[currentId]); });
@@ -651,6 +720,8 @@ $('skipBtn').addEventListener('click', () => {
     setStatus('This is the last piece — give it a try! Tap it to see its details.');
     return;
   }
+  startTimer();
+  setPicked(false);
   const id = queue.shift();
   queue.push(id);
   skips++;
@@ -732,7 +803,7 @@ $('mapSvg').setAttribute('viewBox', `0 0 ${VIEW_W} ${VIEW_H}`);
   badge.classList.add(IS_EASY ? 'easy' : 'hard');
   document.title = 'Japan Prefecture Puzzle — ' + (IS_EASY ? 'Easy' : 'Hard') + ' — 日本の都道府県パズル';
   if (IS_EASY) {
-    $('subtitleEl').textContent = 'Drag each prefecture onto the map and complete the Japanese archipelago — all 47 prefectures. Each prefecture\u2019s outline is coloured by its region, and each piece has its region\u2019s colour — match the colours!';
+    $('subtitleEl').textContent = 'Drag each prefecture onto the map (or tap the piece, then tap its place) and complete the Japanese archipelago — all 47 prefectures. Each prefecture\u2019s outline is coloured by its region, and each piece has its region\u2019s colour — match the colours!';
     $('howColour').style.display = '';
   }
 })();

@@ -13,6 +13,7 @@ import { supabase } from '~/lib/supabaseClient';
 
 // モジュール化したコンポーネントのインポート
 import { TutorPreferencesSection } from '~/components/TutorPreferencesSection';
+import { TimezoneSection } from '~/components/TimezoneSection';
 import { RegistrationDetails } from '~/components/RegistrationDetails';
 import { CreditTransactionsSection } from '~/components/CreditTransactionsSection';
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
@@ -529,6 +530,9 @@ export default function AccountSettingsRoute() {
           initialSchoolRefId={initialData.schoolRefId}
           onSaved={() => revalidator.revalidate()}
         />
+
+        {/* 1-2. タイムゾーン（デイリークイズの切り替わり。変更は 30 日に 1 回まで） */}
+        <TimezoneSection userId={user?.id} />
 
         {/* 1a. 先生アカウントの審査中のお知らせ */}
         {initialData.teacherStatus === "pending" && (

@@ -315,7 +315,7 @@ function TeacherSetup({
         </div>
         <p className="text-xs text-slate-500 mt-2">
           {janken
-            ? 'Treasure chests can contain a janken card. The student challenges a classmate; the loser gives half of their coins to the winner. Students can’t challenge the same person twice in a row, and someone who was just challenged is safe for 30 seconds.'
+            ? 'Treasure chests can contain a janken card. The student challenges a classmate; the loser gives half of their coins (up to 10) to the winner. Students can’t challenge the same person twice in a row, and someone who was just challenged is safe for 30 seconds.'
             : 'No janken cards. Students only collect coins for themselves.'}
         </p>
       </Field>
@@ -331,7 +331,7 @@ function TeacherSetup({
         </div>
         <p className="text-xs text-slate-500 mt-2">
           {speed
-            ? 'From 1:30 into the game and then every 3 minutes, everyone is paired up for one question. The first correct answer wins a quarter of the other student’s coins. With an odd number of students, one sits out and gets +3 coins.'
+            ? 'From 1:30 into the game and then every 3 minutes, everyone is paired up for one question. The first correct answer wins a quarter of the other student’s coins (up to 10). With an odd number of students, one sits out and gets +3 coins.'
             : 'No speed rounds.'}
         </p>
       </Field>

@@ -5,11 +5,14 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowRight, ArrowDown, Send } from 'lucide-react';
+import { NextQuizCountdown } from '~/components/NextQuizCountdown';
 
 export interface HeroDemoChatProps {
   isDarkMode: boolean;
   user: any;
   hasCompletedTodayQuiz: boolean;
+  nextQuizAt?: number | null; // 次のクイズを解ける時刻（ミリ秒）。解答済みのときだけ入る
+  onNextQuizReached?: () => void;
   onOpenAuthModal: (mode: 'signin' | 'signup') => void;
   onOpenQuizModal: () => void;
   validateFeatureCredits: (featureType: 'textAi' | 'imageAi') => Promise<boolean>;
@@ -20,6 +23,8 @@ export function HeroDemoChat({
   isDarkMode,
   user,
   hasCompletedTodayQuiz,
+  nextQuizAt,
+  onNextQuizReached,
   onOpenAuthModal,
   onOpenQuizModal,
   validateFeatureCredits,
@@ -163,6 +168,11 @@ export function HeroDemoChat({
                 ? quizBanner?.completedText 
                 : quizBanner?.defaultText}
             </p>
+            {user && hasCompletedTodayQuiz && nextQuizAt && (
+              <p className="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
+                <NextQuizCountdown nextAt={nextQuizAt} onReached={onNextQuizReached} />
+              </p>
+            )}
           </div>
         </div>
         <button

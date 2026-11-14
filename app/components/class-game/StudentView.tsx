@@ -14,6 +14,7 @@ import {
   JankenDuel,
   JankenTargetPicker,
   sayJankenPon,
+  preloadJankenSound,
   type DuelResult,
   type DuelStart,
   type JankenTarget,
@@ -77,6 +78,17 @@ const CHEST_RESULT_MS = 2200;
 const DUEL_RESULT_MS = 3000;
 /** 早押しタイムの結果を見せる時間 */
 const SPEED_RESULT_MS = 2500;
+/** 宝箱から出たものの写真（public/live-game/items）。ないものは絵文字 */
+const CHEST_PICTURES: Record<string, string> = {
+  kozuchi: '/live-game/items/uchidenokozuchi.webp',
+  urashima: '/live-game/items/urashima-turtle.webp',
+  manekineko: '/live-game/items/maneki-neko-shop.webp',
+  oni: '/live-game/items/oni-stealing-gold.webp',
+  tengu: '/live-game/items/tengu-stealing-gold.webp',
+  kitsune: '/live-game/items/fox-digested.webp',
+};
+const CHEST_EMOJI: Record<string, string> = { koban: '🪙', janken: '✊✌️✋' };
+
 /** ヤマトの問題が終わったあと、正解と上位を見せる時間 */
 const YAMATO_END_MS = 4000;
 /** 早押しタイムでお休みになったお知らせを見せる時間 */
@@ -112,6 +124,8 @@ export function StudentView({ gameId }: { gameId: string }) {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(setTimeout(fn, ms));
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  // じゃんけんの録音を前もって読み込む
+  useEffect(() => preloadJankenSound(), []);
 
   const { status: socketStatus, closedCode, send } = useLiveGameSocket(gameId, (msg) => {
     switch (msg.t) {
@@ -497,13 +511,22 @@ export function StudentView({ gameId }: { gameId: string }) {
           {chestResult ? (
             <>
               <p className="text-sm text-slate-500">You found…</p>
+              {CHEST_PICTURES[chestResult.item.id] ? (
+                <img
+                  src={CHEST_PICTURES[chestResult.item.id]}
+                  alt={chestResult.item.name}
+                  className="w-full max-w-sm mx-auto aspect-[3/2] object-cover rounded-2xl shadow-lg"
+                />
+              ) : (
+                CHEST_EMOJI[chestResult.item.id] && <p className="text-6xl">{CHEST_EMOJI[chestResult.item.id]}</p>
+              )}
               <p className="text-3xl font-black text-slate-900 dark:text-white">{chestResult.item.nameJa}</p>
               <p className="text-lg font-bold text-indigo-600">{chestResult.item.name}</p>
               <p className="text-slate-700 dark:text-slate-300">
                 {chestResult.noTargets ? 'No one can be challenged right now — you get +3 coins instead!' : chestResult.item.description}
               </p>
               {chestResult.coins !== chestResult.before && (
-                <p className="text-2xl font-black text-amber-500">
+                <p className={`text-2xl font-black ${chestResult.coins < chestResult.before ? 'text-rose-500' : 'text-amber-500'}`}>
                   🪙 {chestResult.before} → {chestResult.coins}
                 </p>
               )}
