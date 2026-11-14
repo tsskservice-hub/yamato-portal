@@ -97,42 +97,6 @@ export default function GamesHubIndex() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Insert the "Rolling Kana" card at the beginning of the first section */}
-                    {sIdx === 0 && (
-                      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden group border-indigo-200 bg-gradient-to-br from-white to-indigo-50/30">
-                        <div>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center space-x-2">
-                              <Gamepad2 className="w-5 h-5 text-indigo-600" />
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                                Action
-                            </span>
-                            </div>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
-                              NEW!
-                            </span>
-                        </div>
-                        
-                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                          Rolling Kana
-                        </h3>
-                        
-                        <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-                          Catch the rolling character rings from above! A retro action game where you climb ladders while matching Kana and Romaji.
-                        </p>
-                      </div>
-
-                      <div>
-                        <Link
-                          to="/games/rolling-character"
-                          className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm"
-                        >
-                          Play Now
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-
                   {section.games.map((game) => (
                     <div 
                       key={game.id} 
