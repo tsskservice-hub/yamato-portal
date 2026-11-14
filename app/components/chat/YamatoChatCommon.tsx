@@ -8,6 +8,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { themeStyles, type ThemeColorKey } from "../../styles/chatThemes";
 import { ScrollTopButton } from "../layout/ScrollTopButton";
 import { ImageModal } from "../ImageModal";
+import { addAiGeneratedLabel } from "~/utils/aiImageLabel";
 import { CreditCostFooter } from "../CreditCostFooter";
 import { useChatResize } from "../../hooks/useChatResize";
 import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
@@ -474,7 +475,8 @@ export function YamatoChatCommon({
       }
 
       const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
-      const imageUrl = data.imageUrl;
+      // ヤマトが描いた絵には「AI-generated」のラベルを焼き込んでから表示する
+      const imageUrl = data.imageUrl ? await addAiGeneratedLabel(data.imageUrl) : undefined;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
       setIsTutorLoading(false);

@@ -106,7 +106,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const { data: lessonRows } = await admin
     .from('edu_lessons')
-    .select('id, slug, title_en, title_jp, lesson_order')
+    .select('id, slug, title_en, title_jp, lesson_order, site_order')
+    .order('site_order', { ascending: true, nullsFirst: false })
     .order('slug', { ascending: true });
   const lessons = (lessonRows ?? []).map((l: any) => ({
     id: String(l.id),

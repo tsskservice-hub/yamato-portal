@@ -19,8 +19,8 @@ export function useRealtimeSpeaking({
   userId,
   onFinished,
   apiBaseUrl = 'https://api.jptutoraiyamato.com',
-  appType = 'obento-unit-4-lesson-1',
-  lessonSlug = 'obento-unit-4-lesson-1',
+  appType = 'family-1',
+  lessonSlug = 'family-1',
   topic = '家族の人数や構成、ペットについての質問と答え方の練習',
   initialPrompt = 'あなたは日本語会話の先生です。日本語で短く挨拶し、最初の質問やフリートークを始めてください。',
 }: UseRealtimeSpeakingProps) {

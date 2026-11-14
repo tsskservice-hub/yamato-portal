@@ -30,16 +30,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ pathname, breadcrumbTi
     if (segment === "kanji-grammar-checker") label = "Kanji & Grammar Checker";
     if (segment === "dashboard") label = "Dashboard";
 
-    // Obento ユニットやレッスンのパスをきれいに大文字化・整形する処理
-    if (segment.startsWith("obento-unit-")) {
-      const parts = segment.split("-"); // ["obento", "unit", "4"] など
-      if (parts.length >= 3) {
-        label = `Unit ${parts[2]}`;
-      }
-    } else if (segment.includes("-lesson-")) {
-      const lessonNum = segment.split("-").pop();
-      label = `Lesson ${lessonNum}`;
-    }
+    // レッスンのパス（例：family-1）は共通の整形で "Family 1" になる
 
     // ページ側から明示的なタイトルが渡されている場合は一番最後のラベルを上書き
     if (index === paths.length - 1 && breadcrumbTitle) {

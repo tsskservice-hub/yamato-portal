@@ -2,6 +2,7 @@ import { yamatoFetch } from '~/lib/yamatoApi';
 import { useState, useRef } from "react";
 import { useYamatoAccount, getSafeString } from "../hooks/useYamatoAccount";
 import { personaliseGreeting, resolveDisplayName } from "../utils/nickname";
+import { addAiGeneratedLabel } from "../utils/aiImageLabel";
 
 export type ChatOption = {
   label: string;
@@ -307,7 +308,8 @@ export function useYamatoChat2Logic({
       }
 
       const replyText = data.reply || "I'm sorry, I couldn't generate a response.";
-      const imageUrl = data.imageUrl;
+      // ヤマトが描いた絵には「AI-generated」のラベルを焼き込んでから表示する
+      const imageUrl = data.imageUrl ? await addAiGeneratedLabel(data.imageUrl) : undefined;
       const apiOptions = data.options;
       const sanitizedReply = sanitizeAiOutput(replyText);
 
