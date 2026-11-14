@@ -59,6 +59,11 @@ alter table public.edu_textbooks enable row level security;
 alter table public.edu_textbook_units enable row level security;
 alter table public.edu_lesson_textbook_units enable row level security;
 
+-- 表を読む権限（このプロジェクトでは新しい表に自動で付かない。18 で本番に追加済み）
+grant select on public.edu_textbooks             to anon, authenticated;
+grant select on public.edu_textbook_units        to anon, authenticated;
+grant select on public.edu_lesson_textbook_units to anon, authenticated;
+
 drop policy if exists "edu_textbooks are readable" on public.edu_textbooks;
 create policy "edu_textbooks are readable" on public.edu_textbooks
   for select to anon, authenticated using (true);
