@@ -60,11 +60,14 @@
   }
   .map-wrap { position: relative; border-radius: 10px; overflow: hidden; line-height: 0; }
   #mapSvg { width: 100%; height: auto; display: block; touch-action: none; }
-  .slot { fill: #f3ecdc; stroke: var(--rc, #a89a7d); stroke-width: 1; stroke-linejoin: round; }
-  .slot.hover { stroke: #1e3a5f; stroke-width: 2; }
-  .slot.placed { stroke: rgba(0,0,0,.35); stroke-width: 1; }
-  .slot-label { font-size: 11px; font-weight: 700; fill: #fff; stroke: rgba(0,0,0,.45); stroke-width: 3px; paint-order: stroke; text-anchor: middle; pointer-events: none; font-family: -apple-system, "Segoe UI", sans-serif; }
-  .sea-label { font-family: Georgia, serif; font-style: italic; fill: rgba(255,255,255,.55); font-size: 15px; letter-spacing: 2px; }
+  /* --z is the zoom factor (1 = whole map, about 0.3 when zoomed into a region).
+     Lines and labels are multiplied by it so they keep the same size on screen. */
+  #mapSvg { --z: 1; }
+  .slot { fill: #f3ecdc; stroke: var(--rc, #a89a7d); stroke-width: calc(1px * var(--z)); stroke-linejoin: round; }
+  .slot.hover { stroke: #1e3a5f; stroke-width: calc(2.5px * var(--z)); }
+  .slot.placed { stroke: rgba(0,0,0,.35); stroke-width: calc(1px * var(--z)); }
+  .slot-label { font-size: calc(11px * var(--z)); font-weight: 700; fill: #fff; stroke: rgba(0,0,0,.45); stroke-width: calc(3px * var(--z)); paint-order: stroke; text-anchor: middle; pointer-events: none; font-family: -apple-system, "Segoe UI", sans-serif; }
+  .sea-label { font-family: Georgia, serif; font-style: italic; fill: rgba(255,255,255,.55); font-size: calc(15px * var(--z)); letter-spacing: 2px; }
 
   .piece-box {
     position: absolute; left: 12px; top: 12px; width: 196px; z-index: 5;
@@ -85,6 +88,13 @@
   /* Tap-to-place: the piece box glows while a piece is picked up, and the map shows a crosshair. */
   .piece-box.picked { border-color: #c9a227; box-shadow: 0 0 0 3px #c9a227, 0 6px 20px rgba(20, 40, 70, .35); }
   .map-wrap.placing #mapSvg { cursor: crosshair; }
+  /* Zoomed into a region: the piece box shrinks to a small corner tile so it hides less of the map. */
+  .map-wrap.zoomed .piece-box { width: 86px; padding: 6px; left: 8px; top: 8px; }
+  .map-wrap.zoomed .piece-box .box-title, .map-wrap.zoomed .piece-box .box-hint, .map-wrap.zoomed .piece-box .tap-hint { display: none; }
+  .map-wrap.zoomed #pieceHolder { margin-top: 0; }
+  .map-wrap.zoomed #pieceHolder svg { max-height: 74px; }
+  .zoom-out { position: absolute; right: 10px; top: 10px; z-index: 6; line-height: 1.2; padding: 7px 13px; font-size: 13px; box-shadow: 0 3px 10px rgba(20, 40, 70, .4); }
+  .zoom-out[hidden] { display: none; }
   #pieceHolder svg { width: 100%; max-height: 200px; height: auto; display: block; filter: drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
   .piece-box .tap-hint { font-size: 11px; color: #1e3a5f; text-align: center; margin-top: 4px; }
   .piece-box .tap-hint button { background: none; border: none; padding: 2px 6px; font-size: 11px; color: #1e3a5f; text-decoration: underline; font-weight: 600; }
@@ -202,10 +212,11 @@
             <g id="placedLayer"></g>
             <g id="labelsLayer"></g>
           </svg>
+          <button type="button" class="btn-ghost zoom-out" id="zoomOutBtn" hidden>⤢ Whole map</button>
           <div class="piece-box" id="pieceBox">
             <div class="box-title">Next piece</div>
             <div id="pieceHolder" title="Drag me onto the map, or tap me and then tap the map" role="button" tabindex="0" aria-label="Next prefecture piece. Press Enter to pick it up, then tap its place on the map." aria-pressed="false"></div>
-            <div class="box-hint" id="boxHint">Drag it onto the map — or tap it, then tap the map</div>
+            <div class="box-hint" id="boxHint">Drag it onto the map and hold still to zoom in — or tap it, then tap the map</div>
             <div class="tap-hint"><button id="detailBtn" type="button">Tap for details</button></div>
           </div>
         </div>
@@ -246,7 +257,9 @@
     <h2 id="howTitle">How to Play</h2>
     <ul>
       <li>One prefecture piece at a time appears in the box over the Sea of Japan. Drag it onto the map and drop it in the right place.</li>
-      <li>On a phone or tablet you can also <b>tap the piece</b> (it glows gold), then <b>tap the place on the map</b>. Tap the piece again to put it back.</li>
+      <li><b>Zoom in:</b> while you drag the piece, <b>hold it still</b> over a part of Japan for half a second. The map zooms into that region, so small prefectures are easy to hit. Then drop the piece in its place.</li>
+      <li>On a phone or tablet you can also <b>tap the piece</b> (it glows gold), then <b>tap a region</b> on the map to zoom in, then <b>tap the place</b>. Tap the piece again to put it back.</li>
+      <li>The map goes back to the whole of Japan after each piece. You can also press <b>⤢ Whole map</b> at any time.</li>
       <li>Press <b>Tap for details</b> under the piece to see its name, capital and coastline.</li>
       <li>The clock starts when you first touch the piece, and stops while you are away from this tab.</li>
       <li>All prefecture pieces are prepared with <b>north at the top</b>. They are never rotated.</li>
@@ -340,12 +353,12 @@ function distToRing(x, y, ring) {
 // lets a neighbour's place be accepted. "Just outside" is measured on
 // screen (about 10px), so small or island prefectures (Osaka, Kagawa,
 // Okinawa…) are as easy to hit on a phone as on a big screen; it is kept
-// between 6 and 14 map units.
+// between 3 and 14 map units (it gets smaller when the map is zoomed in).
 const HIT_PX = 10;
 function hitTolerance() {
   const r = $('mapSvg').getBoundingClientRect();
-  const perPx = r.width > 0 ? VIEW_W / r.width : 1;
-  return Math.max(6, Math.min(14, HIT_PX * perPx));
+  const perPx = r.width > 0 ? view.w / r.width : 1;
+  return Math.max(3, Math.min(14, HIT_PX * perPx));
 }
 function hitTest(pref, x, y, tol) {
   if (tol === undefined) tol = 6;
@@ -496,6 +509,99 @@ function placeOnMap(p) {
   }
 }
 
+// ---------- zoom into a region ----------
+// The whole map is small (Osaka is 16 x 24 map units), so the map can zoom
+// into one region. `view` is the part of the map that is shown; the SVG
+// viewBox follows it, and every screen <-> map conversion uses it.
+const FULL_VIEW = { x: 0, y: 0, w: VIEW_W, h: VIEW_H };
+let view = FULL_VIEW;
+let zoomAnim = null;
+function ringArea(ring) {
+  let a = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) a += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+  return Math.abs(a / 2);
+}
+// Each region's box is built from the main landmass of its prefectures only,
+// so far-away islands (Tokyo's Ogasawara, Kagoshima's Amami…) do not stretch it.
+// Okinawa is far from Kyushu, so it is its own zoom area.
+function zoomGroup(p) { return p.name === 'Okinawa' ? 'Okinawa' : p.region; }
+const GROUP_BOX = {};
+PREFS.forEach(p => {
+  let main = p.rings[0], best = -1;
+  p.rings.forEach(r => { const a = ringArea(r); if (a > best) { best = a; main = r; } });
+  p.mainRing = main;
+  const g = zoomGroup(p);
+  const b = GROUP_BOX[g] || (GROUP_BOX[g] = [Infinity, Infinity, -Infinity, -Infinity]);
+  main.forEach(pt => {
+    if (pt[0] < b[0]) b[0] = pt[0];
+    if (pt[1] < b[1]) b[1] = pt[1];
+    if (pt[0] > b[2]) b[2] = pt[0];
+    if (pt[1] > b[3]) b[3] = pt[1];
+  });
+});
+// Turn a box into a view with the map's own shape (so the map keeps its size on the page).
+function fitView(x1, y1, x2, y2) {
+  const pad = 14;
+  // extra room on the left, where the small piece tile sits
+  x1 -= pad + (x2 - x1) * 0.22; x2 += pad; y1 -= pad; y2 += pad;
+  let w = Math.max(x2 - x1, 110), h = y2 - y1;
+  const ratio = VIEW_H / VIEW_W;
+  if (h < w * ratio) h = w * ratio; else w = h / ratio;
+  if (w >= VIEW_W * 0.85) return FULL_VIEW;
+  const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2;
+  const x = Math.max(0, Math.min(VIEW_W - w, cx - w / 2));
+  const y = Math.max(0, Math.min(VIEW_H - h, cy - h / 2));
+  return { x, y, w, h };
+}
+function nearestPref(x, y, maxDist) {
+  let best = null, bestD = maxDist;
+  for (const p of PREFS) {
+    for (const ring of p.rings) {
+      const d = distToRing(x, y, ring);
+      if (d < bestD) { bestD = d; best = p; }
+    }
+  }
+  return best;
+}
+// The view to zoom to for a point on the whole map, or null over open sea.
+function viewForPoint(x, y) {
+  const p = prefAtPoint(x, y) || nearestPref(x, y, 25);
+  if (!p) return null;
+  const b = GROUP_BOX[zoomGroup(p)];
+  const m = 10;
+  if (x >= b[0] - m && x <= b[2] + m && y >= b[1] - m && y <= b[3] + m) return fitView(b[0], b[1], b[2], b[3]);
+  // a remote island outside its region's box: zoom around the pointer instead
+  return fitView(x - 55, y - 55, x + 55, y + 55);
+}
+function isZoomed() { return view !== FULL_VIEW; }
+function setView(target, animate) {
+  const from = view;
+  view = target;
+  const svg = $('mapSvg');
+  const zoomed = isZoomed();
+  $('mapWrap').classList.toggle('zoomed', zoomed);
+  $('zoomOutBtn').hidden = !zoomed;
+  if (zoomAnim) { cancelAnimationFrame(zoomAnim); zoomAnim = null; }
+  const apply = v => {
+    svg.setAttribute('viewBox', `${v.x} ${v.y} ${v.w} ${v.h}`);
+    svg.style.setProperty('--z', String(v.w / VIEW_W));
+  };
+  const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!animate || still || from === target) { apply(target); return; }
+  const t0 = performance.now(), dur = 260;
+  const step = now => {
+    const t = Math.min(1, (now - t0) / dur);
+    const e = t * (2 - t);
+    apply({
+      x: from.x + (target.x - from.x) * e, y: from.y + (target.y - from.y) * e,
+      w: from.w + (target.w - from.w) * e, h: from.h + (target.h - from.h) * e,
+    });
+    zoomAnim = t < 1 ? requestAnimationFrame(step) : null;
+  };
+  zoomAnim = requestAnimationFrame(step);
+}
+function zoomOut(animate) { if (isZoomed()) setView(FULL_VIEW, animate !== false); }
+
 // ---------- flow ----------
 function nextPiece() {
   if (queue.length === 0) { currentId = null; renderCurrentPiece(); return; }
@@ -510,6 +616,7 @@ function startGame() {
   if (timerInt) clearInterval(timerInt);
   timerInt = null;
   setPicked(false);
+  setView(FULL_VIEW, false);
   $('placedLayer').innerHTML = '';
   $('labelsLayer').innerHTML = '';
   document.querySelectorAll('#slots .slot').forEach(s => { s.style.display = ''; });
@@ -541,6 +648,7 @@ function onCorrectDrop(p) {
   queue = queue.filter(id => id !== p.id);
   placeOnMap(p);
   sfxCorrect();
+  zoomOut();
   updateProgress();
   if (placed.size === 47) {
     won = true;
@@ -578,11 +686,14 @@ let drag = null; // {id, moved, startX, startY, startT}
 
 function mapPointFromClient(cx, cy) {
   const r = $('mapSvg').getBoundingClientRect();
-  return { x: (cx - r.left) / r.width * VIEW_W, y: (cy - r.top) / r.height * VIEW_H, rect: r };
+  return {
+    x: view.x + (cx - r.left) / r.width * view.w, y: view.y + (cy - r.top) / r.height * view.h, rect: r,
+    onMap: cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom,
+  };
 }
 function showGhost(p, cx, cy) {
   const r = $('mapSvg').getBoundingClientRect();
-  const scale = r.width / VIEW_W;
+  const scale = r.width / view.w;
   const [x1, y1, x2, y2] = p.bbox;
   const pad = 10;
   const vbW = x2 - x1 + pad * 2, vbH = y2 - y1 + pad * 2;
@@ -604,6 +715,31 @@ function showGhost(p, cx, cy) {
        <path d="${pathFromRings(p.rings)}" fill="${pieceFill(p)}" stroke="${pieceStroke(p)}" stroke-width="2" stroke-linejoin="round"/>
      </svg>`;
 }
+// Hold the dragged piece still over a region for half a second and the map zooms into it.
+const DWELL_MS = 500, DWELL_MOVE_PX = 12;
+let dwell = null; // {x, y, timer}
+function clearDwell() {
+  if (dwell) { clearTimeout(dwell.timer); dwell = null; }
+}
+function trackDwell(cx, cy) {
+  if (isZoomed()) { clearDwell(); return; }
+  if (dwell && Math.hypot(cx - dwell.x, cy - dwell.y) <= DWELL_MOVE_PX) return;
+  clearDwell();
+  const here = { x: cx, y: cy, timer: null };
+  here.timer = setTimeout(() => {
+    if (dwell !== here || !drag || isZoomed()) return;
+    dwell = null;
+    const mp = mapPointFromClient(here.x, here.y);
+    const v = mp.onMap ? viewForPoint(mp.x, mp.y) : null;
+    if (!v || v === FULL_VIEW) return;
+    setView(v, true);
+    clearHover();
+    // the piece is drawn at the map's scale, so redraw it at the zoomed size
+    showGhost(BY_ID[drag.id], drag.lastX, drag.lastY);
+    setStatus('Zoomed in. Drop the piece in its place — or drop it outside the map and press “Whole map” to look elsewhere.');
+  }, DWELL_MS);
+  dwell = here;
+}
 function clearHover() {
   document.querySelectorAll('#slots .slot.hover').forEach(s => s.classList.remove('hover'));
 }
@@ -620,7 +756,9 @@ holder.addEventListener('pointermove', e => {
   if (!drag.moved && Math.hypot(dx, dy) > 8) drag.moved = true;
   if (!drag.moved) return;
   const p = BY_ID[drag.id];
+  drag.lastX = e.clientX; drag.lastY = e.clientY;
   showGhost(p, e.clientX, e.clientY);
+  trackDwell(e.clientX, e.clientY);
   const mp = mapPointFromClient(e.clientX, e.clientY);
   clearHover();
   const under = prefAtPoint(mp.x, mp.y);
@@ -633,6 +771,7 @@ holder.addEventListener('pointerup', e => {
   if (!drag) return;
   const d = drag;
   drag = null;
+  clearDwell();
   ghost.style.display = 'none';
   clearHover();
   const p = BY_ID[d.id];
@@ -643,7 +782,7 @@ holder.addEventListener('pointerup', e => {
   }
   setPicked(false);
   const mp = mapPointFromClient(e.clientX, e.clientY);
-  if (mp.x < 0 || mp.x > VIEW_W || mp.y < 0 || mp.y > VIEW_H) {
+  if (!mp.onMap) {
     setStatus('That was outside the map — the piece is back in its box. Try again.');
     return;
   }
@@ -651,6 +790,7 @@ holder.addEventListener('pointerup', e => {
 });
 holder.addEventListener('pointercancel', () => {
   drag = null;
+  clearDwell();
   ghost.style.display = 'none';
   clearHover();
 });
@@ -665,7 +805,9 @@ function setPicked(on) {
   $('mapWrap').classList.toggle('placing', picked);
   holder.setAttribute('aria-pressed', picked ? 'true' : 'false');
   if (!picked) clearHover();
-  if (picked) setStatus('Now tap the place on the map where this piece goes. Tap the piece again to put it back.');
+  if (picked) setStatus(isZoomed()
+    ? 'Now tap the place where this piece goes. Tap the piece again to put it back.'
+    : 'Now tap a part of the map to zoom in, then tap the place where this piece goes. Tap the piece again to put it back.');
 }
 function tryPlace(p, x, y) {
   if (hitTest(p, x, y, hitTolerance())) { setPicked(false); onCorrectDrop(p); }
@@ -674,7 +816,22 @@ function tryPlace(p, x, y) {
 $('mapSvg').addEventListener('click', e => {
   if (!picked || !currentId || won) return;
   const mp = mapPointFromClient(e.clientX, e.clientY);
+  if (!isZoomed()) {
+    // first tap on the whole map: zoom into that region; the next tap places the piece
+    const v = viewForPoint(mp.x, mp.y);
+    if (!v) { setStatus('Tap on the land (or close to it) to zoom into that part of Japan.'); return; }
+    if (v !== FULL_VIEW) {
+      setView(v, true);
+      clearHover();
+      setStatus('Zoomed in. Now tap the place where this piece goes — or press “Whole map” to look elsewhere.');
+      return;
+    }
+  }
   tryPlace(BY_ID[currentId], mp.x, mp.y);
+});
+$('zoomOutBtn').addEventListener('click', () => {
+  zoomOut();
+  setStatus(picked ? 'Whole map. Tap a region to zoom in.' : 'Whole map.');
 });
 $('mapSvg').addEventListener('pointermove', e => {
   if (!picked || drag || e.pointerType !== 'mouse') return;
@@ -707,6 +864,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     const open = document.querySelectorAll('.overlay.open');
     if (open.length) open.forEach(o => o.classList.remove('open'));
+    else if (isZoomed()) { zoomOut(); setStatus('Whole map.'); }
     else if (picked) { setPicked(false); setStatus('Piece put back in its box.'); }
   }
 });
