@@ -1,13 +1,15 @@
 /**
  * @file games.rolling-character.tsx
  * @description Rolling Kana 〜AI Yamato & Character Mountain Climbing〜 (Retro Arcade Learning Game)
- * Shortened version: same game, same data, same screens and rules.
- * Framework repair: the useLive helper and Overlay component added in the
- * first shortening pass are removed again; ref sync and the four screens
- * are written out exactly as in the supplied original file.
- * Main savings: kana tables as [kana, romaji] pairs (ring pools are derived
- * from them instead of duplicated), one sound table, one key handler,
- * and the duplicated ring drop-down logic merged into a single function.
+ * Kana tables are [kana, romaji] pairs (ring pools are derived from them), one sound table,
+ * one key handler, and one ring drop-down function.
+ *
+ * - The canvas keeps its 800x700 drawing size but is scaled with CSS to fit the screen.
+ * - On-screen buttons (hold to move / climb, tap to jump) for tablets and phones. They write to
+ *   the same key state as the keyboard (keysRef), so the game loop treats both the same way.
+ * - A wrong treasure-chest answer really sends the player back to the start (with a new set of
+ *   3 kana, after showing the correct answers).
+ * - Login and the teacher's game lock are checked by GameAccessGate.
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState } from 'react';
@@ -93,10 +95,21 @@ const SOUNDS: Record<Sound, [OscillatorType, number[], number, number]> = {
 // Platforms: [x1, y1, x2, y2, isGoal]. Ladders: [x, y, height].
 const PLATS = [[50, 620, 750, 612, 0], [50, 490, 750, 498, 0], [50, 360, 750, 352, 0], [50, 230, 750, 238, 0], [250, 100, 550, 100, 1]];
 const LADDERS = [[680, 490, 130], [120, 360, 130], [680, 230, 130], [400, 100, 130]];
-const KEYMAP: Record<string, string> = {
+type Control = 'left' | 'right' | 'up' | 'down' | 'space';
+const KEYMAP: Record<string, Control> = {
   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', Space: 'space',
 };
+const START_POS = { x: 100, y: 598 };
+
+/** Functions the game loop (inside the canvas effect) exposes to the React screens */
+type GameControls = {
+  /** Start a stage (stage 1 also resets the score) */
+  start: (stage: number) => void;
+  /** Put the player back at the bottom-left start and clear the rings ("back to the start") */
+  backToStart: () => void;
+};
+
 function RollingCharacterArena() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'TYPING' | 'GAMEOVER' | 'VICTORY'>('START');
@@ -113,9 +126,18 @@ function RollingCharacterArena() {
   const stageRef = useRef(stage);
   stageRef.current = stage;
   const playSoundRef = useRef<((type: Sound) => void) | null>(null);
+  const controlsRef = useRef<GameControls | null>(null);
+  // Held controls (keyboard and on-screen buttons), and a jump tap from the on-screen button
+  const keysRef = useRef<Record<Control, boolean>>({ left: false, right: false, up: false, down: false, space: false });
+  const jumpRequestRef = useRef(false);
 
   const generateRandomKanaProblem = (st: number) =>
     shuffle(STAGES[st - 1] || STAGES[0]).slice(0, 3);
+
+  // Out of lives -> game over (kept out of the setLives updater, which must not have side effects)
+  useEffect(() => {
+    if (lives <= 0 && gameState === 'PLAYING') setGameState('GAMEOVER');
+  }, [lives, gameState]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -139,9 +161,10 @@ function RollingCharacterArena() {
     };
     playSoundRef.current = playSound;
 
-    const keys: Record<string, boolean> = { left: false, right: false, up: false, down: false, space: false };
+    const keys = keysRef.current;
     const clearKeys = () => {
       keys.left = keys.right = keys.up = keys.down = keys.space = false;
+      jumpRequestRef.current = false;
     };
     const onKey = (down: boolean) => (e: KeyboardEvent) => {
       const k = KEYMAP[e.code] || (e.key === ' ' ? 'space' : undefined);
@@ -149,9 +172,10 @@ function RollingCharacterArena() {
       // Key releases must always clear the key, even while the treasure-
       // chest typing screen is up. Ignoring a keyup leaves that key stuck,
       // so the player keeps climbing (or walking) on their own afterwards.
-      // Only key presses are ignored while typing.
-      if (down && gameStateRef.current === 'TYPING') return;
-      e.preventDefault();
+      // Key presses only count while playing, so the arrow keys still scroll the page
+      // and Space / Enter still press the buttons on the start and result screens.
+      if (down && gameStateRef.current !== 'PLAYING') return;
+      if (down) e.preventDefault();
       keys[k] = down;
     };
     const handleKeyDown = onKey(true), handleKeyUp = onKey(false);
@@ -168,17 +192,25 @@ function RollingCharacterArena() {
     let rings: RingNode[] = [];
     let spawnTimer = 0, invincibilityTimer = 0, spacePressedLastFrame = false;
 
-    (window as any).__startRollingGame = (st = 1) => {
-      if (!audioCtx) audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      setStage(st);
-      if (st === 1) setScore(0);
-      setLives(3);
-      rings = []; spawnTimer = 0;
-      Object.assign(player, { x: 100, y: 598, vx: 0, vy: 0 });
-      setTargetKanaList(generateRandomKanaProblem(st));
-      setInputAnswers(['', '', '']);
-      setGameState('PLAYING');
-      setYamatoSpeech(`Stage ${st} Start! Climb to the top and input the 3 kana passwords!`);
+    const resetPlayer = () => {
+      rings = []; spawnTimer = 0; invincibilityTimer = 0;
+      Object.assign(player, { ...START_POS, vx: 0, vy: 0, isGrounded: false, isOnLadder: false, facing: 1 });
+      clearKeys();
+    };
+
+    controlsRef.current = {
+      start: (st = 1) => {
+        if (!audioCtx) audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        setStage(st);
+        if (st === 1) setScore(0);
+        setLives(3);
+        resetPlayer();
+        setTargetKanaList(generateRandomKanaProblem(st));
+        setInputAnswers(['', '', '']);
+        setGameState('PLAYING');
+        setYamatoSpeech(`Stage ${st} Start! Climb to the top and input the 3 kana passwords!`);
+      },
+      backToStart: resetPlayer,
     };
 
     let animationFrameId: number;
@@ -188,7 +220,10 @@ function RollingCharacterArena() {
 
       const prevBottom = player.y + player.h;
       const spacePressedNow = keys.space;
-      const wantingToJump = spacePressedNow && !spacePressedLastFrame && player.isGrounded;
+      // A tap on the on-screen Jump button can be shorter than one frame, so it is queued
+      const jumpTapped = jumpRequestRef.current;
+      jumpRequestRef.current = false;
+      const wantingToJump = ((spacePressedNow && !spacePressedLastFrame) || jumpTapped) && player.isGrounded;
       const touchedLadder = LADDERS.find(([x, y, h]) =>
         player.x + player.w / 2 >= x - 12 && player.x + player.w / 2 <= x + 12 &&
         player.y + player.h >= y && player.y <= y + h);
@@ -319,10 +354,7 @@ function RollingCharacterArena() {
             setYamatoSpeech(`Correct! "${r.data[0]}" is "${r.data[1]}"! (+100pt)`);
             rings.splice(i, 1);
           } else if (invincibilityTimer === 0) {
-            setLives((l) => {
-              if (l - 1 <= 0) setGameState('GAMEOVER');
-              return l - 1;
-            });
+            setLives((l) => Math.max(0, l - 1)); // game over is handled by the lives effect
             invincibilityTimer = 60;
             playSound('damage');
             setYamatoSpeech(`Oops! Incorrect. "${r.data[0]}" does not match that Romaji!`);
@@ -402,84 +434,144 @@ function RollingCharacterArena() {
       setGameState('VICTORY');
       setYamatoSpeech('Fantastic! All romaji answers are correct! You opened the treasure chest!');
     } else {
+      // Back to the start for real: the player goes to the bottom again, with a new set of 3 kana.
+      // The correct answers are shown so the student learns them.
       playSoundRef.current?.('damage');
-      setGameState('PLAYING');
+      const answers = targetKanaList.map(([kana, romaji]) => `${kana} = ${romaji}`).join(', ');
+      controlsRef.current?.backToStart();
+      setTargetKanaList(generateRandomKanaProblem(stage));
       setInputAnswers(['', '', '']);
-      setYamatoSpeech('Incorrect romaji! Back to the start!');
+      setGameState('PLAYING');
+      setYamatoSpeech(`Not quite! The answers were ${answers}. Back to the start: climb up again for a new treasure chest password!`);
     }
   };
 
+  // On-screen controls: hold to move / climb, tap to jump. They write to the same key state as the keyboard.
+  const holdHandlers = (k: Exclude<Control, 'space'>) => ({
+    onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+      keysRef.current[k] = true;
+    },
+    onPointerUp: () => { keysRef.current[k] = false; },
+    onPointerCancel: () => { keysRef.current[k] = false; },
+    onLostPointerCapture: () => { keysRef.current[k] = false; },
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+  });
+  const padBtn = 'w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-800 active:bg-slate-600 text-white text-xl font-bold shadow select-none touch-none cursor-pointer';
+
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800">
-      <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl h-[700px] relative overflow-hidden flex items-center justify-center p-2 shadow-inner">
+    <div className="bg-white border border-slate-200 rounded-2xl p-3 sm:p-6 text-center space-y-4 sm:space-y-6 shadow-xl text-slate-800">
+      {/* The canvas keeps its 800x700 drawing size and is scaled to the width available */}
+      <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl relative overflow-hidden p-1 sm:p-2 shadow-inner">
         {/* Status bar inside the game frame, at the top */}
-        <div className="absolute top-2 left-2 right-2 z-20 flex flex-wrap justify-between items-center bg-black/50 rounded-lg px-4 py-2 text-sm gap-2">
-          <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(lives)}</span>
-          <span className="text-indigo-300 font-bold">Stage: {stage} / 3</span>
-          <span className="text-emerald-300 font-bold">Score: {score} pt</span>
+        <div className="absolute top-2 left-2 right-2 z-20 flex flex-wrap justify-between items-center bg-black/50 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm gap-1 sm:gap-2">
+          <span className="text-red-400 font-bold" aria-label={`HP ${lives} of 3`}>❤️ {'❤️'.repeat(Math.max(0, lives))}</span>
+          <span className="text-indigo-300 font-bold">Stage {stage} / 3</span>
+          <span className="text-emerald-300 font-bold">{score} pt</span>
         </div>
-        <canvas ref={canvasRef} width={800} height={700} className="block bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg" />
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={700}
+          className="block w-full h-auto aspect-[8/7] bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg"
+        />
 
         {gameState === 'START' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
-            <h1 className="text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
-            <p className="text-sm text-[#ccc] max-w-md leading-relaxed">
-              ~ Climb the Character Mountain with AI Yamato! ~<br /><br />
-              Rings roll from the top-left every 2 seconds, zigzagging down to the bottom.<br />
-              Open the treasure chest at the top by inputting the correct romaji for 3 random kana!<br />
-              [← / →] Move ｜ [↑ / ↓] Ladders (Climb & Descend) ｜ [SPACE] Jump
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-3 sm:gap-4 z-30 p-4 sm:p-6 text-center overflow-y-auto">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#ffcc00]">Rolling Kana</h1>
+            <p className="text-xs sm:text-sm text-[#ccc] max-w-md leading-relaxed">
+              ~ Climb the Character Mountain with AI Yamato! ~<br />
+              Rings roll down from the top. Touch rings whose kana and romaji match (+100 pt) and avoid the wrong ones.
+              At the top, type the romaji for 3 kana to open the treasure chest!
             </p>
-            <button onClick={() => (window as any).__startRollingGame(1)} className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg cursor-pointer transition">Start Game</button>
-            <div className="text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-xs">[← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump</div>
-          </div>
-        )}
-
-        {gameState === 'TYPING' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-5 z-30 p-6 text-center">
-            <h2 className="text-2xl font-black text-[#ffcc00]">🎁 You reached the treasure chest!</h2>
-            <p className="text-sm text-[#ccc]">Type the romaji for each kana in the box under it.</p>
-            <form onSubmit={handlePasswordSubmit} className="space-y-6">
-              <div className="flex justify-center gap-6">
-                {targetKanaList.map(([kana], idx) => (
-                  <div key={idx} className="flex flex-col items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-inner">
-                    <span className="text-4xl font-bold text-white mb-3">{kana}</span>
-                    <input
-                      type="text" maxLength={4} autoFocus={idx === 0} value={inputAnswers[idx]}
-                      onChange={(e) => { const a = [...inputAnswers]; a[idx] = e.target.value; setInputAnswers(a); }}
-                      placeholder="romaji"
-                      className="bg-slate-900 border-2 border-[#ffcc00] rounded-lg px-3 py-2 text-center text-xl font-mono tracking-widest text-white focus:outline-none focus:border-emerald-400 w-24"
-                    />
-                  </div>
-                ))}
-              </div>
-              <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">Check answers &amp; open the chest! (Enter)</button>
-            </form>
-            <div className="text-xs text-[#ff5555]">Careful: if even one answer is wrong, you go back to the start!</div>
+            <button
+              type="button"
+              onClick={() => controlsRef.current?.start(1)}
+              className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg cursor-pointer transition"
+            >
+              Start Game
+            </button>
+            <div className="text-[11px] sm:text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-sm">
+              Keyboard: [← / →] Move ｜ [↑ / ↓] Ladders ｜ [SPACE] Jump<br />Touch screen: use the buttons under the game
+            </div>
           </div>
         )}
 
         {gameState === 'GAMEOVER' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-4 z-30 p-4 sm:p-6 text-center">
             <h2 className="text-3xl font-black text-red-500">GAME OVER</h2>
             <p className="text-sm text-[#ccc]">Score: {score} pts. Try again!</p>
-            <button onClick={() => (window as any).__startRollingGame(1)} className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">Play Again</button>
+            <button type="button" onClick={() => controlsRef.current?.start(1)} className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">Play Again</button>
           </div>
         )}
 
         {gameState === 'VICTORY' && (
-          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center">
-            <h2 className="text-3xl font-black text-[#ffcc00]">CONGRATULATIONS!</h2>
+          <div className="absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-4 z-30 p-4 sm:p-6 text-center">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#ffcc00]">CONGRATULATIONS!</h2>
             <p className="text-sm text-[#ccc]">
               {stage < 3 ? `Stage ${stage} Cleared! Excellent kana typing & climbing!` : `All Stages Completed! Master of Japanese Kana! (Final Score: ${score} pts)`}
             </p>
             <button
-              onClick={() => (window as any).__startRollingGame(stage < 3 ? stage + 1 : 1)}
+              type="button"
+              onClick={() => controlsRef.current?.start(stage < 3 ? stage + 1 : 1)}
               className="bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition"
             >
               {stage < 3 ? 'Proceed to Next Stage' : 'Play Again from Beginning'}
             </button>
           </div>
         )}
+      </div>
+
+      {/* Treasure chest (over the whole screen, so it fits on phones with the keyboard open) */}
+      {gameState === 'TYPING' && (
+        <div className="fixed inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-4 sm:gap-5 z-50 p-4 sm:p-6 text-center overflow-y-auto" role="dialog" aria-modal="true" aria-label="Treasure chest password">
+          <h2 className="text-xl sm:text-2xl font-black text-[#ffcc00]">🎁 You reached the treasure chest!</h2>
+          <p className="text-sm text-[#ccc]">Type the romaji for each kana in the box under it.</p>
+          <form onSubmit={handlePasswordSubmit} className="space-y-5">
+            <div className="flex justify-center gap-2 sm:gap-6">
+              {targetKanaList.map(([kana], idx) => (
+                <div key={idx} className="flex flex-col items-center bg-slate-800 p-2 sm:p-4 rounded-xl border border-slate-700 shadow-inner">
+                  <span className="text-4xl font-bold text-white mb-3">{kana}</span>
+                  <input
+                    type="text" maxLength={4} autoFocus={idx === 0} value={inputAnswers[idx]}
+                    autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                    aria-label={`Romaji for ${kana}`}
+                    onChange={(e) => { const a = [...inputAnswers]; a[idx] = e.target.value; setInputAnswers(a); }}
+                    placeholder="romaji"
+                    className="bg-slate-900 border-2 border-[#ffcc00] rounded-lg px-2 py-2 text-center text-lg sm:text-xl font-mono tracking-widest text-white focus:outline-none focus:border-emerald-400 w-20 sm:w-24"
+                  />
+                </div>
+              ))}
+            </div>
+            <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 sm:px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition">Check answers &amp; open the chest! (Enter)</button>
+          </form>
+          <div className="text-xs text-[#ff5555]">Careful: if even one answer is wrong, you go back to the start!</div>
+        </div>
+      )}
+
+      {/* On-screen controls for tablets and phones (hold to move / climb, tap to jump) */}
+      <div className="flex items-center justify-center gap-4 sm:gap-8 select-none" aria-label="Game controls">
+        <div className="grid grid-cols-3 gap-1.5">
+          <span />
+          <button type="button" className={padBtn} aria-label="Climb up" {...holdHandlers('up')}>▲</button>
+          <span />
+          <button type="button" className={padBtn} aria-label="Move left" {...holdHandlers('left')}>◀</button>
+          <button type="button" className={padBtn} aria-label="Climb down" {...holdHandlers('down')}>▼</button>
+          <button type="button" className={padBtn} aria-label="Move right" {...holdHandlers('right')}>▶</button>
+        </div>
+        <button
+          type="button"
+          aria-label="Jump"
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#ff5500] active:bg-[#ff7733] text-white font-black text-base shadow-lg select-none touch-none cursor-pointer"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            jumpRequestRef.current = true;
+          }}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          JUMP
+        </button>
       </div>
 
       <div className="bg-slate-100 border border-slate-200 rounded-xl p-4 flex items-center gap-4 text-left shadow-inner">
