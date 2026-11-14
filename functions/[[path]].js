@@ -39673,10 +39673,10 @@ var implementations$1 = {};
 var require$$2 = /* @__PURE__ */ getAugmentedNamespace(esm);
 var crypto$2 = {};
 Object.defineProperty(crypto$2, "__esModule", { value: true });
-var encoder = new TextEncoder();
+var encoder$1 = new TextEncoder();
 var sign = async (value, secret) => {
   let key = await createKey(secret, ["sign"]);
-  let data2 = encoder.encode(value);
+  let data2 = encoder$1.encode(value);
   let signature = await crypto.subtle.sign("HMAC", key, data2);
   let hash = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/=+$/, "");
   return value + "." + hash;
@@ -39686,13 +39686,13 @@ var unsign = async (signed, secret) => {
   let value = signed.slice(0, index);
   let hash = signed.slice(index + 1);
   let key = await createKey(secret, ["verify"]);
-  let data2 = encoder.encode(value);
+  let data2 = encoder$1.encode(value);
   let signature = byteStringToUint8Array(atob(hash));
   let valid = await crypto.subtle.verify("HMAC", key, signature, data2);
   return valid ? value : false;
 };
 async function createKey(secret, usages) {
-  let key = await crypto.subtle.importKey("raw", encoder.encode(secret), {
+  let key = await crypto.subtle.importKey("raw", encoder$1.encode(secret), {
     name: "HMAC",
     hash: "SHA-256"
   }, false, usages);
@@ -40703,6 +40703,13 @@ function createServerSupabaseClient(request, context) {
   });
   return { supabase: supabase2, headers };
 }
+function getDerivedSecret(context, purpose) {
+  const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", context);
+  if (!serviceKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.");
+  }
+  return `yamato:${purpose}:${serviceKey}`;
+}
 function createAdminSupabaseClient(context) {
   const url = getEnv("SUPABASE_URL", context) || getEnv("VITE_SUPABASE_URL", context) || DEFAULT_URL;
   const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", context);
@@ -40716,7 +40723,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var stylesheet = "/assets/tailwind-Ba1Z4lei.css";
+var stylesheet = "/assets/tailwind-DsvSlWNZ.css";
 var links$1 = () => [
   { rel: "stylesheet", href: stylesheet },
   // 💡 ヤマトのアイコンをファビコンとして設定
@@ -40732,7 +40739,7 @@ var links$1 = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
   }
 ];
-async function loader$R({ request, context }) {
+async function loader$U({ request, context }) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
   let nickname = "";
@@ -40840,7 +40847,7 @@ var route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   Layout,
   default: App,
   links: links$1,
-  loader: loader$R
+  loader: loader$U
 }, Symbol.toStringTag, { value: "Module" }));
 var OUTSIDE_AU = "OUTSIDE_AU";
 var AU_STATES = [
@@ -41029,7 +41036,7 @@ async function getVerifiedSchoolEmails(admin, userId) {
 }
 var IMAGE_BUCKET = "writing-submissions";
 var SIGNED_URL_SECONDS = 300;
-async function loader$Q({ request, context, params }) {
+async function loader$T({ request, context, params }) {
   const { user, admin } = await requireTeacher(request, context);
   const notFound = () => new Response("Image not found or no longer kept.", { status: 404 });
   const { data: submission } = await admin.from("edu_writing_submissions").select("user_id, image_path, image_deleted_at, image_delete_after").eq("id", params.submissionId ?? "").maybeSingle();
@@ -41051,7 +41058,7 @@ async function loader$Q({ request, context, params }) {
 }
 var route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$Q
+  loader: loader$T
 }, Symbol.toStringTag, { value: "Module" }));
 var lib$1 = { exports: {} };
 var _default$1 = {};
@@ -42552,7 +42559,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   }
   return Component;
 }
-var __iconData$_ = {
+var __iconData$1a = {
   name: "arrow-down-right",
   size: 24,
   node: [
@@ -42560,9 +42567,9 @@ var __iconData$_ = {
     ["path", { d: "M17 7v10H7", key: "6fjiku" }]
   ]
 };
-__iconData$_.node;
-var ArrowDownRight = createLucideIcon(__iconData$_);
-var __iconData$Z = {
+__iconData$1a.node;
+var ArrowDownRight = createLucideIcon(__iconData$1a);
+var __iconData$19 = {
   name: "arrow-down",
   size: 24,
   node: [
@@ -42570,9 +42577,9 @@ var __iconData$Z = {
     ["path", { d: "m19 12-7 7-7-7", key: "1idqje" }]
   ]
 };
-__iconData$Z.node;
-var ArrowDown = createLucideIcon(__iconData$Z);
-var __iconData$Y = {
+__iconData$19.node;
+var ArrowDown = createLucideIcon(__iconData$19);
+var __iconData$18 = {
   name: "arrow-right",
   size: 24,
   node: [
@@ -42580,9 +42587,9 @@ var __iconData$Y = {
     ["path", { d: "m12 5 7 7-7 7", key: "xquz4c" }]
   ]
 };
-__iconData$Y.node;
-var ArrowRight = createLucideIcon(__iconData$Y);
-var __iconData$X = {
+__iconData$18.node;
+var ArrowRight = createLucideIcon(__iconData$18);
+var __iconData$17 = {
   name: "arrow-up-right",
   size: 24,
   node: [
@@ -42590,9 +42597,9 @@ var __iconData$X = {
     ["path", { d: "M7 17 17 7", key: "1vkiza" }]
   ]
 };
-__iconData$X.node;
-var ArrowUpRight = createLucideIcon(__iconData$X);
-var __iconData$W = {
+__iconData$17.node;
+var ArrowUpRight = createLucideIcon(__iconData$17);
+var __iconData$16 = {
   name: "book-open",
   size: 24,
   node: [
@@ -42606,9 +42613,9 @@ var __iconData$W = {
     ]
   ]
 };
-__iconData$W.node;
-var BookOpen = createLucideIcon(__iconData$W);
-var __iconData$V = {
+__iconData$16.node;
+var BookOpen = createLucideIcon(__iconData$16);
+var __iconData$15 = {
   name: "brain",
   size: 24,
   node: [
@@ -42622,9 +42629,9 @@ var __iconData$V = {
     ["path", { d: "M6.004 5.125a4 4 0 00-2.526 5.77", key: "3cw1ss" }]
   ]
 };
-__iconData$V.node;
-var Brain = createLucideIcon(__iconData$V);
-var __iconData$U = {
+__iconData$15.node;
+var Brain = createLucideIcon(__iconData$15);
+var __iconData$14 = {
   name: "chart-column",
   size: 24,
   node: [
@@ -42635,37 +42642,37 @@ var __iconData$U = {
   ],
   aliases: ["bar-chart-3"]
 };
-__iconData$U.node;
-var ChartColumn = createLucideIcon(__iconData$U);
-var __iconData$T = {
+__iconData$14.node;
+var ChartColumn = createLucideIcon(__iconData$14);
+var __iconData$13 = {
   name: "check",
   size: 24,
   node: [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]
 };
-__iconData$T.node;
-var Check = createLucideIcon(__iconData$T);
-var __iconData$S = {
+__iconData$13.node;
+var Check = createLucideIcon(__iconData$13);
+var __iconData$12 = {
   name: "chevron-down",
   size: 24,
   node: [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]]
 };
-__iconData$S.node;
-var ChevronDown = createLucideIcon(__iconData$S);
-var __iconData$R = {
+__iconData$12.node;
+var ChevronDown = createLucideIcon(__iconData$12);
+var __iconData$11 = {
   name: "chevron-right",
   size: 24,
   node: [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]]
 };
-__iconData$R.node;
-var ChevronRight = createLucideIcon(__iconData$R);
-var __iconData$Q = {
+__iconData$11.node;
+var ChevronRight = createLucideIcon(__iconData$11);
+var __iconData$10 = {
   name: "chevron-up",
   size: 24,
   node: [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]
 };
-__iconData$Q.node;
-var ChevronUp = createLucideIcon(__iconData$Q);
-var __iconData$P = {
+__iconData$10.node;
+var ChevronUp = createLucideIcon(__iconData$10);
+var __iconData$$ = {
   name: "circle-check",
   size: 24,
   node: [
@@ -42674,9 +42681,9 @@ var __iconData$P = {
   ],
   aliases: ["check-circle-2"]
 };
-__iconData$P.node;
-var CircleCheck = createLucideIcon(__iconData$P);
-var __iconData$O = {
+__iconData$$.node;
+var CircleCheck = createLucideIcon(__iconData$$);
+var __iconData$_ = {
   name: "circle-question-mark",
   size: 24,
   node: [
@@ -42686,16 +42693,16 @@ var __iconData$O = {
   ],
   aliases: ["help-circle", "circle-help"]
 };
-__iconData$O.node;
-var CircleQuestionMark = createLucideIcon(__iconData$O);
-var __iconData$N = {
+__iconData$_.node;
+var CircleQuestionMark = createLucideIcon(__iconData$_);
+var __iconData$Z = {
   name: "circle",
   size: 24,
   node: [["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]]
 };
-__iconData$N.node;
-var Circle = createLucideIcon(__iconData$N);
-var __iconData$M = {
+__iconData$Z.node;
+var Circle = createLucideIcon(__iconData$Z);
+var __iconData$Y = {
   name: "clipboard-list",
   size: 24,
   node: [
@@ -42713,9 +42720,9 @@ var __iconData$M = {
     ["path", { d: "M8 16h.01", key: "18s6g9" }]
   ]
 };
-__iconData$M.node;
-var ClipboardList = createLucideIcon(__iconData$M);
-var __iconData$L = {
+__iconData$Y.node;
+var ClipboardList = createLucideIcon(__iconData$Y);
+var __iconData$X = {
   name: "coins",
   size: 24,
   node: [
@@ -42725,9 +42732,9 @@ var __iconData$L = {
     ["circle", { cx: "16", cy: "8", r: "6", key: "14bfc9" }]
   ]
 };
-__iconData$L.node;
-var Coins = createLucideIcon(__iconData$L);
-var __iconData$K = {
+__iconData$X.node;
+var Coins = createLucideIcon(__iconData$X);
+var __iconData$W = {
   name: "compass",
   size: 24,
   node: [
@@ -42741,9 +42748,9 @@ var __iconData$K = {
     ]
   ]
 };
-__iconData$K.node;
-var Compass = createLucideIcon(__iconData$K);
-var __iconData$J = {
+__iconData$W.node;
+var Compass = createLucideIcon(__iconData$W);
+var __iconData$V = {
   name: "copy",
   size: 24,
   node: [
@@ -42751,9 +42758,9 @@ var __iconData$J = {
     ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
   ]
 };
-__iconData$J.node;
-var Copy = createLucideIcon(__iconData$J);
-var __iconData$I = {
+__iconData$V.node;
+var Copy = createLucideIcon(__iconData$V);
+var __iconData$U = {
   name: "cpu",
   size: 24,
   node: [
@@ -42773,9 +42780,25 @@ var __iconData$I = {
     ["rect", { x: "8", y: "8", width: "8", height: "8", rx: "1", key: "z9xiuo" }]
   ]
 };
-__iconData$I.node;
-var Cpu = createLucideIcon(__iconData$I);
-var __iconData$H = {
+__iconData$U.node;
+var Cpu = createLucideIcon(__iconData$U);
+var __iconData$T = {
+  name: "crown",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
+        key: "1vdc57"
+      }
+    ],
+    ["path", { d: "M5 21h14", key: "11awu3" }]
+  ]
+};
+__iconData$T.node;
+var Crown = createLucideIcon(__iconData$T);
+var __iconData$S = {
   name: "download",
   size: 24,
   node: [
@@ -42784,9 +42807,49 @@ var __iconData$H = {
     ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
   ]
 };
-__iconData$H.node;
-var Download = createLucideIcon(__iconData$H);
-var __iconData$G = {
+__iconData$S.node;
+var Download = createLucideIcon(__iconData$S);
+var __iconData$R = {
+  name: "eye-off",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
+        key: "ct8e1f"
+      }
+    ],
+    ["path", { d: "M14.084 14.158a3 3 0 0 1-4.242-4.242", key: "151rxh" }],
+    [
+      "path",
+      {
+        d: "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
+        key: "13bj9a"
+      }
+    ],
+    ["path", { d: "m2 2 20 20", key: "1ooewy" }]
+  ]
+};
+__iconData$R.node;
+var EyeOff = createLucideIcon(__iconData$R);
+var __iconData$Q = {
+  name: "eye",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
+        key: "1nclc0"
+      }
+    ],
+    ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
+  ]
+};
+__iconData$Q.node;
+var Eye = createLucideIcon(__iconData$Q);
+var __iconData$P = {
   name: "file-text",
   size: 24,
   node: [
@@ -42803,9 +42866,9 @@ var __iconData$G = {
     ["path", { d: "M16 17H8", key: "z1uh3a" }]
   ]
 };
-__iconData$G.node;
-var FileText = createLucideIcon(__iconData$G);
-var __iconData$F = {
+__iconData$P.node;
+var FileText = createLucideIcon(__iconData$P);
+var __iconData$O = {
   name: "fingerprint-pattern",
   size: 24,
   node: [
@@ -42821,9 +42884,9 @@ var __iconData$F = {
   ],
   aliases: ["fingerprint"]
 };
-__iconData$F.node;
-var FingerprintPattern = createLucideIcon(__iconData$F);
-var __iconData$E = {
+__iconData$O.node;
+var FingerprintPattern = createLucideIcon(__iconData$O);
+var __iconData$N = {
   name: "flame",
   size: 24,
   node: [
@@ -42836,9 +42899,9 @@ var __iconData$E = {
     ]
   ]
 };
-__iconData$E.node;
-var Flame = createLucideIcon(__iconData$E);
-var __iconData$D = {
+__iconData$N.node;
+var Flame = createLucideIcon(__iconData$N);
+var __iconData$M = {
   name: "gamepad-2",
   size: 24,
   node: [
@@ -42855,9 +42918,9 @@ var __iconData$D = {
     ]
   ]
 };
-__iconData$D.node;
-var Gamepad2 = createLucideIcon(__iconData$D);
-var __iconData$C = {
+__iconData$M.node;
+var Gamepad2 = createLucideIcon(__iconData$M);
+var __iconData$L = {
   name: "gauge",
   size: 24,
   node: [
@@ -42865,9 +42928,9 @@ var __iconData$C = {
     ["path", { d: "M3.34 19a10 10 0 1 1 17.32 0", key: "19p75a" }]
   ]
 };
-__iconData$C.node;
-var Gauge = createLucideIcon(__iconData$C);
-var __iconData$B = {
+__iconData$L.node;
+var Gauge = createLucideIcon(__iconData$L);
+var __iconData$K = {
   name: "graduation-cap",
   size: 24,
   node: [
@@ -42882,9 +42945,9 @@ var __iconData$B = {
     ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
   ]
 };
-__iconData$B.node;
-var GraduationCap = createLucideIcon(__iconData$B);
-var __iconData$A = {
+__iconData$K.node;
+var GraduationCap = createLucideIcon(__iconData$K);
+var __iconData$J = {
   name: "grid-3x3",
   size: 24,
   node: [
@@ -42896,9 +42959,9 @@ var __iconData$A = {
   ],
   aliases: ["grid", "grid-3-x-3"]
 };
-__iconData$A.node;
-var Grid3x3 = createLucideIcon(__iconData$A);
-var __iconData$z = {
+__iconData$J.node;
+var Grid3x3 = createLucideIcon(__iconData$J);
+var __iconData$I = {
   name: "heart",
   size: 24,
   node: [
@@ -42911,9 +42974,9 @@ var __iconData$z = {
     ]
   ]
 };
-__iconData$z.node;
-var Heart = createLucideIcon(__iconData$z);
-var __iconData$y = {
+__iconData$I.node;
+var Heart = createLucideIcon(__iconData$I);
+var __iconData$H = {
   name: "house",
   size: 24,
   node: [
@@ -42928,9 +42991,9 @@ var __iconData$y = {
   ],
   aliases: ["home"]
 };
-__iconData$y.node;
-var House = createLucideIcon(__iconData$y);
-var __iconData$x = {
+__iconData$H.node;
+var House = createLucideIcon(__iconData$H);
+var __iconData$G = {
   name: "image",
   size: 24,
   node: [
@@ -42939,9 +43002,9 @@ var __iconData$x = {
     ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21", key: "1xmnt7" }]
   ]
 };
-__iconData$x.node;
-var Image$1 = createLucideIcon(__iconData$x);
-var __iconData$w = {
+__iconData$G.node;
+var Image$1 = createLucideIcon(__iconData$G);
+var __iconData$F = {
   name: "key-round",
   size: 24,
   node: [
@@ -42955,9 +43018,9 @@ var __iconData$w = {
     ["circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor", key: "w0ekpg" }]
   ]
 };
-__iconData$w.node;
-var KeyRound = createLucideIcon(__iconData$w);
-var __iconData$v = {
+__iconData$F.node;
+var KeyRound = createLucideIcon(__iconData$F);
+var __iconData$E = {
   name: "landmark",
   size: 24,
   node: [
@@ -42975,9 +43038,9 @@ var __iconData$v = {
     ["path", { d: "M6 18v-7", key: "1ivflk" }]
   ]
 };
-__iconData$v.node;
-var Landmark = createLucideIcon(__iconData$v);
-var __iconData$u = {
+__iconData$E.node;
+var Landmark = createLucideIcon(__iconData$E);
+var __iconData$D = {
   name: "lightbulb",
   size: 24,
   node: [
@@ -42992,17 +43055,39 @@ var __iconData$u = {
     ["path", { d: "M10 22h4", key: "ceow96" }]
   ]
 };
-__iconData$u.node;
-var Lightbulb = createLucideIcon(__iconData$u);
-var __iconData$t = {
+__iconData$D.node;
+var Lightbulb = createLucideIcon(__iconData$D);
+var __iconData$C = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData$t.node;
-var LoaderCircle = createLucideIcon(__iconData$t);
-var __iconData$s = {
+__iconData$C.node;
+var LoaderCircle = createLucideIcon(__iconData$C);
+var __iconData$B = {
+  name: "lock-open",
+  size: 24,
+  node: [
+    ["rect", { width: "18", height: "11", x: "3", y: "11", rx: "2", ry: "2", key: "1w4ew1" }],
+    ["path", { d: "M7 11V7a5 5 0 0 1 9.9-1", key: "1mm8w8" }]
+  ],
+  aliases: ["unlock"]
+};
+__iconData$B.node;
+var LockOpen = createLucideIcon(__iconData$B);
+var __iconData$A = {
+  name: "log-in",
+  size: 24,
+  node: [
+    ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
+    ["path", { d: "M15 12H3", key: "6jk70r" }],
+    ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
+  ]
+};
+__iconData$A.node;
+var LogIn = createLucideIcon(__iconData$A);
+var __iconData$z = {
   name: "lock",
   size: 24,
   node: [
@@ -43010,9 +43095,9 @@ var __iconData$s = {
     ["path", { d: "M7 11V7a5 5 0 0 1 10 0v4", key: "fwvmzm" }]
   ]
 };
-__iconData$s.node;
-var Lock = createLucideIcon(__iconData$s);
-var __iconData$r = {
+__iconData$z.node;
+var Lock = createLucideIcon(__iconData$z);
+var __iconData$y = {
   name: "log-out",
   size: 24,
   node: [
@@ -43021,9 +43106,9 @@ var __iconData$r = {
     ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
   ]
 };
-__iconData$r.node;
-var LogOut = createLucideIcon(__iconData$r);
-var __iconData$q = {
+__iconData$y.node;
+var LogOut = createLucideIcon(__iconData$y);
+var __iconData$x = {
   name: "mail",
   size: 24,
   node: [
@@ -43031,9 +43116,9 @@ var __iconData$q = {
     ["rect", { x: "2", y: "4", width: "20", height: "16", rx: "2", key: "izxlao" }]
   ]
 };
-__iconData$q.node;
-var Mail = createLucideIcon(__iconData$q);
-var __iconData$p = {
+__iconData$x.node;
+var Mail = createLucideIcon(__iconData$x);
+var __iconData$w = {
   name: "map-pin",
   size: 24,
   node: [
@@ -43047,9 +43132,21 @@ var __iconData$p = {
     ["circle", { cx: "12", cy: "10", r: "3", key: "ilqhr7" }]
   ]
 };
-__iconData$p.node;
-var MapPin = createLucideIcon(__iconData$p);
-var __iconData$o = {
+__iconData$w.node;
+var MapPin = createLucideIcon(__iconData$w);
+var __iconData$v = {
+  name: "maximize-2",
+  size: 24,
+  node: [
+    ["path", { d: "M15 3h6v6", key: "1q9fwt" }],
+    ["path", { d: "m21 3-7 7", key: "1l2asr" }],
+    ["path", { d: "m3 21 7-7", key: "tjx5ai" }],
+    ["path", { d: "M9 21H3v-6", key: "wtvkvv" }]
+  ]
+};
+__iconData$v.node;
+var Maximize2 = createLucideIcon(__iconData$v);
+var __iconData$u = {
   name: "mic",
   size: 24,
   node: [
@@ -43058,9 +43155,21 @@ var __iconData$o = {
     ["rect", { x: "9", y: "2", width: "6", height: "13", rx: "3", key: "s6n7sd" }]
   ]
 };
-__iconData$o.node;
-var Mic = createLucideIcon(__iconData$o);
-var __iconData$n = {
+__iconData$u.node;
+var Mic = createLucideIcon(__iconData$u);
+var __iconData$t = {
+  name: "minimize-2",
+  size: 24,
+  node: [
+    ["path", { d: "m14 10 7-7", key: "oa77jy" }],
+    ["path", { d: "M20 10h-6V4", key: "mjg0md" }],
+    ["path", { d: "m3 21 7-7", key: "tjx5ai" }],
+    ["path", { d: "M4 14h6v6", key: "rmj7iw" }]
+  ]
+};
+__iconData$t.node;
+var Minimize2 = createLucideIcon(__iconData$t);
+var __iconData$s = {
   name: "pen-line",
   size: 24,
   node: [
@@ -43075,9 +43184,25 @@ var __iconData$n = {
   ],
   aliases: ["edit-3"]
 };
-__iconData$n.node;
-var PenLine = createLucideIcon(__iconData$n);
-var __iconData$m = {
+__iconData$s.node;
+var PenLine = createLucideIcon(__iconData$s);
+var __iconData$r = {
+  name: "pencil",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
+        key: "1a8usu"
+      }
+    ],
+    ["path", { d: "m15 5 4 4", key: "1mk7zo" }]
+  ]
+};
+__iconData$r.node;
+var Pencil = createLucideIcon(__iconData$r);
+var __iconData$q = {
   name: "play",
   size: 24,
   node: [
@@ -43090,9 +43215,9 @@ var __iconData$m = {
     ]
   ]
 };
-__iconData$m.node;
-var Play = createLucideIcon(__iconData$m);
-var __iconData$l = {
+__iconData$q.node;
+var Play = createLucideIcon(__iconData$q);
+var __iconData$p = {
   name: "plus",
   size: 24,
   node: [
@@ -43100,9 +43225,9 @@ var __iconData$l = {
     ["path", { d: "M12 5v14", key: "s699le" }]
   ]
 };
-__iconData$l.node;
-var Plus = createLucideIcon(__iconData$l);
-var __iconData$k = {
+__iconData$p.node;
+var Plus = createLucideIcon(__iconData$p);
+var __iconData$o = {
   name: "printer",
   size: 24,
   node: [
@@ -43117,9 +43242,9 @@ var __iconData$k = {
     ["rect", { x: "6", y: "14", width: "12", height: "8", rx: "1", key: "1ue0tg" }]
   ]
 };
-__iconData$k.node;
-var Printer = createLucideIcon(__iconData$k);
-var __iconData$j = {
+__iconData$o.node;
+var Printer = createLucideIcon(__iconData$o);
+var __iconData$n = {
   name: "refresh-cw",
   size: 24,
   node: [
@@ -43129,9 +43254,9 @@ var __iconData$j = {
     ["path", { d: "M8 16H3v5", key: "1cv678" }]
   ]
 };
-__iconData$j.node;
-var RefreshCw = createLucideIcon(__iconData$j);
-var __iconData$i = {
+__iconData$n.node;
+var RefreshCw = createLucideIcon(__iconData$n);
+var __iconData$m = {
   name: "rotate-ccw-clock",
   size: 24,
   node: [
@@ -43141,9 +43266,9 @@ var __iconData$i = {
   ],
   aliases: ["history"]
 };
-__iconData$i.node;
-var RotateCcwClock = createLucideIcon(__iconData$i);
-var __iconData$h = {
+__iconData$m.node;
+var RotateCcwClock = createLucideIcon(__iconData$m);
+var __iconData$l = {
   name: "rotate-ccw",
   size: 24,
   node: [
@@ -43151,9 +43276,9 @@ var __iconData$h = {
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ]
 };
-__iconData$h.node;
-var RotateCcw = createLucideIcon(__iconData$h);
-var __iconData$g = {
+__iconData$l.node;
+var RotateCcw = createLucideIcon(__iconData$l);
+var __iconData$k = {
   name: "school",
   size: 24,
   node: [
@@ -43171,9 +43296,9 @@ var __iconData$g = {
     ["circle", { cx: "12", cy: "9", r: "2", key: "1092wv" }]
   ]
 };
-__iconData$g.node;
-var School = createLucideIcon(__iconData$g);
-var __iconData$f = {
+__iconData$k.node;
+var School = createLucideIcon(__iconData$k);
+var __iconData$j = {
   name: "search",
   size: 24,
   node: [
@@ -43181,9 +43306,9 @@ var __iconData$f = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData$f.node;
-var Search = createLucideIcon(__iconData$f);
-var __iconData$e = {
+__iconData$j.node;
+var Search = createLucideIcon(__iconData$j);
+var __iconData$i = {
   name: "send",
   size: 24,
   node: [
@@ -43197,9 +43322,9 @@ var __iconData$e = {
     ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
   ]
 };
-__iconData$e.node;
-var Send = createLucideIcon(__iconData$e);
-var __iconData$d = {
+__iconData$i.node;
+var Send = createLucideIcon(__iconData$i);
+var __iconData$h = {
   name: "shield-check",
   size: 24,
   node: [
@@ -43213,9 +43338,9 @@ var __iconData$d = {
     ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
   ]
 };
-__iconData$d.node;
-var ShieldCheck = createLucideIcon(__iconData$d);
-var __iconData$c = {
+__iconData$h.node;
+var ShieldCheck = createLucideIcon(__iconData$h);
+var __iconData$g = {
   name: "sliders-horizontal",
   size: 24,
   node: [
@@ -43230,9 +43355,9 @@ var __iconData$c = {
     ["path", { d: "M8 12H3", key: "a7s4jb" }]
   ]
 };
-__iconData$c.node;
-var SlidersHorizontal = createLucideIcon(__iconData$c);
-var __iconData$b = {
+__iconData$g.node;
+var SlidersHorizontal = createLucideIcon(__iconData$g);
+var __iconData$f = {
   name: "sparkles",
   size: 24,
   node: [
@@ -43249,9 +43374,16 @@ var __iconData$b = {
   ],
   aliases: ["stars"]
 };
-__iconData$b.node;
-var Sparkles = createLucideIcon(__iconData$b);
-var __iconData$a = {
+__iconData$f.node;
+var Sparkles = createLucideIcon(__iconData$f);
+var __iconData$e = {
+  name: "square",
+  size: 24,
+  node: [["rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", key: "afitv7" }]]
+};
+__iconData$e.node;
+var Square = createLucideIcon(__iconData$e);
+var __iconData$d = {
   name: "swords",
   size: 24,
   node: [
@@ -43277,9 +43409,9 @@ var __iconData$a = {
     ["path", { d: "M7.5 16.5 4 20", key: "14nozp" }]
   ]
 };
-__iconData$a.node;
-var Swords = createLucideIcon(__iconData$a);
-var __iconData$9 = {
+__iconData$d.node;
+var Swords = createLucideIcon(__iconData$d);
+var __iconData$c = {
   name: "target",
   size: 24,
   node: [
@@ -43288,9 +43420,9 @@ var __iconData$9 = {
     ["circle", { cx: "12", cy: "12", r: "2", key: "1c9p78" }]
   ]
 };
-__iconData$9.node;
-var Target = createLucideIcon(__iconData$9);
-var __iconData$8 = {
+__iconData$c.node;
+var Target = createLucideIcon(__iconData$c);
+var __iconData$b = {
   name: "text-align-justify",
   size: 24,
   node: [
@@ -43300,9 +43432,9 @@ var __iconData$8 = {
   ],
   aliases: ["align-justify"]
 };
-__iconData$8.node;
-var TextAlignJustify = createLucideIcon(__iconData$8);
-var __iconData$7 = {
+__iconData$b.node;
+var TextAlignJustify = createLucideIcon(__iconData$b);
+var __iconData$a = {
   name: "text-align-start",
   size: 24,
   node: [
@@ -43312,9 +43444,9 @@ var __iconData$7 = {
   ],
   aliases: ["text", "align-left"]
 };
-__iconData$7.node;
-var TextAlignStart = createLucideIcon(__iconData$7);
-var __iconData$6 = {
+__iconData$a.node;
+var TextAlignStart = createLucideIcon(__iconData$a);
+var __iconData$9 = {
   name: "ticket",
   size: 24,
   node: [
@@ -43330,9 +43462,9 @@ var __iconData$6 = {
     ["path", { d: "M13 11v2", key: "1wjjxi" }]
   ]
 };
-__iconData$6.node;
-var Ticket = createLucideIcon(__iconData$6);
-var __iconData$5 = {
+__iconData$9.node;
+var Ticket = createLucideIcon(__iconData$9);
+var __iconData$8 = {
   name: "trash",
   size: 24,
   node: [
@@ -43344,9 +43476,9 @@ var __iconData$5 = {
   ],
   aliases: ["trash-2"]
 };
-__iconData$5.node;
-var Trash = createLucideIcon(__iconData$5);
-var __iconData$4 = {
+__iconData$8.node;
+var Trash = createLucideIcon(__iconData$8);
+var __iconData$7 = {
   name: "user-check",
   size: 24,
   node: [
@@ -43355,9 +43487,9 @@ var __iconData$4 = {
     ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
   ]
 };
-__iconData$4.node;
-var UserCheck = createLucideIcon(__iconData$4);
-var __iconData$3 = {
+__iconData$7.node;
+var UserCheck = createLucideIcon(__iconData$7);
+var __iconData$6 = {
   name: "user-plus",
   size: 24,
   node: [
@@ -43367,9 +43499,21 @@ var __iconData$3 = {
     ["line", { x1: "22", x2: "16", y1: "11", y2: "11", key: "1shjgl" }]
   ]
 };
-__iconData$3.node;
-var UserPlus = createLucideIcon(__iconData$3);
-var __iconData$2 = {
+__iconData$6.node;
+var UserPlus = createLucideIcon(__iconData$6);
+var __iconData$5 = {
+  name: "user-x",
+  size: 24,
+  node: [
+    ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
+    ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }],
+    ["line", { x1: "17", x2: "22", y1: "8", y2: "13", key: "3nzzx3" }],
+    ["line", { x1: "22", x2: "17", y1: "8", y2: "13", key: "1swrse" }]
+  ]
+};
+__iconData$5.node;
+var UserX = createLucideIcon(__iconData$5);
+var __iconData$4 = {
   name: "user",
   size: 24,
   node: [
@@ -43377,9 +43521,9 @@ var __iconData$2 = {
     ["circle", { cx: "12", cy: "7", r: "4", key: "17ys0d" }]
   ]
 };
-__iconData$2.node;
-var User = createLucideIcon(__iconData$2);
-var __iconData$1 = {
+__iconData$4.node;
+var User = createLucideIcon(__iconData$4);
+var __iconData$3 = {
   name: "users",
   size: 24,
   node: [
@@ -43389,8 +43533,35 @@ var __iconData$1 = {
     ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
   ]
 };
+__iconData$3.node;
+var Users = createLucideIcon(__iconData$3);
+var __iconData$2 = {
+  name: "wifi-off",
+  size: 24,
+  node: [
+    ["path", { d: "M12 20h.01", key: "zekei9" }],
+    ["path", { d: "M8.5 16.429a5 5 0 0 1 7 0", key: "1bycff" }],
+    ["path", { d: "M5 12.859a10 10 0 0 1 5.17-2.69", key: "1dl1wf" }],
+    ["path", { d: "M19 12.859a10 10 0 0 0-2.007-1.523", key: "4k23kn" }],
+    ["path", { d: "M2 8.82a15 15 0 0 1 4.177-2.643", key: "1grhjp" }],
+    ["path", { d: "M22 8.82a15 15 0 0 0-11.288-3.764", key: "z3jwby" }],
+    ["path", { d: "m2 2 20 20", key: "1ooewy" }]
+  ]
+};
+__iconData$2.node;
+var WifiOff = createLucideIcon(__iconData$2);
+var __iconData$1 = {
+  name: "wifi",
+  size: 24,
+  node: [
+    ["path", { d: "M12 20h.01", key: "zekei9" }],
+    ["path", { d: "M2 8.82a15 15 0 0 1 20 0", key: "dnpr2z" }],
+    ["path", { d: "M5 12.859a10 10 0 0 1 14 0", key: "1x1e6c" }],
+    ["path", { d: "M8.5 16.429a5 5 0 0 1 7 0", key: "1bycff" }]
+  ]
+};
 __iconData$1.node;
-var Users = createLucideIcon(__iconData$1);
+var Wifi = createLucideIcon(__iconData$1);
 var __iconData = {
   name: "x",
   size: 24,
@@ -46560,7 +46731,7 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
     sendAnswerMessage
   };
 }
-async function loader$P({ request }) {
+async function loader$S({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -46573,7 +46744,7 @@ async function loader$P({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$O = ({ data: data2 }) => {
+var meta$P = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceSpeakingEoyOralAcceleratedPage() {
@@ -46752,8 +46923,8 @@ function VceSpeakingEoyOralAcceleratedPage() {
 var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingEoyOralAcceleratedPage,
-  loader: loader$P,
-  meta: meta$O
+  loader: loader$S,
+  meta: meta$P
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoGenkoyoshiEditorVce = ({
   defaultOpen = false,
@@ -47171,7 +47342,7 @@ var genkoStyles = "/assets/genkoyoshi-DYYOnZeq.css";
 var links = () => [
   { rel: "stylesheet", href: genkoStyles }
 ];
-async function loader$O({ request }) {
+async function loader$R({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -47184,7 +47355,7 @@ async function loader$O({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$N = ({ data: data2 }) => {
+var meta$O = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function GenkoyoshiEditorVce() {
@@ -47441,8 +47612,8 @@ var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: GenkoyoshiEditorVce,
   links,
-  loader: loader$O,
-  meta: meta$N
+  loader: loader$R,
+  meta: meta$O
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoKanjiGrammarCheckerVce = ({
   defaultOpen = false,
@@ -47793,7 +47964,7 @@ var VCE_GRAMMAR_LIST = [
   "\u3066\u3044\u307E\u3059",
   "\u3067\u3044\u307E\u3059"
 ];
-async function loader$N({ request }) {
+async function loader$Q({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -48104,14 +48275,14 @@ function KanjiGrammarCheckerPage() {
     ) })
   ] }) });
 }
-var meta$M = ({ data: data2 }) => {
+var meta$N = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiGrammarCheckerPage,
-  loader: loader$N,
-  meta: meta$M
+  loader: loader$Q,
+  meta: meta$N
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoOralExamQuestions = ({
   systemPrompt = "",
@@ -48180,7 +48351,7 @@ async function fetchOralExamQuestionsData(supabaseClient) {
     return null;
   }
 }
-async function loader$M({ request }) {
+async function loader$P({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -48193,7 +48364,7 @@ async function loader$M({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$L = ({ data: data2 }) => {
+var meta$M = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OralExamQuestions() {
@@ -48399,8 +48570,8 @@ function OralExamQuestions() {
 var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OralExamQuestions,
-  loader: loader$M,
-  meta: meta$L
+  loader: loader$P,
+  meta: meta$M
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoEoyOralElaborate = ({
   systemPrompt = "",
@@ -49153,7 +49324,7 @@ var ElaborateHintModal = ({
     ) })
   ] }) });
 };
-async function loader$L({ request }) {
+async function loader$O({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -49166,7 +49337,7 @@ async function loader$L({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$K = ({ data: data2 }) => {
+var meta$L = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralElaboratePage() {
@@ -49799,8 +49970,8 @@ function EoyOralElaboratePage() {
 var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralElaboratePage,
-  loader: loader$L,
-  meta: meta$K
+  loader: loader$O,
+  meta: meta$L
 }, Symbol.toStringTag, { value: "Module" }));
 function FeedbackPdfModal({
   initialContent,
@@ -50118,7 +50289,7 @@ function ChatYamatoEoyWritingCustom({
     )
   ] });
 }
-async function loader$K({ request }) {
+async function loader$N({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -50131,7 +50302,7 @@ async function loader$K({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$J = ({ data: data2 }) => {
+var meta$K = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CustomDashboard() {
@@ -50475,87 +50646,361 @@ Details: ${assignedQuestionText}` : "";
 var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CustomDashboard,
-  loader: loader$K,
-  meta: meta$J
+  loader: loader$N,
+  meta: meta$K
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$J({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname
-  });
-}
-var meta$I = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-};
-function HiraganaMemoryMatchFrameView({ userId }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-slate-100", children: "Hiragana Memory Match" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold", children: "\u{1F9E0} Memory Game" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium text-center", children: "Test your brain and match the Hiragana cards!" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-indigo-800/40 p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "iframe",
-      {
-        src: "/games/hiragana_memory_match.html",
-        title: "Hiragana Memory Match Game",
-        className: "w-full h-full border-0 rounded-xl",
-        sandbox: "allow-scripts allow-same-origin allow-forms"
+var POLL_MS = 3e4;
+function GameAccessGate({ layoutRef, children }) {
+  const [state, setState] = reactExports.useState({ status: "checking" });
+  const ticketRef = reactExports.useRef(null);
+  const check = reactExports.useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        ticketRef.current = null;
+        setState({ status: "login" });
+        return;
       }
-    ) })
-  ] }) });
-}
-function HiraganaMemoryMatchRoute() {
-  const layoutRef = reactExports.useRef(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = reactExports.useState(true);
-  const [user, setUser] = reactExports.useState(null);
-  reactExports.useEffect(() => {
-    let isMounted = true;
-    async function initSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if ((session == null ? void 0 : session.user) && isMounted) {
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        if (isMounted)
-          setLoading(false);
-      }
-    }
-    initSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session == null ? void 0 : session.user) {
-        setUser(session.user);
+      const res = await fetch("/api/game-access", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (!res.ok)
+        throw new Error(`game-access ${res.status}`);
+      const body = await res.json();
+      if (body.status === "allowed" && typeof body.ticket === "string") {
+        if (!ticketRef.current)
+          ticketRef.current = body.ticket;
+        const ticket = ticketRef.current;
+        setState((prev) => prev.status === "allowed" && prev.ticket === ticket ? prev : { status: "allowed", ticket });
+      } else if (body.status === "locked") {
+        ticketRef.current = null;
+        const className = typeof body.className === "string" ? body.className : "";
+        setState((prev) => prev.status === "locked" && prev.className === className ? prev : { status: "locked", className });
+      } else if (body.status === "login") {
+        ticketRef.current = null;
+        setState({ status: "login" });
       } else {
-        setUser(null);
+        throw new Error("Unexpected game-access response");
       }
-      setLoading(false);
+    } catch (err) {
+      console.error("[GameAccessGate] check failed:", err);
+      setState((prev) => prev.status === "checking" ? { status: "error" } : prev);
+    }
+  }, []);
+  reactExports.useEffect(() => {
+    check();
+    const timer = setInterval(() => {
+      if (!document.hidden)
+        check();
+    }, POLL_MS);
+    const onVisible = () => {
+      if (!document.hidden)
+        check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT")
+        check();
     });
     return () => {
-      isMounted = false;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
       subscription == null ? void 0 : subscription.unsubscribe();
     };
-  }, [navigate]);
-  if (loading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center items-center h-screen bg-[#f4f1ea] font-sans", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-slate-700 animate-pulse", children: "Loading Hiragana Memory Match... \u{1F9E0}" }) }) });
+  }, [check]);
+  if (state.status === "allowed")
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: children(state.ticket) });
+  const box = "max-w-xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-sm";
+  if (state.status === "checking") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-16 text-center", role: "status", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-3" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 font-medium", children: "Getting the game ready\u2026" })
+    ] });
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HiraganaMemoryMatchFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
+  if (state.status === "login") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LogIn, { className: "w-7 h-7 text-indigo-600" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Log in to play" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "Games are free with an AI Yamato account. Log in, or create a free account, to start playing." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row gap-2 justify-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              var _a;
+              return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signin");
+            },
+            className: "px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer",
+            children: "Log in"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              var _a;
+              return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signup");
+            },
+            className: "px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-sm font-bold rounded-xl transition cursor-pointer",
+            children: "Create a free account"
+          }
+        )
+      ] })
+    ] });
+  }
+  if (state.status === "locked") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, role: "status", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "w-7 h-7 text-amber-600" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Games are locked right now" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: [
+        "Your teacher has locked games",
+        state.className ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          " for ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: state.className })
+        ] }) : null,
+        ". Please listen to your teacher. This page will open by itself when your teacher unlocks games."
+      ] })
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, role: "alert", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Could not open the game" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: "Please check your internet connection and try again." }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        onClick: () => {
+          setState({ status: "checking" });
+          check();
+        },
+        className: "inline-flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(RefreshCw, { className: "w-4 h-4" }),
+          " Try again"
+        ]
+      }
+    )
+  ] });
+}
+var fullscreenElement = () => {
+  const doc = document;
+  return doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
+};
+function GameFrame({ name, title, ticket, variants, minHeight = 560 }) {
+  const list2 = reactExports.useMemo(() => (variants == null ? void 0 : variants.length) ? variants : [{ key: "main", label: title }], [variants, title]);
+  const [active, setActive] = reactExports.useState(list2[0].key);
+  const [heights, setHeights] = reactExports.useState({});
+  const [nativeFull, setNativeFull] = reactExports.useState(false);
+  const [pseudoFull, setPseudoFull] = reactExports.useState(false);
+  const isFull = nativeFull || pseudoFull;
+  const containerRef = reactExports.useRef(null);
+  const frameRefs = reactExports.useRef({});
+  const srcs = reactExports.useMemo(() => {
+    const out = {};
+    for (const v2 of list2)
+      out[v2.key] = `/game-frame/${name}?${new URLSearchParams({ ...v2.params ?? {}, t: ticket })}`;
+    return out;
+  }, [list2, name, ticket]);
+  reactExports.useEffect(() => {
+    const onMessage = (e) => {
+      if (e.origin !== window.location.origin)
+        return;
+      const data2 = e.data;
+      if (!data2 || data2.type !== "yamato-game:height")
+        return;
+      const key = Object.keys(frameRefs.current).find((k2) => {
+        var _a;
+        return ((_a = frameRefs.current[k2]) == null ? void 0 : _a.contentWindow) === e.source;
+      });
+      const h = Number(data2.height);
+      if (!key || !Number.isFinite(h) || h <= 0)
+        return;
+      const height = Math.min(Math.ceil(h), 2e4);
+      setHeights((prev) => prev[key] === height ? prev : { ...prev, [key]: height });
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+  const sendViewport = reactExports.useCallback(() => {
+    for (const frame of Object.values(frameRefs.current)) {
+      if (!(frame == null ? void 0 : frame.contentWindow))
+        continue;
+      const r2 = frame.getBoundingClientRect();
+      if (r2.height <= 0)
+        continue;
+      let top = Math.max(0, -r2.top);
+      let height = Math.max(0, Math.min(r2.height, window.innerHeight - r2.top) - top);
+      const minVisible = Math.min(r2.height, 320);
+      if (height < minVisible) {
+        top = r2.top > 0 ? 0 : Math.max(0, r2.height - minVisible);
+        height = minVisible;
+      }
+      frame.contentWindow.postMessage({ type: "yamato-game:viewport", top, height }, window.location.origin);
+    }
+  }, []);
+  reactExports.useEffect(() => {
+    let raf = 0;
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(sendViewport);
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    schedule();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [sendViewport, heights, isFull, active]);
+  reactExports.useEffect(() => {
+    const onChange = () => setNativeFull(Boolean(containerRef.current) && fullscreenElement() === containerRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
+  }, []);
+  reactExports.useEffect(() => {
+    if (!pseudoFull)
+      return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => {
+      if (e.key === "Escape")
+        setPseudoFull(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [pseudoFull]);
+  const toggleFullscreen = async () => {
+    var _a;
+    if (isFull) {
+      setPseudoFull(false);
+      if (fullscreenElement()) {
+        const doc = document;
+        try {
+          if (doc.exitFullscreen)
+            await doc.exitFullscreen();
+          else
+            (_a = doc.webkitExitFullscreen) == null ? void 0 : _a.call(doc);
+        } catch {
+        }
+      }
+      return;
+    }
+    const el2 = containerRef.current;
+    if (!el2)
+      return;
+    try {
+      if (el2.requestFullscreen)
+        await el2.requestFullscreen();
+      else if (el2.webkitRequestFullscreen) {
+        el2.webkitRequestFullscreen();
+        await new Promise((r2) => setTimeout(r2, 300));
+      }
+    } catch {
+    }
+    if (fullscreenElement() !== el2)
+      setPseudoFull(true);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      ref: containerRef,
+      className: isFull ? "fixed inset-0 z-[1000] flex flex-col bg-white dark:bg-slate-950" : "w-full",
+      style: pseudoFull ? { height: "100dvh" } : void 0,
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-bold text-slate-700 dark:text-slate-200 mr-1", children: title }),
+          list2.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "group", "aria-label": "Version", className: "inline-flex rounded-full border border-slate-300 dark:border-slate-700 overflow-hidden", children: list2.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              "aria-pressed": active === v2.key,
+              onClick: () => setActive(v2.key),
+              className: `px-3.5 py-1.5 text-xs font-bold transition cursor-pointer ${active === v2.key ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"}`,
+              children: v2.label
+            },
+            v2.key
+          )) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: toggleFullscreen,
+              className: "ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer",
+              children: [
+                isFull ? /* @__PURE__ */ jsxRuntimeExports.jsx(Minimize2, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Maximize2, { className: "w-3.5 h-3.5" }),
+                isFull ? "Exit fullscreen" : "Fullscreen"
+              ]
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: isFull ? "relative flex-1 min-h-0" : "relative", children: list2.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "iframe",
+          {
+            ref: (el2) => {
+              frameRefs.current[v2.key] = el2;
+            },
+            src: srcs[v2.key],
+            title: list2.length > 1 ? `${title} (${v2.label})` : title,
+            className: `block w-full border-0 ${v2.key === active ? "" : "hidden"}`,
+            style: { height: isFull ? "100%" : Math.max(minHeight, heights[v2.key] ?? minHeight) },
+            sandbox: "allow-scripts allow-same-origin allow-forms",
+            allow: "fullscreen",
+            onLoad: sendViewport
+          },
+          v2.key
+        )) })
+      ]
+    }
+  );
+}
+function IframeGamePage({ layoutRef, name, title, description, variants }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-6xl mx-auto px-2 sm:px-4 pt-6 sm:pt-8 space-y-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "text-center px-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-bold text-slate-900 dark:text-slate-100", children: title }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium", children: description })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: (ticket) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GameFrame, { name, title, ticket, variants }) }) })
+  ] }) });
+}
+async function loadGamePage(request) {
+  let portalContent = null;
+  try {
+    const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
+    portalContent = (data2 == null ? void 0 : data2.content) || null;
+  } catch {
+  }
+  return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
+}
+var loader$M = ({ request }) => loadGamePage(request);
+var meta$J = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+function HiraganaMemoryMatchRoute() {
+  const layoutRef = reactExports.useRef(null);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Hiragana Memory Match", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    IframeGamePage,
+    {
+      layoutRef,
+      name: "hiragana-memory-match",
+      title: "Hiragana Memory Match",
+      description: "Test your memory and match each hiragana with its romaji!"
+    }
+  ) });
 }
 var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HiraganaMemoryMatchRoute,
-  loader: loader$J,
-  meta: meta$I
+  loader: loader$M,
+  meta: meta$J
 }, Symbol.toStringTag, { value: "Module" }));
 var OralUserAnswerList = ({
   questions,
@@ -50678,7 +51123,7 @@ var OralUserAnswerList = ({
     ] })
   ] });
 };
-async function loader$I({ request }) {
+async function loader$L({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -50691,7 +51136,7 @@ async function loader$I({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$H = ({ data: data2 }) => {
+var meta$I = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralDrillPage() {
@@ -51090,10 +51535,10 @@ Please enter at least 10 characters for your drill response. (Current: ${current
 var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralDrillPage,
-  loader: loader$I,
-  meta: meta$H
+  loader: loader$L,
+  meta: meta$I
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$H({ request }) {
+async function loader$K({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -51107,7 +51552,7 @@ async function loader$H({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$G = ({ data: data2 }) => {
+var meta$H = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var sportsColorTemplates = [
@@ -51634,8 +52079,8 @@ function TestYamatoNotePage() {
 var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoNotePage,
-  loader: loader$H,
-  meta: meta$G
+  loader: loader$K,
+  meta: meta$H
 }, Symbol.toStringTag, { value: "Module" }));
 var OralMockConfig = ({
   onStartExam,
@@ -52290,7 +52735,7 @@ var ChatYamatoEoyOralMock = ({
     }
   );
 };
-async function loader$G({ request }) {
+async function loader$J({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -52419,14 +52864,14 @@ function MockOralMode() {
     }
   );
 }
-var meta$F = ({ data: data2 }) => {
+var meta$G = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MockOralMode,
-  loader: loader$G,
-  meta: meta$F
+  loader: loader$J,
+  meta: meta$G
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$b = "WRITING_STYLES";
 async function fetchWritingStylesData(supabaseClient) {
@@ -52446,7 +52891,7 @@ async function fetchWritingStylesData(supabaseClient) {
     return null;
   }
 }
-async function loader$F({ request }) {
+async function loader$I({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -52459,7 +52904,7 @@ async function loader$F({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$E = ({ data: data2 }) => {
+var meta$F = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function WritingStylesGuide() {
@@ -52587,91 +53032,42 @@ function WritingStylesGuide() {
 var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: WritingStylesGuide,
-  loader: loader$F,
-  meta: meta$E
+  loader: loader$I,
+  meta: meta$F
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$E({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname
-  });
-}
-var meta$D = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-};
-function PrefecturePuzzleFrameView({ userId }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-slate-100", children: "Japan Prefecture Puzzle" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold", children: "\u{1F9E9} Puzzle Game" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium text-center", children: "Test your geography skills by fitting all the prefectures of Japan into their correct places!" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-indigo-800/40 p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "iframe",
-      {
-        src: "/games/prefecture-puzzle-switch.html",
-        style: { width: "100%", height: "900px", border: 0 },
-        title: "Japan Prefecture Puzzle",
-        className: "rounded-xl",
-        sandbox: "allow-scripts allow-same-origin allow-forms",
-        allowFullScreen: true,
-        allow: "fullscreen"
-      }
-    ) })
-  ] }) });
-}
+var loader$H = ({ request }) => loadGamePage(request);
+var meta$E = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var VARIANTS = [
+  { key: "easy", label: "Easy", params: { version: "easy" } },
+  { key: "hard", label: "Hard", params: { version: "hard" } }
+];
 function PrefecturePuzzleRoute() {
   const layoutRef = reactExports.useRef(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = reactExports.useState(true);
-  const [user, setUser] = reactExports.useState(null);
-  reactExports.useEffect(() => {
-    let isMounted = true;
-    async function initSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if ((session == null ? void 0 : session.user) && isMounted) {
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        if (isMounted)
-          setLoading(false);
-      }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Japan Prefecture Puzzle", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    IframeGamePage,
+    {
+      layoutRef,
+      name: "prefecture-puzzle",
+      title: "Japan Prefecture Puzzle",
+      description: "Test your geography skills by fitting all the prefectures of Japan into their correct places!",
+      variants: VARIANTS
     }
-    initSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session == null ? void 0 : session.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => {
-      isMounted = false;
-      subscription == null ? void 0 : subscription.unsubscribe();
-    };
-  }, [navigate]);
-  if (loading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center items-center h-screen bg-[#f4f1ea] font-sans", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-slate-700 animate-pulse", children: "Loading Prefecture Puzzle... \u{1F9E9}" }) }) });
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(PrefecturePuzzleFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
+  ) });
 }
 var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrefecturePuzzleRoute,
-  loader: loader$E,
-  meta: meta$D
+  loader: loader$H,
+  meta: meta$E
 }, Symbol.toStringTag, { value: "Module" }));
+function shuffle$1(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 var STAGES = [
   [["\u3042", "a"], ["\u3044", "i"], ["\u3046", "u"], ["\u3048", "e"], ["\u304A", "o"], ["\u304B", "ka"], ["\u304D", "ki"], ["\u304F", "ku"], ["\u3051", "ke"], ["\u3053", "ko"]],
   [["\u3055", "sa"], ["\u3057", "shi"], ["\u3059", "su"], ["\u305B", "se"], ["\u305D", "so"], ["\u305F", "ta"], ["\u3061", "chi"], ["\u3064", "tsu"], ["\u306A", "na"], ["\u306B", "ni"]],
@@ -52687,7 +53083,7 @@ var RINGS_DATA = STAGES.map((s2, i) => [
   ...RING_OK[i].map((j) => [...s2[j], true]),
   ...RING_BAD[i].map(([k2, r2]) => [k2, r2, false])
 ]);
-async function loader$D({ request }) {
+async function loader$G({ request }) {
   let portalContent = null;
   try {
     const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
@@ -52696,46 +53092,15 @@ async function loader$D({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var meta$C = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var meta$D = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function RollingCharacterPage() {
   const layoutRef = reactExports.useRef(null);
-  const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
-  const [inputPasscode, setInputPasscode] = reactExports.useState("");
-  const handlePasscodeSubmit = (e) => {
-    e.preventDefault();
-    if (inputPasscode === "1111") {
-      setIsCodeUnlocked(true);
-      alert("\u2728 Authentication successful! The game has been temporarily unlocked.");
-    } else {
-      alert("\u274C Incorrect passcode.");
-    }
-  };
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Rolling Character", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto px-4 py-8 space-y-6", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "bg-white border border-slate-200 p-5 rounded-xl shadow-sm", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u{1F3D4}\uFE0F Rolling Kana ~Climb the Mountain with AI Yamato!~" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-0.5", children: "Japanese Character Learning Retro Arcade Game" })
     ] }),
-    isCodeUnlocked ? /* @__PURE__ */ jsxRuntimeExports.jsx(RollingCharacterArena, {}) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner", children: "\u{1F512}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 mb-2", children: "This area is currently locked" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 leading-relaxed", children: "Complete the lessons or enter the passcode provided by your teacher." })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasscodeSubmit, className: "flex gap-2 max-w-xs mx-auto", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "text",
-            maxLength: 4,
-            placeholder: "4-digit code",
-            value: inputPasscode,
-            onChange: (e) => setInputPasscode(e.target.value),
-            className: "bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition", children: "Unlock" })
-      ] })
-    ] })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: () => /* @__PURE__ */ jsxRuntimeExports.jsx(RollingCharacterArena, {}) })
   ] }) });
 }
 var SOUNDS = {
@@ -52758,6 +53123,7 @@ var KEYMAP = {
   KeyS: "down",
   Space: "space"
 };
+var START_POS = { x: 100, y: 598 };
 function RollingCharacterArena() {
   const canvasRef = reactExports.useRef(null);
   const [gameState, setGameState] = reactExports.useState("START");
@@ -52772,7 +53138,14 @@ function RollingCharacterArena() {
   const stageRef = reactExports.useRef(stage);
   stageRef.current = stage;
   const playSoundRef = reactExports.useRef(null);
-  const generateRandomKanaProblem = (st) => [...STAGES[st - 1] || STAGES[0]].sort(() => 0.5 - Math.random()).slice(0, 3);
+  const controlsRef = reactExports.useRef(null);
+  const keysRef = reactExports.useRef({ left: false, right: false, up: false, down: false, space: false });
+  const jumpRequestRef = reactExports.useRef(false);
+  const generateRandomKanaProblem = (st) => shuffle$1(STAGES[st - 1] || STAGES[0]).slice(0, 3);
+  reactExports.useEffect(() => {
+    if (lives <= 0 && gameState === "PLAYING")
+      setGameState("GAMEOVER");
+  }, [lives, gameState]);
   reactExports.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas)
@@ -52799,17 +53172,19 @@ function RollingCharacterArena() {
       }
     };
     playSoundRef.current = playSound;
-    const keys = { left: false, right: false, up: false, down: false, space: false };
+    const keys = keysRef.current;
     const clearKeys = () => {
       keys.left = keys.right = keys.up = keys.down = keys.space = false;
+      jumpRequestRef.current = false;
     };
     const onKey = (down) => (e) => {
       const k2 = KEYMAP[e.code] || (e.key === " " ? "space" : void 0);
       if (!k2)
         return;
-      if (down && gameStateRef.current === "TYPING")
+      if (down && gameStateRef.current !== "PLAYING")
         return;
-      e.preventDefault();
+      if (down)
+        e.preventDefault();
       keys[k2] = down;
     };
     const handleKeyDown = onKey(true), handleKeyUp = onKey(false);
@@ -52832,20 +53207,28 @@ function RollingCharacterArena() {
     };
     let rings = [];
     let spawnTimer = 0, invincibilityTimer = 0, spacePressedLastFrame = false;
-    window.__startRollingGame = (st = 1) => {
-      if (!audioCtx)
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      setStage(st);
-      if (st === 1)
-        setScore(0);
-      setLives(3);
+    const resetPlayer = () => {
       rings = [];
       spawnTimer = 0;
-      Object.assign(player, { x: 100, y: 598, vx: 0, vy: 0 });
-      setTargetKanaList(generateRandomKanaProblem(st));
-      setInputAnswers(["", "", ""]);
-      setGameState("PLAYING");
-      setYamatoSpeech(`Stage ${st} Start! Climb to the top and input the 3 kana passwords!`);
+      invincibilityTimer = 0;
+      Object.assign(player, { ...START_POS, vx: 0, vy: 0, isGrounded: false, isOnLadder: false, facing: 1 });
+      clearKeys();
+    };
+    controlsRef.current = {
+      start: (st = 1) => {
+        if (!audioCtx)
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        setStage(st);
+        if (st === 1)
+          setScore(0);
+        setLives(3);
+        resetPlayer();
+        setTargetKanaList(generateRandomKanaProblem(st));
+        setInputAnswers(["", "", ""]);
+        setGameState("PLAYING");
+        setYamatoSpeech(`Stage ${st} Start! Climb to the top and input the 3 kana passwords!`);
+      },
+      backToStart: resetPlayer
     };
     let animationFrameId;
     const update = () => {
@@ -52855,7 +53238,9 @@ function RollingCharacterArena() {
         invincibilityTimer--;
       const prevBottom = player.y + player.h;
       const spacePressedNow = keys.space;
-      const wantingToJump = spacePressedNow && !spacePressedLastFrame && player.isGrounded;
+      const jumpTapped = jumpRequestRef.current;
+      jumpRequestRef.current = false;
+      const wantingToJump = (spacePressedNow && !spacePressedLastFrame || jumpTapped) && player.isGrounded;
       const touchedLadder = LADDERS.find(([x2, y2, h]) => player.x + player.w / 2 >= x2 - 12 && player.x + player.w / 2 <= x2 + 12 && player.y + player.h >= y2 && player.y <= y2 + h);
       const wasOnLadder = player.isOnLadder;
       player.isOnLadder = !wantingToJump && !!touchedLadder && (wasOnLadder || keys.up || keys.down);
@@ -52979,11 +53364,7 @@ function RollingCharacterArena() {
             setYamatoSpeech(`Correct! "${r2.data[0]}" is "${r2.data[1]}"! (+100pt)`);
             rings.splice(i, 1);
           } else if (invincibilityTimer === 0) {
-            setLives((l2) => {
-              if (l2 - 1 <= 0)
-                setGameState("GAMEOVER");
-              return l2 - 1;
-            });
+            setLives((l2) => Math.max(0, l2 - 1));
             invincibilityTimer = 60;
             playSound("damage");
             setYamatoSpeech(`Oops! Incorrect. "${r2.data[0]}" does not match that Romaji!`);
@@ -53073,7 +53454,7 @@ function RollingCharacterArena() {
     };
   }, []);
   const handlePasswordSubmit = (e) => {
-    var _a, _b;
+    var _a, _b, _c;
     e.preventDefault();
     const allCorrect = targetKanaList.every(([, romaji], i) => inputAnswers[i].trim().toLowerCase() === romaji.toLowerCase());
     if (allCorrect) {
@@ -53082,93 +53463,168 @@ function RollingCharacterArena() {
       setYamatoSpeech("Fantastic! All romaji answers are correct! You opened the treasure chest!");
     } else {
       (_b = playSoundRef.current) == null ? void 0 : _b.call(playSoundRef, "damage");
-      setGameState("PLAYING");
+      const answers = targetKanaList.map(([kana, romaji]) => `${kana} = ${romaji}`).join(", ");
+      (_c = controlsRef.current) == null ? void 0 : _c.backToStart();
+      setTargetKanaList(generateRandomKanaProblem(stage));
       setInputAnswers(["", "", ""]);
-      setYamatoSpeech("Incorrect romaji! \u632F\u308A\u51FA\u3057\u306B\u623B\u308B (Back to start)!");
+      setGameState("PLAYING");
+      setYamatoSpeech(`Not quite! The answers were ${answers}. Back to the start: climb up again for a new treasure chest password!`);
     }
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-900 border-2 border-slate-700 rounded-2xl h-[700px] relative overflow-hidden flex items-center justify-center p-2 shadow-inner", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute top-2 left-2 right-2 z-20 flex flex-wrap justify-between items-center bg-black/50 rounded-lg px-4 py-2 text-sm gap-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-400 font-bold", children: [
-          "\u2764\uFE0F HP: ",
-          "\u2764\uFE0F".repeat(lives)
+  const holdHandlers = (k2) => ({
+    onPointerDown: (e) => {
+      var _a, _b;
+      e.preventDefault();
+      (_b = (_a = e.currentTarget).setPointerCapture) == null ? void 0 : _b.call(_a, e.pointerId);
+      keysRef.current[k2] = true;
+    },
+    onPointerUp: () => {
+      keysRef.current[k2] = false;
+    },
+    onPointerCancel: () => {
+      keysRef.current[k2] = false;
+    },
+    onLostPointerCapture: () => {
+      keysRef.current[k2] = false;
+    },
+    onContextMenu: (e) => e.preventDefault()
+  });
+  const padBtn = "w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-800 active:bg-slate-600 text-white text-xl font-bold shadow select-none touch-none cursor-pointer";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-3 sm:p-6 text-center space-y-4 sm:space-y-6 shadow-xl text-slate-800", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-900 border-2 border-slate-700 rounded-2xl relative overflow-hidden p-1 sm:p-2 shadow-inner", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute top-2 left-2 right-2 z-20 flex flex-wrap justify-between items-center bg-black/50 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm gap-1 sm:gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-400 font-bold", "aria-label": `HP ${lives} of 3`, children: [
+          "\u2764\uFE0F ",
+          "\u2764\uFE0F".repeat(Math.max(0, lives))
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-300 font-bold", children: [
-          "Stage: ",
+          "Stage ",
           stage,
           " / 3"
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-emerald-300 font-bold", children: [
-          "Score: ",
           score,
           " pt"
         ] })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("canvas", { ref: canvasRef, width: 800, height: 700, className: "block bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg" }),
-      gameState === "START" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-black text-[#ffcc00]", children: "Rolling Kana" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-[#ccc] max-w-md leading-relaxed", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "canvas",
+        {
+          ref: canvasRef,
+          width: 800,
+          height: 700,
+          className: "block w-full h-auto aspect-[8/7] bg-gradient-to-b from-[#0f0f1a] to-[#232336] rounded-lg shadow-lg"
+        }
+      ),
+      gameState === "START" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-3 sm:gap-4 z-30 p-4 sm:p-6 text-center overflow-y-auto", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl sm:text-3xl font-black text-[#ffcc00]", children: "Rolling Kana" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs sm:text-sm text-[#ccc] max-w-md leading-relaxed", children: [
           "~ Climb the Character Mountain with AI Yamato! ~",
           /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "Rings roll from the top-left every 2 seconds, zigzagging down to the bottom.",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "Open the treasure chest at the top by inputting the correct romaji for 3 random kana!",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-          "[\u2190 / \u2192] Move \uFF5C [\u2191 / \u2193] Ladders (Climb & Descend) \uFF5C [SPACE] Jump"
+          "Rings roll down from the top. Touch rings whose kana and romaji match (+100 pt) and avoid the wrong ones. At the top, type the romaji for 3 kana to open the treasure chest!"
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => window.__startRollingGame(1), className: "bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg cursor-pointer transition", children: "Start Game" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-xs", children: "[\u2190 / \u2192] Move \uFF5C [\u2191 / \u2193] Ladders \uFF5C [SPACE] Jump" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              var _a;
+              return (_a = controlsRef.current) == null ? void 0 : _a.start(1);
+            },
+            className: "bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-lg shadow-lg cursor-pointer transition",
+            children: "Start Game"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-[11px] sm:text-xs text-[#888] pt-2 border-t border-slate-700 w-full max-w-sm", children: [
+          "Keyboard: [\u2190 / \u2192] Move \uFF5C [\u2191 / \u2193] Ladders \uFF5C [SPACE] Jump",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+          "Touch screen: use the buttons under the game"
+        ] })
       ] }),
-      gameState === "TYPING" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-5 z-30 p-6 text-center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-[#ffcc00]", children: "\u{1F381} \u5B9D\u7BB1\u304C\u958B\u304D\u307E\u3057\u305F\uFF01" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-[#ccc]", children: "\u6B21\u306E\u4EEE\u540D\u306E\u30ED\u30FC\u30DE\u5B57\u3092\u3001\u305D\u308C\u305E\u308C\u306E\u4EEE\u540D\u306E\u4E0B\u306B\u3042\u308B\u30B9\u30DA\u30FC\u30B9\u306B\u6B63\u3057\u304F\u5165\u529B\u3057\u3066\u306D" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasswordSubmit, className: "space-y-6", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center gap-6", children: targetKanaList.map(([kana], idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-inner", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-bold text-white mb-3", children: kana }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                type: "text",
-                maxLength: 4,
-                autoFocus: idx === 0,
-                value: inputAnswers[idx],
-                onChange: (e) => {
-                  const a = [...inputAnswers];
-                  a[idx] = e.target.value;
-                  setInputAnswers(a);
-                },
-                placeholder: "romaji",
-                className: "bg-slate-900 border-2 border-[#ffcc00] rounded-lg px-3 py-2 text-center text-xl font-mono tracking-widest text-white focus:outline-none focus:border-emerald-400 w-24"
-              }
-            )
-          ] }, idx)) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition", children: "\u7B54\u3048\u5408\u308F\u305B\u3057\u3066\u9375\u3092\u958B\u3051\u308B\uFF01 (Enter)" })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-[#ff5555]", children: "\u203B1\u3064\u3067\u3082\u9593\u9055\u3048\u308B\u3068\u300C\u632F\u308A\u51FA\u3057\u306B\u623B\u308B\u300D\u306B\u306A\u308B\u306E\u3067\u6C17\u3092\u3064\u3051\u3066\uFF01" })
-      ] }),
-      gameState === "GAMEOVER" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center", children: [
+      gameState === "GAMEOVER" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-4 z-30 p-4 sm:p-6 text-center", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black text-red-500", children: "GAME OVER" }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-[#ccc]", children: [
           "Score: ",
           score,
           " pts. Try again!"
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => window.__startRollingGame(1), className: "bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition", children: "Play Again" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => {
+          var _a;
+          return (_a = controlsRef.current) == null ? void 0 : _a.start(1);
+        }, className: "bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition", children: "Play Again" })
       ] }),
-      gameState === "VICTORY" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center space-y-4 z-30 p-6 text-center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black text-[#ffcc00]", children: "CONGRATULATIONS!" }),
+      gameState === "VICTORY" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-4 z-30 p-4 sm:p-6 text-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl font-black text-[#ffcc00]", children: "CONGRATULATIONS!" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-[#ccc]", children: stage < 3 ? `Stage ${stage} Cleared! Excellent kana typing & climbing!` : `All Stages Completed! Master of Japanese Kana! (Final Score: ${score} pts)` }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
-            onClick: () => window.__startRollingGame(stage < 3 ? stage + 1 : 1),
+            type: "button",
+            onClick: () => {
+              var _a;
+              return (_a = controlsRef.current) == null ? void 0 : _a.start(stage < 3 ? stage + 1 : 1);
+            },
             className: "bg-[#ff5500] hover:bg-[#ff7733] text-white font-bold px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition",
             children: stage < 3 ? "Proceed to Next Stage" : "Play Again from Beginning"
           }
         )
       ] })
+    ] }),
+    gameState === "TYPING" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "fixed inset-0 bg-[#0a0a0f]/95 flex flex-col items-center justify-center gap-4 sm:gap-5 z-50 p-4 sm:p-6 text-center overflow-y-auto", role: "dialog", "aria-modal": "true", "aria-label": "Treasure chest password", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl sm:text-2xl font-black text-[#ffcc00]", children: "\u{1F381} You reached the treasure chest!" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-[#ccc]", children: "Type the romaji for each kana in the box under it." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasswordSubmit, className: "space-y-5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center gap-2 sm:gap-6", children: targetKanaList.map(([kana], idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center bg-slate-800 p-2 sm:p-4 rounded-xl border border-slate-700 shadow-inner", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-bold text-white mb-3", children: kana }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              type: "text",
+              maxLength: 4,
+              autoFocus: idx === 0,
+              value: inputAnswers[idx],
+              autoComplete: "off",
+              autoCapitalize: "none",
+              autoCorrect: "off",
+              spellCheck: false,
+              "aria-label": `Romaji for ${kana}`,
+              onChange: (e) => {
+                const a = [...inputAnswers];
+                a[idx] = e.target.value;
+                setInputAnswers(a);
+              },
+              placeholder: "romaji",
+              className: "bg-slate-900 border-2 border-[#ffcc00] rounded-lg px-2 py-2 text-center text-lg sm:text-xl font-mono tracking-widest text-white focus:outline-none focus:border-emerald-400 w-20 sm:w-24"
+            }
+          )
+        ] }, idx)) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 sm:px-8 py-3 rounded-xl text-base shadow-lg cursor-pointer transition", children: "Check answers & open the chest! (Enter)" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-[#ff5555]", children: "Careful: if even one answer is wrong, you go back to the start!" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center gap-4 sm:gap-8 select-none", "aria-label": "Game controls", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-3 gap-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: padBtn, "aria-label": "Climb up", ...holdHandlers("up"), children: "\u25B2" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: padBtn, "aria-label": "Move left", ...holdHandlers("left"), children: "\u25C0" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: padBtn, "aria-label": "Climb down", ...holdHandlers("down"), children: "\u25BC" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: padBtn, "aria-label": "Move right", ...holdHandlers("right"), children: "\u25B6" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          "aria-label": "Jump",
+          className: "w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#ff5500] active:bg-[#ff7733] text-white font-black text-base shadow-lg select-none touch-none cursor-pointer",
+          onPointerDown: (e) => {
+            e.preventDefault();
+            jumpRequestRef.current = true;
+          },
+          onContextMenu: (e) => e.preventDefault(),
+          children: "JUMP"
+        }
+      )
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-100 border border-slate-200 rounded-xl p-4 flex items-center gap-4 text-left shadow-inner", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-10 h-10 bg-[#ffcc00] text-slate-900 font-bold flex items-center justify-center rounded-full shrink-0 border-2 border-white shadow", children: "Yamato" }),
@@ -53179,8 +53635,8 @@ function RollingCharacterArena() {
 var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: RollingCharacterPage,
-  loader: loader$D,
-  meta: meta$C
+  loader: loader$G,
+  meta: meta$D
 }, Symbol.toStringTag, { value: "Module" }));
 function renderGrammarText(text, modalKey) {
   const grammarLinks = {
@@ -53489,7 +53945,7 @@ async function fetchTextTypesData(supabaseClient) {
     return null;
   }
 }
-async function loader$C({ request }) {
+async function loader$F({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -53880,20 +54336,20 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
     }
   );
 }
-var meta$B = ({ data: data2 }) => {
+var meta$C = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
-  loader: loader$C,
-  meta: meta$B
+  loader: loader$F,
+  meta: meta$C
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$B({ request }) {
+async function loader$E({ request }) {
   blockOnProduction(request);
   return null;
 }
-var meta$A = () => {
+var meta$B = () => {
   return [
     { title: "AI Yamato \u72EC\u7ACBAPI\u30C6\u30B9\u30C8\u753B\u9762" },
     { name: "description", content: "\u72EC\u7ACBAPI\u30B5\u30FC\u30D0\u30FC\u3068\u9023\u643A\u3059\u308B\u30E4\u30DE\u30C8\u306E\u30C6\u30B9\u30C8\u30DA\u30FC\u30B8\u3067\u3059\u3002" }
@@ -53932,6 +54388,16 @@ function TestYamatoPage() {
       });
       if (error)
         throw error;
+      const session = data2.session;
+      if (session) {
+        const res = await fetch("/api/auth/callback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken: session.access_token, refreshToken: session.refresh_token })
+        });
+        if (!res.ok)
+          throw new Error(`\u30B5\u30FC\u30D0\u30FC\u3078\u306E\u30ED\u30B0\u30A4\u30F3\u53CD\u6620\u306B\u5931\u6557\u3057\u307E\u3057\u305F (${res.status})`);
+      }
       setDebugStatus(`\u2705 \u30ED\u30B0\u30A4\u30F3\u6210\u529F\uFF01 (${email}) - \u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u53CD\u6620\u3059\u308B\u305F\u3081\u30DA\u30FC\u30B8\u3092\u66F4\u65B0\u3057\u307E\u3059...`);
       setTimeout(() => {
         window.location.reload();
@@ -54279,8 +54745,8 @@ function TestYamatoPage() {
 var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoPage,
-  loader: loader$B,
-  meta: meta$A
+  loader: loader$E,
+  meta: meta$B
 }, Symbol.toStringTag, { value: "Module" }));
 var ENEMY_POOL = [
   { char: "\u3042", romaji: "a" },
@@ -54301,7 +54767,22 @@ var ENEMY_POOL = [
   { char: "\u65E5", romaji: "nichi" },
   { char: "\u672C", romaji: "hon" }
 ];
-async function loader$A({ request }) {
+var START_HP$1 = 5;
+var TICK_MS = 100;
+var SPAWN_MS = 2500;
+var SPEED_UP_MS = 15e3;
+var SPEED_STEP = 0.3;
+var ENEMY_STEP = 0.8;
+var DEFENSE_LINE = 90;
+var ALIGN = 5;
+var KEY_STEP = 6;
+var BUTTON_STEP = 10;
+var POINTS = 100;
+var SOUND_DIR = "/game-assets/ogre-star-sword";
+var SWORD_SOUND = `${SOUND_DIR}/sword-sound.mp3`;
+var COUNT_SOUNDS = Array.from({ length: 10 }, (_2, i) => `${SOUND_DIR}/count-${i + 1}.mp3`);
+var COUNT_FALLBACK_MS = 1500;
+async function loader$D({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -54314,241 +54795,287 @@ async function loader$A({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$z = ({ data: data2 }) => {
+var meta$A = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OgreStarSwordPage() {
   const layoutRef = reactExports.useRef(null);
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = reactExports.useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = reactExports.useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
-  const [inputPasscode, setInputPasscode] = reactExports.useState("");
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-  const handlePasscodeSubmit = (e) => {
-    e.preventDefault();
-    if (inputPasscode === "1111") {
-      setIsCodeUnlocked(true);
-      alert("\u2728 Authentication successful! The game has been temporarily unlocked.");
-    } else {
-      alert("\u274C Incorrect passcode.");
-    }
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Ogre Star Sword", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto px-4 py-8 space-y-6", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Ogre Star Sword", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("header", { className: "bg-white border border-slate-200 p-5 rounded-xl shadow-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u2694\uFE0F Ogre Star Sword \u301CTyping Defense Game\u301C" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-0.5", children: "Ogre Star Sword - VCE Japanese Typing Practice" })
     ] }) }),
-    isAccessible ? /* @__PURE__ */ jsxRuntimeExports.jsx(OgreStarSwordArena, {}) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner", children: "\u{1F512}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 mb-2", children: "This area is currently locked" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 leading-relaxed", children: "Please complete your class assignment or enter the passcode provided by your teacher." })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasscodeSubmit, className: "flex gap-2 max-w-xs mx-auto", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "text",
-            maxLength: 4,
-            placeholder: "4-digit code",
-            value: inputPasscode,
-            onChange: (e) => setInputPasscode(e.target.value),
-            className: "bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "submit",
-            className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition",
-            children: "Unlock"
-          }
-        )
-      ] })
-    ] })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: () => /* @__PURE__ */ jsxRuntimeExports.jsx(OgreStarSwordArena, {}) })
   ] }) });
 }
+function useDefeatSounds() {
+  const baseRef = reactExports.useRef(null);
+  const failedRef = reactExports.useRef(/* @__PURE__ */ new Set());
+  const [muted, setMuted] = reactExports.useState(false);
+  const mutedRef = reactExports.useRef(muted);
+  mutedRef.current = muted;
+  const load = reactExports.useCallback(() => {
+    if (baseRef.current || typeof Audio === "undefined")
+      return;
+    const make = (src) => {
+      const a = new Audio(src);
+      a.preload = "auto";
+      a.addEventListener("error", () => failedRef.current.add(src), { once: true });
+      return a;
+    };
+    baseRef.current = { sword: make(SWORD_SOUND), counts: COUNT_SOUNDS.map(make) };
+  }, []);
+  const playDefeat = reactExports.useCallback((count) => {
+    const base = baseRef.current;
+    if (!base || mutedRef.current)
+      return;
+    const countAudio = base.counts[(count - 1) % COUNT_SOUNDS.length];
+    const play = (src) => {
+      if (failedRef.current.has(src.src.replace(location.origin, "")))
+        return null;
+      const a = src.cloneNode(true);
+      a.volume = 0.8;
+      return a;
+    };
+    let countPlayed = false;
+    const sayCount = () => {
+      var _a;
+      if (countPlayed || mutedRef.current)
+        return;
+      countPlayed = true;
+      (_a = play(countAudio)) == null ? void 0 : _a.play().catch(() => {
+      });
+    };
+    const sword = play(base.sword);
+    if (!sword) {
+      sayCount();
+      return;
+    }
+    sword.addEventListener("ended", sayCount, { once: true });
+    sword.addEventListener("error", sayCount, { once: true });
+    sword.play().catch(sayCount);
+    setTimeout(sayCount, COUNT_FALLBACK_MS);
+  }, []);
+  return { load, playDefeat, muted, setMuted };
+}
 function OgreStarSwordArena() {
+  const [phase, setPhase] = reactExports.useState("start");
   const [score, setScore] = reactExports.useState(0);
   const [defeatCount, setDefeatCount] = reactExports.useState(0);
-  const [hp, setHp] = reactExports.useState(5);
-  const [enemies, setEnemies] = reactExports.useState([]);
+  const [hp, setHp] = reactExports.useState(START_HP$1);
+  const [enemies, setEnemiesState] = reactExports.useState([]);
   const [attacks, setAttacks] = reactExports.useState([]);
   const [playerX, setPlayerX] = reactExports.useState(50);
   const [inputVal, setInputVal] = reactExports.useState("");
-  const [isGameOver, setIsGameOver] = reactExports.useState(false);
-  const [speedMultiplier, setSpeedMultiplier] = reactExports.useState(1);
-  reactExports.useEffect(() => {
-    if (isGameOver)
-      return;
-    const speedTimer = setInterval(() => {
-      setSpeedMultiplier((prev) => prev + 0.3);
-    }, 15e3);
-    return () => clearInterval(speedTimer);
-  }, [isGameOver]);
-  reactExports.useEffect(() => {
-    if (isGameOver)
-      return;
-    const spawnInterval = setInterval(() => {
-      const template = ENEMY_POOL[Math.floor(Math.random() * ENEMY_POOL.length)];
-      const newEnemy = {
-        id: Date.now() + Math.random(),
-        char: template.char,
-        romaji: template.romaji,
-        x: Math.floor(Math.random() * 80) + 10,
-        y: 0
-      };
-      setEnemies((prev) => [...prev, newEnemy]);
-    }, 2500);
-    return () => clearInterval(spawnInterval);
-  }, [isGameOver]);
-  reactExports.useEffect(() => {
-    if (isGameOver)
-      return;
-    const moveInterval = setInterval(() => {
-      setEnemies((prev) => {
-        const nextEnemies = [];
-        let lostHp = 0;
-        prev.forEach((enemy) => {
-          const nextY = enemy.y + 0.8 * speedMultiplier;
-          if (nextY >= 90) {
-            lostHp += 1;
-          } else {
-            nextEnemies.push({ ...enemy, y: nextY });
-          }
-        });
-        if (lostHp > 0) {
-          setHp((h) => {
-            const updated = h - lostHp;
-            if (updated <= 0)
-              setIsGameOver(true);
-            return Math.max(0, updated);
-          });
-        }
-        return nextEnemies;
-      });
-    }, 100);
-    return () => clearInterval(moveInterval);
-  }, [isGameOver, speedMultiplier]);
-  const handleKeyDown = (e) => {
-    if (isGameOver)
-      return;
-    if (e.key === "ArrowLeft") {
-      setPlayerX((prev) => Math.max(10, prev - 6));
-    } else if (e.key === "ArrowRight") {
-      setPlayerX((prev) => Math.min(90, prev + 6));
-    }
+  const [speed, setSpeed] = reactExports.useState(1);
+  const { load: loadSounds, playDefeat, muted, setMuted } = useDefeatSounds();
+  const inputRef = reactExports.useRef(null);
+  const enemiesRef = reactExports.useRef([]);
+  const setEnemies = (next) => {
+    enemiesRef.current = next;
+    setEnemiesState(next);
   };
-  const playVoiceCount = (count) => {
-    try {
-      const audio2 = new Audio(`/audio/hit-${count}.mp3`);
-      audio2.volume = 0.8;
-      audio2.play().catch(() => {
-      });
-    } catch (e) {
-    }
+  const playerXRef = reactExports.useRef(playerX);
+  playerXRef.current = playerX;
+  const defeatCountRef = reactExports.useRef(0);
+  const speedRef = reactExports.useRef(1);
+  const spawnClockRef = reactExports.useRef(0);
+  const speedClockRef = reactExports.useRef(0);
+  const nextIdRef = reactExports.useRef(1);
+  const timersRef = reactExports.useRef([]);
+  const later = (fn, ms) => {
+    timersRef.current.push(setTimeout(fn, ms));
   };
-  const handleInputChange = (e) => {
-    if (isGameOver)
-      return;
-    const val = e.target.value.toLowerCase();
-    setInputVal(val);
-    const matchedEnemy = enemies.find((enemy) => enemy.romaji === val);
-    if (matchedEnemy) {
-      const isAligned = Math.abs(playerX - matchedEnemy.x) <= 5;
-      if (isAligned) {
-        const newAttack = {
-          id: Date.now() + Math.random(),
-          startX: playerX,
-          startY: 90,
-          targetY: matchedEnemy.y,
-          isHit: true,
-          hitX: matchedEnemy.x
-        };
-        setAttacks((prev) => [...prev, newAttack]);
-        setTimeout(() => {
-          setEnemies((prev) => prev.filter((enemy) => enemy.id !== matchedEnemy.id));
-          setAttacks((prev) => prev.filter((a) => a.id !== newAttack.id));
-        }, 200);
-        const newCount = defeatCount + 1;
-        setScore((s2) => s2 + 100);
-        setDefeatCount(newCount);
-        setInputVal("");
-        playVoiceCount(newCount);
-      } else {
-        const missedAttack = {
-          id: Date.now() + Math.random(),
-          startX: playerX,
-          startY: 90,
-          targetY: 5,
-          isHit: false
-        };
-        setAttacks((prev) => [...prev, missedAttack]);
-        setTimeout(() => {
-          setAttacks((prev) => prev.filter((a) => a.id !== missedAttack.id));
-        }, 300);
-        setInputVal("");
-      }
-    }
-  };
-  const restartGame = () => {
+  reactExports.useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
+  const focusInput = () => setTimeout(() => {
+    var _a;
+    return (_a = inputRef.current) == null ? void 0 : _a.focus();
+  }, 0);
+  const startGame = () => {
+    loadSounds();
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
     setScore(0);
     setDefeatCount(0);
-    setHp(5);
+    defeatCountRef.current = 0;
+    setHp(START_HP$1);
     setEnemies([]);
     setAttacks([]);
     setPlayerX(50);
     setInputVal("");
-    setSpeedMultiplier(1);
-    setIsGameOver(false);
+    speedRef.current = 1;
+    setSpeed(1);
+    spawnClockRef.current = SPAWN_MS - 600;
+    speedClockRef.current = 0;
+    setPhase("playing");
+    focusInput();
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-4 shadow-xl text-white", tabIndex: 0, onKeyDown: handleKeyDown, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-400 font-bold", children: [
-        "\u2764\uFE0F HP: ",
+  const resume = () => {
+    setPhase("playing");
+    focusInput();
+  };
+  reactExports.useEffect(() => {
+    if (phase !== "playing")
+      return;
+    const timer = setInterval(() => {
+      if (document.hidden) {
+        setPhase("paused");
+        return;
+      }
+      speedClockRef.current += TICK_MS;
+      if (speedClockRef.current >= SPEED_UP_MS) {
+        speedClockRef.current = 0;
+        speedRef.current = Math.round((speedRef.current + SPEED_STEP) * 10) / 10;
+        setSpeed(speedRef.current);
+      }
+      let list2 = enemiesRef.current;
+      spawnClockRef.current += TICK_MS;
+      if (spawnClockRef.current >= SPAWN_MS) {
+        spawnClockRef.current = 0;
+        const template = ENEMY_POOL[Math.floor(Math.random() * ENEMY_POOL.length)];
+        list2 = [...list2, { id: nextIdRef.current++, ...template, x: Math.floor(Math.random() * 80) + 10, y: 0 }];
+      }
+      let lost = 0;
+      const moved = [];
+      for (const enemy of list2) {
+        const y2 = enemy.y + ENEMY_STEP * speedRef.current;
+        if (y2 >= DEFENSE_LINE)
+          lost++;
+        else
+          moved.push({ ...enemy, y: y2 });
+      }
+      setEnemies(moved);
+      if (lost > 0)
+        setHp((h) => Math.max(0, h - lost));
+    }, TICK_MS);
+    return () => clearInterval(timer);
+  }, [phase]);
+  reactExports.useEffect(() => {
+    if (phase === "playing" && hp <= 0)
+      setPhase("over");
+  }, [phase, hp]);
+  reactExports.useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden)
+        setPhase((p2) => p2 === "playing" ? "paused" : p2);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+  const move = (step) => {
+    if (phase !== "playing")
+      return;
+    setPlayerX((prev) => Math.min(90, Math.max(10, prev + step)));
+  };
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      move(-KEY_STEP);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      move(KEY_STEP);
+    }
+  };
+  const handleInputChange = (e) => {
+    if (phase !== "playing")
+      return;
+    const val = e.target.value.toLowerCase().replace(/\s+/g, "");
+    setInputVal(val);
+    const matches = enemiesRef.current.filter((enemy) => enemy.romaji === val);
+    if (matches.length === 0)
+      return;
+    const x2 = playerXRef.current;
+    const target = matches.filter((enemy) => Math.abs(x2 - enemy.x) <= ALIGN).sort((a, b) => b.y - a.y)[0];
+    setInputVal("");
+    if (target) {
+      setEnemies(enemiesRef.current.filter((enemy) => enemy.id !== target.id));
+      const attack = { id: Date.now() + Math.random(), startX: x2, targetY: target.y, isHit: true, hitX: target.x };
+      setAttacks((prev) => [...prev, attack]);
+      later(() => setAttacks((prev) => prev.filter((a) => a.id !== attack.id)), 300);
+      defeatCountRef.current += 1;
+      setDefeatCount(defeatCountRef.current);
+      setScore((s2) => s2 + POINTS);
+      playDefeat(defeatCountRef.current);
+    } else {
+      const miss = { id: Date.now() + Math.random(), startX: x2, targetY: 5, isHit: false };
+      setAttacks((prev) => [...prev, miss]);
+      later(() => setAttacks((prev) => prev.filter((a) => a.id !== miss.id)), 300);
+    }
+  };
+  const keepFocus = (e) => e.preventDefault();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-900 border border-slate-700 rounded-2xl p-4 sm:p-6 text-center space-y-4 shadow-xl text-white", onKeyDown: handleKeyDown, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-between items-center gap-2 bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-400 font-bold", "aria-label": `HP ${hp} of ${START_HP$1}`, children: [
+        "\u2764\uFE0F ",
         "\u2764\uFE0F".repeat(hp)
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-300 font-bold animate-pulse", children: [
-        "\u{1F5E3}\uFE0F Defeated: ",
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-300 font-bold", children: [
+        "\u{1F5E1}\uFE0F Defeated: ",
         defeatCount
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-emerald-400 font-bold", children: [
         "SCORE: ",
         score,
         " pt"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex gap-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onPointerDown: keepFocus,
+            onClick: () => setMuted((m2) => !m2),
+            "aria-pressed": muted,
+            "aria-label": muted ? "Sound off" : "Sound on",
+            className: "bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded text-xs font-bold cursor-pointer",
+            children: muted ? "\u{1F507}" : "\u{1F50A}"
+          }
+        ),
+        phase === "playing" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setPhase("paused"),
+            className: "bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded text-xs font-bold cursor-pointer",
+            children: "\u23F8 Pause"
+          }
+        )
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-slate-950 border border-slate-800 rounded-xl h-80 relative overflow-hidden flex flex-col justify-between p-4", children: isGameOver ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-black/80 flex flex-col items-center justify-center space-y-4 z-20", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-red-500", children: "Game Over" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-300", children: [
-        "Defeated: ",
-        defeatCount,
-        " (",
-        score,
-        " pt)"
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-950 border border-slate-800 rounded-xl h-80 relative overflow-hidden flex flex-col justify-between p-4", children: [
+      phase === "start" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-3 z-30 p-5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-amber-300", children: "\u2694\uFE0F Defend the castle!" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-300 leading-relaxed max-w-sm", children: "Ogres \u{1F479} carry kana as they march down. Move under an ogre with \u2190 \u2192 (or the buttons), then type its romaji to throw your star sword. Don't let them reach the defense line!" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: startGame, className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-8 py-3 rounded-xl text-white transition cursor-pointer", children: "Start" })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          onClick: restartGame,
-          className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer",
-          children: "Try Again"
-        }
-      )
-    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-500 tracking-wider flex justify-between", children: [
+      phase === "paused" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-3 z-30", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-slate-100", children: "\u23F8 Paused" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: resume, className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-8 py-3 rounded-xl text-white transition cursor-pointer", children: "Resume" })
+      ] }),
+      phase === "over" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-black/85 flex flex-col items-center justify-center gap-4 z-30", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-red-500", children: "Game Over" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-300", children: [
+          "Defeated: ",
+          defeatCount,
+          " (",
+          score,
+          " pt)"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: startGame, className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer", children: "Try Again" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-500 tracking-wider flex justify-between gap-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
           "\u25BC Ogre Domain \u25BC (Lv.",
-          speedMultiplier.toFixed(1),
+          speed.toFixed(1),
           ")"
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-indigo-400", children: "Use \u2190 \u2192 keys to align and shoot!" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-indigo-400 hidden sm:inline", children: "Use \u2190 \u2192 to line up, then type!" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { className: "absolute inset-0 w-full h-full pointer-events-none z-10", children: attacks.map((atk) => /* @__PURE__ */ jsxRuntimeExports.jsx(
         "line",
         {
           x1: `${atk.startX}%`,
-          y1: `${atk.startY}%`,
+          y1: `${DEFENSE_LINE}%`,
           x2: `${atk.startX}%`,
           y2: `${atk.targetY}%`,
           stroke: atk.isHit ? "#38bdf8" : "#ef4444",
@@ -54560,15 +55087,15 @@ function OgreStarSwordArena() {
       )) }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 pointer-events-none", children: [
         enemies.map((enemy) => {
-          const isExactAligned = Math.abs(playerX - enemy.x) <= 5;
+          const aligned = Math.abs(playerX - enemy.x) <= ALIGN;
           return /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "div",
             {
               className: "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 flex flex-col items-center",
               style: { left: `${enemy.x}%`, top: `${enemy.y}%` },
               children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl animate-bounce", children: "\u{1F479}" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `px-2.5 py-0.5 rounded text-sm font-black text-white shadow-md ${isExactAligned ? "bg-emerald-600 border-2 border-yellow-300 animate-pulse" : "bg-red-600/90 border border-red-400"}`, children: enemy.char })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl", children: "\u{1F479}" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `px-2.5 py-0.5 rounded text-sm font-black text-white shadow-md ${aligned ? "bg-emerald-600 border-2 border-yellow-300 animate-pulse" : "bg-red-600/90 border border-red-400"}`, children: enemy.char })
               ]
             },
             enemy.id
@@ -54577,11 +55104,11 @@ function OgreStarSwordArena() {
         attacks.filter((a) => a.isHit).map((atk) => /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
-            className: "absolute text-2xl transition-all transform -translate-x-1/2 -translate-y-1/2 z-20 animate-spin",
+            className: "absolute text-2xl transform -translate-x-1/2 -translate-y-1/2 z-20 animate-spin",
             style: { left: `${atk.hitX}%`, top: `${atk.targetY}%` },
             children: "\u2728"
           },
-          `shuriken-${atk.id}`
+          `hit-${atk.id}`
         ))
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute bottom-6 transform -translate-x-1/2 transition-all duration-75 flex flex-col items-center z-20", style: { left: `${playerX}%` }, children: [
@@ -54589,34 +55116,45 @@ function OgreStarSwordArena() {
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl", children: "\u{1F977}" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t-2 border-dashed border-indigo-500/50 pt-2 flex justify-between items-center text-xs text-indigo-300 font-bold mt-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F3F0} Defense Line" }) })
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xs mx-auto space-y-2", children: [
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-sm mx-auto space-y-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "input",
         {
+          ref: inputRef,
           type: "text",
-          autoFocus: true,
-          disabled: isGameOver,
+          disabled: phase !== "playing",
           value: inputVal,
           onChange: handleInputChange,
-          placeholder: "Move with arrows & type Romaji",
-          className: "bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner"
+          autoComplete: "off",
+          autoCapitalize: "none",
+          autoCorrect: "off",
+          spellCheck: false,
+          "aria-label": "Type the romaji",
+          placeholder: "Move with \u2190 \u2192 and type romaji",
+          className: "bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-center text-lg font-mono text-white w-full focus:outline-none focus:border-emerald-500 shadow-inner disabled:opacity-50"
         }
       ),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 justify-center", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
-            onClick: () => setPlayerX((prev) => Math.max(10, prev - 10)),
-            className: "bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer",
+            type: "button",
+            onPointerDown: keepFocus,
+            onMouseDown: keepFocus,
+            onClick: () => move(-BUTTON_STEP),
+            className: "flex-1 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 py-3 rounded-lg text-sm font-bold text-slate-200 cursor-pointer select-none touch-manipulation",
             children: "\u25C0 Move Left"
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
-            onClick: () => setPlayerX((prev) => Math.min(90, prev + 10)),
-            className: "bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded text-xs font-bold text-slate-200 cursor-pointer",
+            type: "button",
+            onPointerDown: keepFocus,
+            onMouseDown: keepFocus,
+            onClick: () => move(BUTTON_STEP),
+            className: "flex-1 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 py-3 rounded-lg text-sm font-bold text-slate-200 cursor-pointer select-none touch-manipulation",
             children: "Move Right \u25B6"
           }
         )
@@ -54627,8 +55165,8 @@ function OgreStarSwordArena() {
 var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OgreStarSwordPage,
-  loader: loader$A,
-  meta: meta$z
+  loader: loader$D,
+  meta: meta$A
 }, Symbol.toStringTag, { value: "Module" }));
 var handleScrollToSection = (e, anchorId) => {
   e.preventDefault();
@@ -54640,7 +55178,7 @@ var handleScrollToSection = (e, anchorId) => {
 var getAnchorId = (text) => {
   return `cat-${text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 };
-async function loader$z({ request }) {
+async function loader$C({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   let grammarCategories = [];
@@ -54666,7 +55204,7 @@ async function loader$z({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$y = ({ data: data2 }) => {
+var meta$z = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceGrammarComponent() {
@@ -54818,13 +55356,13 @@ function VceGrammarComponent() {
 var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceGrammarComponent,
-  loader: loader$z,
-  meta: meta$y
+  loader: loader$C,
+  meta: meta$z
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$y() {
+async function loader$B() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405 });
 }
-async function action$5({ request, context }) {
+async function action$6({ request, context }) {
   var _a;
   if (request.method !== "POST") {
     return dist$1.json({ error: "Method not allowed." }, { status: 405 });
@@ -54872,10 +55410,10 @@ async function action$5({ request, context }) {
 }
 var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$5,
-  loader: loader$y
+  action: action$6,
+  loader: loader$B
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$x({ request, context }) {
+async function loader$A({ request, context }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -54946,16 +55484,16 @@ function ImageTestPage() {
     ] })
   ] }) });
 }
-var meta$x = ({ data: data2 }) => {
+var meta$y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ImageTestPage,
-  loader: loader$x,
-  meta: meta$x
+  loader: loader$A,
+  meta: meta$y
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$w({ request }) {
+async function loader$z({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -54969,7 +55507,7 @@ async function loader$w({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$w = ({ data: data2 }) => {
+var meta$x = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TestAudioPage() {
@@ -55317,8 +55855,8 @@ function TestAudioPage() {
 var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestAudioPage,
-  loader: loader$w,
-  meta: meta$w
+  loader: loader$z,
+  meta: meta$x
 }, Symbol.toStringTag, { value: "Module" }));
 var MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -55337,83 +55875,543 @@ var MAZE_GRID = [
   [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
-var PATH_COORDS = [];
-MAZE_GRID.forEach((row, y2) => {
-  row.forEach((cell, x2) => {
-    if (cell === 0 && !(x2 === 1 && y2 === 1)) {
-      PATH_COORDS.push({ x: x2, y: y2 });
-    }
-  });
-});
-var CHARACTER_POOLS = {
-  hiragana: [
-    { char: "\u3042", romaji: "a" },
-    { char: "\u3044", romaji: "i" },
-    { char: "\u3046", romaji: "u" },
-    { char: "\u3048", romaji: "e" },
-    { char: "\u304A", romaji: "o" },
-    { char: "\u304B", romaji: "ka" },
-    { char: "\u304D", romaji: "ki" },
-    { char: "\u304F", romaji: "ku" },
-    { char: "\u3051", romaji: "ke" },
-    { char: "\u3053", romaji: "ko" },
-    { char: "\u3055", romaji: "sa" },
-    { char: "\u3057", romaji: "shi" },
-    { char: "\u3059", romaji: "su" },
-    { char: "\u305B", romaji: "se" },
-    { char: "\u305D", romaji: "so" },
-    { char: "\u305F", romaji: "ta" },
-    { char: "\u3061", romaji: "chi" },
-    { char: "\u3064", romaji: "tsu" },
-    { char: "\u3066", romaji: "te" },
-    { char: "\u3068", romaji: "to" }
-  ],
-  katakana: [
-    { char: "\u30A2", romaji: "a" },
-    { char: "\u30A4", romaji: "i" },
-    { char: "\u30A6", romaji: "u" },
-    { char: "\u30A8", romaji: "e" },
-    { char: "\u30AA", romaji: "o" },
-    { char: "\u30AB", romaji: "ka" },
-    { char: "\u30AD", romaji: "ki" },
-    { char: "\u30AF", romaji: "ku" },
-    { char: "\u30B1", romaji: "ke" },
-    { char: "\u30B3", romaji: "ko" },
-    { char: "\u30B5", romaji: "sa" },
-    { char: "\u30B7", romaji: "shi" },
-    { char: "\u30B9", romaji: "su" },
-    { char: "\u30BB", romaji: "se" },
-    { char: "\u30BD", romaji: "so" },
-    { char: "\u30BF", romaji: "ta" },
-    { char: "\u30C1", romaji: "chi" },
-    { char: "\u30C4", romaji: "tsu" },
-    { char: "\u30C6", romaji: "te" },
-    { char: "\u30C8", romaji: "to" }
-  ],
-  kanji: [
-    { char: "\u65E5", romaji: "nichi" },
-    { char: "\u672C", romaji: "hon" },
-    { char: "\u6C34", romaji: "mizu" },
-    { char: "\u706B", romaji: "hi" },
-    { char: "\u6728", romaji: "ki" },
-    { char: "\u91D1", romaji: "kin" },
-    { char: "\u571F", romaji: "do" },
-    { char: "\u5DDD", romaji: "kawa" },
-    { char: "\u5C71", romaji: "yama" },
-    { char: "\u7530", romaji: "ta" },
-    { char: "\u6708", romaji: "tsuki" },
-    { char: "\u96E8", romaji: "ame" },
-    { char: "\u8ECA", romaji: "kuruma" },
-    { char: "\u9580", romaji: "mon" },
-    { char: "\u7A7A", romaji: "sora" },
-    { char: "\u5B66\u6821", romaji: "gakkou" },
-    { char: "\u5148\u751F", romaji: "sensei" },
-    { char: "\u53CB\u9054", romaji: "tomodachi" },
-    { char: "\u65E5\u672C\u8A9E", romaji: "nihongo" },
-    { char: "\u685C", romaji: "sakura" }
-  ]
+var SIZE = MAZE_GRID.length;
+var START = { x: 1, y: 1 };
+var GOAL = { x: 13, y: 13 };
+var same = (a, b) => a.x === b.x && a.y === b.y;
+var keyOf = (p2) => `${p2.x},${p2.y}`;
+var isPath = (x2, y2) => {
+  var _a;
+  return ((_a = MAZE_GRID[y2]) == null ? void 0 : _a[x2]) === 0;
 };
-async function loader$v({ request }) {
+var FREE_CELLS = [];
+MAZE_GRID.forEach(
+  (row, y2) => row.forEach((cell, x2) => {
+    const p2 = { x: x2, y: y2 };
+    if (cell === 0 && !same(p2, START) && !same(p2, GOAL))
+      FREE_CELLS.push(p2);
+  })
+);
+var ITEM_COUNT = 20;
+var START_HP = 5;
+var SNAKE_STEP_MS = 850;
+var SHIELD_MS = 2e3;
+var SNAKE_MIN_DISTANCE = 10;
+var POINTS_PER_CHAR = 200;
+var DIRECTIONS = [
+  { x: 0, y: -1 },
+  { x: 0, y: 1 },
+  { x: -1, y: 0 },
+  { x: 1, y: 0 }
+];
+var KANA_GROUP = {
+  \u6E05\u97F3: "basic",
+  \u6FC1\u97F3: "dakuten",
+  \u534A\u6FC1\u97F3: "dakuten",
+  \u62D7\u97F3: "combo"
+};
+var KANA_SETS = [
+  { key: "basic", label: "Basic sounds", example: { hiragana: "\u3042 \u3044 \u3046", katakana: "\u30A2 \u30A4 \u30A6" } },
+  { key: "dakuten", label: "Dakuten & handakuten", example: { hiragana: "\u304C \u3056 \u3071", katakana: "\u30AC \u30B6 \u30D1" } },
+  { key: "combo", label: "Combinations", example: { hiragana: "\u304D\u3083 \u3057\u3085", katakana: "\u30AD\u30E3 \u30B7\u30E5" } },
+  { key: "all", label: "All", example: { hiragana: "\u3042\u301C\u3074\u3087", katakana: "\u30A2\u301C\u30D4\u30E7" } }
+];
+var clean$1 = (v2) => typeof v2 === "string" ? v2.trim() : "";
+async function loader$y({ request }) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
+    portalContent = (portalData == null ? void 0 : portalData.content) || null;
+  } catch (e) {
+  }
+  const pools = { hiragana: [], katakana: [], kanji: [] };
+  let loadError = null;
+  try {
+    const { data: data2, error } = await supabase.from("kl_character").select("character, romaji, kun_romaji, on_romaji, char_type, category, sort_order").in("char_type", ["hiragana", "katakana", "kanji"]).order("sort_order", { ascending: true, nullsFirst: false }).limit(1e3);
+    if (error)
+      throw error;
+    for (const r2 of data2 ?? []) {
+      const char = clean$1(r2.character);
+      if (!char)
+        continue;
+      if (r2.char_type === "hiragana" || r2.char_type === "katakana") {
+        const romaji = clean$1(r2.romaji).toLowerCase();
+        if (!romaji)
+          continue;
+        pools[r2.char_type].push({
+          char,
+          answers: [romaji],
+          reading: romaji,
+          group: KANA_GROUP[clean$1(r2.category)] ?? "basic"
+        });
+      } else {
+        const readings = [clean$1(r2.kun_romaji).toLowerCase(), clean$1(r2.on_romaji).toLowerCase()].filter(Boolean);
+        if (readings.length === 0)
+          continue;
+        pools.kanji.push({
+          char,
+          answers: [...new Set(readings)],
+          reading: [...new Set(readings)].join(" / "),
+          group: clean$1(r2.category) || "Other"
+        });
+      }
+    }
+    if (pools.hiragana.length + pools.katakana.length + pools.kanji.length === 0) {
+      loadError = "No characters were returned from the database.";
+    }
+  } catch (e) {
+    loadError = "Characters could not be loaded from the database. Please try again later.";
+  }
+  return dist$1.json({ portalContent, currentPath: url.pathname, pools, loadError });
+}
+var meta$w = ({ data: data2 }) => {
+  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+};
+function CharacterMazePage() {
+  const layoutRef = reactExports.useRef(null);
+  const { pools, loadError } = useLoaderData();
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Character Maze", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "bg-white border border-slate-200 p-5 rounded-xl shadow-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u{1F9ED} Character Maze ~Typing Adventure~" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-0.5", children: "Collect characters in the maze: hiragana, katakana and kanji typing practice" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: () => loadError ? /* @__PURE__ */ jsxRuntimeExports.jsx(DataErrorState, { title: "Unable to Load Data", errorMessage: `Failed to load characters (kl_character): ${loadError}` }) : /* @__PURE__ */ jsxRuntimeExports.jsx(CharacterMazeArena, { pools }) })
+  ] }) });
+}
+function pickFreeCell(occupied) {
+  const free = FREE_CELLS.filter((p2) => !occupied.has(keyOf(p2)));
+  return free.length ? free[Math.floor(Math.random() * free.length)] : null;
+}
+function stepSnake(s2) {
+  const open = DIRECTIONS.filter((d) => isPath(s2.x + d.x, s2.y + d.y));
+  if (open.length === 0)
+    return s2;
+  const forward = open.filter((d) => !(d.x === -s2.dx && d.y === -s2.dy));
+  const choices = forward.length ? forward : open;
+  const canGoStraight = choices.some((d) => d.x === s2.dx && d.y === s2.dy);
+  const dir = canGoStraight && (choices.length === 1 || Math.random() < 0.7) ? { x: s2.dx, y: s2.dy } : choices[Math.floor(Math.random() * choices.length)];
+  return { ...s2, x: s2.x + dir.x, y: s2.y + dir.y, dx: dir.x, dy: dir.y };
+}
+function CharacterMazeArena({ pools }) {
+  const [script, setScript] = reactExports.useState("hiragana");
+  const [kanaSet, setKanaSet] = reactExports.useState("basic");
+  const [kanjiCategory, setKanjiCategory] = reactExports.useState("all");
+  const [playing, setPlaying] = reactExports.useState(false);
+  const kanjiCategories = reactExports.useMemo(() => {
+    const counts = /* @__PURE__ */ new Map();
+    for (const k2 of pools.kanji)
+      counts.set(k2.group, (counts.get(k2.group) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0], "en"));
+  }, [pools.kanji]);
+  const selectedPool = reactExports.useMemo(() => {
+    if (script === "kanji")
+      return kanjiCategory === "all" ? pools.kanji : pools.kanji.filter((k2) => k2.group === kanjiCategory);
+    const list2 = pools[script];
+    return kanaSet === "all" ? list2 : list2.filter((k2) => k2.group === kanaSet);
+  }, [pools, script, kanaSet, kanjiCategory]);
+  const [score, setScore] = reactExports.useState(0);
+  const [totalItemsCount, setTotalItemsCount] = reactExports.useState(0);
+  const [collectedCount, setCollectedCount] = reactExports.useState(0);
+  const [hp, setHp] = reactExports.useState(START_HP);
+  const [player, setPlayer] = reactExports.useState(START);
+  const [items, setItems] = reactExports.useState([]);
+  const [snakes, setSnakes] = reactExports.useState([]);
+  const [shielded, setShielded] = reactExports.useState(false);
+  const [activeQuizItem, setActiveQuizItem] = reactExports.useState(null);
+  const [typingInput, setTypingInput] = reactExports.useState("");
+  const [quizFeedback, setQuizFeedback] = reactExports.useState(null);
+  const [answering, setAnswering] = reactExports.useState(false);
+  const [isGoalReached, setIsGoalReached] = reactExports.useState(false);
+  const [isGameOver, setIsGameOver] = reactExports.useState(false);
+  const active = playing && !activeQuizItem && !isGameOver && !isGoalReached;
+  const activeRef = reactExports.useRef(active);
+  activeRef.current = active;
+  const quizOpenRef = reactExports.useRef(false);
+  quizOpenRef.current = Boolean(activeQuizItem);
+  const playerRef = reactExports.useRef(player);
+  playerRef.current = player;
+  const snakesRef = reactExports.useRef(snakes);
+  snakesRef.current = snakes;
+  const shieldUntilRef = reactExports.useRef(0);
+  const timersRef = reactExports.useRef([]);
+  const later = (fn, ms) => {
+    timersRef.current.push(setTimeout(fn, ms));
+  };
+  const clearTimers = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  };
+  reactExports.useEffect(() => clearTimers, []);
+  const startGame = () => {
+    clearTimers();
+    const chars = shuffle$1(selectedPool).slice(0, ITEM_COUNT);
+    const cells = shuffle$1(FREE_CELLS);
+    const itemCells = cells.slice(0, chars.length);
+    const used = new Set(itemCells.map(keyOf));
+    setItems(chars.map((c, i) => ({ ...c, id: i + 1, ...itemCells[i] })));
+    setTotalItemsCount(chars.length);
+    setCollectedCount(0);
+    setScore(0);
+    setHp(START_HP);
+    setPlayer(START);
+    setActiveQuizItem(null);
+    setQuizFeedback(null);
+    setTypingInput("");
+    setAnswering(false);
+    setIsGoalReached(false);
+    setIsGameOver(false);
+    setShielded(false);
+    shieldUntilRef.current = 0;
+    const far = cells.filter((p2) => !used.has(keyOf(p2)) && Math.abs(p2.x - START.x) + Math.abs(p2.y - START.y) >= SNAKE_MIN_DISTANCE);
+    const spawn = far.slice(0, 2);
+    setSnakes(
+      spawn.map((p2, i) => {
+        const dir = DIRECTIONS.find((d) => isPath(p2.x + d.x, p2.y + d.y)) ?? { x: 0, y: 0 };
+        return { id: i + 1, x: p2.x, y: p2.y, dx: dir.x, dy: dir.y };
+      })
+    );
+    setPlaying(true);
+  };
+  const backToSetup = () => {
+    clearTimers();
+    setPlaying(false);
+    setActiveQuizItem(null);
+  };
+  const move = reactExports.useCallback((dx, dy) => {
+    if (!activeRef.current)
+      return;
+    setPlayer((p2) => isPath(p2.x + dx, p2.y + dy) ? { x: p2.x + dx, y: p2.y + dy } : p2);
+  }, []);
+  reactExports.useEffect(() => {
+    if (!playing)
+      return;
+    const KEYS = {
+      arrowup: { x: 0, y: -1 },
+      w: { x: 0, y: -1 },
+      arrowdown: { x: 0, y: 1 },
+      s: { x: 0, y: 1 },
+      arrowleft: { x: -1, y: 0 },
+      a: { x: -1, y: 0 },
+      arrowright: { x: 1, y: 0 },
+      d: { x: 1, y: 0 }
+    };
+    const onKey = (e) => {
+      if (quizOpenRef.current)
+        return;
+      const target = e.target;
+      if (target == null ? void 0 : target.closest("input, textarea, select"))
+        return;
+      const dir = KEYS[e.key.toLowerCase()];
+      if (!dir)
+        return;
+      e.preventDefault();
+      move(dir.x, dir.y);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [playing, move]);
+  reactExports.useEffect(() => {
+    if (!active)
+      return;
+    const timer = setInterval(() => {
+      if (document.hidden)
+        return;
+      setSnakes((prev) => prev.map(stepSnake));
+    }, SNAKE_STEP_MS);
+    return () => clearInterval(timer);
+  }, [active]);
+  reactExports.useEffect(() => {
+    if (!active)
+      return;
+    if (snakes.some((s2) => same(s2, player)) && Date.now() >= shieldUntilRef.current) {
+      shieldUntilRef.current = Date.now() + SHIELD_MS;
+      setShielded(true);
+      later(() => setShielded(false), SHIELD_MS);
+      setHp((h) => Math.max(0, h - 1));
+      setPlayer(START);
+      return;
+    }
+    const item = items.find((i) => same(i, player));
+    if (item) {
+      setActiveQuizItem(item);
+      setTypingInput("");
+      setQuizFeedback(null);
+      setAnswering(false);
+      return;
+    }
+    if (same(player, GOAL) && totalItemsCount > 0 && items.length === 0)
+      setIsGoalReached(true);
+  }, [active, player, snakes, items, totalItemsCount]);
+  reactExports.useEffect(() => {
+    if (playing && hp <= 0)
+      setIsGameOver(true);
+  }, [playing, hp]);
+  const handleQuizSubmit = (e) => {
+    e.preventDefault();
+    const item = activeQuizItem;
+    const guess = typingInput.trim().toLowerCase();
+    if (!item || answering || !guess)
+      return;
+    setAnswering(true);
+    if (item.answers.includes(guess)) {
+      setQuizFeedback({ ok: true, text: `Correct! ${item.char} = ${item.reading} (+${POINTS_PER_CHAR} pt)` });
+      later(() => {
+        setScore((s2) => s2 + POINTS_PER_CHAR);
+        setCollectedCount((c) => c + 1);
+        setItems((prev) => prev.filter((i) => i.id !== item.id));
+        setActiveQuizItem(null);
+        setAnswering(false);
+      }, 900);
+    } else {
+      setQuizFeedback({ ok: false, text: `Not quite: ${item.char} is "${item.reading}". It ran away to another spot!` });
+      later(() => {
+        setItems((prev) => {
+          const occupied = /* @__PURE__ */ new Set([
+            ...prev.filter((i) => i.id !== item.id).map(keyOf),
+            keyOf(playerRef.current),
+            ...snakesRef.current.map(keyOf)
+          ]);
+          const spot = pickFreeCell(occupied);
+          return spot ? prev.map((i) => i.id === item.id ? { ...i, ...spot } : i) : prev;
+        });
+        setActiveQuizItem(null);
+        setAnswering(false);
+      }, 2e3);
+    }
+  };
+  if (!playing) {
+    const scriptBtn = (s2, sample, label, color) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        "aria-pressed": script === s2,
+        onClick: () => setScript(s2),
+        className: `p-4 rounded-2xl border-2 transition cursor-pointer flex flex-col items-center gap-1 ${script === s2 ? `${color} shadow-md` : "bg-white border-slate-200 hover:bg-slate-50"}`,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl sm:text-3xl font-black text-slate-800", children: sample }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-700 text-sm", children: label })
+        ]
+      },
+      s2
+    );
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 text-center space-y-6 shadow-xl text-slate-800", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-slate-800", children: "Choose your characters" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600", children: "Walk onto a character and type its reading in romaji to collect it. Avoid the snakes \u{1F40D}, collect them all, then reach the castle \u{1F3F0}." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-3 gap-2 sm:gap-4 max-w-md mx-auto", children: [
+        scriptBtn("hiragana", "\u3042\u3044\u3046", "Hiragana", "bg-indigo-50 border-indigo-400"),
+        scriptBtn("katakana", "\u30A2\u30A4\u30A6", "Katakana", "bg-emerald-50 border-emerald-400"),
+        scriptBtn("kanji", "\u65E5\u672C", "Kanji", "bg-amber-50 border-amber-400")
+      ] }),
+      script === "kanji" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "block max-w-md mx-auto text-left text-sm font-semibold text-slate-700 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Kanji category" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "select",
+          {
+            value: kanjiCategory,
+            onChange: (e) => setKanjiCategory(e.target.value),
+            className: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("option", { value: "all", children: [
+                "All kanji (",
+                pools.kanji.length,
+                ")"
+              ] }),
+              kanjiCategories.map(([name, count]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("option", { value: name, children: [
+                name,
+                " (",
+                count,
+                ")"
+              ] }, name))
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-xs font-normal text-slate-500", children: "Either reading is correct: the kun reading (e.g. yama) or the on reading (e.g. san)." })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "group", "aria-label": "Character set", className: "grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-xl mx-auto", children: KANA_SETS.map((s2) => {
+        const count = s2.key === "all" ? pools[script].length : pools[script].filter((k2) => k2.group === s2.key).length;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            "aria-pressed": kanaSet === s2.key,
+            onClick: () => setKanaSet(s2.key),
+            className: `px-3 py-2 rounded-xl border text-sm transition cursor-pointer ${kanaSet === s2.key ? "bg-slate-900 border-slate-900 text-white" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"}`,
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block font-bold", children: s2.label }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: `block text-xs ${kanaSet === s2.key ? "text-slate-300" : "text-slate-500"}`, children: [
+                s2.example[script],
+                " \xB7 ",
+                count
+              ] })
+            ]
+          },
+          s2.key
+        );
+      }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: startGame,
+            disabled: selectedPool.length === 0,
+            className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-8 py-3 rounded-xl text-white text-base transition cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed",
+            children: "Start"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: selectedPool.length === 0 ? "No characters are available for this choice yet." : `${Math.min(ITEM_COUNT, selectedPool.length)} characters will appear in the maze.` })
+      ] })
+    ] });
+  }
+  const canGoal = items.length === 0;
+  const dpadBtn = "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-300 w-16 h-14 sm:w-20 rounded-xl text-lg font-bold text-slate-700 cursor-pointer shadow-sm transition select-none touch-manipulation";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-3 sm:p-6 text-center space-y-4 sm:space-y-6 shadow-xl text-slate-800", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-between items-center bg-slate-100 p-3 sm:p-4 rounded-xl border border-slate-200 text-sm shadow-inner gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-500 font-bold", "aria-label": `HP ${hp} of ${START_HP}`, children: [
+        "\u2764\uFE0F ",
+        "\u2764\uFE0F".repeat(hp),
+        "\u{1F90D}".repeat(Math.max(0, START_HP - hp))
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-600 font-bold", children: [
+        "\u{1F392} ",
+        collectedCount,
+        " / ",
+        totalItemsCount
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-emerald-600 font-bold", children: [
+        "Score: ",
+        score,
+        " pt"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: backToSetup,
+          className: "text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700 transition cursor-pointer",
+          children: "Change characters"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 -mt-2", children: canGoal ? "All characters collected! Go to the castle \u{1F3F0} in the bottom-right corner." : "Collect every character, then go to the castle \u{1F3F0}. Move with the arrow keys, WASD, or the buttons." }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative bg-slate-50 border-2 border-slate-200 rounded-2xl p-2 sm:p-4 shadow-inner", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative w-full max-w-[540px] aspect-square mx-auto bg-slate-700 p-1 sm:p-2 rounded-xl border-4 border-slate-800 shadow-lg", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "w-full h-full grid bg-slate-700",
+          style: {
+            gridTemplateColumns: `repeat(${SIZE}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${SIZE}, minmax(0, 1fr))`,
+            fontSize: "clamp(10px, 4vw, 22px)"
+          },
+          children: MAZE_GRID.map(
+            (row, y2) => row.map((cell, x2) => {
+              const here = { x: x2, y: y2 };
+              const isPlayer = same(player, here);
+              const isGoal = same(GOAL, here);
+              const item = items.find((i) => same(i, here));
+              const snake = snakes.find((s2) => same(s2, here));
+              return /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: `flex items-center justify-center select-none leading-none overflow-hidden ${cell === 1 ? "bg-slate-700 border border-slate-600/40" : "bg-white"}`,
+                  children: isPlayer ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: shielded ? "animate-pulse opacity-60" : "", "aria-label": "You", children: "\u{1F9DD}" }) : snake ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { "aria-label": "Snake", children: "\u{1F40D}" }) : isGoal ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: canGoal ? "animate-bounce" : "opacity-40", "aria-label": "Castle", children: "\u{1F3F0}" }) : item ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "span",
+                    {
+                      className: "bg-amber-400 text-slate-900 rounded font-black shadow-md border border-amber-200 px-[0.1em] py-[0.05em]",
+                      style: { fontSize: item.char.length > 1 ? "0.5em" : "0.7em" },
+                      children: item.char
+                    }
+                  ) : null
+                },
+                `${x2}-${y2}`
+              );
+            })
+          )
+        }
+      ) }),
+      isGameOver && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-white/95 rounded-2xl flex flex-col items-center justify-center gap-4 z-30 p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black text-red-600", children: "Game Over" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600", children: [
+          "The snakes caught you\u2026 You collected ",
+          collectedCount,
+          " of ",
+          totalItemsCount,
+          " characters."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2 justify-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: startGame, className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-3 rounded-xl text-white transition cursor-pointer shadow-md", children: "Try again" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: backToSetup, className: "bg-white border border-slate-300 hover:bg-slate-50 font-bold px-6 py-3 rounded-xl text-slate-700 transition cursor-pointer", children: "Change characters" })
+        ] })
+      ] }),
+      isGoalReached && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-indigo-50/95 rounded-2xl flex flex-col items-center justify-center gap-4 z-30 p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl font-black text-amber-600", children: "\u{1F389} You reached the castle!" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-700", children: [
+          "You collected all ",
+          totalItemsCount,
+          " characters and escaped the maze! (Score: ",
+          score,
+          " pt)"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2 justify-center", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: startGame, className: "bg-emerald-600 hover:bg-emerald-700 font-bold px-6 py-3 rounded-xl text-white transition cursor-pointer shadow-md", children: "Play again" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: backToSetup, className: "bg-white border border-slate-300 hover:bg-slate-50 font-bold px-6 py-3 rounded-xl text-slate-700 transition cursor-pointer", children: "Change characters" })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-2", "aria-label": "Move", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => move(0, -1), className: dpadBtn, "aria-label": "Up", children: "\u25B2" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => move(-1, 0), className: dpadBtn, "aria-label": "Left", children: "\u25C0" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => move(0, 1), className: dpadBtn, "aria-label": "Down", children: "\u25BC" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => move(1, 0), className: dpadBtn, "aria-label": "Right", children: "\u25B6" })
+      ] })
+    ] }),
+    activeQuizItem && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50", role: "dialog", "aria-modal": "true", "aria-label": "Type the reading", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border-2 border-indigo-500 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block text-xs bg-indigo-600 text-white px-3 py-1 rounded-full font-bold", children: "You found a character! Type its reading" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-6xl font-black text-amber-500 my-2", children: activeQuizItem.char }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600", children: script === "kanji" ? "Type its kun or on reading in romaji (e.g. yama or san)" : "Type its romaji (e.g. ka, shi, kya)" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleQuizSubmit, className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "text",
+            autoFocus: true,
+            autoComplete: "off",
+            autoCapitalize: "none",
+            autoCorrect: "off",
+            spellCheck: false,
+            value: typingInput,
+            disabled: answering,
+            onChange: (e) => setTypingInput(e.target.value),
+            placeholder: "Type here...",
+            "aria-label": "Reading in romaji",
+            className: "bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 text-center text-xl font-mono text-slate-900 w-full focus:outline-none focus:border-indigo-600 shadow-inner disabled:opacity-60"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "submit",
+            disabled: answering || !typingInput.trim(),
+            className: "w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-3 rounded-xl text-white text-sm transition cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed",
+            children: "Enter \u21B5"
+          }
+        )
+      ] }),
+      quizFeedback && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { role: "status", className: `text-sm font-bold pt-1 ${quizFeedback.ok ? "text-emerald-600" : "text-amber-600"}`, children: quizFeedback.text })
+    ] }) })
+  ] });
+}
+var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: CharacterMazePage,
+  loader: loader$y,
+  meta: meta$w
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$x({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55427,461 +56425,6 @@ async function loader$v({ request }) {
   });
 }
 var meta$v = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-};
-function CharacterMazePage() {
-  const layoutRef = reactExports.useRef(null);
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = reactExports.useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = reactExports.useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
-  const [inputPasscode, setInputPasscode] = reactExports.useState("");
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-  const handlePasscodeSubmit = (e) => {
-    e.preventDefault();
-    if (inputPasscode === "1111") {
-      setIsCodeUnlocked(true);
-      alert("\u2728 \u8A8D\u8A3C\u306B\u6210\u529F\u3057\u307E\u3057\u305F\uFF01\u30B2\u30FC\u30E0\u304C\u4E00\u6642\u7684\u306B\u30ED\u30C3\u30AF\u89E3\u9664\u3055\u308C\u307E\u3057\u305F\u3002");
-    } else {
-      alert("\u274C \u30D1\u30B9\u30B3\u30FC\u30C9\u304C\u9055\u3044\u307E\u3059\u3002");
-    }
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Character Maze", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto px-4 py-8 space-y-6", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "bg-white border border-slate-200 p-5 rounded-xl shadow-sm", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u{1F9ED} \u5730\u8868\u306E\u8FF7\u5BAE \u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u30B5\u30FC\u30C1 \u301C\u30BF\u30A4\u30D4\u30F3\u30B0\u30A2\u30C9\u30D9\u30F3\u30C1\u30E3\u30FC\u301C" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-0.5", children: "\u8FF7\u5BAE\u6587\u5B57\u96C6\u3081\u30FB\u3072\u3089\u304C\u306A/\u30AB\u30BF\u30AB\u30CA/\u6F22\u5B57\u30BF\u30A4\u30D4\u30F3\u30B0\u7DF4\u7FD2" })
-    ] }),
-    isAccessible ? /* @__PURE__ */ jsxRuntimeExports.jsx(CharacterMazeArena, {}) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner", children: "\u{1F512}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 mb-2", children: "\u3053\u306E\u30A8\u30EA\u30A2\u306F\u73FE\u5728\u30ED\u30C3\u30AF\u3055\u308C\u3066\u3044\u307E\u3059" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 leading-relaxed", children: "\u8AB2\u984C\u3092\u5B8C\u4E86\u3059\u308B\u304B\u3001\u5148\u751F\u304B\u3089\u63D0\u4F9B\u3055\u308C\u305F\u30D1\u30B9\u30B3\u30FC\u30C9\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\u3002" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasscodeSubmit, className: "flex gap-2 max-w-xs mx-auto", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "text",
-            maxLength: 4,
-            placeholder: "4\u6841\u306E\u30B3\u30FC\u30C9",
-            value: inputPasscode,
-            onChange: (e) => setInputPasscode(e.target.value),
-            className: "bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "submit",
-            className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition",
-            children: "\u89E3\u9664"
-          }
-        )
-      ] })
-    ] })
-  ] }) });
-}
-function CharacterMazeArena() {
-  const [selectedMode, setSelectedMode] = reactExports.useState(null);
-  const [score, setScore] = reactExports.useState(0);
-  const [totalItemsCount, setTotalItemsCount] = reactExports.useState(0);
-  const [collectedCount, setCollectedCount] = reactExports.useState(0);
-  const [hp, setHp] = reactExports.useState(5);
-  const [playerX, setPlayerX] = reactExports.useState(1);
-  const [playerY, setPlayerY] = reactExports.useState(1);
-  const [items, setItems] = reactExports.useState([]);
-  const [snakes, setSnakes] = reactExports.useState([]);
-  const [activeQuizItem, setActiveQuizItem] = reactExports.useState(null);
-  const [typingInput, setTypingInput] = reactExports.useState("");
-  const [quizFeedback, setQuizFeedback] = reactExports.useState(null);
-  const [isGoalReached, setIsGoalReached] = reactExports.useState(false);
-  const [isGameOver, setIsGameOver] = reactExports.useState(false);
-  const startGameWithMode = (mode2) => {
-    setSelectedMode(mode2);
-    const pool = CHARACTER_POOLS[mode2];
-    const shuffledPaths = [...PATH_COORDS].sort(() => 0.5 - Math.random());
-    const spawnCount = Math.min(pool.length, shuffledPaths.length);
-    setTotalItemsCount(spawnCount);
-    const initialItems = [];
-    const poolShuffled = [...pool].sort(() => 0.5 - Math.random());
-    for (let i = 0; i < spawnCount; i++) {
-      const pos = shuffledPaths[i];
-      initialItems.push({
-        id: Date.now() + i,
-        char: poolShuffled[i].char,
-        romaji: poolShuffled[i].romaji,
-        x: pos.x,
-        y: pos.y
-      });
-    }
-    setItems(initialItems);
-    setCollectedCount(0);
-    setScore(0);
-    setHp(5);
-    setPlayerX(1);
-    setPlayerY(1);
-    setIsGoalReached(false);
-    setIsGameOver(false);
-    const snake1Pos = shuffledPaths[Math.floor(shuffledPaths.length * 0.2)] || { x: 13, y: 1 };
-    const snake2Pos = shuffledPaths[Math.floor(shuffledPaths.length * 0.8)] || { x: 1, y: 13 };
-    setSnakes([
-      { id: 1, x: snake1Pos.x, y: snake1Pos.y, dx: 0, dy: 1 },
-      { id: 2, x: snake2Pos.x, y: snake2Pos.y, dx: -1, dy: 0 }
-    ]);
-  };
-  reactExports.useEffect(() => {
-    if (!selectedMode || isGameOver || activeQuizItem || isGoalReached)
-      return;
-    const snakeInterval = setInterval(() => {
-      setSnakes(
-        (prevSnakes) => prevSnakes.map((snake) => {
-          var _a;
-          const nextX = snake.x + snake.dx;
-          const nextY = snake.y + snake.dy;
-          if (((_a = MAZE_GRID[nextY]) == null ? void 0 : _a[nextX]) === 0) {
-            return { ...snake, x: nextX, y: nextY };
-          }
-          const directions = [
-            { dx: 0, dy: -1 },
-            { dx: 0, dy: 1 },
-            { dx: -1, dy: 0 },
-            { dx: 1, dy: 0 }
-          ];
-          const validMoves = directions.filter(
-            (d) => {
-              var _a2;
-              return ((_a2 = MAZE_GRID[snake.y + d.dy]) == null ? void 0 : _a2[snake.x + d.dx]) === 0;
-            }
-          );
-          if (validMoves.length > 0) {
-            const currentDirValid = validMoves.some((d) => d.dx === snake.dx && d.dy === snake.dy);
-            const chosenMove = currentDirValid ? { dx: snake.dx, dy: snake.dy } : validMoves[Math.floor(Math.random() * validMoves.length)];
-            return {
-              ...snake,
-              x: snake.x + chosenMove.dx,
-              y: snake.y + chosenMove.dy,
-              dx: chosenMove.dx,
-              dy: chosenMove.dy
-            };
-          }
-          return snake;
-        })
-      );
-    }, 850);
-    return () => clearInterval(snakeInterval);
-  }, [selectedMode, isGameOver, activeQuizItem, isGoalReached]);
-  reactExports.useEffect(() => {
-    if (!selectedMode || isGameOver || activeQuizItem || isGoalReached)
-      return;
-    const hitSnake = snakes.some((snake) => snake.x === playerX && snake.y === playerY);
-    if (hitSnake) {
-      setHp((h) => {
-        const updated = h - 1;
-        if (updated <= 0)
-          setIsGameOver(true);
-        return Math.max(0, updated);
-      });
-      setPlayerX(1);
-      setPlayerY(1);
-    }
-    items.forEach((item) => {
-      if (item.x === playerX && item.y === playerY && !activeQuizItem) {
-        setActiveQuizItem(item);
-        setTypingInput("");
-        setQuizFeedback(null);
-      }
-    });
-    if (playerX === 13 && playerY === 13 && totalItemsCount > 0 && collectedCount >= totalItemsCount) {
-      setIsGoalReached(true);
-    }
-  }, [playerX, playerY, snakes, items, activeQuizItem, isGameOver, isGoalReached, collectedCount, totalItemsCount, selectedMode]);
-  reactExports.useEffect(() => {
-    if (!selectedMode)
-      return;
-    const handleKeyDownGlobal = (e) => {
-      var _a;
-      if (activeQuizItem)
-        return;
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "w", "a", "s", "d"].includes(e.key)) {
-        e.preventDefault();
-      }
-      if (isGameOver || isGoalReached)
-        return;
-      let dx = 0;
-      let dy = 0;
-      if (e.key === "ArrowLeft" || e.key === "a")
-        dx = -1;
-      else if (e.key === "ArrowRight" || e.key === "d")
-        dx = 1;
-      else if (e.key === "ArrowUp" || e.key === "w")
-        dy = -1;
-      else if (e.key === "ArrowDown" || e.key === "s")
-        dy = 1;
-      if (dx !== 0 || dy !== 0) {
-        const nextX = playerX + dx;
-        const nextY = playerY + dy;
-        if (((_a = MAZE_GRID[nextY]) == null ? void 0 : _a[nextX]) === 0) {
-          setPlayerX(nextX);
-          setPlayerY(nextY);
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKeyDownGlobal);
-    return () => window.removeEventListener("keydown", handleKeyDownGlobal);
-  }, [playerX, playerY, isGameOver, activeQuizItem, isGoalReached, selectedMode]);
-  const handleQuizSubmit = (e) => {
-    e.preventDefault();
-    if (!activeQuizItem)
-      return;
-    if (typingInput.toLowerCase().trim() === activeQuizItem.romaji) {
-      setQuizFeedback("\u6B63\u89E3\uFF01 \u{1F389} \u6587\u5B57\u3092\u30B2\u30C3\u30C8\u3057\u307E\u3057\u305F\uFF01");
-      setTimeout(() => {
-        setScore((s2) => s2 + 200);
-        setCollectedCount((c) => c + 1);
-        setItems((prev) => prev.filter((i) => i.id !== activeQuizItem.id));
-        setActiveQuizItem(null);
-        setTypingInput("");
-        setQuizFeedback(null);
-      }, 800);
-    } else {
-      setQuizFeedback("\u4E0D\u6B63\u89E3\u2026 \u{1F300} \u6587\u5B57\u304C\u5225\u306E\u5834\u6240\u306B\u9003\u3052\u51FA\u3057\u307E\u3057\u305F\uFF01");
-      setTimeout(() => {
-        const randomPath = PATH_COORDS[Math.floor(Math.random() * PATH_COORDS.length)];
-        setItems(
-          (prev) => prev.map(
-            (i) => i.id === activeQuizItem.id ? { ...i, x: randomPath.x, y: randomPath.y } : i
-          )
-        );
-        setActiveQuizItem(null);
-        setTypingInput("");
-        setQuizFeedback(null);
-      }, 1200);
-    }
-  };
-  const restartGame = () => {
-    setSelectedMode(null);
-  };
-  if (!selectedMode) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-xl text-slate-800", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-slate-800", children: "\u5B66\u7FD2\u30E2\u30FC\u30C9\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600", children: "\u8FF7\u5BAE\u306B\u51FA\u73FE\u3055\u305B\u305F\u3044\u6587\u5B57\u306E\u7A2E\u985E\u3092\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044\u3002" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-md mx-auto", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            onClick: () => startGameWithMode("hiragana"),
-            className: "bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-400 p-6 rounded-2xl transition shadow-sm cursor-pointer flex flex-col items-center space-y-2",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl font-black text-indigo-600", children: "\u3042\u3044\u3046" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-700", children: "\u3072\u3089\u304C\u306A" })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            onClick: () => startGameWithMode("katakana"),
-            className: "bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-400 p-6 rounded-2xl transition shadow-sm cursor-pointer flex flex-col items-center space-y-2",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl font-black text-emerald-600", children: "\u30A2\u30A4\u30A6" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-700", children: "\u30AB\u30BF\u30AB\u30CA" })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            onClick: () => startGameWithMode("kanji"),
-            className: "bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 p-6 rounded-2xl transition shadow-sm cursor-pointer flex flex-col items-center space-y-2",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl font-black text-amber-600", children: "\u65E5\u672C" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-700", children: "\u6F22\u5B57" })
-            ]
-          }
-        )
-      ] })
-    ] });
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-6 shadow-xl text-slate-800", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-between items-center bg-slate-100 p-4 rounded-xl border border-slate-200 text-sm shadow-inner gap-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-500 font-bold", children: [
-        "\u2764\uFE0F HP: ",
-        "\u2764\uFE0F".repeat(hp)
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-600 font-bold", children: [
-        "\u{1F392} \u53CE\u96C6: ",
-        collectedCount,
-        " / ",
-        totalItemsCount,
-        " (\u5168\u56DE\u53CE\u3067\u57CE\u3078\uFF01)"
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-emerald-600 font-bold", children: [
-        "\u30B9\u30B3\u30A2: ",
-        score,
-        " pt"
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          onClick: restartGame,
-          className: "text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700 transition",
-          children: "\u30E2\u30FC\u30C9\u5909\u66F4"
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-slate-50 border-2 border-slate-200 rounded-2xl h-[620px] relative overflow-hidden flex items-center justify-center p-4 shadow-inner", children: isGameOver ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black text-red-600", children: "\u30B2\u30FC\u30E0\u30AA\u30FC\u30D0\u30FC" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600", children: "\u30D8\u30D3\u306B\u6355\u307E\u3063\u3066\u3057\u307E\u3044\u307E\u3057\u305F\u2026" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          onClick: () => startGameWithMode(selectedMode),
-          className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-8 py-3 rounded-xl text-white text-base transition cursor-pointer shadow-md",
-          children: "\u3082\u3046\u4E00\u5EA6\u6311\u6226\u3059\u308B"
-        }
-      )
-    ] }) : isGoalReached ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 bg-indigo-50/95 flex flex-col items-center justify-center space-y-4 z-30", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-black text-amber-600", children: "\u{1F389} \u5168\u6587\u5B57\u30AF\u30EA\u30A2\uFF01\u30B4\u30FC\u30EB\u9054\u6210\uFF01" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-700", children: [
-        "\u3059\u3079\u3066\u306E\u6587\u5B57\u3092\u6B63\u3057\u304F\u56DE\u53CE\u3057\u3066\u8FF7\u5BAE\u3092\u7A81\u7834\u3057\u307E\u3057\u305F\uFF01 (\u30B9\u30B3\u30A2: ",
-        score,
-        " pt)"
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          onClick: restartGame,
-          className: "bg-emerald-600 hover:bg-emerald-700 font-bold px-8 py-3 rounded-xl text-white text-base transition cursor-pointer shadow-md",
-          children: "\u5225\u306E\u30E2\u30FC\u30C9\u3067\u904A\u3076"
-        }
-      )
-    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative w-[540px] h-[540px] bg-slate-700 p-2 rounded-xl border-4 border-slate-800 shadow-lg", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full grid grid-cols-15 grid-rows-15 bg-slate-700", children: MAZE_GRID.map(
-        (row, y2) => row.map((cell, x2) => {
-          const isPlayer = playerX === x2 && playerY === y2;
-          const isGoal = x2 === 13 && y2 === 13;
-          const item = items.find((i) => i.x === x2 && i.y === y2);
-          const matchedSnake = snakes.find((s2) => s2.x === x2 && s2.y === y2);
-          const canGoal = collectedCount >= totalItemsCount;
-          return /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: `w-full h-full flex items-center justify-center text-xs font-bold select-none ${cell === 1 ? "bg-slate-700 border border-slate-600/40" : "bg-white"}`,
-              children: isPlayer ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl animate-pulse", children: "\u{1F9DD}" }) : isGoal ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xl ${canGoal ? "animate-bounce" : "opacity-40"}`, children: "\u{1F3F0}" }) : item ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "bg-amber-400 text-slate-900 px-1 py-0.5 rounded font-black text-[10px] shadow-md border border-amber-200", children: item.char }) : matchedSnake ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-base transition-all duration-300", children: "\u{1F40D}" }) : null
-            },
-            `${x2}-${y2}`
-          );
-        })
-      ) }),
-      activeQuizItem && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-slate-900/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-40 space-y-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border-2 border-indigo-500 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs bg-indigo-600 text-white px-3 py-1 rounded-full font-bold", children: "\u6587\u5B57\u3092\u767A\u898B\uFF01\u30ED\u30FC\u30DE\u5B57\u3092\u5165\u529B\u3057\u3066\u306D" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-6xl font-black text-amber-500 my-2 animate-bounce", children: activeQuizItem.char }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600", children: "\u6B63\u3057\u3044\u30ED\u30FC\u30DE\u5B57\u306E\u8AAD\u307F\u65B9\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\uFF08\u4F8B: ka, shi, nichi\uFF09" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleQuizSubmit, className: "space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "input",
-            {
-              type: "text",
-              autoFocus: true,
-              value: typingInput,
-              onChange: (e) => setTypingInput(e.target.value),
-              placeholder: "\u3053\u3053\u306B\u5165\u529B...",
-              className: "bg-slate-50 border-2 border-slate-300 rounded-xl px-4 py-3 text-center text-xl font-mono text-slate-900 w-full focus:outline-none focus:border-indigo-600 shadow-inner"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "submit",
-              className: "w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-3 rounded-xl text-white text-sm transition cursor-pointer shadow-md",
-              children: "\u6C7A\u5B9A \u21B5"
-            }
-          )
-        ] }),
-        quizFeedback && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm font-bold text-amber-600 animate-pulse pt-2", children: quizFeedback })
-      ] }) })
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xs mx-auto space-y-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          onClick: () => {
-            var _a;
-            if (activeQuizItem || isGameOver || isGoalReached)
-              return;
-            if (((_a = MAZE_GRID[playerY - 1]) == null ? void 0 : _a[playerX]) === 0)
-              setPlayerY((p2) => p2 - 1);
-          },
-          className: "bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition",
-          children: "\u25B2 \u4E0A"
-        }
-      ) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-center gap-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            onClick: () => {
-              var _a;
-              if (activeQuizItem || isGameOver || isGoalReached)
-                return;
-              if (((_a = MAZE_GRID[playerY]) == null ? void 0 : _a[playerX - 1]) === 0)
-                setPlayerX((p2) => p2 - 1);
-            },
-            className: "bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition",
-            children: "\u25C0 \u5DE6"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            onClick: () => {
-              var _a;
-              if (activeQuizItem || isGameOver || isGoalReached)
-                return;
-              if (((_a = MAZE_GRID[playerY]) == null ? void 0 : _a[playerX + 1]) === 0)
-                setPlayerX((p2) => p2 - 1);
-            },
-            className: "bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition",
-            children: "\u53F3 \u25B6"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          onClick: () => {
-            var _a;
-            if (activeQuizItem || isGameOver || isGoalReached)
-              return;
-            if (((_a = MAZE_GRID[playerY + 1]) == null ? void 0 : _a[playerX]) === 0)
-              setPlayerY((p2) => p2 + 1);
-          },
-          className: "bg-slate-100 hover:bg-slate-200 border border-slate-300 px-8 py-2.5 rounded-xl text-sm font-bold text-slate-700 cursor-pointer shadow-sm transition",
-          children: "\u25BC \u4E0B"
-        }
-      ) })
-    ] })
-  ] });
-}
-var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: CharacterMazePage,
-  loader: loader$v,
-  meta: meta$v
-}, Symbol.toStringTag, { value: "Module" }));
-async function loader$u({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname
-  });
-}
-var meta$u = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TextTypesComponent() {
@@ -55977,8 +56520,8 @@ function TextTypesComponent() {
 var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TextTypesComponent,
-  loader: loader$u,
-  meta: meta$u
+  loader: loader$x,
+  meta: meta$v
 }, Symbol.toStringTag, { value: "Module" }));
 var CHAR_POOL = [
   { char: "\u3042", kana: "\u30A2", romaji: "a" },
@@ -55997,7 +56540,7 @@ var CHAR_POOL = [
   { char: "\u305B", kana: "\u30BB", romaji: "se" },
   { char: "\u305D", kana: "\u30BD", romaji: "so" }
 ];
-async function loader$t({ request }) {
+async function loader$w({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -56010,58 +56553,17 @@ async function loader$t({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$t = ({ data: data2 }) => {
+var meta$u = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function StudentTunnelEscapePage() {
   const layoutRef = reactExports.useRef(null);
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = reactExports.useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = reactExports.useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
-  const [inputPasscode, setInputPasscode] = reactExports.useState("");
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-  const handlePasscodeSubmit = (e) => {
-    e.preventDefault();
-    if (inputPasscode === "1111") {
-      setIsCodeUnlocked(true);
-      alert("\u2728 \u8A8D\u8A3C\u6210\u529F\uFF01\u8131\u51FA\u30C8\u30F3\u30CD\u30EB\u304C\u4E00\u6642\u7684\u306B\u89E3\u653E\u3055\u308C\u307E\u3057\u305F\u3002");
-    } else {
-      alert("\u274C \u30D1\u30B9\u30B3\u30FC\u30C9\u304C\u9055\u3044\u307E\u3059\u3002");
-    }
-  };
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Shawshank Tunnel Escape", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto px-4 py-8 space-y-6", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("header", { className: "bg-white border border-slate-200 p-5 rounded-xl shadow-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u26CF\uFE0F \u30B7\u30E7\u30FC\u30B7\u30E3\u30F3\u30AF\u304B\u3089\u306E\u8131\u51FA" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-0.5", children: "\u3072\u3089\u304C\u306A\u30FB\u30AB\u30BF\u30AB\u30CA\u8A18\u61B6\uFF06\u56DB\u629E\u30C8\u30F3\u30CD\u30EB\u6398\u524A\u30B2\u30FC\u30E0" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-xl font-bold text-slate-800", children: "\u26CF\uFE0F Escape from Shawshank" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-0.5", children: "Dig the tunnel by answering hiragana and katakana multiple-choice questions" })
     ] }) }),
-    isAccessible ? /* @__PURE__ */ jsxRuntimeExports.jsx(GameArena, {}) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner", children: "\u{1F512}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 mb-2", children: "\u3053\u306E\u30A8\u30EA\u30A2\u306F\u73FE\u5728\u30ED\u30C3\u30AF\u3055\u308C\u3066\u3044\u307E\u3059" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 leading-relaxed", children: "\u6388\u696D\u306E\u8AB2\u984C\u3092\u7D42\u308F\u3089\u305B\u308B\u304B\u3001\u5148\u751F\u304B\u3089\u4F1D\u3048\u3089\u308C\u305F\u30D1\u30B9\u30B3\u30FC\u30C9\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\u3002\u65E9\u304F\u7D42\u308F\u3063\u305F\u751F\u5F92\u306F\u5148\u751F\u304C\u500B\u5225\u306B\u89E3\u653E\u3057\u3066\u304F\u308C\u307E\u3059\uFF01" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasscodeSubmit, className: "flex gap-2 max-w-xs mx-auto", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "text",
-            maxLength: 4,
-            placeholder: "4\u6841\u30B3\u30FC\u30C9",
-            value: inputPasscode,
-            onChange: (e) => setInputPasscode(e.target.value),
-            className: "bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "submit",
-            className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition",
-            children: "\u89E3\u9664"
-          }
-        )
-      ] })
-    ] })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: () => /* @__PURE__ */ jsxRuntimeExports.jsx(GameArena, {}) })
   ] }) });
 }
 function GameArena() {
@@ -56081,29 +56583,29 @@ function GameArena() {
     let correctAnswer = "";
     let typeHint = "";
     if (modeType < 0.4) {
-      questionText = `\u3053\u306E\u6587\u5B57\u300C ${targetSymbol} \u300D\u306E\u6B63\u3057\u3044\u8AAD\u307F\u306F\u3069\u308C\uFF1F`;
+      questionText = `What is the correct reading of "${targetSymbol}"?`;
       correctAnswer = item.char;
-      typeHint = `\u30ED\u30FC\u30DE\u5B57: ${item.romaji}`;
+      typeHint = `Romaji: ${item.romaji}`;
     } else if (modeType < 0.7) {
       if (isKana) {
-        questionText = `\u30AB\u30BF\u30AB\u30CA\u300C ${targetSymbol} \u300D\u306E\u3072\u3089\u304C\u306A\u306F\u3069\u308C\uFF1F`;
+        questionText = `Which hiragana matches the katakana "${targetSymbol}"?`;
         correctAnswer = item.char;
       } else {
-        questionText = `\u3072\u3089\u304C\u306A\u300C ${targetSymbol} \u300D\u306E\u30AB\u30BF\u30AB\u30CA\u306F\u3069\u308C\uFF1F`;
+        questionText = `Which katakana matches the hiragana "${targetSymbol}"?`;
         correctAnswer = item.kana;
       }
-      typeHint = `\u30D2\u30F3\u30C8: [${item.romaji}]`;
+      typeHint = `Hint: [${item.romaji}]`;
     } else {
-      questionText = `\u30ED\u30FC\u30DE\u5B57\u300C ${item.romaji.toUpperCase()} \u300D\u306B\u5BFE\u5FDC\u3059\u308B\u6587\u5B57\u306F\u3069\u308C\uFF1F`;
+      questionText = `Which character is "${item.romaji.toUpperCase()}"?`;
       correctAnswer = targetSymbol;
-      typeHint = `\u6587\u5B57\u8A8D\u8B58\u30C8\u30EC\u30FC\u30CB\u30F3\u30B0`;
+      typeHint = `Character recognition`;
     }
     const wrongPool = CHAR_POOL.filter((p2) => (isKana ? p2.kana : p2.char) !== targetSymbol);
-    const shuffledWrong = [...wrongPool].sort(() => 0.5 - Math.random()).slice(0, 3);
-    const options = [
+    const shuffledWrong = shuffle$1(wrongPool).slice(0, 3);
+    const options = shuffle$1([
       correctAnswer,
       ...shuffledWrong.map((w2) => isKana && modeType >= 0.4 ? w2.kana : w2.char)
-    ].sort(() => 0.5 - Math.random());
+    ]);
     setCurrentQuiz({
       questionText,
       targetChar: targetSymbol,
@@ -56120,7 +56622,7 @@ function GameArena() {
     if (!currentQuiz || feedback || isGameOver || isCleared)
       return;
     if (selectedOption === currentQuiz.correctAnswer) {
-      setFeedback({ text: "\u26CF\uFE0F \u30B3\u30C4\u2026\uFF01\u58C1\u304C\u5D29\u308C\u3001\u30C8\u30F3\u30CD\u30EB\u304C\u5C11\u3057\u9032\u3093\u3060\uFF01", isCorrect: true });
+      setFeedback({ text: "\u26CF\uFE0F Chip\u2026 The wall crumbles and the tunnel moves forward!", isCorrect: true });
       setStrikeCount((prev) => prev + 1);
       const nextProgress = Math.min(100, progress + 10);
       setProgress(nextProgress);
@@ -56134,7 +56636,7 @@ function GameArena() {
     } else {
       const nextHp = hp - 1;
       setHp(nextHp);
-      setFeedback({ text: `\u274C \u5D29\u843D\u306E\u5371\u967A\uFF01\u30CF\u30F3\u30DE\u30FC\u304C\u6ED1\u3063\u305F\u2026 (\u6B8B\u308AHP: ${nextHp})`, isCorrect: false });
+      setFeedback({ text: `\u274C Danger of a cave-in! Your hammer slipped\u2026 (HP left: ${nextHp})`, isCorrect: false });
       if (nextHp <= 0) {
         setTimeout(() => {
           setIsGameOver(true);
@@ -56153,64 +56655,63 @@ function GameArena() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-5 shadow-xl text-white", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-red-400 font-bold", children: [
-        "\u2764\uFE0F \u8B66\u6212\u5EA6HP: ",
+        "\u2764\uFE0F HP: ",
         "\u2764\uFE0F".repeat(hp)
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-amber-400 font-bold", children: [
-        "\u26CF\uFE0F \u6398\u524A: ",
-        strikeCount,
-        "\u56DE"
+        "\u26CF\uFE0F Digs: ",
+        strikeCount
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-emerald-400 font-bold", children: [
-        "\u8131\u51FA\u9032\u6357: ",
+        "Escape: ",
         progress,
         "%"
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-b from-slate-950 to-stone-900 border border-stone-800 rounded-xl p-5 relative overflow-hidden space-y-3", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between text-xs text-stone-400 font-mono", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F512} \u72EC\u623F\u306E\u30DD\u30B9\u30BF\u30FC\u88CF" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u81EA\u7531\u306E\u7A7A\u30FB\u592A\u5E73\u6D0B \u{1F30A}" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F512} Behind the cell poster" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Freedom: the Pacific \u{1F30A}" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full bg-stone-950 rounded-full h-6 border border-stone-700 relative overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         "div",
         {
           className: "bg-amber-600 h-full transition-all duration-500 flex items-center justify-end pr-2 text-xs font-bold text-amber-100 shadow-inner",
           style: { width: `${progress}%` },
-          children: progress > 10 && "\u26CF\uFE0F \u30A2\u30F3\u30C7\u30A3"
+          children: progress > 10 && "\u26CF\uFE0F Andy"
         }
       ) }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-400 italic", children: [
-        progress < 30 && "\u300C\u6839\u6C17\u3068\u5CA9\u76E4\u3002\u30B7\u30E7\u30FC\u30B7\u30E3\u30F3\u30AF\u306E\u58C1\u306F\u786C\u3044\u304C\u3001\u6BCE\u65E5\u524A\u308C\u3070\u3044\u3064\u304B\u5FC5\u305A\u7A74\u304C\u958B\u304F\u3002\u300D",
-        progress >= 30 && progress < 70 && "\u300C\u30DD\u30B9\u30BF\u30FC\u306E\u88CF\u306B\u96A0\u3055\u308C\u305F\u6697\u3044\u30C8\u30F3\u30CD\u30EB\u3092\u3001\u30ED\u30C3\u30AF\u30CF\u30F3\u30DE\u30FC\u3067\u5C11\u3057\u305A\u3064\u6398\u308A\u9032\u3081\u3066\u3044\u308B\u2026\u300D",
-        progress >= 70 && progress < 100 && "\u300C\u3082\u3046\u3059\u3050\u3060\uFF01\u96E8\u306E\u5302\u3044\u304C\u3059\u308B\u3002\u51FA\u53E3\u306E\u30D1\u30A4\u30D7\u307E\u3067\u3042\u3068\u3082\u3046\u4E00\u606F\uFF01\u300D",
-        progress >= 100 && "\u300C\u3064\u3044\u306B\u81EA\u7531\u3060\uFF01\u96E8\u306B\u6253\u305F\u308C\u306A\u304C\u3089\u4E21\u624B\u3092\u5E83\u3052\u308B\u30A2\u30F3\u30C7\u30A3\u306E\u89E3\u653E\u611F\uFF01\u300D"
+        progress < 30 && '"Patience and rock. The prison walls are hard, but if you chip away every day, one day you will break through."',
+        progress >= 30 && progress < 70 && '"Digging the dark tunnel hidden behind the poster, little by little, with a rock hammer\u2026"',
+        progress >= 70 && progress < 100 && '"Almost there! I can smell the rain. Just a little further to the pipe!"',
+        progress >= 100 && '"Free at last! Andy stands in the rain with his arms wide open!"'
       ] })
     ] }),
     isCleared ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-stone-900 border-2 border-emerald-500 rounded-2xl p-8 space-y-4 animate-fade-in", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-4xl", children: "\u{1F30A}\u{1F985}\u2728" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-emerald-400", children: "\u8131\u51FA\u6210\u529F\uFF01" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-stone-300 leading-relaxed", children: "\u898B\u4E8B\u306B\u3059\u3079\u3066\u306E\u6587\u5B57\u3068\u56DB\u629E\u3092\u6B63\u78BA\u306B\u30DE\u30B9\u30BF\u30FC\u3057\u3001\u9577\u3044\u30C8\u30F3\u30CD\u30EB\u3092\u7A81\u304D\u629C\u3051\u3066\u81EA\u7531\u306E\u7A7A\u3078\u305F\u3069\u308A\u7740\u304D\u307E\u3057\u305F\uFF01" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-emerald-400", children: "You escaped!" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-stone-300 leading-relaxed", children: "You mastered every character and question, dug all the way through the tunnel, and reached freedom!" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "button",
         {
           onClick: restartGame,
           className: "bg-emerald-600 hover:bg-emerald-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer",
-          children: "\u3082\u3046\u4E00\u5EA6\u6700\u521D\u304B\u3089\u6398\u308A\u76F4\u3059"
+          children: "Dig again from the start"
         }
       )
     ] }) : isGameOver ? (
       /* ゲームオーバー画面 */
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-stone-900 border-2 border-red-500 rounded-2xl p-8 space-y-4", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-4xl", children: "\u{1F6A8}" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-red-500", children: "\u898B\u3064\u304B\u3063\u3066\u3057\u307E\u3063\u305F\u2026" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-stone-300", children: "\u9023\u7D9A\u30DF\u30B9\u306B\u3088\u308A\u770B\u5B88\u306B\u6C17\u3065\u304B\u308C\u3001\u72EC\u623F\u884C\u304D\u306B\u306A\u3063\u3066\u3057\u307E\u3044\u307E\u3057\u305F\u3002\u3082\u3046\u4E00\u5EA6\u8A18\u61B6\u3092\u6574\u7406\u3057\u3066\u6311\u6226\u3057\u3088\u3046\uFF01" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-red-500", children: "You were caught\u2026" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-stone-300", children: "Too many mistakes alerted the guards, and you were sent back to your cell. Review the characters and try again!" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
             onClick: restartGame,
             className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer",
-            children: "\u30EA\u30C8\u30E9\u30A4\u3059\u308B"
+            children: "Try again"
           }
         )
       ] })
@@ -56245,8 +56746,8 @@ function GameArena() {
 var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: StudentTunnelEscapePage,
-  loader: loader$t,
-  meta: meta$t
+  loader: loader$w,
+  meta: meta$u
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$8 = "CONTENT_VCE_SPEAKING";
 async function fetchVceSpeakingContentData(supabase2) {
@@ -56308,7 +56809,7 @@ function useVceSpeakingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$s({ request }) {
+async function loader$v({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -56378,21 +56879,21 @@ function VceSpeakingIndex() {
     }
   );
 }
-var meta$s = ({ data: data2 }) => {
+var meta$t = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingIndex,
-  loader: loader$s,
-  meta: meta$s
+  loader: loader$v,
+  meta: meta$t
 }, Symbol.toStringTag, { value: "Module" }));
 function parseEnglishAnswers(rawEnglishText) {
   if (!rawEnglishText)
     return [];
   return rawEnglishText.replace(/、/g, ",").split(",").map((s2) => s2.trim().toLowerCase()).filter(Boolean);
 }
-async function loader$r({ request, params, context }) {
+async function loader$u({ request, params, context }) {
   const { listId } = params;
   const { supabase: supabase2 } = createServerSupabaseClient(request, context);
   const { data: listMeta, error: metaError } = await supabase2.from("edu_vocab_lists").select("*").eq("id", listId).single();
@@ -56448,7 +56949,7 @@ async function loader$r({ request, params, context }) {
   const vocabularies = listItems.map((item) => item.kl_vocabulary).filter(Boolean);
   return dist$1.json({ listMeta, taskId: (taskData == null ? void 0 : taskData.id) || null, vocabularies });
 }
-async function action$4({ request, context }) {
+async function action$5({ request, context }) {
   const { supabase: supabase2 } = createServerSupabaseClient(request, context);
   const { data: { user }, error: userError } = await supabase2.auth.getUser();
   if (userError || !user) {
@@ -56745,90 +57246,29 @@ function DrillSessionPage() {
 }
 var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$4,
+  action: action$5,
   default: DrillSessionPage,
-  loader: loader$r
+  loader: loader$u
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$q({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname
-  });
-}
-var meta$r = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-};
-function KanjiSudokuFrameView({ userId }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-slate-100", children: "Kanji Sudoku Puzzle" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold", children: "\u{1F9E9} Puzzle Game" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium text-center", children: "Challenge your kanji reading and logic skills with Kanji Sudoku!" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-indigo-800/40 p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "iframe",
-      {
-        src: "/games/kanji_sudoku.html",
-        title: "Kanji Sudoku Puzzle",
-        className: "w-full h-full border-0 rounded-xl",
-        sandbox: "allow-scripts allow-same-origin allow-forms",
-        allowFullScreen: true,
-        allow: "fullscreen"
-      }
-    ) })
-  ] }) });
-}
+var loader$t = ({ request }) => loadGamePage(request);
+var meta$s = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function KanjiSudokuRoute() {
   const layoutRef = reactExports.useRef(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = reactExports.useState(true);
-  const [user, setUser] = reactExports.useState(null);
-  reactExports.useEffect(() => {
-    let isMounted = true;
-    async function initSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if ((session == null ? void 0 : session.user) && isMounted) {
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        if (isMounted)
-          setLoading(false);
-      }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Kanji Sudoku", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    IframeGamePage,
+    {
+      layoutRef,
+      name: "kanji-sudoku",
+      title: "Kanji Sudoku",
+      description: "Challenge your kanji reading and logic skills with Kanji Sudoku!"
     }
-    initSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session == null ? void 0 : session.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => {
-      isMounted = false;
-      subscription == null ? void 0 : subscription.unsubscribe();
-    };
-  }, [navigate]);
-  if (loading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center items-center h-screen bg-[#f4f1ea] font-sans", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-slate-700 animate-pulse", children: "Loading Kanji Sudoku... \u{1F9E9}" }) }) });
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(KanjiSudokuFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
+  ) });
 }
 var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiSudokuRoute,
-  loader: loader$q,
-  meta: meta$r
+  loader: loader$t,
+  meta: meta$s
 }, Symbol.toStringTag, { value: "Module" }));
 var DEFAULT_CATEGORY = "Miscellaneous";
 var CATEGORY_ORDER$1 = [
@@ -57233,7 +57673,7 @@ function buildPools(rows) {
   kanjiMeaning.sort(byCategoryThenSortOrder);
   return { hiragana, katakana, kanjiReading, kanjiMeaning };
 }
-async function loader$p({ request }) {
+async function loader$s({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -57276,7 +57716,7 @@ async function loader$p({ request }) {
     kanjiReadingAvailable
   });
 }
-var meta$q = ({
+var meta$r = ({
   data: data2
 }) => {
   return generateModuleMeta(
@@ -57289,14 +57729,6 @@ var DIFFICULTIES = {
   medium: { label: "Medium", pairs: 12, cols: 6 },
   hard: { label: "Hard", pairs: 18, cols: 6 }
 };
-function shuffle$1(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 function uniqueByAnswer(items) {
   const seen = /* @__PURE__ */ new Set();
   const out = [];
@@ -57337,27 +57769,13 @@ function formatTime(totalSeconds) {
 function MemoryMatchPage() {
   const layoutRef = reactExports.useRef(null);
   const data2 = useLoaderData();
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = reactExports.useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = reactExports.useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = reactExports.useState(false);
-  const [inputPasscode, setInputPasscode] = reactExports.useState("");
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-  const handlePasscodeSubmit = (e) => {
-    e.preventDefault();
-    if (inputPasscode === "1111") {
-      setIsCodeUnlocked(true);
-      alert("\u2728 \u8A8D\u8A3C\u306B\u6210\u529F\u3057\u307E\u3057\u305F\uFF01\u30B2\u30FC\u30E0\u304C\u4E00\u6642\u7684\u306B\u30ED\u30C3\u30AF\u89E3\u9664\u3055\u308C\u307E\u3057\u305F\u3002");
-    } else {
-      alert("\u274C \u30D1\u30B9\u30B3\u30FC\u30C9\u304C\u9055\u3044\u307E\u3059\u3002");
-    }
-  };
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Memory Match", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto max-w-3xl px-4 py-8", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "mb-6 text-center", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] font-bold tracking-[0.25em] text-indigo-500 dark:text-indigo-300", children: "MEMORY MATCH" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-1 text-3xl font-black tracking-tight text-slate-900 dark:text-white", children: "Kana & Kanji Memory Match" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mx-auto mt-2 max-w-xl text-sm leading-relaxed text-slate-500 dark:text-slate-400", children: "Flip two cards at a time and find every matching pair. Hiragana and Katakana match with their romaji; Kanji match with the reading or the meaning \u2014 you choose." })
     ] }),
-    isAccessible ? data2.loadError && data2.pools.hiragana.length === 0 && data2.pools.katakana.length === 0 && data2.pools.kanji.length === 0 && data2.pools.kanjiMeaning.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: () => data2.loadError && data2.pools.hiragana.length === 0 && data2.pools.katakana.length === 0 && data2.pools.kanji.length === 0 && data2.pools.kanjiMeaning.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
       DataErrorState,
       {
         title: "Unable to Load Data",
@@ -57369,34 +57787,7 @@ function MemoryMatchPage() {
         pools: data2.pools,
         kanjiReadingAvailable: data2.kanjiReadingAvailable
       }
-    ) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm dark:bg-slate-900 dark:border-slate-800", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner dark:bg-slate-800 dark:border-slate-700", children: "\u{1F512}" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white mb-2", children: "\u3053\u306E\u30A8\u30EA\u30A2\u306F\u73FE\u5728\u30ED\u30C3\u30AF\u3055\u308C\u3066\u3044\u307E\u3059" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "\u8AB2\u984C\u3092\u5B8C\u4E86\u3059\u308B\u304B\u3001\u5148\u751F\u304B\u3089\u63D0\u4F9B\u3055\u308C\u305F\u30D1\u30B9\u30B3\u30FC\u30C9\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044\u3002" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handlePasscodeSubmit, className: "flex gap-2 max-w-xs mx-auto", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            type: "text",
-            maxLength: 4,
-            placeholder: "4\u6841\u306E\u30B3\u30FC\u30C9",
-            value: inputPasscode,
-            onChange: (e) => setInputPasscode(e.target.value),
-            className: "bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:border-indigo-500"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "submit",
-            className: "bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition",
-            children: "\u89E3\u9664"
-          }
-        )
-      ] })
-    ] })
+    ) })
   ] }) });
 }
 function MemoryMatchGame({
@@ -57446,10 +57837,10 @@ function MemoryMatchGame({
   reactExports.useEffect(() => {
     if (!started || won)
       return;
-    const t2 = setInterval(
-      () => setElapsed((e) => e + 1),
-      1e3
-    );
+    const t2 = setInterval(() => {
+      if (!document.hidden)
+        setElapsed((e) => e + 1);
+    }, 1e3);
     return () => clearInterval(t2);
   }, [started, won]);
   const newGame = (next) => {
@@ -57796,8 +58187,8 @@ function MemoryMatchGame({
 var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MemoryMatchPage,
-  loader: loader$p,
-  meta: meta$q
+  loader: loader$s,
+  meta: meta$r
 }, Symbol.toStringTag, { value: "Module" }));
 var CATEGORY_ORDER = [
   "Numbers",
@@ -57826,7 +58217,7 @@ var CATEGORY_ORDER = [
   "Repeat sign",
   "Miscellaneous"
 ];
-async function loader$o({ request }) {
+async function loader$r({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -57839,7 +58230,7 @@ async function loader$o({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$p = ({ data: data2 }) => {
+var meta$q = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Kanji200Component() {
@@ -57993,8 +58384,8 @@ function Kanji200Component() {
 var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Kanji200Component,
-  loader: loader$o,
-  meta: meta$p
+  loader: loader$r,
+  meta: meta$q
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$7 = "CONTENT_VCE_WRITING";
 async function fetchVceWritingContentData(supabase2) {
@@ -58056,7 +58447,7 @@ function useVceWritingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$n({ request }) {
+async function loader$q({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -58123,16 +58514,16 @@ function VceWritingIndex() {
     }
   );
 }
-var meta$o = ({ data: data2 }) => {
+var meta$p = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceWritingIndex,
-  loader: loader$n,
-  meta: meta$o
+  loader: loader$q,
+  meta: meta$p
 }, Symbol.toStringTag, { value: "Module" }));
-async function action$3({ request, context }) {
+async function action$4({ request, context }) {
   try {
     const body = await request.json().catch(() => ({}));
     const { accessToken, refreshToken } = body;
@@ -58154,7 +58545,7 @@ async function action$3({ request, context }) {
 }
 var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$3
+  action: action$4
 }, Symbol.toStringTag, { value: "Module" }));
 var __vite_import_meta_env__ = {};
 function enabledProviders() {
@@ -58298,6 +58689,75 @@ function ClassBar({ data: data2 }) {
       " ",
       /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/contact", className: "text-indigo-700 font-semibold hover:underline", children: "Ask us about a school plan" }),
       "."
+    ] })
+  ] });
+}
+function GamesCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  const nav = useNavigation();
+  const busy = nav.state !== "idle";
+  const unlocked = new Set(cls.gameUnlockedIds);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: `${card} ${cls.gamesLocked ? "border-amber-300" : ""}`, "aria-label": "Games", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-start justify-between gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Gamepad2, { className: "w-5 h-5 text-indigo-600" }),
+          " Games"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: 'Lock the games on AI Yamato during your lesson so students stay with you. Students in this class see "Games are locked" within about 30 seconds, even if a game is already open. Lessons, homework and the AI tutor are not affected.' })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "shrink-0", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: cls.gamesLocked ? "unlock-games" : "lock-games" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "submit",
+            disabled: busy,
+            className: `inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-md transition cursor-pointer disabled:opacity-50 ${cls.gamesLocked ? "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50" : "bg-amber-500 text-white hover:bg-amber-600"}`,
+            children: cls.gamesLocked ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(LockOpen, { className: "w-4 h-4" }),
+              " Unlock games for the whole class"
+            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "w-4 h-4" }),
+              " Lock games for the whole class"
+            ] })
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "p",
+      {
+        role: "status",
+        className: `text-sm font-semibold rounded-md px-3 py-2 border ${cls.gamesLocked ? "bg-amber-50 border-amber-200 text-amber-900" : "bg-emerald-50 border-emerald-200 text-emerald-800"}`,
+        children: cls.gamesLocked ? `\u{1F512} Games are locked for this class${unlocked.size ? ` (${unlocked.size} student${unlocked.size === 1 ? "" : "s"} unlocked individually)` : ""}.` : "\u2705 Games are open for this class."
+      }
+    ),
+    cls.gamesLocked && data2.students.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-bold text-slate-700", children: "Unlock individual students" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "For example, a student who has finished their work early. Locking or unlocking the whole class resets these." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: data2.students.map((s2) => {
+        const canPlay = unlocked.has(s2.id);
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800 truncate", children: studentName(s2) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-[11px] font-semibold ${canPlay ? "text-emerald-700" : "text-slate-500"}`, children: canPlay ? "Can play games" : "Locked" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: canPlay ? "relock-student-games" : "unlock-student-games" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "studentId", value: s2.id }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: busy, className: btnGhost, "aria-label": `${canPlay ? "Lock games again for" : "Unlock games for"} ${studentName(s2)}`, children: canPlay ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "w-3.5 h-3.5" }),
+              " Lock again"
+            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(LockOpen, { className: "w-3.5 h-3.5" }),
+              " Unlock"
+            ] }) })
+          ] })
+        ] }, s2.id);
+      }) })
     ] })
   ] });
 }
@@ -58816,7 +59276,7 @@ function memberSubtitle(schoolEmail, inviteLabel) {
     return schoolEmail;
   return inviteLabel ? `Invite code: ${inviteLabel}` : "Joined with an invite code";
 }
-async function loader$m({ request, context }) {
+async function loader$p({ request, context }) {
   const { user, profile, admin } = await getTeacherOrApplicant(request, context);
   const url = new URL(request.url);
   const tz = parseTz(url.searchParams.get("tz"));
@@ -58828,7 +59288,7 @@ async function loader$m({ request, context }) {
       schoolEmails
     });
   }
-  const { data: classes } = await admin.from("edu_classes").select("id, name, join_code, school_domain, created_at").eq("teacher_id", user.id).order("created_at", { ascending: true });
+  const { data: classes } = await admin.from("edu_classes").select("id, name, join_code, school_domain, games_locked, created_at").eq("teacher_id", user.id).order("created_at", { ascending: true });
   const classList = classes ?? [];
   const selected = classList.find((c) => c.id === url.searchParams.get("class")) ?? classList[0] ?? null;
   const now = /* @__PURE__ */ new Date();
@@ -58932,13 +59392,18 @@ async function loader$m({ request, context }) {
   }));
   const { data: settings } = await admin.from("edu_class_writing_settings").select("image_retention_mode, image_retention_days").eq("class_id", selected.id).maybeSingle();
   const retention = (settings == null ? void 0 : settings.image_retention_mode) === "days" && settings.image_retention_days ? String(settings.image_retention_days) : "none";
+  const { data: unlockRows } = selected.games_locked ? await admin.from("edu_class_game_unlocks").select("user_id").eq("class_id", selected.id) : { data: [] };
+  const memberSet = new Set(studentIds);
+  const gameUnlockedIds = (unlockRows ?? []).map((u2) => u2.user_id).filter((id2) => memberSet.has(id2));
   return dist$1.json({
     ...base,
     selectedClass: {
       id: selected.id,
       name: selected.name,
       joinCode: selected.join_code,
-      allowedDomains: allowedStudentDomains(selected.school_domain)
+      allowedDomains: allowedStudentDomains(selected.school_domain),
+      gamesLocked: Boolean(selected.games_locked),
+      gameUnlockedIds
     },
     joinRequests,
     invites,
@@ -58949,7 +59414,7 @@ async function loader$m({ request, context }) {
     retention
   });
 }
-async function action$2({ request, context }) {
+async function action$3({ request, context }) {
   const { user, admin } = await requireTeacher(request, context);
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
@@ -59098,6 +59563,29 @@ async function action$2({ request, context }) {
   if (intent === "remove-student") {
     const studentId = String(form.get("studentId") ?? "");
     await admin.from("edu_class_members").delete().eq("class_id", cls.id).eq("user_id", studentId).eq("role", "student");
+    await admin.from("edu_class_game_unlocks").delete().eq("class_id", cls.id).eq("user_id", studentId);
+    return backTo(cls.id);
+  }
+  if (intent === "lock-games" || intent === "unlock-games") {
+    const locked = intent === "lock-games";
+    const { error } = await admin.from("edu_classes").update({ games_locked: locked, games_locked_at: locked ? (/* @__PURE__ */ new Date()).toISOString() : null }).eq("id", cls.id);
+    if (error) {
+      console.error("[teacher-dashboard] game lock failed:", error.message);
+      return fail("Could not change the game lock. Please try again.", 500);
+    }
+    await admin.from("edu_class_game_unlocks").delete().eq("class_id", cls.id);
+    return backTo(cls.id);
+  }
+  if (intent === "unlock-student-games" || intent === "relock-student-games") {
+    const studentId = String(form.get("studentId") ?? "");
+    const { data: member } = await admin.from("edu_class_members").select("user_id").eq("class_id", cls.id).eq("user_id", studentId).eq("role", "student").maybeSingle();
+    if (!member)
+      return fail("Student not found.", 404);
+    const { error } = intent === "unlock-student-games" ? await admin.from("edu_class_game_unlocks").upsert({ class_id: cls.id, user_id: studentId, unlocked_at: (/* @__PURE__ */ new Date()).toISOString() }, { onConflict: "class_id,user_id" }) : await admin.from("edu_class_game_unlocks").delete().eq("class_id", cls.id).eq("user_id", studentId);
+    if (error) {
+      console.error("[teacher-dashboard] student game lock failed:", error.message);
+      return fail("Could not change the game lock for this student. Please try again.", 500);
+    }
     return backTo(cls.id);
   }
   if (intent === "update-retention") {
@@ -59205,6 +59693,7 @@ function TeacherDashboardPage() {
     (actionData == null ? void 0 : actionData.error) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { role: "alert", className: "text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3", children: actionData.error }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(ClassBar, { data: data2 }),
     data2.selectedClass && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(GamesCard, { data: data2 }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(JoinRequestsCard, { data: data2 }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(ClassSettingsCard, { data: data2 }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(InviteCodesCard, { data: data2 }),
@@ -59214,16 +59703,5702 @@ function TeacherDashboardPage() {
     ] })
   ] }) });
 }
-var meta$n = () => [
+var meta$o = () => [
   { title: "Teacher Dashboard | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
 var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$2,
+  action: action$3,
   default: TeacherDashboardPage,
-  loader: loader$m,
-  meta: meta$n
+  loader: loader$p,
+  meta: meta$o
+}, Symbol.toStringTag, { value: "Module" }));
+var TICKET_TTL_MS = 10 * 6e4;
+async function getUserIdFromBearer(request, admin) {
+  var _a;
+  const token = (_a = request.headers.get("Authorization")) == null ? void 0 : _a.replace(/^Bearer\s+/i, "").trim();
+  if (!token)
+    return null;
+  const { data: data2, error } = await admin.auth.getUser(token);
+  if (error || !(data2 == null ? void 0 : data2.user))
+    return null;
+  return data2.user.id;
+}
+async function getGameAccessForUser(admin, userId) {
+  const { data: memberships, error: memberError } = await admin.from("edu_class_members").select("class_id").eq("user_id", userId).eq("role", "student");
+  if (memberError) {
+    console.error("[game-access] members query failed:", memberError.message);
+    return { status: "allowed" };
+  }
+  const classIds = (memberships ?? []).map((m2) => m2.class_id).filter(Boolean);
+  if (classIds.length === 0)
+    return { status: "allowed" };
+  const { data: lockedClasses, error: classError } = await admin.from("edu_classes").select("id, name").in("id", classIds).eq("games_locked", true);
+  if (classError) {
+    console.error("[game-access] classes query failed:", classError.message);
+    return { status: "allowed" };
+  }
+  if (!(lockedClasses == null ? void 0 : lockedClasses.length))
+    return { status: "allowed" };
+  const { data: unlocks, error: unlockError } = await admin.from("edu_class_game_unlocks").select("class_id").eq("user_id", userId).in("class_id", lockedClasses.map((c) => c.id));
+  if (unlockError) {
+    console.error("[game-access] unlocks query failed:", unlockError.message);
+    return { status: "allowed" };
+  }
+  const unlocked = new Set((unlocks ?? []).map((u2) => u2.class_id));
+  const lockedBy = lockedClasses.find((c) => !unlocked.has(c.id));
+  return lockedBy ? { status: "locked", className: lockedBy.name } : { status: "allowed" };
+}
+var encoder = new TextEncoder();
+function toBase64Url(bytes) {
+  let s2 = "";
+  for (const b of new Uint8Array(bytes))
+    s2 += String.fromCharCode(b);
+  return btoa(s2).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function fromBase64Url(text) {
+  try {
+    const s2 = atob(text.replace(/-/g, "+").replace(/_/g, "/"));
+    return Uint8Array.from(s2, (c) => c.charCodeAt(0));
+  } catch {
+    return null;
+  }
+}
+async function ticketKey(context) {
+  return crypto.subtle.importKey(
+    "raw",
+    encoder.encode(getDerivedSecret(context, "game-frame-ticket")),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+}
+async function createGameTicket(context, userId) {
+  const payload = `${userId}.${Date.now() + TICKET_TTL_MS}`;
+  const sig = await crypto.subtle.sign("HMAC", await ticketKey(context), encoder.encode(payload));
+  return `${payload}.${toBase64Url(sig)}`;
+}
+async function verifyGameTicket(context, ticket) {
+  if (!ticket)
+    return null;
+  const parts = ticket.split(".");
+  if (parts.length !== 3)
+    return null;
+  const [userId, expRaw, sigText] = parts;
+  const exp = Number(expRaw);
+  if (!userId || !Number.isFinite(exp) || exp < Date.now())
+    return null;
+  const sig = fromBase64Url(sigText);
+  if (!sig)
+    return null;
+  const ok2 = await crypto.subtle.verify("HMAC", await ticketKey(context), sig, encoder.encode(`${userId}.${expRaw}`));
+  return ok2 ? userId : null;
+}
+var shogi = `<!doctype html>
+<!-- Portal copy of the Shogi vs Computer library game. Served by app/routes/game-frame.$name.ts (login + teacher lock); fullscreen is the portal's GameFrame toolbar. Library original untouched. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Shogi vs Computer</title>
+    <style>
+      :root {
+        --bg: #f2ecdf;
+        --surface: #fbf8f1;
+        --surface-2: #efe7d6;
+        --ink: #2b2118;
+        --ink-soft: #6b5d4c;
+        --line: #d8cbb2;
+        --accent: #a33327;
+        --accent-ink: #ffffff;
+        --gold: #b8862f;
+        --board: #eec987;
+        --board-line: #7d5f30;
+        --piece-a: #f9e7b8;
+        --piece-b: #eec987;
+        --piece-edge: #a97e3f;
+        --piece-ink: #33241a;
+        --promo-ink: #b02a1e;
+        --sel: #2e7d4f;
+        --last: rgba(163, 51, 39, 0.28);
+        --hint-dot: rgba(46, 125, 79, 0.55);
+        --check: #c0271a;
+        --shadow: 0 10px 28px rgba(60, 42, 18, 0.16);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #17140f;
+          --surface: #221d16;
+          --surface-2: #2b241a;
+          --ink: #f0e6d2;
+          --ink-soft: #b3a488;
+          --line: #453a29;
+          --accent: #c8452f;
+          --gold: #d9a84e;
+          --board: #d9ab5e;
+          --board-line: #5e451f;
+          --piece-a: #f3ddab;
+          --piece-b: #e2ba72;
+          --piece-edge: #8a6527;
+          --piece-ink: #2e2013;
+          --sel: #4caf7d;
+          --last: rgba(200, 69, 47, 0.35);
+          --hint-dot: rgba(76, 175, 125, 0.6);
+          --shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .page { max-width: 1060px; margin: 0 auto; padding: 14px 14px 40px; }
+
+      /* ---------- top bar & new game ---------- */
+      .topbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
+      .btn {
+        appearance: none; border: 1px solid var(--line); background: var(--surface);
+        color: var(--ink); border-radius: 8px; padding: 8px 14px; font-size: 14px;
+        cursor: pointer; font-family: inherit; line-height: 1.2;
+      }
+      .btn:hover { border-color: var(--gold); }
+      .btn:disabled { opacity: 0.45; cursor: default; }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+      .btn.primary:hover { filter: brightness(1.08); }
+      .newgame {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+        padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end;
+        box-shadow: var(--shadow); margin-bottom: 16px;
+      }
+      .newgame .field { display: flex; flex-direction: column; gap: 5px; }
+      .newgame label { font-size: 12px; color: var(--ink-soft); font-weight: 700; letter-spacing: 0.04em; }
+      .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+      .seg button {
+        appearance: none; border: 0; background: var(--surface-2); color: var(--ink);
+        padding: 8px 13px; font-size: 14px; cursor: pointer; font-family: inherit;
+      }
+      .seg button + button { border-left: 1px solid var(--line); }
+      .seg button.on { background: var(--ink); color: var(--bg); font-weight: 700; }
+      .newgame .spacer { flex: 1; }
+
+      /* ---------- layout ---------- */
+      .layout { display: flex; gap: 18px; align-items: flex-start; }
+      .board-col { flex: 0 1 560px; min-width: 0; margin: 0 auto; width: 100%; }
+      .side { flex: 1 1 260px; min-width: 240px; display: flex; flex-direction: column; gap: 14px; }
+      @media (max-width: 819px) {
+        .layout { flex-direction: column; }
+        .side { width: 100%; }
+      }
+
+      /* ---------- hands (mochigoma) ---------- */
+      .hand {
+        display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+        min-height: 52px; padding: 6px 8px; background: var(--surface);
+        border: 1px solid var(--line); border-radius: 10px;
+      }
+      .hand .who { font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-right: 2px; white-space: nowrap; }
+      .hand .none { font-size: 13px; color: var(--ink-soft); }
+      .hand-piece {
+        position: relative; width: 40px; height: 44px; border: 0; background: transparent;
+        cursor: pointer; padding: 0; font-family: inherit;
+      }
+      .hand-piece .shape {
+        position: absolute; inset: 0;
+        clip-path: polygon(50% 0%, 92% 16%, 100% 100%, 0% 100%, 8% 16%);
+        background: linear-gradient(180deg, var(--piece-a), var(--piece-b));
+        border: 1px solid var(--piece-edge);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--piece-ink); font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        font-weight: 700; font-size: 19px; padding-top: 6px;
+      }
+      .hand-piece.gote .shape { transform: rotate(180deg); }
+      .hand-piece.sel .shape { background: var(--sel); color: #fff; }
+      .hand-piece .cnt {
+        position: absolute; right: -4px; bottom: -4px; z-index: 2;
+        background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
+        border-radius: 999px; min-width: 18px; height: 18px; line-height: 18px; text-align: center;
+        padding: 0 4px;
+      }
+      .hand.mine.active { outline: 2px solid var(--gold); outline-offset: -2px; }
+
+      /* ---------- board ---------- */
+      .board-frame { margin: 8px 0; }
+      .files { display: grid; grid-template-columns: repeat(9, 1fr); padding-right: 20px; }
+      .files span { text-align: center; font-size: 12px; color: var(--ink-soft); padding: 2px 0; }
+      .board-row { display: flex; }
+      .board {
+        flex: 1; display: grid; grid-template-columns: repeat(9, 1fr);
+        grid-template-rows: repeat(9, 1fr);
+        aspect-ratio: 9 / 9.85;
+        background: var(--board);
+        border: 2px solid var(--board-line);
+        box-shadow: var(--shadow);
+        touch-action: manipulation; user-select: none; -webkit-user-select: none;
+      }
+      .ranks { width: 20px; display: grid; grid-template-rows: repeat(9, 1fr); }
+      .ranks span { display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-soft); }
+      .cell {
+        position: relative; border-right: 1px solid var(--board-line); border-bottom: 1px solid var(--board-line);
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+      }
+      .cell:nth-child(9n) { border-right: 0; }
+      .cell:nth-child(n+73) { border-bottom: 0; }
+      .cell.last::before { content: ""; position: absolute; inset: 0; background: var(--last); }
+      .cell.check::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(192,39,26,0.5), rgba(192,39,26,0.12) 70%); }
+      .cell .dot {
+        position: absolute; width: 34%; height: 30%; border-radius: 50%;
+        background: var(--hint-dot); z-index: 3; pointer-events: none;
+      }
+      .cell .ring {
+        position: absolute; inset: 6%; border: 3px solid var(--hint-dot); border-radius: 50%;
+        z-index: 3; pointer-events: none;
+      }
+      .piece {
+        position: absolute; z-index: 2; top: 3%; bottom: 3%; left: 6%; right: 6%;
+        clip-path: polygon(50% 0%, 92% 16%, 100% 100%, 0% 100%, 8% 16%);
+        background: linear-gradient(180deg, var(--piece-a), var(--piece-b));
+        display: flex; align-items: center; justify-content: center;
+        color: var(--piece-ink);
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+        font-weight: 700; line-height: 1.05; text-align: center;
+        padding-top: 10%; pointer-events: none;
+      }
+      .piece.gote { transform: rotate(180deg); }
+      .piece.promo { color: var(--promo-ink); }
+      .piece.one { font-size: clamp(15px, 4.6vw, 27px); }
+      .piece.two { font-size: clamp(10px, 3vw, 18px); writing-mode: vertical-rl; letter-spacing: 0.02em; }
+      .cell.selected { background: var(--sel); }
+      .cell.selected .piece { background: linear-gradient(180deg, #fdf3cd, #f5dd96); }
+
+      .thinking { visibility: hidden; font-size: 13px; color: var(--ink-soft); text-align: center; min-height: 18px; }
+      .thinking.show { visibility: visible; }
+
+      /* ---------- side panel ---------- */
+      .card {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+        padding: 13px 14px; box-shadow: var(--shadow);
+      }
+      .card h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.06em; color: var(--ink-soft); }
+      .turn-big { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 9px; }
+      .turn-big .mark { font-size: 22px; }
+      .check-badge {
+        display: none; background: var(--check); color: #fff; font-size: 12px; font-weight: 700;
+        border-radius: 999px; padding: 3px 10px;
+      }
+      .check-badge.show { display: inline-block; }
+      .status-sub { font-size: 13px; color: var(--ink-soft); margin-top: 5px; min-height: 18px; }
+      .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+      .kifu {
+        max-height: 300px; overflow-y: auto; font-size: 14px; line-height: 1.5;
+        font-variant-numeric: tabular-nums;
+      }
+      .kifu table { border-collapse: collapse; width: 100%; }
+      .kifu td { padding: 2px 4px; vertical-align: top; }
+      .kifu td.no { color: var(--ink-soft); width: 34px; text-align: right; }
+      .kifu tr.now td { font-weight: 700; color: var(--accent); }
+      .kifu .empty { color: var(--ink-soft); font-size: 13px; }
+
+      /* ---------- modals ---------- */
+      .overlay {
+        position: fixed; inset: 0; background: rgba(20, 14, 8, 0.55);
+        display: none; align-items: center; justify-content: center; padding: 18px; z-index: 50;
+      }
+      .overlay.show { display: flex; }
+      .modal {
+        background: var(--surface); color: var(--ink); border-radius: 14px; max-width: 560px; width: 100%;
+        max-height: 86vh; overflow-y: auto; padding: 22px 22px 18px; box-shadow: var(--shadow);
+      }
+      .modal h2 { margin: 0 0 10px; font-size: 19px; }
+      .modal h3 { margin: 16px 0 6px; font-size: 15px; }
+      .modal p, .modal li { font-size: 14px; line-height: 1.75; }
+      .modal ul { margin: 4px 0; padding-left: 20px; }
+      .modal .close-row { display: flex; justify-content: flex-end; margin-top: 16px; gap: 8px; }
+      .promo-modal { max-width: 340px; text-align: center; }
+      .promo-modal .choices { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+      .promo-modal .choices .btn { font-size: 17px; padding: 12px 22px; font-weight: 700; }
+      .result-modal { max-width: 380px; text-align: center; }
+      .result-modal .result-big { font-size: 26px; font-weight: 800; margin: 6px 0 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="topbar">
+        <button class="btn" id="rulesBtn" type="button">How to Play &amp; Rules</button>
+      </div>
+
+      <section class="newgame" aria-label="New game">
+        <div class="field">
+          <label>Your side</label>
+          <div class="seg" id="colorSeg">
+            <button type="button" data-color="0" class="on">Sente \u2617 (first)</button>
+            <button type="button" data-color="1">Gote \u2616 (second)</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Computer strength</label>
+          <div class="seg" id="levelSeg">
+            <button type="button" data-level="1">Beginner</button>
+            <button type="button" data-level="2" class="on">Normal</button>
+            <button type="button" data-level="3">Strong</button>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn primary" id="startBtn" type="button">Start Game</button>
+      </section>
+
+      <div class="layout">
+        <div class="board-col">
+          <div class="hand" id="handGote" aria-label="Opponent's pieces in hand"></div>
+          <div class="board-frame">
+            <div class="files" aria-hidden="true">
+              <span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+            </div>
+            <div class="board-row">
+              <div class="board" id="board" role="grid" aria-label="Shogi board"></div>
+              <div class="ranks" aria-hidden="true">
+                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+              </div>
+            </div>
+          </div>
+          <div class="hand mine" id="handSente" aria-label="Pieces in hand"></div>
+          <p class="thinking" id="thinking">The computer is thinking\u2026</p>
+        </div>
+
+        <aside class="side">
+          <div class="card">
+            <h2>Turn</h2>
+            <div class="turn-big"><span class="mark" id="turnMark">\u2617</span><span id="turnText">Your turn</span><span class="check-badge" id="checkBadge">Check</span></div>
+            <p class="status-sub" id="statusSub">Tap one of your pieces to see where it can move.</p>
+          </div>
+          <div class="card">
+            <h2>Game Controls</h2>
+            <div class="controls">
+              <button class="btn" id="undoBtn" type="button">Undo</button>
+              <button class="btn" id="resignBtn" type="button">Resign</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Move List</h2>
+            <div class="kifu" id="kifu"><span class="empty">No moves yet.</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- promotion choice -->
+    <div class="overlay" id="promoOverlay">
+      <div class="modal promo-modal" role="dialog" aria-modal="true" aria-labelledby="promoTitle">
+        <h2 id="promoTitle">Promote this piece?</h2>
+        <p id="promoText">This piece can promote.</p>
+        <div class="choices">
+          <button class="btn primary" id="promoYes" type="button">Promote</button>
+          <button class="btn" id="promoNo" type="button">Don't promote</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- result -->
+    <div class="overlay" id="resultOverlay">
+      <div class="modal result-modal" role="dialog" aria-modal="true">
+        <h2>Game Over</h2>
+        <p class="result-big" id="resultText">You win!</p>
+        <p id="resultSub"></p>
+        <div class="close-row" style="justify-content:center;">
+          <button class="btn primary" id="againBtn" type="button">Play Again</button>
+          <button class="btn" id="resultClose" type="button">View Board</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- rules -->
+    <div class="overlay" id="rulesOverlay">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+        <h2 id="rulesTitle">How to Play &amp; Rules</h2>
+        <h3>How to play</h3>
+        <ul>
+          <li>Tap one of your pieces and the squares it can move to are highlighted. Tap a highlighted square to move there.</li>
+          <li>Pieces you capture become your "pieces in hand". Tap a piece in your hand area, then tap an empty square on the board to drop it there.</li>
+          <li>When a move enters, leaves, or moves within the promotion zone (the opponent's three ranks), you can choose to promote the piece. A promoted piece gains the stronger movement shown on its reverse side.</li>
+          <li>"Undo" takes back your last move together with the computer's reply. "Resign" accepts defeat and ends the game.</li>
+        </ul>
+        <h3>How the pieces move</h3>
+        <ul>
+          <li><b>King (\u738B\u5C06 / \u7389\u5C06)</b>: one square in any direction.</li>
+          <li><b>Rook (\u98DB\u8ECA)</b>: any number of squares horizontally or vertically. Promotes to <b>Dragon King (\u7ADC\u738B)</b>, which also moves one square diagonally.</li>
+          <li><b>Bishop (\u89D2\u884C)</b>: any number of squares diagonally. Promotes to <b>Dragon Horse (\u7ADC\u99AC)</b>, which also moves one square horizontally or vertically.</li>
+          <li><b>Gold General (\u91D1\u5C06)</b>: one square forward, sideways, diagonally forward, or straight back \u2014 everything except diagonally back.</li>
+          <li><b>Silver General (\u9280\u5C06)</b>: one square forward or diagonally \u2014 not sideways or straight back.</li>
+          <li><b>Knight (\u6842\u99AC)</b>: jumps two squares forward and one square sideways; it is the only piece that can jump over other pieces.</li>
+          <li><b>Lance (\u9999\u8ECA)</b>: any number of squares straight forward.</li>
+          <li><b>Pawn (\u6B69\u5175)</b>: one square forward.</li>
+          <li>When a Pawn, Lance, Knight, or Silver promotes, it moves exactly like a Gold General (\u3068\u91D1, \u6210\u9999, \u6210\u6842, \u6210\u9280).</li>
+        </ul>
+        <h3>Illegal moves &amp; winning</h3>
+        <ul>
+          <li>You cannot make a move that leaves your own king in check. If your king is in check, you must get out of check.</li>
+          <li>Nifu is illegal: you may not drop a pawn on a file where you already have an unpromoted pawn. A pawn or lance cannot be dropped on the farthest rank, and a knight cannot be dropped on the farthest two ranks, because it would have no move.</li>
+          <li>Uchifuzume is also illegal: you may not drop a pawn to deliver checkmate.</li>
+          <li>You win by checkmating the opponent's king. If the same position occurs four times (sennichite), the game is a draw.</li>
+        </ul>
+        <div class="close-row">
+          <button class="btn primary" id="rulesClose" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+      /* ================= Shogi engine ================= */
+      // Board: idx = row*9+col, row 0 = rank 1 (Gote side), row 8 = rank 9 (Sente side)
+      // col 0 = file 9, col 8 = file 1. Sente owner=0 (bottom), Gote owner=1 (top).
+      // Piece: { t: 'K'|'R'|'B'|'G'|'S'|'N'|'L'|'P', o: 0|1, pr: bool }
+
+      var VAL = { P: 100, L: 330, N: 350, S: 540, G: 580, B: 920, R: 1080, K: 100000 };
+      var VAL_PR = { P: 600, L: 620, N: 630, S: 640, B: 1180, R: 1380 };
+      var PROMOTABLE = { P: 1, L: 1, N: 1, S: 1, B: 1, R: 1 };
+      var NAMES = { K: "\u7389", R: "\u98DB", B: "\u89D2", G: "\u91D1", S: "\u9280", N: "\u6842", L: "\u9999", P: "\u6B69" };
+      var NAMES_FULL = { K: ["\u738B\u5C06", "\u7389\u5C06"], R: "\u98DB\u8ECA", B: "\u89D2\u884C", G: "\u91D1\u5C06", S: "\u9280\u5C06", N: "\u6842\u99AC", L: "\u9999\u8ECA", P: "\u6B69\u5175" };
+      var NAMES_PR = { R: "\u7ADC\u738B", B: "\u7ADC\u99AC", S: "\u6210\u9280", N: "\u6210\u6842", L: "\u6210\u9999", P: "\u3068\u91D1" };
+      var NAMES_EN = { K: "King", R: "Rook", B: "Bishop", G: "Gold", S: "Silver", N: "Knight", L: "Lance", P: "Pawn" };
+      var NAMES_PR_EN = { R: "Dragon King", B: "Dragon Horse", S: "Promoted Silver", N: "Promoted Knight", L: "Promoted Lance", P: "Tokin" };
+      var HAND_ORDER = ["R", "B", "G", "S", "N", "L", "P"];
+
+      function rc(idx) { return [Math.floor(idx / 9), idx % 9]; }
+      function inBoard(r, c) { return r >= 0 && r < 9 && c >= 0 && c < 9; }
+
+      function initialState() {
+        var b = new Array(81).fill(null);
+        var back = ["L", "N", "S", "G", "K", "G", "S", "N", "L"];
+        for (var c = 0; c < 9; c++) {
+          b[c] = { t: back[c], o: 1, pr: false };              // rank 1, Gote
+          b[18 + c] = { t: "P", o: 1, pr: false };              // rank 3, Gote pawns
+          b[54 + c] = { t: "P", o: 0, pr: false };              // rank 7, Sente pawns
+          b[72 + c] = { t: back[c], o: 0, pr: false };          // rank 9, Sente
+        }
+        b[10] = { t: "R", o: 1, pr: false };  // 8-2 Rook (Gote)
+        b[16] = { t: "B", o: 1, pr: false };  // 2-2 Bishop (Gote)
+        b[64] = { t: "B", o: 0, pr: false };  // 8-8 Bishop (Sente)
+        b[70] = { t: "R", o: 0, pr: false };  // 2-8 Rook (Sente)
+        // Note: the K of owner 0 is displayed as the "Osho" king (see pieceLabel).
+        return {
+          board: b,
+          hands: [{}, {}],   // hands[owner][type] = count
+          turn: 0
+        };
+      }
+
+      function cloneState(st) {
+        var b = st.board.map(function (p) { return p ? { t: p.t, o: p.o, pr: p.pr } : null; });
+        var h = [Object.assign({}, st.hands[0]), Object.assign({}, st.hands[1])];
+        return { board: b, hands: h, turn: st.turn };
+      }
+
+      // Destination squares of a piece (doubles as its attack range). Board moves only.
+      function pieceMoves(board, idx) {
+        var p = board[idx];
+        if (!p) return [];
+        var pos = rc(idx), r = pos[0], c = pos[1];
+        var fwd = p.o === 0 ? -1 : 1;
+        var dests = [];
+        function step(dr, dc) {
+          var nr = r + dr, nc = c + dc;
+          if (inBoard(nr, nc)) {
+            var q = board[nr * 9 + nc];
+            if (!q || q.o !== p.o) dests.push(nr * 9 + nc);
+          }
+        }
+        function slide(dr, dc) {
+          var nr = r + dr, nc = c + dc;
+          while (inBoard(nr, nc)) {
+            var q = board[nr * 9 + nc];
+            if (!q) { dests.push(nr * 9 + nc); }
+            else { if (q.o !== p.o) dests.push(nr * 9 + nc); break; }
+            nr += dr; nc += dc;
+          }
+        }
+        var goldLike = p.pr && (p.t === "P" || p.t === "L" || p.t === "N" || p.t === "S");
+        if (goldLike || p.t === "G") {
+          step(fwd, 0); step(fwd, -1); step(fwd, 1); step(0, -1); step(0, 1); step(-fwd, 0);
+        } else if (p.t === "K") {
+          for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) if (dr || dc) step(dr, dc);
+        } else if (p.t === "P" && !p.pr) {
+          step(fwd, 0);
+        } else if (p.t === "N" && !p.pr) {
+          step(fwd * 2, -1); step(fwd * 2, 1);
+        } else if (p.t === "S" && !p.pr) {
+          step(fwd, 0); step(fwd, -1); step(fwd, 1); step(-fwd, -1); step(-fwd, 1);
+        } else if (p.t === "L" && !p.pr) {
+          slide(fwd, 0);
+        } else if (p.t === "B") {
+          slide(1, 1); slide(1, -1); slide(-1, 1); slide(-1, -1);
+          if (p.pr) { step(1, 0); step(-1, 0); step(0, 1); step(0, -1); }
+        } else if (p.t === "R") {
+          slide(1, 0); slide(-1, 0); slide(0, 1); slide(0, -1);
+          if (p.pr) { step(1, 1); step(1, -1); step(-1, 1); step(-1, -1); }
+        }
+        return dests;
+      }
+
+      function kingIdx(board, owner) {
+        for (var i = 0; i < 81; i++) {
+          var p = board[i];
+          if (p && p.t === "K" && p.o === owner) return i;
+        }
+        return -1;
+      }
+
+      function isAttacked(board, idx, byOwner) {
+        for (var i = 0; i < 81; i++) {
+          var p = board[i];
+          if (p && p.o === byOwner) {
+            var ds = pieceMoves(board, i);
+            for (var j = 0; j < ds.length; j++) if (ds[j] === idx) return true;
+          }
+        }
+        return false;
+      }
+
+      function inCheck(st, owner) {
+        var k = kingIdx(st.board, owner);
+        return k >= 0 && isAttacked(st.board, k, 1 - owner);
+      }
+
+      function inZone(row, owner) {
+        return owner === 0 ? row <= 2 : row >= 6;
+      }
+      function deadRank(type, row, owner) {
+        // Whether a piece would have no move on that rank (P/L: last rank, N: last two ranks)
+        var last = owner === 0 ? 0 : 8;
+        var second = owner === 0 ? 1 : 7;
+        if (type === "P" || type === "L") return row === last;
+        if (type === "N") return row === last || row === second;
+        return false;
+      }
+
+      // Move: { from: idx|-1(drop), to, promote, drop: type|null }
+      function genPseudo(st, side) {
+        var moves = [];
+        var b = st.board;
+        for (var i = 0; i < 81; i++) {
+          var p = b[i];
+          if (!p || p.o !== side) continue;
+          var ds = pieceMoves(b, i);
+          var fromRow = Math.floor(i / 9);
+          for (var j = 0; j < ds.length; j++) {
+            var to = ds[j], toRow = Math.floor(to / 9);
+            var canPromote = PROMOTABLE[p.t] && !p.pr && (inZone(fromRow, side) || inZone(toRow, side));
+            var mustPromote = !p.pr && deadRank(p.t, toRow, side);
+            if (mustPromote) moves.push({ from: i, to: to, promote: true, drop: null });
+            else if (canPromote) {
+              moves.push({ from: i, to: to, promote: true, drop: null });
+              moves.push({ from: i, to: to, promote: false, drop: null });
+            } else moves.push({ from: i, to: to, promote: false, drop: null });
+          }
+        }
+        // Drops
+        var hand = st.hands[side];
+        for (var ti = 0; ti < HAND_ORDER.length; ti++) {
+          var t = HAND_ORDER[ti];
+          if (!hand[t]) continue;
+          for (var sq = 0; sq < 81; sq++) {
+            if (b[sq]) continue;
+            var r = Math.floor(sq / 9), c = sq % 9;
+            if (deadRank(t, r, side)) continue;
+            if (t === "P") {
+              // Nifu check
+              var nifu = false;
+              for (var rr = 0; rr < 9; rr++) {
+                var q = b[rr * 9 + c];
+                if (q && q.o === side && q.t === "P" && !q.pr) { nifu = true; break; }
+              }
+              if (nifu) continue;
+            }
+            moves.push({ from: -1, to: sq, promote: false, drop: t });
+          }
+        }
+        return moves;
+      }
+
+      function applyMove(st, mv) {
+        var ns = cloneState(st);
+        if (mv.drop) {
+          ns.hands[st.turn][mv.drop]--;
+          ns.board[mv.to] = { t: mv.drop, o: st.turn, pr: false };
+        } else {
+          var cap = ns.board[mv.to];
+          if (cap) ns.hands[st.turn][cap.t] = (ns.hands[st.turn][cap.t] || 0) + 1;
+          var p = ns.board[mv.from];
+          ns.board[mv.to] = { t: p.t, o: p.o, pr: p.pr || mv.promote };
+          ns.board[mv.from] = null;
+        }
+        ns.turn = 1 - st.turn;
+        return ns;
+      }
+
+      // Legal moves: moves that leave the king captured are excluded. skipUchifu=true skips the uchifuzume test (recursion guard).
+      function legalMoves(st, side, skipUchifu) {
+        var pseudo = genPseudo(st, side);
+        var out = [];
+        for (var i = 0; i < pseudo.length; i++) {
+          var mv = pseudo[i];
+          var ns = applyMove(st, mv);
+          if (inCheck(ns, side)) continue;
+          if (!skipUchifu && mv.drop === "P") {
+            // Uchifuzume: a pawn drop that gives check is illegal if the opponent then has no legal move at all
+            if (inCheck(ns, 1 - side)) {
+              var replies = legalMoves(ns, 1 - side, true);
+              if (replies.length === 0) continue;
+            }
+          }
+          out.push(mv);
+        }
+        return out;
+      }
+
+      function stateKey(st) {
+        var s = st.turn + "|";
+        for (var i = 0; i < 81; i++) {
+          var p = st.board[i];
+          s += p ? (p.o + p.t + (p.pr ? "+" : "")) : ".";
+        }
+        for (var o = 0; o < 2; o++) {
+          for (var ti = 0; ti < HAND_ORDER.length; ti++) {
+            var t = HAND_ORDER[ti];
+            s += (st.hands[o][t] || 0);
+          }
+        }
+        return s;
+      }
+
+      /* ================= AI ================= */
+      function evaluate(st) {
+        // Evaluation score from Sente's point of view
+        var score = 0;
+        for (var i = 0; i < 81; i++) {
+          var p = st.board[i];
+          if (!p) continue;
+          var v = p.pr && VAL_PR[p.t] ? VAL_PR[p.t] : VAL[p.t];
+          // Advancement bonus (slightly favors pieces closer to the enemy camp)
+          var row = Math.floor(i / 9);
+          var adv = p.o === 0 ? (8 - row) : row;
+          if (p.t !== "K") v += adv * 4;
+          score += p.o === 0 ? v : -v;
+        }
+        for (var o = 0; o < 2; o++) {
+          for (var ti = 0; ti < HAND_ORDER.length; ti++) {
+            var t = HAND_ORDER[ti];
+            var n = st.hands[o][t] || 0;
+            var hv = VAL[t] * 1.12;
+            score += o === 0 ? hv * n : -hv * n;
+          }
+        }
+        return score;
+      }
+
+      function orderMoves(st, moves) {
+        moves.sort(function (a, b) { return moveScore(st, b) - moveScore(st, a); });
+        function moveScore(st2, mv) {
+          var s = 0;
+          if (!mv.drop && st2.board[mv.to]) {
+            var cap = st2.board[mv.to];
+            s = 10 * (cap.pr && VAL_PR[cap.t] ? VAL_PR[cap.t] : VAL[cap.t]);
+            var atk = mv.from >= 0 ? st2.board[mv.from] : null;
+            if (atk) s -= (atk.pr && VAL_PR[atk.t] ? VAL_PR[atk.t] : VAL[atk.t]);
+          }
+          if (mv.promote) s += 5000;
+          return s;
+        }
+        return moves;
+      }
+
+      var MATE = 10000000;
+      function negamax(st, depth, alpha, beta, ply) {
+        var side = st.turn;
+        if (depth === 0) return (side === 0 ? 1 : -1) * evaluate(st);
+        var moves = legalMoves(st, side, false);
+        if (moves.length === 0) return -MATE + ply * 100; // checkmate (or stalemate) loses
+        orderMoves(st, moves);
+        var best = -Infinity;
+        for (var i = 0; i < moves.length; i++) {
+          var ns = applyMove(st, moves[i]);
+          var sc = -negamax(ns, depth - 1, -beta, -alpha, ply + 1);
+          if (sc > best) best = sc;
+          if (best > alpha) alpha = best;
+          if (alpha >= beta) break;
+        }
+        return best;
+      }
+
+      function aiChooseMove(st, level) {
+        var side = st.turn;
+        var moves = legalMoves(st, side, false);
+        if (moves.length === 0) return null;
+        var depth = level === 1 ? 1 : level === 2 ? 2 : 3;
+        var jitter = level === 1 ? 90 : level === 2 ? 18 : 0;
+        orderMoves(st, moves);
+        var best = -Infinity, bestMoves = [];
+        var alpha = -Infinity;
+        for (var i = 0; i < moves.length; i++) {
+          var ns = applyMove(st, moves[i]);
+          var sc = -negamax(ns, depth - 1, -Infinity, -alpha === -Infinity ? Infinity : -alpha, 1);
+          if (jitter) sc += Math.random() * jitter * 2 - jitter;
+          if (sc > best + 0.001) { best = sc; bestMoves = [moves[i]]; }
+          else if (Math.abs(sc - best) <= 0.001) bestMoves.push(moves[i]);
+          if (sc > alpha) alpha = sc;
+        }
+        return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+      }
+
+      /* ================= Move notation ================= */
+      function pieceNameEn(p) {
+        if (p.pr && NAMES_PR_EN[p.t]) return NAMES_PR_EN[p.t];
+        return NAMES_EN[p.t];
+      }
+
+      function moveNotation(st, mv, num) {
+        var mark = st.turn === 0 ? "\u2617" : "\u2616";
+        var toR = Math.floor(mv.to / 9), toC = mv.to % 9;
+        var file = 9 - toC;
+        var dest = file + "-" + (toR + 1);
+        var name;
+        if (mv.drop) name = NAMES_EN[mv.drop] + " drop " + dest;
+        else {
+          var p = st.board[mv.from];
+          name = pieceNameEn(p) + " to " + dest;
+          if (mv.promote) name += " +promotes";
+        }
+        return mark + " " + name;
+      }
+
+      function pieceLabel(p) {
+        if (p.pr) return NAMES_PR[p.t];
+        if (p.t === "K") return p.o === 0 ? "\u738B\u5C06" : "\u7389\u5C06";
+        return NAMES_FULL[p.t];
+      }
+
+      /* ================= UI ================= */
+      var boardEl = document.getElementById("board");
+      var handSenteEl = document.getElementById("handSente");
+      var handGoteEl = document.getElementById("handGote");
+      var turnMark = document.getElementById("turnMark");
+      var turnText = document.getElementById("turnText");
+      var statusSub = document.getElementById("statusSub");
+      var checkBadge = document.getElementById("checkBadge");
+      var kifuEl = document.getElementById("kifu");
+      var thinkingEl = document.getElementById("thinking");
+      var undoBtn = document.getElementById("undoBtn");
+      var resignBtn = document.getElementById("resignBtn");
+
+      var cells = [];
+      for (var ci = 0; ci < 81; ci++) {
+        var d = document.createElement("div");
+        d.className = "cell";
+        d.setAttribute("role", "gridcell");
+        (function (idx) { d.addEventListener("click", function () { onCellClick(idx); }); })(ci);
+        boardEl.appendChild(d);
+        cells.push(d);
+      }
+
+      var game = null; // { state, playerColor, level, history:[{state,kifu}], kifuList:[], over, rep:{} }
+      var selected = null; // { kind:'board', idx } | { kind:'hand', type }
+      var legalCache = []; // \u73FE\u5728\u306E\u624B\u756A\u306E\u5408\u6CD5\u624B
+      var pendingPromo = null;
+
+      var selColor = 0, selLevel = 2;
+      document.getElementById("colorSeg").addEventListener("click", function (e) {
+        if (e.target.tagName !== "BUTTON") return;
+        selColor = +e.target.getAttribute("data-color");
+        segOn("colorSeg", e.target);
+      });
+      document.getElementById("levelSeg").addEventListener("click", function (e) {
+        if (e.target.tagName !== "BUTTON") return;
+        selLevel = +e.target.getAttribute("data-level");
+        segOn("levelSeg", e.target);
+      });
+      function segOn(id, btn) {
+        var seg = document.getElementById(id);
+        for (var i = 0; i < seg.children.length; i++) seg.children[i].classList.remove("on");
+        btn.classList.add("on");
+      }
+      document.getElementById("startBtn").addEventListener("click", function () { startGame(selColor, selLevel); });
+      document.getElementById("againBtn").addEventListener("click", function () {
+        document.getElementById("resultOverlay").classList.remove("show");
+        startGame(game ? game.playerColor : selColor, game ? game.level : selLevel);
+      });
+      document.getElementById("resultClose").addEventListener("click", function () {
+        document.getElementById("resultOverlay").classList.remove("show");
+      });
+
+      function startGame(playerColor, level) {
+        game = {
+          state: initialState(),
+          playerColor: playerColor,
+          level: level,
+          history: [],
+          kifuList: [],
+          over: false,
+          rep: {}
+        };
+        game.rep[stateKey(game.state)] = 1;
+        selected = null;
+        pendingPromo = null;
+        refreshLegal();
+        render();
+        if (game.state.turn !== playerColor) aiTurn();
+      }
+
+      function refreshLegal() {
+        legalCache = game && !game.over ? legalMoves(game.state, game.state.turn, false) : [];
+      }
+
+      function isPlayerTurn() {
+        return game && !game.over && game.state.turn === game.playerColor;
+      }
+
+      function movesFrom(sel) {
+        if (!sel) return [];
+        return legalCache.filter(function (mv) {
+          if (sel.kind === "board") return mv.from === sel.idx;
+          return mv.drop === sel.type;
+        });
+      }
+
+      function onCellClick(idx) {
+        if (!isPlayerTurn() || pendingPromo) return;
+        var st = game.state;
+        // Is this square a destination of the current selection?
+        if (selected) {
+          var cands = movesFrom(selected).filter(function (mv) { return mv.to === idx; });
+          if (cands.length === 1) { doPlayerMove(cands[0]); return; }
+          if (cands.length > 1) {
+            // Promote / don't promote choice
+            pendingPromo = cands;
+            var pc = st.board[selected.idx];
+            document.getElementById("promoText").textContent =
+              "Your " + pieceNameEn(pc) + " can promote. Promoting changes how it moves.";
+            document.getElementById("promoOverlay").classList.add("show");
+            return;
+          }
+        }
+        var p = st.board[idx];
+        if (p && p.o === game.playerColor) {
+          selected = { kind: "board", idx: idx };
+        } else {
+          selected = null;
+        }
+        render();
+      }
+
+      function onHandClick(owner, type) {
+        if (!isPlayerTurn() || pendingPromo) return;
+        if (owner !== game.playerColor) return;
+        if (selected && selected.kind === "hand" && selected.type === type) selected = null;
+        else selected = { kind: "hand", type: type };
+        render();
+      }
+
+      document.getElementById("promoYes").addEventListener("click", function () { resolvePromo(true); });
+      document.getElementById("promoNo").addEventListener("click", function () { resolvePromo(false); });
+      function resolvePromo(promote) {
+        document.getElementById("promoOverlay").classList.remove("show");
+        if (!pendingPromo) return;
+        var mv = pendingPromo.filter(function (m) { return m.promote === promote; })[0];
+        pendingPromo = null;
+        if (mv) doPlayerMove(mv);
+      }
+
+      function doPlayerMove(mv) {
+        pushMove(mv);
+        selected = null;
+        render();
+        if (!game.over) aiTurn();
+      }
+
+      function aiTurn() {
+        if (game.over) return;
+        thinkingEl.classList.add("show");
+        render();
+        setTimeout(function () {
+          var mv = aiChooseMove(game.state, game.level);
+          thinkingEl.classList.remove("show");
+          if (!mv) { endGame(game.playerColor, "The computer has no legal moves left."); render(); return; }
+          pushMove(mv);
+          render();
+        }, 350);
+      }
+
+      function pushMove(mv) {
+        var st = game.state;
+        var notation = moveNotation(st, mv, game.kifuList.length + 1);
+        game.history.push({ state: st, });
+        game.kifuList.push(notation);
+        game.state = applyMove(st, mv);
+        playKnock();
+        // Sennichite (fourfold repetition) check
+        var key = stateKey(game.state);
+        game.rep[key] = (game.rep[key] || 0) + 1;
+        refreshLegal();
+        if (game.rep[key] >= 4) {
+          game.over = true;
+          endGame(null, "The same position occurred four times (sennichite), so the game is drawn.");
+          return;
+        }
+        if (legalCache.length === 0) {
+          game.over = true;
+          var loser = game.state.turn;
+          if (inCheck(game.state, loser)) {
+            endGame(1 - loser, "Checkmate.");
+          } else {
+            endGame(1 - loser, "No legal moves remain.");
+          }
+        }
+      }
+
+      function endGame(winner, sub) {
+        game.over = true;
+        var txt;
+        if (winner === null) txt = "It's a draw";
+        else if (winner === game.playerColor) txt = "You win!";
+        else txt = "The computer wins";
+        document.getElementById("resultText").textContent = txt;
+        document.getElementById("resultSub").textContent = sub || "";
+        setTimeout(function () { document.getElementById("resultOverlay").classList.add("show"); }, 450);
+      }
+
+      undoBtn.addEventListener("click", function () {
+        if (!game || game.history.length === 0 || thinkingEl.classList.contains("show")) return;
+        // Take back up to two plies, until it is the player's turn again
+        var steps = 0;
+        while (game.history.length > 0 && steps < 2) {
+          var h = game.history.pop();
+          game.state = h.state;
+          game.kifuList.pop();
+          steps++;
+          if (game.state.turn === game.playerColor) break;
+        }
+        game.over = false;
+        document.getElementById("resultOverlay").classList.remove("show");
+        // Rebuild the repetition counter
+        game.rep = {};
+        game.rep[stateKey(game.state)] = 1;
+        game.lastTo = -1;
+        selected = null;
+        refreshLegal();
+        render();
+        if (game.state.turn !== game.playerColor) aiTurn();
+      });
+
+      resignBtn.addEventListener("click", function () {
+        if (!game || game.over) return;
+        game.over = true;
+        refreshLegal();
+        endGame(1 - game.playerColor, "You resigned.");
+        render();
+      });
+
+      /* ---------- Sound effect (wooden piece knock) ---------- */
+      var audioCtx = null;
+      function playKnock() {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          var t = audioCtx.currentTime;
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(190, t);
+          osc.frequency.exponentialRampToValueAtTime(80, t + 0.07);
+          gain.gain.setValueAtTime(0.22, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(t); osc.stop(t + 0.1);
+        } catch (e) { /* the game continues even if sound fails */ }
+      }
+
+      /* ---------- Rendering ---------- */
+      function render() {
+        if (!game) return;
+        var st = game.state;
+        var dests = movesFrom(selected);
+        var destSet = {};
+        dests.forEach(function (mv) { destSet[mv.to] = true; });
+        var lastTo = -1;
+        // Use the stored last-move square (it cannot be derived from the move list)
+        lastTo = game.lastTo != null ? game.lastTo : -1;
+
+        for (var i = 0; i < 81; i++) {
+          var cell = cells[i];
+          var p = st.board[i];
+          var cls = "cell";
+          if (i === lastTo) cls += " last";
+          if (selected && selected.kind === "board" && selected.idx === i) cls += " selected";
+          if (p && p.t === "K" && inCheck(st, p.o)) cls += " check";
+          cell.className = cls;
+          var html = "";
+          if (p) {
+            var label = pieceLabel(p);
+            var sizeCls = label.length <= 1 ? "one" : "two";
+            if (label === "\u738B\u5C06" || label === "\u7389\u5C06" || label === "\u98DB\u8ECA" || label === "\u89D2\u884C" ||
+                label === "\u91D1\u5C06" || label === "\u9280\u5C06" || label === "\u6842\u99AC" || label === "\u9999\u8ECA" || label === "\u6B69\u5175" ||
+                label === "\u7ADC\u738B" || label === "\u7ADC\u99AC" || label === "\u6210\u9280" || label === "\u6210\u6842" || label === "\u6210\u9999") sizeCls = "two";
+            if (label === "\u3068\u91D1") sizeCls = "two";
+            html += '<div class="piece' + (p.o === 1 ? " gote" : "") + (p.pr ? " promo" : "") + " " + sizeCls + '">' + label + "</div>";
+          }
+          if (destSet[i]) html += p ? '<div class="ring"></div>' : '<div class="dot"></div>';
+          cell.innerHTML = html;
+        }
+
+        renderHand(handGoteEl, 1, "\u2616 Gote (" + (game.playerColor === 1 ? "you" : "computer") + ") in hand:");
+        renderHand(handSenteEl, 0, "\u2617 Sente (" + (game.playerColor === 0 ? "you" : "computer") + ") in hand:");
+        handSenteEl.classList.toggle("active", game.playerColor === 0);
+        handGoteEl.classList.toggle("active", game.playerColor === 1);
+
+        // Turn indicator
+        var mine = st.turn === game.playerColor;
+        turnMark.textContent = st.turn === 0 ? "\u2617" : "\u2616";
+        if (game.over) turnText.textContent = "Game over";
+        else turnText.textContent = mine ? "Your turn" : "Computer's turn";
+        var chk = !game.over && inCheck(st, st.turn);
+        checkBadge.classList.toggle("show", chk);
+        if (game.over) statusSub.textContent = "Thanks for playing. Press \\"Start Game\\" above to play another game.";
+        else if (chk) statusSub.textContent = mine ? "Your king is in check \u2014 you must protect it." : "The computer's king is in check.";
+        else if (mine) statusSub.textContent = selected ? "Tap a highlighted square to move there." : "Tap one of your pieces to see where it can move.";
+        else statusSub.textContent = "The computer is thinking.";
+
+        undoBtn.disabled = !game.history.length || thinkingEl.classList.contains("show");
+        resignBtn.disabled = game.over;
+
+        // Move list
+        if (game.kifuList.length === 0) {
+          kifuEl.innerHTML = '<span class="empty">No moves yet.</span>';
+        } else {
+          var rows = "";
+          for (var n = 0; n < game.kifuList.length; n += 2) {
+            var nowCls = (n + 2 >= game.kifuList.length) ? ' class="now"' : "";
+            rows += "<tr" + nowCls + "><td class='no'>" + (n / 2 + 1) + ".</td><td>" +
+              escapeHtml(game.kifuList[n]) + "</td><td>" +
+              (game.kifuList[n + 1] ? escapeHtml(game.kifuList[n + 1]) : "") + "</td></tr>";
+          }
+          kifuEl.innerHTML = "<table>" + rows + "</table>";
+          kifuEl.scrollTop = kifuEl.scrollHeight;
+        }
+      }
+
+      function renderHand(el, owner, title) {
+        var st = game.state;
+        var hand = st.hands[owner];
+        var html = '<span class="who">' + title + "</span>";
+        var any = false;
+        for (var i = 0; i < HAND_ORDER.length; i++) {
+          var t = HAND_ORDER[i];
+          var n = hand[t] || 0;
+          if (!n) continue;
+          any = true;
+          var sel = selected && selected.kind === "hand" && selected.type === t && owner === game.playerColor;
+          html += '<button type="button" class="hand-piece' + (owner === 1 ? " gote" : "") + (sel ? " sel" : "") +
+            '" data-owner="' + owner + '" data-type="' + t + '"><span class="shape">' + NAMES[t] + "</span>" +
+            (n > 1 ? '<span class="cnt">' + n + "</span>" : "") + "</button>";
+        }
+        if (!any) html += '<span class="none">None</span>';
+        el.innerHTML = html;
+        var btns = el.querySelectorAll(".hand-piece");
+        for (var j = 0; j < btns.length; j++) {
+          (function (btn) {
+            btn.addEventListener("click", function () {
+              onHandClick(+btn.getAttribute("data-owner"), btn.getAttribute("data-type"));
+            });
+          })(btns[j]);
+        }
+      }
+
+      function escapeHtml(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      // Wrap pushMove to record the last move's destination square
+      var origPush = pushMove;
+      pushMove = function (mv) { game.lastTo = mv.to; origPush(mv); };
+
+      /* ---------- Rules modal ---------- */
+      var rulesOverlay = document.getElementById("rulesOverlay");
+      document.getElementById("rulesBtn").addEventListener("click", function () { rulesOverlay.classList.add("show"); });
+      document.getElementById("rulesClose").addEventListener("click", function () { rulesOverlay.classList.remove("show"); });
+      rulesOverlay.addEventListener("click", function (e) { if (e.target === rulesOverlay) rulesOverlay.classList.remove("show"); });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") rulesOverlay.classList.remove("show");
+      });
+
+      /* ---------- Init ---------- */
+      startGame(0, 2);
+      /* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */
+    <\/script>
+  </body>
+</html>
+`;
+var go = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>9x9 Go Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@600;700&display=swap" rel="stylesheet" />
+<!-- Portal copy of the 9x9 Go library game. Served by app/routes/game-frame.$name.ts (login + teacher lock); fullscreen is the portal's GameFrame toolbar. Library original untouched. -->
+    <style>
+      :root {
+        --bg: #e9e6de;
+        --panel: #fbfaf6;
+        --panel-border: #d8d2c4;
+        --ink: #23211c;
+        --ink-soft: #5c574c;
+        --accent: #2e4a68;
+        --accent-ink: #ffffff;
+        --accent-soft: #dde5ee;
+        --danger: #b03a2e;
+        --danger-soft: #f6e3e0;
+        --board-hi: #eac87e;
+        --board-lo: #dda94f;
+        --board-line: #4a3517;
+        --marker: #c23b2a;
+        --shadow: 0 10px 30px rgba(50, 40, 15, 0.18);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #16181b;
+          --panel: #22252a;
+          --panel-border: #3a3e45;
+          --ink: #ece9e2;
+          --ink-soft: #a9a499;
+          --accent: #7fa6cf;
+          --accent-ink: #10151c;
+          --accent-soft: #2b3644;
+          --danger: #e08a7f;
+          --danger-soft: #42302c;
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap;
+      }
+      main {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 20px 16px 40px;
+        container-type: inline-size;
+        container-name: game;
+      }
+      /* ---------- Top actions ---------- */
+      .top-bar {
+        display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+        margin-bottom: 12px;
+      }
+      .rules-btn { flex: 0 0 auto; white-space: nowrap; font-weight: 700; }
+      /* ---------- New Game (top of the game) ---------- */
+      .new-game-card { margin-bottom: 16px; }
+      .new-game-fields { display: flex; gap: 14px 16px; align-items: flex-end; flex-wrap: wrap; }
+      .new-game-fields .field { flex: 1 1 250px; margin-bottom: 0; min-width: min(250px, 100%); }
+      .new-game-action { flex: 0 1 230px; min-width: min(230px, 100%); }
+      .new-game-action button { width: 100%; }
+      /* ---------- Board + panel arrangement ---------- */
+      .game-layout {
+        display: flex;
+        gap: 22px;
+        align-items: flex-start;
+      }
+      .game-layout.layout-side { flex-direction: row; }
+      .game-layout.layout-side .panel { flex: 0 1 308px; }
+      .game-layout.layout-stacked { flex-direction: column; }
+      .game-layout.layout-stacked .board-wrap { width: 100%; }
+      .game-layout.layout-stacked .panel { flex: none; width: 100%; }
+      .game-layout.layout-auto { flex-direction: row; }
+      /* Auto follows the width actually available to the game \u2014 the iframe
+         or column it is embedded in \u2014 not just the device screen. */
+      @container game (max-width: 680px) {
+        .game-layout.layout-auto { flex-direction: column; }
+        .game-layout.layout-auto .board-wrap { width: 100%; }
+        .game-layout.layout-auto .panel { flex: none; width: 100%; }
+      }
+      /* ---------- Board ---------- */
+      .board-wrap { flex: 1 1 auto; min-width: 0; width: 100%; }
+      .board {
+        position: relative;
+        width: 100%;
+        max-width: 560px;
+        margin: 0 auto;
+        aspect-ratio: 1 / 1;
+        border-radius: 10px;
+        background:
+          repeating-linear-gradient(93deg, rgba(120, 84, 20, 0.05) 0 3px, transparent 3px 11px),
+          linear-gradient(145deg, var(--board-hi), var(--board-lo) 70%, #d29f42);
+        box-shadow: var(--shadow), inset 0 0 0 2px rgba(90, 62, 18, 0.35), inset 0 2px 10px rgba(255, 240, 200, 0.5);
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .board svg.grid { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .board.locked { pointer-events: none; }
+      .hit {
+        position: absolute;
+        width: 10.5%; height: 10.5%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 3;
+      }
+      .hit:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      .stone {
+        position: absolute;
+        width: 10%; height: 10%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .stone.black {
+        background: radial-gradient(circle at 35% 32%, #6b6b6b 0%, #2c2c2c 45%, #060606 100%);
+        box-shadow: 0 3px 5px rgba(40, 26, 4, 0.45), inset 0 -2px 4px rgba(0,0,0,0.6);
+      }
+      .stone.white {
+        background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f1efe8 55%, #c9c7bd 100%);
+        box-shadow: 0 3px 5px rgba(40, 26, 4, 0.4), inset 0 -2px 4px rgba(120, 115, 100, 0.35);
+      }
+      .stone .last-dot {
+        position: absolute; left: 50%; top: 50%;
+        width: 26%; height: 26%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: var(--marker);
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+      }
+      .ghost {
+        position: absolute;
+        width: 10%; height: 10%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.08s;
+      }
+      .ghost.black { background: radial-gradient(circle at 35% 32%, #6b6b6b, #060606); }
+      .ghost.white { background: radial-gradient(circle at 35% 30%, #ffffff, #c9c7bd); }
+      .ghost.show { opacity: 0.45; }
+      .terr {
+        position: absolute;
+        width: 4.6%; height: 4.6%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 1;
+      }
+      .terr.black { background: rgba(10, 10, 10, 0.75); }
+      .terr.white { background: rgba(255, 255, 255, 0.85); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); }
+      @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+      .board.shake { animation: shake 0.18s ease-in-out 2; }
+      /* ---------- Panel ---------- */
+      .panel {
+        flex: 0 1 308px;
+        width: 308px;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .status {
+        display: flex; align-items: center; gap: 10px;
+        font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", serif;
+        font-size: 20px; font-weight: 700; line-height: 1.35;
+      }
+      .status .dot {
+        flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+      }
+      .status .dot.black { background: radial-gradient(circle at 35% 32%, #6b6b6b, #060606); box-shadow: 0 2px 3px rgba(0,0,0,0.35); }
+      .status .dot.white { background: radial-gradient(circle at 35% 30%, #ffffff, #c9c7bd); box-shadow: 0 2px 3px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(0,0,0,0.12); }
+      .status .dot.none { background: transparent; box-shadow: inset 0 0 0 2px var(--panel-border); }
+      .message {
+        margin-top: 8px; min-height: 1.5em;
+        font-size: 13.5px; color: var(--ink-soft); line-height: 1.55;
+      }
+      .message.warn { color: var(--danger); font-weight: 500; }
+      .score-rows { display: flex; flex-direction: column; gap: 8px; }
+      .score-row { display: flex; align-items: center; gap: 9px; font-size: 14.5px; }
+      .score-row .mini {
+        flex: 0 0 auto; width: 16px; height: 16px; border-radius: 50%;
+      }
+      .mini.black { background: radial-gradient(circle at 35% 32%, #6b6b6b, #060606); }
+      .mini.white { background: radial-gradient(circle at 35% 30%, #ffffff, #c9c7bd); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18); }
+      .score-row .who { font-weight: 500; }
+      .score-row .pts { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+      .score-row .sub { font-size: 12px; color: var(--ink-soft); font-weight: 400; }
+      .meter {
+        margin-top: 12px; height: 9px; border-radius: 99px; overflow: hidden;
+        display: flex; background: #e8e4da;
+      }
+      @media (prefers-color-scheme: dark) { .meter { background: #101114; } }
+      .meter .mb { background: #26241f; transition: width 0.35s ease; }
+      .meter .mw { background: #f4f2ec; transition: width 0.35s ease; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+      .meter-label { margin-top: 6px; font-size: 12px; color: var(--ink-soft); text-align: center; }
+      .cap-row { display: flex; gap: 16px; margin-top: 12px; font-size: 13.5px; color: var(--ink-soft); }
+      .cap-row b { color: var(--ink); font-variant-numeric: tabular-nums; }
+      .card h2 {
+        margin: 0 0 10px; font-size: 13px; letter-spacing: 0.08em;
+        color: var(--ink-soft); font-weight: 700;
+      }
+      .btn-row { display: flex; gap: 8px; }
+      button {
+        font-family: inherit; font-size: 14.5px; font-weight: 500;
+        border-radius: 9px; border: 1px solid var(--panel-border);
+        background: var(--panel); color: var(--ink);
+        padding: 10px 12px; cursor: pointer;
+        transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+      }
+      button:hover:not(:disabled) { border-color: var(--accent); }
+      button:disabled { opacity: 0.45; cursor: default; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); flex: 1; }
+      button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+      button.danger { color: var(--danger); }
+      button.danger:hover:not(:disabled) { border-color: var(--danger); background: var(--danger-soft); }
+      .btn-row button { flex: 1; }
+      .confirm-row { display: none; gap: 8px; margin-top: 8px; align-items: center; }
+      .confirm-row.show { display: flex; }
+      .confirm-row span { font-size: 13.5px; flex: 1; }
+      .seg { display: flex; border: 1px solid var(--panel-border); border-radius: 9px; overflow: hidden; }
+      .seg button { flex: 1; border: none; border-radius: 0; padding: 9px 6px; font-size: 14px; background: transparent; }
+      .seg button + button { border-left: 1px solid var(--panel-border); }
+      .seg button.on { background: var(--accent-soft); font-weight: 700; color: var(--ink); }
+      .field { margin-bottom: 12px; }
+      .field:last-child { margin-bottom: 0; }
+      .field label { display: block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 6px; font-weight: 500; }
+      .rules-content { font-size: 14px; line-height: 1.75; color: var(--ink-soft); text-align: left; }
+      .rules-content ul { margin: 0 0 20px; padding-left: 20px; }
+      .rules-content li { margin-bottom: 6px; }
+      .rules-content li:last-child { margin-bottom: 0; }
+      .dialog.rules-dialog { text-align: left; max-width: 520px; }
+      .dialog.rules-dialog .result-title { text-align: left; font-size: 24px; margin-bottom: 14px; }
+      /* ---------- Result modal ---------- */
+      .overlay {
+        position: fixed; inset: 0; z-index: 20;
+        background: rgba(18, 16, 10, 0.55);
+        display: none; align-items: center; justify-content: center;
+        padding: 18px;
+      }
+      .overlay.show { display: flex; }
+      .dialog {
+        background: var(--panel); color: var(--ink);
+        border-radius: 14px; padding: 26px 24px;
+        width: 100%; max-width: 400px;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+      .dialog .result-title {
+        font-family: "Shippori Mincho B1", serif;
+        font-size: 27px; font-weight: 700; margin: 0 0 4px;
+      }
+      .dialog .result-sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 18px; }
+      .dialog table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin-bottom: 20px; }
+      .dialog th, .dialog td { padding: 8px 6px; text-align: right; font-variant-numeric: tabular-nums; }
+      .dialog th:first-child, .dialog td:first-child { text-align: left; }
+      .dialog thead th { border-bottom: 2px solid var(--panel-border); font-weight: 700; }
+      .dialog tbody td { border-bottom: 1px solid var(--panel-border); }
+      .dialog tfoot td { font-weight: 700; font-size: 16px; }
+      .dialog .btn-row { margin-top: 4px; }
+      @media (max-width: 680px) {
+        main { padding: 14px 12px 32px; }
+        /* Fallback for browsers without container queries: Auto stacks.
+           Forced Side / Board on top choices are left untouched. */
+        .game-layout.layout-auto { flex-direction: column; }
+        .game-layout.layout-auto .panel { flex: none; width: 100%; }
+        .board { max-width: 500px; }
+        .game-layout.layout-side { gap: 12px; }
+        .game-layout.layout-side .panel { flex-basis: 248px; }
+        .game-layout.layout-side .btn-row { flex-wrap: wrap; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="sr-only">9x9 Go \u2014 Play Against the Computer</h1>
+    <main>
+      <div class="top-bar">
+        <button type="button" class="rules-btn" id="btnRules" aria-haspopup="dialog">How to Play &amp; Rules</button>
+      </div>
+      <section class="card new-game-card">
+        <h2>New Game</h2>
+        <div class="new-game-fields">
+          <div class="field">
+            <label>Your stones</label>
+            <div class="seg" id="segColor">
+              <button type="button" data-color="1" class="on">Black (first)</button>
+              <button type="button" data-color="2">White (second)</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Computer strength</label>
+            <div class="seg" id="segLevel">
+              <button type="button" data-level="0">Beginner</button>
+              <button type="button" data-level="1" class="on">Normal</button>
+            </div>
+          </div>
+          <div class="btn-row new-game-action">
+            <button id="btnNew" type="button" class="primary">Start New Game</button>
+          </div>
+        </div>
+      </section>
+      <div class="game-layout layout-auto" id="gameLayout">
+      <div class="board-wrap">
+        <div class="board" id="board" aria-label="9x9 Go board">
+          <svg class="grid" viewBox="0 0 200 200" aria-hidden="true">
+            <g id="gridLines">
+              <g stroke="#4a3517" stroke-width="0.6">
+                <line x1="16" y1="16" x2="16" y2="184"/>
+                <line x1="16" y1="16" x2="184" y2="16"/>
+                <line x1="37" y1="16" x2="37" y2="184"/>
+                <line x1="16" y1="37" x2="184" y2="37"/>
+                <line x1="58" y1="16" x2="58" y2="184"/>
+                <line x1="16" y1="58" x2="184" y2="58"/>
+                <line x1="79" y1="16" x2="79" y2="184"/>
+                <line x1="16" y1="79" x2="184" y2="79"/>
+                <line x1="100" y1="16" x2="100" y2="184"/>
+                <line x1="16" y1="100" x2="184" y2="100"/>
+                <line x1="121" y1="16" x2="121" y2="184"/>
+                <line x1="16" y1="121" x2="184" y2="121"/>
+                <line x1="142" y1="16" x2="142" y2="184"/>
+                <line x1="16" y1="142" x2="184" y2="142"/>
+                <line x1="163" y1="16" x2="163" y2="184"/>
+                <line x1="16" y1="163" x2="184" y2="163"/>
+                <line x1="184" y1="16" x2="184" y2="184"/>
+                <line x1="16" y1="184" x2="184" y2="184"/>
+              </g>
+              <rect x="16" y="16" width="168" height="168" fill="none" stroke="#4a3517" stroke-width="1.4"/>
+              <g fill="#4a3517">
+                <circle cx="58" cy="58" r="1.9"/>
+                <circle cx="142" cy="58" r="1.9"/>
+                <circle cx="58" cy="142" r="1.9"/>
+                <circle cx="142" cy="142" r="1.9"/>
+                <circle cx="100" cy="100" r="1.9"/>
+              </g>
+            </g>
+            <g id="gridLabels" font-family="Noto Sans JP, sans-serif" font-size="6.5" fill="#5d451a" text-anchor="middle">
+              <text x="16" y="8.5">A</text>
+              <text x="16" y="196">A</text>
+              <text x="7" y="18.2">9</text>
+              <text x="193" y="18.2">9</text>
+              <text x="37" y="8.5">B</text>
+              <text x="37" y="196">B</text>
+              <text x="7" y="39.2">8</text>
+              <text x="193" y="39.2">8</text>
+              <text x="58" y="8.5">C</text>
+              <text x="58" y="196">C</text>
+              <text x="7" y="60.2">7</text>
+              <text x="193" y="60.2">7</text>
+              <text x="79" y="8.5">D</text>
+              <text x="79" y="196">D</text>
+              <text x="7" y="81.2">6</text>
+              <text x="193" y="81.2">6</text>
+              <text x="100" y="8.5">E</text>
+              <text x="100" y="196">E</text>
+              <text x="7" y="102.2">5</text>
+              <text x="193" y="102.2">5</text>
+              <text x="121" y="8.5">F</text>
+              <text x="121" y="196">F</text>
+              <text x="7" y="123.2">4</text>
+              <text x="193" y="123.2">4</text>
+              <text x="142" y="8.5">G</text>
+              <text x="142" y="196">G</text>
+              <text x="7" y="144.2">3</text>
+              <text x="193" y="144.2">3</text>
+              <text x="163" y="8.5">H</text>
+              <text x="163" y="196">H</text>
+              <text x="7" y="165.2">2</text>
+              <text x="193" y="165.2">2</text>
+              <text x="184" y="8.5">J</text>
+              <text x="184" y="196">J</text>
+              <text x="7" y="186.2">1</text>
+              <text x="193" y="186.2">1</text>
+            </g>
+          </svg>
+          <div id="terrLayer"></div>
+          <div id="stoneLayer"></div>
+          <div class="ghost" id="ghost"></div>
+          <div id="hitLayer"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <section class="card" aria-live="polite">
+          <div class="status"><span class="dot black" id="statusDot"></span><span id="statusText">Your turn</span></div>
+          <p class="message" id="message">Black plays first. Tap (or click) an intersection to place a stone.</p>
+          <div class="cap-row">
+            <span>Moves <b id="moveCount">0</b></span>
+            <span>Black captures <b id="capBlack">0</b></span>
+            <span>White captures <b id="capWhite">0</b></span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Position Estimate</h2>
+          <div class="score-rows">
+            <div class="score-row"><span class="mini black"></span><span class="who">Black</span><span class="pts" id="estBlack">0.0</span></div>
+            <div class="score-row"><span class="mini white"></span><span class="who">White <span class="sub">incl. 6.5 komi</span></span><span class="pts" id="estWhite">6.5</span></div>
+          </div>
+          <div class="meter" aria-hidden="true"><div class="mb" id="meterBlack" style="width:50%"></div><div class="mw" id="meterWhite" style="width:50%"></div></div>
+          <p class="meter-label" id="meterLabel">Even</p>
+        </section>
+
+        <section class="card">
+          <h2>Game Controls</h2>
+          <div class="btn-row">
+            <button id="btnPass" type="button">Pass</button>
+            <button id="btnUndo" type="button">Undo</button>
+            <button id="btnResign" type="button" class="danger">Resign</button>
+          </div>
+          <div class="confirm-row" id="resignConfirm">
+            <span>Are you sure you want to resign?</span>
+            <button id="btnResignYes" type="button" class="danger">Resign</button>
+            <button id="btnResignNo" type="button">Cancel</button>
+          </div>
+        </section>
+
+      </div>
+      </div>
+    </main>
+
+    <div class="overlay" id="overlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <p class="result-title" id="resultTitle">Black wins</p>
+        <p class="result-sub" id="resultSub"></p>
+        <table id="resultTable">
+          <thead><tr><th></th><th>Black</th><th>White</th></tr></thead>
+          <tbody>
+            <tr><td>Stones on board</td><td id="rBS">0</td><td id="rWS">0</td></tr>
+            <tr><td>Territory</td><td id="rBT">0</td><td id="rWT">0</td></tr>
+            <tr><td>Komi</td><td>\u2014</td><td>6.5</td></tr>
+          </tbody>
+          <tfoot><tr><td>Total</td><td id="rBTotal">0</td><td id="rWTotal">0</td></tr></tfoot>
+        </table>
+        <div class="btn-row">
+          <button id="btnAgain" type="button" class="primary">Play Again</button>
+          <button id="btnCloseResult" type="button">View Board</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="rulesOverlay">
+      <div class="dialog rules-dialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+        <p class="result-title" id="rulesTitle">How to Play &amp; Rules</p>
+        <div class="rules-content">
+          <ul>
+            <li>Tap (or click) an intersection to place a stone. You can capture opponent stones by completely surrounding them.</li>
+            <li>You cannot play a suicide move (a point where your own stones would be captured) or a move that violates the ko rule.</li>
+            <li>If you have no good move, choose Pass. If both players pass in a row, the game ends and territory is counted.</li>
+            <li>Scoring uses Chinese rules: stones on the board plus surrounded empty points count as score. White receives 6.5 points of komi.</li>
+            <li>Undo takes the game back to your previous turn.</li>
+          </ul>
+        </div>
+        <div class="btn-row">
+          <button id="btnCloseRules" type="button" class="primary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+      var SIZE = 9, N = 81, KOMI = 6.5;
+      var EMPTY = 0, BLACK = 1, WHITE = 2;
+      var COLS = ["A","B","C","D","E","F","G","H","J"];
+
+      function idx(x, y) { return y * SIZE + x; }
+      function xy(i) { return [i % SIZE, Math.floor(i / SIZE)]; }
+      function nbrs(i) {
+        var x = i % SIZE, y = Math.floor(i / SIZE), out = [];
+        if (x > 0) out.push(i - 1);
+        if (x < SIZE - 1) out.push(i + 1);
+        if (y > 0) out.push(i - SIZE);
+        if (y < SIZE - 1) out.push(i + SIZE);
+        return out;
+      }
+      function hashOf(bd) { return bd.join(""); }
+
+      function groupInfo(bd, start) {
+        var color = bd[start], stones = [], libs = {}, seen = {};
+        var stack = [start]; seen[start] = true;
+        while (stack.length) {
+          var i = stack.pop(); stones.push(i);
+          var ns = nbrs(i);
+          for (var k = 0; k < ns.length; k++) {
+            var n = ns[k];
+            if (bd[n] === EMPTY) libs[n] = true;
+            else if (bd[n] === color && !seen[n]) { seen[n] = true; stack.push(n); }
+          }
+        }
+        return { stones: stones, liberties: Object.keys(libs).length, libSet: libs };
+      }
+
+      // Returns {board, captured} or null if illegal (occupied / suicide). Ko checked by caller.
+      function simulate(bd, color, i) {
+        if (bd[i] !== EMPTY) return null;
+        var nb = bd.slice(); nb[i] = color;
+        var opp = color === BLACK ? WHITE : BLACK, captured = 0;
+        var checked = {}, ns = nbrs(i), k, n, g, s;
+        for (k = 0; k < ns.length; k++) {
+          n = ns[k];
+          if (nb[n] === opp && !checked[n]) {
+            g = groupInfo(nb, n);
+            for (s = 0; s < g.stones.length; s++) checked[g.stones[s]] = true;
+            if (g.liberties === 0) {
+              for (s = 0; s < g.stones.length; s++) nb[g.stones[s]] = EMPTY;
+              captured += g.stones.length;
+            }
+          }
+        }
+        if (groupInfo(nb, i).liberties === 0) return null;
+        return { board: nb, captured: captured };
+      }
+
+      function scoreBoard(bd, estimate) {
+        var seen = new Array(N).fill(false), terrMap = new Array(N).fill(0);
+        var bS = 0, wS = 0, bT = 0, wT = 0, i;
+        for (i = 0; i < N; i++) { if (bd[i] === BLACK) bS++; else if (bd[i] === WHITE) wS++; }
+        for (i = 0; i < N; i++) {
+          if (bd[i] !== EMPTY || seen[i]) continue;
+          var region = [], borders = {}, stack = [i]; seen[i] = true;
+          while (stack.length) {
+            var c = stack.pop(); region.push(c);
+            var ns = nbrs(c);
+            for (var k = 0; k < ns.length; k++) {
+              var n = ns[k];
+              if (bd[n] === EMPTY) { if (!seen[n]) { seen[n] = true; stack.push(n); } }
+              else borders[bd[n]] = true;
+            }
+          }
+          var keys = Object.keys(borders);
+          if (keys.length === 1 && !(estimate && region.length > 18)) {
+            var owner = parseInt(keys[0], 10);
+            for (var r = 0; r < region.length; r++) terrMap[region[r]] = owner;
+            if (owner === BLACK) bT += region.length; else wT += region.length;
+          }
+        }
+        return { bS: bS, wS: wS, bT: bT, wT: wT, terrMap: terrMap,
+                 black: bS + bT, white: wS + wT + KOMI };
+      }
+
+      /* ---------------- AI ---------------- */
+      function aiChooseMove(bd, color, level, lastMove, moveCount, pastHashes) {
+        var opp = color === BLACK ? WHITE : BLACK;
+        var moves = [], i, sim;
+        for (i = 0; i < N; i++) {
+          if (bd[i] !== EMPTY) continue;
+          sim = simulate(bd, color, i);
+          if (!sim) continue;
+          if (pastHashes[hashOf(sim.board)]) continue;
+          moves.push({ i: i, sim: sim });
+        }
+        if (!moves.length) return -1;
+
+        var best = null, bestScore = -Infinity;
+        for (var m = 0; m < moves.length; m++) {
+          var mv = moves[m], p = mv.i, nb = mv.sim.board;
+          var pt = xy(p), x = pt[0], y = pt[1];
+          var s = 0;
+          // capture
+          s += mv.sim.captured * 11 + (mv.sim.captured > 0 ? 4 : 0);
+          // resulting own group safety
+          var own = groupInfo(nb, p);
+          if (own.liberties === 1 && mv.sim.captured === 0) s -= 13;
+          else if (own.liberties === 2) s += 0.6;
+          // pre-move analysis of neighbours
+          var ns = nbrs(p), friendlyAtariSave = false, allFriendly = ns.length > 0;
+          var seenG = {};
+          for (var k = 0; k < ns.length; k++) {
+            var n = ns[k];
+            if (bd[n] === EMPTY) { allFriendly = false; s += 0.35; continue; }
+            if (bd[n] !== color) allFriendly = false;
+            if (seenG[n]) continue;
+            var g0 = groupInfo(bd, n);
+            for (var q = 0; q < g0.stones.length; q++) seenG[g0.stones[q]] = true;
+            if (bd[n] === color) {
+              s += 1.2; // connection / extension
+              if (g0.liberties === 1) { friendlyAtariSave = true; s += 7 + g0.stones.length * 2.5; }
+            } else {
+              s += 1.4; // contact with enemy
+              var gAfter = groupInfo(nb, n);
+              if (gAfter.liberties === 1) s += 5 + g0.stones.length * 2;
+              else if (g0.liberties === 2) s += 2.5; // reducing to atari threat
+            }
+          }
+          // filling own eye
+          if (allFriendly && mv.sim.captured === 0 && !friendlyAtariSave) s -= 9;
+          // stay near the action
+          if (lastMove >= 0) {
+            var lp = xy(lastMove);
+            var d = Math.max(Math.abs(lp[0] - x), Math.abs(lp[1] - y));
+            if (d <= 2) s += 2.6 - d * 0.6;
+          }
+          // opening preferences on 9x9
+          var line = Math.min(x, SIZE - 1 - x, y, SIZE - 1 - y);
+          if (moveCount < 18) {
+            if (line === 0) s -= 3.2;
+            else if (line === 1) s += 0.8;
+            if ((x === 2 || x === 6) && (y === 2 || y === 6)) s += 1.2;
+            if (x === 4 && y === 4) s += 0.7;
+          } else if (line === 0) s -= 0.8;
+          // jitter by level
+          s += Math.random() * (level === 0 ? 5.5 : 1.1);
+          mv.score = s;
+          if (s > bestScore) { bestScore = s; best = mv; }
+        }
+        if (level === 0) {
+          // beginner: sometimes pick from the top handful
+          moves.sort(function (a, b) { return b.score - a.score; });
+          var top = moves.slice(0, Math.min(5, moves.length));
+          if (Math.random() < 0.35) best = top[Math.floor(Math.random() * top.length)];
+        }
+        // pass when nothing meaningful remains
+        if (bestScore < 2.0 && moveCount > 34) return -1;
+        if (bestScore < -2) return -1;
+        return best.i;
+      }
+
+      /* ---------------- Game state ---------------- */
+      var playerColor = BLACK, aiLevel = 1;
+      var gameLog = []; // snapshots: {board, toMove, capB, capW, lastMove, passes, hash}
+      var thinking = false, gameOver = false, overReason = "";
+
+      function cur() { return gameLog[gameLog.length - 1]; }
+      function emptyBoard() { return new Array(N).fill(0); }
+
+      function newGame() {
+        gameLog = [{ board: emptyBoard(), toMove: BLACK, capB: 0, capW: 0, lastMove: -2, passes: 0, hash: hashOf(emptyBoard()) }];
+        gameOver = false; overReason = ""; thinking = false;
+        hideResignConfirm();
+        el.overlay.classList.remove("show");
+        setMessage(playerColor === BLACK
+          ? "Black plays first. Tap (or click) an intersection to place a stone."
+          : "You are White. The computer (Black) will play first.", false);
+        render();
+        maybeAiTurn();
+      }
+
+      function pastHashes() {
+        var map = {};
+        for (var i = 0; i < gameLog.length - 1; i++) map[gameLog[i].hash] = true;
+        return map;
+      }
+
+      function pushMove(color, i) {
+        var s = cur();
+        if (i === -1) {
+          gameLog.push({ board: s.board.slice(), toMove: color === BLACK ? WHITE : BLACK,
+            capB: s.capB, capW: s.capW, lastMove: -1, passes: s.passes + 1, hash: s.hash });
+          return { captured: 0 };
+        }
+        var sim = simulate(s.board, color, i);
+        gameLog.push({ board: sim.board, toMove: color === BLACK ? WHITE : BLACK,
+          capB: s.capB + (color === BLACK ? sim.captured : 0),
+          capW: s.capW + (color === WHITE ? sim.captured : 0),
+          lastMove: i, passes: 0, hash: hashOf(sim.board) });
+        return sim;
+      }
+
+      function moveCount() { return gameLog.length - 1; }
+
+      /* ---------------- Sound ---------------- */
+      var audioCtx = null;
+      function stoneSound() {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          var t = audioCtx.currentTime;
+          var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          o.type = "triangle";
+          o.frequency.setValueAtTime(1500, t);
+          o.frequency.exponentialRampToValueAtTime(280, t + 0.035);
+          g.gain.setValueAtTime(0.12, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(t); o.stop(t + 0.06);
+        } catch (e) { /* sound is optional */ }
+      }
+
+      /* ---------------- DOM ---------------- */
+      var el = {};
+      ["board","stoneLayer","terrLayer","hitLayer","ghost","statusDot","statusText","message",
+       "moveCount","capBlack","capWhite","estBlack","estWhite","meterBlack","meterWhite","meterLabel",
+       "btnPass","btnUndo","btnResign","resignConfirm","btnResignYes","btnResignNo","btnNew",
+       "segColor","segLevel","segLayout","gameLayout","overlay","resultTitle","resultSub",
+       "rBS","rWS","rBT","rWT","rBTotal","rWTotal","btnAgain","btnCloseResult","gridLines","gridLabels",
+       "btnRules","rulesOverlay","btnCloseRules"
+      ].forEach(function (id) { el[id] = document.getElementById(id); });
+
+      // Grid lines + labels ship as static SVG markup above (no JS needed to
+      // render the intersections). This only rebuilds them \u2014 using
+      // createElementNS, never innerHTML on SVG nodes \u2014 if they are missing.
+      (function buildGrid() {
+        if (!el.gridLines || el.gridLines.childNodes.length > 0) return;
+        var NS = "http://www.w3.org/2000/svg", i, p;
+        function mk(tag, attrs, parent) {
+          var n = document.createElementNS(NS, tag);
+          for (var k in attrs) n.setAttribute(k, attrs[k]);
+          (parent || el.gridLines).appendChild(n);
+          return n;
+        }
+        for (i = 0; i < SIZE; i++) {
+          p = 16 + i * 21;
+          mk("line", { x1: p, y1: 16, x2: p, y2: 184, stroke: "#4a3517", "stroke-width": 0.6 });
+          mk("line", { x1: 16, y1: p, x2: 184, y2: p, stroke: "#4a3517", "stroke-width": 0.6 });
+        }
+        mk("rect", { x: 16, y: 16, width: 168, height: 168, fill: "none", stroke: "#4a3517", "stroke-width": 1.4 });
+        [[2,2],[6,2],[2,6],[6,6],[4,4]].forEach(function (h) {
+          mk("circle", { cx: 16 + h[0] * 21, cy: 16 + h[1] * 21, r: 1.9, fill: "#4a3517" });
+        });
+        if (el.gridLabels && el.gridLabels.childNodes.length === 0) {
+          for (i = 0; i < SIZE; i++) {
+            p = 16 + i * 21;
+            [["text", { x: p, y: 8.5 }, COLS[i]],
+             ["text", { x: p, y: 196 }, COLS[i]],
+             ["text", { x: 7, y: p + 2.2 }, String(SIZE - i)],
+             ["text", { x: 193, y: p + 2.2 }, String(SIZE - i)]].forEach(function (spec) {
+              var t = mk(spec[0], spec[1], el.gridLabels);
+              t.textContent = spec[2];
+            });
+          }
+        }
+      })();
+
+      function pct(i) { var p = xy(i); return [8 + p[0] * 10.5, 8 + p[1] * 10.5]; }
+
+      // Hit areas
+      (function buildHits() {
+        for (var i = 0; i < N; i++) {
+          (function (i) {
+            var d = document.createElement("div");
+            d.className = "hit"; d.setAttribute("role", "button");
+            var pos = pct(i);
+            d.style.left = pos[0] + "%"; d.style.top = pos[1] + "%";
+            d.setAttribute("aria-label", "Play at " + COLS[i % SIZE] + (SIZE - Math.floor(i / SIZE)));
+            d.addEventListener("click", function () { onPoint(i); });
+            d.addEventListener("mouseenter", function () { showGhost(i); });
+            d.addEventListener("mouseleave", function () { el.ghost.classList.remove("show"); });
+            el.hitLayer.appendChild(d);
+          })(i);
+        }
+      })();
+
+      function showGhost(i) {
+        if (gameOver || thinking) return;
+        var s = cur();
+        if (s.toMove !== playerColor || s.board[i] !== EMPTY) { el.ghost.classList.remove("show"); return; }
+        var pos = pct(i);
+        el.ghost.style.left = pos[0] + "%"; el.ghost.style.top = pos[1] + "%";
+        el.ghost.className = "ghost show " + (playerColor === BLACK ? "black" : "white");
+      }
+
+      function setMessage(text, warn) {
+        el.message.textContent = text;
+        el.message.className = "message" + (warn ? " warn" : "");
+      }
+
+      function render() {
+        var s = cur();
+        // stones
+        var html = "";
+        for (var i = 0; i < N; i++) {
+          if (s.board[i] === EMPTY) continue;
+          var pos = pct(i);
+          html += '<div class="stone ' + (s.board[i] === BLACK ? "black" : "white") + '" style="left:' + pos[0] + '%;top:' + pos[1] + '%">'
+            + (s.lastMove === i ? '<span class="last-dot"></span>' : "") + "</div>";
+        }
+        el.stoneLayer.innerHTML = html;
+        // territory markers only when finished by double pass
+        var thtml = "";
+        if (gameOver && overReason === "score") {
+          var sc = scoreBoard(s.board);
+          for (var j = 0; j < N; j++) {
+            if (sc.terrMap[j] !== 0) {
+              var tp = pct(j);
+              thtml += '<div class="terr ' + (sc.terrMap[j] === BLACK ? "black" : "white") + '" style="left:' + tp[0] + '%;top:' + tp[1] + '%"></div>';
+            }
+          }
+        }
+        el.terrLayer.innerHTML = thtml;
+        // status
+        var mine = playerColor === BLACK ? "Black" : "White";
+        if (gameOver) {
+          el.statusDot.className = "dot none";
+          el.statusText.textContent = "Game over";
+        } else if (thinking) {
+          el.statusDot.className = "dot " + (playerColor === BLACK ? "white" : "black");
+          el.statusText.textContent = "Computer is thinking\u2026";
+        } else if (s.toMove === playerColor) {
+          el.statusDot.className = "dot " + (playerColor === BLACK ? "black" : "white");
+          el.statusText.textContent = "Your turn (" + mine + ")";
+        } else {
+          el.statusDot.className = "dot " + (playerColor === BLACK ? "white" : "black");
+          el.statusText.textContent = "Computer's turn";
+        }
+        el.moveCount.textContent = moveCount();
+        el.capBlack.textContent = s.capB;
+        el.capWhite.textContent = s.capW;
+        // estimate
+        var est = scoreBoard(s.board, true);
+        el.estBlack.textContent = est.black.toFixed(1);
+        el.estWhite.textContent = est.white.toFixed(1);
+        var total = est.black + est.white;
+        var bw = total > 0 ? (est.black / total) * 100 : 50;
+        el.meterBlack.style.width = bw + "%";
+        el.meterWhite.style.width = (100 - bw) + "%";
+        var diff = est.black - est.white;
+        el.meterLabel.textContent = Math.abs(diff) < 1.5 ? "Even"
+          : (diff > 0 ? "Black leads by about " + diff.toFixed(1) + " points" : "White leads by about " + Math.abs(diff).toFixed(1) + " points");
+        // controls
+        var myTurn = !gameOver && !thinking && s.toMove === playerColor;
+        el.btnPass.disabled = !myTurn;
+        el.btnResign.disabled = gameOver;
+        el.btnUndo.disabled = thinking || gameOver || gameLog.length <= 1 || (playerColor === WHITE && gameLog.length <= 2);
+        el.board.classList.toggle("locked", !myTurn);
+      }
+
+      /* ---------------- Flow ---------------- */
+      function onPoint(i) {
+        if (gameOver || thinking) return;
+        var s = cur();
+        if (s.toMove !== playerColor) return;
+        var sim = simulate(s.board, playerColor, i);
+        if (!sim) {
+          el.board.classList.remove("shake"); void el.board.offsetWidth; el.board.classList.add("shake");
+          setMessage("You can't play there (suicide move or already occupied).", true);
+          return;
+        }
+        if (pastHashes()[hashOf(sim.board)]) {
+          el.board.classList.remove("shake"); void el.board.offsetWidth; el.board.classList.add("shake");
+          setMessage("Ko \u2014 you can't play a move that repeats the same position.", true);
+          return;
+        }
+        pushMove(playerColor, i);
+        stoneSound();
+        el.ghost.classList.remove("show");
+        var cap = sim.captured;
+        setMessage(cap > 0 ? "You captured " + cap + (cap > 1 ? " stones." : " stone.") : "Move played. Waiting for the computer's move.", false);
+        render();
+        maybeAiTurn();
+      }
+
+      function maybeAiTurn() {
+        var s = cur();
+        if (gameOver || s.toMove === playerColor) { render(); return; }
+        thinking = true; render();
+        var aiColor = s.toMove;
+        var delay = 380 + Math.random() * 420;
+        setTimeout(function () {
+          thinking = false;
+          if (gameOver) { render(); return; }
+          // AI resigns when hopelessly behind late in the game
+          var est = scoreBoard(cur().board);
+          var aiScore = aiColor === BLACK ? est.black : est.white;
+          var plScore = aiColor === BLACK ? est.white : est.black;
+          if (moveCount() > 55 && plScore - aiScore > 28) {
+            finishByResign(aiColor);
+            return;
+          }
+          var mv = aiChooseMove(cur().board, aiColor, aiLevel, cur().lastMove, moveCount(), pastHashes());
+          if (mv === -1) {
+            pushMove(aiColor, -1);
+            if (cur().passes >= 2) { finishByScore(); return; }
+            setMessage("The computer passed. If you pass as well, the game will end and territory will be counted.", false);
+          } else {
+            var r = pushMove(aiColor, mv);
+            stoneSound();
+            var pos = xy(mv);
+            var coord = COLS[pos[0]] + (SIZE - pos[1]);
+            setMessage(r.captured > 0
+              ? "The computer played " + coord + " and captured " + r.captured + " of your stones."
+
+              : "The computer played " + coord + ". Your turn.", false);
+          }
+          render();
+        }, delay);
+      }
+
+      function finishByScore() {
+        gameOver = true; overReason = "score";
+        var sc = scoreBoard(cur().board);
+        var blackWin = sc.black > sc.white;
+        var diff = Math.abs(sc.black - sc.white).toFixed(1);
+        showResult(blackWin ? "Black wins" : "White wins",
+          (blackWin ? "Black" : "White") + " wins by " + diff + " points (both players passed).", sc);
+        render();
+      }
+
+      function finishByResign(resigner) {
+        gameOver = true; overReason = "resign";
+        var winner = resigner === BLACK ? WHITE : BLACK;
+        var sc = scoreBoard(cur().board);
+        showResult((winner === BLACK ? "Black" : "White") + " wins",
+          (resigner === playerColor ? "You resigned" : "The computer resigned") + ", so " + (winner === BLACK ? "Black" : "White") + " wins.", sc);
+        render();
+      }
+
+      function showResult(title, sub, sc) {
+        el.resultTitle.textContent = title;
+        el.resultSub.textContent = sub;
+        el.rBS.textContent = sc.bS; el.rWS.textContent = sc.wS;
+        el.rBT.textContent = sc.bT; el.rWT.textContent = sc.wT;
+        el.rBTotal.textContent = sc.black.toFixed(1);
+        el.rWTotal.textContent = sc.white.toFixed(1);
+        el.overlay.classList.add("show");
+      }
+
+      el.btnPass.addEventListener("click", function () {
+        if (gameOver || thinking) return;
+        var s = cur();
+        if (s.toMove !== playerColor) return;
+        hideResignConfirm();
+        pushMove(playerColor, -1);
+        if (cur().passes >= 2) { finishByScore(); return; }
+        setMessage("You passed. It's the computer's turn.", false);
+        render();
+        maybeAiTurn();
+      });
+
+      el.btnUndo.addEventListener("click", function () {
+        if (thinking || gameOver) return;
+        var popped = 0;
+        while (gameLog.length > 1) {
+          gameLog.pop(); popped++;
+          if (cur().toMove === playerColor && popped >= 2) break;
+        }
+        if (cur().toMove !== playerColor && gameLog.length > 1) {
+          // fall back: pop until player's turn or start
+          while (gameLog.length > 1 && cur().toMove !== playerColor) gameLog.pop();
+        }
+        hideResignConfirm();
+        setMessage("Move undone. Your turn.", false);
+        render();
+      });
+
+      function hideResignConfirm() { el.resignConfirm.classList.remove("show"); }
+      el.btnResign.addEventListener("click", function () {
+        if (gameOver) return;
+        el.resignConfirm.classList.add("show");
+      });
+      el.btnResignNo.addEventListener("click", hideResignConfirm);
+      el.btnResignYes.addEventListener("click", function () {
+        hideResignConfirm();
+        finishByResign(playerColor);
+      });
+
+      function segWire(segEl, attr, fn) {
+        segEl.addEventListener("click", function (e) {
+          var b = e.target.closest("button"); if (!b) return;
+          var btns = segEl.querySelectorAll("button");
+          for (var i = 0; i < btns.length; i++) btns[i].classList.remove("on");
+          b.classList.add("on");
+          fn(parseInt(b.getAttribute(attr), 10));
+        });
+      }
+      segWire(el.segColor, "data-color", function (v) { playerColor = v; });
+      segWire(el.segLevel, "data-level", function (v) { aiLevel = v; });
+
+      /* ---------------- Layout: Auto / Side / Stacked ----------------
+         Auto follows the width available to the game itself (container
+         queries in CSS), so it works the same standalone or in an iframe.
+         A portal can also force it from the iframe URL, e.g.
+         go.html?layout=side or go.html?layout=stacked, or later from the
+         parent page with postMessage({ type: "go-layout", layout: "side" }). */
+      var LAYOUTS = { auto: "layout-auto", side: "layout-side", stacked: "layout-stacked" };
+      function setLayout(mode) {
+        if (!LAYOUTS[mode]) mode = "auto";
+        el.gameLayout.classList.remove("layout-auto", "layout-side", "layout-stacked");
+        el.gameLayout.classList.add(LAYOUTS[mode]);
+        if (el.segLayout) {
+          var btns = el.segLayout.querySelectorAll("button");
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].classList.toggle("on", btns[i].getAttribute("data-layout") === mode);
+          }
+        }
+      }
+      if (el.segLayout) {
+        el.segLayout.addEventListener("click", function (e) {
+          var b = e.target.closest("button"); if (!b) return;
+          setLayout(b.getAttribute("data-layout"));
+        });
+      }
+      window.addEventListener("message", function (e) {
+        if (e.data && e.data.type === "go-layout") setLayout(e.data.layout);
+      });
+      (function initLayout() {
+        var mode = "auto";
+        try {
+          var p = new URLSearchParams(window.location.search).get("layout");
+          if (p && LAYOUTS[p]) mode = p;
+        } catch (err) { /* keep Auto */ }
+        setLayout(mode);
+      })();
+
+      el.btnNew.addEventListener("click", newGame);
+      el.btnAgain.addEventListener("click", function () { el.overlay.classList.remove("show"); newGame(); });
+      el.btnCloseResult.addEventListener("click", function () { el.overlay.classList.remove("show"); });
+
+      /* ---------------- How to Play & Rules modal ---------------- */
+      function openRules() {
+        el.rulesOverlay.classList.add("show");
+        el.btnCloseRules.focus();
+      }
+      function closeRules() {
+        el.rulesOverlay.classList.remove("show");
+        el.btnRules.focus();
+      }
+      el.btnRules.addEventListener("click", openRules);
+      el.btnCloseRules.addEventListener("click", closeRules);
+      el.rulesOverlay.addEventListener("click", function (e) {
+        if (e.target === el.rulesOverlay) closeRules();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && el.rulesOverlay.classList.contains("show")) closeRules();
+      });
+
+      /* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */
+      newGame();
+    <\/script>
+  </body>
+</html>
+`;
+var hanafuda = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>\u82B1\u672D\u3000\u3053\u3044\u3053\u3044</title>
+<!-- Portal copy of the Hanafuda Koi-Koi library game. Served by app/routes/game-frame.$name.ts (login + teacher lock); fullscreen is the portal's GameFrame toolbar. Library original (ts-spaces/hua-zha-koikoi/index.html) untouched. -->
+    <style>
+      :root{
+        --bg:#f4efe4; --panel:#fffdf6; --ink:#2b2620; --ink-soft:#6b6257;
+        --line:#ddd3bd; --accent:#a33327; --accent-ink:#fff;
+        --felt:#33603f; --felt-dark:#274c31; --felt-line:#ffffff2b;
+        --gold:#c9a227; --chip:#efe6cf;
+        --card-w:58px; --card-h:87px;
+        --shadow:0 2px 10px rgba(60,45,20,.16);
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#191713; --panel:#24211b; --ink:#ece5d5; --ink-soft:#b3a98f;
+          --line:#453e30; --chip:#332e24; --shadow:0 2px 10px rgba(0,0,0,.5);
+          --felt:#2a5234; --felt-dark:#1f3f27;
+        }
+      }
+      *{box-sizing:border-box}
+      html,body{margin:0;padding:0}
+      body{
+        background:var(--bg); color:var(--ink);
+        font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic",system-ui,sans-serif;
+        line-height:1.55; -webkit-text-size-adjust:100%;
+      }
+      .wrap{max-width:1060px;margin:0 auto;padding:14px 14px 40px}
+      .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-bottom:10px}
+      .top-actions{display:flex;gap:10px;flex-wrap:wrap}
+      .page-title{
+        margin:0;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+        font-size:1.65rem;font-weight:700;line-height:1.35;letter-spacing:.02em;
+      }
+      .page-title rt{font-size:.58rem;letter-spacing:.22em;color:var(--ink-soft);font-weight:400}
+      button{
+        font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);
+        background:var(--panel);color:var(--ink);padding:8px 16px;
+      }
+      button:hover{filter:brightness(1.04)}
+      button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+      button:disabled{opacity:.45;cursor:default}
+      select{
+        font:inherit;padding:7px 10px;border-radius:10px;border:1px solid var(--line);
+        background:var(--panel);color:var(--ink);
+      }
+      /* New game card */
+      .setup{
+        background:var(--panel);border:1px solid var(--line);border-radius:14px;
+        box-shadow:var(--shadow);padding:12px 16px;margin-bottom:14px;
+        display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;
+      }
+      .setup .group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .setup label{font-weight:700;font-size:.92rem}
+      .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+      .seg button{border:0;border-radius:0;padding:7px 14px;background:transparent}
+      .seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+      /* Score strip */
+      .scorebar{
+        display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-bottom:12px;
+      }
+      .scorecell{
+        background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:8px 14px;box-shadow:var(--shadow);min-width:104px;
+      }
+      .scorecell .k{font-size:.72rem;color:var(--ink-soft);letter-spacing:.04em}
+      .scorecell .v{font-size:1.25rem;font-weight:800;line-height:1.2}
+      .scorecell.turn{outline:2px solid var(--gold);outline-offset:-2px}
+      .status{
+        flex:1 1 240px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:8px 14px;box-shadow:var(--shadow);display:flex;align-items:center;min-height:52px;
+        font-weight:600;
+      }
+      .status .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);margin-right:9px;flex:none}
+      /* Table */
+      .table{
+        background:radial-gradient(120% 120% at 50% 0%,var(--felt) 0%,var(--felt-dark) 100%);
+        border-radius:18px;padding:14px 12px 16px;color:#f5efdd;
+        border:1px solid #00000033;box-shadow:var(--shadow);
+      }
+      .zone-label{font-size:.78rem;letter-spacing:.08em;color:#e8dfbe;opacity:.9;margin:2px 2px 6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+      .cpu-hand{display:flex;gap:5px;flex-wrap:wrap;min-height:var(--card-h);align-items:flex-start}
+      .field{
+        border:1.5px dashed var(--felt-line);border-radius:14px;padding:10px;
+        display:flex;flex-wrap:wrap;gap:7px;min-height:calc(var(--card-h) + 22px);
+        align-content:flex-start;margin:8px 0;position:relative;background:#00000014;
+      }
+      .stock-wrap{display:flex;gap:12px;align-items:flex-start}
+      .stock-pile{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}
+      .stock-pile .cnt{font-size:.75rem;color:#e8dfbe}
+      .field-cards{display:flex;flex-wrap:wrap;gap:7px;flex:1;align-content:flex-start}
+      .my-hand{display:flex;gap:6px;flex-wrap:wrap;min-height:var(--card-h);align-items:flex-start}
+      /* Cards */
+      .card{
+        width:var(--card-w);height:var(--card-h);border-radius:6px;flex:none;
+        background:#fdf9ee;border:1px solid #b9a888;position:relative;overflow:hidden;
+        box-shadow:0 2px 5px rgba(0,0,0,.35);user-select:none;
+      }
+      .card svg{position:absolute;inset:0;width:100%;height:100%}
+      .card .tag{
+        position:absolute;right:2px;bottom:2px;font-size:.56rem;font-weight:800;line-height:1;
+        background:rgba(253,249,238,.88);border:1px solid #b9a888;border-radius:4px;padding:2px 3px;color:#5c4a26;
+      }
+      .card.back{
+        background:repeating-linear-gradient(45deg,#a33327 0 6px,#8e2a20 6px 12px);
+        border-color:#6f1f16;
+      }
+      .card.back::after{
+        content:"";position:absolute;inset:5px;border:1.5px solid #f3d9a4;border-radius:4px;opacity:.85;
+      }
+      .card.small{width:40px;height:60px}
+      .card.small .tag{font-size:.48rem;padding:1px 2px}
+      .my-hand .card{cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
+      .my-hand .card:hover{transform:translateY(-6px)}
+      .my-hand .card.match-hint{box-shadow:0 0 0 2px var(--gold),0 4px 8px rgba(0,0,0,.4)}
+      .my-hand .card.dim{opacity:.55}
+      .field .card.pickable{cursor:pointer;box-shadow:0 0 0 3px var(--gold),0 4px 10px rgba(0,0,0,.45);animation:pulse 1s infinite}
+      @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+      .card.just{box-shadow:0 0 0 3px #ffd94d,0 4px 10px rgba(0,0,0,.45)}
+      .table.locked .my-hand .card{cursor:default}
+      .table.locked .my-hand .card:hover{transform:none}
+      /* Captured piles */
+      .captured{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+      .cap-group{display:flex;flex-direction:column;gap:3px}
+      .cap-group .cap-label{font-size:.68rem;color:#e8dfbe;opacity:.85}
+      .cap-row{display:flex;flex-wrap:wrap}
+      .cap-row .card{margin-right:-24px}
+      .cap-row .card:last-child{margin-right:0}
+      .cap-empty{font-size:.75rem;color:#e8dfbe;opacity:.6;padding:6px 2px}
+      .yaku-now{font-size:.8rem;color:#ffe9a8;min-height:1.2em}
+      /* Yaku guide (separate frame below the game) */
+      .yaku-guide{
+        margin-top:18px;background:var(--panel);border:1px solid var(--line);
+        border-radius:18px;box-shadow:var(--shadow);padding:20px 18px 14px;
+      }
+      .yaku-guide-head h2{
+        margin:0 0 4px;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:1.4rem;line-height:1.3;
+      }
+      .yaku-guide-head p{margin:0 0 6px;color:var(--ink-soft);font-size:.92rem;max-width:72ch}
+      .yaku-grid{
+        display:grid;grid-template-columns:repeat(auto-fill,minmax(308px,1fr));
+        gap:14px;margin-top:14px;
+      }
+      .yaku-item{
+        border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;
+        background:var(--bg);display:flex;flex-direction:column;gap:8px;
+      }
+      .yaku-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+      .yaku-title{
+        margin:0;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+        font-size:1.42rem;font-weight:700;line-height:1.45;letter-spacing:.02em;
+      }
+      .yaku-title rt{font-size:.56rem;letter-spacing:.14em;color:var(--ink-soft);font-weight:400}
+      .yaku-pts{
+        flex:none;background:var(--accent);color:var(--accent-ink);font-weight:800;
+        font-size:.82rem;border-radius:999px;padding:3px 10px;white-space:nowrap;margin-top:4px;
+      }
+      .yaku-en{margin:0;font-weight:800;font-size:.98rem;line-height:1.3}
+      .yaku-cards{display:flex;flex-wrap:wrap;gap:6px}
+      .yaku-cards .card{width:50px;height:75px;cursor:default}
+      .yaku-cards .card .tag{font-size:.5rem;padding:1px 2px}
+      .yaku-desc{margin:0;font-size:.9rem;color:var(--ink)}
+      .yaku-need{margin:0;font-size:.85rem;color:var(--ink-soft)}
+      .yaku-need strong{color:var(--ink)}
+      .yaku-guide-note{margin:14px 2px 4px}
+      @media (max-width:640px){
+        .yaku-guide{padding:16px 12px 10px}
+        .yaku-grid{grid-template-columns:1fr}
+        .yaku-cards .card{width:46px;height:69px}
+      }
+      /* Dialogs */
+      .overlay{
+        position:fixed;inset:0;background:rgba(20,16,8,.55);display:none;
+        align-items:center;justify-content:center;padding:16px;z-index:50;
+      }
+      .overlay.open{display:flex}
+      .dialog{
+        background:var(--panel);color:var(--ink);border-radius:16px;max-width:520px;width:100%;
+        max-height:86vh;overflow:auto;padding:22px 24px;box-shadow:0 12px 40px rgba(0,0,0,.4);
+      }
+      .dialog h2{margin:0 0 8px;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:1.35rem}
+      .dialog h3{margin:18px 0 6px;font-size:1rem}
+      .dialog p{margin:6px 0}
+      .dialog ul{margin:6px 0;padding-left:1.3em}
+      .dialog li{margin:3px 0}
+      .dialog .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+      .dialog .btns button{flex:1 1 140px;padding:12px}
+      .koikoi-score{font-size:1.6rem;font-weight:800;color:var(--accent)}
+      table.yaku{border-collapse:collapse;width:100%;font-size:.9rem}
+      table.yaku td,table.yaku th{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
+      table.yaku td:last-child,table.yaku th:last-child{text-align:right;white-space:nowrap}
+      .round-result-yaku{margin:8px 0}
+      .round-result-yaku div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 2px}
+      .muted{color:var(--ink-soft);font-size:.88rem}
+      .final-score{font-size:1.15rem;font-weight:700}
+      @media (max-width:640px){
+        :root{--card-w:46px;--card-h:69px}
+        .wrap{padding:10px 8px 32px}
+        .cap-row .card{margin-right:-18px}
+        .scorecell{min-width:88px;padding:6px 10px}
+      }
+      @media (prefers-reduced-motion: reduce){
+        .field .card.pickable{animation:none}
+        .my-hand .card{transition:none}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <h1 class="page-title"><ruby>\u82B1\u672D<rt>\u306F\u306A\u3075\u3060</rt></ruby>\u3000\u3053\u3044\u3053\u3044</h1>
+        <div class="top-actions">
+          <button id="rulesBtn" type="button">How to Play &amp; Yaku List</button>
+        </div>
+      </div>
+
+      <section class="setup" aria-label="New match">
+        <div class="group">
+          <label>Match length</label>
+          <div class="seg" id="lengthSeg" role="group" aria-label="Match length">
+            <button type="button" data-len="3">3 months</button>
+            <button type="button" data-len="6">6 months</button>
+            <button type="button" data-len="12" class="on">12 months</button>
+          </div>
+        </div>
+        <div class="group">
+          <label>Computer strength</label>
+          <div class="seg" id="levelSeg" role="group" aria-label="Computer strength">
+            <button type="button" data-lv="1">Beginner</button>
+            <button type="button" data-lv="2" class="on">Normal</button>
+            <button type="button" data-lv="3">Strong</button>
+          </div>
+        </div>
+        <div class="group">
+          <button class="primary" id="startBtn" type="button">Start Match</button>
+        </div>
+      </section>
+
+      <div class="scorebar">
+        <div class="scorecell" id="roundCell">
+          <div class="k">Month (Round)</div><div class="v" id="roundVal">\u2013</div>
+        </div>
+        <div class="scorecell" id="youCell">
+          <div class="k">You</div><div class="v"><span id="youScore">0</span> pts</div>
+        </div>
+        <div class="scorecell" id="cpuCell">
+          <div class="k">Computer</div><div class="v"><span id="cpuScore">0</span> pts</div>
+        </div>
+        <div class="status" role="status"><span class="dot"></span><span id="statusText">Press \u201CStart Match\u201D to begin. You are the dealer for the first month.</span></div>
+      </div>
+
+      <section class="table locked" id="tableEl" aria-label="Hanafuda table">
+        <div class="zone-label"><span>Computer's hand</span><span class="yaku-now" id="cpuYakuNow"></span></div>
+        <div class="cpu-hand" id="cpuHand"></div>
+        <div class="captured" id="cpuCaptured"></div>
+
+        <div class="zone-label" style="margin-top:12px"><span>Field cards</span><span id="fieldInfo"></span></div>
+        <div class="field">
+          <div class="stock-wrap">
+            <div class="stock-pile">
+              <div class="card back" id="stockPile" style="visibility:hidden" aria-label="Draw deck"></div>
+              <div class="cnt">Deck <span id="stockCount">0</span></div>
+            </div>
+            <div class="field-cards" id="fieldCards"></div>
+          </div>
+        </div>
+
+        <div class="captured" id="myCaptured"></div>
+        <div class="zone-label" style="margin-top:12px"><span>Your hand (tap a card to play it)</span><span class="yaku-now" id="myYakuNow"></span></div>
+        <div class="my-hand" id="myHand"></div>
+      </section>
+
+      <section class="yaku-guide" aria-label="Yaku guide \u2014 all scoring combinations">
+        <div class="yaku-guide-head">
+          <h2>Yaku Guide</h2>
+          <p>Every scoring combination in this game, shown with the actual cards that form it. Points shown are base points, before doubling. A finish of 7 points or more doubles the score, and each Koi-Koi call \u2014 by the finisher or by the opponent \u2014 doubles it again.</p>
+        </div>
+        <div class="yaku-grid" id="yakuGuideGrid"></div>
+      </section>
+    </div>
+
+    <!-- \u3053\u3044\u3053\u3044\uFF0F\u3042\u304C\u308A\u9078\u629E -->
+    <div class="overlay" id="koikoiOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="koikoiTitle">
+        <h2 id="koikoiTitle">You completed a yaku!</h2>
+        <div id="koikoiYaku"></div>
+        <p>Current score: <span class="koikoi-score" id="koikoiScore">0</span> pts</p>
+        <p class="muted">Choose \u201CFinish\u201D to lock in this month's points. Choose \u201CKoi-Koi\u201D to keep playing: if you complete another yaku, your score doubles \u2014 but if the computer finishes first, the computer's score doubles instead.</p>
+        <div class="btns">
+          <button type="button" id="agariBtn" class="primary">Finish (lock it in)</button>
+          <button type="button" id="koikoiBtn">Koi-Koi (keep going)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- \u6708\u306E\u7D50\u679C -->
+    <div class="overlay" id="roundOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="roundTitle">
+        <h2 id="roundTitle">Result</h2>
+        <div id="roundBody"></div>
+        <div class="btns">
+          <button type="button" id="nextRoundBtn" class="primary">Next Month</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- \u5BFE\u5C40\u7D42\u4E86 -->
+    <div class="overlay" id="finalOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="finalTitle">
+        <h2 id="finalTitle">Match Over</h2>
+        <div id="finalBody"></div>
+        <div class="btns">
+          <button type="button" id="playAgainBtn" class="primary">Play Again</button>
+          <button type="button" id="closeFinalBtn">View Board</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- \u30EB\u30FC\u30EB -->
+    <div class="overlay" id="rulesOverlay">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+        <h2 id="rulesTitle">How to Play &amp; Rules</h2>
+        <h3>How the game flows</h3>
+        <ul>
+          <li>The game uses all 48 hanafuda cards (12 months \xD7 4 cards). Each player starts with 8 cards in hand and 8 cards on the field, and turns alternate starting with the dealer.</li>
+          <li>On your turn, first play one card from your hand. If a field card shares its month, you capture both; otherwise your card stays on the field. Then flip the top card of the deck and match it the same way.</li>
+          <li>If two field cards share the played card's month, you choose which one to take. If three are there, you take all four (a sweep).</li>
+          <li>When your captured cards complete a yaku (scoring combination), choose \u201CFinish\u201D to lock in the points or \u201CKoi-Koi\u201D to keep playing for more.</li>
+          <li>If both hands run out with no yaku completed, the month is a draw (nagare). The dealer alternates each month.</li>
+        </ul>
+        <h3>Koi-Koi and doubling</h3>
+        <ul>
+          <li>If a player who called \u201CKoi-Koi\u201D finishes next, their score doubles. If the opponent finishes first instead, the opponent's score doubles.</li>
+          <li>A finish whose yaku total 7 points or more also doubles the score. All doublings stack (for example, 7+ points with both players having called Koi-Koi is \xD78).</li>
+          <li>If a player is dealt all four cards of one month, they win the month immediately for 6 points (a hand yaku). If all four cards of a month appear on the field, the month is redealt.</li>
+        </ul>
+        <h3>Card types</h3>
+        <ul>
+          <li><strong>Brights</strong> (tagged \u201CBright\u201D): the Crane (Pine), Curtain (Cherry Blossom), Moon (Susuki Grass), Rain (Willow), and Phoenix (Paulownia) \u2014 5 cards.</li>
+          <li><strong>Animals</strong> (tagged \u201CAnimal\u201D): 10 cards, including birds, the butterfly, boar, deer, and the Sake Cup. The Chrysanthemum Sake Cup also counts as a Chaff card.</li>
+          <li><strong>Ribbons</strong> (tagged \u201CRibbon\u201D): 10 cards. The ribbons of January\u2013March (Pine, Plum Blossom, Cherry Blossom) form the Red Ribbons; those of June, September, and October (Peony, Chrysanthemum, Maple) form the Blue Ribbons.</li>
+          <li><strong>Chaff</strong> (tagged \u201CPlain\u201D): the remaining plain cards. Paulownia has three Chaff cards.</li>
+        </ul>
+        <h3>Yaku list</h3>
+        <table class="yaku">
+          <tr><th>Yaku</th><th>Cards needed</th><th>Points</th></tr>
+          <tr><td>Five Brights</td><td>All 5 Bright cards</td><td>10 pts</td></tr>
+          <tr><td>Four Brights</td><td>4 Brights (without the Rain card)</td><td>8 pts</td></tr>
+          <tr><td>Rainy Four Brights</td><td>4 Brights including the Willow Rain card</td><td>7 pts</td></tr>
+          <tr><td>Three Brights</td><td>3 Brights (without the Rain card)</td><td>5 pts</td></tr>
+          <tr><td>Boar, Deer &amp; Butterfly</td><td>Boar (Bush Clover), Deer (Maple), Butterfly (Peony)</td><td>5 pts + 1 per extra Animal</td></tr>
+          <tr><td>Red Ribbons</td><td>Ribbons of Pine, Plum Blossom &amp; Cherry Blossom</td><td>5 pts + 1 per extra Ribbon</td></tr>
+          <tr><td>Blue Ribbons</td><td>Ribbons of Peony, Chrysanthemum &amp; Maple</td><td>5 pts + 1 per extra Ribbon</td></tr>
+          <tr><td>Cherry Blossom Viewing</td><td>Cherry Blossom Bright + Sake Cup</td><td>3 pts</td></tr>
+          <tr><td>Moon Viewing</td><td>Susuki Grass Moon Bright + Sake Cup</td><td>3 pts</td></tr>
+          <tr><td>Animals</td><td>5 Animal cards</td><td>1 pt + 1 per card from the 6th</td></tr>
+          <tr><td>Ribbons</td><td>5 Ribbon cards</td><td>1 pt + 1 per card from the 6th</td></tr>
+          <tr><td>Chaff</td><td>10 Chaff cards (Sake Cup counts)</td><td>1 pt + 1 per card from the 11th</td></tr>
+        </table>
+        <div class="btns">
+          <button type="button" id="closeRulesBtn" class="primary">Close</button>
+        </div>
+      </div>
+    </div>
+
+<script>
+"use strict";
+/* ================= \u672D\u30C7\u30FC\u30BF ================= */
+var MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var MONTH_FLOWER = ["Pine","Plum Blossom","Cherry Blossom","Wisteria","Iris","Peony","Bush Clover","Susuki Grass","Chrysanthemum","Maple","Willow","Paulownia"];
+/* kind: hikari Bright / tane Animal / tanzaku Ribbon / kasu Chaff. n is the card's picture name */
+var MONTH_CARDS = [
+  [{k:"hikari",n:"Crane"},{k:"tanzaku",n:"Red Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Bush Warbler"},{k:"tanzaku",n:"Red Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"hikari",n:"Curtain"},{k:"tanzaku",n:"Red Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Cuckoo"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Bridge"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Butterfly"},{k:"tanzaku",n:"Blue Ribbon",r:"ao"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Boar"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"hikari",n:"Moon"},{k:"tane",n:"Wild Geese"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Sake Cup"},{k:"tanzaku",n:"Blue Ribbon",r:"ao"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"tane",n:"Deer"},{k:"tanzaku",n:"Blue Ribbon",r:"ao"},{k:"kasu",n:""},{k:"kasu",n:""}],
+  [{k:"hikari",n:"Rain"},{k:"tane",n:"Swallow"},{k:"tanzaku",n:"Ribbon",r:"aka"},{k:"kasu",n:"Lightning"}],
+  [{k:"hikari",n:"Phoenix"},{k:"kasu",n:""},{k:"kasu",n:""},{k:"kasu",n:""}]
+];
+var CARDS = [];
+MONTH_CARDS.forEach(function(list, mi){
+  list.forEach(function(c, ci){
+    CARDS.push({ id: mi*4+ci, month: mi+1, kind: c.k, name: c.n, ribbon: c.r || null });
+  });
+});
+function cardById(id){ return CARDS[id]; }
+function kindLabel(k){ return k==="hikari"?"Bright":k==="tane"?"Animal":k==="tanzaku"?"Ribbon":"Plain"; }
+function cardLabel(c){
+  return MONTH_NAMES[c.month-1]+" "+MONTH_FLOWER[c.month-1]+(c.name?" "+c.name:"")+" ("+kindLabel(c.kind)+")";
+}
+
+/* ================= \u672D\u306E\u7D75\uFF08SVG\uFF09 ================= */
+function motif(month, kind){
+  var s = "";
+  switch(month){
+    case 1: /* \u677E */
+      s = '<path d="M28 90 L31 46" stroke="#7a5230" stroke-width="5" fill="none"/>'
+        + '<path d="M30 58 L14 40 M30 52 L46 36 M30 66 L12 56 M30 62 L48 52" stroke="#7a5230" stroke-width="3" fill="none"/>'
+        + '<g fill="#2e6b34"><ellipse cx="13" cy="36" rx="10" ry="6"/><ellipse cx="47" cy="32" rx="10" ry="6"/><ellipse cx="11" cy="53" rx="9" ry="5"/><ellipse cx="49" cy="49" rx="9" ry="5"/><ellipse cx="30" cy="22" rx="11" ry="6"/></g>'
+        + '<g fill="#3f9150"><ellipse cx="18" cy="30" rx="7" ry="4"/><ellipse cx="42" cy="26" rx="7" ry="4"/><ellipse cx="30" cy="40" rx="8" ry="4"/></g>';
+      if(kind==="hikari") s += '<g><ellipse cx="24" cy="70" rx="12" ry="6" fill="#f7f3e8" stroke="#c9c2ae"/><path d="M34 66 Q44 56 42 46" stroke="#f7f3e8" stroke-width="4" fill="none"/><circle cx="42" cy="45" r="3.4" fill="#f7f3e8"/><circle cx="42" cy="43" r="1.6" fill="#c02b1e"/><path d="M45 45 L51 47 L45 48" fill="#e8a13a"/></g>';
+      break;
+    case 2: /* \u6885 */
+      s = '<path d="M8 88 Q20 60 26 44 Q32 28 48 14" stroke="#6b4632" stroke-width="4" fill="none"/>'
+        + '<path d="M24 52 Q36 50 44 40 M18 70 Q28 68 34 60" stroke="#6b4632" stroke-width="3" fill="none"/>'
+        + '<g fill="#e77a9b"><circle cx="47" cy="14" r="6"/><circle cx="40" cy="20" r="5"/><circle cx="30" cy="34" r="5.4"/><circle cx="44" cy="40" r="4.6"/><circle cx="20" cy="56" r="5"/><circle cx="34" cy="60" r="4.4"/><circle cx="12" cy="72" r="4.4"/></g>'
+        + '<g fill="#f6c9d4"><circle cx="47" cy="14" r="2.6"/><circle cx="30" cy="34" r="2.4"/><circle cx="20" cy="56" r="2.2"/></g>'
+        + '<g fill="#f2b138"><circle cx="47" cy="14" r="1.2"/><circle cx="30" cy="34" r="1.1"/><circle cx="44" cy="40" r="1"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="18" cy="26" rx="8" ry="5" fill="#7fae4c" transform="rotate(-24 18 26)"/><circle cx="25" cy="21" r="3.4" fill="#7fae4c"/><path d="M28 21 L33 22 L28 23.6" fill="#444"/><path d="M12 30 Q18 34 24 30" stroke="#5b8436" stroke-width="2" fill="none"/></g>';
+      break;
+    case 3: /* \u685C */
+      var sakura = '<g fill="#ef9db8"><ellipse cx="16" cy="20" rx="14" ry="10"/><ellipse cx="34" cy="14" rx="15" ry="10"/><ellipse cx="47" cy="24" rx="11" ry="8"/><ellipse cx="26" cy="26" rx="13" ry="8"/></g>'
+        + '<g fill="#f7c3d3"><ellipse cx="22" cy="18" rx="8" ry="5"/><ellipse cx="40" cy="20" rx="7" ry="4"/></g>'
+        + '<path d="M30 34 Q28 58 30 88" stroke="#6b4632" stroke-width="5" fill="none"/>'
+        + '<g fill="#ef9db8"><path d="M14 52 l3 4 l-5 1 l1 -4 z"/><path d="M46 58 l3 4 l-5 1 l1 -4 z"/><path d="M24 70 l3 4 l-5 1 l1 -4 z"/><path d="M40 78 l3 4 l-5 1 l1 -4 z"/></g>';
+      if(kind==="hikari"){
+        s = '<rect x="0" y="0" width="60" height="24" fill="#b03024"/><rect x="0" y="22" width="60" height="3" fill="#8e2318"/><g fill="#f3d9a4"><rect x="8" y="3" width="3" height="13"/><rect x="28" y="3" width="3" height="13"/><rect x="48" y="3" width="3" height="13"/></g>'
+          + '<g transform="translate(1,26) scale(0.97,0.7)">' + sakura + "</g>";
+      } else {
+        s = sakura;
+      }
+      break;
+    case 4: /* \u85E4 */
+      s = '<path d="M4 10 H56" stroke="#6b4632" stroke-width="4"/>'
+        + '<g fill="#7c5cbf"><circle cx="14" cy="18" r="4"/><circle cx="14" cy="26" r="3.6"/><circle cx="14" cy="33" r="3.1"/><circle cx="14" cy="39" r="2.5"/><circle cx="30" cy="18" r="4.2"/><circle cx="30" cy="27" r="3.8"/><circle cx="30" cy="35" r="3.2"/><circle cx="30" cy="42" r="2.5"/><circle cx="46" cy="18" r="4"/><circle cx="46" cy="26" r="3.5"/><circle cx="46" cy="32" r="2.8"/></g>'
+        + '<g fill="#9a7fd4"><circle cx="12.6" cy="16.6" r="1.6"/><circle cx="28.6" cy="16.6" r="1.7"/><circle cx="44.6" cy="16.6" r="1.6"/></g>'
+        + '<g fill="#5d8f4e"><ellipse cx="10" cy="58" rx="8" ry="4" transform="rotate(-30 10 58)"/><ellipse cx="50" cy="62" rx="8" ry="4" transform="rotate(24 50 62)"/><ellipse cx="24" cy="72" rx="9" ry="4" transform="rotate(-14 24 72)"/><ellipse cx="42" cy="80" rx="8" ry="4" transform="rotate(12 42 80)"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="30" cy="56" rx="7" ry="4.4" fill="#8a6d4a"/><circle cx="36" cy="52" r="3" fill="#8a6d4a"/><path d="M38.6 52 L44 53 L38.6 54.4" fill="#e8a13a"/><path d="M24 60 Q18 66 20 72" stroke="#8a6d4a" stroke-width="2.4" fill="none"/></g>';
+      break;
+    case 5: /* \u83D6\u84B2 */
+      s = '<rect x="0" y="72" width="60" height="18" fill="#7fb0c9"/>'
+        + '<g stroke="#3d7a3a" stroke-width="2.6"><path d="M14 88 Q12 50 14 26"/><path d="M24 88 Q24 44 22 20"/><path d="M36 88 Q38 48 36 28"/><path d="M47 88 Q45 54 47 34"/></g>'
+        + '<g><path d="M22 20 q-7 -8 -3 -14 q4 4 3 8 q2 -6 6 -7 q1 7 -2 13 q-2 2 -4 0" fill="#6a5fb8"/><circle cx="22" cy="17" r="2" fill="#f2c138"/></g>'
+        + '<g><path d="M38 30 q-6 -7 -2 -12 q3 3 3 7 q1 -5 5 -6 q1 6 -2 11 q-2 2 -4 0" fill="#8378cc"/><circle cx="38" cy="27" r="1.8" fill="#f2c138"/></g>'
+        + '<g><path d="M13 28 q-5 -6 -2 -10 q3 3 2 6 q1 -4 4 -5 q1 5 -1 9 q-2 1 -3 0" fill="#6a5fb8"/><circle cx="13" cy="25" r="1.5" fill="#f2c138"/></g>';
+      if(kind==="tane") s += '<g stroke="#8a5a2b" stroke-width="3"><path d="M4 66 H56"/><path d="M8 66 V58 M20 66 V58 M32 66 V58 M44 66 V58 M52 66 V58" stroke-width="2.4"/></g>';
+      break;
+    case 6: /* \u7261\u4E39 */
+      s = '<g fill="#5d8f4e"><ellipse cx="14" cy="70" rx="10" ry="5" transform="rotate(-24 14 70)"/><ellipse cx="47" cy="74" rx="10" ry="5" transform="rotate(20 47 74)"/><ellipse cx="30" cy="82" rx="11" ry="5"/></g>'
+        + '<g fill="#d84f6d"><circle cx="30" cy="44" r="15"/><circle cx="19" cy="50" r="10"/><circle cx="41" cy="50" r="10"/></g>'
+        + '<g fill="#ef8296"><circle cx="30" cy="42" r="10"/><circle cx="24" cy="48" r="7"/><circle cx="37" cy="48" r="7"/></g>'
+        + '<circle cx="30" cy="45" r="4.6" fill="#f6d45e"/>';
+      if(kind==="tane") s += '<g><ellipse cx="16" cy="16" rx="7" ry="4.4" fill="#e8862e" transform="rotate(-28 16 16)"/><ellipse cx="16" cy="24" rx="7" ry="4.4" fill="#f2a54a" transform="rotate(28 16 24)"/><ellipse cx="46" cy="14" rx="6" ry="3.8" fill="#e8862e" transform="rotate(24 46 14)"/><ellipse cx="46" cy="21" rx="6" ry="3.8" fill="#f2a54a" transform="rotate(-24 46 21)"/><path d="M23 20 q7 -3 14 0" stroke="#5b4632" stroke-width="1.6" fill="none"/></g>';
+      break;
+    case 7: /* \u8429 */
+      s = '<g stroke="#4d7a3e" stroke-width="2.4" fill="none"><path d="M14 90 Q16 50 10 22"/><path d="M28 90 Q28 46 30 16"/><path d="M44 90 Q42 52 50 26"/></g>'
+        + '<g fill="#c94f7c"><circle cx="10" cy="20" r="3.4"/><circle cx="14" cy="28" r="3"/><circle cx="9" cy="34" r="2.8"/><circle cx="30" cy="14" r="3.4"/><circle cx="34" cy="22" r="3"/><circle cx="29" cy="28" r="2.8"/><circle cx="50" cy="24" r="3.4"/><circle cx="46" cy="32" r="3"/><circle cx="51" cy="38" r="2.6"/></g>'
+        + '<g fill="#e58bab"><circle cx="10" cy="20" r="1.4"/><circle cx="30" cy="14" r="1.4"/><circle cx="50" cy="24" r="1.4"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="28" cy="66" rx="15" ry="9" fill="#7c5a3c"/><circle cx="42" cy="60" r="6" fill="#7c5a3c"/><ellipse cx="47" cy="62" rx="3.6" ry="2.8" fill="#a97d52"/><circle cx="40" cy="58" r="1.1" fill="#2b2620"/><path d="M16 62 l-4 -3 M44 52 l2 -4" stroke="#7c5a3c" stroke-width="2.4"/></g>';
+      break;
+    case 8: /* \u8292 */
+      s = '<g stroke="#c8a86a" stroke-width="2.2" fill="none"><path d="M12 90 Q10 56 6 34"/><path d="M20 90 Q20 52 16 30"/><path d="M30 90 Q32 54 30 28"/><path d="M42 90 Q40 56 46 36"/><path d="M50 90 Q52 60 54 42"/></g>'
+        + '<g fill="#e6cf9a"><ellipse cx="6" cy="30" rx="3" ry="8" transform="rotate(-8 6 30)"/><ellipse cx="16" cy="26" rx="3" ry="9"/><ellipse cx="30" cy="24" rx="3" ry="9"/><ellipse cx="46" cy="32" rx="3" ry="8" transform="rotate(8 46 32)"/><ellipse cx="54" cy="38" rx="2.6" ry="7"/></g>';
+      if(kind==="hikari") s = '<circle cx="42" cy="20" r="13" fill="#d84f35"/><circle cx="42" cy="20" r="13" fill="none" stroke="#b23a24" stroke-width="1.4"/>' + s;
+      if(kind==="tane") s += '<g fill="#3c4652"><path d="M10 22 q5 -5 10 0 q-5 2 -10 0"/><path d="M24 14 q5 -5 10 0 q-5 2 -10 0"/><path d="M14 34 q4 -4 9 0 q-4.5 2 -9 0"/></g>';
+      break;
+    case 9: /* \u83CA */
+      s = '<g stroke="#e8a91c" stroke-width="2.2"><path d="M30 46 L30 24 M30 46 L16 30 M30 46 L44 30 M30 46 L13 44 M30 46 L47 44 M30 46 L20 58 M30 46 L40 58 M30 46 L30 64"/></g>'
+        + '<g fill="#f2c138"><circle cx="30" cy="24" r="4"/><circle cx="16" cy="30" r="3.6"/><circle cx="44" cy="30" r="3.6"/><circle cx="13" cy="44" r="3.4"/><circle cx="47" cy="44" r="3.4"/><circle cx="20" cy="58" r="3.4"/><circle cx="40" cy="58" r="3.4"/><circle cx="30" cy="64" r="3.6"/></g>'
+        + '<circle cx="30" cy="45" r="6.4" fill="#e8862e"/>'
+        + '<g fill="#5d8f4e"><ellipse cx="16" cy="78" rx="9" ry="4" transform="rotate(-18 16 78)"/><ellipse cx="45" cy="78" rx="9" ry="4" transform="rotate(18 45 78)"/></g>';
+      if(kind==="tane") s += '<g><path d="M20 74 h20 l-3 10 h-14 z" fill="#f7f3e8" stroke="#b9a888"/><ellipse cx="30" cy="74" rx="10" ry="2.6" fill="#d84f35"/><text x="30" y="83" font-size="7" text-anchor="middle" fill="#a33327" font-weight="bold">\u5BFF</text></g>';
+      break;
+    case 10: /* \u7D05\u8449 */
+      s = '<path d="M30 88 Q28 60 34 40" stroke="#7a4a2a" stroke-width="4" fill="none"/>'
+        + '<g fill="#c9452c"><path d="M18 16 l3 6 6 -2 -3 6 6 2 -7 3 2 6 -7 -3 -3 6 -1 -7 -7 1 4 -5 -6 -3 7 -1 -1 -7 5 4 z"/><path d="M44 34 l2 5 5 -1 -2 5 5 2 -6 2 1 5 -5 -2 -3 5 -1 -6 -6 1 3 -4 -5 -3 6 -1 0 -6 4 4 z"/></g>'
+        + '<g fill="#e0682f"><path d="M14 48 l2 4 4 -1 -2 4 4 2 -5 2 1 4 -4 -2 -2 4 -1 -5 -5 1 3 -3 -4 -2 5 -1 0 -5 3 3 z"/><path d="M40 62 l2 4 4 -1 -2 4 4 2 -5 2 1 4 -4 -2 -2 4 -1 -5 -5 1 3 -3 -4 -2 5 -1 0 -5 3 3 z"/></g>';
+      if(kind==="tane") s += '<g><ellipse cx="26" cy="66" rx="13" ry="7.4" fill="#8a6238"/><circle cx="38" cy="59" r="5.4" fill="#8a6238"/><path d="M36 54 l-3 -6 M40 54 l1 -7 M34 55 l-6 -4" stroke="#8a6238" stroke-width="2"/><ellipse cx="42" cy="61" rx="3" ry="2.2" fill="#c39a63"/><path d="M16 72 v8 M34 72 v8" stroke="#8a6238" stroke-width="2.4"/></g>';
+      break;
+    case 11: /* \u67F3 */
+      s = '<g stroke="#4d8a46" stroke-width="2.4" fill="none"><path d="M10 0 Q8 34 12 62"/><path d="M22 0 Q20 38 24 70"/><path d="M34 0 Q34 36 30 64"/><path d="M46 0 Q48 32 44 58"/><path d="M54 0 Q52 26 54 46"/></g>'
+        + '<g stroke="#6fae62" stroke-width="1.6" fill="none"><path d="M16 0 Q14 30 18 54"/><path d="M28 0 Q27 32 29 58"/><path d="M40 0 Q41 30 38 52"/></g>';
+      if(kind==="hikari") s += '<g stroke="#7fb0c9" stroke-width="1.6"><path d="M6 30 l-3 8 M16 26 l-3 8 M50 30 l-3 8 M56 40 l-3 8"/></g><g><path d="M22 66 L38 66 L30 54 Z" fill="#e8c33a"/><rect x="27" y="66" width="6" height="9" fill="#3a6ea8"/><path d="M24 84 h12 l-2 -9 h-8 z" fill="#7a4a2a"/><path d="M38 62 q8 2 9 8" stroke="#3a6ea8" stroke-width="3" fill="none"/></g>';
+      if(kind==="tane") s += '<g fill="#2e3440"><path d="M14 60 q8 -8 16 -4 q-6 1 -8 4 q4 0 6 3 q-8 2 -14 -3"/><path d="M30 56 l8 -3 -4 5 z"/></g>';
+      if(kind==="kasu") s = '<path d="M34 8 L20 44 h9 L24 82 L46 36 h-10 L44 8 z" fill="#f2c138" stroke="#d89a17" stroke-width="1.6"/>';
+      break;
+    case 12: /* \u6850 */
+      s = '<g fill="#b9c46a"><path d="M14 58 q-10 -14 2 -22 q10 8 4 20 q-2 4 -6 2"/><path d="M46 58 q10 -14 -2 -22 q-10 8 -4 20 q2 4 6 2"/><path d="M30 74 q-12 -12 -2 -24 q12 8 6 22 q-1 3 -4 2"/></g>'
+        + '<g fill="#8a79c4"><circle cx="20" cy="16" r="4"/><circle cx="28" cy="10" r="4.4"/><circle cx="36" cy="15" r="4"/><circle cx="24" cy="22" r="3.6"/><circle cx="33" cy="23" r="3.6"/></g>'
+        + '<g fill="#a893d8"><circle cx="28" cy="16" r="2"/><circle cx="20" cy="16" r="1.8"/></g>';
+      if(kind==="hikari") s += '<g><path d="M14 84 Q26 66 24 52 Q36 62 34 74 Q44 60 40 46 Q50 56 44 70 Q52 74 44 84 Q30 76 14 84" fill="#3f8f7a"/><circle cx="28" cy="50" r="5" fill="#d84f35"/><path d="M33 48 L42 45 L34 52" fill="#e8a13a"/><path d="M20 82 Q10 74 12 64 M40 84 Q50 78 48 68" stroke="#3f8f7a" stroke-width="2.6" fill="none"/></g>';
+      break;
+  }
+  return s;
+}
+function ribbonSVG(card){
+  if(card.kind !== "tanzaku") return "";
+  var col = card.ribbon === "ao" ? "#2456a6" : "#c0392b";
+  var txt = card.ribbon ? '<circle cx="30" cy="10" r="1.6" fill="#f7f3e8"/><circle cx="30" cy="17" r="1.6" fill="#f7f3e8"/><circle cx="30" cy="24" r="1.6" fill="#f7f3e8"/>' : "";
+  return '<rect x="22" y="0" width="16" height="46" fill="'+col+'"/><rect x="22" y="42" width="16" height="4" fill="'+col+'" opacity=".75"/>' + txt;
+}
+function cardFaceSVG(card){
+  return '<svg viewBox="0 0 60 90" aria-hidden="true">'
+    + '<rect x="0" y="0" width="60" height="90" fill="#fdf9ee"/>'
+    + motif(card.month, card.kind)
+    + ribbonSVG(card)
+    + "</svg>";
+}
+function cardEl(card, opts){
+  opts = opts || {};
+  var d = document.createElement("div");
+  d.className = "card" + (opts.small ? " small" : "");
+  d.dataset.id = card.id;
+  d.innerHTML = cardFaceSVG(card) + '<span class="tag">' + kindLabel(card.kind) + "</span>";
+  d.title = cardLabel(card);
+  return d;
+}
+function backEl(small){
+  var d = document.createElement("div");
+  d.className = "card back" + (small ? " small" : "");
+  return d;
+}
+
+/* ================= \u5F79\u5224\u5B9A ================= */
+function evalYaku(captured){
+  var byKind = { hikari:[], tane:[], tanzaku:[], kasu:[] };
+  captured.forEach(function(id){ var c = cardById(id); byKind[c.kind].push(c); });
+  var kasuCount = byKind.kasu.length + (byKind.tane.some(function(c){return c.month===9;}) ? 1 : 0); /* \u76C3\u306F\u30AB\u30B9\u517C\u7528 */
+  var hikariMonths = byKind.hikari.map(function(c){return c.month;});
+  var hasRain = hikariMonths.indexOf(11) >= 0;
+  var taneMonths = byKind.tane.map(function(c){return c.month;});
+  var tanMonths = byKind.tanzaku.map(function(c){return c.month;});
+  var list = [];
+  var hn = hikariMonths.length;
+  if(hn === 5) list.push({name:"Five Brights", pts:10});
+  else if(hn === 4 && hasRain) list.push({name:"Rainy Four Brights", pts:7});
+  else if(hn === 4) list.push({name:"Four Brights", pts:8});
+  else if(hn === 3 && !hasRain) list.push({name:"Three Brights", pts:5});
+  var ino = [7,10,6].every(function(m){ return taneMonths.indexOf(m) >= 0; });
+  if(ino) list.push({name:"Boar, Deer & Butterfly", pts: 5 + Math.max(0, byKind.tane.length - 3)});
+  var aka = [1,2,3].every(function(m){ return tanMonths.indexOf(m) >= 0; });
+  var ao = [6,9,10].every(function(m){ return tanMonths.indexOf(m) >= 0; });
+  if(aka) list.push({name:"Red Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
+  if(ao) list.push({name:"Blue Ribbons", pts: 5 + Math.max(0, byKind.tanzaku.length - 3)});
+  var hasSakura = hikariMonths.indexOf(3) >= 0, hasMoon = hikariMonths.indexOf(8) >= 0, hasCup = taneMonths.indexOf(9) >= 0;
+  if(hasSakura && hasCup) list.push({name:"Cherry Blossom Viewing", pts:3});
+  if(hasMoon && hasCup) list.push({name:"Moon Viewing", pts:3});
+  if(!ino && byKind.tane.length >= 5) list.push({name:"Animals", pts: 1 + (byKind.tane.length - 5)});
+  if(!aka && !ao && byKind.tanzaku.length >= 5) list.push({name:"Ribbons", pts: 1 + (byKind.tanzaku.length - 5)});
+  if(kasuCount >= 10) list.push({name:"Chaff", pts: 1 + (kasuCount - 10)});
+  var total = list.reduce(function(a,y){ return a + y.pts; }, 0);
+  return { list: list, total: total };
+}
+
+/* ================= \u30B2\u30FC\u30E0\u72B6\u614B ================= */
+var P = "you", C = "cpu";
+var G = null;
+var settings = { months: 12, level: 2 };
+
+function newMatch(){
+  G = {
+    round: 0, totalMonths: settings.months,
+    score: { you: 0, cpu: 0 },
+    oya: P, /* 1\u6708\u306F\u3042\u306A\u305F\u304C\u89AA */
+    phase: "idle"
+  };
+  startRound();
+}
+function shuffledDeck(){
+  var d = CARDS.map(function(c){ return c.id; });
+  for(var i = d.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = d[i]; d[i] = d[j]; d[j] = t;
+  }
+  return d;
+}
+function monthOf4(ids){
+  var cnt = {};
+  for(var i = 0; i < ids.length; i++){ var m = cardById(ids[i]).month; cnt[m] = (cnt[m]||0)+1; if(cnt[m] === 4) return m; }
+  return 0;
+}
+function startRound(){
+  G.round++;
+  var deck, tries = 0;
+  while(true){
+    deck = shuffledDeck();
+    var field = deck.slice(16, 24);
+    if(!monthOf4(field)) break; /* \u5834\u306B4\u679A\u540C\u6708\u306F\u914D\u308A\u76F4\u3057 */
+    if(++tries > 50) break;
+  }
+  G.hand = { you: deck.slice(0, 8), cpu: deck.slice(8, 16) };
+  G.field = deck.slice(16, 24);
+  G.stock = deck.slice(24);
+  G.captured = { you: [], cpu: [] };
+  G.turn = G.oya;
+  G.koikoi = { you: false, cpu: false };
+  G.baseScore = { you: 0, cpu: 0 }; /* \u524D\u56DE\u5224\u5B9A\u6642\u306E\u5F79\u70B9\uFF08\u5897\u3048\u305F\u3089\u518D\u5224\u5B9A\uFF09 */
+  G.phase = "play";
+  render();
+  /* \u624B\u5F79\u30C1\u30A7\u30C3\u30AF */
+  var youT = monthOf4(G.hand.you), cpuT = monthOf4(G.hand.cpu);
+  if(youT || cpuT){
+    var winner = youT ? P : C;
+    setStatus((winner===P ? "You were" : "The computer was") + " dealt all four " + MONTH_FLOWER[(youT||cpuT)-1] + " cards \u2014 a four-of-a-kind hand yaku.");
+    setTimeout(function(){ endRound(winner, [{name:"Hand Yaku (four of a month)", pts:6}], 6, false); }, 900);
+    G.phase = "over";
+    return;
+  }
+  setStatus(G.turn === P ? "Your turn. Choose a card from your hand." : "Computer's turn.");
+  if(G.turn === C){ lock(true); setTimeout(cpuTurn, 900); }
+  else lock(false);
+}
+
+/* ================= \u9032\u884C ================= */
+function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function matchesInField(month){
+  return G.field.filter(function(id){ return cardById(id).month === month; });
+}
+/* played \u30AB\u30FC\u30C9\u3068\u5834\u306E\u30DE\u30C3\u30C1\u3092\u89E3\u6C7A\u3002choiceId \u306F2\u679A\u30DE\u30C3\u30C1\u6642\u306B\u53D6\u308B\u5834\u672D\uFF08null\u306A\u3089\u81EA\u52D5\uFF09 */
+function applyMatch(who, cardId, choiceId){
+  var c = cardById(cardId);
+  var m = matchesInField(c.month);
+  var taken = [];
+  if(m.length === 1){ taken = [m[0]]; }
+  else if(m.length === 2){ taken = [choiceId != null ? choiceId : m[0]]; }
+  else if(m.length >= 3){ taken = m.slice(); }
+  if(taken.length){
+    taken.forEach(function(id){
+      G.field.splice(G.field.indexOf(id), 1);
+      G.captured[who].push(id);
+    });
+    G.captured[who].push(cardId);
+    return taken;
+  }
+  G.field.push(cardId);
+  return taken;
+}
+function removeFromHand(who, cardId){
+  var h = G.hand[who]; h.splice(h.indexOf(cardId), 1);
+}
+/* 1\u624B\u756A\uFF1A\u624B\u672D\u2192\uFF08\u5C71\u672D\uFF09\u2192\u5F79\u5224\u5B9A\u2192\u4EA4\u4EE3\u3002who \u304C\u4EBA\u306E\u5834\u5408\u306F\u30AF\u30EA\u30C3\u30AF\u8D77\u70B9\u3067\u547C\u3070\u308C\u308B */
+var busy = false;
+async function playFromHand(who, cardId, choiceId){
+  removeFromHand(who, cardId);
+  var taken = applyMatch(who, cardId, choiceId);
+  render(taken.concat([cardId]));
+  if(taken.length) setStatus((who===P?"You":"The computer") + " captured " + (taken.length+1) + " cards with " + cardLabel(cardById(cardId)) + ".");
+  await delay(650);
+  await drawPhase(who);
+  await afterTurn(who);
+}
+async function drawPhase(who){
+  if(!G.stock.length) return;
+  var cardId = G.stock.pop();
+  render([cardId]);
+  setStatus("Drew " + cardLabel(cardById(cardId)) + " from the deck.");
+  await delay(650);
+  var m = matchesInField(cardById(cardId).month);
+  var choice = null;
+  if(m.length === 2){
+    if(who === P){
+      choice = await askFieldChoice(cardId, m);
+    } else {
+      choice = cpuChooseFieldCard(m, G.captured.cpu);
+    }
+  }
+  var taken = applyMatch(who, cardId, choice);
+  render(taken.concat([cardId]));
+  if(taken.length) setStatus((who===P?"You":"The computer") + " captured " + (taken.length+1) + " cards with the drawn card.");
+  await delay(500);
+}
+/* \u5F79\u304C\u65B0\u3057\u304F\u3067\u304D\u305F\uFF0F\u5897\u3048\u305F\u3089 true \u3092\u8FD4\u3057\u3001\u5FC5\u8981\u306A\u3089\u9078\u629E\u3092\u5F85\u3064 */
+async function afterTurn(who){
+  var ev = evalYaku(G.captured[who]);
+  var improved = ev.total > G.baseScore[who];
+  if(improved && ev.total > 0){
+    G.baseScore[who] = ev.total;
+    var noMore = G.hand.you.length === 0 && G.hand.cpu.length === 0;
+    if(noMore){ endRoundWithScore(who, ev); return; }
+    var cont;
+    if(who === P){ cont = await askKoikoi(ev); }
+    else { cont = cpuDecideKoikoi(ev); await delay(400); }
+    if(!cont){ endRoundWithScore(who, ev); return; }
+    G.koikoi[who] = true;
+    setStatus((who===P?"You":"The computer") + " called \u201CKoi-Koi\u201D!");
+    render();
+    await delay(800);
+  }
+  if(G.hand.you.length === 0 && G.hand.cpu.length === 0){
+    endRoundDraw();
+    return;
+  }
+  G.turn = (who === P) ? C : P;
+  render();
+  if(G.turn === C){
+    lock(true);
+    setStatus("Computer's turn.");
+    await delay(500);
+    cpuTurn();
+  } else {
+    busy = false;
+    lock(false);
+    setStatus("Your turn. Choose a card from your hand.");
+  }
+}
+function scoreWithMultipliers(who, baseTotal){
+  var pts = baseTotal, mult = 1, notes = [];
+  if(baseTotal >= 7){ mult *= 2; notes.push("Doubled: 7 points or more"); }
+  var other = who === P ? C : P;
+  if(G.koikoi[who]){ mult *= 2; notes.push("Doubled: winner's Koi-Koi"); }
+  if(G.koikoi[other]){ mult *= 2; notes.push("Doubled: opponent's Koi-Koi"); }
+  return { pts: pts * mult, mult: mult, notes: notes };
+}
+function endRoundWithScore(who, ev){
+  var r = scoreWithMultipliers(who, ev.total);
+  endRound(who, ev.list, r.pts, r.notes);
+}
+function endRound(winner, yakuList, pts, notes){
+  G.phase = "over";
+  busy = false;
+  lock(true);
+  if(winner) G.score[winner] += pts;
+  render();
+  var body = document.getElementById("roundBody");
+  var html = "";
+  if(winner){
+    html += "<p><strong>" + (winner===P ? "You" : "The computer") + "</strong> win" + (winner===P ? "" : "s") + " this month.</p>";
+    html += '<div class="round-result-yaku">';
+    yakuList.forEach(function(y){ html += "<div><span>" + y.name + "</span><span>" + y.pts + " pts</span></div>"; });
+    html += "</div>";
+    if(notes && notes.length) html += '<p class="muted">' + notes.join(" / ") + "</p>";
+    html += '<p class="final-score">This month: ' + pts + ' pts</p>';
+  } else {
+    html += "<p>Neither player completed a yaku, so the month is a draw (nagare).</p>";
+  }
+  html += '<p class="muted">Totals \u2014 You: ' + G.score.you + " pts / Computer: " + G.score.cpu + " pts</p>";
+  body.innerHTML = html;
+  document.getElementById("roundTitle").textContent = "Month " + G.round + " Results";
+  var btn = document.getElementById("nextRoundBtn");
+  btn.textContent = G.round >= G.totalMonths ? "See Final Results" : "Next Month (Month " + (G.round+1) + ")";
+  openOverlay("roundOverlay");
+}
+function endRoundDraw(){ endRound(null, [], 0, []); }
+function nextStep(){
+  closeOverlay("roundOverlay");
+  if(G.round >= G.totalMonths){ showFinal(); return; }
+  G.oya = (G.oya === P) ? C : P;
+  startRound();
+}
+function showFinal(){
+  var b = document.getElementById("finalBody");
+  var diff = G.score.you - G.score.cpu;
+  var msg = diff > 0 ? "You win the match!" : diff < 0 ? "The computer wins the match." : "The match is a draw.";
+  b.innerHTML = '<p class="final-score">' + msg + "</p>"
+    + '<p>You: ' + G.score.you + " pts<br>Computer: " + G.score.cpu + " pts</p>"
+    + '<p class="muted">The ' + G.totalMonths + "-month match is over.</p>";
+  openOverlay("finalOverlay");
+  setStatus("Match over: " + msg + " (You " + G.score.you + " pts / Computer " + G.score.cpu + " pts)");
+}
+
+/* ================= \u3042\u306A\u305F\u306E\u64CD\u4F5C ================= */
+var pendingPick = null; /* {cardId, fromDraw, candidates, resolve} */
+function onHandCardClick(cardId){
+  if(!G || G.phase !== "play" || busy || G.turn !== P || pendingPick) return;
+  var c = cardById(cardId);
+  var m = matchesInField(c.month);
+  if(m.length === 2){
+    pendingPick = { cardId: cardId, candidates: m, fromDraw: false };
+    setStatus("There are two " + MONTH_FLOWER[c.month-1] + " cards on the field. Tap the one you want to take.");
+    render();
+    return;
+  }
+  busy = true; lock(true);
+  playFromHand(P, cardId, null);
+}
+function onFieldCardClick(cardId){
+  if(!pendingPick || pendingPick.candidates.indexOf(cardId) < 0) return;
+  var pick = pendingPick; pendingPick = null;
+  if(pick.fromDraw){ pick.resolve(cardId); render(); return; }
+  busy = true; lock(true);
+  playFromHand(P, pick.cardId, cardId);
+}
+function askFieldChoice(drawnId, candidates){
+  return new Promise(function(resolve){
+    pendingPick = { cardId: drawnId, candidates: candidates, fromDraw: true, resolve: resolve };
+    setStatus("The drawn card's month also has two cards on the field. Tap the one you want to take.");
+    render();
+  });
+}
+function askKoikoi(ev){
+  return new Promise(function(resolve){
+    var box = document.getElementById("koikoiYaku");
+    box.innerHTML = ev.list.map(function(y){ return "<div style='display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 2px'><span>" + y.name + "</span><span>" + y.pts + " pts</span></div>"; }).join("");
+    document.getElementById("koikoiScore").textContent = ev.total;
+    openOverlay("koikoiOverlay");
+    document.getElementById("agariBtn").onclick = function(){ closeOverlay("koikoiOverlay"); resolve(false); };
+    document.getElementById("koikoiBtn").onclick = function(){ closeOverlay("koikoiOverlay"); resolve(true); };
+  });
+}
+
+/* ================= \u30B3\u30F3\u30D4\u30E5\u30FC\u30BF\u30FC ================= */
+function cardValue(c){
+  return c.kind === "hikari" ? 20 : c.kind === "tane" ? 10 : c.kind === "tanzaku" ? 5 : 1;
+}
+/* \u5F79\u3078\u306E\u8FD1\u3055\u30DC\u30FC\u30CA\u30B9\uFF1A\u53D6\u3063\u305F\u5F8C\u306E\u5F79\u70B9\u3092\u3056\u3063\u304F\u308A\u8A55\u4FA1 */
+function captureGain(who, cardIds){
+  var sim = G.captured[who].concat(cardIds);
+  return evalYaku(sim).total * 30;
+}
+function potentialBonus(who, cardId){
+  /* \u81EA\u5206\u306E\u53D6\u672D\u3068\u540C\u6708\u306E\u672D\u3092\u6301\u3063\u3066\u3044\u308B\uFF0F\u5F79\u306E\u6750\u6599\u306B\u306A\u308B\u672D\u3078\u306E\u5BC4\u305B */
+  var c = cardById(cardId), b = 0;
+  G.captured[who].forEach(function(id){ if(cardById(id).month === c.month) b += 2; });
+  if(c.kind === "hikari") b += 6;
+  if(c.kind === "tane" && [6,7,9,10].indexOf(c.month) >= 0) b += 4; /* \u732A\u9E7F\u8776\u30FB\u76C3 */
+  if(c.kind === "tanzaku" && [1,2,3,6,9,10].indexOf(c.month) >= 0) b += 4; /* \u8D64\u77ED\u9752\u77ED */
+  return b;
+}
+function cpuChooseFieldCard(candidates, capturedBy){
+  var best = candidates[0], bv = -1;
+  candidates.forEach(function(id){ var v = cardValue(cardById(id)); if(v > bv){ bv = v; best = id; } });
+  return best;
+}
+function cpuPickPlay(){
+  var hand = G.hand.cpu, best = null, bestScore = -1e9;
+  var rnd = settings.level === 1 ? 14 : settings.level === 2 ? 5 : 0;
+  hand.forEach(function(cardId){
+    var c = cardById(cardId);
+    var m = matchesInField(c.month);
+    var s = Math.random() * rnd;
+    if(m.length){
+      var take = m.length === 2 ? [cpuChooseFieldCard(m, G.captured.cpu)] : m;
+      s += take.reduce(function(a,id){ return a + cardValue(cardById(id)); }, 0) + cardValue(c);
+      s += captureGain(C, take.concat([cardId]));
+      if(m.length >= 3) s += 25; /* \u5F15\u304D\u306F\u5927\u304D\u3044 */
+    } else {
+      /* \u53D6\u308C\u306A\u3044\u624B\uFF1A\u4FA1\u5024\u306E\u4F4E\u3044\u672D\u304B\u3089\u6368\u3066\u308B\u3002\u305F\u3060\u3057\u5F79\u306E\u6750\u6599\u30FB\u5834\u306B\u540C\u6708\u304C\u591A\u3044\u672D\u306F\u6E29\u5B58 */
+      s -= cardValue(c) * 0.6;
+      s += potentialBonus(C, cardId) * -1.5;
+      var sameOnField = 0;
+      s += sameOnField;
+    }
+    if(s > bestScore){ bestScore = s; best = { cardId: cardId, choice: m.length === 2 ? cpuChooseFieldCard(m, G.captured.cpu) : null }; }
+  });
+  return best;
+}
+function cpuDecideKoikoi(ev){
+  if(settings.level === 1) return ev.total <= 2 && Math.random() < 0.6;
+  var myLeft = G.hand.cpu.length;
+  var oppEv = evalYaku(G.captured.you).total;
+  if(ev.total >= 6) return false;
+  if(myLeft <= 1) return false;
+  if(oppEv >= 3 && ev.total >= 3) return false; /* \u76F8\u624B\u304C\u80B2\u3063\u3066\u3044\u308B\u306A\u3089\u6B62\u3081\u308B */
+  if(ev.total <= 2) return true;
+  return myLeft >= 4;
+}
+async function cpuTurn(){
+  if(!G || G.phase !== "play") return;
+  busy = true;
+  await delay(500);
+  var pick = cpuPickPlay();
+  var c = cardById(pick.cardId);
+  setStatus("The computer played " + cardLabel(c) + ".");
+  await playFromHand(C, pick.cardId, pick.choice);
+}
+
+/* ================= \u63CF\u753B ================= */
+var el = {};
+["cpuHand","myHand","fieldCards","cpuCaptured","myCaptured","statusText","stockCount","roundVal","youScore","cpuScore","youCell","cpuCell","tableEl","myYakuNow","cpuYakuNow","fieldInfo"].forEach(function(id){ el[id] = document.getElementById(id); });
+function setStatus(t){ el.statusText.textContent = t; }
+function lock(on){ el.tableEl.classList.toggle("locked", !!on); }
+function renderCaptured(container, ids){
+  container.innerHTML = "";
+  if(!ids.length){ container.innerHTML = '<span class="cap-empty">No captured cards</span>'; return; }
+  var groups = [["hikari","Bright"],["tane","Animal"],["tanzaku","Ribbon"],["kasu","Plain"]];
+  groups.forEach(function(g){
+    var sub = ids.filter(function(id){ return cardById(id).kind === g[0]; });
+    if(!sub.length) return;
+    var wrap = document.createElement("div"); wrap.className = "cap-group";
+    var lab = document.createElement("div"); lab.className = "cap-label"; lab.textContent = g[1] + " (" + sub.length + ")";
+    var row = document.createElement("div"); row.className = "cap-row";
+    sub.forEach(function(id){ row.appendChild(cardEl(cardById(id), { small: true })); });
+    wrap.appendChild(lab); wrap.appendChild(row);
+    container.appendChild(wrap);
+  });
+}
+function yakuLine(who){
+  var ev = evalYaku(G.captured[who]);
+  if(!ev.list.length) return "";
+  return "Yaku: " + ev.list.map(function(y){ return y.name + " " + y.pts; }).join(", ") + (G.koikoi[who] ? " (Koi-Koi declared)" : "");
+}
+function render(justIds){
+  if(!G) return;
+  justIds = justIds || [];
+  el.roundVal.textContent = G.round ? (G.round + " of " + G.totalMonths) : "\u2013";
+  el.youScore.textContent = G.score.you;
+  el.cpuScore.textContent = G.score.cpu;
+  el.youCell.classList.toggle("turn", G.turn === P && G.phase === "play");
+  el.cpuCell.classList.toggle("turn", G.turn === C && G.phase === "play");
+  el.stockCount.textContent = G.stock ? G.stock.length : 0;
+  document.getElementById("stockPile").style.visibility = G.stock && G.stock.length ? "visible" : "hidden";
+  /* CPU\u624B\u672D\uFF08\u88CF\u5411\u304D\uFF09 */
+  el.cpuHand.innerHTML = "";
+  (G.hand ? G.hand.cpu : []).forEach(function(){ el.cpuHand.appendChild(backEl(false)); });
+  /* \u5834\u672D */
+  el.fieldCards.innerHTML = "";
+  var pickCands = pendingPick ? pendingPick.candidates : [];
+  (G.field || []).forEach(function(id){
+    var c = cardEl(cardById(id));
+    if(pickCands.indexOf(id) >= 0){ c.classList.add("pickable"); c.addEventListener("click", function(){ onFieldCardClick(id); }); }
+    if(justIds.indexOf(id) >= 0) c.classList.add("just");
+    el.fieldCards.appendChild(c);
+  });
+  el.fieldInfo.textContent = G.field ? G.field.length + " cards" : "";
+  /* \u53D6\u672D */
+  renderCaptured(el.cpuCaptured, G.captured ? G.captured.cpu : []);
+  renderCaptured(el.myCaptured, G.captured ? G.captured.you : []);
+  el.cpuYakuNow.textContent = G.captured ? yakuLine(C) : "";
+  el.myYakuNow.textContent = G.captured ? yakuLine(P) : "";
+  /* \u81EA\u5206\u306E\u624B\u672D */
+  el.myHand.innerHTML = "";
+  var sorted = (G.hand ? G.hand.you.slice() : []).sort(function(a,b){ return a - b; });
+  sorted.forEach(function(id){
+    var c = cardEl(cardById(id));
+    if(G.turn === P && G.phase === "play" && !busy && !pendingPick){
+      if(matchesInField(cardById(id).month).length) c.classList.add("match-hint");
+    }
+    c.addEventListener("click", function(){ onHandCardClick(id); });
+    el.myHand.appendChild(c);
+  });
+}
+
+/* ================= \u5F79\u30AC\u30A4\u30C9\uFF08\u30B2\u30FC\u30E0\u67A0\u306E\u4E0B\u306E\u5225\u67A0\uFF09 ================= */
+var YAKU_GUIDE = [
+  {
+    jp: '<ruby>\u4E94\u5149<rt>\u3054\u3053\u3046</rt></ruby>', en: "Five Brights", pts: "10 pts",
+    ids: [0, 8, 28, 40, 44],
+    need: "All 5 Bright cards",
+    desc: "The highest Bright combination. Collect every Bright card in the deck: the Pine Crane, the Cherry Blossom Curtain, the Susuki Grass Moon, the Willow Rain, and the Paulownia Phoenix."
+  },
+  {
+    jp: '<ruby>\u56DB\u5149<rt>\u3057\u3053\u3046</rt></ruby>', en: "Four Brights", pts: "8 pts",
+    ids: [0, 8, 28, 44],
+    need: "4 Bright cards, without the Willow Rain card",
+    desc: "Any four Bright cards, as long as the Willow Rain card is not among them. The four cards shown here are the only set that qualifies."
+  },
+  {
+    jp: '<ruby>\u96E8\u56DB\u5149<rt>\u3042\u3081\u3057\u3053\u3046</rt></ruby>', en: "Rainy Four Brights", pts: "7 pts",
+    ids: [0, 8, 28, 40],
+    need: "4 Bright cards, including the Willow Rain card",
+    desc: "Four Bright cards that include the Willow Rain card. It scores one point less than Four Brights because the Rain card is counted as a weaker Bright."
+  },
+  {
+    jp: '<ruby>\u4E09\u5149<rt>\u3055\u3093\u3053\u3046</rt></ruby>', en: "Three Brights", pts: "5 pts",
+    ids: [0, 8, 28],
+    need: "3 Bright cards, without the Willow Rain card",
+    desc: "Any three Bright cards, as long as the Willow Rain card is not among them. Three Brights that include the Rain card do not score."
+  },
+  {
+    jp: '<ruby>\u732A<rt>\u3044\u306E</rt>\u9E7F<rt>\u3057\u304B</rt>\u8776<rt>\u3061\u3087\u3046</rt></ruby>', en: "Boar, Deer & Butterfly", pts: "5 pts + extras",
+    ids: [24, 36, 20],
+    need: "Boar (Bush Clover) + Deer (Maple) + Butterfly (Peony)",
+    desc: "The three signature Animal cards: the Boar, the Deer, and the Butterfly. Worth 5 points, plus 1 extra point for every additional Animal card you hold."
+  },
+  {
+    jp: '<ruby>\u8D64\u77ED<rt>\u3042\u304B\u305F\u3093</rt></ruby>', en: "Red Ribbons", pts: "5 pts + extras",
+    ids: [1, 5, 9],
+    need: "The ribbons of Pine, Plum Blossom & Cherry Blossom",
+    desc: "The three red poetry ribbons, each inscribed with writing. Worth 5 points, plus 1 extra point for every additional Ribbon card you hold."
+  },
+  {
+    jp: '<ruby>\u9752\u77ED<rt>\u3042\u304A\u305F\u3093</rt></ruby>', en: "Blue Ribbons", pts: "5 pts + extras",
+    ids: [21, 33, 37],
+    need: "The ribbons of Peony, Chrysanthemum & Maple",
+    desc: "The three blue ribbons of Peony, Chrysanthemum, and Maple. Worth 5 points, plus 1 extra point for every additional Ribbon card you hold."
+  },
+  {
+    jp: '<ruby>\u82B1\u898B<rt>\u306F\u306A\u307F</rt></ruby>\u3067<ruby>\u4E00\u676F<rt>\u3044\u3063\u3071\u3044</rt></ruby>', en: "Cherry Blossom Viewing", pts: "3 pts",
+    ids: [8, 32],
+    need: "Cherry Blossom Curtain (Bright) + Sake Cup (Chrysanthemum)",
+    desc: "A cup of sake under the cherry blossoms: pair the Cherry Blossom Bright card with the Chrysanthemum Sake Cup."
+  },
+  {
+    jp: '<ruby>\u6708\u898B<rt>\u3064\u304D\u307F</rt></ruby>\u3067<ruby>\u4E00\u676F<rt>\u3044\u3063\u3071\u3044</rt></ruby>', en: "Moon Viewing", pts: "3 pts",
+    ids: [28, 32],
+    need: "Susuki Grass Moon (Bright) + Sake Cup (Chrysanthemum)",
+    desc: "A cup of sake under the full moon: pair the Susuki Grass Moon Bright card with the Chrysanthemum Sake Cup. It can be scored together with Cherry Blossom Viewing when you hold all three cards."
+  },
+  {
+    jp: '<ruby>\u30BF\u30CD<rt>\u305F\u306D</rt></ruby>', en: "Animals", pts: "1 pt + extras",
+    ids: [4, 12, 16, 29, 41],
+    need: "Any 5 Animal cards \u2014 five examples are shown",
+    desc: "Collect any five Animal cards for 1 point, plus 1 extra point for each Animal card from the sixth onward. If Boar, Deer & Butterfly is completed, its points are counted instead of this combination for those three cards."
+  },
+  {
+    jp: '<ruby>\u77ED\u518A<rt>\u305F\u3093\u3056\u304F</rt></ruby>', en: "Ribbons", pts: "1 pt + extras",
+    ids: [13, 17, 25, 42, 1],
+    need: "Any 5 Ribbon cards \u2014 five examples are shown",
+    desc: "Collect any five Ribbon cards for 1 point, plus 1 extra point for each Ribbon card from the sixth onward. Ribbons that complete Red Ribbons or Blue Ribbons score through those combinations instead."
+  },
+  {
+    jp: '<ruby>\u30AB\u30B9<rt>\u304B\u3059</rt></ruby>', en: "Chaff", pts: "1 pt + extras",
+    ids: [2, 6, 10, 14, 18, 22, 26, 30, 34, 45],
+    need: "Any 10 Chaff (Plain) cards \u2014 ten examples are shown",
+    desc: "Collect any ten Chaff cards \u2014 the plain cards tagged \u201CPlain\u201D \u2014 for 1 point, plus 1 extra point for each card from the eleventh onward. The Chrysanthemum Sake Cup also counts as a Chaff card, on top of counting as an Animal."
+  },
+  {
+    jp: '<ruby>\u624B\u5F79<rt>\u3066\u3084\u304F</rt></ruby>', en: "Hand Yaku \u2014 Four of a Month", pts: "6 pts",
+    ids: [0, 1, 2, 3],
+    need: "All 4 cards of one month in your opening hand \u2014 all four Pine cards are shown as an example",
+    desc: "A special hand dealt at the start of a month: if your opening hand contains all four cards of a single month, you win the month immediately for 6 points, with no doubling. If all four cards of a month are dealt onto the field instead, the month is redealt."
+  }
+];
+function renderYakuGuide(){
+  var grid = document.getElementById("yakuGuideGrid");
+  if(!grid) return;
+  grid.innerHTML = "";
+  YAKU_GUIDE.forEach(function(y){
+    var item = document.createElement("article");
+    item.className = "yaku-item";
+    var head = document.createElement("div");
+    head.className = "yaku-item-head";
+    var title = document.createElement("h3");
+    title.className = "yaku-title";
+    title.innerHTML = y.jp;
+    var pts = document.createElement("span");
+    pts.className = "yaku-pts";
+    pts.textContent = y.pts;
+    head.appendChild(title); head.appendChild(pts);
+    var en = document.createElement("p");
+    en.className = "yaku-en";
+    en.textContent = y.en;
+    var cards = document.createElement("div");
+    cards.className = "yaku-cards";
+    y.ids.forEach(function(id){ cards.appendChild(cardEl(cardById(id))); });
+    var need = document.createElement("p");
+    need.className = "yaku-need";
+    need.innerHTML = "<strong>Cards needed:</strong> ";
+    need.appendChild(document.createTextNode(y.need));
+    var desc = document.createElement("p");
+    desc.className = "yaku-desc";
+    desc.textContent = y.desc;
+    item.appendChild(head); item.appendChild(en); item.appendChild(cards); item.appendChild(need); item.appendChild(desc);
+    grid.appendChild(item);
+  });
+}
+renderYakuGuide();
+
+/* ================= UI\u914D\u7DDA ================= */
+function openOverlay(id){ document.getElementById(id).classList.add("open"); }
+function closeOverlay(id){ document.getElementById(id).classList.remove("open"); }
+function segWire(id, attr, apply){
+  var seg = document.getElementById(id);
+  seg.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    seg.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    apply(parseInt(b.dataset[attr], 10));
+  });
+}
+segWire("lengthSeg", "len", function(v){ settings.months = v; });
+segWire("levelSeg", "lv", function(v){ settings.level = v; });
+document.getElementById("startBtn").addEventListener("click", function(){
+  pendingPick = null; busy = false;
+  closeOverlay("roundOverlay"); closeOverlay("finalOverlay"); closeOverlay("koikoiOverlay");
+  newMatch();
+});
+document.getElementById("nextRoundBtn").addEventListener("click", nextStep);
+document.getElementById("playAgainBtn").addEventListener("click", function(){
+  closeOverlay("finalOverlay"); newMatch();
+});
+document.getElementById("closeFinalBtn").addEventListener("click", function(){ closeOverlay("finalOverlay"); });
+document.getElementById("rulesBtn").addEventListener("click", function(){ openOverlay("rulesOverlay"); });
+document.getElementById("closeRulesBtn").addEventListener("click", function(){ closeOverlay("rulesOverlay"); });
+document.getElementById("rulesOverlay").addEventListener("click", function(e){ if(e.target === this) closeOverlay("rulesOverlay"); });
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){ closeOverlay("rulesOverlay"); closeOverlay("finalOverlay"); }
+});
+/* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */
+render();
+<\/script>
+  </body>
+</html>
+`;
+var kanjiSudoku = `<!doctype html>
+<!-- Portal copy of the Kanji Sudoku library game. Served by app/routes/game-frame.$name.ts (login + teacher lock); fullscreen is the portal's GameFrame toolbar; auto-pauses when the tab is hidden. Library original untouched. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Kanji Sudoku \u2014 \u6F22\u6570\u5B57\u6570\u72EC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#f4f1ea;
+        --bg-2:#ece7da;
+        --surface:#fffdf8;
+        --surface-2:#f8f4ea;
+        --ink:#1c1a16;
+        --ink-soft:#55504a;
+        --ink-faint:#8a847b;
+        --line:#d8d1c1;
+        --line-strong:#2b2822;
+        --cell-line:#cfc8b6;
+        --accent:#b3352b;
+        --accent-ink:#ffffff;
+        --accent-soft:#f6e3df;
+        --user:#1f4e8c;
+        --user-soft:#e2ebf7;
+        --given-bg:transparent;
+        --selected:#f3c969;
+        --selected-soft:#fdf0cd;
+        --related:#efe9da;
+        --same:#fbe3ae;
+        --error:#c62f22;
+        --error-bg:#fbe3de;
+        --good:#2e7d43;
+        --shadow:0 18px 44px rgba(40,32,18,.14);
+        --board-shadow:0 10px 30px rgba(40,32,18,.12);
+        color-scheme:light;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#141311;
+          --bg-2:#1b1a17;
+          --surface:#211f1b;
+          --surface-2:#28251f;
+          --ink:#f0ead9;
+          --ink-soft:#c9c2b0;
+          --ink-faint:#97907f;
+          --line:#3a362d;
+          --line-strong:#e8e1cd;
+          --cell-line:#3f3b32;
+          --accent:#e0574a;
+          --accent-ink:#ffffff;
+          --accent-soft:#40241f;
+          --user:#8db8f2;
+          --user-soft:#24344d;
+          --selected:#8a6d1f;
+          --selected-soft:#4a3d18;
+          --related:#2a2822;
+          --same:#54451d;
+          --error:#ff8a7a;
+          --error-bg:#472420;
+          --good:#7cc78f;
+          --shadow:0 18px 44px rgba(0,0,0,.5);
+          --board-shadow:0 10px 30px rgba(0,0,0,.45);
+          color-scheme:dark;
+        }
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0;
+        background:
+          radial-gradient(900px 480px at 85% -80px, var(--bg-2), transparent 70%),
+          var(--bg);
+        color:var(--ink);
+        font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+        line-height:1.5;
+      }
+      .kanji-font{font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif}
+      .wrap{max-width:1120px;margin:0 auto;padding:22px 18px 56px}
+      /* ---------- Header ---------- */
+      header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px}
+      .title-block h1{
+        margin:0;font-size:clamp(30px,4.6vw,44px);line-height:1.08;font-weight:700;letter-spacing:-.01em;
+        display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+      }
+      .title-block h1 .jp{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-weight:900;font-size:.82em;color:var(--accent)}
+      .title-block p{margin:8px 0 0;color:var(--ink-soft);font-size:15.5px;max-width:56ch}
+      .title-block p .kanji-font{font-weight:700;color:var(--ink)}
+      .seal{
+        flex:none;width:58px;height:58px;border-radius:10px;background:var(--accent);color:#fff;
+        display:flex;align-items:center;justify-content:center;
+        font-family:"Noto Serif JP",serif;font-weight:900;font-size:27px;line-height:1;
+        box-shadow:0 6px 16px rgba(0,0,0,.18);transform:rotate(3deg);
+      }
+      .head-row{display:flex;align-items:center;gap:14px}
+      /* ---------- Stats strip ---------- */
+      .stats{
+        display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-bottom:16px;
+      }
+      .stat{
+        background:var(--surface);border:1px solid var(--line);border-radius:12px;
+        padding:8px 14px;min-width:104px;
+      }
+      .stat .label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+      .stat .value{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.25}
+      .stat .value.bad{color:var(--error)}
+      .difficulty-bar{
+        display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+        border-radius:12px;padding:6px;flex-wrap:wrap;
+      }
+      .difficulty-bar .label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);padding:0 6px}
+      .diff-btn{
+        appearance:none;border:1px solid transparent;background:transparent;color:var(--ink-soft);
+        font:inherit;font-size:14px;font-weight:600;padding:7px 13px;border-radius:8px;cursor:pointer;
+      }
+      .diff-btn:hover{color:var(--ink);background:var(--surface-2)}
+      .diff-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      .diff-btn:focus-visible,.layout-btn:focus-visible,.tool-btn:focus-visible,.pad-btn:focus-visible,.primary-btn:focus-visible,.ghost-btn:focus-visible{outline:3px solid var(--selected);outline-offset:2px}
+      /* layout switcher (for iframe embedding) */
+      .layout-bar{
+        display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+        border-radius:12px;padding:6px;flex-wrap:wrap;
+      }
+      .layout-bar .label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);padding:0 6px}
+      .layout-btn{
+        appearance:none;border:1px solid transparent;background:transparent;color:var(--ink-soft);
+        font:inherit;font-size:14px;font-weight:600;padding:7px 13px;border-radius:8px;cursor:pointer;
+      }
+      .layout-btn:hover{color:var(--ink);background:var(--surface-2)}
+      .layout-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      /* ---------- Layout ---------- */
+      .layout{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+      body[data-layout-effective="side"] .layout{grid-template-columns:minmax(0,600px) minmax(0,1fr)}
+      body[data-layout-effective="stacked"] .board-card{width:100%;max-width:660px}
+      /* ---------- Board ---------- */
+      .board-card{
+        background:var(--surface);border:1px solid var(--line);border-radius:16px;
+        padding:clamp(10px,2.4vw,18px);box-shadow:var(--board-shadow);position:relative;
+      }
+      .board{
+        display:grid;grid-template-columns:repeat(9,1fr);
+        border:3px solid var(--line-strong);border-radius:6px;overflow:hidden;
+        aspect-ratio:1/1;background:var(--surface);touch-action:manipulation;user-select:none;-webkit-user-select:none;
+      }
+      .cell{
+        appearance:none;border:0;margin:0;padding:0;background:transparent;color:var(--ink);
+        border-right:1px solid var(--cell-line);border-bottom:1px solid var(--cell-line);
+        position:relative;cursor:pointer;font-family:inherit;
+        display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;min-width:0;
+      }
+      .cell:nth-child(9n){border-right:0}
+      .cell:nth-child(n+73){border-bottom:0}
+      .cell.br{border-right:2.5px solid var(--line-strong)}
+      .cell.bb{border-bottom:2.5px solid var(--line-strong)}
+      .cell .big{
+        font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;
+        font-size:clamp(19px,5.4vw,34px);font-weight:700;line-height:1;pointer-events:none;
+      }
+      @media (min-width:920px){.cell .big{font-size:36px}}
+      .cell .tiny{
+        position:absolute;right:3px;bottom:2px;font-size:9.5px;font-weight:600;color:var(--ink-faint);
+        font-variant-numeric:tabular-nums;pointer-events:none;line-height:1;
+      }
+      .cell.given .big{color:var(--ink);font-weight:900}
+      .cell.user .big{color:var(--user)}
+      .cell.hinted .big{color:var(--good)}
+      .cell.error{background:var(--error-bg)}
+      .cell.error .big{color:var(--error)}
+      .cell.related{background:var(--related)}
+      .cell.same{background:var(--same)}
+      .cell.selected{background:var(--selected)}
+      .cell.selected .big{color:var(--ink)}
+      .cell .notes{
+        display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+        width:88%;height:88%;pointer-events:none;
+      }
+      .cell .notes span{
+        font-family:"Noto Serif JP",serif;font-size:clamp(8px,1.8vw,12px);font-weight:500;color:var(--ink-soft);
+        display:flex;align-items:center;justify-content:center;line-height:1;
+      }
+      .board.paused .cell{visibility:hidden}
+      .pause-cover{
+        position:absolute;inset:0;border-radius:16px;display:none;align-items:center;justify-content:center;
+        flex-direction:column;gap:10px;text-align:center;padding:20px;
+      }
+      .board-card.is-paused .pause-cover{display:flex}
+      .pause-cover .kanji-font{font-size:40px;font-weight:900;color:var(--accent)}
+      .pause-cover p{margin:0;color:var(--ink-soft)}
+      .progress-row{display:flex;align-items:center;gap:12px;margin-top:14px}
+      .progress-track{flex:1;height:8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+      .progress-fill{height:100%;width:0%;background:var(--accent);border-radius:99px;transition:width .3s ease}
+      .progress-text{font-size:13px;font-weight:600;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+      .status-msg{
+        margin:12px 2px 0;font-size:14.5px;min-height:22px;color:var(--ink-soft);
+      }
+      .status-msg strong{color:var(--ink)}
+      .status-msg.err{color:var(--error)}
+      .status-msg.ok{color:var(--good)}
+      /* ---------- Side panel ---------- */
+      .panel{display:flex;flex-direction:column;gap:16px}
+      .card{
+        background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;
+        box-shadow:var(--shadow);
+      }
+      .card h2{margin:0 0 4px;font-size:16px;font-weight:700}
+      .card .hint-text{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft)}
+      /* number pad */
+      .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+      body[data-layout-effective="side"] .pad{grid-template-columns:repeat(3,1fr);gap:8px}
+      .pad-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);
+        border-radius:12px;cursor:pointer;padding:8px 2px 6px;display:flex;flex-direction:column;
+        align-items:center;gap:0;line-height:1.1;font-family:inherit;position:relative;
+      }
+      .pad-btn:hover{border-color:var(--ink-faint)}
+      .pad-btn .k{font-family:"Noto Serif JP",serif;font-weight:900;font-size:clamp(20px,4.6vw,30px);line-height:1.15}
+      .pad-btn .a{font-size:11px;font-weight:600;color:var(--ink-soft)}
+      .pad-btn .left{font-size:10px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+      .pad-btn.done{opacity:.38;pointer-events:none}
+      .pad-btn.flash{border-color:var(--accent);background:var(--accent-soft)}
+      /* tools */
+      .tools{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+      .tool-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);
+        border-radius:12px;cursor:pointer;padding:10px 4px 8px;font-family:inherit;
+        display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12.5px;font-weight:600;
+      }
+      .tool-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      .tool-btn:hover{border-color:var(--ink-faint)}
+      .tool-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      .tool-btn .badge{
+        font-size:10px;font-weight:700;background:var(--accent);color:#fff;border-radius:99px;padding:0 6px;line-height:1.5;
+      }
+      .tool-btn[aria-pressed="true"] .badge{background:var(--accent)}
+      .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+      .primary-btn{
+        appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;
+        font-size:15px;padding:13px 14px;border-radius:12px;cursor:pointer;
+      }
+      .primary-btn:hover{filter:brightness(1.07)}
+      .ghost-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:600;
+        font-size:15px;padding:13px 14px;border-radius:12px;cursor:pointer;
+      }
+      .ghost-btn:hover{border-color:var(--ink-faint)}
+      .toggle-row{display:flex;gap:8px;flex-wrap:wrap}
+      .toggle-btn{
+        appearance:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);
+        font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:99px;cursor:pointer;
+      }
+      .toggle-btn[aria-pressed="true"]{background:var(--user-soft);border-color:var(--user);color:var(--user)}
+      /* reference */
+      .ref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+      .ref-cell{
+        border:1px solid var(--line);border-radius:10px;background:var(--surface-2);
+        padding:8px 4px;text-align:center;cursor:pointer;appearance:none;font-family:inherit;color:var(--ink);
+      }
+      .ref-cell:hover{border-color:var(--accent)}
+      .ref-cell .k{display:block;font-family:"Noto Serif JP",serif;font-weight:900;font-size:24px;line-height:1.2}
+      .ref-cell .w{display:block;font-size:12px;color:var(--ink-soft);font-weight:600}
+      .ref-cell .n{display:block;font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+      /* how to play */
+      .howto{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+      .howto h2{margin:0 0 10px;font-size:18px}
+      .howto ol{margin:0;padding-left:20px;color:var(--ink-soft);font-size:14.5px;display:grid;gap:6px}
+      .howto ol strong{color:var(--ink)}
+      .howto .kanji-font{font-weight:700;color:var(--ink)}
+      kbd{
+        font-family:inherit;font-size:12px;font-weight:600;border:1px solid var(--line);border-bottom-width:2px;
+        border-radius:6px;padding:1px 6px;background:var(--surface-2);color:var(--ink);
+      }
+      /* win overlay */
+      .overlay{
+        position:fixed;inset:0;background:rgba(12,10,6,.55);display:none;align-items:center;justify-content:center;
+        padding:18px;z-index:50;
+      }
+      .overlay.show{display:flex}
+      .dialog{
+        background:var(--surface);color:var(--ink);border-radius:18px;max-width:430px;width:100%;
+        padding:28px 24px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--line);
+      }
+      .dialog .big-kanji{font-family:"Noto Serif JP",serif;font-weight:900;font-size:52px;color:var(--accent);line-height:1.1}
+      .dialog h2{margin:8px 0 6px;font-size:24px}
+      .dialog p{margin:0 0 16px;color:var(--ink-soft);font-size:14.5px}
+      .dialog .results{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+      .dialog .results div{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 4px}
+      .dialog .results .v{display:block;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+      .dialog .results .l{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
+      .dialog .row{display:flex;gap:8px}
+      .dialog .row button{flex:1}
+      @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+      .cell.shake{animation:shake .35s ease}
+      @media (prefers-reduced-motion: reduce){
+        .cell.shake{animation:none}
+        .progress-fill{transition:none}
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="top">
+        <div class="title-block">
+          <h1>Kanji Sudoku <span class="jp">\u6F22\u6570\u5B57\u6570\u72EC</span></h1>
+          <p>The classic 9\xD79 Sudoku, played entirely with Japanese kanji numerals \u2014 from <span class="kanji-font">\u4E00</span> (one) to <span class="kanji-font">\u4E5D</span> (nine). Fill every row, column, and 3\xD73 box with all nine kanji, with no repeats.</p>
+        </div>
+        <div class="head-row"><div class="seal" aria-hidden="true">\u6570\u72EC</div></div>
+      </header>
+
+      <div class="stats" role="group" aria-label="Game status and difficulty">
+        <div class="difficulty-bar" role="group" aria-label="Difficulty">
+          <span class="label">Difficulty</span>
+          <button type="button" class="diff-btn" data-diff="easy" aria-pressed="true">Easy</button>
+          <button type="button" class="diff-btn" data-diff="medium" aria-pressed="false">Medium</button>
+          <button type="button" class="diff-btn" data-diff="hard" aria-pressed="false">Hard</button>
+          <button type="button" class="diff-btn" data-diff="expert" aria-pressed="false">Expert</button>
+        </div>
+        <div class="layout-bar" role="group" aria-label="Layout">
+          <span class="label">Layout</span>
+          <button type="button" class="layout-btn" data-layout="auto" aria-pressed="true">Auto</button>
+          <button type="button" class="layout-btn" data-layout="side" aria-pressed="false">Side by side</button>
+          <button type="button" class="layout-btn" data-layout="stacked" aria-pressed="false">Board on top</button>
+        </div>
+        <div class="stat"><span class="label">Time</span><div class="value" id="stat-time">00:00</div></div>
+        <div class="stat"><span class="label">Mistakes</span><div class="value" id="stat-mistakes">0</div></div>
+        <div class="stat"><span class="label">Hints used</span><div class="value" id="stat-hints">0</div></div>
+        <div class="stat"><span class="label">Filled</span><div class="value" id="stat-filled">0 / 81</div></div>
+      </div>
+
+      <div class="layout">
+        <section class="board-card" id="board-card" aria-label="Sudoku board">
+          <div class="board" id="board" role="grid" aria-label="9 by 9 Sudoku grid"></div>
+          <div class="pause-cover">
+            <div class="kanji-font">\u4E00\u6642\u505C\u6B62</div>
+            <p>The game is paused. The board is hidden so you can take a clean break.</p>
+            <button type="button" class="primary-btn" id="resume-btn">Resume game</button>
+          </div>
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">0% complete</div>
+          </div>
+          <p class="status-msg" id="status-msg" role="status" aria-live="polite">Pick a cell, then tap a kanji \u2014 or type 1\u20139 on your keyboard.</p>
+        </section>
+
+        <aside class="panel">
+          <div class="card">
+            <h2>Number pad</h2>
+            <p class="hint-text">Tap a cell on the board first, then choose a kanji. The romaji under each kanji is its Japanese reading \u2014 for example, \u4E00 is \u201Cichi\u201D \u2014 and \u201Cleft\u201D shows how many are still to place.</p>
+            <div class="pad" id="pad"></div>
+          </div>
+
+          <div class="card">
+            <h2>Tools</h2>
+            <p class="hint-text">Notes mode lets you pencil in small candidate kanji before you commit.</p>
+            <div class="tools">
+              <button type="button" class="tool-btn" id="btn-notes" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                Notes <span class="badge" id="notes-state">OFF</span>
+              </button>
+              <button type="button" class="tool-btn" id="btn-erase">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+                Erase
+              </button>
+              <button type="button" class="tool-btn" id="btn-undo">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+                Undo
+              </button>
+              <button type="button" class="tool-btn" id="btn-hint">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2Z"/></svg>
+                Hint
+              </button>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button type="button" class="primary-btn" id="btn-new">New game</button>
+              <button type="button" class="ghost-btn" id="btn-pause" aria-pressed="false">Pause</button>
+            </div>
+            <div class="toggle-row" style="margin-top:12px">
+              <button type="button" class="toggle-btn" id="toggle-helper" aria-pressed="true">Small Arabic numbers: On</button>
+              <button type="button" class="toggle-btn" id="toggle-highlight" aria-pressed="true">Highlight matching kanji: On</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Kanji numeral reference</h2>
+            <p class="hint-text">New to kanji numerals? Use this chart any time. Tap a card to highlight every matching cell on the board.</p>
+            <div class="ref-grid" id="ref-grid"></div>
+          </div>
+        </aside>
+      </div>
+
+      <section class="howto">
+        <h2>How to play</h2>
+        <ol>
+          <li><strong>The goal:</strong> fill the grid so that every row, every column, and every 3\xD73 box contains each of the nine kanji \u2014 <span class="kanji-font">\u4E00 \u4E8C \u4E09 \u56DB \u4E94 \u516D \u4E03 \u516B \u4E5D</span> \u2014 exactly once.</li>
+          <li><strong>Placing a kanji:</strong> tap any empty cell to select it, then tap a kanji on the number pad, or press <kbd>1</kbd>\u2013<kbd>9</kbd> on a keyboard. Use the arrow keys to move around the board.</li>
+          <li><strong>Given clues</strong> are printed in bold black and cannot be changed. Your entries appear in blue; a hint-filled cell appears in green.</li>
+          <li><strong>Mistakes</strong> are checked instantly: a wrong kanji turns red and the mistake counter goes up. Fix it with Erase or by entering the right kanji.</li>
+          <li><strong>Notes mode</strong> (pencil icon, or press <kbd>N</kbd>) lets you jot down small candidate kanji in an empty cell. Press <kbd>Backspace</kbd> to erase, <kbd>Ctrl</kbd>+<kbd>Z</kbd> to undo, and <kbd>H</kbd> for a hint.</li>
+          <li><strong>Learning the kanji:</strong> keep \u201CSmall Arabic numbers\u201D on while you learn \u2014 a tiny 1\u20139 appears in the corner of each filled cell. Turn it off for a real challenge once the kanji feel familiar.</li>
+          <li><strong>Winning:</strong> the puzzle is complete when all 81 cells are filled correctly. Every puzzle here has exactly one solution.</li>
+          <li><strong>Layout:</strong> use the Layout switch at the top to choose <strong>Side by side</strong> (board on the left, number pad and tools on the right) or <strong>Board on top</strong> (board above the controls). <strong>Auto</strong> follows the width the game is given \u2014 handy when the game is embedded in a page with an iframe: wide frames get the side-by-side layout, narrow frames stack. A page embedding the game can also force a layout with <kbd>?layout=side</kbd> or <kbd>?layout=stacked</kbd> in the frame URL, or by sending a <kbd>postMessage</kbd> of <kbd>{type: "sudoku-layout", layout: "side"}</kbd>.</li>
+        </ol>
+      </section>
+    </main>
+
+    <div class="overlay" id="win-overlay" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <div class="dialog">
+        <div class="big-kanji">\u5B8C\u6210</div>
+        <h2 id="win-title">Puzzle complete!</h2>
+        <p id="win-sub">You filled the whole grid with kanji numerals. Well played.</p>
+        <div class="results">
+          <div><span class="v" id="win-time">00:00</span><span class="l">Time</span></div>
+          <div><span class="v" id="win-mistakes">0</span><span class="l">Mistakes</span></div>
+          <div><span class="v" id="win-hints">0</span><span class="l">Hints</span></div>
+        </div>
+        <div class="row">
+          <button type="button" class="ghost-btn" id="win-close">Keep looking</button>
+          <button type="button" class="primary-btn" id="win-again">Play again</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        "use strict";
+        var KANJI = ["", "\u4E00","\u4E8C","\u4E09","\u56DB","\u4E94","\u516D","\u4E03","\u516B","\u4E5D"];
+        var WORDS = ["", "One","Two","Three","Four","Five","Six","Seven","Eight","Nine"];
+        var ROMAJI = ["", "ichi","ni","san","yon","go","roku","nana","hachi","ky\u016B"];
+        var REMOVALS = { easy: 36, medium: 46, hard: 52, expert: 57 };
+        var DIFF_LABEL = { easy:"Easy", medium:"Medium", hard:"Hard", expert:"Expert" };
+
+        /* ---------- Solver / generator ---------- */
+        function shuffled(arr){
+          var a = arr.slice();
+          for (var i=a.length-1;i>0;i--){
+            var j = Math.floor(Math.random()*(i+1));
+            var t=a[i]; a[i]=a[j]; a[j]=t;
+          }
+          return a;
+        }
+        function peersOf(i){
+          var r = Math.floor(i/9), c = i%9, out = [];
+          for (var k=0;k<9;k++){ out.push(r*9+k); out.push(k*9+c); }
+          var br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+          for (var dr=0;dr<3;dr++) for (var dc=0;dc<3;dc++) out.push((br+dr)*9+(bc+dc));
+          return out;
+        }
+        function candidates(grid, i){
+          if (grid[i] !== 0) return [];
+          var used = {};
+          var ps = peersOf(i);
+          for (var k=0;k<ps.length;k++) used[grid[ps[k]]] = true;
+          var out = [];
+          for (var n=1;n<=9;n++) if (!used[n]) out.push(n);
+          return out;
+        }
+        function pickCell(grid){
+          var best=-1, bestC=null;
+          for (var i=0;i<81;i++){
+            if (grid[i]===0){
+              var cs = candidates(grid,i);
+              if (cs.length===0) return {i:i, cs:cs};
+              if (bestC===null || cs.length<bestC.length){ best=i; bestC=cs; if (cs.length===1) break; }
+            }
+          }
+          return best===-1 ? null : {i:best, cs:bestC};
+        }
+        function solveRandom(grid){
+          var pick = pickCell(grid);
+          if (!pick) return true;
+          if (pick.cs.length===0) return false;
+          var order = shuffled(pick.cs);
+          for (var k=0;k<order.length;k++){
+            grid[pick.i]=order[k];
+            if (solveRandom(grid)) return true;
+            grid[pick.i]=0;
+          }
+          return false;
+        }
+        function countSolutions(grid, limit){
+          var pick = pickCell(grid);
+          if (!pick) return 1;
+          if (pick.cs.length===0) return 0;
+          var total = 0;
+          for (var k=0;k<pick.cs.length;k++){
+            grid[pick.i]=pick.cs[k];
+            total += countSolutions(grid, limit-total);
+            grid[pick.i]=0;
+            if (total>=limit) break;
+          }
+          return total;
+        }
+        function generatePuzzle(removalsTarget){
+          var solution = new Array(81).fill(0);
+          solveRandom(solution);
+          var puzzle = solution.slice();
+          var order = shuffled(Array.from({length:81}, function(_,i){return i;}));
+          var removed = 0;
+          for (var k=0;k<order.length && removed<removalsTarget;k++){
+            var i = order[k];
+            if (puzzle[i]===0) continue;
+            var backup = puzzle[i];
+            puzzle[i]=0;
+            var test = puzzle.slice();
+            if (countSolutions(test,2)===1){ removed++; }
+            else { puzzle[i]=backup; }
+          }
+          return { solution:solution, puzzle:puzzle };
+        }
+
+        /* ---------- State ---------- */
+        var state = {
+          difficulty:"easy",
+          solution:[], puzzle:[], board:[], given:[], hinted:[],
+          notes:[], errors:{},
+          selected:0, notesMode:false,
+          mistakes:0, hints:0, seconds:0,
+          timer:null, paused:false, finished:false,
+          helper:true, highlightSame:true,
+          history:[]
+        };
+
+        /* ---------- DOM ---------- */
+        var boardEl = document.getElementById("board");
+        var boardCard = document.getElementById("board-card");
+        var padEl = document.getElementById("pad");
+        var statusEl = document.getElementById("status-msg");
+        var cellEls = [];
+        var padBtns = [];
+
+        function buildBoard(){
+          boardEl.innerHTML=""; cellEls=[];
+          for (var i=0;i<81;i++){
+            (function(i){
+              var b=document.createElement("button");
+              b.type="button"; b.className="cell";
+              b.setAttribute("role","gridcell");
+              var c=i%9, r=Math.floor(i/9);
+              if (c===2||c===5) b.classList.add("br");
+              if (r===2||r===5) b.classList.add("bb");
+              b.addEventListener("click", function(){ selectCell(i); });
+              boardEl.appendChild(b); cellEls.push(b);
+            })(i);
+          }
+        }
+        function buildPad(){
+          padEl.innerHTML=""; padBtns=[];
+          for (var n=1;n<=9;n++){
+            (function(n){
+              var b=document.createElement("button");
+              b.type="button"; b.className="pad-btn";
+              b.setAttribute("aria-label","Enter "+KANJI[n]+" ("+n+", "+ROMAJI[n]+")");
+              b.innerHTML='<span class="k">'+KANJI[n]+'</span><span class="a">'+n+" \xB7 "+ROMAJI[n]+'</span><span class="left"></span>';
+              b.addEventListener("click", function(){ enterNumber(n); });
+              padEl.appendChild(b); padBtns.push(b);
+            })(n);
+          }
+        }
+        function buildRef(){
+          var grid=document.getElementById("ref-grid");
+          for (var n=1;n<=9;n++){
+            (function(n){
+              var b=document.createElement("button");
+              b.type="button"; b.className="ref-cell";
+              b.setAttribute("aria-label","Highlight all "+KANJI[n]+" cells");
+              b.innerHTML='<span class="k">'+KANJI[n]+'</span><span class="w">'+WORDS[n]+'</span><span class="n">value '+n+'</span>';
+              b.addEventListener("click", function(){
+                for (var i=0;i<81;i++){ if (state.board[i]===n){ selectCell(i); return; } }
+                setStatus("There is no <strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") on the board yet. Place one from the number pad.","");
+              });
+              grid.appendChild(b);
+            })(n);
+          }
+        }
+
+        /* ---------- Rendering ---------- */
+        function render(){
+          var sel = state.selected;
+          var selVal = sel>=0 ? state.board[sel] : 0;
+          var selR = Math.floor(sel/9), selC = sel%9;
+          for (var i=0;i<81;i++){
+            var el = cellEls[i];
+            var v = state.board[i];
+            var r = Math.floor(i/9), c = i%9;
+            el.className = "cell"
+              + ((c===2||c===5) ? " br":"") + ((r===2||r===5) ? " bb":"")
+              + (state.given[i] ? " given" : (state.hinted[i] ? " hinted" : " user"))
+              + (state.errors[i] ? " error":"");
+            if (sel>=0){
+              var sameBox = Math.floor(r/3)===Math.floor(selR/3) && Math.floor(c/3)===Math.floor(selC/3);
+              if (i===sel) el.classList.add("selected");
+              else if (r===selR || c===selC || sameBox) el.classList.add("related");
+              if (state.highlightSame && selVal!==0 && v===selVal && i!==sel) el.classList.add("same");
+            }
+            if (v!==0){
+              el.innerHTML = '<span class="big">'+KANJI[v]+'</span>' + (state.helper ? '<span class="tiny">'+v+'</span>' : '');
+              el.setAttribute("aria-label","Row "+(r+1)+", column "+(c+1)+": "+KANJI[v]+" ("+WORDS[v]+")"+(state.given[i]?", given clue":(state.errors[i]?", incorrect":"")));
+            } else if (state.notes[i] && state.notes[i].size>0){
+              var html='<span class="notes">';
+              for (var n=1;n<=9;n++) html += "<span>"+(state.notes[i].has(n)?KANJI[n]:"")+"</span>";
+              html+="</span>";
+              el.innerHTML=html;
+              el.setAttribute("aria-label","Row "+(r+1)+", column "+(c+1)+": empty, with notes");
+            } else {
+              el.innerHTML="";
+              el.setAttribute("aria-label","Row "+(r+1)+", column "+(c+1)+": empty");
+            }
+          }
+          /* pad remaining counts */
+          for (var n2=1;n2<=9;n2++){
+            var count=0;
+            for (var j=0;j<81;j++) if (state.board[j]===n2 && !state.errors[j]) count++;
+            var left = 9-count;
+            var btn = padBtns[n2-1];
+            btn.querySelector(".left").textContent = left>0 ? left+" left" : "done";
+            btn.classList.toggle("done", left<=0);
+          }
+          /* stats */
+          document.getElementById("stat-mistakes").textContent = state.mistakes;
+          document.getElementById("stat-mistakes").classList.toggle("bad", state.mistakes>0);
+          document.getElementById("stat-hints").textContent = state.hints;
+          var filled=0;
+          for (var k=0;k<81;k++) if (state.board[k]!==0 && !state.errors[k]) filled++;
+          document.getElementById("stat-filled").textContent = filled+" / 81";
+          var pct = Math.round(filled/81*100);
+          document.getElementById("progress-fill").style.width = pct+"%";
+          document.getElementById("progress-text").textContent = pct+"% complete";
+        }
+        function setStatus(html, kind){
+          statusEl.innerHTML = html;
+          statusEl.className = "status-msg" + (kind ? " "+kind : "");
+        }
+        function fmt(sec){
+          var m=Math.floor(sec/60), s=sec%60;
+          return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+        }
+        function startTimer(){
+          stopTimer();
+          state.timer=setInterval(function(){
+            if (!state.paused && !state.finished){
+              state.seconds++;
+              document.getElementById("stat-time").textContent = fmt(state.seconds);
+            }
+          },1000);
+        }
+        function stopTimer(){ if (state.timer){ clearInterval(state.timer); state.timer=null; } }
+
+        /* ---------- History ---------- */
+        function snapshot(){
+          state.history.push({
+            board: state.board.slice(),
+            hinted: state.hinted.slice(),
+            errors: Object.assign({}, state.errors),
+            notes: state.notes.map(function(s){ return new Set(s); }),
+            mistakes: state.mistakes
+          });
+          if (state.history.length>200) state.history.shift();
+        }
+        function undo(){
+          if (state.finished || state.paused) return;
+          var s = state.history.pop();
+          if (!s){ setStatus("Nothing to undo yet.",""); return; }
+          state.board=s.board; state.hinted=s.hinted; state.errors=s.errors; state.notes=s.notes; state.mistakes=s.mistakes;
+          render();
+          setStatus("Undid your last move.","");
+        }
+
+        /* ---------- Game flow ---------- */
+        function newGame(diff){
+          state.difficulty = diff || state.difficulty;
+          document.querySelectorAll(".diff-btn").forEach(function(b){
+            b.setAttribute("aria-pressed", b.getAttribute("data-diff")===state.difficulty ? "true":"false");
+          });
+          setStatus("Generating a fresh "+DIFF_LABEL[state.difficulty]+" puzzle\u2026","");
+          setTimeout(function(){
+            var g = generatePuzzle(REMOVALS[state.difficulty]);
+            state.solution=g.solution; state.puzzle=g.puzzle;
+            state.board=g.puzzle.slice();
+            state.given=g.puzzle.map(function(v){ return v!==0; });
+            state.hinted=new Array(81).fill(false);
+            state.notes=Array.from({length:81}, function(){ return new Set(); });
+            state.errors={}; state.history=[];
+            state.mistakes=0; state.hints=0; state.seconds=0; state.finished=false;
+            state.paused=false;
+            boardCard.classList.remove("is-paused"); boardEl.classList.remove("paused");
+            document.getElementById("btn-pause").textContent="Pause";
+            document.getElementById("btn-pause").setAttribute("aria-pressed","false");
+            document.getElementById("stat-time").textContent="00:00";
+            /* select first empty cell */
+            state.selected = state.board.indexOf(0);
+            if (state.selected<0) state.selected=0;
+            document.getElementById("win-overlay").classList.remove("show");
+            render(); startTimer();
+            var clues = state.given.filter(Boolean).length;
+            setStatus("<strong>"+DIFF_LABEL[state.difficulty]+" game started.</strong> "+clues+" clues are given. Pick an empty cell and enter a kanji.","");
+          }, 30);
+        }
+        function selectCell(i){
+          if (state.paused || state.finished) return;
+          state.selected=i;
+          render();
+        }
+        function cleanNotesAround(i, n){
+          var ps = peersOf(i);
+          for (var k=0;k<ps.length;k++){
+            if (state.notes[ps[k]]) state.notes[ps[k]].delete(n);
+          }
+        }
+        function enterNumber(n){
+          if (state.paused || state.finished) return;
+          var i = state.selected;
+          if (i<0) return;
+          if (state.given[i] || state.hinted[i]){ setStatus("That cell is a fixed clue \u2014 it cannot be changed. Pick an empty cell.",""); return; }
+          if (state.notesMode){
+            if (state.board[i]!==0){ setStatus("Notes go in empty cells. Erase this cell first if you want to change it.",""); return; }
+            snapshot();
+            if (state.notes[i].has(n)) state.notes[i].delete(n); else state.notes[i].add(n);
+            render(); return;
+          }
+          if (state.board[i]===n && !state.errors[i]) return;
+          snapshot();
+          state.board[i]=n;
+          state.notes[i].clear();
+          if (n !== state.solution[i]){
+            state.errors[i]=true;
+            state.mistakes++;
+            render();
+            var el=cellEls[i]; el.classList.add("shake");
+            setTimeout(function(){ el.classList.remove("shake"); }, 400);
+            setStatus("<strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") does not belong there \u2014 it breaks a row, column, or box rule. Try another kanji, or erase it.","err");
+          } else {
+            delete state.errors[i];
+            cleanNotesAround(i,n);
+            render();
+            setStatus("<strong>"+KANJI[n]+"</strong> ("+WORDS[n].toLowerCase()+") placed correctly.","ok");
+            checkWin();
+          }
+        }
+        function eraseCell(){
+          if (state.paused || state.finished) return;
+          var i=state.selected;
+          if (i<0) return;
+          if (state.given[i] || state.hinted[i]){ setStatus("Fixed clues cannot be erased.",""); return; }
+          if (state.board[i]===0 && state.notes[i].size===0) return;
+          snapshot();
+          state.board[i]=0; delete state.errors[i]; state.notes[i].clear();
+          render();
+          setStatus("Cell cleared.","");
+        }
+        function useHint(){
+          if (state.paused || state.finished) return;
+          var empties=[];
+          for (var i=0;i<81;i++) if (state.board[i]!==state.solution[i]) empties.push(i);
+          if (empties.length===0) return;
+          var target = (state.selected>=0 && state.board[state.selected]!==state.solution[state.selected] && !state.given[state.selected])
+            ? state.selected
+            : empties[Math.floor(Math.random()*empties.length)];
+          snapshot();
+          state.board[target]=state.solution[target];
+          state.hinted[target]=true;
+          delete state.errors[target];
+          state.notes[target].clear();
+          cleanNotesAround(target, state.solution[target]);
+          state.hints++;
+          state.selected=target;
+          render();
+          var v=state.solution[target];
+          setStatus("Hint: this cell is <strong>"+KANJI[v]+"</strong> ("+WORDS[v].toLowerCase()+", "+v+").","ok");
+          checkWin();
+        }
+        function checkWin(){
+          for (var i=0;i<81;i++) if (state.board[i]!==state.solution[i]) return;
+          state.finished=true; stopTimer();
+          document.getElementById("win-time").textContent=fmt(state.seconds);
+          document.getElementById("win-mistakes").textContent=state.mistakes;
+          document.getElementById("win-hints").textContent=state.hints;
+          document.getElementById("win-sub").textContent =
+            "You solved the "+DIFF_LABEL[state.difficulty]+" puzzle in "+fmt(state.seconds)+
+            " with "+state.mistakes+(state.mistakes===1?" mistake":" mistakes")+
+            " and "+state.hints+(state.hints===1?" hint":" hints")+". Every row, column, and box now holds \u4E00 through \u4E5D exactly once.";
+          setStatus("<strong>Puzzle complete!</strong> The whole grid is filled correctly.","ok");
+          setTimeout(function(){ document.getElementById("win-overlay").classList.add("show"); }, 350);
+        }
+        function togglePause(){
+          if (state.finished) return;
+          state.paused=!state.paused;
+          boardCard.classList.toggle("is-paused", state.paused);
+          boardEl.classList.toggle("paused", state.paused);
+          var btn=document.getElementById("btn-pause");
+          btn.textContent = state.paused ? "Resume" : "Pause";
+          btn.setAttribute("aria-pressed", state.paused?"true":"false");
+          setStatus(state.paused ? "Game paused. Press Resume when you are ready." : "Welcome back \u2014 game resumed.","");
+        }
+
+        /* ---------- Layout switching (iframe embedding) ---------- */
+        var SIDE_MIN_WIDTH = 820;
+        var layoutMode = "auto";
+        var lastLayoutSent = "";
+        function normalizeLayout(v){
+          if (typeof v !== "string") return null;
+          v = v.toLowerCase();
+          if (v==="auto") return "auto";
+          if (v==="side" || v==="side-by-side" || v==="side_by_side" || v==="horizontal" || v==="row") return "side";
+          if (v==="stacked" || v==="top" || v==="board-on-top" || v==="board_on_top" || v==="vertical" || v==="column") return "stacked";
+          return null;
+        }
+        function effectiveLayout(){
+          if (layoutMode !== "auto") return layoutMode;
+          var wrap = document.querySelector(".wrap");
+          var w = wrap ? wrap.clientWidth : window.innerWidth;
+          return w >= SIDE_MIN_WIDTH ? "side" : "stacked";
+        }
+        function applyLayout(){
+          var eff = effectiveLayout();
+          document.body.setAttribute("data-layout-mode", layoutMode);
+          document.body.setAttribute("data-layout-effective", eff);
+          document.querySelectorAll(".layout-btn").forEach(function(b){
+            b.setAttribute("aria-pressed", b.getAttribute("data-layout")===layoutMode ? "true":"false");
+          });
+          var key = layoutMode+"/"+eff;
+          if (key !== lastLayoutSent){
+            lastLayoutSent = key;
+            if (window.parent && window.parent !== window){
+              try { window.parent.postMessage({ type:"sudoku-layout-changed", layout:layoutMode, effective:eff }, "*"); } catch(e){}
+            }
+          }
+        }
+        function setLayoutMode(v){
+          var n = normalizeLayout(v);
+          if (!n) return;
+          layoutMode = n;
+          applyLayout();
+        }
+        (function initLayout(){
+          var param = null;
+          try { param = new URLSearchParams(window.location.search).get("layout"); } catch(e){}
+          if (param) setLayoutMode(param); else applyLayout();
+          document.querySelectorAll(".layout-btn").forEach(function(b){
+            b.addEventListener("click", function(){ setLayoutMode(b.getAttribute("data-layout")); });
+          });
+          window.addEventListener("message", function(e){
+            var d = e && e.data;
+            if (!d || typeof d !== "object") return;
+            if (d.type && ["sudoku-layout","go-layout","layout","set-layout"].indexOf(d.type)===-1) return;
+            if (d.layout) setLayoutMode(d.layout);
+          });
+          var wrap = document.querySelector(".wrap");
+          if (window.ResizeObserver && wrap){
+            new ResizeObserver(function(){ if (layoutMode==="auto") applyLayout(); }).observe(wrap);
+          }
+          window.addEventListener("resize", function(){ if (layoutMode==="auto") applyLayout(); });
+        })();
+
+        /* ---------- Wiring ---------- */
+        buildBoard(); buildPad(); buildRef();
+        document.querySelectorAll(".diff-btn").forEach(function(b){
+          b.addEventListener("click", function(){ newGame(b.getAttribute("data-diff")); });
+        });
+        document.getElementById("btn-new").addEventListener("click", function(){ newGame(state.difficulty); });
+        document.getElementById("btn-erase").addEventListener("click", eraseCell);
+        document.getElementById("btn-undo").addEventListener("click", undo);
+        document.getElementById("btn-hint").addEventListener("click", useHint);
+        document.getElementById("btn-pause").addEventListener("click", togglePause);
+        document.getElementById("resume-btn").addEventListener("click", togglePause);
+        document.getElementById("btn-notes").addEventListener("click", function(){
+          state.notesMode=!state.notesMode;
+          this.setAttribute("aria-pressed", state.notesMode?"true":"false");
+          document.getElementById("notes-state").textContent = state.notesMode?"ON":"OFF";
+          setStatus(state.notesMode ? "<strong>Notes mode is on.</strong> Numbers you enter now become small pencil notes." : "<strong>Notes mode is off.</strong> Numbers you enter now are placed for real.","");
+        });
+        document.getElementById("toggle-helper").addEventListener("click", function(){
+          state.helper=!state.helper;
+          this.setAttribute("aria-pressed", state.helper?"true":"false");
+          this.textContent="Small Arabic numbers: "+(state.helper?"On":"Off");
+          render();
+        });
+        document.getElementById("toggle-highlight").addEventListener("click", function(){
+          state.highlightSame=!state.highlightSame;
+          this.setAttribute("aria-pressed", state.highlightSame?"true":"false");
+          this.textContent="Highlight matching kanji: "+(state.highlightSame?"On":"Off");
+          render();
+        });
+        document.getElementById("win-again").addEventListener("click", function(){ newGame(state.difficulty); });
+        document.getElementById("win-close").addEventListener("click", function(){
+          document.getElementById("win-overlay").classList.remove("show");
+        });
+        document.addEventListener("keydown", function(e){
+          if (state.paused || state.finished){
+            if (state.paused && (e.key==="Enter"||e.key===" ")) { /* let buttons work */ }
+            return;
+          }
+          var sel=state.selected;
+          if (e.key>="1" && e.key<="9"){ enterNumber(parseInt(e.key,10)); }
+          else if (e.key==="Backspace" || e.key==="Delete"){ e.preventDefault(); eraseCell(); }
+          else if (e.key==="n" || e.key==="N"){ document.getElementById("btn-notes").click(); }
+          else if (e.key==="h" || e.key==="H"){ useHint(); }
+          else if ((e.ctrlKey||e.metaKey) && (e.key==="z"||e.key==="Z")){ e.preventDefault(); undo(); }
+          else if (e.key==="ArrowRight" && sel>=0){ e.preventDefault(); selectCell(sel%9===8?sel:sel+1); }
+          else if (e.key==="ArrowLeft" && sel>=0){ e.preventDefault(); selectCell(sel%9===0?sel:sel-1); }
+          else if (e.key==="ArrowDown" && sel>=0){ e.preventDefault(); selectCell(sel+9>80?sel:sel+9); }
+          else if (e.key==="ArrowUp" && sel>=0){ e.preventDefault(); selectCell(sel-9<0?sel:sel-9); }
+        });
+
+        /* Leaving the tab pauses the game, so the timer does not run while you are away.
+           The board is hidden while paused; press Resume to carry on. */
+        document.addEventListener("visibilitychange", function(){
+          if (document.hidden && !state.paused && !state.finished && state.solution.length) togglePause();
+        });
+
+        newGame("easy");
+      })();
+      /* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */
+    <\/script>
+  </body>
+</html>
+`;
+var hiraganaMemoryMatch = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Hiragana Memory Match</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#f2ecdd;
+        --bg-2:#e9e0c9;
+        --surface:#fffdf6;
+        --surface-2:#f8f2e2;
+        --ink:#1c2436;
+        --ink-2:#4a5266;
+        --ink-3:#7c8496;
+        --line:#ddd2b8;
+        --line-strong:#c9b98f;
+        --indigo:#1e3a5f;
+        --indigo-2:#2a4d7a;
+        --indigo-soft:#e3eaf3;
+        --vermillion:#c2402a;
+        --vermillion-soft:#fbe9e4;
+        --gold:#b8892e;
+        --gold-soft:#f7ecd2;
+        --green:#237a4b;
+        --green-soft:#e2f2e6;
+        --card-back:#1e3a5f;
+        --shadow:0 10px 28px rgba(28,36,54,.12), 0 2px 6px rgba(28,36,54,.08);
+        --shadow-sm:0 3px 10px rgba(28,36,54,.10);
+        --radius:14px;
+        color-scheme:light;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#0e1320;
+          --bg-2:#0a0e18;
+          --surface:#1a2233;
+          --surface-2:#141b2b;
+          --ink:#f0ead8;
+          --ink-2:#c3c9d6;
+          --ink-3:#8b94a8;
+          --line:#2c3850;
+          --line-strong:#3d4d6d;
+          --indigo:#7aa3d6;
+          --indigo-2:#93b6e0;
+          --indigo-soft:#223350;
+          --vermillion:#e87a63;
+          --vermillion-soft:#3d2622;
+          --gold:#d9ae5a;
+          --gold-soft:#332b18;
+          --green:#5cc98a;
+          --green-soft:#1d3325;
+          --card-back:#16283f;
+          --shadow:0 10px 28px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.35);
+          --shadow-sm:0 3px 10px rgba(0,0,0,.35);
+          color-scheme:dark;
+        }
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0;
+        font-family:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(1100px 480px at 85% -120px, rgba(30,58,95,.10), transparent 60%),
+          radial-gradient(800px 400px at -10% 30%, rgba(194,64,42,.06), transparent 55%),
+          linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+        color:var(--ink);
+        min-height:100vh;
+      }
+      .jp{font-family:"Noto Sans JP", sans-serif}
+      .wrap{max-width:1020px;margin:0 auto;padding:18px 16px 56px}
+
+      /* ---------- Top bar ---------- */
+      .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+      .title-block h1{
+        font-family:"Shippori Mincho", serif;
+        font-size:clamp(26px,4.4vw,38px);
+        line-height:1.08;margin:0;font-weight:800;letter-spacing:.01em;
+      }
+      .title-block h1 .accent{color:var(--vermillion)}
+      .title-block p{margin:7px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.5;max-width:56ch}
+      .title-block p strong{color:var(--ink)}
+      .btn{
+        appearance:none;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);
+        font:inherit;font-weight:600;font-size:14px;padding:9px 16px;border-radius:999px;cursor:pointer;
+        box-shadow:var(--shadow-sm);white-space:nowrap;transition:transform .12s ease, background .15s ease, border-color .15s ease;
+      }
+      .btn:hover{transform:translateY(-1px)}
+      .btn:active{transform:translateY(0)}
+      .btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+      .btn.primary{background:var(--indigo);border-color:var(--indigo);color:#fff}
+      @media (prefers-color-scheme: dark){ .btn.primary{color:#0e1320} }
+      .btn.primary:hover{background:var(--indigo-2)}
+      .btn.vermillion{background:var(--vermillion);border-color:var(--vermillion);color:#fff}
+      .btn.small{padding:7px 13px;font-size:13px}
+
+      /* ---------- Setup card ---------- */
+      .setup{
+        background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+        box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;
+      }
+      .setup .group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+      .setup .label{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+      .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+      .seg button{
+        appearance:none;border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:13.5px;font-weight:600;
+        padding:7px 14px;border-radius:999px;cursor:pointer;line-height:1.2;text-align:center;
+      }
+      .seg button small{display:block;font-size:11px;font-weight:500;color:var(--ink-3);margin-top:1px}
+      .seg button[aria-pressed="true"]{background:var(--indigo);color:#fff;box-shadow:var(--shadow-sm)}
+      .seg button[aria-pressed="true"] small{color:rgba(255,255,255,.75)}
+      @media (prefers-color-scheme: dark){ .seg button[aria-pressed="true"]{color:#0e1320} .seg button[aria-pressed="true"] small{color:rgba(14,19,32,.65)} }
+      .seg button:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+      .setup .spacer{flex:1}
+      .setup .note{font-size:12.5px;color:var(--ink-3)}
+
+      /* ---------- Status strip ---------- */
+      .status{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 10px}
+      .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;box-shadow:var(--shadow-sm)}
+      .stat .k{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+      .stat .v{font-size:24px;font-weight:800;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums}
+      .stat .v small{font-size:13px;font-weight:600;color:var(--ink-3)}
+      .progress{height:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:2px 0 14px}
+      .progress > div{height:100%;width:0%;background:linear-gradient(90deg, var(--gold), var(--vermillion));border-radius:999px;transition:width .45s ease}
+
+      .message{
+        min-height:26px;display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;margin:0 0 12px;color:var(--ink);
+      }
+      .message .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);flex:none}
+      .message.good{color:var(--green)} .message.good .dot{background:var(--green)}
+      .message.bad{color:var(--vermillion)} .message.bad .dot{background:var(--vermillion)}
+
+      /* ---------- Board ---------- */
+      .board-wrap{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:clamp(10px,2.4vw,20px)}
+      .board{display:grid;gap:clamp(7px,1.6vw,12px);grid-template-columns:repeat(var(--cols,4),1fr);container-type:inline-size;margin:0 auto}
+      .card{
+        appearance:none;border:0;background:transparent;padding:0;cursor:pointer;aspect-ratio:3/4;perspective:700px;
+        font:inherit;-webkit-tap-highlight-color:transparent;
+      }
+      .card:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:12px}
+      .card-inner{
+        display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
+        transition:transform .45s cubic-bezier(.3,.7,.3,1);
+      }
+      .card.flipped .card-inner,.card.matched .card-inner{transform:rotateY(180deg)}
+      .face{
+        position:absolute;inset:0;border-radius:clamp(8px,1.6vw,13px);backface-visibility:hidden;-webkit-backface-visibility:hidden;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;
+      }
+      .face.back{
+        background-color:var(--card-back);
+        background-image:
+          radial-gradient(circle at 50% 135%, transparent 58%, rgba(255,255,255,.16) 59%, rgba(255,255,255,.16) 66%, transparent 67%),
+          radial-gradient(circle at 0% 135%, transparent 58%, rgba(255,255,255,.16) 59%, rgba(255,255,255,.16) 66%, transparent 67%),
+          radial-gradient(circle at 100% 135%, transparent 58%, rgba(255,255,255,.16) 59%, rgba(255,255,255,.16) 66%, transparent 67%);
+        background-size:56px 28px;
+        border:1px solid rgba(255,255,255,.14);
+        box-shadow:inset 0 0 0 5px rgba(255,255,255,.05), var(--shadow-sm);
+      }
+      .face.back::after{
+        content:"\u3042";font-family:"Noto Sans JP",sans-serif;font-weight:900;color:rgba(255,255,255,.9);
+        font-size:clamp(13px,5.2cqw,26px);width:1.9em;height:1.9em;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;
+        display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);line-height:1;
+      }
+      .card:not(.flipped):not(.matched):hover .card-inner{transform:rotateY(14deg)}
+      .face.front{
+        transform:rotateY(180deg);background:var(--surface);border:1.5px solid var(--line-strong);box-shadow:var(--shadow-sm);
+      }
+      .face.front .tag{font-size:clamp(8px,1.5vw,10px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+      .face.front .glyph{font-weight:900;line-height:1.1;color:var(--ink)}
+      .face.front.kana .glyph{font-family:"Noto Sans JP",sans-serif;font-size:clamp(20px,9.5cqw,54px)}
+      .face.front.romaji{background:var(--indigo-soft)}
+      .face.front.romaji .glyph{font-size:clamp(15px,6.8cqw,38px);letter-spacing:.01em;text-transform:lowercase}
+      .card.matched{cursor:default}
+      .card.matched .face.front{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 0 0 2px var(--gold-soft), var(--shadow-sm)}
+      .card.matched .face.front .glyph{color:var(--ink)}
+      .card.matched .face.front::after{
+        content:"\u2713";position:absolute;top:5px;right:8px;font-size:13px;font-weight:800;color:var(--gold);
+      }
+      .card.wrong .face.front{border-color:var(--vermillion);background:var(--vermillion-soft)}
+      @media (prefers-reduced-motion: reduce){
+        .card-inner{transition:none}
+        .card:not(.flipped):not(.matched):hover .card-inner{transform:none}
+        .progress > div{transition:none}
+      }
+
+      /* ---------- Win banner ---------- */
+      .win{
+        display:none;margin-top:14px;background:var(--surface);border:1.5px solid var(--gold);border-radius:var(--radius);
+        box-shadow:var(--shadow);padding:20px 22px;text-align:center;
+      }
+      .win.show{display:block}
+      .win .stars{font-size:27px;letter-spacing:.18em;color:var(--gold);line-height:1}
+      .win .stars .off{color:var(--line-strong)}
+      .win h2{font-family:"Shippori Mincho",serif;margin:9px 0 5px;font-size:25px}
+      .win p{margin:0 auto 15px;color:var(--ink-2);font-size:14.5px;line-height:1.55;max-width:52ch}
+      .win p strong{color:var(--ink)}
+
+      /* ---------- Chart ---------- */
+      .section{margin-top:34px}
+      .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+      .section h2{font-family:"Shippori Mincho",serif;font-size:23px;margin:0}
+      .section .sub{color:var(--ink-2);font-size:14px;line-height:1.55;margin:0 0 14px;max-width:68ch}
+      .chart-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px;overflow:hidden}
+      .chart{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+      .chart .cell{
+        border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:8px 4px 7px;text-align:center;min-height:64px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+      }
+      .chart .cell.empty{background:transparent;border-style:dashed;opacity:.45}
+      .chart .cell .k{font-family:"Noto Sans JP",sans-serif;font-weight:900;font-size:23px;line-height:1.15}
+      .chart .cell .r{font-size:12px;font-weight:600;color:var(--ink-2);letter-spacing:.03em}
+      .chart .cell.solo{grid-column:1 / -1;flex-direction:row;gap:10px;min-height:52px}
+      .chart .cell.solo .k{font-size:21px}
+      .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--ink-2)}
+      .legend span{display:inline-flex;align-items:center;gap:7px}
+      .swatch{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--line-strong);display:inline-block}
+      .swatch.kana{background:var(--surface)} .swatch.romaji{background:var(--indigo-soft)} .swatch.matched{background:var(--gold-soft);border-color:var(--gold)}
+
+      footer{margin-top:30px;color:var(--ink-3);font-size:12.5px;text-align:center;line-height:1.6}
+
+      /* ---------- Modal ---------- */
+      .modal-backdrop{
+        position:fixed;inset:0;background:rgba(10,14,24,.55);backdrop-filter:blur(3px);display:none;
+        align-items:center;justify-content:center;padding:18px;z-index:50;
+      }
+      .modal-backdrop.open{display:flex}
+      .modal{
+        background:var(--surface);color:var(--ink);border-radius:16px;box-shadow:var(--shadow);
+        max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:24px 26px 22px;border:1px solid var(--line);
+      }
+      .modal h2{font-family:"Shippori Mincho",serif;margin:0 0 12px;font-size:23px}
+      .modal h3{margin:18px 0 6px;font-size:15px}
+      .modal p,.modal li{font-size:14.5px;line-height:1.65;color:var(--ink-2)}
+      .modal p strong,.modal li strong{color:var(--ink)}
+      .modal ul{margin:6px 0;padding-left:20px}
+      .modal .example{
+        display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line);
+        border-radius:12px;padding:12px 16px;margin:12px 0;
+      }
+      .mini-card{
+        width:52px;height:68px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;
+        border:1.5px solid var(--line-strong);background:var(--surface);box-shadow:var(--shadow-sm);
+      }
+      .mini-card .g{font-weight:900;line-height:1.1}
+      .mini-card.kana .g{font-family:"Noto Sans JP",sans-serif;font-size:28px}
+      .mini-card.romaji{background:var(--indigo-soft)} .mini-card.romaji .g{font-size:20px}
+      .mini-card .t{font-size:7.5px;font-weight:700;letter-spacing:.13em;color:var(--ink-3);text-transform:uppercase}
+      .modal .actions{display:flex;justify-content:flex-end;margin-top:20px}
+
+      /* ---------- Compact fit on landscape laptop/desktop screens ----------
+         Tighten the chrome and let the board size itself to the viewport
+         height (see fitBoard in the script) so a whole game is playable
+         without scrolling. */
+      @media (min-width:641px) and (orientation:landscape){
+        .wrap{padding-top:10px;padding-bottom:24px}
+        .topbar{margin-bottom:9px}
+        .title-block h1{font-size:clamp(23px,3vw,30px)}
+        .title-block p{margin-top:4px;font-size:13px;line-height:1.4}
+        .setup{padding:9px 13px}
+        .status{gap:8px;margin:9px 0 7px}
+        .stat{padding:7px 12px}
+        .stat .v{font-size:19px}
+        .progress{margin-bottom:9px}
+        .message{min-height:22px;font-size:14px;margin-bottom:8px}
+        .board-wrap{padding:12px}
+        .board{gap:9px}
+      }
+
+      @media (max-width:640px){
+        .status{grid-template-columns:repeat(2,1fr)}
+        .topbar{flex-direction:column}
+        .topbar .btn{align-self:flex-start}
+        .setup{gap:10px}
+        .chart .cell .k{font-size:19px}
+        .chart .cell{min-height:56px}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="title-block">
+          <h1>Hiragana <span class="accent">Memory Match</span></h1>
+          <p>Flip two cards at a time and pair each <strong>hiragana</strong> with its <strong>romaji</strong> reading \u2014 for example, <span class="jp"><strong>\u3042</strong></span> goes with <strong>a</strong>. Clear the whole board in as few moves as you can.</p>
+        </div>
+        <button class="btn" id="howToBtn" type="button">How to Play</button>
+      </div>
+
+      <div class="setup" aria-label="New game settings">
+        <div class="group">
+          <span class="label" id="diffLabel">Difficulty</span>
+          <div class="seg" role="group" aria-labelledby="diffLabel">
+            <button type="button" data-diff="easy" aria-pressed="true">Easy<small>8 pairs</small></button>
+            <button type="button" data-diff="medium" aria-pressed="false">Medium<small>12 pairs</small></button>
+            <button type="button" data-diff="hard" aria-pressed="false">Hard<small>18 pairs</small></button>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <span class="note">A fresh set of hiragana is drawn at random each game.</span>
+        <button class="btn primary" id="newGameBtn" type="button">Start New Game</button>
+      </div>
+
+      <div class="status" aria-label="Game status">
+        <div class="stat"><div class="k">Pairs Found</div><div class="v"><span id="statPairs">0</span> <small>/ <span id="statTotal">8</span></small></div></div>
+        <div class="stat"><div class="k">Moves</div><div class="v" id="statMoves">0</div></div>
+        <div class="stat"><div class="k">Time</div><div class="v" id="statTime">0:00</div></div>
+        <div class="stat"><div class="k">Accuracy</div><div class="v" id="statAcc">\u2014</div></div>
+      </div>
+      <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+
+      <p class="message" id="message" role="status" aria-live="polite"><span class="dot"></span><span id="messageText">Pick any card to start.</span></p>
+
+      <div class="board-wrap">
+        <div class="board" id="board"></div>
+      </div>
+
+      <div class="win" id="winBanner">
+        <div class="stars" id="winStars" aria-hidden="true"></div>
+        <h2 id="winTitle">Board Cleared!</h2>
+        <p id="winText"></p>
+        <button class="btn vermillion" id="playAgainBtn" type="button">Play Again</button>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Hiragana Chart \u2014 The 46 Basic Sounds</h2>
+        </div>
+        <p class="sub">These are the <strong>seion</strong> \u2014 the plain, basic hiragana sounds. Every card in the game comes from this chart. Read each row left to right: a, i, u, e, o. Use it to study between games, or to check a sound you are unsure about.</p>
+        <div class="chart-wrap">
+          <div class="chart" id="chart"></div>
+          <div class="legend">
+            <span><i class="swatch kana"></i> Hiragana card</span>
+            <span><i class="swatch romaji"></i> Romaji card</span>
+            <span><i class="swatch matched"></i> Matched pair</span>
+          </div>
+        </div>
+      </div>
+
+      <footer>Hiragana Memory Match \xB7 Romaji follows the Hepburn system (shi, chi, tsu, fu).</footer>
+    </div>
+
+    <!-- How to Play modal -->
+    <div class="modal-backdrop" id="modalBackdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <h2 id="modalTitle">How to Play</h2>
+        <p><strong>Goal:</strong> find all the matching pairs hidden on the board.</p>
+        <div class="example" aria-hidden="true">
+          <div class="mini-card kana"><span class="t">Hiragana</span><span class="g jp">\u3042</span></div>
+          <span style="font-weight:800;font-size:18px">+</span>
+          <div class="mini-card romaji"><span class="t">Romaji</span><span class="g">a</span></div>
+          <span style="font-size:14px;color:var(--ink-2)">= a pair! Each hiragana matches the card with its romaji reading.</span>
+        </div>
+        <h3>Playing a turn</h3>
+        <ul>
+          <li>Click or tap a face-down card to flip it over.</li>
+          <li>Flip a <strong>second card</strong>. That completes one move.</li>
+          <li>If the two cards are a hiragana and its romaji reading, they <strong>stay face up</strong> and turn gold.</li>
+          <li>If they do not match, remember where they are \u2014 they flip back over after a moment.</li>
+        </ul>
+        <h3>Winning</h3>
+        <ul>
+          <li>The game ends when <strong>every pair</strong> has been found.</li>
+          <li>Your score is based on <strong>moves</strong> and <strong>time</strong>: fewer moves earns more stars.</li>
+          <li>The timer starts on your first flip.</li>
+        </ul>
+        <h3>Difficulty</h3>
+        <ul>
+          <li><strong>Easy</strong> \u2014 8 pairs (16 cards). A gentle warm-up.</li>
+          <li><strong>Medium</strong> \u2014 12 pairs (24 cards).</li>
+          <li><strong>Hard</strong> \u2014 18 pairs (36 cards). A real memory workout.</li>
+          <li>The hiragana used are drawn at random from all 46 basic sounds each game, so no two games are the same.</li>
+        </ul>
+        <div class="actions">
+          <button class="btn primary" id="modalCloseBtn" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ---- The 46 seion (basic hiragana) with Hepburn romaji ----
+      var KANA = [
+        {k:'\u3042',r:'a'},  {k:'\u3044',r:'i'},  {k:'\u3046',r:'u'},  {k:'\u3048',r:'e'},  {k:'\u304A',r:'o'},
+        {k:'\u304B',r:'ka'}, {k:'\u304D',r:'ki'}, {k:'\u304F',r:'ku'}, {k:'\u3051',r:'ke'}, {k:'\u3053',r:'ko'},
+        {k:'\u3055',r:'sa'}, {k:'\u3057',r:'shi'},{k:'\u3059',r:'su'}, {k:'\u305B',r:'se'}, {k:'\u305D',r:'so'},
+        {k:'\u305F',r:'ta'}, {k:'\u3061',r:'chi'},{k:'\u3064',r:'tsu'},{k:'\u3066',r:'te'}, {k:'\u3068',r:'to'},
+        {k:'\u306A',r:'na'}, {k:'\u306B',r:'ni'}, {k:'\u306C',r:'nu'}, {k:'\u306D',r:'ne'}, {k:'\u306E',r:'no'},
+        {k:'\u306F',r:'ha'}, {k:'\u3072',r:'hi'}, {k:'\u3075',r:'fu'}, {k:'\u3078',r:'he'}, {k:'\u307B',r:'ho'},
+        {k:'\u307E',r:'ma'}, {k:'\u307F',r:'mi'}, {k:'\u3080',r:'mu'}, {k:'\u3081',r:'me'}, {k:'\u3082',r:'mo'},
+        {k:'\u3084',r:'ya'}, {k:'\u3086',r:'yu'}, {k:'\u3088',r:'yo'},
+        {k:'\u3089',r:'ra'}, {k:'\u308A',r:'ri'}, {k:'\u308B',r:'ru'}, {k:'\u308C',r:'re'}, {k:'\u308D',r:'ro'},
+        {k:'\u308F',r:'wa'}, {k:'\u3092',r:'wo'}, {k:'\u3093',r:'n'}
+      ];
+      // Chart layout: rows of 5 columns (a i u e o); null = no such sound
+      var CHART_ROWS = [
+        [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24],
+        [25,26,27,28,29], [30,31,32,33,34], [35,null,36,null,37], [38,39,40,41,42], [43,null,null,null,44]
+      ];
+      var DIFFS = {
+        easy:   { pairs: 8,  cols: 4 },
+        medium: { pairs: 12, cols: 6 },
+        hard:   { pairs: 18, cols: 6 }
+      };
+
+      var boardEl = document.getElementById('board');
+      var messageEl = document.getElementById('message');
+      var messageText = document.getElementById('messageText');
+      var statPairs = document.getElementById('statPairs');
+      var statTotal = document.getElementById('statTotal');
+      var statMoves = document.getElementById('statMoves');
+      var statTime = document.getElementById('statTime');
+      var statAcc = document.getElementById('statAcc');
+      var progressBar = document.getElementById('progressBar');
+      var winBanner = document.getElementById('winBanner');
+      var winStars = document.getElementById('winStars');
+      var winText = document.getElementById('winText');
+      var winTitle = document.getElementById('winTitle');
+
+      var difficulty = 'easy';
+      var deck = [];        // [{id, type:'kana'|'romaji', kana, romaji}]
+      var openCards = [];   // currently flipped, unresolved card elements+data
+      var matchedCount = 0;
+      var totalPairs = 8;
+      var moves = 0;
+      var lock = false;
+      var started = false;
+      var finished = false;
+      var timerId = null;
+      var elapsed = 0;      // seconds
+
+      function shuffle(arr){
+        for (var i = arr.length - 1; i > 0; i--){
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+        }
+        return arr;
+      }
+      function fmtTime(s){
+        var m = Math.floor(s / 60), ss = s % 60;
+        return m + ':' + (ss < 10 ? '0' : '') + ss;
+      }
+      function setMessage(text, kind){
+        messageText.textContent = text;
+        messageEl.className = 'message' + (kind ? ' ' + kind : '');
+      }
+      function startTimer(){
+        if (timerId) return;
+        timerId = setInterval(function(){
+          // The clock stops while the tab is hidden (you are not playing then).
+          if (document.hidden) return;
+          elapsed++;
+          statTime.textContent = fmtTime(elapsed);
+        }, 1000);
+      }
+      function stopTimer(){
+        if (timerId){ clearInterval(timerId); timerId = null; }
+      }
+      function updateStats(){
+        statPairs.textContent = matchedCount;
+        statTotal.textContent = totalPairs;
+        statMoves.textContent = moves;
+        statAcc.textContent = moves === 0 ? '\u2014' : Math.round(matchedCount / moves * 100) + '%';
+        progressBar.style.width = (totalPairs ? (matchedCount / totalPairs * 100) : 0) + '%';
+      }
+
+      function colsForViewport(cols){
+        var w = window.innerWidth;
+        if (w <= 640){
+          if (cols === 6) return difficulty === 'hard' ? 6 : 4;
+          return 4;
+        }
+        return cols;
+      }
+
+      // On wide landscape screens, shrink the board so the whole grid fits
+      // between its top edge and the bottom of the viewport \u2014 no scrolling
+      // needed while playing. On narrow/portrait screens the board simply
+      // takes the full width as before.
+      function fitBoard(){
+        // Inside the portal the iframe grows to fit this page, so its own height can't be used
+        // (the board would keep growing). Fit the board to the portal window's height instead.
+        var embedded = document.documentElement.classList.contains('yg-embedded');
+        var viewH = window.innerHeight;
+        if (embedded){ try { viewH = window.parent.innerHeight; } catch (e) {} }
+        var isLandscapeDesktop = window.innerWidth > 640 && window.innerWidth >= viewH;
+        if (!isLandscapeDesktop || !deck.length){
+          boardEl.style.maxWidth = '';
+          return;
+        }
+        var cols = colsForViewport(DIFFS[difficulty].cols);
+        var rows = Math.ceil(deck.length / cols);
+        var gap = 9; // matches the landscape .board gap
+        var availH = embedded
+          ? viewH - 120 // whole board visible in the portal window, with room for the toolbar
+          : window.innerHeight - boardEl.getBoundingClientRect().top - 26; // 26px breathing room below
+        if (availH < 200){ boardEl.style.maxWidth = ''; return; }
+        // Card height = card width * 4/3 (aspect-ratio 3/4).
+        // Solve board width W: rows * ((W - (cols-1)*gap)/cols) * 4/3 + (rows-1)*gap = availH
+        var w = ((availH - (rows - 1) * gap) * 3 / 4) * cols / rows + (cols - 1) * gap;
+        w = Math.min(w, 760); // don't let cards balloon on very tall screens
+        boardEl.style.maxWidth = Math.max(w, 300) + 'px';
+      }
+
+      function newGame(){
+        stopTimer();
+        elapsed = 0; moves = 0; matchedCount = 0;
+        openCards = []; lock = false; started = false; finished = false;
+        statTime.textContent = '0:00';
+        winBanner.classList.remove('show');
+
+        var cfg = DIFFS[difficulty];
+        totalPairs = cfg.pairs;
+        boardEl.style.setProperty('--cols', colsForViewport(cfg.cols));
+
+        var pool = shuffle(KANA.slice()).slice(0, totalPairs);
+        deck = [];
+        pool.forEach(function(item, idx){
+          deck.push({ id: idx, type: 'kana',   kana: item.k, romaji: item.r });
+          deck.push({ id: idx, type: 'romaji', kana: item.k, romaji: item.r });
+        });
+        shuffle(deck);
+
+        boardEl.innerHTML = '';
+        deck.forEach(function(card, pos){
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'card';
+          btn.setAttribute('aria-label', 'Face-down card ' + (pos + 1));
+          var label = card.type === 'kana' ? ('Hiragana ' + card.kana) : ('Romaji ' + card.romaji);
+          btn.innerHTML =
+            '<span class="card-inner">' +
+              '<span class="face back" aria-hidden="true"></span>' +
+              '<span class="face front ' + card.type + '">' +
+                '<span class="tag">' + (card.type === 'kana' ? 'Hiragana' : 'Romaji') + '</span>' +
+                '<span class="glyph">' + (card.type === 'kana' ? card.kana : card.romaji) + '</span>' +
+              '</span>' +
+            '</span>';
+          btn.addEventListener('click', function(){ flipCard(btn, card, label, pos); });
+          boardEl.appendChild(btn);
+        });
+
+        updateStats();
+        setMessage('Pick any card to start. The timer starts on your first flip.');
+        requestAnimationFrame(fitBoard);
+      }
+
+      function flipCard(btn, card, label, pos){
+        if (lock || finished) return;
+        if (btn.classList.contains('flipped') || btn.classList.contains('matched')) return;
+        if (!started){ started = true; startTimer(); }
+
+        btn.classList.add('flipped');
+        btn.setAttribute('aria-label', label);
+        openCards.push({ btn: btn, card: card, pos: pos });
+
+        if (openCards.length === 1){
+          setMessage(card.type === 'kana'
+            ? 'You found ' + card.kana + ' \u2014 now find its romaji, "' + card.romaji + '".'
+            : 'You found "' + card.romaji + '" \u2014 now find its hiragana, ' + card.kana + '.');
+          return;
+        }
+
+        // Second card: one move
+        moves++;
+        var a = openCards[0], b = openCards[1];
+        openCards = [];
+
+        if (a.card.id === b.card.id){
+          a.btn.classList.add('matched'); b.btn.classList.add('matched');
+          a.btn.setAttribute('aria-label', a.btn.getAttribute('aria-label') + ' \u2014 matched');
+          b.btn.setAttribute('aria-label', b.btn.getAttribute('aria-label') + ' \u2014 matched');
+          matchedCount++;
+          updateStats();
+          if (matchedCount === totalPairs){
+            finishGame();
+          } else {
+            setMessage('That\\u2019s a pair! ' + a.card.kana + ' = ' + a.card.romaji + '. ' +
+              (totalPairs - matchedCount) + (totalPairs - matchedCount === 1 ? ' pair' : ' pairs') + ' to go.', 'good');
+          }
+        } else {
+          lock = true;
+          a.btn.classList.add('wrong'); b.btn.classList.add('wrong');
+          setMessage('Not a pair \u2014 ' +
+            (a.card.type === 'kana' ? a.card.kana : '"' + a.card.romaji + '"') + ' and ' +
+            (b.card.type === 'kana' ? b.card.kana : '"' + b.card.romaji + '"') +
+            ' don\\u2019t match. Try to remember them!', 'bad');
+          updateStats();
+          setTimeout(function(){
+            a.btn.classList.remove('flipped', 'wrong');
+            b.btn.classList.remove('flipped', 'wrong');
+            a.btn.setAttribute('aria-label', 'Face-down card ' + (a.pos + 1));
+            b.btn.setAttribute('aria-label', 'Face-down card ' + (b.pos + 1));
+            lock = false;
+          }, 950);
+        }
+        updateStats();
+      }
+
+      function finishGame(){
+        finished = true;
+        stopTimer();
+        updateStats();
+        var ratio = moves / totalPairs;
+        var stars = ratio <= 1.4 ? 3 : (ratio <= 2 ? 2 : 1);
+        var starHtml = '';
+        for (var i = 0; i < 3; i++) starHtml += i < stars ? '\u2605' : '<span class="off">\u2605</span>';
+        winStars.innerHTML = starHtml;
+        var praise = stars === 3 ? 'Outstanding memory! ' : (stars === 2 ? 'Great job! ' : 'Well done! ');
+        winTitle.textContent = 'Board Cleared!';
+        winText.innerHTML = praise + 'You matched all <strong>' + totalPairs + ' pairs</strong> in <strong>' +
+          moves + ' moves</strong> and <strong>' + fmtTime(elapsed) + '</strong>.' +
+          (difficulty !== 'hard'
+            ? ' Ready for a bigger board? Try a harder difficulty, or play again \u2014 a new set of hiragana is drawn every game.'
+            : ' You cleared the hardest board. Play again for a fresh set of hiragana.');
+        setMessage('Board cleared in ' + moves + ' moves and ' + fmtTime(elapsed) + '. Congratulations!', 'good');
+        winBanner.classList.add('show');
+        winBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // ---- Difficulty + controls ----
+      var segBtns = document.querySelectorAll('.seg button[data-diff]');
+      segBtns.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          difficulty = btn.getAttribute('data-diff');
+          segBtns.forEach(function(b){ b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+          newGame();
+        });
+      });
+      document.getElementById('newGameBtn').addEventListener('click', newGame);
+      document.getElementById('playAgainBtn').addEventListener('click', function(){
+        newGame();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      window.addEventListener('resize', function(){
+        boardEl.style.setProperty('--cols', colsForViewport(DIFFS[difficulty].cols));
+        fitBoard();
+      });
+
+      // ---- Reference chart ----
+      var chartEl = document.getElementById('chart');
+      CHART_ROWS.forEach(function(row){
+        row.forEach(function(idx){
+          var cell = document.createElement('div');
+          if (idx === null){
+            cell.className = 'cell empty';
+            cell.innerHTML = '<span class="r">\u2014</span>';
+          } else {
+            cell.className = 'cell';
+            cell.innerHTML = '<span class="k">' + KANA[idx].k + '</span><span class="r">' + KANA[idx].r + '</span>';
+          }
+          chartEl.appendChild(cell);
+        });
+      });
+      var nCell = document.createElement('div');
+      nCell.className = 'cell solo';
+      nCell.innerHTML = '<span class="k">' + KANA[45].k + '</span><span class="r">' + KANA[45].r + ' \u2014 the syllabic n, a sound all on its own</span>';
+      chartEl.appendChild(nCell);
+
+      // ---- Modal ----
+      var backdrop = document.getElementById('modalBackdrop');
+      function openModal(){ backdrop.classList.add('open'); document.getElementById('modalCloseBtn').focus(); }
+      function closeModal(){ backdrop.classList.remove('open'); document.getElementById('howToBtn').focus(); }
+      document.getElementById('howToBtn').addEventListener('click', openModal);
+      document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+      backdrop.addEventListener('click', function(e){ if (e.target === backdrop) closeModal(); });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && backdrop.classList.contains('open')) closeModal(); });
+
+      newGame();
+    <\/script>
+  </body>
+</html>
+`;
+var prefecturePuzzle = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan Prefecture Puzzle \u2014 \u65E5\u672C\u306E\u90FD\u9053\u5E9C\u770C\u30D1\u30BA\u30EB</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: #f6f1e5;
+    background-image: radial-gradient(ellipse at 20% 0%, #fdf9ec 0%, #f6f1e5 55%, #efe7d2 100%);
+    color: #33302a;
+    min-height: 100vh;
+  }
+  .page { max-width: 1080px; margin: 0 auto; padding: 14px 14px 28px; }
+  header.topbar {
+    display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;
+    background: #fffdf6; border: 1px solid #e2d9c2; border-radius: 14px;
+    padding: 14px 18px; box-shadow: 0 2px 10px rgba(61, 43, 31, .08);
+  }
+  header.topbar .titles { flex: 1 1 260px; min-width: 220px; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 26px; line-height: 1.15; margin: 0; color: #1e3a5f; letter-spacing: .2px;
+  }
+  h1 .jp { display: block; font-size: 14px; color: #8a6d3b; font-weight: normal; margin-top: 3px; letter-spacing: 2px; }
+  .level-badge {
+    display: inline-block; font-family: -apple-system, "Segoe UI", sans-serif; font-size: 13px; font-weight: 700;
+    border-radius: 999px; padding: 3px 11px; vertical-align: middle; margin-left: 8px; letter-spacing: .3px;
+  }
+  .level-badge.easy { background: #e6f4ea; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .level-badge.hard { background: #fdecea; color: #b03024; border: 1px solid #ef9a9a; }
+  .subtitle { margin: 6px 0 0; font-size: 13px; color: #6d675c; line-height: 1.5; }
+  .top-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+  button {
+    font-family: inherit; cursor: pointer; border-radius: 999px; border: 1px solid transparent;
+    padding: 9px 16px; font-size: 14px; font-weight: 600; transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
+  }
+  button:active { transform: translateY(1px); }
+  .btn-ghost { background: #fff; border-color: #c9bfa5; color: #4a4438; }
+  .btn-ghost:hover { background: #f4edda; }
+  .btn-primary { background: #1e3a5f; color: #fff; box-shadow: 0 2px 6px rgba(30, 58, 95, .35); }
+  .btn-primary:hover { background: #2a4d77; }
+  .btn-gold { background: #c9a227; color: #fff; box-shadow: 0 2px 6px rgba(201, 162, 39, .35); }
+  .btn-gold:hover { background: #d4ad33; }
+  .icon-btn { padding: 8px 12px; font-size: 16px; line-height: 1; }
+
+  .layout { display: flex; gap: 16px; margin-top: 16px; align-items: flex-start; }
+  .layout.stacked { flex-direction: column; }
+  .layout.side { flex-direction: row; }
+  .map-col { flex: 1 1 auto; min-width: 0; }
+  .side-col { flex: 0 0 300px; width: 300px; }
+  .layout.stacked .side-col { flex: 1 1 auto; width: 100%; }
+
+  .map-card {
+    background: #fffdf6; border: 1px solid #e2d9c2; border-radius: 14px;
+    padding: 10px; box-shadow: 0 2px 10px rgba(61, 43, 31, .08);
+  }
+  .map-wrap { position: relative; border-radius: 10px; overflow: hidden; line-height: 0; }
+  #mapSvg { width: 100%; height: auto; display: block; touch-action: none; }
+  .slot { fill: #f3ecdc; stroke: var(--rc, #a89a7d); stroke-width: 1; stroke-linejoin: round; }
+  .slot.hover { stroke: #1e3a5f; stroke-width: 2; }
+  .slot.placed { stroke: rgba(0,0,0,.35); stroke-width: 1; }
+  .slot-label { font-size: 11px; font-weight: 700; fill: #fff; stroke: rgba(0,0,0,.45); stroke-width: 3px; paint-order: stroke; text-anchor: middle; pointer-events: none; font-family: -apple-system, "Segoe UI", sans-serif; }
+  .sea-label { font-family: Georgia, serif; font-style: italic; fill: rgba(255,255,255,.55); font-size: 15px; letter-spacing: 2px; }
+
+  .piece-box {
+    position: absolute; left: 12px; top: 12px; width: 196px; z-index: 5;
+    background: rgba(255, 253, 246, .97); border: 1px solid #d8cba6; border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(20, 40, 70, .35); padding: 10px 10px 8px; line-height: 1.35;
+  }
+  .piece-box.shake { animation: shake .4s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); } 40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); } 80% { transform: translateX(3px); }
+  }
+  .piece-box .box-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8a6d3b; text-align: center; }
+  .piece-box .box-hint { font-size: 11px; color: #6d675c; text-align: center; margin-top: 2px; }
+  #pieceHolder { margin-top: 6px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #pieceHolder:active { cursor: grabbing; }
+  #pieceHolder svg { width: 100%; max-height: 200px; height: auto; display: block; filter: drop-shadow(0 3px 5px rgba(0,0,0,.3)); }
+  .piece-box .tap-hint { font-size: 11px; color: #1e3a5f; text-align: center; margin-top: 4px; }
+  .piece-box .tap-hint button { background: none; border: none; padding: 2px 6px; font-size: 11px; color: #1e3a5f; text-decoration: underline; font-weight: 600; }
+
+  #dragGhost {
+    position: fixed; z-index: 60; pointer-events: none; display: none;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.45));
+  }
+  #dragGhost svg { width: 100%; height: 100%; display: block; }
+
+  .panel { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: #fffdf6; border: 1px solid #e2d9c2; border-radius: 14px;
+    padding: 14px 16px; box-shadow: 0 2px 10px rgba(61, 43, 31, .08);
+  }
+  .card h2 { font-family: Georgia, serif; font-size: 16px; margin: 0 0 8px; color: #1e3a5f; }
+  .big-count { font-family: Georgia, serif; font-size: 30px; color: #1e3a5f; line-height: 1; }
+  .big-count small { font-size: 16px; color: #6d675c; }
+  .progress-track { height: 10px; background: #ece3cb; border-radius: 999px; overflow: hidden; margin: 10px 0 4px; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #c9a227, #d97b29); border-radius: 999px; transition: width .4s ease; }
+  .stats { display: flex; gap: 16px; margin-top: 10px; font-size: 13px; color: #6d675c; }
+  .stats b { color: #33302a; font-size: 15px; }
+  #statusMsg { min-height: 38px; font-size: 13.5px; line-height: 1.45; color: #4a4438; margin-top: 10px; }
+  #statusMsg.good { color: #2e7d32; font-weight: 600; }
+  #statusMsg.bad { color: #b03024; font-weight: 600; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .btn-row button { flex: 1 1 auto; }
+
+  #placedList { list-style: none; margin: 0; padding: 0; max-height: 230px; overflow-y: auto; font-size: 13px; }
+  #placedList li { display: flex; align-items: center; gap: 8px; padding: 4px 2px; border-bottom: 1px dashed #eadfc3; color: #9a938a; }
+  #placedList li.done { color: #33302a; font-weight: 600; }
+  #placedList li .dot { width: 10px; height: 10px; border-radius: 50%; background: #d8d0ba; flex: 0 0 10px; }
+  #placedList li.done .dot { background: var(--rc, #888); }
+  #placedList li .kanji { margin-left: auto; color: #9a938a; font-size: 12px; }
+  #placedList li.done .kanji { color: #6d675c; }
+  #placedList li .tick { color: #2e7d32; font-weight: 700; width: 14px; text-align: center; }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(30, 30, 40, .55); z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: #fffdf6; border-radius: 16px; max-width: 520px; width: 100%;
+    max-height: 88vh; overflow-y: auto; padding: 22px 24px; position: relative;
+    box-shadow: 0 16px 50px rgba(0,0,0,.35); border: 1px solid #e2d9c2;
+  }
+  .modal h2 { font-family: Georgia, serif; color: #1e3a5f; margin: 0 0 4px; font-size: 22px; }
+  .modal .jp-big { font-size: 15px; color: #8a6d3b; margin-bottom: 10px; }
+  .modal p { font-size: 14px; line-height: 1.65; color: #4a4438; }
+  .modal ul { font-size: 14px; line-height: 1.65; color: #4a4438; padding-left: 20px; }
+  .modal ul li { margin-bottom: 8px; }
+  .modal .close-x {
+    position: absolute; top: 10px; right: 10px; background: #f0e9d6; border: none;
+    width: 32px; height: 32px; border-radius: 50%; font-size: 16px; color: #4a4438; padding: 0;
+  }
+  .modal .close-x:hover { background: #e6dcc0; }
+  .food-badge {
+    position: absolute; top: 12px; right: 52px;
+    background: #fff3d6; border: 1px solid #e3c98a; color: #6b4e12;
+    border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700;
+    max-width: 58%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .detail-shape { background: linear-gradient(160deg, #16324f, #1e4a6b); border-radius: 12px; padding: 12px; margin: 12px 0; position: relative; }
+  .detail-shape svg { width: 100%; height: auto; display: block; max-height: 300px; }
+  /* North is up in every shape, so this badge tells the player which way
+     the blue coastline faces (north, east, south or west). */
+  .north-arrow { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.92); color: #1e3a5f; font: 700 13px/1 Georgia, serif; padding: 5px 8px; border-radius: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+  .detail-rows { font-size: 14px; line-height: 1.9; }
+  .detail-rows .row { display: flex; gap: 10px; border-bottom: 1px dashed #eadfc3; padding: 3px 0; }
+  .detail-rows .k { flex: 0 0 84px; color: #8a6d3b; font-weight: 700; }
+  .coast-note { font-size: 12.5px; color: #1e3a5f; background: #e8f0fa; border: 1px solid #bcd2ea; border-radius: 8px; padding: 8px 10px; margin-top: 12px; line-height: 1.5; }
+  .coast-note .blue-line { display: inline-block; width: 26px; height: 0; border-top: 3px solid #2563eb; vertical-align: middle; margin: 0 4px; }
+  .win-emoji { font-size: 44px; text-align: center; }
+  .win-stats { text-align: center; font-size: 14px; color: #4a4438; margin: 8px 0 16px; line-height: 1.8; }
+  .center { text-align: center; }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 21px; }
+    .piece-box { width: 150px; top: 8px; left: 8px; padding: 8px 8px 6px; }
+    .side-col { flex-basis: auto; }
+    #placedList { max-height: 170px; }
+    .food-badge { font-size: 12px; padding: 5px 9px; max-width: 52%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="topbar">
+    <div class="titles">
+      <h1>Japan Prefecture Puzzle <span class="level-badge" id="levelBadge"></span><span class="jp">\u65E5\u672C\u306E\u90FD\u9053\u5E9C\u770C\u30D1\u30BA\u30EB</span></h1>
+      <p class="subtitle" id="subtitleEl">Drag each prefecture onto the map and complete the Japanese archipelago \u2014 all 47 prefectures.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn-ghost icon-btn" id="soundBtn" title="Sound on / off" aria-label="Toggle sound">\u{1F50A}</button>
+      <button class="btn-ghost" id="howBtn">How to Play</button>
+    </div>
+  </header>
+
+  <div class="layout side" id="layout">
+    <div class="map-col">
+      <div class="map-card">
+        <div class="map-wrap" id="mapWrap">
+          <svg id="mapSvg" viewBox="0 0 640 696" role="img" aria-label="Map of Japan with 47 prefecture outlines">
+            <defs>
+              <linearGradient id="seaGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1e4a6b"/>
+                <stop offset="55%" stop-color="#16324f"/>
+                <stop offset="100%" stop-color="#122a44"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="640" height="696" fill="url(#seaGrad)"/>
+            <text class="sea-label" x="470" y="640">Pacific Ocean</text>
+            <g id="slots"></g>
+            <g id="placedLayer"></g>
+            <g id="labelsLayer"></g>
+          </svg>
+          <div class="piece-box" id="pieceBox">
+            <div class="box-title">Next piece</div>
+            <div id="pieceHolder" title="Drag me onto the map"></div>
+            <div class="box-hint">Drag it onto the map</div>
+            <div class="tap-hint"><button id="detailBtn" type="button">Tap for details</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col">
+      <div class="panel">
+        <div class="card">
+          <h2>Your progress</h2>
+          <div class="big-count"><span id="placedCount">0</span> <small>/ 47 placed</small></div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="stats">
+            <span>\u23F1 Time <b id="timeEl">0:00</b></span>
+            <span>\u2716 Mistakes <b id="mistakeEl">0</b></span>
+            <span>\u23ED Skipped <b id="skipEl">0</b></span>
+          </div>
+          <div id="statusMsg">Drag the piece in the box onto the map. Tap the piece to see which prefecture it is.</div>
+          <div class="btn-row">
+            <button class="btn-primary" id="skipBtn">Skip this piece \u23ED</button>
+            <button class="btn-gold" id="newBtn">New Game</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Prefectures placed</h2>
+          <ul id="placedList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="dragGhost"></div>
+
+<div class="overlay" id="howOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+    <button class="close-x" data-close="howOverlay" aria-label="Close">\u2715</button>
+    <h2 id="howTitle">How to Play</h2>
+    <ul>
+      <li>One prefecture piece at a time appears in the box over the Sea of Japan. Drag it onto the map and drop it in the right place. Tap a piece to see its details.</li>
+      <li>All prefecture pieces are prepared with <b>north at the top</b>. They are never rotated.</li>
+      <li>If the shape in the pop-up has a <b style="color:#2563eb">blue line</b>, that part of the prefecture <b>faces the sea</b>. The pop-up also tells you which sea it is.</li>
+      <li id="howColour" style="display:none">This is the <b>easy version</b>: each prefecture's outline is coloured by its region, and each piece has the colour of its region \u2014 match the colours to find where it goes!</li>
+      <li>Stuck? Press <b>Skip</b> to try the next piece. Skipped pieces come back later, and you must place every one of them to finish.</li>
+    </ul>
+    <p class="center"><button class="btn-primary" data-close="howOverlay">Got it!</button></p>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <button class="close-x" data-close="detailOverlay" aria-label="Close">\u2715</button>
+    <div class="food-badge" id="detailFood">\u2014</div>
+    <h2 id="detailTitle">\u2014</h2>
+    <div class="jp-big" id="detailKanji">\u2014</div>
+    <div class="detail-shape"><div class="north-arrow" title="North is up">\u2191 N</div><svg id="detailSvg" viewBox="0 0 100 100"></svg></div>
+    <div class="detail-rows">
+      <div class="row"><span class="k">Region</span><span id="detailRegion">\u2014</span></div>
+      <div class="row"><span class="k">Capital</span><span id="detailCapital">\u2014</span></div>
+      <div class="row"><span class="k">Coast</span><span id="detailCoast">\u2014</span></div>
+    </div>
+    <div class="coast-note" id="coastNote"></div>
+    <p class="center" style="margin-top:16px"><button class="btn-primary" data-close="detailOverlay">Back to the puzzle</button></p>
+  </div>
+</div>
+
+<div class="overlay" id="winOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-emoji">\u{1F389}</div>
+    <h2 id="winTitle" class="center">Congratulations!</h2>
+    <p class="center" style="font-size:15px">You placed all 47 prefectures \u2014 the Japanese archipelago is complete!</p>
+    <div class="win-stats" id="winStats"></div>
+    <p class="center"><button class="btn-gold" id="againBtn">Play Again</button></p>
+  </div>
+</div>
+
+<script>
+"use strict";
+const PREF_DATA = {"viewW":640,"viewH":696,"prefs":[{"id":1,"name":"Hokkaido","kanji":"\u5317\u6D77\u9053","capital":"Sapporo","region":"Hokkaido","food":"\u{1F980} \u304B\u306B","seas":["Sea of Japan","Pacific Ocean","Sea of Okhotsk"],"coastDirs":["all around"],"rings":[[[490,23],[491,14],[492,16],[495,16],[499,12],[513,27],[519,36],[526,42],[540,52],[558,56],[558,59],[561,61],[572,62],[586,49],[587,52],[580,63],[579,68],[581,71],[586,73],[585,74],[586,73],[582,72],[587,82],[590,83],[594,79],[598,79],[592,82],[591,86],[581,87],[577,92],[574,91],[573,89],[570,92],[572,93],[564,93],[560,91],[550,95],[541,102],[536,110],[532,125],[525,119],[513,114],[497,104],[491,103],[493,102],[483,106],[475,113],[467,104],[461,104],[457,109],[457,114],[463,119],[469,119],[474,125],[480,128],[474,131],[469,129],[467,130],[468,128],[466,128],[465,130],[461,132],[460,137],[456,139],[454,141],[451,141],[449,135],[452,128],[453,123],[450,119],[447,118],[444,114],[445,108],[445,103],[447,101],[451,100],[454,96],[457,98],[459,93],[463,91],[458,84],[458,81],[462,79],[470,85],[475,84],[475,85],[479,87],[486,81],[483,68],[491,62],[491,50],[494,45],[495,40],[490,23]],[[476,20],[474,14],[477,15],[476,20]],[[479,21],[480,20],[482,21],[483,24],[481,25],[478,22]],[[628,39],[628,39]],[[596,58],[606,44],[611,47],[618,46],[615,49],[614,48],[610,51],[606,51],[601,55],[597,62],[592,64],[591,70],[591,68],[588,69],[588,65],[596,58]],[[486,46],[485,46],[486,46]],[[482,47],[483,47]],[[619,69],[618,66],[622,65],[621,65],[624,63],[627,65],[620,69]],[[625,66],[625,66]],[[623,68],[623,68]],[[621,68],[621,68]],[[621,68],[621,68]],[[612,72],[610,71],[612,72]],[[583,73],[584,73]],[[586,73],[586,73]],[[613,73],[613,73]],[[586,73],[586,73]],[[606,77],[604,75],[608,74],[606,77]],[[600,78],[599,77],[602,77],[600,78]],[[604,78],[605,77],[604,78]],[[607,78],[607,78]],[[607,78],[607,78]],[[600,79],[600,79]],[[603,80],[603,80]],[[465,81],[465,81]],[[594,82],[595,82]],[[593,84],[593,84]],[[482,85],[482,85]],[[593,85],[593,85]],[[581,89],[581,89]],[[580,90],[580,90]],[[574,93],[574,93]],[[435,121],[434,117],[438,114],[435,121]],[[432,138],[433,137],[432,138]],[[444,143],[444,142]],[[498,12],[498,12]],[[474,13],[474,13]],[[474,13],[474,13]],[[474,13],[474,13]],[[474,14],[474,14]],[[474,13],[474,14]],[[533,125],[533,125]],[[434,117],[434,117]]],"coast":"M490,23L491,14L492,16L495,16L499,12L513,27L519,36L526,42L540,52L558,56L558,59L561,61L572,62L586,49L587,52L580,63L579,68L581,71L586,73L585,74L586,73L582,72L587,82L590,83L594,79L598,79L592,82L591,86L581,87L577,92L574,91L573,89L570,92L572,93L564,93L560,91L550,95L541,102L536,110L532,125L525,119L513,114L497,104L491,103L493,102L483,106L475,113L467,104L461,104L457,109L457,114L463,119L469,119L474,125L480,128L474,131L469,129L467,130L468,128L466,128L465,130L461,132L460,137L456,139L454,141L451,141L449,135L452,128L453,123L450,119L447,118L444,114L445,108L445,103L447,101L451,100L454,96L457,98L459,93L463,91L458,84L458,81L462,79L470,85L475,84L475,85L479,87L486,81L483,68L491,62L491,50L494,45L495,40L490,23L490,23M476,20L474,14L477,15L476,20L476,20M479,21L480,20L482,21L483,24L481,25L478,22L479,21M628,39L628,39L628,39M596,58L606,44L611,47L618,46L615,49L614,48L610,51L606,51L601,55L597,62L592,64L591,70L591,68L588,69L588,65L596,58L596,58M486,46L485,46L486,46L486,46M482,47L483,47L482,47M619,69L618,66L622,65L621,65L624,63L627,65L620,69L619,69M625,66L625,66L625,66M623,68L623,68L623,68M621,68L621,68L621,68M621,68L621,68L621,68M612,72L610,71L612,72L612,72M583,73L584,73L583,73M586,73L586,73L586,73M613,73L613,73L613,73M586,73L586,73L586,73M606,77L604,75L608,74L606,77L606,77M600,78L599,77L602,77L600,78L600,78M604,78L605,77L604,78L604,78M607,78L607,78L607,78M607,78L607,78L607,78M600,79L600,79L600,79M603,80L603,80L603,80M465,81L465,81L465,81M594,82L595,82L594,82M593,84L593,84L593,84M482,85L482,85L482,85M593,85L593,85L593,85M581,89L581,89L581,89M580,90L580,90L580,90M574,93L574,93L574,93M435,121L434,117L438,114L435,121L435,121M432,138L433,137L432,138L432,138M444,143L444,142L444,143M498,12L498,12L498,12M474,13L474,13L474,13M474,13L474,13L474,13M474,13L474,13L474,13M474,14L474,14L474,14M474,13L474,14L474,13M533,125L533,125L533,125M434,117L434,117L434,117","cx":515,"cy":79,"area":7034,"bbox":[432,12,628,143]},{"id":2,"name":"Aomori","kanji":"\u9752\u68EE\u770C","capital":"Aomori","region":"Tohoku","food":"\u{1F34E} \u308A\u3093\u3054","seas":["Sea of Japan","Pacific Ocean"],"coastDirs":[],"rings":[[[473,136],[473,136]],[[469,147],[473,136],[482,142],[487,140],[485,148],[485,161],[487,167],[492,171],[489,174],[486,173],[484,174],[483,173],[475,178],[473,177],[474,171],[471,171],[472,169],[466,172],[464,171],[464,172],[459,170],[458,171],[451,170],[450,172],[448,171],[448,168],[446,166],[449,162],[456,160],[457,151],[456,149],[457,149],[458,145],[461,148],[463,146],[466,148],[466,156],[468,159],[471,157],[472,153],[477,157],[479,157],[482,149],[481,146],[479,145],[476,148],[470,150],[469,147]],[[472,153],[472,153]],[[471,156],[471,156]],[[436,168],[436,168]]],"coast":"M473,136L473,136L473,136M469,147L473,136L482,142L487,140L485,148L485,161L487,167L492,171M448,171L448,168L446,166L449,162L456,160L457,151L456,149L457,149L458,145L461,148L463,146L466,148L466,156L468,159L471,157L472,153L477,157L479,157L482,149L481,146L479,145L476,148L470,150L469,147L469,147M472,153L472,153L472,153M471,156L471,156L471,156M436,168L436,168L436,168","cx":471,"cy":160,"area":846,"bbox":[436,136,492,178]},{"id":3,"name":"Iwate","kanji":"\u5CA9\u624B\u770C","capital":"Morioka","region":"Tohoku","food":"\u{1F35C} \u308F\u3093\u3053\u305D\u3070","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[490,173],[492,171],[496,177],[495,179],[497,180],[496,183],[499,185],[501,193],[499,198],[501,196],[502,199],[499,201],[500,202],[502,201],[498,206],[500,205],[500,206],[498,207],[499,208],[498,208],[500,208],[496,212],[498,213],[496,213],[497,214],[496,214],[496,215],[494,215],[493,214],[493,218],[492,216],[491,217],[487,216],[486,223],[483,222],[480,224],[477,221],[478,220],[474,220],[469,217],[470,214],[468,212],[470,210],[466,204],[470,196],[469,193],[471,191],[469,189],[472,189],[471,183],[472,178],[476,178],[483,173],[484,174],[490,173]],[[500,195],[500,195]],[[501,203],[501,203]],[[500,204],[500,204]],[[500,207],[500,207]],[[493,218],[493,218]]],"coast":"M492,171L496,177L495,179L497,180L496,183L499,185L501,193L499,198L501,196L502,199L499,201L500,202L502,201L498,206L500,205L500,206L498,207L499,208L498,208L500,208L496,212L498,213L496,213L497,214L496,214L496,215L494,215L493,214L493,218L492,216L491,217M500,195L500,195L500,195M501,203L501,203L501,203M500,204L500,204L500,204M500,207L500,207L500,207M493,218L493,218L493,218","cx":484,"cy":198,"area":1278,"bbox":[466,171,502,224]},{"id":4,"name":"Miyagi","kanji":"\u5BAE\u57CE\u770C","capital":"Sendai","region":"Tohoku","food":"\u{1F404} \u304E\u3085\u3046\u305F\u3093","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[487,217],[491,217],[492,221],[490,219],[490,222],[488,223],[489,226],[488,225],[486,226],[488,227],[487,230],[489,232],[487,231],[488,233],[486,234],[487,235],[489,235],[487,236],[488,239],[485,235],[482,234],[479,236],[480,237],[477,236],[475,237],[477,238],[475,239],[476,239],[473,245],[473,251],[471,251],[471,254],[468,254],[467,251],[462,251],[461,249],[456,248],[456,246],[460,245],[461,239],[465,233],[463,228],[465,227],[466,223],[463,220],[470,217],[474,220],[478,220],[478,222],[481,224],[483,222],[486,223],[487,217]],[[491,221],[491,220],[491,221]],[[491,221],[491,221]],[[488,230],[488,230]],[[488,232],[488,232]],[[488,234],[488,234]],[[490,234],[490,234]],[[490,235],[490,235]],[[490,235],[490,235]],[[486,236],[486,236]],[[477,236],[477,236]],[[477,236],[477,236]],[[477,236],[477,236]],[[479,236],[479,236]],[[478,236],[478,236]],[[478,237],[478,237]],[[478,237],[478,237]],[[478,237],[478,237]],[[478,237],[478,237]],[[478,237],[478,237]],[[476,237],[476,237]],[[476,237],[476,237]],[[478,237],[478,237]],[[477,237],[477,237]],[[479,237],[479,237]],[[490,239],[489,238],[490,239]],[[485,238],[485,238]],[[488,240],[487,239],[488,240]]],"coast":"M491,217L492,221L490,219L490,222L488,223L489,226L488,225L486,226L488,227L487,230L489,232L487,231L488,233L486,234L487,235L489,235L487,236L488,239L485,235L482,234L479,236L480,237L477,236L475,237L477,238L475,239L476,239L473,245L473,251M491,221L491,220L491,221L491,221M491,221L491,221L491,221M488,230L488,230L488,230M488,232L488,232L488,232M488,234L488,234L488,234M490,234L490,234L490,234M490,235L490,235L490,235M490,235L490,235L490,235M486,236L486,236L486,236M477,236L477,236L477,236M477,236L477,236L477,236M477,236L477,236L477,236M479,236L479,236L479,236M478,236L478,236L478,236M478,237L478,237L478,237M478,237L478,237L478,237M478,237L478,237L478,237M478,237L478,237L478,237M478,237L478,237L478,237M476,237L476,237L476,237M476,237L476,237L476,237M478,237L478,237L478,237M477,237L477,237L477,237M479,237L479,237L479,237M490,239L489,238L490,239L490,239M485,238L485,238L485,238M488,240L487,239L488,240L488,240","cx":473,"cy":234,"area":601,"bbox":[456,217,492,254]},{"id":5,"name":"Akita","kanji":"\u79CB\u7530\u770C","capital":"Akita","region":"Tohoku","food":"\u{1F372} \u304D\u308A\u305F\u3093\u307D","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[472,169],[471,171],[474,171],[475,173],[471,179],[472,189],[469,189],[471,191],[469,193],[470,196],[466,204],[470,210],[468,212],[470,214],[469,217],[464,220],[460,216],[453,215],[451,212],[446,212],[450,203],[451,192],[447,188],[443,189],[441,185],[444,186],[448,182],[450,174],[448,171],[450,172],[451,170],[458,171],[459,170],[464,172],[464,171],[466,172],[472,169]],[[441,184],[442,184]],[[450,192],[450,192]],[[437,210],[437,210]]],"coast":"M446,212L450,203L451,192L447,188L443,189L441,185L444,186L448,182L450,174L448,171M441,184L442,184L441,184M450,192L450,192L450,192M437,210L437,210L437,210","cx":460,"cy":192,"area":983,"bbox":[437,169,475,220]},{"id":6,"name":"Yamagata","kanji":"\u5C71\u5F62\u770C","capital":"Yamagata","region":"Tohoku","food":"\u{1F352} \u3055\u304F\u3089\u3093\u307C","seas":["Sea of Japan"],"coastDirs":["west"],"rings":[[[438,210],[438,210]],[[446,212],[451,212],[453,215],[458,215],[466,223],[465,227],[463,228],[465,233],[461,239],[460,245],[456,246],[457,253],[455,255],[449,255],[448,253],[444,254],[440,251],[442,241],[444,241],[447,238],[442,235],[442,232],[438,230],[443,222],[446,213]]],"coast":"M438,210L438,210L438,210M438,230L443,222L446,213L446,212","cx":452,"cy":233,"area":771,"bbox":[438,210,466,255]},{"id":7,"name":"Fukushima","kanji":"\u798F\u5CF6\u770C","capital":"Fukushima","region":"Tohoku","food":"\u{1F351} \u3082\u3082","seas":["Pacific Ocean"],"coastDirs":["east"],"rings":[[[456,248],[467,251],[468,254],[471,254],[471,251],[473,251],[476,258],[476,271],[474,279],[470,283],[464,280],[464,283],[461,285],[455,280],[456,278],[453,275],[448,274],[434,281],[430,281],[430,274],[428,271],[429,265],[434,264],[435,263],[439,263],[438,258],[443,253],[441,252],[444,254],[448,253],[449,255],[452,256],[455,255],[457,253],[456,248]]],"coast":"M473,251L476,258L476,271L474,279L470,283","cx":455,"cy":267,"area":1127,"bbox":[428,248,476,285]},{"id":8,"name":"Ibaraki","kanji":"\u8328\u57CE\u770C","capital":"Mito","region":"Kanto","food":"\u{1F348} \u3081\u308D\u3093","seas":["Pacific Ocean"],"coastDirs":["east"],"rings":[[[464,281],[470,283],[465,295],[465,298],[464,302],[467,312],[466,313],[467,312],[471,318],[462,311],[462,313],[453,315],[448,312],[441,305],[449,298],[454,297],[456,294],[455,288],[457,288],[456,281],[461,285],[464,283],[464,281]],[[467,312],[467,312]]],"coast":"M470,283L465,295L465,298L464,302L467,312L466,313L467,312L471,318M467,312L467,312L467,312","cx":457,"cy":300,"area":498,"bbox":[441,281,471,318]},{"id":9,"name":"Tochigi","kanji":"\u6803\u6728\u770C","capital":"Utsunomiya","region":"Kanto","food":"\u{1F353} \u3044\u3061\u3054","seas":[],"coastDirs":[],"rings":[[[448,274],[456,278],[456,294],[454,297],[449,298],[445,302],[441,304],[440,301],[435,301],[433,298],[436,292],[432,290],[434,284],[433,283],[435,280],[448,274]]],"coast":"","cx":445,"cy":288,"area":514,"bbox":[432,274,456,304]},{"id":10,"name":"Gunma","kanji":"\u7FA4\u99AC\u770C","capital":"Maebashi","region":"Kanto","food":"\u{1F35C} \u307F\u305A\u3055\u308F\u3046\u3069\u3093","seas":[],"coastDirs":[],"rings":[[[414,297],[408,296],[409,291],[411,288],[418,287],[419,284],[422,284],[423,279],[425,279],[426,277],[430,281],[434,281],[432,290],[436,292],[433,298],[435,301],[440,301],[441,303],[436,304],[427,301],[425,306],[416,310],[414,309],[415,306],[413,305],[414,305],[413,301],[415,300],[415,297]]],"coast":"","cx":423,"cy":294,"area":521,"bbox":[408,277,441,310]},{"id":11,"name":"Saitama","kanji":"\u57FC\u7389\u770C","capital":"Saitama","region":"Kanto","food":"\u{1F360} \u3055\u3064\u307E\u3044\u3082","seas":[],"coastDirs":[],"rings":[[[427,301],[436,304],[441,304],[446,313],[446,317],[443,316],[442,317],[440,316],[438,318],[437,316],[434,317],[431,315],[424,313],[421,315],[417,313],[417,309],[425,306],[427,301]]],"coast":"","cx":432,"cy":310,"area":292,"bbox":[417,301,446,318]},{"id":12,"name":"Chiba","kanji":"\u5343\u8449\u770C","capital":"Chiba","region":"Kanto","food":"\u{1F95C} \u3089\u3063\u304B\u305B\u3044","seas":["Pacific Ocean","Tokyo Bay"],"coastDirs":[],"rings":[[[443,307],[448,312],[453,315],[462,313],[462,311],[471,318],[471,320],[467,319],[462,323],[459,328],[459,335],[452,338],[446,344],[443,342],[446,342],[444,340],[446,333],[444,331],[447,330],[447,328],[452,323],[449,320],[446,321],[447,319],[447,314],[444,307]],[[448,320],[448,320]],[[443,331],[443,331]],[[443,331],[443,331]]],"coast":"M471,318L471,320L467,319L462,323L459,328L459,335L452,338L446,344L443,342L446,342L444,340L446,333L444,331L447,330L447,328L452,323L449,320L446,321M448,320L448,320L448,320M443,331L443,331L443,331M443,331L443,331L443,331","cx":455,"cy":325,"area":391,"bbox":[443,307,471,344]},{"id":13,"name":"Tokyo","kanji":"\u6771\u4EAC\u90FD","capital":"Tokyo","region":"Kanto","food":"\u{1F363} \u3059\u3057","seas":["Pacific Ocean","Tokyo Bay"],"coastDirs":[],"rings":[[[422,314],[424,313],[431,315],[434,317],[437,316],[438,318],[445,316],[447,319],[446,321],[443,321],[444,325],[437,321],[435,322],[437,323],[436,326],[434,323],[430,322],[424,319],[422,315]],[[445,321],[445,321]],[[446,321],[446,321]],[[446,321],[446,321]],[[443,322],[443,322]],[[443,322],[443,322]],[[445,322],[445,322]],[[444,322],[444,322]],[[443,323],[443,323]],[[444,323],[445,322]],[[444,323],[445,323]],[[444,323],[444,323]],[[443,324],[443,323]],[[435,351],[433,351],[433,348],[435,348],[435,351]],[[431,357],[431,356]],[[431,358],[431,358]],[[431,362],[431,359],[431,362]],[[429,361],[429,361]],[[429,362],[429,362]],[[429,363],[429,363]],[[431,362],[431,362]],[[427,367],[427,365],[427,367]],[[429,366],[429,366]],[[425,367],[426,367]],[[436,371],[437,369],[438,370],[437,371]],[[439,377],[439,376],[440,377]],[[445,402],[443,399],[445,400],[445,402]],[[442,400],[442,400]],[[443,421],[444,421]],[[451,453],[451,453]],[[457,483],[457,483]],[[433,371],[433,371]],[[419,374],[419,374]],[[419,374],[419,374]],[[431,383],[431,383]],[[419,374],[419,374]],[[419,374],[419,374]],[[419,374],[419,374]],[[419,374],[419,374]],[[447,439],[447,439]]],"coast":"M446,321L443,321L444,325M445,321L445,321L445,321M446,321L446,321L446,321M446,321L446,321L446,321M443,322L443,322L443,322M443,322L443,322L443,322M445,322L445,322L445,322M444,322L444,322L444,322M443,323L443,323L443,323M444,323L445,322L444,323M444,323L445,323L444,323M444,323L444,323L444,323M443,324L443,323L443,324M435,351L433,351L433,348L435,348L435,351L435,351M431,357L431,356L431,357M431,358L431,358L431,358M431,362L431,359L431,362L431,362M429,361L429,361L429,361M429,362L429,362L429,362M429,363L429,363L429,363M431,362L431,362L431,362M427,367L427,365L427,367L427,367M429,366L429,366L429,366M425,367L426,367L425,367M436,371L437,369L438,370L437,371L436,371M439,377L439,376L440,377L439,377M445,402L443,399L445,400L445,402L445,402M442,400L442,400L442,400M443,421L444,421L443,421M451,453L451,453L451,453M457,483L457,483L457,483M433,371L433,371L433,371M419,374L419,374L419,374M419,374L419,374L419,374M431,383L431,383L431,383M419,374L419,374L419,374M419,374L419,374L419,374M419,374L419,374L419,374M419,374L419,374L419,374M447,439L447,439L447,439","cx":434,"cy":319,"area":146,"bbox":[419,313,457,483]},{"id":14,"name":"Kanagawa","kanji":"\u795E\u5948\u5DDD\u770C","capital":"Yokohama","region":"Kanto","food":"\u{1F95F} \u3057\u3085\u3046\u307E\u3044","seas":["Pacific Ocean","Tokyo Bay"],"coastDirs":[],"rings":[[[427,320],[434,323],[436,326],[437,323],[435,322],[437,321],[444,325],[440,327],[441,327],[440,328],[440,332],[443,333],[440,335],[441,337],[439,337],[438,332],[435,331],[429,333],[427,334],[428,337],[426,337],[423,335],[424,329],[421,328],[426,325],[427,320]],[[443,326],[444,325],[443,326]],[[442,326],[442,326]],[[440,327],[440,327]],[[441,327],[442,327]],[[440,327],[440,327]],[[441,329],[441,329]],[[441,329],[441,328]],[[440,331],[440,331]],[[440,332],[440,332]],[[440,337],[440,337]]],"coast":"M444,325L440,327L441,327L440,328L440,332L443,333L440,335L441,337L439,337L438,332L435,331L429,333L427,334L428,337L426,337M443,326L444,325L443,326L443,326M442,326L442,326L442,326M440,327L440,327L440,327M441,327L442,327L441,327M440,327L440,327L440,327M441,329L441,329L441,329M441,329L441,328L441,329M440,331L440,331L440,331M440,332L440,332L440,332M440,337L440,337L440,337","cx":432,"cy":328,"area":197,"bbox":[421,320,444,337]},{"id":15,"name":"Niigata","kanji":"\u65B0\u6F5F\u770C","capital":"Niigata","region":"Chubu","food":"\u{1F35A} \u304A\u3053\u3081","seas":["Sea of Japan"],"coastDirs":["northwest"],"rings":[[[438,230],[442,232],[442,235],[447,239],[441,242],[440,250],[443,253],[438,258],[439,263],[435,263],[434,264],[429,266],[430,268],[428,271],[430,274],[430,280],[426,277],[425,279],[423,279],[422,284],[416,287],[416,283],[413,281],[412,278],[408,279],[405,284],[403,283],[399,285],[398,282],[395,281],[392,286],[391,281],[389,279],[396,277],[401,273],[404,273],[412,267],[417,260],[419,254],[425,249],[430,248],[434,243],[435,235],[438,230]],[[429,234],[430,232],[429,234]],[[410,237],[410,237]],[[404,254],[403,253],[407,249],[406,247],[404,248],[404,245],[411,237],[409,245],[413,245],[412,247],[410,251],[404,254]],[[404,245],[404,245]],[[430,232],[430,232]]],"coast":"M389,279L396,277L401,273L404,273L412,267L417,260L419,254L425,249L430,248L434,243L435,235L438,230L438,230M429,234L430,232L429,234L429,234M410,237L410,237L410,237M404,254L403,253L407,249L406,247L404,248L404,245L411,237L409,245L413,245L412,247L410,251L404,254L404,254M404,245L404,245L404,245M430,232L430,232L430,232","cx":423,"cy":263,"area":962,"bbox":[389,230,447,287]},{"id":16,"name":"Toyama","kanji":"\u5BCC\u5C71\u770C","capital":"Toyama","region":"Chubu","food":"\u{1F990} \u3057\u308D\u3048\u3073","seas":["Sea of Japan"],"coastDirs":["north"],"rings":[[[389,279],[391,281],[392,289],[388,298],[382,296],[381,297],[380,295],[376,296],[372,301],[369,298],[367,301],[367,287],[369,281],[374,280],[372,283],[373,284],[376,286],[380,286],[382,285],[383,281],[388,279]]],"coast":"M374,280L372,283L373,284L376,286L380,286L382,285L383,281L388,279L389,279","cx":379,"cy":290,"area":354,"bbox":[367,279,392,301]},{"id":17,"name":"Ishikawa","kanji":"\u77F3\u5DDD\u770C","capital":"Kanazawa","region":"Chubu","food":"\u{1F35B} \u304B\u306A\u3056\u308F\u304B\u308C\u30FC","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[370,252],[370,252]],[[370,260],[370,260]],[[369,260],[369,260]],[[369,260],[369,260]],[[375,264],[379,262],[382,265],[379,265],[379,268],[375,270],[373,273],[371,271],[370,272],[369,276],[372,277],[374,275],[374,280],[369,281],[367,287],[366,297],[369,302],[366,307],[364,308],[361,305],[356,305],[353,301],[361,292],[366,283],[366,279],[365,274],[364,274],[366,268],[374,264]],[[371,276],[370,274],[374,274],[374,275],[371,276]],[[370,275],[370,275]]],"coast":"M370,252L370,252L370,252M370,260L370,260L370,260M369,260L369,260L369,260M369,260L369,260L369,260M375,264L379,262L382,265L379,265L379,268L375,270L373,273L371,271L370,272L369,276L372,277L374,275L374,280M353,301L361,292L366,283L366,279L365,274L364,274L366,268L374,264L375,264M371,276L370,274L374,274L374,275L371,276L371,276M370,275L370,275L370,275","cx":366,"cy":286,"area":333,"bbox":[353,252,382,308]},{"id":18,"name":"Fukui","kanji":"\u798F\u4E95\u770C","capital":"Fukui","region":"Chubu","food":"\u{1F35C} \u3048\u3061\u305C\u3093\u305D\u3070","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[353,301],[356,305],[361,305],[364,308],[366,307],[365,310],[368,314],[367,316],[360,317],[360,318],[356,316],[354,321],[351,319],[351,324],[350,323],[349,325],[347,326],[345,325],[344,329],[342,328],[341,330],[335,329],[333,327],[334,324],[335,326],[338,324],[336,326],[340,326],[341,324],[339,325],[340,323],[342,324],[342,321],[346,322],[346,319],[347,317],[349,321],[349,317],[346,311],[350,302],[353,301]],[[350,302],[350,302]],[[342,322],[342,321]]],"coast":"M334,324L335,326L338,324L336,326L340,326L341,324L339,325L340,323L342,324L342,321L346,322L346,319L347,317L349,321L349,317L346,311L350,302L353,301L353,301M350,302L350,302L350,302M342,322L342,321L342,322","cx":352,"cy":315,"area":338,"bbox":[333,301,368,330]},{"id":19,"name":"Yamanashi","kanji":"\u5C71\u68A8\u770C","capital":"Kofu","region":"Chubu","food":"\u{1F347} \u3076\u3069\u3046","seas":[],"coastDirs":[],"rings":[[[407,311],[410,313],[413,312],[415,314],[417,313],[422,314],[424,319],[427,320],[426,325],[421,329],[415,330],[412,328],[411,336],[408,335],[407,331],[405,332],[404,330],[405,325],[403,316],[407,311]]],"coast":"","cx":414,"cy":322,"area":361,"bbox":[403,311,427,336]},{"id":20,"name":"Nagano","kanji":"\u9577\u91CE\u770C","capital":"Nagano","region":"Chubu","food":"\u{1F35C} \u3057\u3093\u3057\u3085\u3046\u305D\u3070","seas":[],"coastDirs":[],"rings":[[[411,278],[416,283],[416,287],[411,288],[409,291],[408,296],[415,297],[415,300],[413,301],[414,305],[413,305],[417,313],[414,314],[413,312],[410,313],[407,311],[403,316],[404,318],[403,319],[404,321],[402,324],[402,330],[395,334],[387,335],[386,333],[388,331],[387,329],[389,329],[388,327],[389,325],[386,322],[386,321],[384,318],[381,315],[388,309],[387,306],[389,300],[387,298],[392,292],[392,286],[395,283],[395,281],[398,282],[399,285],[403,283],[405,284],[408,279],[411,278]]],"coast":"","cx":399,"cy":306,"area":1086,"bbox":[381,278,417,335]},{"id":21,"name":"Gifu","kanji":"\u5C90\u961C\u770C","capital":"Gifu","region":"Chubu","food":"\u{1F356} \u3072\u3060\u304E\u3085\u3046","seas":[],"coastDirs":[],"rings":[[[374,298],[376,296],[380,295],[381,297],[382,296],[389,299],[387,306],[388,308],[387,310],[381,315],[386,321],[386,322],[389,325],[388,327],[389,329],[387,329],[387,332],[383,334],[380,332],[377,333],[374,332],[372,328],[366,330],[364,337],[360,333],[356,334],[358,329],[357,325],[355,324],[354,321],[356,316],[360,318],[360,317],[367,316],[368,313],[365,310],[366,305],[369,302],[367,301],[369,298],[372,301],[374,298]]],"coast":"","cx":374,"cy":317,"area":851,"bbox":[354,295,389,337]},{"id":22,"name":"Shizuoka","kanji":"\u9759\u5CA1\u770C","capital":"Shizuoka","region":"Chubu","food":"\u{1F375} \u304A\u3061\u3083","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[404,321],[404,331],[407,331],[409,336],[412,335],[412,329],[413,327],[415,330],[424,329],[423,335],[426,337],[425,339],[427,345],[424,349],[423,352],[420,354],[417,351],[418,342],[418,340],[421,340],[416,337],[412,338],[411,342],[407,344],[403,351],[404,354],[397,352],[385,351],[385,347],[389,345],[394,335],[402,330],[402,324],[403,321]],[[428,340],[428,340]],[[421,340],[421,340]],[[404,353],[404,353]]],"coast":"M426,337L425,339L427,345L424,349L423,352L420,354L417,351L418,342L418,340L421,340L416,337L412,338L411,342L407,344L403,351L404,354L397,352L385,351M428,340L428,340L428,340M421,340L421,340L421,340M404,353L404,353L404,353","cx":407,"cy":341,"area":596,"bbox":[385,321,428,354]},{"id":23,"name":"Aichi","kanji":"\u611B\u77E5\u770C","capital":"Nagoya","region":"Chubu","food":"\u{1F35C} \u307F\u305D\u306B\u3053\u307F\u3046\u3069\u3093","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[371,328],[377,333],[380,332],[383,334],[387,332],[387,335],[394,335],[389,345],[385,347],[385,351],[373,354],[374,352],[375,353],[380,350],[380,351],[381,348],[378,347],[377,349],[373,348],[371,347],[372,342],[370,348],[372,351],[371,351],[368,349],[368,345],[370,338],[366,341],[364,337],[364,334],[366,330],[371,328]],[[368,341],[368,341]],[[368,343],[368,343]],[[367,346],[367,345],[367,346]],[[380,347],[380,347]],[[380,348],[380,348]],[[378,348],[378,348]],[[375,349],[375,349]],[[381,350],[381,350]],[[374,350],[374,350]],[[381,350],[381,350]],[[379,350],[379,350]],[[372,351],[373,350]],[[373,352],[372,352]],[[376,352],[376,352]],[[375,352],[375,352]]],"coast":"M385,351L373,354L374,352L375,353L380,350L380,351L381,348L378,347L377,349L373,348L371,347L372,342L370,348L372,351L371,351L368,349L368,345L370,338L366,341M368,341L368,341L368,341M368,343L368,343L368,343M367,346L367,345L367,346L367,346M380,347L380,347L380,347M380,348L380,348L380,348M378,348L378,348L378,348M375,349L375,349L375,349M381,350L381,350L381,350M374,350L374,350L374,350M381,350L381,350L381,350M379,350L379,350L379,350M372,351L373,350L372,351M373,352L372,352L373,352M376,352L376,352L376,352M375,352L375,352L375,352","cx":378,"cy":340,"area":416,"bbox":[364,328,394,354]},{"id":24,"name":"Mie","kanji":"\u4E09\u91CD\u770C","capital":"Tsu","region":"Kansai","food":"\u{1F969} \u307E\u3064\u3055\u304B\u304E\u3085\u3046","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[360,333],[366,341],[363,341],[360,350],[360,353],[368,357],[369,359],[370,359],[370,361],[368,361],[370,361],[370,364],[367,364],[369,364],[368,363],[364,364],[365,362],[364,362],[362,364],[362,363],[361,365],[360,364],[360,365],[359,364],[355,366],[354,370],[354,368],[352,370],[354,373],[352,373],[353,374],[349,376],[347,381],[345,381],[343,377],[347,374],[347,371],[349,372],[350,363],[349,360],[353,357],[348,354],[348,352],[349,351],[347,348],[349,347],[350,344],[353,346],[356,344],[358,339],[357,334],[360,333]],[[364,342],[364,342]],[[372,356],[372,355]],[[370,356],[370,356]],[[369,357],[370,356],[369,357]],[[369,356],[369,356]],[[368,356],[368,356]],[[368,357],[368,357]],[[369,358],[370,358]],[[369,357],[369,357]],[[370,358],[370,358]],[[370,358],[370,358]],[[369,361],[369,361]],[[365,362],[365,362]],[[368,363],[368,363]],[[368,363],[368,363]],[[368,363],[368,363]],[[364,363],[364,363]],[[368,363],[368,363]],[[368,363],[368,363]],[[368,363],[368,363]],[[368,364],[368,363]],[[368,364],[368,364]],[[368,364],[368,364]],[[361,365],[361,365]],[[356,366],[356,366]],[[357,366],[357,366]],[[357,367],[357,367]],[[357,367],[357,367]],[[355,367],[355,367]],[[355,367],[355,367]],[[354,368],[355,367]],[[356,368],[356,368]],[[353,370],[353,370]],[[353,371],[353,371]]],"coast":"M366,341L363,341L360,350L360,353L368,357L369,359L370,359L370,361L368,361L370,361L370,364L367,364L369,364L368,363L364,364L365,362L364,362L362,364L362,363L361,365L360,364L360,365L359,364L355,366L354,370L354,368L352,370L354,373L352,373L353,374L349,376L347,381M364,342L364,342L364,342M372,356L372,355L372,356M370,356L370,356L370,356M369,357L370,356L369,357L369,357M369,356L369,356L369,356M368,356L368,356L368,356M368,357L368,357L368,357M369,358L370,358L369,358M369,357L369,357L369,357M370,358L370,358L370,358M370,358L370,358L370,358M369,361L369,361L369,361M365,362L365,362L365,362M368,363L368,363L368,363M368,363L368,363L368,363M368,363L368,363L368,363M364,363L364,363L364,363M368,363L368,363L368,363M368,363L368,363L368,363M368,363L368,363L368,363M368,364L368,363L368,364M368,364L368,364L368,364M368,364L368,364L368,364M361,365L361,365L361,365M356,366L356,366L356,366M357,366L357,366L357,366M357,367L357,367L357,367M357,367L357,367L357,367M355,367L355,367L355,367M355,367L355,367L355,367M354,368L355,367L354,368M356,368L356,368L356,368M353,370L353,370L353,370M353,371L353,371L353,371","cx":356,"cy":356,"area":435,"bbox":[343,333,372,381]},{"id":25,"name":"Shiga","kanji":"\u6ECB\u8CC0\u770C","capital":"Otsu","region":"Kansai","food":"\u{1F42E} \u304A\u3046\u307F\u304E\u3085\u3046","seas":[],"coastDirs":[],"rings":[[[351,319],[354,321],[355,324],[357,325],[358,329],[356,334],[358,336],[358,339],[356,344],[353,346],[350,344],[349,347],[347,348],[345,345],[343,345],[342,340],[343,332],[341,330],[342,328],[344,329],[345,325],[347,326],[349,325],[350,323],[351,324],[351,320]]],"coast":"","cx":350,"cy":335,"area":317,"bbox":[341,319,358,348]},{"id":26,"name":"Kyoto","kanji":"\u4EAC\u90FD\u5E9C","capital":"Kyoto","region":"Kansai","food":"\u{1F361} \u3084\u3064\u306F\u3057","seas":["Sea of Japan"],"coastDirs":["northwest"],"rings":[[[322,324],[319,325],[318,321],[327,317],[329,320],[326,324],[328,322],[329,327],[331,326],[330,324],[333,322],[334,324],[333,327],[335,329],[341,330],[343,332],[342,341],[344,345],[345,345],[347,347],[347,350],[345,349],[344,350],[340,350],[337,342],[335,344],[334,341],[331,341],[331,337],[326,336],[325,333],[323,334],[319,331],[319,328],[322,328],[322,325]],[[332,320],[332,320]],[[333,323],[333,323]],[[330,326],[330,326]]],"coast":"M318,321L327,317L329,320L326,324L328,322L329,327L331,326L330,324L333,322L334,324M332,320L332,320L332,320M333,323L333,323L333,323M330,326L330,326L330,326","cx":332,"cy":333,"area":376,"bbox":[318,317,347,350]},{"id":27,"name":"Osaka","kanji":"\u5927\u962A\u5E9C","capital":"Osaka","region":"Kansai","food":"\u{1F419} \u305F\u3053\u3084\u304D","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[331,340],[335,344],[337,342],[340,347],[338,353],[339,360],[325,364],[324,363],[327,362],[331,356],[332,356],[331,354],[333,354],[331,351],[333,350],[332,347],[332,344],[333,344],[330,342],[331,340]],[[332,352],[332,352]],[[331,352],[331,352]],[[332,353],[332,353]],[[332,353],[332,353]],[[332,355],[332,355]],[[331,356],[331,356]],[[330,359],[330,358]],[[327,359],[327,359]]],"coast":"M324,363L327,362L331,356L332,356L331,354L333,354L331,351M332,352L332,352L332,352M331,352L331,352L331,352M332,353L332,353L332,353M332,353L332,353L332,353M332,355L332,355L332,355M331,356L331,356L331,356M330,359L330,358L330,359M327,359L327,359L327,359","cx":334,"cy":353,"area":152,"bbox":[324,340,340,364]},{"id":28,"name":"Hyogo","kanji":"\u5175\u5EAB\u770C","capital":"Kobe","region":"Kansai","food":"\u{1F969} \u3053\u3046\u3079\u304E\u3085\u3046","seas":["Sea of Japan","Seto Inland Sea"],"coastDirs":[],"rings":[[[318,321],[319,325],[322,325],[322,328],[319,328],[319,331],[323,334],[325,333],[326,336],[331,337],[330,342],[333,344],[332,344],[332,347],[333,350],[331,351],[329,350],[323,353],[314,348],[308,349],[307,347],[306,350],[304,350],[302,346],[302,341],[306,336],[305,334],[309,333],[305,322],[309,320],[318,321]],[[313,321],[313,321]],[[313,349],[313,348]],[[330,350],[330,350]],[[329,350],[329,350]],[[329,350],[329,350]],[[330,351],[330,350]],[[317,351],[318,350]],[[318,351],[318,351]],[[328,351],[328,351]],[[312,351],[312,351]],[[309,352],[309,352]],[[327,352],[327,351],[327,352]],[[311,351],[311,351]],[[310,352],[310,352]],[[308,352],[308,352]],[[309,353],[309,352]],[[307,352],[307,352]],[[309,352],[309,352]],[[311,353],[311,353]],[[327,353],[327,353]],[[308,353],[308,353]],[[316,359],[321,354],[318,359],[320,364],[314,367],[312,363],[316,359]],[[308,354],[308,354]],[[320,364],[320,364]],[[316,368],[316,368]]],"coast":"M331,351L329,350L323,353L314,348L308,349L307,347L306,350L304,350M305,322L309,320L318,321L318,321M313,321L313,321L313,321M313,349L313,348L313,349M330,350L330,350L330,350M329,350L329,350L329,350M329,350L329,350L329,350M330,351L330,350L330,351M317,351L318,350L317,351M318,351L318,351L318,351M328,351L328,351L328,351M312,351L312,351L312,351M309,352L309,352L309,352M327,352L327,351L327,352L327,352M311,351L311,351L311,351M310,352L310,352L310,352M308,352L308,352L308,352M309,353L309,352L309,353M307,352L307,352L307,352M309,352L309,352L309,352M311,353L311,353L311,353M327,353L327,353L327,353M308,353L308,353L308,353M316,359L321,354L318,359L320,364L314,367L312,363L316,359L316,359M308,354L308,354L308,354M320,364L320,364L320,364M316,368L316,368L316,368","cx":316,"cy":338,"area":616,"bbox":[302,320,333,368]},{"id":29,"name":"Nara","kanji":"\u5948\u826F\u770C","capital":"Nara","region":"Kansai","food":"\u{1F363} \u304B\u304D\u306E\u306F\u3059\u3057","seas":[],"coastDirs":[],"rings":[[[339,348],[343,350],[345,349],[347,350],[348,349],[348,354],[353,357],[349,360],[350,363],[349,372],[345,373],[343,377],[342,375],[337,376],[337,373],[335,370],[338,366],[340,365],[338,361],[339,348]]],"coast":"","cx":343,"cy":362,"area":292,"bbox":[335,348,353,377]},{"id":30,"name":"Wakayama","kanji":"\u548C\u6B4C\u5C71\u770C","capital":"Wakayama","region":"Kansai","food":"\u{1F35C} \u308F\u304B\u3084\u307E\u3089\u30FC\u3081\u3093","seas":["Pacific Ocean","Seto Inland Sea"],"coastDirs":[],"rings":[[[335,362],[338,361],[340,365],[338,366],[335,369],[337,373],[337,376],[343,376],[343,378],[347,381],[345,384],[346,386],[342,388],[341,390],[341,389],[333,387],[330,383],[331,381],[327,379],[325,376],[323,376],[324,374],[323,373],[326,371],[323,370],[326,368],[323,364],[324,363],[325,364],[335,362]],[[322,363],[322,363]],[[321,364],[321,364]],[[326,368],[326,368]],[[324,369],[324,369]],[[323,369],[323,369]],[[324,372],[324,372]],[[345,373],[347,372],[346,375],[344,375],[345,373]],[[324,372],[324,372]],[[323,372],[323,372]],[[323,373],[323,373]],[[323,374],[323,374]],[[344,375],[344,377],[344,375]],[[325,377],[325,377]],[[329,380],[329,380]],[[330,382],[330,382]],[[331,382],[331,382]],[[345,384],[345,384]],[[334,387],[334,387]],[[335,388],[335,388]],[[342,390],[342,389],[343,389],[342,390]],[[342,390],[342,390]]],"coast":"M347,381L345,384L346,386L342,388L341,390L341,389L333,387L330,383L331,381L327,379L325,376L323,376L324,374L323,373L326,371L323,370L326,368L323,364L324,363M322,363L322,363L322,363M321,364L321,364L321,364M326,368L326,368L326,368M324,369L324,369L324,369M323,369L323,369L323,369M324,372L324,372L324,372M324,372L324,372L324,372M323,372L323,372L323,372M323,373L323,373L323,373M323,374L323,374L323,374M325,377L325,377L325,377M329,380L329,380L329,380M330,382L330,382L330,382M331,382L331,382L331,382M345,384L345,384L345,384M334,387L334,387L334,387M335,388L335,388L335,388M342,390L342,389L343,389L342,390L342,390M342,390L342,390L342,390","cx":334,"cy":376,"area":356,"bbox":[321,361,347,390]},{"id":31,"name":"Tottori","kanji":"\u9CE5\u53D6\u770C","capital":"Tottori","region":"Chugoku","food":"\u{1F350} \u306A\u3057","seas":["Sea of Japan"],"coastDirs":["north"],"rings":[[[305,322],[309,330],[307,334],[300,336],[299,332],[296,332],[296,330],[292,333],[285,330],[283,335],[280,336],[280,338],[277,339],[273,339],[275,336],[274,334],[278,333],[278,328],[275,325],[276,324],[280,327],[284,325],[298,325],[305,322]]],"coast":"M276,324L280,327L284,325L298,325L305,322L305,322","cx":292,"cy":330,"area":285,"bbox":[273,322,309,339]},{"id":32,"name":"Shimane","kanji":"\u5CF6\u6839\u770C","capital":"Matsue","region":"Chugoku","food":"\u{1F35C} \u3044\u305A\u3082\u305D\u3070","seas":["Sea of Japan"],"coastDirs":[],"rings":[[[276,305],[275,301],[277,299],[280,302],[278,304],[279,305],[276,305]],[[273,305],[273,305]],[[270,309],[269,307],[272,306],[271,308],[269,307],[270,309]],[[274,306],[274,306]],[[272,309],[273,306],[274,308],[272,309]],[[274,307],[274,307]],[[271,310],[270,309],[271,310]],[[271,310],[271,310]],[[272,310],[272,310]],[[271,310],[271,310]],[[276,324],[275,325],[278,328],[278,333],[274,334],[275,336],[273,339],[267,338],[261,344],[262,346],[258,348],[255,347],[254,348],[250,347],[248,350],[247,354],[243,363],[242,362],[240,363],[238,361],[239,359],[237,359],[236,351],[240,350],[255,335],[260,332],[262,329],[260,328],[269,325],[272,322],[274,324],[278,323],[276,324]],[[273,323],[273,323]],[[276,323],[276,323]],[[271,324],[271,323]],[[254,336],[254,336]],[[254,336],[254,336]],[[255,336],[255,336]],[[245,344],[246,344]],[[246,344],[246,344]],[[240,346],[240,346]],[[241,271],[241,271]],[[241,271],[241,271]],[[241,271],[241,271]]],"coast":"M276,305L275,301L277,299L280,302L278,304L279,305L276,305L276,305M273,305L273,305L273,305M270,309L269,307L272,306L271,308L269,307L270,309L270,309M274,306L274,306L274,306M272,309L273,306L274,308L272,309L272,309M274,307L274,307L274,307M271,310L270,309L271,310L271,310M271,310L271,310L271,310M272,310L272,310L272,310M271,310L271,310L271,310M236,351L240,350L255,335L260,332L262,329L260,328L269,325L272,322L274,324L278,323L276,324L276,324M273,323L273,323L273,323M276,323L276,323L276,323M271,324L271,323L271,324M254,336L254,336L254,336M254,336L254,336L254,336M255,336L255,336L255,336M245,344L246,344L245,344M246,344L246,344L246,344M240,346L240,346L240,346M241,271L241,271L241,271M241,271L241,271L241,271M241,271L241,271L241,271","cx":258,"cy":341,"area":514,"bbox":[236,271,280,363]},{"id":33,"name":"Okayama","kanji":"\u5CA1\u5C71\u770C","capital":"Okayama","region":"Chugoku","food":"\u{1F351} \u306F\u304F\u3068\u3046","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[296,330],[296,332],[299,332],[300,336],[306,334],[306,337],[302,341],[302,346],[304,350],[300,349],[302,351],[298,354],[294,354],[297,354],[294,358],[291,358],[290,359],[289,356],[288,358],[288,356],[285,358],[282,356],[283,358],[282,359],[281,357],[280,347],[277,345],[277,338],[280,338],[280,336],[283,336],[285,330],[292,333],[296,330]],[[304,351],[303,350],[304,350]],[[301,350],[301,350]],[[302,350],[302,350]],[[302,351],[302,351]],[[303,351],[303,351]],[[302,351],[302,351]],[[303,351],[303,351]],[[301,352],[301,352]],[[300,354],[300,354]],[[301,353],[301,353]],[[295,354],[295,354]],[[300,354],[301,354]],[[300,354],[300,354]],[[298,355],[298,355]],[[298,355],[298,355]],[[296,357],[296,357],[296,357]],[[288,358],[288,358]],[[289,358],[289,358]],[[292,359],[292,358]],[[283,359],[283,359]],[[283,359],[283,359]],[[290,359],[290,359]],[[291,359],[291,359]],[[291,359],[291,359]],[[293,359],[294,359]],[[283,360],[283,360]],[[284,361],[284,360],[284,361]],[[283,361],[283,361]],[[285,361],[285,361]],[[285,362],[285,361]],[[283,362],[283,362]],[[283,362],[283,362]],[[284,363],[284,363]]],"coast":"M304,350L300,349L302,351L298,354L294,354L297,354L294,358L291,358L290,359L289,356L288,358L288,356L285,358L282,356L283,358L282,359L281,357M304,351L303,350L304,350L304,351M301,350L301,350L301,350M302,350L302,350L302,350M302,351L302,351L302,351M303,351L303,351L303,351M302,351L302,351L302,351M303,351L303,351L303,351M301,352L301,352L301,352M300,354L300,354L300,354M301,353L301,353L301,353M295,354L295,354L295,354M300,354L301,354L300,354M300,354L300,354L300,354M298,355L298,355L298,355M298,355L298,355L298,355M296,357L296,357L296,357M288,358L288,358L288,358M289,358L289,358L289,358M292,359L292,358L292,359M283,359L283,359L283,359M283,359L283,359L283,359M290,359L290,359L290,359M291,359L291,359L291,359M291,359L291,359L291,359M293,359L294,359M283,360L283,360L283,360M284,361L284,360L284,361L284,361M283,361L283,361L283,361M285,361L285,361L285,361M285,362L285,361L285,362M283,362L283,362L283,362M283,362L283,362L283,362M284,363L284,363L284,363","cx":291,"cy":344,"area":554,"bbox":[277,330,306,363]},{"id":34,"name":"Hiroshima","kanji":"\u5E83\u5CF6\u770C","capital":"Hiroshima","region":"Chugoku","food":"\u{1F9AA} \u304B\u304D","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[266,338],[276,339],[278,341],[277,345],[280,347],[281,357],[279,361],[276,360],[276,359],[272,360],[271,362],[265,363],[264,365],[261,366],[260,365],[258,366],[258,361],[254,361],[250,365],[251,366],[248,365],[248,362],[246,361],[245,357],[247,354],[248,350],[250,347],[254,348],[255,347],[258,348],[262,346],[261,344],[266,338]],[[275,361],[274,360],[276,360],[275,361]],[[274,361],[274,361]],[[280,361],[280,361]],[[277,361],[277,361]],[[276,361],[276,361]],[[278,362],[278,361]],[[273,361],[274,361]],[[272,361],[273,361]],[[273,363],[273,361],[273,362]],[[275,364],[274,361],[275,364]],[[274,361],[274,361]],[[277,362],[277,362]],[[282,361],[282,361]],[[256,362],[256,362]],[[281,362],[281,362]],[[257,362],[257,362]],[[272,363],[272,363]],[[255,363],[255,363]],[[269,363],[269,363]],[[256,363],[256,363]],[[282,363],[282,363]],[[272,364],[273,363],[272,364]],[[270,363],[270,363]],[[251,365],[253,363],[251,365]],[[268,364],[268,364]],[[255,368],[256,367],[254,364],[256,366],[255,365],[257,363],[257,368],[255,368]],[[254,363],[254,363]],[[265,364],[265,363]],[[267,364],[267,364]],[[268,364],[268,364]],[[267,366],[266,365],[268,364],[267,366]],[[265,364],[265,364]],[[254,364],[254,364]],[[267,364],[268,364]],[[267,364],[267,364]],[[267,365],[267,364]],[[264,364],[264,364]],[[264,364],[264,364]],[[264,364],[264,364]],[[266,365],[266,365]],[[266,365],[266,365]],[[253,365],[253,365]],[[262,366],[262,366]],[[263,368],[262,366],[264,366],[263,367]],[[261,367],[262,366],[261,367]],[[252,366],[252,366]],[[258,370],[256,370],[258,366],[258,369],[259,369],[259,370]],[[257,366],[257,366]],[[252,367],[252,367]],[[265,367],[265,367]],[[265,368],[266,366],[265,368]],[[266,367],[266,366]],[[264,367],[264,367]],[[254,368],[255,368]],[[259,368],[259,368]],[[255,368],[256,368]],[[261,368],[262,368]],[[261,368],[261,368]],[[264,368],[264,368]],[[252,369],[252,369],[252,369]],[[264,369],[265,369]],[[258,370],[259,370]],[[258,371],[258,371]],[[256,371],[256,371]],[[257,371],[257,371]]],"coast":"M281,357L279,361L276,360L276,359L272,360L271,362L265,363L264,365L261,366L260,365L258,366L258,361L254,361L250,365L251,366M275,361L274,360L276,360L275,361L275,361M274,361L274,361L274,361M280,361L280,361L280,361M277,361L277,361L277,361M276,361L276,361L276,361M278,362L278,361L278,362M273,361L274,361L273,361M272,361L273,361L272,361M273,363L273,361L273,362L273,363M275,364L274,361L275,364L275,364M274,361L274,361L274,361M277,362L277,362L277,362M282,361L282,361L282,361M256,362L256,362L256,362M281,362L281,362L281,362M257,362L257,362L257,362M272,363L272,363L272,363M255,363L255,363L255,363M269,363L269,363L269,363M256,363L256,363L256,363M282,363L282,363L282,363M272,364L273,363L272,364L272,364M270,363L270,363L270,363M251,365L253,363L251,365L251,365M268,364L268,364L268,364M255,368L256,367L254,364L256,366L255,365L257,363L257,368L255,368L255,368M254,363L254,363L254,363M265,364L265,363L265,364M267,364L267,364L267,364M268,364L268,364L268,364M267,366L266,365L268,364L267,366L267,366M265,364L265,364L265,364M254,364L254,364L254,364M267,364L268,364L267,364M267,364L267,364L267,364M267,365L267,364L267,365M264,364L264,364L264,364M264,364L264,364L264,364M264,364L264,364L264,364M266,365L266,365L266,365M266,365L266,365L266,365M253,365L253,365L253,365M262,366L262,366L262,366M263,368L262,366L264,366L263,367L263,368M261,367L262,366L261,367L261,367M252,366L252,366L252,366M258,370L256,370L258,366L258,369L259,369L259,370L258,370M257,366L257,366L257,366M252,367L252,367L252,367M265,367L265,367L265,367M265,368L266,366L265,368L265,368M266,367L266,366L266,367M264,367L264,367L264,367M254,368L255,368L254,368M259,368L259,368L259,368M255,368L256,368L255,368M261,368L262,368L261,368M261,368L261,368L261,368M264,368L264,368L264,368M252,369L252,369L252,369M264,369L265,369L264,369M258,370L259,370L258,370M258,371L258,371L258,371M256,371L256,371L256,371M257,371L257,371L257,371","cx":264,"cy":353,"area":640,"bbox":[245,338,282,371]},{"id":35,"name":"Yamaguchi","kanji":"\u5C71\u53E3\u770C","capital":"Yamaguchi","region":"Chugoku","food":"\u{1F421} \u3075\u3050","seas":["Sea of Japan","Seto Inland Sea"],"coastDirs":[],"rings":[[[222,349],[222,348],[222,349]],[[236,351],[237,355],[236,357],[237,359],[239,359],[239,362],[243,363],[246,358],[248,365],[251,366],[250,372],[247,374],[248,378],[246,375],[243,375],[241,372],[238,373],[240,372],[238,370],[233,373],[231,371],[230,373],[229,371],[225,375],[223,375],[223,373],[220,371],[216,375],[216,371],[215,369],[217,366],[215,364],[216,361],[220,361],[217,360],[218,359],[222,359],[223,361],[226,361],[229,359],[229,358],[234,352],[236,351]],[[231,355],[231,354]],[[232,355],[232,355]],[[229,356],[229,356]],[[226,357],[226,357]],[[229,357],[229,357]],[[228,357],[227,357]],[[228,357],[228,357]],[[228,358],[228,358]],[[224,360],[223,359],[225,359],[224,360]],[[227,359],[227,359]],[[226,360],[226,360]],[[215,362],[215,361],[215,362]],[[218,361],[218,361]],[[216,367],[216,367]],[[216,367],[216,367]],[[252,369],[252,369],[252,369]],[[213,370],[214,370]],[[254,371],[255,371]],[[237,372],[239,371],[238,372]],[[254,372],[254,371]],[[255,371],[255,371]],[[237,373],[237,371],[237,373]],[[255,372],[255,372]],[[233,373],[234,372],[233,373]],[[239,372],[239,372]],[[251,373],[251,373]],[[255,372],[255,372]],[[219,373],[219,373]],[[253,373],[253,373]],[[219,373],[219,373]],[[253,373],[253,373]],[[240,375],[241,373],[240,375]],[[238,373],[238,373]],[[215,373],[215,373]],[[253,374],[253,374]],[[250,377],[250,374],[252,376],[256,374],[254,375],[254,377],[252,376],[250,377]],[[256,374],[257,374]],[[253,374],[253,374]],[[257,374],[257,374]],[[236,375],[237,374]],[[248,374],[248,374]],[[243,374],[242,374]],[[217,375],[217,375]],[[256,375],[256,375]],[[254,376],[254,375]],[[246,376],[246,376]],[[246,377],[246,377]],[[245,377],[245,377]],[[252,377],[252,377]],[[254,377],[254,377]],[[246,379],[246,377],[247,378],[246,379]],[[249,377],[249,377]],[[247,378],[247,378]],[[251,380],[249,379],[251,380]],[[251,379],[251,378]],[[254,379],[255,379]],[[243,380],[244,380]],[[243,379],[243,379]],[[254,379],[254,379]],[[246,380],[246,379]],[[248,381],[248,380],[248,381]],[[245,381],[245,381]]],"coast":"M222,349L222,348L222,349L222,349M251,366L250,372L247,374L248,378L246,375L243,375L241,372L238,373L240,372L238,370L233,373L231,371L230,373L229,371L225,375L223,375L223,373L220,371L216,375L216,371L215,369L217,366L215,364L216,361L220,361L217,360L218,359L222,359L223,361L226,361L229,359L229,358L234,352L236,351L236,351M231,355L231,354L231,355M232,355L232,355L232,355M229,356L229,356L229,356M226,357L226,357L226,357M229,357L229,357L229,357M228,357L227,357L228,357M228,357L228,357L228,357M228,358L228,358L228,358M224,360L223,359L225,359L224,360L224,360M227,359L227,359L227,359M226,360L226,360L226,360M215,362L215,361L215,362L215,362M218,361L218,361L218,361M216,367L216,367L216,367M216,367L216,367L216,367M252,369L252,369L252,369M213,370L214,370L213,370M254,371L255,371L254,371M237,372L239,371L238,372L237,372M254,372L254,371L254,372M255,371L255,371L255,371M237,373L237,371L237,373L237,373M255,372L255,372L255,372M233,373L234,372L233,373L233,373M239,372L239,372L239,372M251,373L251,373L251,373M255,372L255,372L255,372M219,373L219,373L219,373M253,373L253,373L253,373M219,373L219,373L219,373M253,373L253,373L253,373M240,375L241,373L240,375L240,375M238,373L238,373L238,373M215,373L215,373L215,373M253,374L253,374L253,374M250,377L250,374L252,376L256,374L254,375L254,377L252,376L250,377L250,377M256,374L257,374L256,374M253,374L253,374L253,374M257,374L257,374L257,374M236,375L237,374L236,375M248,374L248,374L248,374M243,374L242,374L243,374M217,375L217,375L217,375M256,375L256,375L256,375M254,376L254,375L254,376M246,376L246,376L246,376M246,377L246,377L246,377M245,377L245,377L245,377M252,377L252,377L252,377M254,377L254,377L254,377M246,379L246,377L247,378L246,379L246,379M249,377L249,377L249,377M247,378L247,378L247,378M251,380L249,379L251,380L251,380M251,379L251,378L251,379M254,379L255,379L254,379M243,380L244,380L243,380M243,379L243,379L243,379M254,379L254,379L254,379M246,380L246,379L246,380M248,381L248,380L248,381L248,381M245,381L245,381L245,381","cx":233,"cy":366,"area":467,"bbox":[213,348,257,381]},{"id":36,"name":"Tokushima","kanji":"\u5FB3\u5CF6\u770C","capital":"Tokushima","region":"Shikoku","food":"\u{1F34B} \u3059\u3060\u3061","seas":["Seto Inland Sea","Pacific Ocean"],"coastDirs":[],"rings":[[[311,366],[311,365],[311,366]],[[311,367],[311,366],[312,365],[312,367]],[[307,366],[311,365],[312,367],[311,372],[314,375],[312,377],[315,378],[306,383],[303,387],[300,386],[300,382],[297,382],[296,378],[293,379],[287,377],[287,372],[292,369],[295,370],[300,367],[306,368],[307,366]],[[313,377],[313,377]],[[312,377],[312,377]],[[314,377],[314,377]],[[316,377],[316,377]],[[314,377],[314,377]],[[316,377],[316,377]],[[316,378],[316,377]],[[308,384],[308,384]],[[307,384],[307,384]],[[306,384],[306,384]],[[304,387],[304,387]]],"coast":"M311,366L311,365L311,366L311,366M311,367L311,366L312,365L312,367L311,367M307,366L311,365L312,367L311,372L314,375L312,377L315,378L306,383L303,387M313,377L313,377L313,377M312,377L312,377L312,377M314,377L314,377L314,377M316,377L316,377L316,377M314,377L314,377L314,377M316,377L316,377L316,377M316,378L316,377L316,378M308,384L308,384L308,384M307,384L307,384L307,384M306,384L306,384L306,384M304,387L304,387L304,387","cx":302,"cy":375,"area":334,"bbox":[287,365,316,387]},{"id":37,"name":"Kagawa","kanji":"\u9999\u5DDD\u770C","capital":"Takamatsu","region":"Shikoku","food":"\u{1F35C} \u3055\u306C\u304D\u3046\u3069\u3093","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[304,355],[304,359],[303,359],[303,357],[301,360],[301,357],[299,358],[300,356],[304,355]],[[300,356],[300,356]],[[300,356],[300,356]],[[299,356],[299,356]],[[295,357],[295,357]],[[296,357],[296,357],[296,357]],[[295,357],[295,357]],[[298,358],[296,357],[298,357],[298,358]],[[295,357],[295,357]],[[295,357],[295,357]],[[299,358],[299,358]],[[295,358],[295,358]],[[295,359],[295,358],[295,359]],[[295,358],[296,358]],[[294,358],[294,358]],[[300,358],[300,358]],[[296,358],[296,358]],[[294,358],[295,358]],[[304,359],[304,358]],[[296,359],[296,359]],[[304,359],[304,359]],[[297,359],[297,359]],[[291,360],[291,359]],[[299,359],[299,359]],[[293,359],[294,359],[294,359]],[[290,360],[290,360]],[[298,360],[298,360]],[[299,360],[299,360]],[[299,360],[299,360]],[[287,361],[287,360]],[[297,361],[297,360]],[[291,360],[291,360]],[[290,360],[290,360]],[[289,361],[290,361]],[[288,361],[288,360],[288,361]],[[299,368],[295,370],[294,369],[288,372],[285,371],[287,366],[284,364],[287,366],[294,360],[298,362],[299,360],[300,362],[302,361],[302,364],[307,366],[306,368],[299,368]],[[300,360],[300,360]],[[294,360],[294,360]],[[291,361],[291,360]],[[291,360],[291,360]],[[287,361],[287,361]],[[292,361],[292,361]],[[290,361],[290,361]],[[286,362],[286,362]],[[286,362],[286,362]],[[287,363],[287,363]],[[286,363],[286,363]],[[286,364],[286,364]],[[287,364],[287,364]],[[286,366],[286,366]],[[286,366],[286,366]],[[282,368],[282,368]],[[284,369],[284,369]]],"coast":"M304,355L304,359L303,359L303,357L301,360L301,357L299,358L300,356L304,355L304,355M300,356L300,356L300,356M300,356L300,356L300,356M299,356L299,356L299,356M295,357L295,357L295,357M296,357L296,357L296,357M295,357L295,357L295,357M298,358L296,357L298,357L298,358L298,358M295,357L295,357L295,357M295,357L295,357L295,357M299,358L299,358L299,358M295,358L295,358L295,358M295,359L295,358L295,359L295,359M295,358L296,358L295,358M294,358L294,358L294,358M300,358L300,358L300,358M296,358L296,358L296,358M294,358L295,358L294,358M304,359L304,358L304,359M296,359L296,359L296,359M304,359L304,359L304,359M297,359L297,359L297,359M291,360L291,359L291,360M299,359L299,359L299,359M294,359L294,359L293,359M290,360L290,360L290,360M298,360L298,360L298,360M299,360L299,360L299,360M299,360L299,360L299,360M287,361L287,360L287,361M297,361L297,360L297,361M291,360L291,360L291,360M290,360L290,360L290,360M289,361L290,361L289,361M288,361L288,360L288,361L288,361M285,371L287,366L284,364L287,366L294,360L298,362L299,360L300,362L302,361L302,364L307,366M300,360L300,360L300,360M294,360L294,360L294,360M291,361L291,360L291,361M291,360L291,360L291,360M287,361L287,361L287,361M292,361L292,361L292,361M290,361L290,361L290,361M286,362L286,362L286,362M286,362L286,362L286,362M287,363L287,363L287,363M286,363L286,363L286,363M286,364L286,364L286,364M287,364L287,364L287,364M286,366L286,366L286,366M286,366L286,366L286,366M282,368L282,368L282,368M284,369L284,369L284,369","cx":295,"cy":366,"area":134,"bbox":[282,355,307,372]},{"id":38,"name":"Ehime","kanji":"\u611B\u5A9B\u770C","capital":"Matsuyama","region":"Shikoku","food":"\u{1F34A} \u307F\u304B\u3093","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[269,367],[271,363],[271,366],[269,366]],[[275,365],[276,363],[275,365]],[[274,364],[274,363]],[[274,364],[274,364]],[[274,364],[275,364]],[[273,365],[274,364],[274,365]],[[275,365],[275,365]],[[269,365],[269,365]],[[274,365],[274,365]],[[273,367],[272,365],[273,366]],[[276,365],[277,365]],[[274,366],[274,366]],[[268,366],[268,366]],[[268,367],[268,367]],[[277,367],[277,367]],[[267,367],[267,367]],[[272,366],[272,366]],[[271,369],[271,366],[273,367],[271,369]],[[272,367],[272,367]],[[267,367],[268,367]],[[268,367],[268,367]],[[278,367],[278,367]],[[279,367],[279,367]],[[270,368],[270,368]],[[258,384],[261,382],[264,373],[268,370],[267,369],[268,368],[273,375],[278,373],[283,373],[285,371],[287,372],[287,376],[275,379],[270,389],[265,389],[267,394],[265,395],[262,399],[260,398],[262,405],[261,406],[257,405],[257,407],[256,405],[258,405],[257,402],[254,403],[255,401],[257,402],[256,400],[257,400],[255,397],[257,399],[259,397],[258,395],[256,396],[257,394],[254,394],[255,389],[253,388],[245,393],[257,384]],[[269,369],[269,369]],[[274,369],[274,369]],[[275,369],[275,369]],[[270,369],[270,369]],[[275,369],[275,369]],[[262,370],[262,370]],[[273,371],[273,371]],[[273,371],[273,371]],[[259,372],[259,372]],[[272,372],[272,372]],[[260,374],[261,372],[260,374]],[[279,373],[279,373]],[[258,374],[258,373]],[[257,374],[257,373]],[[262,374],[262,374]],[[264,373],[264,373]],[[261,374],[261,374]],[[258,375],[258,375]],[[259,375],[259,375]],[[261,377],[262,375],[261,376]],[[261,376],[261,376]],[[258,377],[258,377]],[[256,381],[257,381]],[[253,390],[253,390]],[[254,390],[254,390]],[[253,392],[253,392]],[[253,392],[254,392]],[[258,397],[258,397]],[[254,397],[254,397]],[[254,398],[254,397],[254,398]],[[257,397],[257,397]],[[255,398],[255,398]],[[251,398],[251,398]],[[251,398],[251,398]],[[254,398],[254,398]],[[252,399],[252,399]],[[254,398],[255,398]],[[254,399],[254,399]],[[252,399],[252,399]],[[252,399],[253,399]],[[255,400],[255,400]],[[255,401],[255,401]],[[252,401],[253,401]],[[255,406],[256,406]],[[255,406],[255,406]],[[255,406],[255,406]],[[258,407],[258,406]],[[259,407],[259,406]]],"coast":"M269,367L271,363L271,366L269,366L269,367M275,365L276,363L275,365L275,365M274,364L274,363L274,364M274,364L274,364L274,364M274,364L275,364L274,364M273,365L274,364L274,365L273,365M275,365L275,365L275,365M269,365L269,365L269,365M274,365L274,365L274,365M273,367L272,365L273,366L273,367M276,365L277,365L276,365M274,366L274,366L274,366M268,366L268,366L268,366M268,367L268,367L268,367M277,367L277,367L277,367M267,367L267,367L267,367M272,366L272,366L272,366M271,369L271,366L273,367L271,369L271,369M272,367L272,367L272,367M267,367L268,367L267,367M268,367L268,367L268,367M278,367L278,367L278,367M279,367L279,367L279,367M270,368L270,368L270,368M258,384L261,382L264,373L268,370L267,369L268,368L273,375L278,373L283,373L285,371M261,406L257,405L257,407L256,405L258,405L257,402L254,403L255,401L257,402L256,400L257,400L255,397L257,399L259,397L258,395L256,396L257,394L254,394L255,389L253,388L245,393L257,384L258,384M269,369L269,369L269,369M274,369L274,369L274,369M275,369L275,369L275,369M270,369L270,369L270,369M275,369L275,369L275,369M262,370L262,370L262,370M273,371L273,371L273,371M273,371L273,371L273,371M259,372L259,372L259,372M272,372L272,372L272,372M260,374L261,372L260,374L260,374M279,373L279,373L279,373M258,374L258,373L258,374M257,374L257,373L257,374M262,374L262,374L262,374M264,373L264,373L264,373M261,374L261,374L261,374M258,375L258,375L258,375M259,375L259,375L259,375M261,377L262,375L261,376L261,377M261,376L261,376L261,376M258,377L258,377L258,377M256,381L257,381L256,381M253,390L253,390L253,390M254,390L254,390L254,390M253,392L253,392L253,392M253,392L254,392L253,392M258,397L258,397L258,397M254,397L254,397L254,397M254,398L254,397L254,398L254,398M257,397L257,397L257,397M255,398L255,398L255,398M251,398L251,398L251,398M251,398L251,398L251,398M254,398L254,398L254,398M252,399L252,399L252,399M254,398L255,398L254,398M254,399L254,399L254,399M252,399L252,399L252,399M252,399L253,399L252,399M255,400L255,400L255,400M255,401L255,401L255,401M252,401L253,401L252,401M255,406L256,406L255,406M255,406L255,406L255,406M255,406L255,406L255,406M258,407L258,406L258,407M259,407L259,406L259,407","cx":266,"cy":385,"area":413,"bbox":[245,363,287,407]},{"id":39,"name":"Kochi","kanji":"\u9AD8\u77E5\u770C","capital":"Kochi","region":"Shikoku","food":"\u{1F41F} \u304B\u3064\u304A","seas":["Pacific Ocean"],"coastDirs":[],"rings":[[[285,377],[291,377],[293,379],[296,378],[297,382],[300,382],[300,386],[303,387],[300,396],[294,389],[289,387],[284,388],[284,386],[285,388],[279,391],[282,391],[278,393],[277,391],[276,399],[275,399],[272,403],[270,403],[270,407],[269,408],[270,412],[268,410],[260,411],[261,408],[263,408],[262,406],[261,406],[262,405],[260,398],[262,399],[265,395],[267,394],[265,389],[270,389],[275,379],[285,377]],[[303,387],[303,387]],[[304,387],[304,387]],[[278,393],[278,393]],[[278,393],[278,393]],[[278,393],[278,393]],[[262,406],[262,406]],[[261,406],[261,406]],[[261,406],[261,406]],[[262,407],[262,406]],[[257,410],[257,410]],[[260,411],[260,411]],[[258,413],[258,411],[258,413]],[[260,412],[260,412]],[[257,412],[257,412]]],"coast":"M303,387L300,396L294,389L289,387L284,388L284,386L285,388L279,391L282,391L278,393L277,391L276,399L275,399L272,403L270,403L270,407L269,408L270,412L268,410L260,411L261,408L263,408L262,406L261,406M303,387L303,387L303,387M304,387L304,387L304,387M278,393L278,393L278,393M278,393L278,393L278,393M278,393L278,393L278,393M262,406L262,406L262,406M261,406L261,406L261,406M261,406L261,406L261,406M262,407L262,406L262,407M257,410L257,410L257,410M260,411L260,411L260,411M258,413L258,411L258,413L258,413M260,412L260,412L260,412M257,412L257,412L257,412","cx":279,"cy":391,"area":558,"bbox":[257,377,304,413]},{"id":40,"name":"Fukuoka","kanji":"\u798F\u5CA1\u770C","capital":"Fukuoka","region":"Kyushu","food":"\u{1F35C} \u306F\u304B\u305F\u3089\u30FC\u3081\u3093","seas":["Sea of Japan","Seto Inland Sea"],"coastDirs":[],"rings":[[[196,365],[196,365]],[[212,372],[212,372]],[[211,372],[211,372]],[[214,372],[214,372]],[[214,373],[214,373]],[[215,374],[215,374]],[[210,375],[213,374],[214,376],[212,376],[214,376],[214,375],[216,376],[219,374],[218,378],[221,384],[223,384],[223,388],[218,388],[216,390],[214,396],[216,398],[215,400],[210,398],[210,400],[206,402],[206,404],[204,404],[202,399],[203,396],[207,393],[207,390],[204,391],[200,389],[194,389],[197,387],[195,386],[198,383],[200,386],[203,385],[204,382],[202,384],[200,382],[203,382],[205,380],[205,377],[210,375]],[[214,375],[213,374],[215,374]],[[204,376],[204,376]],[[206,376],[206,376]],[[194,377],[194,377]],[[205,377],[205,377]],[[219,378],[219,377],[220,378]],[[218,378],[218,378]],[[219,378],[219,378]],[[219,379],[219,379]],[[202,380],[202,380]],[[199,382],[199,382]],[[203,383],[204,383]],[[201,385],[201,385]],[[194,386],[194,386]]],"coast":"M196,365L196,365L196,365M212,372L212,372L212,372M211,372L211,372L211,372M214,372L214,372L214,372M214,373L214,373L214,373M215,374L215,374L215,374M210,375L213,374L214,376L212,376L214,376L214,375L216,376L219,374L218,378L221,384L223,384M204,404L202,399M194,389L197,387L195,386L198,383L200,386L203,385L204,382L202,384L200,382L203,382L205,380L205,377L210,375L210,375M214,375L213,374L215,374L214,375M204,376L204,376L204,376M206,376L206,376L206,376M194,377L194,377L194,377M205,377L205,377L205,377M219,378L219,377L220,378L219,378M218,378L218,378L218,378M219,378L219,378L219,378M219,379L219,379L219,379M202,380L202,380L202,380M199,382L199,382L199,382M203,383L204,383L203,383M201,385L201,385L201,385M194,386L194,386L194,386","cx":210,"cy":387,"area":390,"bbox":[194,365,223,404]},{"id":41,"name":"Saga","kanji":"\u4F50\u8CC0\u770C","capital":"Saga","region":"Kyushu","food":"\u{1F42E} \u3055\u304C\u304E\u3085\u3046","seas":["East China Sea"],"coastDirs":[],"rings":[[[190,385],[190,385]],[[190,385],[190,385]],[[189,386],[189,385]],[[187,386],[187,386]],[[190,387],[190,387]],[[194,389],[200,389],[204,391],[207,390],[207,393],[203,396],[202,399],[199,397],[196,400],[198,405],[191,401],[191,399],[188,398],[187,395],[188,393],[189,395],[190,391],[187,390],[189,390],[189,386],[190,388],[191,387],[192,389],[194,389]],[[192,387],[192,387]],[[193,389],[193,389]],[[189,391],[189,391]],[[189,391],[190,391]],[[189,394],[189,394]],[[199,405],[199,405]]],"coast":"M190,385L190,385L190,385M190,385L190,385L190,385M189,386L189,385L189,386M187,386L187,386L187,386M190,387L190,387L190,387M202,399L199,397L196,400L198,405M188,393L189,395L190,391L187,390L189,390L189,386L190,388L191,387L192,389L194,389L194,389M192,387L192,387L192,387M193,389L193,389L193,389M189,391L189,391L189,391M189,391L190,391L189,391M189,394L189,394L189,394M199,405L199,405L199,405","cx":196,"cy":395,"area":178,"bbox":[187,385,207,405]},{"id":42,"name":"Nagasaki","kanji":"\u9577\u5D0E\u770C","capital":"Nagasaki","region":"Kyushu","food":"\u{1F35C} \u3061\u3083\u3093\u307D\u3093","seas":["East China Sea"],"coastDirs":["all around"],"rings":[[[179,350],[179,350]],[[177,359],[176,363],[177,361],[175,362],[175,360],[175,362],[173,361],[176,356],[175,355],[176,352],[178,353],[179,350],[180,355],[177,359]],[[180,351],[180,351]],[[174,359],[174,359]],[[174,359],[174,359]],[[174,359],[174,359]],[[178,362],[178,361]],[[178,362],[178,362]],[[176,361],[176,361]],[[176,362],[176,362]],[[176,362],[176,362]],[[176,362],[176,362]],[[176,363],[175,362],[176,363]],[[173,370],[172,369],[172,363],[175,364],[175,362],[176,364],[173,370]],[[178,363],[178,363]],[[176,363],[176,363]],[[177,364],[177,364]],[[174,369],[174,369]],[[185,377],[185,377]],[[185,377],[185,377]],[[185,377],[185,377]],[[186,382],[184,380],[185,377],[188,379],[186,382]],[[184,378],[184,378]],[[184,380],[184,380]],[[184,381],[184,381]],[[190,381],[190,381]],[[187,381],[187,381]],[[184,381],[184,381]],[[184,381],[184,381]],[[183,382],[183,382]],[[182,385],[182,385]],[[182,389],[180,389],[181,388],[182,389]],[[186,391],[187,389],[188,390],[186,391]],[[186,390],[186,390]],[[180,390],[181,390],[181,390]],[[178,393],[178,390],[179,393]],[[181,391],[181,390]],[[186,391],[186,391]],[[185,391],[185,391]],[[188,393],[188,391],[189,392],[188,393]],[[177,398],[179,393],[181,393],[182,391],[180,396],[177,398]],[[187,391],[188,391]],[[184,392],[185,391],[185,393],[188,393],[187,395],[188,398],[191,399],[191,401],[198,405],[195,408],[201,408],[203,411],[202,414],[197,417],[196,413],[198,411],[195,410],[192,411],[190,414],[186,417],[190,412],[189,413],[184,406],[185,401],[187,402],[186,404],[187,403],[188,404],[188,408],[193,408],[190,402],[189,403],[187,401],[186,402],[188,399],[185,399],[184,401],[185,399],[184,397],[183,398],[182,397],[183,394],[182,394],[182,392],[183,392]],[[187,392],[187,392]],[[183,392],[183,392]],[[182,394],[182,394]],[[170,396],[169,395],[171,394],[171,396]],[[182,395],[182,395]],[[182,395],[182,395]],[[182,395],[182,395]],[[182,395],[182,395]],[[182,396],[182,395]],[[182,396],[182,396]],[[182,396],[182,396]],[[169,396],[169,396]],[[182,396],[182,396]],[[182,396],[182,396]],[[182,396],[182,396]],[[169,396],[169,396]],[[176,396],[176,396]],[[182,397],[182,397]],[[171,397],[171,397]],[[169,397],[169,397]],[[169,398],[169,397],[170,397],[169,398]],[[182,397],[182,397]],[[171,399],[171,397],[171,399]],[[168,398],[168,397]],[[182,397],[182,397]],[[176,397],[176,397]],[[183,397],[183,397]],[[183,397],[183,397]],[[183,398],[183,398]],[[183,398],[183,398]],[[182,398],[182,398]],[[176,398],[176,398]],[[166,398],[166,398]],[[167,398],[167,398]],[[182,399],[183,399]],[[176,398],[176,398]],[[183,398],[183,398]],[[176,398],[176,398]],[[168,398],[168,398]],[[169,398],[169,398]],[[168,398],[168,398]],[[168,399],[168,399]],[[165,399],[165,398]],[[168,398],[168,398]],[[181,399],[181,398]],[[185,399],[185,399]],[[169,409],[169,407],[167,405],[169,404],[170,399],[170,404],[172,403],[172,405],[170,405],[169,409]],[[184,399],[184,399]],[[185,399],[185,399]],[[165,399],[165,399]],[[184,399],[185,399]],[[181,400],[181,399]],[[185,400],[185,399]],[[184,399],[184,399]],[[171,400],[171,400]],[[184,400],[184,400]],[[187,400],[187,400]],[[188,402],[188,402]],[[183,403],[184,402],[183,403]],[[182,402],[182,402]],[[188,402],[188,402]],[[184,403],[184,403]],[[182,404],[182,404]],[[173,404],[174,404]],[[172,403],[172,403]],[[179,403],[179,403]],[[176,404],[176,404]],[[172,404],[172,403]],[[168,404],[168,404]],[[181,404],[181,403]],[[184,404],[184,404]],[[182,404],[182,404]],[[187,404],[187,404]],[[177,404],[177,404]],[[186,404],[187,404]],[[168,405],[168,404]],[[170,404],[170,404]],[[167,405],[167,405]],[[188,405],[188,405]],[[184,405],[184,405]],[[183,406],[183,406]],[[168,409],[167,408],[167,406],[168,408]],[[166,407],[167,407]],[[191,407],[191,407]],[[172,406],[172,406]],[[169,406],[169,406]],[[188,406],[188,406]],[[192,407],[192,407]],[[166,407],[166,407]],[[165,407],[165,407]],[[168,407],[169,407]],[[189,407],[189,407]],[[183,408],[183,407]],[[166,410],[165,408],[166,409],[166,408],[166,410]],[[168,408],[168,408]],[[188,408],[188,408]],[[165,408],[165,408]],[[182,408],[181,408]],[[191,408],[191,408]],[[188,408],[188,408]],[[169,408],[169,408]],[[182,408],[182,408]],[[168,408],[168,408]],[[188,408],[189,408]],[[169,408],[169,408]],[[167,408],[167,408]],[[168,409],[168,409]],[[164,411],[164,409],[165,410],[164,411]],[[159,410],[159,410]],[[166,410],[166,410]],[[166,410],[166,410]],[[162,417],[157,416],[159,415],[159,411],[162,412],[163,410],[164,412],[165,415],[161,415],[162,417]],[[187,410],[187,410]],[[167,412],[167,410],[167,412]],[[167,411],[167,411]],[[193,412],[193,412]],[[203,411],[203,411]],[[193,412],[193,411]],[[193,411],[193,411]],[[168,411],[168,411]],[[163,411],[163,411]],[[164,412],[164,412]],[[162,412],[162,412]],[[157,413],[157,413]],[[164,413],[164,412]],[[164,413],[164,412]],[[188,413],[188,413]],[[187,413],[188,413]],[[165,413],[165,413]],[[158,415],[158,414],[158,415]],[[187,415],[187,415]],[[186,415],[186,415]],[[162,416],[162,416]],[[162,416],[162,416]],[[163,416],[163,416]],[[165,417],[166,416]],[[165,417],[165,417]],[[160,417],[160,417]],[[165,417],[165,417]],[[187,418],[188,418]],[[152,434],[152,434]],[[152,434],[152,434]],[[151,434],[151,434]],[[151,435],[151,435]],[[151,435],[151,435]],[[179,350],[179,350]],[[178,350],[178,350]],[[162,398],[162,398]],[[162,398],[162,398]],[[145,427],[145,427]],[[145,427],[145,427]],[[145,427],[145,427]],[[152,433],[152,433]],[[151,435],[151,435]],[[162,398],[162,398]],[[162,398],[162,398]],[[185,376],[185,376]]],"coast":"M179,350L179,350L179,350M177,359L176,363L177,361L175,362L175,360L175,362L173,361L176,356L175,355L176,352L178,353L179,350L180,355L177,359L177,359M180,351L180,351L180,351M174,359L174,359L174,359M174,359L174,359L174,359M174,359L174,359L174,359M178,362L178,361L178,362M178,362L178,362L178,362M176,361L176,361L176,361M176,362L176,362L176,362M176,362L176,362L176,362M176,362L176,362L176,362M176,363L175,362L176,363L176,363M173,370L172,369L172,363L175,364L175,362L176,364L173,370L173,370M178,363L178,363L178,363M176,363L176,363L176,363M177,364L177,364L177,364M174,369L174,369L174,369M185,377L185,377L185,377M185,377L185,377L185,377M185,377L185,377L185,377M186,382L184,380L185,377L188,379L186,382L186,382M184,378L184,378L184,378M184,380L184,380L184,380M184,381L184,381L184,381M190,381L190,381L190,381M187,381L187,381L187,381M184,381L184,381L184,381M184,381L184,381L184,381M183,382L183,382L183,382M182,385L182,385L182,385M182,389L180,389L181,388L182,389L182,389M186,391L187,389L188,390L186,391L186,391M186,390L186,390L186,390M180,390L181,390L181,390L180,390M178,393L178,390L179,393L178,393M181,391L181,390L181,391M186,391L186,391L186,391M185,391L185,391L185,391M188,393L188,391L189,392L188,393L188,393M177,398L179,393L181,393L182,391L180,396L177,398L177,398M187,391L188,391L187,391M184,392L185,391L185,393L188,393M198,405L195,408L201,408L203,411L202,414L197,417L196,413L198,411L195,410L192,411L190,414L186,417L190,412L189,413L184,406L185,401L187,402L186,404L187,403L188,404L188,408L193,408L190,402L189,403L187,401L186,402L188,399L185,399L184,401L185,399L184,397L183,398L182,397L183,394L182,394L182,392L183,392L184,392M187,392L187,392L187,392M183,392L183,392L183,392M182,394L182,394L182,394M170,396L169,395L171,394L171,396L170,396M182,395L182,395L182,395M182,395L182,395L182,395M182,395L182,395L182,395M182,395L182,395L182,395M182,396L182,395L182,396M182,396L182,396L182,396M182,396L182,396L182,396M169,396L169,396L169,396M182,396L182,396L182,396M182,396L182,396L182,396M182,396L182,396L182,396M169,396L169,396L169,396M176,396L176,396L176,396M182,397L182,397L182,397M171,397L171,397L171,397M169,397L169,397L169,397M169,398L169,397L170,397L169,398L169,398M182,397L182,397L182,397M171,399L171,397L171,399L171,399M168,398L168,397L168,398M182,397L182,397L182,397M176,397L176,397L176,397M183,397L183,397L183,397M183,397L183,397L183,397M183,398L183,398L183,398M183,398L183,398L183,398M182,398L182,398L182,398M176,398L176,398L176,398M166,398L166,398L166,398M167,398L167,398L167,398M182,399L183,399L182,399M176,398L176,398L176,398M183,398L183,398L183,398M176,398L176,398L176,398M168,398L168,398L168,398M169,398L169,398L169,398M168,398L168,398L168,398M168,399L168,399L168,399M165,399L165,398L165,399M168,398L168,398L168,398M181,399L181,398L181,399M185,399L185,399L185,399M169,409L169,407L167,405L169,404L170,399L170,404L172,403L172,405L170,405L169,409L169,409M184,399L184,399L184,399M185,399L185,399L185,399M165,399L165,399L165,399M184,399L185,399L184,399M181,400L181,399L181,400M185,400L185,399L185,400M184,399L184,399L184,399M171,400L171,400L171,400M184,400L184,400L184,400M187,400L187,400L187,400M188,402L188,402L188,402M183,403L184,402L183,403L183,403M182,402L182,402L182,402M188,402L188,402L188,402M184,403L184,403L184,403M182,404L182,404L182,404M173,404L174,404L173,404M172,403L172,403L172,403M179,403L179,403L179,403M176,404L176,404L176,404M172,404L172,403L172,404M168,404L168,404L168,404M181,404L181,403L181,404M184,404L184,404L184,404M182,404L182,404L182,404M187,404L187,404L187,404M177,404L177,404L177,404M186,404L187,404L186,404M168,405L168,404L168,405M170,404L170,404L170,404M167,405L167,405L167,405M188,405L188,405L188,405M184,405L184,405L184,405M183,406L183,406L183,406M168,409L167,408L167,406L168,408L168,409M166,407L167,407L166,407M191,407L191,407L191,407M172,406L172,406L172,406M169,406L169,406L169,406M188,406L188,406L188,406M192,407L192,407L192,407M166,407L166,407L166,407M165,407L165,407L165,407M168,407L169,407L168,407M189,407L189,407L189,407M183,408L183,407L183,408M166,410L165,408L166,409L166,408L166,410L166,410M168,408L168,408L168,408M188,408L188,408L188,408M165,408L165,408L165,408M182,408L181,408L182,408M191,408L191,408L191,408M188,408L188,408L188,408M169,408L169,408L169,408M182,408L182,408L182,408M168,408L168,408L168,408M188,408L189,408L188,408M169,408L169,408L169,408M167,408L167,408L167,408M168,409L168,409L168,409M164,411L164,409L165,410L164,411L164,411M159,410L159,410L159,410M166,410L166,410L166,410M166,410L166,410L166,410M162,417L157,416L159,415L159,411L162,412L163,410L164,412L165,415L161,415L162,417L162,417M187,410L187,410L187,410M167,412L167,410L167,412L167,412M167,411L167,411L167,411M193,412L193,412L193,412M203,411L203,411L203,411M193,412L193,411L193,412M193,411L193,411L193,411M168,411L168,411L168,411M163,411L163,411L163,411M164,412L164,412L164,412M162,412L162,412L162,412M157,413L157,413L157,413M164,413L164,412L164,413M164,413L164,412L164,413M188,413L188,413L188,413M187,413L188,413L187,413M165,413L165,413L165,413M158,415L158,414L158,415L158,415M187,415L187,415L187,415M186,415L186,415L186,415M162,416L162,416L162,416M162,416L162,416L162,416M163,416L163,416L163,416M165,417L166,416L165,417M165,417L165,417L165,417M160,417L160,417L160,417M165,417L165,417L165,417M187,418L188,418L187,418M152,434L152,434L152,434M152,434L152,434L152,434M151,434L151,434L151,434M151,435L151,435L151,435M151,435L151,435L151,435M179,350L179,350L179,350M178,350L178,350L178,350M162,398L162,398L162,398M162,398L162,398L162,398M145,427L145,427L145,427M145,427L145,427L145,427M145,427L145,427L145,427M152,433L152,433L152,433M151,435L151,435L151,435M162,398L162,398L162,398M162,398L162,398L162,398M185,376L185,376L185,376","cx":193,"cy":404,"area":172,"bbox":[145,350,203,435]},{"id":43,"name":"Kumamoto","kanji":"\u718A\u672C\u770C","capital":"Kumamoto","region":"Kyushu","food":"\u{1F434} \u3070\u3055\u3057","seas":["East China Sea"],"coastDirs":[],"rings":[[[222,398],[227,409],[225,409],[221,417],[219,418],[219,421],[222,425],[220,427],[221,430],[219,430],[217,431],[212,432],[209,429],[205,431],[202,430],[208,421],[207,418],[210,415],[205,416],[209,413],[209,410],[204,406],[204,404],[206,404],[206,402],[210,400],[210,398],[218,403],[218,398],[221,398]],[[204,418],[204,415],[204,418]],[[206,417],[206,416],[206,417]],[[202,416],[202,416]],[[205,416],[205,416]],[[205,416],[205,416]],[[205,418],[205,417],[205,418]],[[203,417],[203,417]],[[205,417],[205,417]],[[196,418],[196,418]],[[202,422],[199,423],[198,422],[198,425],[193,429],[193,426],[195,426],[192,425],[194,420],[193,418],[198,418],[198,421],[205,418],[203,423],[202,422]],[[203,418],[203,418]],[[204,418],[204,418]],[[198,418],[198,418]],[[203,418],[203,418]],[[204,418],[204,418]],[[204,419],[204,418]],[[203,419],[203,418]],[[204,419],[204,419]],[[206,420],[206,420]],[[199,422],[199,422]],[[199,423],[199,422]],[[204,424],[204,423]],[[201,423],[202,423]],[[203,423],[203,423]],[[202,423],[202,423]],[[201,423],[201,423]],[[199,424],[199,424]],[[201,424],[201,423]],[[202,424],[202,424]],[[201,424],[201,424]],[[202,424],[202,424]],[[201,426],[203,424],[201,425]],[[200,425],[200,424]],[[198,425],[199,425]],[[201,425],[201,425]],[[197,427],[197,427]],[[192,429],[192,429]],[[195,429],[195,429]],[[202,429],[202,429]],[[194,430],[194,430]],[[192,429],[192,429]],[[193,429],[193,429]],[[194,430],[194,430]],[[194,430],[194,430]],[[194,430],[194,430]],[[192,431],[192,430]]],"coast":"M202,430L208,421L207,418L210,415L205,416L209,413L209,410L204,406L204,404M204,418L204,415L204,418L204,418M206,417L206,416L206,417L206,417M202,416L202,416L202,416M205,416L205,416L205,416M205,416L205,416L205,416M205,418L205,417L205,418L205,418M203,417L203,417L203,417M205,417L205,417L205,417M196,418L196,418L196,418M202,422L199,423L198,422L198,425L193,429L193,426L195,426L192,425L194,420L193,418L198,418L198,421L205,418L203,423L202,422L202,422M203,418L203,418L203,418M204,418L204,418L204,418M198,418L198,418L198,418M203,418L203,418L203,418M204,418L204,418L204,418M204,419L204,418L204,419M203,419L203,418L203,419M204,419L204,419L204,419M206,420L206,420L206,420M199,422L199,422L199,422M199,423L199,422L199,423M204,424L204,423L204,424M201,423L202,423L201,423M203,423L203,423L203,423M202,423L202,423L202,423M201,423L201,423L201,423M199,424L199,424L199,424M201,424L201,423L201,424M202,424L202,424L202,424M201,424L201,424L201,424M202,424L202,424L202,424M201,426L203,424L201,425L201,426M200,425L200,424L200,425M198,425L199,425L198,425M201,425L201,425L201,425M197,427L197,427L197,427M192,429L192,429L192,429M195,429L195,429L195,429M202,429L202,429L202,429M194,430L194,430L194,430M192,429L192,429L192,429M193,429L193,429L193,429M194,430L194,430L194,430M194,430L194,430L194,430M194,430L194,430L194,430M192,431L192,430L192,431","cx":215,"cy":415,"area":492,"bbox":[192,398,227,432]},{"id":44,"name":"Oita","kanji":"\u5927\u5206\u770C","capital":"Oita","region":"Kyushu","food":"\u{1F357} \u3068\u308A\u3066\u3093","seas":["Seto Inland Sea"],"coastDirs":[],"rings":[[[235,381],[237,381],[235,381]],[[233,383],[236,383],[238,387],[237,391],[235,391],[234,393],[231,392],[232,395],[242,395],[239,400],[242,400],[241,401],[244,401],[245,402],[242,402],[241,404],[246,406],[244,406],[245,407],[243,409],[244,409],[241,410],[241,412],[240,412],[240,409],[233,411],[231,409],[228,410],[221,398],[218,398],[218,403],[215,401],[216,398],[214,397],[214,393],[216,390],[218,388],[223,388],[223,384],[230,386],[233,383]],[[243,395],[243,395]],[[238,396],[238,396]],[[242,396],[242,396]],[[240,398],[240,398]],[[244,399],[244,399]],[[244,399],[244,399]],[[241,399],[241,399]],[[244,401],[245,400]],[[242,401],[242,401]],[[242,404],[242,404]],[[242,404],[242,403]],[[246,405],[246,405]],[[243,405],[243,405]],[[246,406],[246,406]],[[245,407],[245,407]],[[245,408],[245,408]],[[242,411],[242,411]],[[242,413],[242,413]]],"coast":"M235,381L237,381L235,381L235,381M233,383L236,383L238,387L237,391L235,391L234,393L231,392L232,395L242,395L239,400L242,400L241,401L244,401L245,402L242,402L241,404L246,406L244,406L245,407L243,409L244,409L241,410L241,412M223,384L230,386L233,383L233,383M243,395L243,395L243,395M238,396L238,396L238,396M242,396L242,396L242,396M240,398L240,398L240,398M244,399L244,399L244,399M244,399L244,399L244,399M241,399L241,399L241,399M244,401L245,400L244,401M242,401L242,401L242,401M242,404L242,404L242,404M242,404L242,403L242,404M246,405L246,405L246,405M243,405L243,405L243,405M246,406L246,406L246,406M245,407L245,407L245,407M245,408L245,408L245,408M242,411L242,411L242,411M242,413L242,413L242,413","cx":230,"cy":397,"area":496,"bbox":[214,381,246,413]},{"id":45,"name":"Miyazaki","kanji":"\u5BAE\u5D0E\u770C","capital":"Miyazaki","region":"Kyushu","food":"\u{1F96D} \u307E\u3093\u3054\u30FC","seas":["Pacific Ocean"],"coastDirs":["east"],"rings":[[[232,411],[237,411],[238,409],[241,409],[240,412],[241,412],[236,417],[237,420],[235,420],[236,422],[234,425],[231,438],[231,446],[228,449],[228,455],[223,452],[224,447],[220,446],[218,442],[216,441],[216,439],[211,433],[217,431],[219,430],[221,430],[220,427],[222,425],[219,421],[219,418],[221,417],[225,409],[231,409],[232,411]],[[240,414],[240,414]],[[240,415],[240,415]],[[240,415],[240,415]],[[237,420],[237,420]],[[236,421],[236,421]],[[237,421],[237,421]],[[231,443],[231,443]],[[229,450],[229,450]],[[229,451],[229,451]],[[229,451],[229,451]],[[228,452],[228,452]]],"coast":"M241,412L236,417L237,420L235,420L236,422L234,425L231,438L231,446L228,449L228,455L223,452M240,414L240,414L240,414M240,415L240,415L240,415M240,415L240,415L240,415M237,420L237,420L237,420M236,421L236,421L236,421M237,421L237,421L237,421M231,443L231,443L231,443M229,450L229,450L229,450M229,451L229,451L229,451M229,451L229,451L229,451M228,452L228,452L228,452","cx":226,"cy":429,"area":600,"bbox":[211,409,241,455]},{"id":46,"name":"Kagoshima","kanji":"\u9E7F\u5150\u5CF6\u770C","capital":"Kagoshima","region":"Kyushu","food":"\u{1F437} \u304F\u308D\u3076\u305F","seas":["Pacific Ocean","East China Sea"],"coastDirs":[],"rings":[[[199,427],[200,425],[199,427]],[[197,428],[198,427],[197,428]],[[198,427],[198,427]],[[199,427],[199,427]],[[198,428],[198,427]],[[198,429],[198,428]],[[197,432],[195,429],[198,428],[198,430],[197,432]],[[198,428],[198,428]],[[199,428],[199,428]],[[208,429],[216,439],[216,441],[218,442],[220,446],[224,447],[223,452],[221,451],[219,454],[221,456],[221,458],[222,458],[219,459],[218,462],[210,466],[214,456],[211,452],[211,449],[208,448],[210,447],[211,449],[213,449],[214,446],[210,443],[206,451],[208,456],[210,458],[209,460],[208,461],[205,458],[199,459],[199,457],[197,456],[198,455],[196,453],[200,453],[202,448],[197,442],[199,438],[197,432],[201,432],[202,430],[205,431],[208,429]],[[197,432],[197,432]],[[197,434],[197,434]],[[197,434],[197,434]],[[190,441],[189,439],[191,439],[190,441]],[[191,439],[192,439]],[[192,439],[192,439]],[[192,439],[192,439]],[[189,441],[189,441]],[[189,442],[189,441],[189,442]],[[186,447],[184,446],[188,442],[186,447]],[[211,444],[211,444]],[[212,447],[212,447]],[[222,453],[222,453]],[[219,455],[220,455]],[[197,455],[197,455]],[[210,458],[210,458]],[[180,460],[180,460]],[[179,461],[179,461]],[[210,466],[210,466]],[[179,471],[179,471]],[[191,472],[191,471],[191,472]],[[178,471],[179,471]],[[217,478],[220,471],[221,476],[218,483],[218,485],[215,487],[215,483],[217,478]],[[204,473],[203,472],[204,472]],[[200,473],[201,473],[200,473]],[[202,472],[202,472]],[[215,475],[215,474],[215,475]],[[198,484],[197,482],[200,484],[199,484]],[[206,490],[204,490],[203,486],[206,483],[210,486],[210,488],[207,490]],[[218,484],[218,484]],[[167,534],[168,534]],[[167,535],[167,535]],[[184,547],[185,544],[186,547],[179,551],[178,552],[180,554],[178,555],[176,555],[177,557],[174,554],[175,553],[171,552],[174,552],[173,551],[179,547],[180,548],[181,546],[183,545],[183,547],[184,547]],[[192,552],[191,550],[194,548],[192,551]],[[173,551],[173,551]],[[176,558],[174,557],[173,558],[172,554],[174,554],[173,555],[176,556],[176,558]],[[172,554],[172,554]],[[171,556],[171,556]],[[172,557],[172,557]],[[171,560],[172,558],[171,560]],[[174,560],[173,558],[174,560]],[[175,560],[175,559]],[[174,560],[174,560]],[[165,568],[165,564],[167,563],[168,567],[167,570],[165,570],[165,568]],[[157,579],[160,578],[156,581],[155,580],[156,579]],[[153,591],[152,590],[153,589],[154,591]],[[186,457],[186,457]],[[178,461],[178,461]],[[178,462],[178,462]],[[186,457],[186,457]],[[178,461],[178,461]],[[178,472],[178,472]],[[178,471],[178,471]]],"coast":"M199,427L200,425L199,427L199,427M197,428L198,427L197,428L197,428M198,427L198,427L198,427M199,427L199,427L199,427M198,428L198,427L198,428M198,429L198,428L198,429M197,432L195,429L198,428L198,430L197,432L197,432M198,428L198,428L198,428M199,428L199,428L199,428M223,452L221,451L219,454L221,456L221,458L222,458L219,459L218,462L210,466L214,456L211,452L211,449L208,448L210,447L211,449L213,449L214,446L210,443L206,451L208,456L210,458L209,460L208,461L205,458L199,459L199,457L197,456L198,455L196,453L200,453L202,448L197,442L199,438L197,432L201,432L202,430M197,432L197,432L197,432M197,434L197,434L197,434M197,434L197,434L197,434M190,441L189,439L191,439L190,441L190,441M191,439L192,439L191,439M192,439L192,439L192,439M192,439L192,439L192,439M189,441L189,441L189,441M189,442L189,441L189,442L189,442M186,447L184,446L188,442L186,447L186,447M211,444L211,444L211,444M212,447L212,447L212,447M222,453L222,453L222,453M219,455L220,455L219,455M197,455L197,455L197,455M210,458L210,458L210,458M180,460L180,460L180,460M179,461L179,461L179,461M210,466L210,466L210,466M179,471L179,471L179,471M191,472L191,471L191,472L191,472M178,471L179,471L178,471M217,478L220,471L221,476L218,483L218,485L215,487L215,483L217,478L217,478M204,473L203,472L204,472L204,473M200,473L201,473L200,473L200,473M202,472L202,472L202,472M215,475L215,474L215,475L215,475M198,484L197,482L200,484L199,484L198,484M206,490L204,490L203,486L206,483L210,486L210,488L207,490L206,490M218,484L218,484L218,484M167,534L168,534L167,534M167,535L167,535L167,535M184,547L185,544L186,547L179,551L178,552L180,554L178,555L176,555L177,557L174,554L175,553L171,552L174,552L173,551L179,547L180,548L181,546L183,545L183,547L184,547L184,547M192,552L191,550L194,548L192,551L192,552M173,551L173,551L173,551M176,558L174,557L173,558L172,554L174,554L173,555L176,556L176,558L176,558M172,554L172,554L172,554M171,556L171,556L171,556M172,557L172,557L172,557M171,560L172,558L171,560L171,560M174,560L173,558L174,560L174,560M175,560L175,559L175,560M174,560L174,560L174,560M165,568L165,564L167,563L168,567L167,570L165,570L165,568L165,568M157,579L160,578L156,581L155,580L156,579L157,579M153,591L152,590L153,589L154,591L153,591M186,457L186,457L186,457M178,461L178,461L178,461M178,462L178,462L178,462M186,457L186,457L186,457M178,461L178,461L178,461M178,472L178,472L178,472M178,471L178,471L178,471","cx":210,"cy":448,"area":505,"bbox":[152,425,224,591]},{"id":47,"name":"Okinawa","kanji":"\u6C96\u7E04\u770C","capital":"Naha","region":"Kyushu","food":"\u{1F35C} \u304A\u304D\u306A\u308F\u305D\u3070","seas":["Pacific Ocean","East China Sea"],"coastDirs":["all around"],"rings":[[[148,564],[148,564]],[[140,592],[142,588],[140,591]],[[140,592],[140,591]],[[141,592],[141,592]],[[140,594],[140,593],[140,594]],[[140,595],[140,595]],[[146,600],[149,595],[150,598],[149,602],[146,603],[145,605],[143,605],[140,609],[137,609],[140,613],[138,612],[136,616],[137,617],[133,620],[132,616],[136,613],[134,609],[137,609],[141,605],[139,604],[139,600],[142,601],[142,603],[146,600]],[[150,599],[150,599]],[[137,601],[135,600],[137,600]],[[142,601],[142,601]],[[143,602],[142,602],[143,602]],[[144,602],[144,602]],[[138,603],[138,603]],[[137,603],[137,602]],[[143,603],[143,603]],[[122,605],[122,605]],[[142,611],[142,611]],[[109,612],[111,610],[111,614],[109,612]],[[119,611],[119,611]],[[140,612],[141,611],[140,612]],[[120,612],[120,612]],[[113,612],[113,612]],[[138,612],[138,612]],[[112,612],[112,612]],[[112,612],[112,612]],[[113,612],[113,612]],[[112,612],[112,612]],[[141,613],[141,613]],[[140,613],[140,613]],[[142,613],[142,613]],[[130,614],[130,614]],[[131,615],[131,614]],[[131,615],[131,614]],[[140,615],[140,615]],[[127,615],[127,615]],[[124,616],[124,615],[124,616]],[[128,615],[128,615]],[[126,616],[126,616]],[[128,616],[128,615]],[[125,618],[125,616],[125,618]],[[127,616],[128,616]],[[122,616],[123,616]],[[124,616],[124,616]],[[124,616],[124,616]],[[123,617],[123,617]],[[126,617],[126,617]],[[124,617],[124,617]],[[122,618],[122,617]],[[124,618],[124,617]],[[139,618],[139,617]],[[125,618],[125,618]],[[123,618],[123,618]],[[124,618],[124,618]],[[125,618],[125,618]],[[136,619],[136,619]],[[227,625],[226,624],[227,625]],[[31,625],[31,625]],[[225,629],[225,627],[225,628]],[[26,631],[26,631]],[[28,631],[28,631]],[[28,631],[28,631]],[[71,656],[71,656]],[[73,657],[73,657]],[[73,663],[71,662],[73,659],[71,657],[77,663],[73,663]],[[70,660],[69,658],[70,660]],[[70,660],[69,659],[69,660]],[[57,662],[57,662]],[[71,663],[72,663]],[[57,665],[57,664],[57,665]],[[44,675],[41,671],[45,671],[48,666],[46,674],[44,675]],[[35,671],[35,670]],[[14,672],[12,671],[14,671]],[[223,671],[224,671]],[[43,671],[43,671]],[[36,677],[31,676],[32,674],[33,675],[33,672],[38,674],[36,677]],[[32,674],[32,674]],[[39,674],[39,674]],[[33,674],[33,674]],[[39,675],[38,674],[39,675]],[[38,675],[38,675]],[[41,676],[42,675]],[[43,675],[43,675]],[[40,678],[39,677],[40,678]],[[38,678],[38,678]],[[37,679],[38,679]],[[28,679],[28,679]],[[34,684],[33,683],[34,684]],[[28,629],[28,629]],[[28,630],[28,630]],[[28,630],[28,630]],[[28,630],[28,630]],[[27,631],[27,631]],[[112,604],[112,604]],[[27,631],[27,631]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]],[[54,625],[54,625]]],"coast":"M148,564L148,564L148,564M140,592L142,588L140,591L140,592M140,592L140,591L140,592M141,592L141,592L141,592M140,594L140,593L140,594L140,594M140,595L140,595L140,595M146,600L149,595L150,598L149,602L146,603L145,605L143,605L140,609L137,609L140,613L138,612L136,616L137,617L133,620L132,616L136,613L134,609L137,609L141,605L139,604L139,600L142,601L142,603L146,600L146,600M150,599L150,599L150,599M137,601L135,600L137,600L137,601M142,601L142,601L142,601M143,602L142,602L143,602L143,602M144,602L144,602L144,602M138,603L138,603L138,603M137,603L137,602L137,603M143,603L143,603L143,603M122,605L122,605L122,605M142,611L142,611L142,611M109,612L111,610L111,614L109,612L109,612M119,611L119,611L119,611M140,612L141,611L140,612L140,612M120,612L120,612L120,612M113,612L113,612L113,612M138,612L138,612L138,612M112,612L112,612L112,612M112,612L112,612L112,612M113,612L113,612L113,612M112,612L112,612L112,612M141,613L141,613L141,613M140,613L140,613L140,613M142,613L142,613L142,613M130,614L130,614L130,614M131,615L131,614L131,615M131,615L131,614L131,615M140,615L140,615L140,615M127,615L127,615L127,615M124,616L124,615L124,616L124,616M128,615L128,615L128,615M126,616L126,616L126,616M128,616L128,615L128,616M125,618L125,616L125,618L125,618M127,616L128,616L127,616M122,616L123,616L122,616M124,616L124,616L124,616M124,616L124,616L124,616M123,617L123,617L123,617M126,617L126,617L126,617M124,617L124,617L124,617M122,618L122,617L122,618M124,618L124,617L124,618M139,618L139,617L139,618M125,618L125,618L125,618M123,618L123,618L123,618M124,618L124,618L124,618M125,618L125,618L125,618M136,619L136,619L136,619M227,625L226,624L227,625L227,625M31,625L31,625L31,625M225,629L225,627L225,628L225,629M26,631L26,631L26,631M28,631L28,631L28,631M28,631L28,631L28,631M71,656L71,656L71,656M73,657L73,657L73,657M73,663L71,662L73,659L71,657L77,663L73,663L73,663M70,660L69,658L70,660L70,660M70,660L69,659L69,660L70,660M57,662L57,662L57,662M71,663L72,663L71,663M57,665L57,664L57,665L57,665M44,675L41,671L45,671L48,666L46,674L44,675L44,675M35,671L35,670L35,671M14,672L12,671L14,671L14,672M223,671L224,671L223,671M43,671L43,671L43,671M36,677L31,676L32,674L33,675L33,672L38,674L36,677L36,677M32,674L32,674L32,674M39,674L39,674L39,674M33,674L33,674L33,674M39,675L38,674L39,675L39,675M38,675L38,675L38,675M41,676L42,675L41,676M43,675L43,675L43,675M40,678L39,677L40,678L40,678M38,678L38,678L38,678M37,679L38,679L37,679M28,679L28,679L28,679M34,684L33,683L34,684L34,684M28,629L28,629L28,629M28,630L28,630L28,630M28,630L28,630L28,630M28,630L28,630L28,630M27,631L27,631L27,631M112,604L112,604L112,604M27,631L27,631L27,631M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625M54,625L54,625L54,625","cx":141,"cy":607,"area":87,"bbox":[12,564,227,684]}]};
+// Easy and Hard are the same file: the portal opens it with ?version=easy or ?version=hard
+// (the Easy / Hard switch is in the portal's GameFrame toolbar).
+const VERSION = new URLSearchParams(location.search).get('version') === 'easy' ? 'easy' : 'hard';
+
+const IS_EASY = VERSION === 'easy';
+const VIEW_W = PREF_DATA.viewW, VIEW_H = PREF_DATA.viewH;
+const PREFS = PREF_DATA.prefs;
+const BY_ID = {};
+PREFS.forEach(p => { BY_ID[p.id] = p; });
+const REGION_COLORS = {
+  Hokkaido: '#4a6fa5', Tohoku: '#5b8c5a', Kanto: '#d97b29', Chubu: '#2a9d8f',
+  Kansai: '#7b5ea7', Chugoku: '#c25e7a', Shikoku: '#b98a1d', Kyushu: '#c0392b',
+};
+const PIECE_FILL = '#c0392b';
+// Easy version: the piece takes its region's colour, matching the
+// region-coloured map. Hard version: every piece is the same vermilion.
+function pieceFill(p) { return IS_EASY ? REGION_COLORS[p.region] : PIECE_FILL; }
+function pieceStroke(p) { return IS_EASY ? 'rgba(0,0,0,.4)' : '#7e2418'; }
+const $ = id => document.getElementById(id);
+
+// ---------- geometry helpers ----------
+function pathFromRings(rings) {
+  return rings.map(r => 'M' + r.map(p => p[0] + ',' + p[1]).join('L') + 'Z').join('');
+}
+function pointInRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function distToRing(x, y, ring) {
+  let best = Infinity;
+  for (let i = 0; i < ring.length; i++) {
+    const ax = ring[i][0], ay = ring[i][1];
+    const bx = ring[(i + 1) % ring.length][0], by = ring[(i + 1) % ring.length][1];
+    const dx = bx - ax, dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    let t = len2 ? ((x - ax) * dx + (y - ay) * dy) / len2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    const d = Math.hypot(x - (ax + t * dx), y - (ay + t * dy));
+    if (d < best) best = d;
+  }
+  return best;
+}
+function hitTest(pref, x, y) {
+  for (const ring of pref.rings) {
+    if (pointInRing(x, y, ring)) return true;
+  }
+  for (const ring of pref.rings) {
+    if (distToRing(x, y, ring) <= 6) return true;
+  }
+  return false;
+}
+function prefAtPoint(x, y) {
+  for (const p of PREFS) {
+    for (const ring of p.rings) {
+      if (pointInRing(x, y, ring)) return p;
+    }
+  }
+  return null;
+}
+function joinSeas(seas) {
+  const s = seas.map(x => 'the ' + x);
+  if (s.length === 1) return s[0];
+  if (s.length === 2) return s[0] + ' and ' + s[1];
+  return s.slice(0, -1).join(', ') + ' and ' + s[s.length - 1];
+}
+
+// ---------- sound ----------
+let soundOn = true;
+let audioCtx = null;
+function tone(freq, dur, type, when, vol) {
+  if (!soundOn) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = audioCtx.currentTime + (when || 0);
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol || 0.12, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  } catch (e) {}
+}
+const sfxCorrect = () => { tone(659, 0.18, 'sine', 0); tone(880, 0.28, 'sine', 0.12); };
+const sfxWrong = () => { tone(150, 0.22, 'triangle', 0, 0.14); };
+const sfxClick = () => { tone(520, 0.07, 'sine', 0, 0.06); };
+const sfxWin = () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.3, 'sine', i * 0.14)); };
+
+// ---------- game state ----------
+let queue = [];        // ids left to place, in order
+let placed = new Set();
+let currentId = null;
+let mistakes = 0, skips = 0;
+let startTime = null, elapsed = 0, timerInt = null, won = false;
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function fmtTime(s) {
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+function setStatus(msg, kind) {
+  const el = $('statusMsg');
+  el.textContent = msg;
+  el.className = kind || '';
+}
+
+// ---------- rendering ----------
+function renderSlots() {
+  const g = $('slots');
+  g.innerHTML = PREFS.map(p => {
+    if (IS_EASY) {
+      // Easy version: the slot stays whitish like the hard version, and
+      // only its outline takes the region's colour, so the player can
+      // match the piece's colour to the outline on the map.
+      const col = REGION_COLORS[p.region];
+      return \`<path class="slot" data-id="\${p.id}" d="\${pathFromRings(p.rings)}" style="--rc:\${col}" stroke-width="1.5"/>\`;
+    }
+    return \`<path class="slot" data-id="\${p.id}" d="\${pathFromRings(p.rings)}"/>\`;
+  }).join('');
+}
+function renderPlacedList() {
+  const ul = $('placedList');
+  ul.innerHTML = PREFS.map(p => {
+    const done = placed.has(p.id);
+    const col = REGION_COLORS[p.region];
+    return \`<li class="\${done ? 'done' : ''}" style="--rc:\${col}">
+      <span class="dot"></span><span>\${p.name}</span>
+      <span class="kanji">\${p.kanji}</span>
+      <span class="tick">\${done ? '\u2713' : ''}</span></li>\`;
+  }).join('');
+}
+function updateProgress() {
+  $('placedCount').textContent = placed.size;
+  $('progressFill').style.width = (placed.size / 47 * 100) + '%';
+  $('mistakeEl').textContent = mistakes;
+  $('skipEl').textContent = skips;
+  $('timeEl').textContent = fmtTime(elapsed);
+  renderPlacedList();
+}
+function pieceViewBox(p) {
+  const [x1, y1, x2, y2] = p.bbox;
+  const pad = 10;
+  return \`\${x1 - pad} \${y1 - pad} \${x2 - x1 + pad * 2} \${y2 - y1 + pad * 2}\`;
+}
+function renderCurrentPiece() {
+  const holder = $('pieceHolder');
+  const p = BY_ID[currentId];
+  if (!p) { holder.innerHTML = ''; return; }
+  holder.innerHTML =
+    \`<svg viewBox="\${pieceViewBox(p)}" aria-label="Prefecture piece">
+       <path d="\${pathFromRings(p.rings)}" fill="\${pieceFill(p)}" stroke="\${pieceStroke(p)}" stroke-width="1.5" stroke-linejoin="round"/>
+     </svg>\`;
+}
+function placeOnMap(p) {
+  const g = $('placedLayer');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', pathFromRings(p.rings));
+  // Fill via inline style, not a presentation attribute: the .slot CSS
+  // rule would otherwise override the attribute and leave the placed
+  // piece parchment-coloured.
+  path.style.fill = REGION_COLORS[p.region];
+  path.style.stroke = 'rgba(0,0,0,.35)';
+  path.setAttribute('stroke-width', '1');
+  path.setAttribute('stroke-linejoin', 'round');
+  path.setAttribute('class', 'slot placed');
+  path.setAttribute('data-id', p.id);
+  path.style.cursor = 'pointer';
+  path.addEventListener('click', () => showDetails(p));
+  g.appendChild(path);
+  const slot = document.querySelector(\`#slots .slot[data-id="\${p.id}"]\`);
+  if (slot) slot.style.display = 'none';
+  // name label when the shape is big enough to hold it
+  const [x1, y1, x2, y2] = p.bbox;
+  if (p.area > 1500 && (x2 - x1) > 55) {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', p.cx); t.setAttribute('y', p.cy + 4);
+    t.setAttribute('class', 'slot-label');
+    t.textContent = p.name;
+    $('labelsLayer').appendChild(t);
+  }
+}
+
+// ---------- flow ----------
+function nextPiece() {
+  if (queue.length === 0) { currentId = null; renderCurrentPiece(); return; }
+  currentId = queue[0];
+  renderCurrentPiece();
+}
+function startGame() {
+  queue = shuffle(PREFS.map(p => p.id));
+  placed = new Set();
+  mistakes = 0; skips = 0; elapsed = 0; won = false;
+  startTime = null;
+  if (timerInt) clearInterval(timerInt);
+  timerInt = null;
+  $('placedLayer').innerHTML = '';
+  $('labelsLayer').innerHTML = '';
+  document.querySelectorAll('#slots .slot').forEach(s => { s.style.display = ''; });
+  updateProgress();
+  nextPiece();
+  setStatus('Drag the piece in the box onto the map. Tap the piece to see which prefecture it is.');
+}
+function startTimer() {
+  if (timerInt || startTime !== null) return;
+  startTime = Date.now();
+  timerInt = setInterval(() => {
+    if (document.hidden) return;
+    elapsed = Math.floor((Date.now() - startTime) / 1000);
+    $('timeEl').textContent = fmtTime(elapsed);
+  }, 1000);
+}
+// The clock stops while the tab is hidden: the time spent away is added to startTime when you come back.
+let hiddenAt = null;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    hiddenAt = Date.now();
+  } else if (hiddenAt !== null) {
+    if (startTime !== null && !won) startTime += Date.now() - hiddenAt;
+    hiddenAt = null;
+  }
+});
+function onCorrectDrop(p) {
+  placed.add(p.id);
+  queue = queue.filter(id => id !== p.id);
+  placeOnMap(p);
+  sfxCorrect();
+  startTimer();
+  updateProgress();
+  if (placed.size === 47) {
+    won = true;
+    if (timerInt) clearInterval(timerInt);
+    sfxWin();
+    $('winStats').innerHTML =
+      \`Time: <b>\${fmtTime(elapsed)}</b> &nbsp;\xB7&nbsp; Mistakes: <b>\${mistakes}</b> &nbsp;\xB7&nbsp; Skipped: <b>\${skips}</b>\`;
+    openOverlay('winOverlay');
+    setStatus('\u{1F389} All 47 prefectures placed \u2014 the archipelago is complete!', 'good');
+    currentId = null;
+    renderCurrentPiece();
+    return;
+  }
+  setStatus(\`Nice! \${p.name} (\${p.kanji}) placed. \${47 - placed.size} to go.\`, 'good');
+  nextPiece();
+}
+function onWrongDrop(p) {
+  mistakes++;
+  sfxWrong();
+  updateProgress();
+  setStatus(\`Not quite \u2014 \${p.name} doesn't go there. Look at the shape and the coastline, then try again.\`, 'bad');
+  const box = $('pieceBox');
+  box.classList.remove('shake');
+  void box.offsetWidth;
+  box.classList.add('shake');
+}
+
+// ---------- drag & drop ----------
+const holder = $('pieceHolder');
+const ghost = $('dragGhost');
+let drag = null; // {id, moved, startX, startY, startT}
+
+function mapPointFromClient(cx, cy) {
+  const r = $('mapSvg').getBoundingClientRect();
+  return { x: (cx - r.left) / r.width * VIEW_W, y: (cy - r.top) / r.height * VIEW_H, rect: r };
+}
+function showGhost(p, cx, cy) {
+  const r = $('mapSvg').getBoundingClientRect();
+  const scale = r.width / VIEW_W;
+  const [x1, y1, x2, y2] = p.bbox;
+  const pad = 10;
+  const vbW = x2 - x1 + pad * 2, vbH = y2 - y1 + pad * 2;
+  const w = Math.max(48, vbW * scale * 1.15);
+  const h = Math.max(36, vbH * scale * 1.15);
+  // Anchor the drag on the centre of the prefecture's main landmass
+  // (its largest ring), not the centre of the whole bounding box: for an
+  // island chain such as Tokyo, the box centre is empty sea, so a drop
+  // aimed at the mainland was judged as sea and the piece never went in.
+  const fx = (p.cx - (x1 - pad)) / vbW;
+  const fy = (p.cy - (y1 - pad)) / vbH;
+  ghost.style.display = 'block';
+  ghost.style.width = w + 'px';
+  ghost.style.height = h + 'px';
+  ghost.style.left = (cx - fx * w) + 'px';
+  ghost.style.top = (cy - fy * h) + 'px';
+  ghost.innerHTML =
+    \`<svg viewBox="\${pieceViewBox(p)}">
+       <path d="\${pathFromRings(p.rings)}" fill="\${pieceFill(p)}" stroke="\${pieceStroke(p)}" stroke-width="2" stroke-linejoin="round"/>
+     </svg>\`;
+}
+function clearHover() {
+  document.querySelectorAll('#slots .slot.hover').forEach(s => s.classList.remove('hover'));
+}
+holder.addEventListener('pointerdown', e => {
+  if (!currentId || won) return;
+  e.preventDefault();
+  holder.setPointerCapture(e.pointerId);
+  drag = { id: currentId, moved: false, startX: e.clientX, startY: e.clientY, startT: Date.now() };
+});
+holder.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+  if (!drag.moved && Math.hypot(dx, dy) > 8) drag.moved = true;
+  if (!drag.moved) return;
+  const p = BY_ID[drag.id];
+  showGhost(p, e.clientX, e.clientY);
+  const mp = mapPointFromClient(e.clientX, e.clientY);
+  clearHover();
+  const under = prefAtPoint(mp.x, mp.y);
+  if (under) {
+    const el = document.querySelector(\`#slots .slot[data-id="\${under.id}"]\`);
+    if (el) el.classList.add('hover');
+  }
+});
+holder.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag;
+  drag = null;
+  ghost.style.display = 'none';
+  clearHover();
+  const p = BY_ID[d.id];
+  if (!d.moved) {
+    // a tap: show details
+    if (Date.now() - d.startT < 600) showDetails(p);
+    return;
+  }
+  const mp = mapPointFromClient(e.clientX, e.clientY);
+  if (mp.x < 0 || mp.x > VIEW_W || mp.y < 0 || mp.y > VIEW_H) {
+    setStatus('That was outside the map \u2014 the piece is back in its box. Try again.');
+    return;
+  }
+  if (hitTest(p, mp.x, mp.y)) onCorrectDrop(p);
+  else onWrongDrop(p);
+});
+holder.addEventListener('pointercancel', () => {
+  drag = null;
+  ghost.style.display = 'none';
+  clearHover();
+});
+
+// ---------- modals ----------
+function openOverlay(id) { $(id).classList.add('open'); }
+function closeOverlay(id) { $(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(el => {
+  el.addEventListener('click', () => closeOverlay(el.getAttribute('data-close')));
+});
+document.querySelectorAll('.overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+});
+$('howBtn').addEventListener('click', () => openOverlay('howOverlay'));
+$('detailBtn').addEventListener('click', () => { if (currentId) showDetails(BY_ID[currentId]); });
+$('againBtn').addEventListener('click', () => { closeOverlay('winOverlay'); startGame(); });
+$('newBtn').addEventListener('click', () => { sfxClick(); startGame(); });
+$('skipBtn').addEventListener('click', () => {
+  if (!currentId || won) return;
+  if (queue.length <= 1) {
+    setStatus('This is the last piece \u2014 give it a try! Tap it to see its details.');
+    return;
+  }
+  const id = queue.shift();
+  queue.push(id);
+  skips++;
+  sfxClick();
+  updateProgress();
+  nextPiece();
+  setStatus('Skipped \u2014 that piece will come back later. Here is the next one.');
+});
+$('soundBtn').addEventListener('click', () => {
+  soundOn = !soundOn;
+  $('soundBtn').textContent = soundOn ? '\u{1F50A}' : '\u{1F507}';
+  if (soundOn) sfxClick();
+});
+
+function showDetails(p) {
+  $('detailTitle').textContent = p.name;
+  $('detailKanji').textContent = p.kanji + ' \xB7 ' + p.name;
+  $('detailRegion').textContent = p.region;
+  $('detailCapital').textContent = p.capital;
+  $('detailFood').textContent = p.food;
+  $('detailCoast').textContent = p.seas.length ? p.seas.join(', ') : 'Landlocked \u2014 no coast';
+  const note = $('coastNote');
+  if (p.seas.length) {
+    // The direction is only stated when it is clear (see the build script):
+    // a single dominant side, or "all around" for an island prefecture.
+    const dir = (p.coastDirs && p.coastDirs.length)
+      ? (p.coastDirs[0] === 'all around'
+        ? 'It runs all around the prefecture.'
+        : \`It runs along the \${p.coastDirs[0]} side.\`)
+      : '';
+    note.innerHTML = \`The <span class="blue-line"></span> blue line is the coastline. \${dir} This prefecture faces \${joinSeas(p.seas)}. \` +
+      \`The grey line is a land border with a neighbouring prefecture.\`;
+  } else {
+    note.innerHTML = \`This prefecture is landlocked, so it has no coastline and no blue line. \` +
+      \`The grey line is a land border with a neighbouring prefecture.\`;
+  }
+  const svg = $('detailSvg');
+  svg.setAttribute('viewBox', pieceViewBox(p));
+  const hasCoast = p.coast && p.coast.length > 0;
+  // The lines are drawn with vector-effect="non-scaling-stroke", so they
+  // stay the same thin width on screen for every prefecture. Without it,
+  // the stroke width is measured in map units, and on a small prefecture
+  // (whose shape is magnified many times) the blue line looked very thick.
+  svg.innerHTML =
+    \`<path d="\${pathFromRings(p.rings)}" fill="#f3ecdc" stroke="#8a7f66" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>\` +
+    (hasCoast ? \`<path d="\${p.coast}" fill="none" stroke="#2563eb" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>\` : '');
+  openOverlay('detailOverlay');
+}
+
+// ---------- layout (side / stacked, like the Go game) ----------
+const layoutEl = $('layout');
+let layoutMode = 'auto';
+function applyLayout(mode) {
+  layoutMode = mode;
+  const side = mode === 'side' || (mode === 'auto' && window.innerWidth >= 860);
+  layoutEl.classList.toggle('side', side);
+  layoutEl.classList.toggle('stacked', !side);
+  try {
+    window.parent.postMessage({ type: 'prefecture-layout-changed', layout: side ? 'side' : 'stacked' }, '*');
+  } catch (e) {}
+}
+window.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d && d.type === 'prefecture-layout' && (d.layout === 'side' || d.layout === 'stacked' || d.layout === 'auto')) {
+    applyLayout(d.layout);
+  }
+});
+window.addEventListener('resize', () => { if (layoutMode === 'auto') applyLayout('auto'); });
+(function initLayout() {
+  const m = new URLSearchParams(location.search).get('layout');
+  applyLayout(m === 'side' || m === 'stacked' ? m : 'auto');
+})();
+
+// ---------- init ----------
+$('mapSvg').setAttribute('viewBox', \`0 0 \${VIEW_W} \${VIEW_H}\`);
+(function initVersion() {
+  const badge = $('levelBadge');
+  badge.textContent = IS_EASY ? 'Easy \xB7 \u304B\u3093\u305F\u3093' : 'Hard \xB7 \u3080\u305A\u304B\u3057\u3044';
+  badge.classList.add(IS_EASY ? 'easy' : 'hard');
+  document.title = 'Japan Prefecture Puzzle \u2014 ' + (IS_EASY ? 'Easy' : 'Hard') + ' \u2014 \u65E5\u672C\u306E\u90FD\u9053\u5E9C\u770C\u30D1\u30BA\u30EB';
+  if (IS_EASY) {
+    $('subtitleEl').textContent = 'Drag each prefecture onto the map and complete the Japanese archipelago \u2014 all 47 prefectures. Each prefecture\\u2019s outline is coloured by its region, and each piece has its region\\u2019s colour \u2014 match the colours!';
+    $('howColour').style.display = '';
+  }
+})();
+renderSlots();
+startGame();
+<\/script>
+</body>
+</html>
+`;
+var FRAMES = {
+  shogi,
+  go,
+  hanafuda,
+  "kanji-sudoku": kanjiSudoku,
+  "hiragana-memory-match": hiraganaMemoryMatch,
+  "prefecture-puzzle": prefecturePuzzle
+};
+var FRAME_BRIDGE = `
+<style>
+  html.yg-embedded, html.yg-embedded body { min-height: 0 !important; }
+  html.yg-embedded .overlay, html.yg-embedded .modal-backdrop {
+    top: var(--yg-view-top, 0px) !important;
+    bottom: auto !important;
+    height: var(--yg-view-h, 100vh) !important;
+  }
+  html.yg-embedded .overlay > *, html.yg-embedded .modal-backdrop > * {
+    max-height: calc(var(--yg-view-h, 100vh) - 32px) !important;
+    overflow: auto;
+  }
+</style>
+<script>
+(function () {
+  if (window.top === window) { location.replace('/games'); return; }
+  var root = document.documentElement;
+  root.classList.add('yg-embedded');
+  var origin = location.origin;
+  var lastHeight = 0;
+  function report() {
+    var h = Math.ceil(root.getBoundingClientRect().height);
+    if (h > 0 && Math.abs(h - lastHeight) > 1) {
+      lastHeight = h;
+      try { window.parent.postMessage({ type: 'yamato-game:height', height: h }, origin); } catch (e) {}
+    }
+  }
+  window.addEventListener('message', function (e) {
+    if (e.source !== window.parent || e.origin !== origin) return;
+    var d = e.data || {};
+    if (d.type === 'yamato-game:viewport' && typeof d.top === 'number' && typeof d.height === 'number') {
+      root.style.setProperty('--yg-view-top', Math.max(0, d.top) + 'px');
+      root.style.setProperty('--yg-view-h', Math.max(0, d.height) + 'px');
+    }
+  });
+  function start() {
+    report();
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(report);
+      ro.observe(root);
+      if (document.body) ro.observe(document.body);
+    }
+    window.addEventListener('load', report);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(report);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+<\/script>`;
+var BASE_HEADERS = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "private, no-store",
+  "X-Frame-Options": "SAMEORIGIN",
+  "Content-Security-Policy": "frame-ancestors 'self'",
+  "Referrer-Policy": "same-origin",
+  "X-Robots-Tag": "noindex, nofollow"
+};
+function messagePage(message, status) {
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game unavailable</title><style>body{margin:0;font-family:system-ui,sans-serif;background:#f8fafc;color:#334155;display:flex;align-items:center;justify-content:center;min-height:240px;padding:24px;text-align:center}</style>
+</head><body><p>${message}</p></body></html>`;
+  return new Response(html, { status, headers: BASE_HEADERS });
+}
+async function loader$o({ request, context, params }) {
+  const html = FRAMES[params.name ?? ""];
+  if (!html)
+    return messagePage("This game could not be found.", 404);
+  const dest = request.headers.get("Sec-Fetch-Dest");
+  if (dest && dest !== "iframe")
+    throw dist$1.redirect("/games");
+  const userId = await verifyGameTicket(context, new URL(request.url).searchParams.get("t"));
+  if (!userId)
+    return messagePage("This game link has expired. Please open the game again from the Games page.", 403);
+  const access = await getGameAccessForUser(createAdminSupabaseClient(context), userId);
+  if (access.status !== "allowed")
+    return messagePage("Games are locked by your teacher right now.", 403);
+  return new Response(html.replace(/<head>/i, `<head>${FRAME_BRIDGE}`), { headers: BASE_HEADERS });
+}
+var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  loader: loader$o
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$6 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
@@ -59243,7 +65418,7 @@ async function fetchLegalContentData(supabaseClient) {
     return null;
   }
 }
-async function loader$l({ request }) {
+async function loader$n({ request }) {
   const url = new URL(request.url);
   const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
   return dist$1.json({
@@ -59251,7 +65426,7 @@ async function loader$l({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$m = ({ data: data2 }) => {
+var meta$n = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Disclaimer() {
@@ -59349,11 +65524,11 @@ function Disclaimer() {
     }
   );
 }
-var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Disclaimer,
-  loader: loader$l,
-  meta: meta$m
+  loader: loader$n,
+  meta: meta$n
 }, Symbol.toStringTag, { value: "Module" }));
 function useYamatoChat2Logic({
   initialGreeting,
@@ -60013,7 +66188,7 @@ async function fetchTextbookRefs(lessonIds) {
   if (lessonIds.length === 0)
     return result;
   try {
-    const { data: data2, error } = await supabase.from("edu_lesson_textbook_units").select("lesson_id, coverage, page_ref, note, edu_textbook_units ( unit_number, edu_textbooks ( title, edition, sort_order ) )").in("lesson_id", lessonIds);
+    const { data: data2, error } = await supabase.from("edu_lesson_textbook_units").select("lesson_id, coverage, page_ref, note, edu_textbook_units ( unit_number, title, edu_textbooks ( title, edition, sort_order ) )").in("lesson_id", lessonIds);
     if (error)
       throw error;
     for (const row of data2 ?? []) {
@@ -60026,6 +66201,7 @@ async function fetchTextbookRefs(lessonIds) {
         textbook: book.title,
         edition: book.edition ?? null,
         unit: unit.unit_number,
+        unitTitle: unit.title ?? null,
         coverage: row.coverage === "partial" ? "partial" : "full",
         pageRef: row.page_ref ?? null,
         note: row.note ?? null,
@@ -60042,7 +66218,8 @@ function formatTextbookRef(ref) {
   const book = ref.edition ? `${ref.textbook} (${ref.edition})` : ref.textbook;
   const page = ref.pageRef ? ` \xB7 ${ref.pageRef.replace(/^Unit \d+,\s*/, "")}` : "";
   const partial = ref.coverage === "partial" ? " \xB7 partly" : "";
-  return `${book} \xB7 Unit ${ref.unit}${page}${partial}`;
+  const unit = ref.unitTitle ? `Unit ${ref.unit}: ${ref.unitTitle}` : `Unit ${ref.unit}`;
+  return `${book} \xB7 ${unit}${page}${partial}`;
 }
 var TEXTBOOK_DISCLAIMER = "Textbook references are for convenience only. This site is not affiliated with the publishers of these textbooks.";
 var EduLessonHeader = ({ lesson, topic, textbookRefs = [] }) => {
@@ -65347,81 +71524,11 @@ var CULTURE_TASKS = {
     ]
   }
 };
-var LEGACY_LESSON_SLUGS = {
-  "obento-unit-1-lesson-1": "greetings-1",
-  "obento-unit-1-lesson-2": "greetings-2",
-  "obento-unit-1-lesson-3": "greetings-3",
-  "obento-unit-2-lesson-1": "numbers-1",
-  "obento-unit-2-lesson-2": "numbers-2",
-  "obento-unit-2-lesson-3": "numbers-3",
-  "obento-unit-3-lesson-1": "countries-1",
-  "obento-unit-3-lesson-2": "countries-2",
-  "obento-unit-3-lesson-3": "countries-3",
-  "obento-unit-4-lesson-1": "family-1",
-  "obento-unit-4-lesson-2": "family-2",
-  "obento-unit-4-lesson-3": "family-3",
-  "obento-unit-5-lesson-1": "pets-1",
-  "obento-unit-5-lesson-2": "pets-2",
-  "obento-unit-6-lesson-1": "food-1",
-  "obento-unit-6-lesson-2": "food-2"
-};
-var LEGACY_TOPIC_SLUGS = {
-  "obento-unit-1": "greetings",
-  "obento-unit-2": "numbers",
-  "obento-unit-3": "countries",
-  "obento-unit-4": "family",
-  "obento-unit-5": "pets",
-  "obento-unit-6": "food"
-};
-function newSlugFor(slug) {
-  return LEGACY_LESSON_SLUGS[slug] ?? LEGACY_TOPIC_SLUGS[slug] ?? null;
-}
-function slugCandidates(slug) {
-  const legacy = [...Object.entries(LEGACY_LESSON_SLUGS), ...Object.entries(LEGACY_TOPIC_SLUGS)].filter(([, next]) => next === slug).map(([old]) => old);
-  return [slug, ...legacy];
-}
-var LESSON_SLUG = "family-1";
-async function loader$k({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
+var LESSON_PAGE_EXTRAS = {
+  "family-1": {
+    listening: "family-count",
+    speakingTitle: "Speaking Task: Practice Talking About Your Family Members"
   }
-  let lessonData = null;
-  let vocabData = [];
-  let topicData = null;
-  let textbookRefs = [];
-  let loadError = null;
-  try {
-    const { data: lessons } = await supabase.from("edu_lessons").select("*").in("slug", slugCandidates(LESSON_SLUG)).limit(1);
-    lessonData = (lessons == null ? void 0 : lessons[0]) || null;
-    if (lessonData) {
-      if (lessonData.topic_id) {
-        const { data: topic } = await supabase.from("edu_topics").select("*").eq("id", lessonData.topic_id).single();
-        topicData = topic || null;
-      }
-      const { data: vocabs } = await supabase.from("kl_vocabulary").select("*").eq("lesson_id", lessonData.id).order("order_index", { ascending: true });
-      vocabData = vocabs || [];
-      textbookRefs = (await fetchTextbookRefs([String(lessonData.id)]))[String(lessonData.id)] ?? [];
-    }
-  } catch (err) {
-    console.warn(`\u26A0\uFE0F [Loader] Failed to fetch lesson ${LESSON_SLUG} from Supabase:`, err);
-    loadError = `Supabase error: ${(err == null ? void 0 : err.message) || String(err)}`;
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname,
-    lesson: lessonData,
-    topic: topicData,
-    vocabulary: vocabData,
-    textbookRefs,
-    loadError: loadError || (!lessonData ? `Lesson ${LESSON_SLUG} not found in edu_lessons.` : null)
-  });
-}
-var meta$l = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var COMPLETED_TASK_NAMES = {
   vocabulary: "vocabulary drills",
@@ -65431,7 +71538,7 @@ var COMPLETED_TASK_NAMES = {
   writing: "writing tasks",
   culture: "culture tasks"
 };
-function LessonsFamily1Page() {
+function EduLessonPage({ lessonSlug: LESSON_SLUG2, data: data2 }) {
   var _a;
   const layoutRef = reactExports.useRef(null);
   const themeColor = "#f97316";
@@ -65451,7 +71558,8 @@ function LessonsFamily1Page() {
   const [writingTaskCompleted, setWritingTaskCompleted] = reactExports.useState(false);
   const [isCultureTaskOpen, setIsCultureTaskOpen] = reactExports.useState(false);
   const [cultureTaskCompleted, setCultureTaskCompleted] = reactExports.useState(false);
-  const cultureTask = (_a = findCultureTaskForLesson(LESSON_SLUG)) == null ? void 0 : _a.task;
+  const cultureTask = (_a = findCultureTaskForLesson(LESSON_SLUG2)) == null ? void 0 : _a.task;
+  const extras = LESSON_PAGE_EXTRAS[LESSON_SLUG2] ?? {};
   const [savedProgress, setSavedProgress] = reactExports.useState(null);
   const [completedNotice, setCompletedNotice] = reactExports.useState(null);
   const startTask = (key, open) => {
@@ -65462,8 +71570,9 @@ function LessonsFamily1Page() {
     open();
   };
   const startVocabularyDrill = () => startTask("vocabulary", () => setIsDrillOpen(true));
-  const loaderData = useLoaderData() || {};
-  const { lesson, topic, vocabulary = [], textbookRefs = [] } = loaderData;
+  const loaderData = data2;
+  const { lesson, topic, vocabulary = [], textbookRefs = [], hasSpeaking } = data2;
+  const hasVocabulary = vocabulary.length > 0;
   const readingItems = vocabulary.map((v2) => ({
     jp_text: v2.jp_text,
     romaji: v2.romaji,
@@ -65498,12 +71607,12 @@ function LessonsFamily1Page() {
   }, []);
   const fetchProfile = async (userId) => {
     try {
-      const { data: data2, error } = await supabase.from("profiles").select("credits, nickname").eq("id", userId).single();
-      if (data2 && !error) {
-        if (typeof data2.credits === "number")
-          setCredits(data2.credits);
-        if (data2.nickname)
-          setNickname(data2.nickname);
+      const { data: data22, error } = await supabase.from("profiles").select("credits, nickname").eq("id", userId).single();
+      if (data22 && !error) {
+        if (typeof data22.credits === "number")
+          setCredits(data22.credits);
+        if (data22.nickname)
+          setNickname(data22.nickname);
       }
     } catch (err) {
       console.error("Fetch profile error:", err);
@@ -65562,13 +71671,13 @@ function LessonsFamily1Page() {
             YamatoChatCommon2,
             {
               characterName: "Yamato Sensei",
-              appType: LESSON_SLUG,
+              appType: LESSON_SLUG2,
               themeColor,
               userId: user == null ? void 0 : user.id,
               userNickname: nickname,
               credits,
               onOpenAuth: handleOpenAuth,
-              assignedQuestion: `${(topic == null ? void 0 : topic.title_en) ? `${topic.title_en} \u2013 ` : ""}Lesson ${(lesson == null ? void 0 : lesson.lesson_order) || 1}: ${(lesson == null ? void 0 : lesson.title_en) || "How many people are in your family?"}`
+              assignedQuestion: `${(topic == null ? void 0 : topic.title_en) ? `${topic.title_en} \u2013 ` : ""}Lesson ${(lesson == null ? void 0 : lesson.lesson_order) || 1}: ${(lesson == null ? void 0 : lesson.title_en) || ""}`
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 pt-4", children: [
@@ -65584,14 +71693,14 @@ function LessonsFamily1Page() {
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             EduLessonTaskManager,
             {
-              lessonId: (lesson == null ? void 0 : lesson.id) || LESSON_SLUG,
+              lessonId: (lesson == null ? void 0 : lesson.id) || LESSON_SLUG2,
               userId: user == null ? void 0 : user.id,
               onProgressChange: setSavedProgress,
-              onStartVocabularyDrill: startVocabularyDrill,
-              onStartListeningDrill: () => startTask("listening", () => setIsListeningTaskOpen(true)),
-              onStartReadingDrill: () => startTask("reading", () => setIsReadingDrillOpen(true)),
-              onStartSpeakingDrill: () => startTask("speaking", () => setIsSpeakingModalOpen(true)),
-              onStartWritingTask: () => setIsWritingTaskOpen(true),
+              onStartVocabularyDrill: hasVocabulary ? startVocabularyDrill : void 0,
+              onStartListeningDrill: extras.listening ? () => startTask("listening", () => setIsListeningTaskOpen(true)) : void 0,
+              onStartReadingDrill: hasVocabulary ? () => startTask("reading", () => setIsReadingDrillOpen(true)) : void 0,
+              onStartSpeakingDrill: hasSpeaking ? () => startTask("speaking", () => setIsSpeakingModalOpen(true)) : void 0,
+              onStartWritingTask: (lesson == null ? void 0 : lesson.id) ? () => setIsWritingTaskOpen(true) : void 0,
               onStartCultureTask: cultureTask ? () => startTask("culture", () => setIsCultureTaskOpen(true)) : void 0,
               externalTaskStatus: {
                 vocabulary: vocabTaskCompleted,
@@ -65613,7 +71722,7 @@ function LessonsFamily1Page() {
             onCompleted: () => setVocabTaskCompleted(true)
           }
         ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
+        extras.listening === "family-count" && /* @__PURE__ */ jsxRuntimeExports.jsx(
           EduListeningTaskModal,
           {
             isOpen: isListeningTaskOpen,
@@ -65630,15 +71739,15 @@ function LessonsFamily1Page() {
             onCompleted: () => setReadingTaskCompleted(true)
           }
         ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
+        hasSpeaking && /* @__PURE__ */ jsxRuntimeExports.jsx(
           EduSpeakingTaskModal,
           {
             isOpen: isSpeakingModalOpen,
             onClose: () => setIsSpeakingModalOpen(false),
-            title: "Speaking Task: Practice Talking About Your Family Members",
+            title: extras.speakingTitle || `Speaking Task: ${(lesson == null ? void 0 : lesson.title_en) || "Practice Speaking"}`,
             userId: user == null ? void 0 : user.id,
-            appType: LESSON_SLUG,
-            lessonSlug: (lesson == null ? void 0 : lesson.slug) || LESSON_SLUG,
+            appType: LESSON_SLUG2,
+            lessonSlug: (lesson == null ? void 0 : lesson.slug) || LESSON_SLUG2,
             onCompleted: () => {
               setSpeakingTaskCompleted(true);
             }
@@ -65674,11 +71783,100 @@ function LessonsFamily1Page() {
     }
   );
 }
-var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var LEGACY_LESSON_SLUGS = {
+  "obento-unit-1-lesson-1": "greetings-1",
+  "obento-unit-1-lesson-2": "greetings-2",
+  "obento-unit-1-lesson-3": "greetings-3",
+  "obento-unit-2-lesson-1": "numbers-1",
+  "obento-unit-2-lesson-2": "numbers-2",
+  "obento-unit-2-lesson-3": "numbers-3",
+  "obento-unit-3-lesson-1": "countries-1",
+  "obento-unit-3-lesson-2": "countries-2",
+  "obento-unit-3-lesson-3": "countries-3",
+  "obento-unit-4-lesson-1": "family-1",
+  "obento-unit-4-lesson-2": "family-2",
+  "obento-unit-4-lesson-3": "family-3",
+  "obento-unit-5-lesson-1": "pets-1",
+  "obento-unit-5-lesson-2": "pets-2",
+  "obento-unit-6-lesson-1": "food-1",
+  "obento-unit-6-lesson-2": "food-2"
+};
+var LEGACY_TOPIC_SLUGS = {
+  "obento-unit-1": "greetings",
+  "obento-unit-2": "numbers",
+  "obento-unit-3": "countries",
+  "obento-unit-4": "family",
+  "obento-unit-5": "pets",
+  "obento-unit-6": "food"
+};
+function newSlugFor(slug) {
+  return LEGACY_LESSON_SLUGS[slug] ?? LEGACY_TOPIC_SLUGS[slug] ?? null;
+}
+function slugCandidates(slug) {
+  const legacy = [...Object.entries(LEGACY_LESSON_SLUGS), ...Object.entries(LEGACY_TOPIC_SLUGS)].filter(([, next]) => next === slug).map(([old]) => old);
+  return [slug, ...legacy];
+}
+async function fetchLessonPageData(slug) {
+  var _a;
+  const data2 = {
+    lesson: null,
+    topic: null,
+    vocabulary: [],
+    textbookRefs: [],
+    hasSpeaking: false,
+    loadError: null
+  };
+  try {
+    const { data: lessons } = await supabase.from("edu_lessons").select("*").in("slug", slugCandidates(slug)).limit(1);
+    const lesson = (lessons == null ? void 0 : lessons[0]) || null;
+    data2.lesson = lesson;
+    if (lesson) {
+      const [topicRes, vocabRes, refs, dialogueRes] = await Promise.all([
+        lesson.topic_id ? supabase.from("edu_topics").select("*").eq("id", lesson.topic_id).maybeSingle() : Promise.resolve({ data: null }),
+        supabase.from("kl_vocabulary").select("*").eq("lesson_id", lesson.id).order("order_index", { ascending: true }),
+        fetchTextbookRefs([String(lesson.id)]),
+        supabase.from("edu_lesson_dialogues").select("lesson_key").in("lesson_key", slugCandidates(String(lesson.slug))).limit(1)
+      ]);
+      data2.topic = topicRes.data || null;
+      data2.vocabulary = vocabRes.data || [];
+      data2.textbookRefs = refs[String(lesson.id)] ?? [];
+      data2.hasSpeaking = (((_a = dialogueRes.data) == null ? void 0 : _a.length) ?? 0) > 0;
+    }
+  } catch (err) {
+    console.warn(`\u26A0\uFE0F [Loader] Failed to fetch lesson ${slug} from Supabase:`, err);
+    data2.loadError = `Supabase error: ${(err == null ? void 0 : err.message) || String(err)}`;
+  }
+  if (!data2.lesson && !data2.loadError)
+    data2.loadError = `Lesson ${slug} not found in edu_lessons.`;
+  return data2;
+}
+var LESSON_SLUG = "family-1";
+async function loader$m({ request }) {
+  const url = new URL(request.url);
+  let portalContent = null;
+  try {
+    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
+    portalContent = (portalData == null ? void 0 : portalData.content) || null;
+  } catch (e) {
+  }
+  return dist$1.json({
+    portalContent,
+    currentPath: url.pathname,
+    ...await fetchLessonPageData(LESSON_SLUG)
+  });
+}
+var meta$m = ({ data: data2 }) => {
+  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+};
+function LessonsFamily1Page() {
+  const data2 = useLoaderData();
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonPage, { lessonSlug: LESSON_SLUG, data: data2 });
+}
+var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsFamily1Page,
-  loader: loader$k,
-  meta: meta$l
+  loader: loader$m,
+  meta: meta$m
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$5 = "CONTENT_REFERENCE";
 async function fetchReferenceContentData(supabase2) {
@@ -65740,7 +71938,7 @@ function useReferenceContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$j({ request }) {
+async function loader$l({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -65879,16 +72077,40 @@ function ReferenceIndex() {
     }
   );
 }
-var meta$k = ({ data: data2 }) => {
+var meta$l = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ReferenceIndex,
-  loader: loader$j,
-  meta: meta$k
+  loader: loader$l,
+  meta: meta$l
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$i({ request }) {
+var NO_STORE = { "Cache-Control": "no-store" };
+async function loader$k() {
+  return dist$1.json({ error: "Method not allowed." }, { status: 405, headers: NO_STORE });
+}
+async function action$2({ request, context }) {
+  if (request.method !== "POST") {
+    return dist$1.json({ error: "Method not allowed." }, { status: 405, headers: NO_STORE });
+  }
+  if (!request.headers.get("Authorization"))
+    return dist$1.json({ status: "login" }, { headers: NO_STORE });
+  const admin = createAdminSupabaseClient(context);
+  const userId = await getUserIdFromBearer(request, admin);
+  if (!userId)
+    return dist$1.json({ status: "login" }, { headers: NO_STORE });
+  const access = await getGameAccessForUser(admin, userId);
+  if (access.status !== "allowed")
+    return dist$1.json(access, { headers: NO_STORE });
+  return dist$1.json({ status: "allowed", ticket: await createGameTicket(context, userId) }, { headers: NO_STORE });
+}
+var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  action: action$2,
+  loader: loader$k
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$j({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -65901,7 +72123,7 @@ async function loader$i({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$j = ({ data: data2 }) => {
+var meta$k = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VocabIndexPage() {
@@ -66114,15 +72336,15 @@ function VocabIndexPage() {
     ] }) })
   ] }) });
 }
-var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VocabIndexPage,
-  loader: loader$i,
-  meta: meta$j
+  loader: loader$j,
+  meta: meta$k
 }, Symbol.toStringTag, { value: "Module" }));
 var PAGE_TITLE = "Japanese Culture";
 var PAGE_DESCRIPTION = "Picture stories about life in Japan, with narration and English subtitles. No Japanese needed \u2013 watch the story, then try a short quiz.";
-var meta$i = () => [
+var meta$j = () => [
   { title: `${PAGE_TITLE} | AI Yamato Portal` },
   { name: "description", content: PAGE_DESCRIPTION },
   { property: "og:title", content: `${PAGE_TITLE} | AI Yamato Portal` },
@@ -66341,93 +72563,32 @@ function CultureHubPage() {
     )
   ] });
 }
-var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CultureHubPage,
+  meta: meta$j
+}, Symbol.toStringTag, { value: "Module" }));
+var loader$i = ({ request }) => loadGamePage(request);
+var meta$i = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+function HanafudaRoute() {
+  const layoutRef = reactExports.useRef(null);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Hanafuda Koi-Koi", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    IframeGamePage,
+    {
+      layoutRef,
+      name: "hanafuda",
+      title: "Hanafuda Koi-Koi",
+      description: "Experience the classic Japanese card game! Form yaku, call Koi-Koi, and win."
+    }
+  ) });
+}
+var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: HanafudaRoute,
+  loader: loader$i,
   meta: meta$i
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$h({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname
-  });
-}
-var meta$h = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-};
-function HanafudaFrameView({ userId }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-slate-100", children: "Hanafuda Koi-Koi" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold", children: "\u2728 Hanafuda Card Game" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium text-center", children: "Experience the classic Japanese card game! Form yaku, call Koi-Koi, and win." }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-amber-800/40 p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "iframe",
-      {
-        src: "/games/hanafuda.html",
-        title: "Hanafuda Koi-Koi Game",
-        className: "w-full h-full border-0 rounded-xl",
-        sandbox: "allow-scripts allow-same-origin allow-forms",
-        allowFullScreen: true,
-        allow: "fullscreen"
-      }
-    ) })
-  ] }) });
-}
-function HanafudaRoute() {
-  const layoutRef = reactExports.useRef(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = reactExports.useState(true);
-  const [user, setUser] = reactExports.useState(null);
-  reactExports.useEffect(() => {
-    let isMounted = true;
-    async function initSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if ((session == null ? void 0 : session.user) && isMounted) {
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        if (isMounted)
-          setLoading(false);
-      }
-    }
-    initSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session == null ? void 0 : session.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => {
-      isMounted = false;
-      subscription == null ? void 0 : subscription.unsubscribe();
-    };
-  }, [navigate]);
-  if (loading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center items-center h-screen bg-[#f4f1ea] font-sans", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-slate-700 animate-pulse", children: "Loading Hanafuda Koi-Koi... \u{1F3B4}" }) }) });
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HanafudaFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
-}
-var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: HanafudaRoute,
-  loader: loader$h,
-  meta: meta$h
-}, Symbol.toStringTag, { value: "Module" }));
-async function loader$g({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -66449,7 +72610,7 @@ async function loader$g({ request }) {
       topicsData = (topics || []).map((topic) => ({
         ...topic,
         edu_lessons: (topic.edu_lessons || []).sort((a, b) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0))
-      }));
+      })).filter((topic) => topic.edu_lessons.length > 0);
     }
   } catch (err) {
     console.error("\u274C [Loader Exception]:", err);
@@ -66464,7 +72625,7 @@ async function loader$g({ request }) {
     errorMessage: fetchError
   });
 }
-var meta$g = ({ data: data2 }) => {
+var meta$h = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsHubIndex() {
@@ -66589,13 +72750,13 @@ function LessonsHubIndex() {
     }
   );
 }
-var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsHubIndex,
-  loader: loader$g,
-  meta: meta$g
+  loader: loader$h,
+  meta: meta$h
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$f({ request }) {
+async function loader$g({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -66608,7 +72769,7 @@ async function loader$f({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$f = ({ data: data2 }) => {
+var meta$g = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function PrivacyPolicy() {
@@ -66672,13 +72833,13 @@ function PrivacyPolicy() {
     }
   );
 }
-var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrivacyPolicy,
-  loader: loader$f,
-  meta: meta$f
+  loader: loader$g,
+  meta: meta$g
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$e({ request, params }) {
+async function loader$f({ request, params }) {
   const url = new URL(request.url);
   const slug = String(params.slug || "");
   const renamed = newSlugFor(slug);
@@ -66703,7 +72864,17 @@ async function loader$e({ request, params }) {
     console.warn(`\u26A0\uFE0F [Loader] Failed to fetch topic ${slug}:`, err);
   }
   if (!topicData) {
-    throw new Response("Not Found", { status: 404 });
+    const lessonPage = await fetchLessonPageData(slug);
+    if (!lessonPage.lesson) {
+      throw new Response("Not Found", { status: 404 });
+    }
+    return dist$1.json({
+      kind: "lesson",
+      portalContent,
+      currentPath: url.pathname,
+      slug: String(lessonPage.lesson.slug),
+      ...lessonPage
+    });
   }
   try {
     const { data: lessons } = await supabase.from("edu_lessons").select("*").eq("topic_id", topicData.id).order("lesson_order", { ascending: true });
@@ -66719,6 +72890,7 @@ async function loader$e({ request, params }) {
     loadError = `Supabase error: ${(err == null ? void 0 : err.message) || String(err)}`;
   }
   return dist$1.json({
+    kind: "topic",
     portalContent,
     currentPath: url.pathname,
     topic: topicData,
@@ -66728,9 +72900,16 @@ async function loader$e({ request, params }) {
     loadError
   });
 }
-var meta$e = ({ data: data2 }) => {
+var meta$f = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
+function LessonSlugPage() {
+  const loaderData = useLoaderData();
+  if ((loaderData == null ? void 0 : loaderData.kind) === "lesson") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonPage, { lessonSlug: loaderData.slug, data: loaderData }, loaderData.slug);
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(LessonTopicHubPage, {});
+}
 function LessonTopicHubPage() {
   const layoutRef = reactExports.useRef(null);
   const [user, setUser] = reactExports.useState(null);
@@ -66897,11 +73076,11 @@ function LessonTopicHubPage() {
     }
   );
 }
-var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  default: LessonTopicHubPage,
-  loader: loader$e,
-  meta: meta$e
+  default: LessonSlugPage,
+  loader: loader$f,
+  meta: meta$f
 }, Symbol.toStringTag, { value: "Module" }));
 var generatedRoutes = [
   "/about",
@@ -66947,7 +73126,7 @@ var generatedRoutes = [
   "/vce.writing.genkoyoshi-editor-vce",
   "/vce.writing.kanji-grammar-checker"
 ];
-async function loader$d({ request }) {
+async function loader$e({ request }) {
   const baseUrl = "https://jptutoraiyamato.com";
   const routes2 = generatedRoutes.includes("") ? generatedRoutes : ["", ...generatedRoutes];
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -66968,11 +73147,11 @@ ${routes2.map(
     }
   });
 }
-var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$d
+  loader: loader$e
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$c({ request, context }) {
+async function loader$d({ request, context }) {
   const url = new URL(request.url);
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   let portalContent = null;
@@ -67000,7 +73179,7 @@ async function loader$c({ request, context }) {
     currentPath: url.pathname
   });
 }
-var meta$d = ({ data: data2 }) => {
+var meta$e = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VocabCreatorPage() {
@@ -67305,11 +73484,11 @@ function VocabCreatorPage() {
     ] })
   ] }) }) });
 }
-var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VocabCreatorPage,
-  loader: loader$c,
-  meta: meta$d
+  loader: loader$d,
+  meta: meta$e
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$4 = "CONTENT_GAMES";
 async function fetchGamesContentData(supabase2) {
@@ -67372,7 +73551,7 @@ function useGamesContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$b({ request }) {
+async function loader$c({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -67461,16 +73640,16 @@ function GamesHubIndex() {
     }
   );
 }
-var meta$c = ({ data: data2 }) => {
+var meta$d = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: GamesHubIndex,
-  loader: loader$b,
-  meta: meta$c
+  loader: loader$c,
+  meta: meta$d
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$a({ request }) {
+async function loader$b({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -67560,109 +73739,48 @@ function LegalIndex() {
     }
   );
 }
-var meta$b = ({ data: data2 }) => {
+var meta$c = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LegalIndex,
-  loader: loader$a,
-  meta: meta$b
+  loader: loader$b,
+  meta: meta$c
 }, Symbol.toStringTag, { value: "Module" }));
-var meta$a = () => [
+var meta$b = () => [
   { title: "Preparing report..." },
   { name: "robots", content: "noindex, nofollow" }
 ];
 function PrintReport() {
   return null;
 }
-var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrintReport,
+  meta: meta$b
+}, Symbol.toStringTag, { value: "Module" }));
+var loader$a = ({ request }) => loadGamePage(request);
+var meta$a = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+function ShogiRoute() {
+  const layoutRef = reactExports.useRef(null);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Shogi", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    IframeGamePage,
+    {
+      layoutRef,
+      name: "shogi",
+      title: "Shogi",
+      description: "Enjoy a tactical game of Shogi (Japanese chess) against the computer!"
+    }
+  ) });
+}
+var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: ShogiRoute,
+  loader: loader$a,
   meta: meta$a
 }, Symbol.toStringTag, { value: "Module" }));
 async function loader$9({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname
-  });
-}
-var meta$9 = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-};
-function ShogiFrameView({ userId }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-slate-100", children: "Shogi Board" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold", children: "\u2694\uFE0F Shogi Board Game" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium text-center", children: "Enjoy your tactical Shogi match!" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-amber-800/40 p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "iframe",
-      {
-        src: "/games/shogi.html",
-        title: "Shogi Game",
-        className: "w-full h-full border-0 rounded-xl",
-        sandbox: "allow-scripts allow-same-origin allow-forms",
-        allowFullScreen: true,
-        allow: "fullscreen"
-      }
-    ) })
-  ] }) });
-}
-function ShogiRoute() {
-  const layoutRef = reactExports.useRef(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = reactExports.useState(true);
-  const [user, setUser] = reactExports.useState(null);
-  reactExports.useEffect(() => {
-    let isMounted = true;
-    async function initSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if ((session == null ? void 0 : session.user) && isMounted) {
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        if (isMounted)
-          setLoading(false);
-      }
-    }
-    initSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session == null ? void 0 : session.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => {
-      isMounted = false;
-      subscription == null ? void 0 : subscription.unsubscribe();
-    };
-  }, [navigate]);
-  if (loading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center items-center h-screen bg-[#f4f1ea] font-sans", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-slate-700 animate-pulse", children: "Loading Shogi Board... \u265F\uFE0F" }) }) });
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ShogiFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
-}
-var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: ShogiRoute,
-  loader: loader$9,
-  meta: meta$9
-}, Symbol.toStringTag, { value: "Module" }));
-async function loader$8({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -67736,12 +73854,813 @@ function TermsOfService() {
     }
   );
 }
-var meta$8 = ({ data: data2 }) => {
+var meta$9 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TermsOfService,
+  loader: loader$9,
+  meta: meta$9
+}, Symbol.toStringTag, { value: "Module" }));
+function useLiveGameSocket(gameId, onMessage) {
+  const [status, setStatus] = reactExports.useState("connecting");
+  const [closedCode, setClosedCode] = reactExports.useState(null);
+  const wsRef = reactExports.useRef(null);
+  const handlerRef = reactExports.useRef(onMessage);
+  handlerRef.current = onMessage;
+  reactExports.useEffect(() => {
+    if (!gameId)
+      return;
+    let stopped = false;
+    let retries = 0;
+    let retryTimer = null;
+    const connect = async () => {
+      const token = await getAccessToken();
+      if (stopped)
+        return;
+      if (!token) {
+        setClosedCode("LOGIN_REQUIRED");
+        setStatus("closed");
+        return;
+      }
+      const url = `${YAMATO_API_BASE.replace(/^http/, "ws")}/api/live-game/${gameId}/ws`;
+      const ws = new WebSocket(url);
+      wsRef.current = ws;
+      let serverClosed = false;
+      ws.onopen = () => {
+        retries = 0;
+        ws.send(JSON.stringify({ t: "auth", token }));
+        setStatus("open");
+      };
+      ws.onmessage = (event) => {
+        let msg;
+        try {
+          msg = JSON.parse(String(event.data));
+        } catch {
+          return;
+        }
+        if ((msg == null ? void 0 : msg.t) === "closed" || (msg == null ? void 0 : msg.t) === "cancelled") {
+          serverClosed = true;
+          setClosedCode(msg.t === "cancelled" ? "CANCELLED" : String(msg.code || "CLOSED"));
+        }
+        handlerRef.current(msg);
+      };
+      ws.onclose = (event) => {
+        if (wsRef.current === ws)
+          wsRef.current = null;
+        if (stopped)
+          return;
+        if (serverClosed || event.code === 4e3) {
+          setStatus("closed");
+          return;
+        }
+        retries += 1;
+        if (retries > 20) {
+          setClosedCode("CONNECTION_LOST");
+          setStatus("closed");
+          return;
+        }
+        setStatus("reconnecting");
+        retryTimer = setTimeout(connect, Math.min(1e3 * retries, 5e3));
+      };
+    };
+    setStatus("connecting");
+    setClosedCode(null);
+    connect();
+    return () => {
+      var _a;
+      stopped = true;
+      if (retryTimer)
+        clearTimeout(retryTimer);
+      (_a = wsRef.current) == null ? void 0 : _a.close();
+      wsRef.current = null;
+    };
+  }, [gameId]);
+  const send = reactExports.useCallback((msg) => {
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN)
+      ws.send(JSON.stringify(msg));
+  }, []);
+  return { status, closedCode, send };
+}
+function useCountdown(endsAt, serverOffset) {
+  const [left, setLeft] = reactExports.useState(0);
+  reactExports.useEffect(() => {
+    if (!endsAt) {
+      setLeft(0);
+      return;
+    }
+    const tick = () => setLeft(Math.max(0, Math.ceil((endsAt - (Date.now() + serverOffset)) / 1e3)));
+    tick();
+    const timer = setInterval(tick, 250);
+    return () => clearInterval(timer);
+  }, [endsAt, serverOffset]);
+  return left;
+}
+function formatClock(sec) {
+  const m2 = Math.floor(sec / 60);
+  const s2 = sec % 60;
+  return `${m2}:${String(s2).padStart(2, "0")}`;
+}
+var QUESTION_SET_LABELS = {
+  hiragana: "Hiragana",
+  katakana: "Katakana",
+  kanji: "VCE Kanji"
+};
+var CLOSED_MESSAGES = {
+  LOGIN_REQUIRED: "Please log in again to join the game.",
+  NOT_IN_CLASS: "This game is only for students in this class.",
+  REMOVED: "Your teacher removed you from this game.",
+  OPENED_ELSEWHERE: "You opened the game in another tab or device, so this one was closed.",
+  GAME_OVER: "This game has already finished.",
+  CANCELLED: "Your teacher closed this game.",
+  NO_GAME: "This game could not be found.",
+  AUTH_TIMEOUT: "The connection timed out. Please reload the page.",
+  CONNECTION_LOST: "The connection was lost. Please reload the page.",
+  SERVER_ERROR: "Something went wrong on the server. Please reload the page."
+};
+function HostView({ gameId, onNewGame }) {
+  const [state, setState] = reactExports.useState(null);
+  const [offset, setOffset] = reactExports.useState(0);
+  const [showLabels, setShowLabels] = reactExports.useState(false);
+  const [notice, setNotice] = reactExports.useState(null);
+  const { status: socketStatus, closedCode, send } = useLiveGameSocket(gameId, (msg) => {
+    if (msg.t === "host") {
+      setOffset(msg.now - Date.now());
+      setState(msg);
+    } else if (msg.t === "nameRejected") {
+      setNotice(nameReason(msg.reason));
+    }
+  });
+  const left = useCountdown((state == null ? void 0 : state.status) === "running" ? state.endsAt : 0, offset);
+  if (socketStatus === "closed") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700 dark:text-slate-300", children: CLOSED_MESSAGES[closedCode ?? ""] ?? "The game was closed." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onNewGame, className: primaryBtn, children: "Back" })
+    ] });
+  }
+  if (!state)
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Spinner, { text: "Opening the game room\u2026" });
+  const named = state.players.filter((p2) => p2.name);
+  const rename = (p2) => {
+    const name = window.prompt(`New display name for ${p2.name ?? p2.label}:`, p2.name ?? "");
+    if (name !== null)
+      send({ t: "rename", userId: p2.userId, name });
+  };
+  const kick = (p2) => {
+    if (window.confirm(`Remove ${p2.name ?? p2.label} from this game? They will not be able to rejoin it.`)) {
+      send({ t: "kick", userId: p2.userId });
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold tracking-widest text-indigo-500", children: "CLASS LIVE GAME" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white", children: state.config.className }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+          QUESTION_SET_LABELS[state.config.questionSet],
+          " \xB7 ",
+          state.config.durationSec / 60,
+          " min \xB7",
+          " ",
+          state.config.nameMode === "free" ? "Students choose their names" : "Names chosen by AI Yamato"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs text-slate-500 flex items-center gap-1", children: [
+          socketStatus === "open" ? /* @__PURE__ */ jsxRuntimeExports.jsx(Wifi, { className: "w-4 h-4 text-emerald-500" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "w-4 h-4 text-amber-500" }),
+          socketStatus === "open" ? "Connected" : "Reconnecting\u2026"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: () => setShowLabels((v2) => !v2),
+            className: "text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1 cursor-pointer",
+            title: "Only turn this on when your screen is not on the projector",
+            children: [
+              showLabels ? /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Eye, { className: "w-4 h-4" }),
+              showLabels ? "Hide who is who" : "Show who is who"
+            ]
+          }
+        )
+      ] })
+    ] }),
+    notice && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-2 flex justify-between", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: notice }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setNotice(null), className: "font-bold cursor-pointer", children: "\u2715" })
+    ] }),
+    state.status === "lobby" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg font-bold text-slate-800 dark:text-white", children: [
+          "Students: open ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-indigo-600", children: "jptutoraiyamato.com/class-game" }),
+          " and log in."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500", children: "No code needed \u2014 only students in this class can join." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "w-5 h-5" }),
+          " ",
+          state.players.length,
+          " joined"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            disabled: named.length === 0,
+            onClick: () => send({ t: "start" }),
+            className: `${primaryBtn} flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed`,
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "w-4 h-4" }),
+              " Start"
+            ]
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(PlayerGrid, { players: state.players, showLabels, onRename: rename, onKick: kick })
+    ] }),
+    state.status === "running" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between bg-indigo-600 text-white rounded-2xl p-5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-5xl font-black tabular-nums", children: formatClock(left) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: () => window.confirm("End the game now?") && send({ t: "end" }),
+            className: "px-4 py-2 bg-white/15 hover:bg-white/25 rounded-xl font-bold text-sm flex items-center gap-2 cursor-pointer",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Square, { className: "w-4 h-4" }),
+              " End now"
+            ]
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Leaderboard, { players: state.players, showLabels, onRename: rename, onKick: kick })
+    ] }),
+    state.status === "ended" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-2xl font-black text-center text-slate-900 dark:text-white mb-4", children: "\u{1F3C6} Final results" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Podium, { players: named.slice(0, 3) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Leaderboard, { players: state.players, showLabels }),
+      state.classMissed && state.classMissed.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-slate-800 dark:text-white mb-1", children: "Characters the class missed most" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mb-3", children: "Number of wrong answers across the class" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: state.classMissed.map((m2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 font-bold", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl", children: m2.key }),
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs", children: [
+            "\xD7",
+            m2.count
+          ] })
+        ] }, m2.key)) })
+      ] }),
+      showLabels && /* @__PURE__ */ jsxRuntimeExports.jsx(StudentMissedTable, { players: state.players }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onNewGame, className: primaryBtn, children: "New game" }) })
+    ] })
+  ] });
+}
+function PlayerGrid({
+  players,
+  showLabels,
+  onRename,
+  onKick
+}) {
+  if (!players.length)
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-slate-400 py-6", children: "Waiting for students\u2026" });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2", children: players.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `rounded-xl border px-3 py-2 ${p2.online ? "border-indigo-200 bg-indigo-50/50 dark:bg-indigo-950/30" : "border-slate-200 opacity-60"}`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-800 dark:text-white truncate", children: p2.name ?? /* @__PURE__ */ jsxRuntimeExports.jsx("em", { className: "text-slate-400 font-normal", children: "choosing a name\u2026" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(PlayerActions, { p: p2, onRename, onKick })
+    ] }),
+    showLabels && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-500 truncate", children: p2.label })
+  ] }, p2.userId)) });
+}
+function PlayerActions({ p: p2, onRename, onKick }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-1 shrink-0", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => onRename(p2), title: "Change name", className: "p-1 text-slate-400 hover:text-indigo-600 cursor-pointer", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Pencil, { className: "w-3.5 h-3.5" }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => onKick(p2), title: "Remove from game", className: "p-1 text-slate-400 hover:text-rose-600 cursor-pointer", children: /* @__PURE__ */ jsxRuntimeExports.jsx(UserX, { className: "w-3.5 h-3.5" }) })
+  ] });
+}
+function Leaderboard({
+  players,
+  showLabels,
+  onRename,
+  onKick
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full text-sm", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { className: "bg-slate-50 dark:bg-slate-800 text-slate-500 text-xs", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-left w-12", children: "#" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-left", children: "Name" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-right", children: "Coins" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-right hidden sm:table-cell", children: "Correct" }),
+      onRename && onKick && /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "w-16" })
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: players.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-t border-slate-100 dark:border-slate-800", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-3 py-2 font-bold text-slate-500", children: p2.rank ?? "\u2013" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "px-3 py-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-800 dark:text-white", children: p2.name ?? "(no name)" }),
+        !p2.online && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "ml-2 text-[10px] text-slate-400", children: "offline" }),
+        showLabels && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-[11px] text-slate-500", children: p2.label })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "px-3 py-2 text-right font-black text-amber-600 tabular-nums", children: [
+        "\u{1FA99} ",
+        p2.coins
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "px-3 py-2 text-right text-slate-500 hidden sm:table-cell tabular-nums", children: [
+        p2.correct,
+        "/",
+        p2.answered
+      ] }),
+      onRename && onKick && /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(PlayerActions, { p: p2, onRename, onKick }) })
+    ] }, p2.userId)) })
+  ] }) });
+}
+function Podium({ players }) {
+  const medals = ["\u{1F947}", "\u{1F948}", "\u{1F949}"];
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col sm:flex-row justify-center gap-3", children: players.map((p2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `flex-1 max-w-xs rounded-2xl border p-4 text-center ${i === 0 ? "border-amber-300 bg-amber-50" : "border-slate-200 bg-slate-50"}`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-3xl", children: medals[i] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-black text-lg text-slate-900 truncate flex items-center justify-center gap-1", children: [
+      i === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(Crown, { className: "w-4 h-4 text-amber-500" }),
+      " ",
+      p2.name
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold text-amber-600", children: [
+      "\u{1FA99} ",
+      p2.coins
+    ] })
+  ] }, p2.userId)) });
+}
+function StudentMissedTable({ players }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-slate-800 dark:text-white mb-3", children: "Each student's missed characters" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: players.map((p2) => {
+      const missed = Object.entries(p2.missed ?? {}).sort((a, b) => b[1] - a[1]);
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-sm border-t border-slate-100 dark:border-slate-800 pt-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-800 dark:text-white", children: p2.label }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-500", children: [
+          " (",
+          p2.name ?? "no name",
+          ") \xB7 ",
+          p2.correct,
+          "/",
+          p2.answered,
+          " correct"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-1 text-slate-700 dark:text-slate-300", children: missed.length ? missed.map(([k2, n2]) => `${k2}\xD7${n2}`).join("  ") : "No mistakes" })
+      ] }, p2.userId);
+    }) })
+  ] });
+}
+function nameReason(reason) {
+  switch (reason) {
+    case "TAKEN":
+      return "Someone already has that name.";
+    case "TOO_LONG":
+      return "Names can be up to 12 characters.";
+    case "NOT_ALLOWED":
+      return "That name is not allowed.";
+    default:
+      return "Please enter a name.";
+  }
+}
+var primaryBtn = "px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer";
+function Box({ children }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-sm", children });
+}
+function Spinner({ text }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-16 text-center", role: "status", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 font-medium", children: text })
+  ] });
+}
+var RESULT_MS = 900;
+var CHEST_RESULT_MS = 2200;
+function StudentView({ gameId }) {
+  const [state, setState] = reactExports.useState(null);
+  const [offset, setOffset] = reactExports.useState(0);
+  const [question, setQuestion] = reactExports.useState(null);
+  const [picked, setPicked] = reactExports.useState(null);
+  const [result, setResult] = reactExports.useState(null);
+  const [chestOpen, setChestOpen] = reactExports.useState(false);
+  const [chestResult, setChestResult] = reactExports.useState(null);
+  const [final, setFinal] = reactExports.useState(null);
+  const [nameError, setNameError] = reactExports.useState(null);
+  const [nameInput, setNameInput] = reactExports.useState("");
+  const timers = reactExports.useRef([]);
+  const later = (fn, ms) => timers.current.push(setTimeout(fn, ms));
+  reactExports.useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const { status: socketStatus, closedCode, send } = useLiveGameSocket(gameId, (msg) => {
+    switch (msg.t) {
+      case "student":
+        setOffset(msg.now - Date.now());
+        setState(msg);
+        if (msg.chestPending)
+          setChestOpen(true);
+        break;
+      case "question":
+        setQuestion(msg);
+        setPicked(null);
+        setResult(null);
+        break;
+      case "tooFast":
+        setPicked(null);
+        break;
+      case "result":
+        setResult(msg);
+        setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
+        later(() => {
+          if (msg.chest) {
+            setChestOpen(true);
+          } else {
+            send({ t: "next" });
+          }
+        }, RESULT_MS);
+        break;
+      case "chestResult":
+        setChestResult(msg);
+        setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
+        later(() => {
+          setChestResult(null);
+          setChestOpen(false);
+          send({ t: "next" });
+        }, CHEST_RESULT_MS);
+        break;
+      case "final":
+        setFinal(msg);
+        setQuestion(null);
+        setState((s2) => s2 ? { ...s2, status: "ended", coins: msg.coins } : s2);
+        break;
+      case "nameRejected":
+        setNameError(nameReason(msg.reason));
+        break;
+    }
+  });
+  const left = useCountdown((state == null ? void 0 : state.status) === "running" ? state.endsAt : 0, offset);
+  if (socketStatus === "closed" && !final) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Box, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700 dark:text-slate-300", children: CLOSED_MESSAGES[closedCode ?? ""] ?? "The game was closed." }) });
+  }
+  if (!state)
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(Spinner, { text: "Joining the game\u2026" });
+  if (final) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold tracking-widest text-indigo-500", children: "GAME OVER" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-5xl font-black text-amber-500", children: [
+        "\u{1FA99} ",
+        final.coins
+      ] }),
+      final.rank && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xl font-bold text-slate-800 dark:text-white", children: [
+        "You came #",
+        final.rank,
+        " of ",
+        final.total,
+        "!"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500", children: [
+        final.correct,
+        " correct out of ",
+        final.answered
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("ol", { className: "text-left max-w-xs mx-auto space-y-1", children: final.top.map((t2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex justify-between text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "font-bold text-slate-700 dark:text-slate-200", children: [
+          ["\u{1F947}", "\u{1F948}", "\u{1F949}", "4.", "5."][i],
+          " ",
+          t2.name
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-amber-600 font-bold", children: [
+          "\u{1FA99} ",
+          t2.coins
+        ] })
+      ] }, i)) })
+    ] });
+  }
+  if (!state.name) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold tracking-widest text-indigo-500", children: state.className }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Choose your game name" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500", children: "Up to 12 characters. Your teacher can see who you are." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "form",
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+            setNameError(null);
+            send({ t: "setName", name: nameInput });
+          },
+          className: "flex gap-2 justify-center",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                value: nameInput,
+                onChange: (e) => setNameInput(e.target.value),
+                maxLength: 12,
+                autoFocus: true,
+                className: "flex-1 max-w-[220px] px-3 py-2 border border-slate-300 rounded-xl text-slate-900"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: primaryBtn, children: "OK" })
+          ]
+        }
+      ),
+      nameError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: nameError })
+    ] });
+  }
+  const header = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 truncate", children: [
+        state.className,
+        " \xB7 ",
+        QUESTION_SET_LABELS[state.questionSet]
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-800 dark:text-white truncate", children: state.name })
+    ] }),
+    state.status === "running" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black tabular-nums text-indigo-600", children: formatClock(left) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-amber-500 tabular-nums", children: [
+      "\u{1FA99} ",
+      state.coins
+    ] })
+  ] });
+  if (state.status === "lobby") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
+      header,
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg font-bold text-slate-800 dark:text-white", children: "You're in! \u{1F389}" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-slate-600 dark:text-slate-300", children: [
+          "You are ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-black text-indigo-600", children: state.name }),
+          ". Wait for your teacher to start."
+        ] }),
+        socketStatus !== "open" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-amber-600", children: "Reconnecting\u2026" })
+      ] })
+    ] });
+  }
+  if (chestOpen) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
+      header,
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Box, { children: chestResult ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500", children: "You found\u2026" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-3xl font-black text-slate-900 dark:text-white", children: chestResult.item.nameJa }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg font-bold text-indigo-600", children: chestResult.item.name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700 dark:text-slate-300", children: chestResult.item.description }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-amber-500", children: [
+          "\u{1FA99} ",
+          chestResult.before,
+          " \u2192 ",
+          chestResult.coins
+        ] })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Treasure! Pick a chest \u{1F381}" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center gap-3", children: [0, 1, 2].map((box) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => send({ t: "openChest", box }),
+            className: "text-6xl p-3 rounded-2xl border-2 border-amber-300 bg-amber-50 hover:bg-amber-100 hover:scale-105 transition cursor-pointer",
+            children: "\u{1F9F0}"
+          },
+          box
+        )) })
+      ] }) })
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
+    header,
+    !question ? /* @__PURE__ */ jsxRuntimeExports.jsx(Spinner, { text: "Next question\u2026" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm font-bold text-slate-500", children: question.label }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center font-black text-slate-900 dark:text-white ${question.promptIsJapanese ? "text-7xl" : "text-5xl"}`, children: question.prompt }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-3", children: question.options.map((opt, i) => {
+        let tone = "border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 text-slate-800";
+        if (result) {
+          if (i === result.correctIndex)
+            tone = "border-emerald-400 bg-emerald-50 text-emerald-800";
+          else if (i === picked)
+            tone = "border-rose-400 bg-rose-50 text-rose-800";
+          else
+            tone = "border-slate-200 bg-slate-50 text-slate-400";
+        } else if (picked === i) {
+          tone = "border-indigo-400 bg-indigo-50 text-indigo-800";
+        }
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            disabled: picked !== null,
+            onClick: () => {
+              setPicked(i);
+              send({ t: "answer", qid: question.qid, choice: i });
+            },
+            className: `min-h-[64px] rounded-2xl border-2 px-3 py-3 font-bold transition cursor-pointer disabled:cursor-default ${tone} ${question.optionsAreJapanese ? "text-2xl" : "text-lg"}`,
+            children: opt
+          },
+          i
+        );
+      }) }),
+      result && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center text-lg font-black ${result.correct ? "text-emerald-600" : "text-rose-600"}`, children: result.correct ? "+1 \u{1FA99} Correct!" : "Not quite!" })
+    ] }),
+    socketStatus !== "open" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-xs text-amber-600", children: "Reconnecting\u2026" })
+  ] });
+}
+async function loader$8({ request }) {
+  return dist$1.json({ portalContent: null, currentPath: new URL(request.url).pathname });
+}
+var meta$8 = () => [
+  { title: "Class Live Game | JP Tutor AI Yamato" },
+  { name: "description", content: "A live Japanese game for the whole class, run by your teacher." },
+  { name: "robots", content: "noindex, nofollow" }
+];
+var STUDENT_POLL_MS = 5e3;
+function ClassGamePage() {
+  const layoutRef = reactExports.useRef(null);
+  const [page, setPage] = reactExports.useState({ kind: "loading" });
+  const [hostGameId, setHostGameId] = reactExports.useState(null);
+  const load = reactExports.useCallback(async () => {
+    const { data: data2 } = await supabase.auth.getSession();
+    if (!data2.session) {
+      setPage({ kind: "login" });
+      return;
+    }
+    try {
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/mine`);
+      if (res.status === 401)
+        return setPage({ kind: "login" });
+      if (!res.ok)
+        throw new Error(`live-game/mine ${res.status}`);
+      setPage({ kind: "mine", mine: await res.json() });
+    } catch (err) {
+      console.error("[class-game] load failed:", err);
+      setPage((prev) => prev.kind === "mine" ? prev : { kind: "error" });
+    }
+  }, []);
+  reactExports.useEffect(() => {
+    load();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT")
+        load();
+    });
+    return () => subscription == null ? void 0 : subscription.unsubscribe();
+  }, [load]);
+  const waitingStudent = page.kind === "mine" && page.mine.role === "student" && page.mine.inClass && !page.mine.game;
+  reactExports.useEffect(() => {
+    if (!waitingStudent)
+      return;
+    const timer = setInterval(() => {
+      if (!document.hidden)
+        load();
+    }, STUDENT_POLL_MS);
+    return () => clearInterval(timer);
+  }, [waitingStudent, load]);
+  let body;
+  if (page.kind === "loading") {
+    body = /* @__PURE__ */ jsxRuntimeExports.jsx(Spinner, { text: "Checking your class\u2026" });
+  } else if (page.kind === "login") {
+    body = /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LogIn, { className: "w-7 h-7 text-indigo-600" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Log in to join your class game" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => {
+        var _a;
+        return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signin");
+      }, className: primaryBtn, children: "Log in" })
+    ] });
+  } else if (page.kind === "error") {
+    body = /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700 dark:text-slate-300", children: "We could not check your class. Please try again." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: load, className: primaryBtn, children: "Try again" })
+    ] });
+  } else if (page.mine.role === "teacher") {
+    body = hostGameId ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+      HostView,
+      {
+        gameId: hostGameId,
+        onNewGame: () => {
+          setHostGameId(null);
+          load();
+        }
+      }
+    ) : /* @__PURE__ */ jsxRuntimeExports.jsx(TeacherSetup, { classes: page.mine.classes, onOpen: setHostGameId });
+  } else if (!page.mine.inClass) {
+    body = /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "You are not in a class yet" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: [
+        "Class games are for students in a teacher's class. Ask your teacher how to join their class on",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/my-account", className: "text-indigo-600 underline", children: "My Account" }),
+        "."
+      ] })
+    ] });
+  } else if (!page.mine.game) {
+    body = /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block animate-pulse text-5xl", children: "\u23F3" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Waiting for your teacher" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: "The game will open here automatically when your teacher starts it." })
+    ] });
+  } else {
+    body = /* @__PURE__ */ jsxRuntimeExports.jsx(StudentView, { gameId: page.mine.game.id });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Class Live Game", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mx-auto max-w-5xl px-4 py-8", children: body }) });
+}
+function TeacherSetup({
+  classes,
+  onOpen
+}) {
+  var _a;
+  const [classId, setClassId] = reactExports.useState(((_a = classes[0]) == null ? void 0 : _a.id) ?? "");
+  const [questionSet, setQuestionSet] = reactExports.useState("hiragana");
+  const [durationMin, setDurationMin] = reactExports.useState(10);
+  const [nameMode, setNameMode] = reactExports.useState("preset");
+  const [busy, setBusy] = reactExports.useState(false);
+  const [error, setError] = reactExports.useState(null);
+  if (!classes.length) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Create a class first" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: [
+        "Class games are played by the students in your class. Create a class in the",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/teacher-dashboard", className: "text-indigo-600 underline", children: "Teacher Dashboard" }),
+        "."
+      ] })
+    ] });
+  }
+  const selected = classes.find((c) => c.id === classId);
+  const create = async () => {
+    if ((selected == null ? void 0 : selected.activeGameId) && !window.confirm("This class already has an open game. Close it and start a new one?"))
+      return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classId, questionSet, durationMin, nameMode })
+      });
+      const data2 = await res.json().catch(() => ({}));
+      if (!res.ok || !data2.gameId)
+        throw new Error(data2.message || data2.error || `HTTP ${res.status}`);
+      onOpen(data2.gameId);
+    } catch (err) {
+      setError((err == null ? void 0 : err.message) || "Could not create the game.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  const option = (active) => `px-4 py-2.5 rounded-xl border-2 text-sm font-bold transition cursor-pointer ${active ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-2xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold tracking-widest text-indigo-500", children: "CLASS LIVE GAME" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-black text-slate-900 dark:text-white", children: "Start a game for your class" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 mt-1", children: "Only students in the class you choose can join \u2014 there is no code to share. Scores are kept on the server, so they can't be changed from a student's device. This game works even when class games are locked." })
+    ] }),
+    classes.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(Field, { label: "Class", children: /* @__PURE__ */ jsxRuntimeExports.jsx("select", { value: classId, onChange: (e) => setClassId(e.target.value), className: "w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900", children: classes.map((c) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: c.id, children: c.name }, c.id)) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Field, { label: "Questions", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: ["hiragana", "katakana", "kanji"].map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setQuestionSet(s2), className: option(questionSet === s2), children: QUESTION_SET_LABELS[s2] }, s2)) }),
+      questionSet === "kanji" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: "Readings and meanings are mixed." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Field, { label: `Time: ${durationMin} min`, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "input",
+      {
+        type: "range",
+        min: 1,
+        max: 15,
+        value: durationMin,
+        onChange: (e) => setDurationMin(Number(e.target.value)),
+        className: "w-full accent-indigo-600"
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Field, { label: "Display names", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setNameMode("preset"), className: option(nameMode === "preset"), children: "Names chosen by AI Yamato" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setNameMode("free"), className: option(nameMode === "free"), children: "Students choose their names" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: nameMode === "preset" ? "Each student gets a fun name like \u201COnigiri\u201D or \u201CTanuki\u201D." : "Students type a name (up to 12 characters). You can rename or remove anyone." })
+    ] }),
+    error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: error }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2 justify-end", children: [
+      (selected == null ? void 0 : selected.activeGameId) && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => onOpen(selected.activeGameId),
+          className: "px-5 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded-xl cursor-pointer hover:bg-slate-50",
+          children: "Return to the open game"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", disabled: busy, onClick: create, className: `${primaryBtn} disabled:opacity-50`, children: busy ? "Creating\u2026" : "Create game room" })
+    ] })
+  ] });
+}
+function Field({ label, children }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-200 mb-2", children: label }),
+    children
+  ] });
+}
+var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: ClassGamePage,
   loader: loader$8,
   meta: meta$8
 }, Symbol.toStringTag, { value: "Module" }));
@@ -72470,7 +79389,7 @@ function AccountSettingsRoute() {
 var meta$7 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
   default: AccountSettingsRoute,
@@ -72602,88 +79521,27 @@ function VceHubIndex() {
 var meta$6 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceHubIndex,
   loader: loader$6,
   meta: meta$6
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$5({ request }) {
-  const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (portalData == null ? void 0 : portalData.content) || null;
-  } catch (e) {
-  }
-  return dist$1.json({
-    portalContent,
-    currentPath: url.pathname
-  });
-}
-var meta$5 = ({ data: data2 }) => {
-  return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-};
-function IgoFrameView({ userId }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 mb-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-slate-100", children: "9x9 Go Board" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold", children: "\u2694\uFE0F Go Board Game" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mb-6 font-medium text-center", children: "Enjoy your tactical Go match against Yamato-sensei!" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full max-w-5xl h-[700px] bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-amber-800/40 p-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "iframe",
-      {
-        src: "/games/9by9go.html",
-        title: "9by9 Go Game",
-        className: "w-full h-full border-0 rounded-xl",
-        sandbox: "allow-scripts allow-same-origin allow-forms",
-        allowFullScreen: true,
-        allow: "fullscreen"
-      }
-    ) })
-  ] }) });
-}
+var loader$5 = ({ request }) => loadGamePage(request);
+var meta$5 = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function IgoRoute() {
   const layoutRef = reactExports.useRef(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = reactExports.useState(true);
-  const [user, setUser] = reactExports.useState(null);
-  reactExports.useEffect(() => {
-    let isMounted = true;
-    async function initSession() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if ((session == null ? void 0 : session.user) && isMounted) {
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error("Session check error:", err);
-      } finally {
-        if (isMounted)
-          setLoading(false);
-      }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "9x9 Go", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    IframeGamePage,
+    {
+      layoutRef,
+      name: "go",
+      title: "9x9 Go",
+      description: "Enjoy a game of Go on a 9x9 board against Yamato-sensei!"
     }
-    initSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session == null ? void 0 : session.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => {
-      isMounted = false;
-      subscription == null ? void 0 : subscription.unsubscribe();
-    };
-  }, [navigate]);
-  if (loading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center items-center h-screen bg-[#f4f1ea] font-sans", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-slate-700 animate-pulse", children: "Loading Go Board... \u265F\uFE0F" }) }) });
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "max-w-6xl mx-auto px-4 pt-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800", children: /* @__PURE__ */ jsxRuntimeExports.jsx(IgoFrameView, { userId: user == null ? void 0 : user.id }) }) }) }) });
+  ) });
 }
-var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: IgoRoute,
   loader: loader$5,
@@ -72864,7 +79722,7 @@ function Contact() {
     }
   );
 }
-var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action,
   default: Contact,
@@ -73238,7 +80096,7 @@ function Prices() {
     }
   );
 }
-var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route56 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Prices,
   loader: loader$3,
@@ -74488,7 +81346,7 @@ function Home() {
 var meta$2 = ({ data: data2 }) => {
   return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route57 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Home,
   loader: loader$2,
@@ -74634,7 +81492,7 @@ function AboutPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
   ] }) });
 }
-var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route58 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: AboutPage,
   loader: loader$1,
@@ -74879,13 +81737,13 @@ function FaqPage() {
     }
   );
 }
-var route56 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route59 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: FaqPage,
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-BGC_hFWN.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-DBigzBw0.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-DKakX5ys.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-DQvUan5A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-BzayzAzT.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-SqtTv1-d.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/check-Btlt0QhP.js", "/assets/book-open-Cv5MGmar.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-B0QTHQO5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-wXVPOSQo.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-BDzn0A-3.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-CXZlCMhz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/trash-BrCoXmSH.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-BURSMOkC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-CXgPSCJQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-CaETJyUi.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/ChatYamatoEoyOralDrill-DQvUan5A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-B0CDek6i.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-V07Z2dkq.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-yWUVpADL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-C8C4Qjkv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-B0fH4J00.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-DOQQRIrI.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-DlOpPMR8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BjIMk7hh.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-DaEK6Nv5.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-xxcrANoL.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/nickname-B5PdWvQt.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-5KldfK0m.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-BQbsLGm9.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-Z3rjsHrW.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-DP3R374s.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-Dyld_UEF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CHzQGuqV.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-BYkANnhR.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-CB7Y35zF.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DmoHhDTc.js", "imports": ["/assets/components-BfPPHToQ.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-DrRXdUba.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-CHKONd0e.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-fa2hGHcv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-fQiepOZv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CL8ANZ73.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/SchoolAccountLink-CDgvMnth.js", "/assets/users-CyFwdcnm.js", "/assets/check-Btlt0QhP.js", "/assets/pen-line-SqtTv1-d.js", "/assets/trash-BrCoXmSH.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-B5djLjGm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-DQH3CIAE.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-B5PdWvQt.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lessonTextbooks-DCWXsHMf.js", "/assets/culture-tasks-D6IftfLJ.js", "/assets/GenkoyoshiModal-BdpJdSGO.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/price-plans-DhQ9vAY3.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-Cocaa_o9.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-BEU1HXtL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-CPjAd_pQ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-Uu8aoQqv.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/culture-tasks-D6IftfLJ.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-CYEz8bLn.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-Wq8PlXzk.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-C7w0kTIN.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-BoPsJpE_.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/lessonTextbooks-DCWXsHMf.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-qN4OGgZZ.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-B3Vh1iXC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-games-Cy4e-Rb4.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-BT9UaJf8.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-BCKFsblz.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-B9TWO01m.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-BcWjs64V.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/SchoolAccountLink-CDgvMnth.js", "/assets/users-CyFwdcnm.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CwT6N0Lm.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-DZbpoxbj.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-KwfRgkBC.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-DKdWdmQK.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/flame-CEKYSjVY.js", "/assets/check-Btlt0QhP.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-BpDaJIp3.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/yamatoApi-DnvjtfWg.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-CEKYSjVY.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/check-Btlt0QhP.js", "/assets/yamato-configs-BC5C-uVY.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-wXVPOSQo.js", "/assets/book-open-Cv5MGmar.js", "/assets/content-games-Cy4e-Rb4.js", "/assets/content-vce-speaking-C34Lc21y.js", "/assets/content-vce-writing-D_8EODn9.js", "/assets/content-reference-BEU1HXtL.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-B5PdWvQt.js", "/assets/ScrollTopButton-XzAAAaVD.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-0jahUKoq.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/book-open-Cv5MGmar.js", "/assets/users-CyFwdcnm.js", "/assets/DataErrorState-4krJBn0w.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-BicQNGL2.js", "imports": ["/assets/components-BfPPHToQ.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BMHbPJCj.js", "/assets/ScrollTopButton-XzAAAaVD.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BvEc6D7r.js", "/assets/DataErrorState-4krJBn0w.js"], "css": [] } }, "url": "/assets/manifest-601648ed.js", "version": "601648ed" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-BH2kbz6n.js", "imports": ["/assets/components-CqR4DhZ3.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-aK5CclxI.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-DYFVUSlu.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/ChatYamatoEoyOralDrill-CtV3d3DL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-B5XS2WXj.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-Da2bAZQ9.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/check-BlOMdqYi.js", "/assets/book-open-CnKQnBAu.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-U0sTbk9Z.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-Bmt-0M3e.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-DgwW0Xmv.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-C6ri_7mk.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-DiOERdRH.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/play-B6BXaov8.js", "/assets/trash-CHg5fFtN.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-BhOXpWO4.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-B1Z3vIyF.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-BxGcY698.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/ChatYamatoEoyOralDrill-CtV3d3DL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-DiOERdRH.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-CbFI5tDf.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-CZp_KjiC.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-D38zOq--.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-Crw8qiMU.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BOWoCzHF.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-CCINxj9G.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-Cro4d5I9.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-C0z1PuJ_.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-BThbuFOc.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dp1i0UsV.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-adWRnwLC.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-BbktqrYP.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-Cb9wA7kR.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-C_hr608X.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-BdAZHMQc.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-DJBwU_yp.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DxGBepWA.js", "imports": ["/assets/components-CqR4DhZ3.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-C_PD03fa.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-Cn09Y80v.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/shuffle-Direv13U.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-Bkpndivl.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dp1i0UsV.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BfobFk49.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CpOWhcjP.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/SchoolAccountLink-BMBGgChn.js", "/assets/users-BaM02D8E.js", "/assets/gamepad-2-G9i67rJa.js", "/assets/check-BlOMdqYi.js", "/assets/refresh-cw-KxcwuA6_.js", "/assets/pen-line-Da2bAZQ9.js", "/assets/trash-CHg5fFtN.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/game-frame.$name": { "id": "routes/game-frame.$name", "parentId": "root", "path": "game-frame/:name", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/game-frame._name-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-hBeMEvcK.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-BFR7id1t.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/EduLessonPage-Dm25aKFQ.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/GenkoyoshiModal-DdMaIZXb.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-CRSCQIzn.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-CUlNW6P8.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/api.game-access": { "id": "routes/api.game-access", "parentId": "root", "path": "api/game-access", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.game-access-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-JfZeqFiH.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-Cfnm0UmK.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BTkIZtS4.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-BdI96AQG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-COkEFUZL.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-C4ePavha.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/EduLessonPage-Dm25aKFQ.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/GenkoyoshiModal-DdMaIZXb.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-CPwhK-mE.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-mQxxldas.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-games-D3Hc0QLS.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/gamepad-2-G9i67rJa.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-D8TUJ4Bb.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-CBhKotib.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-CWOcaib8.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/class-game": { "id": "routes/class-game", "parentId": "root", "path": "class-game", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-game-QkrAN2Rq.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/users-BaM02D8E.js", "/assets/play-B6BXaov8.js", "/assets/log-in-Dx7ghKM_.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-Bb1WeAEU.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/SchoolAccountLink-BMBGgChn.js", "/assets/users-BaM02D8E.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CCeJRT32.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-DjqCkHLj.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-DotxEi-U.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-_X5nva_l.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/flame-B9fPh486.js", "/assets/check-BlOMdqYi.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-05u6uTuQ.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-B9fPh486.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/check-BlOMdqYi.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-Bmt-0M3e.js", "/assets/book-open-CnKQnBAu.js", "/assets/gamepad-2-G9i67rJa.js", "/assets/content-games-D3Hc0QLS.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/content-reference-CUlNW6P8.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-DayO1UZG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/book-open-CnKQnBAu.js", "/assets/users-BaM02D8E.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-BycZ7FVD.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] } }, "url": "/assets/manifest-7db92725.js", "version": "7db92725" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
@@ -75158,13 +82016,21 @@ var routes = {
     caseSensitive: void 0,
     module: route32
   },
+  "routes/game-frame.$name": {
+    id: "routes/game-frame.$name",
+    parentId: "root",
+    path: "game-frame/:name",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route33
+  },
   "routes/legal.disclaimer": {
     id: "routes/legal.disclaimer",
     parentId: "root",
     path: "legal/disclaimer",
     index: void 0,
     caseSensitive: void 0,
-    module: route33
+    module: route34
   },
   "routes/lessons.family-1": {
     id: "routes/lessons.family-1",
@@ -75172,7 +82038,7 @@ var routes = {
     path: "lessons/family-1",
     index: void 0,
     caseSensitive: void 0,
-    module: route34
+    module: route35
   },
   "routes/reference._index": {
     id: "routes/reference._index",
@@ -75180,7 +82046,15 @@ var routes = {
     path: "reference",
     index: true,
     caseSensitive: void 0,
-    module: route35
+    module: route36
+  },
+  "routes/api.game-access": {
+    id: "routes/api.game-access",
+    parentId: "root",
+    path: "api/game-access",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route37
   },
   "routes/reference.vocab": {
     id: "routes/reference.vocab",
@@ -75188,7 +82062,7 @@ var routes = {
     path: "reference/vocab",
     index: void 0,
     caseSensitive: void 0,
-    module: route36
+    module: route38
   },
   "routes/culture._index": {
     id: "routes/culture._index",
@@ -75196,7 +82070,7 @@ var routes = {
     path: "culture",
     index: true,
     caseSensitive: void 0,
-    module: route37
+    module: route39
   },
   "routes/games.hanafuda": {
     id: "routes/games.hanafuda",
@@ -75204,7 +82078,7 @@ var routes = {
     path: "games/hanafuda",
     index: void 0,
     caseSensitive: void 0,
-    module: route38
+    module: route40
   },
   "routes/lessons._index": {
     id: "routes/lessons._index",
@@ -75212,7 +82086,7 @@ var routes = {
     path: "lessons",
     index: true,
     caseSensitive: void 0,
-    module: route39
+    module: route41
   },
   "routes/legal.privacy": {
     id: "routes/legal.privacy",
@@ -75220,7 +82094,7 @@ var routes = {
     path: "legal/privacy",
     index: void 0,
     caseSensitive: void 0,
-    module: route40
+    module: route42
   },
   "routes/lessons.$slug": {
     id: "routes/lessons.$slug",
@@ -75228,7 +82102,7 @@ var routes = {
     path: "lessons/:slug",
     index: void 0,
     caseSensitive: void 0,
-    module: route41
+    module: route43
   },
   "routes/sitemap[.]xml": {
     id: "routes/sitemap[.]xml",
@@ -75236,7 +82110,7 @@ var routes = {
     path: "sitemap.xml",
     index: void 0,
     caseSensitive: void 0,
-    module: route42
+    module: route44
   },
   "routes/vocab-creator": {
     id: "routes/vocab-creator",
@@ -75244,7 +82118,7 @@ var routes = {
     path: "vocab-creator",
     index: void 0,
     caseSensitive: void 0,
-    module: route43
+    module: route45
   },
   "routes/games._index": {
     id: "routes/games._index",
@@ -75252,7 +82126,7 @@ var routes = {
     path: "games",
     index: true,
     caseSensitive: void 0,
-    module: route44
+    module: route46
   },
   "routes/legal._index": {
     id: "routes/legal._index",
@@ -75260,7 +82134,7 @@ var routes = {
     path: "legal",
     index: true,
     caseSensitive: void 0,
-    module: route45
+    module: route47
   },
   "routes/print-report": {
     id: "routes/print-report",
@@ -75268,7 +82142,7 @@ var routes = {
     path: "print-report",
     index: void 0,
     caseSensitive: void 0,
-    module: route46
+    module: route48
   },
   "routes/games.shogi": {
     id: "routes/games.shogi",
@@ -75276,7 +82150,7 @@ var routes = {
     path: "games/shogi",
     index: void 0,
     caseSensitive: void 0,
-    module: route47
+    module: route49
   },
   "routes/legal.terms": {
     id: "routes/legal.terms",
@@ -75284,7 +82158,15 @@ var routes = {
     path: "legal/terms",
     index: void 0,
     caseSensitive: void 0,
-    module: route48
+    module: route50
+  },
+  "routes/class-game": {
+    id: "routes/class-game",
+    parentId: "root",
+    path: "class-game",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route51
   },
   "routes/my-account": {
     id: "routes/my-account",
@@ -75292,7 +82174,7 @@ var routes = {
     path: "my-account",
     index: void 0,
     caseSensitive: void 0,
-    module: route49
+    module: route52
   },
   "routes/vce._index": {
     id: "routes/vce._index",
@@ -75300,7 +82182,7 @@ var routes = {
     path: "vce",
     index: true,
     caseSensitive: void 0,
-    module: route50
+    module: route53
   },
   "routes/games.igo": {
     id: "routes/games.igo",
@@ -75308,7 +82190,7 @@ var routes = {
     path: "games/igo",
     index: void 0,
     caseSensitive: void 0,
-    module: route51
+    module: route54
   },
   "routes/contact": {
     id: "routes/contact",
@@ -75316,7 +82198,7 @@ var routes = {
     path: "contact",
     index: void 0,
     caseSensitive: void 0,
-    module: route52
+    module: route55
   },
   "routes/prices": {
     id: "routes/prices",
@@ -75324,7 +82206,7 @@ var routes = {
     path: "prices",
     index: void 0,
     caseSensitive: void 0,
-    module: route53
+    module: route56
   },
   "routes/_index": {
     id: "routes/_index",
@@ -75332,7 +82214,7 @@ var routes = {
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route54
+    module: route57
   },
   "routes/about": {
     id: "routes/about",
@@ -75340,7 +82222,7 @@ var routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route55
+    module: route58
   },
   "routes/faq": {
     id: "routes/faq",
@@ -75348,7 +82230,7 @@ var routes = {
     path: "faq",
     index: void 0,
     caseSensitive: void 0,
-    module: route56
+    module: route59
   }
 };
 
