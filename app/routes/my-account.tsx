@@ -129,6 +129,11 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     }
 
     const supabaseAdmin = createAdminSupabaseClient(context);
+
+    // 手書きの写真とライティングの提出記録を先に消す（アカウントを消しても写真のファイルが残らないように）
+    // 失敗しても削除は止めない。記録が消えれば、写真はデータベースの削除待ちリストから毎日の処理で消える（SQL 20）
+    await deleteHandwritingSubmissions(supabaseAdmin, user.id);
+
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
@@ -287,6 +292,26 @@ export async function action({ request, context }: LoaderFunctionArgs) {
   }
 
   return json({ error: "Invalid intent.", success: false }, { status: 400 });
+}
+
+/** アカウント削除の前に、その人の手書きの写真（非公開バケット）とライティングの提出記録を消す */
+async function deleteHandwritingSubmissions(admin: any, userId: string) {
+  try {
+    const { data: rows } = await admin
+      .from("edu_writing_submissions")
+      .select("image_path")
+      .eq("user_id", userId)
+      .not("image_path", "is", null);
+    const paths = (rows ?? []).map((r: any) => r.image_path as string).filter(Boolean);
+    if (paths.length > 0) {
+      const { error } = await admin.storage.from("writing-submissions").remove(paths);
+      if (error) console.error("delete-account: could not delete handwriting images:", error.message);
+    }
+    const { error: rowError } = await admin.from("edu_writing_submissions").delete().eq("user_id", userId);
+    if (rowError) console.error("delete-account: could not delete writing submissions:", rowError.message);
+  } catch (err) {
+    console.error("delete-account: handwriting cleanup failed:", err);
+  }
 }
 
 /**
