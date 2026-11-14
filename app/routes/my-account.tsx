@@ -8,7 +8,7 @@ import { useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/re
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
+import { appendClearAuthCookies, createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
 import { supabase } from '~/lib/supabaseClient';
 
 // モジュール化したコンポーネントのインポート
@@ -140,12 +140,9 @@ export async function action({ request, context }: LoaderFunctionArgs) {
       return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
     }
 
-    return redirect("/", {
-      headers: {
-        ...Object.fromEntries(headers.entries()),
-        "Set-Cookie": "sb-access-token=; Max-Age=0; path=/",
-      },
-    });
+    // 🔐 サーバー用のログイン Cookie をすべて消す（以前は存在しない名前の Cookie を消していた）
+    appendClearAuthCookies(request, headers);
+    return redirect("/", { headers });
   }
 
   // 💡 生徒：参加コードでクラスへの参加を申請する（1人1クラス・先生が承認すると入れる）

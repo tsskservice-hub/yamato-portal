@@ -382,7 +382,7 @@ export default function Home() {
             gamesData={gamesData}
             isDarkMode={isDarkMode}
             onSelectModule={async (mod) => {
-              if (mod.isComingSoon) return;
+              if (mod.isComingSoon || !mod.path) return;
               if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement as 'textAi' | 'imageAi')) {
                 navigate(mod.path);
               }

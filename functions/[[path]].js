@@ -40703,6 +40703,14 @@ function createServerSupabaseClient(request, context) {
   });
   return { supabase: supabase2, headers };
 }
+function appendClearAuthCookies(request, headers) {
+  const cookies = parseCookieHeader(request.headers.get("Cookie") ?? "");
+  for (const { name } of cookies) {
+    if (name.startsWith("sb-")) {
+      headers.append("Set-Cookie", serializeCookieHeader(name, "", { path: "/", maxAge: 0 }));
+    }
+  }
+}
 function getDerivedSecret(context, purpose) {
   const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", context);
   if (!serviceKey) {
@@ -40723,7 +40731,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var stylesheet = "/assets/tailwind-DsvSlWNZ.css";
+var stylesheet = "/assets/tailwind-DWXCFIvt.css";
 var links$1 = () => [
   { rel: "stylesheet", href: stylesheet },
   // 💡 ヤマトのアイコンをファビコンとして設定
@@ -44157,13 +44165,19 @@ var PageLayout = reactExports.forwardRef(({
     return () => subscription.unsubscribe();
   }, []);
   const handleSignOut = async () => {
-    if (propOnSignOut) {
-      await propOnSignOut();
-    } else {
-      await supabase.auth.signOut();
+    try {
+      if (propOnSignOut) {
+        await propOnSignOut();
+      } else {
+        await supabase.auth.signOut();
+      }
+    } finally {
+      await fetch("/api/auth/logout", { method: "POST" }).catch(() => {
+      });
+      setUser(null);
+      setNickname("");
+      window.location.reload();
     }
-    setUser(null);
-    setNickname("");
   };
   const [isAuthModalOpen, setIsAuthModalOpen] = reactExports.useState(false);
   const [authMode, setAuthMode] = reactExports.useState("signin");
@@ -44993,7 +45007,7 @@ function ImageModal({
   );
 }
 var AI_IMAGE_LABEL = "AI-generated \xB7 AI Yamato \xB7 jptutoraiyamato.com";
-function loadImage(src) {
+function loadImage$1(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -45006,7 +45020,7 @@ async function addAiGeneratedLabel(src) {
   if (typeof document === "undefined" || !src)
     return src;
   try {
-    const img = await loadImage(src);
+    const img = await loadImage$1(src);
     const width = img.naturalWidth;
     const height = img.naturalHeight;
     if (!width || !height)
@@ -46744,7 +46758,7 @@ async function loader$S({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$P = ({ data: data2 }) => {
+var meta$O = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceSpeakingEoyOralAcceleratedPage() {
@@ -46924,7 +46938,7 @@ var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: VceSpeakingEoyOralAcceleratedPage,
   loader: loader$S,
-  meta: meta$P
+  meta: meta$O
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoGenkoyoshiEditorVce = ({
   defaultOpen = false,
@@ -47355,7 +47369,7 @@ async function loader$R({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$O = ({ data: data2 }) => {
+var meta$N = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function GenkoyoshiEditorVce() {
@@ -47613,7 +47627,7 @@ var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   default: GenkoyoshiEditorVce,
   links,
   loader: loader$R,
-  meta: meta$O
+  meta: meta$N
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoKanjiGrammarCheckerVce = ({
   defaultOpen = false,
@@ -48275,14 +48289,14 @@ function KanjiGrammarCheckerPage() {
     ) })
   ] }) });
 }
-var meta$N = ({ data: data2 }) => {
+var meta$M = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiGrammarCheckerPage,
   loader: loader$Q,
-  meta: meta$N
+  meta: meta$M
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoOralExamQuestions = ({
   systemPrompt = "",
@@ -48364,7 +48378,7 @@ async function loader$P({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$M = ({ data: data2 }) => {
+var meta$L = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OralExamQuestions() {
@@ -48571,7 +48585,7 @@ var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: OralExamQuestions,
   loader: loader$P,
-  meta: meta$M
+  meta: meta$L
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoEoyOralElaborate = ({
   systemPrompt = "",
@@ -49337,7 +49351,7 @@ async function loader$O({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$L = ({ data: data2 }) => {
+var meta$K = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralElaboratePage() {
@@ -49971,7 +49985,7 @@ var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: EoyOralElaboratePage,
   loader: loader$O,
-  meta: meta$L
+  meta: meta$K
 }, Symbol.toStringTag, { value: "Module" }));
 function FeedbackPdfModal({
   initialContent,
@@ -50302,7 +50316,7 @@ async function loader$N({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$K = ({ data: data2 }) => {
+var meta$J = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CustomDashboard() {
@@ -50647,359 +50661,6 @@ var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: CustomDashboard,
   loader: loader$N,
-  meta: meta$K
-}, Symbol.toStringTag, { value: "Module" }));
-var POLL_MS = 3e4;
-function GameAccessGate({ layoutRef, children }) {
-  const [state, setState] = reactExports.useState({ status: "checking" });
-  const ticketRef = reactExports.useRef(null);
-  const check = reactExports.useCallback(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        ticketRef.current = null;
-        setState({ status: "login" });
-        return;
-      }
-      const res = await fetch("/api/game-access", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${session.access_token}` }
-      });
-      if (!res.ok)
-        throw new Error(`game-access ${res.status}`);
-      const body = await res.json();
-      if (body.status === "allowed" && typeof body.ticket === "string") {
-        if (!ticketRef.current)
-          ticketRef.current = body.ticket;
-        const ticket = ticketRef.current;
-        setState((prev) => prev.status === "allowed" && prev.ticket === ticket ? prev : { status: "allowed", ticket });
-      } else if (body.status === "locked") {
-        ticketRef.current = null;
-        const className = typeof body.className === "string" ? body.className : "";
-        setState((prev) => prev.status === "locked" && prev.className === className ? prev : { status: "locked", className });
-      } else if (body.status === "login") {
-        ticketRef.current = null;
-        setState({ status: "login" });
-      } else {
-        throw new Error("Unexpected game-access response");
-      }
-    } catch (err) {
-      console.error("[GameAccessGate] check failed:", err);
-      setState((prev) => prev.status === "checking" ? { status: "error" } : prev);
-    }
-  }, []);
-  reactExports.useEffect(() => {
-    check();
-    const timer = setInterval(() => {
-      if (!document.hidden)
-        check();
-    }, POLL_MS);
-    const onVisible = () => {
-      if (!document.hidden)
-        check();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT")
-        check();
-    });
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVisible);
-      subscription == null ? void 0 : subscription.unsubscribe();
-    };
-  }, [check]);
-  if (state.status === "allowed")
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: children(state.ticket) });
-  const box = "max-w-xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-sm";
-  if (state.status === "checking") {
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-16 text-center", role: "status", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-3" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 font-medium", children: "Getting the game ready\u2026" })
-    ] });
-  }
-  if (state.status === "login") {
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LogIn, { className: "w-7 h-7 text-indigo-600" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Log in to play" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "Games are free with an AI Yamato account. Log in, or create a free account, to start playing." }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row gap-2 justify-center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => {
-              var _a;
-              return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signin");
-            },
-            className: "px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer",
-            children: "Log in"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => {
-              var _a;
-              return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signup");
-            },
-            className: "px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-sm font-bold rounded-xl transition cursor-pointer",
-            children: "Create a free account"
-          }
-        )
-      ] })
-    ] });
-  }
-  if (state.status === "locked") {
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, role: "status", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "w-7 h-7 text-amber-600" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Games are locked right now" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: [
-        "Your teacher has locked games",
-        state.className ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-          " for ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: state.className })
-        ] }) : null,
-        ". Please listen to your teacher. This page will open by itself when your teacher unlocks games."
-      ] })
-    ] });
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, role: "alert", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Could not open the game" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: "Please check your internet connection and try again." }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "button",
-      {
-        type: "button",
-        onClick: () => {
-          setState({ status: "checking" });
-          check();
-        },
-        className: "inline-flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer",
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(RefreshCw, { className: "w-4 h-4" }),
-          " Try again"
-        ]
-      }
-    )
-  ] });
-}
-var fullscreenElement = () => {
-  const doc = document;
-  return doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
-};
-function GameFrame({ name, title, ticket, variants, minHeight = 560 }) {
-  const list2 = reactExports.useMemo(() => (variants == null ? void 0 : variants.length) ? variants : [{ key: "main", label: title }], [variants, title]);
-  const [active, setActive] = reactExports.useState(list2[0].key);
-  const [heights, setHeights] = reactExports.useState({});
-  const [nativeFull, setNativeFull] = reactExports.useState(false);
-  const [pseudoFull, setPseudoFull] = reactExports.useState(false);
-  const isFull = nativeFull || pseudoFull;
-  const containerRef = reactExports.useRef(null);
-  const frameRefs = reactExports.useRef({});
-  const srcs = reactExports.useMemo(() => {
-    const out = {};
-    for (const v2 of list2)
-      out[v2.key] = `/game-frame/${name}?${new URLSearchParams({ ...v2.params ?? {}, t: ticket })}`;
-    return out;
-  }, [list2, name, ticket]);
-  reactExports.useEffect(() => {
-    const onMessage = (e) => {
-      if (e.origin !== window.location.origin)
-        return;
-      const data2 = e.data;
-      if (!data2 || data2.type !== "yamato-game:height")
-        return;
-      const key = Object.keys(frameRefs.current).find((k2) => {
-        var _a;
-        return ((_a = frameRefs.current[k2]) == null ? void 0 : _a.contentWindow) === e.source;
-      });
-      const h = Number(data2.height);
-      if (!key || !Number.isFinite(h) || h <= 0)
-        return;
-      const height = Math.min(Math.ceil(h), 2e4);
-      setHeights((prev) => prev[key] === height ? prev : { ...prev, [key]: height });
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-  const sendViewport = reactExports.useCallback(() => {
-    for (const frame of Object.values(frameRefs.current)) {
-      if (!(frame == null ? void 0 : frame.contentWindow))
-        continue;
-      const r2 = frame.getBoundingClientRect();
-      if (r2.height <= 0)
-        continue;
-      let top = Math.max(0, -r2.top);
-      let height = Math.max(0, Math.min(r2.height, window.innerHeight - r2.top) - top);
-      const minVisible = Math.min(r2.height, 320);
-      if (height < minVisible) {
-        top = r2.top > 0 ? 0 : Math.max(0, r2.height - minVisible);
-        height = minVisible;
-      }
-      frame.contentWindow.postMessage({ type: "yamato-game:viewport", top, height }, window.location.origin);
-    }
-  }, []);
-  reactExports.useEffect(() => {
-    let raf = 0;
-    const schedule = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(sendViewport);
-    };
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    schedule();
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-    };
-  }, [sendViewport, heights, isFull, active]);
-  reactExports.useEffect(() => {
-    const onChange = () => setNativeFull(Boolean(containerRef.current) && fullscreenElement() === containerRef.current);
-    document.addEventListener("fullscreenchange", onChange);
-    document.addEventListener("webkitfullscreenchange", onChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", onChange);
-      document.removeEventListener("webkitfullscreenchange", onChange);
-    };
-  }, []);
-  reactExports.useEffect(() => {
-    if (!pseudoFull)
-      return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e) => {
-      if (e.key === "Escape")
-        setPseudoFull(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [pseudoFull]);
-  const toggleFullscreen = async () => {
-    var _a;
-    if (isFull) {
-      setPseudoFull(false);
-      if (fullscreenElement()) {
-        const doc = document;
-        try {
-          if (doc.exitFullscreen)
-            await doc.exitFullscreen();
-          else
-            (_a = doc.webkitExitFullscreen) == null ? void 0 : _a.call(doc);
-        } catch {
-        }
-      }
-      return;
-    }
-    const el2 = containerRef.current;
-    if (!el2)
-      return;
-    try {
-      if (el2.requestFullscreen)
-        await el2.requestFullscreen();
-      else if (el2.webkitRequestFullscreen) {
-        el2.webkitRequestFullscreen();
-        await new Promise((r2) => setTimeout(r2, 300));
-      }
-    } catch {
-    }
-    if (fullscreenElement() !== el2)
-      setPseudoFull(true);
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      ref: containerRef,
-      className: isFull ? "fixed inset-0 z-[1000] flex flex-col bg-white dark:bg-slate-950" : "w-full",
-      style: pseudoFull ? { height: "100dvh" } : void 0,
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-bold text-slate-700 dark:text-slate-200 mr-1", children: title }),
-          list2.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "group", "aria-label": "Version", className: "inline-flex rounded-full border border-slate-300 dark:border-slate-700 overflow-hidden", children: list2.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              "aria-pressed": active === v2.key,
-              onClick: () => setActive(v2.key),
-              className: `px-3.5 py-1.5 text-xs font-bold transition cursor-pointer ${active === v2.key ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"}`,
-              children: v2.label
-            },
-            v2.key
-          )) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: toggleFullscreen,
-              className: "ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer",
-              children: [
-                isFull ? /* @__PURE__ */ jsxRuntimeExports.jsx(Minimize2, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Maximize2, { className: "w-3.5 h-3.5" }),
-                isFull ? "Exit fullscreen" : "Fullscreen"
-              ]
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: isFull ? "relative flex-1 min-h-0" : "relative", children: list2.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "iframe",
-          {
-            ref: (el2) => {
-              frameRefs.current[v2.key] = el2;
-            },
-            src: srcs[v2.key],
-            title: list2.length > 1 ? `${title} (${v2.label})` : title,
-            className: `block w-full border-0 ${v2.key === active ? "" : "hidden"}`,
-            style: { height: isFull ? "100%" : Math.max(minHeight, heights[v2.key] ?? minHeight) },
-            sandbox: "allow-scripts allow-same-origin allow-forms",
-            allow: "fullscreen",
-            onLoad: sendViewport
-          },
-          v2.key
-        )) })
-      ]
-    }
-  );
-}
-function IframeGamePage({ layoutRef, name, title, description, variants }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-6xl mx-auto px-2 sm:px-4 pt-6 sm:pt-8 space-y-4", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "text-center px-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-bold text-slate-900 dark:text-slate-100", children: title }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium", children: description })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: (ticket) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GameFrame, { name, title, ticket, variants }) }) })
-  ] }) });
-}
-async function loadGamePage(request) {
-  let portalContent = null;
-  try {
-    const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
-    portalContent = (data2 == null ? void 0 : data2.content) || null;
-  } catch {
-  }
-  return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
-}
-var loader$M = ({ request }) => loadGamePage(request);
-var meta$J = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
-function HiraganaMemoryMatchRoute() {
-  const layoutRef = reactExports.useRef(null);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Hiragana Memory Match", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-    IframeGamePage,
-    {
-      layoutRef,
-      name: "hiragana-memory-match",
-      title: "Hiragana Memory Match",
-      description: "Test your memory and match each hiragana with its romaji!"
-    }
-  ) });
-}
-var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: HiraganaMemoryMatchRoute,
-  loader: loader$M,
   meta: meta$J
 }, Symbol.toStringTag, { value: "Module" }));
 var OralUserAnswerList = ({
@@ -51123,7 +50784,7 @@ var OralUserAnswerList = ({
     ] })
   ] });
 };
-async function loader$L({ request }) {
+async function loader$M({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -51532,13 +51193,13 @@ Please enter at least 10 characters for your drill response. (Current: ${current
     )
   ] }) }) });
 }
-var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralDrillPage,
-  loader: loader$L,
+  loader: loader$M,
   meta: meta$I
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$K({ request }) {
+async function loader$L({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -52076,10 +51737,10 @@ function TestYamatoNotePage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { style: { textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\xA9 2026 JPTutor AI Yamato." }) })
   ] }) });
 }
-var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoNotePage,
-  loader: loader$K,
+  loader: loader$L,
   meta: meta$H
 }, Symbol.toStringTag, { value: "Module" }));
 var OralMockConfig = ({
@@ -52735,7 +52396,7 @@ var ChatYamatoEoyOralMock = ({
     }
   );
 };
-async function loader$J({ request }) {
+async function loader$K({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -52867,10 +52528,10 @@ function MockOralMode() {
 var meta$G = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MockOralMode,
-  loader: loader$J,
+  loader: loader$K,
   meta: meta$G
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$b = "WRITING_STYLES";
@@ -52891,7 +52552,7 @@ async function fetchWritingStylesData(supabaseClient) {
     return null;
   }
 }
-async function loader$I({ request }) {
+async function loader$J({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -53029,13 +52690,346 @@ function WritingStylesGuide() {
     }
   );
 }
-var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: WritingStylesGuide,
-  loader: loader$I,
+  loader: loader$J,
   meta: meta$F
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$H = ({ request }) => loadGamePage(request);
+var POLL_MS = 3e4;
+function GameAccessGate({ layoutRef, children }) {
+  const [state, setState] = reactExports.useState({ status: "checking" });
+  const ticketRef = reactExports.useRef(null);
+  const check = reactExports.useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        ticketRef.current = null;
+        setState({ status: "login" });
+        return;
+      }
+      const res = await fetch("/api/game-access", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (!res.ok)
+        throw new Error(`game-access ${res.status}`);
+      const body = await res.json();
+      if (body.status === "allowed" && typeof body.ticket === "string") {
+        if (!ticketRef.current)
+          ticketRef.current = body.ticket;
+        const ticket = ticketRef.current;
+        setState((prev) => prev.status === "allowed" && prev.ticket === ticket ? prev : { status: "allowed", ticket });
+      } else if (body.status === "locked") {
+        ticketRef.current = null;
+        const className = typeof body.className === "string" ? body.className : "";
+        setState((prev) => prev.status === "locked" && prev.className === className ? prev : { status: "locked", className });
+      } else if (body.status === "login") {
+        ticketRef.current = null;
+        setState({ status: "login" });
+      } else {
+        throw new Error("Unexpected game-access response");
+      }
+    } catch (err) {
+      console.error("[GameAccessGate] check failed:", err);
+      setState((prev) => prev.status === "checking" ? { status: "error" } : prev);
+    }
+  }, []);
+  reactExports.useEffect(() => {
+    check();
+    const timer = setInterval(() => {
+      if (!document.hidden)
+        check();
+    }, POLL_MS);
+    const onVisible = () => {
+      if (!document.hidden)
+        check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT")
+        check();
+    });
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      subscription == null ? void 0 : subscription.unsubscribe();
+    };
+  }, [check]);
+  if (state.status === "allowed")
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: children(state.ticket) });
+  const box = "max-w-xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-sm";
+  if (state.status === "checking") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-16 text-center", role: "status", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-3" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 font-medium", children: "Getting the game ready\u2026" })
+    ] });
+  }
+  if (state.status === "login") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LogIn, { className: "w-7 h-7 text-indigo-600" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Log in to play" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: "Games are free with an AI Yamato account. Log in, or create a free account, to start playing." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row gap-2 justify-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              var _a;
+              return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signin");
+            },
+            className: "px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer",
+            children: "Log in"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              var _a;
+              return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signup");
+            },
+            className: "px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-sm font-bold rounded-xl transition cursor-pointer",
+            children: "Create a free account"
+          }
+        )
+      ] })
+    ] });
+  }
+  if (state.status === "locked") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, role: "status", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-14 h-14 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "w-7 h-7 text-amber-600" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Games are locked right now" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-400 leading-relaxed", children: [
+        "Your teacher has locked games",
+        state.className ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          " for ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: state.className })
+        ] }) : null,
+        ". Please listen to your teacher. This page will open by itself when your teacher unlocks games."
+      ] })
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: box, role: "alert", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-bold text-slate-800 dark:text-white", children: "Could not open the game" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: "Please check your internet connection and try again." }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        onClick: () => {
+          setState({ status: "checking" });
+          check();
+        },
+        className: "inline-flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(RefreshCw, { className: "w-4 h-4" }),
+          " Try again"
+        ]
+      }
+    )
+  ] });
+}
+var fullscreenElement = () => {
+  const doc = document;
+  return doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
+};
+function GameFrame({ name, title, ticket, variants, minHeight = 560 }) {
+  const list2 = reactExports.useMemo(() => (variants == null ? void 0 : variants.length) ? variants : [{ key: "main", label: title }], [variants, title]);
+  const [active, setActive] = reactExports.useState(list2[0].key);
+  const [heights, setHeights] = reactExports.useState({});
+  const [nativeFull, setNativeFull] = reactExports.useState(false);
+  const [pseudoFull, setPseudoFull] = reactExports.useState(false);
+  const isFull = nativeFull || pseudoFull;
+  const containerRef = reactExports.useRef(null);
+  const frameRefs = reactExports.useRef({});
+  const srcs = reactExports.useMemo(() => {
+    const out = {};
+    for (const v2 of list2)
+      out[v2.key] = `/game-frame/${name}?${new URLSearchParams({ ...v2.params ?? {}, t: ticket })}`;
+    return out;
+  }, [list2, name, ticket]);
+  reactExports.useEffect(() => {
+    const onMessage = (e) => {
+      if (e.origin !== window.location.origin)
+        return;
+      const data2 = e.data;
+      if (!data2 || data2.type !== "yamato-game:height")
+        return;
+      const key = Object.keys(frameRefs.current).find((k2) => {
+        var _a;
+        return ((_a = frameRefs.current[k2]) == null ? void 0 : _a.contentWindow) === e.source;
+      });
+      const h = Number(data2.height);
+      if (!key || !Number.isFinite(h) || h <= 0)
+        return;
+      const height = Math.min(Math.ceil(h), 2e4);
+      setHeights((prev) => prev[key] === height ? prev : { ...prev, [key]: height });
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+  const sendViewport = reactExports.useCallback(() => {
+    for (const frame of Object.values(frameRefs.current)) {
+      if (!(frame == null ? void 0 : frame.contentWindow))
+        continue;
+      const r2 = frame.getBoundingClientRect();
+      if (r2.height <= 0)
+        continue;
+      let top = Math.max(0, -r2.top);
+      let height = Math.max(0, Math.min(r2.height, window.innerHeight - r2.top) - top);
+      const minVisible = Math.min(r2.height, 320);
+      if (height < minVisible) {
+        top = r2.top > 0 ? 0 : Math.max(0, r2.height - minVisible);
+        height = minVisible;
+      }
+      frame.contentWindow.postMessage({ type: "yamato-game:viewport", top, height }, window.location.origin);
+    }
+  }, []);
+  reactExports.useEffect(() => {
+    let raf = 0;
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(sendViewport);
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    schedule();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [sendViewport, heights, isFull, active]);
+  reactExports.useEffect(() => {
+    const onChange = () => setNativeFull(Boolean(containerRef.current) && fullscreenElement() === containerRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
+  }, []);
+  reactExports.useEffect(() => {
+    if (!pseudoFull)
+      return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => {
+      if (e.key === "Escape")
+        setPseudoFull(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [pseudoFull]);
+  const toggleFullscreen = async () => {
+    var _a;
+    if (isFull) {
+      setPseudoFull(false);
+      if (fullscreenElement()) {
+        const doc = document;
+        try {
+          if (doc.exitFullscreen)
+            await doc.exitFullscreen();
+          else
+            (_a = doc.webkitExitFullscreen) == null ? void 0 : _a.call(doc);
+        } catch {
+        }
+      }
+      return;
+    }
+    const el2 = containerRef.current;
+    if (!el2)
+      return;
+    try {
+      if (el2.requestFullscreen)
+        await el2.requestFullscreen();
+      else if (el2.webkitRequestFullscreen) {
+        el2.webkitRequestFullscreen();
+        await new Promise((r2) => setTimeout(r2, 300));
+      }
+    } catch {
+    }
+    if (fullscreenElement() !== el2)
+      setPseudoFull(true);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      ref: containerRef,
+      className: isFull ? "fixed inset-0 z-[1000] flex flex-col bg-white dark:bg-slate-950" : "w-full",
+      style: pseudoFull ? { height: "100dvh" } : void 0,
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-bold text-slate-700 dark:text-slate-200 mr-1", children: title }),
+          list2.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "group", "aria-label": "Version", className: "inline-flex rounded-full border border-slate-300 dark:border-slate-700 overflow-hidden", children: list2.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              "aria-pressed": active === v2.key,
+              onClick: () => setActive(v2.key),
+              className: `px-3.5 py-1.5 text-xs font-bold transition cursor-pointer ${active === v2.key ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"}`,
+              children: v2.label
+            },
+            v2.key
+          )) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: toggleFullscreen,
+              className: "ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer",
+              children: [
+                isFull ? /* @__PURE__ */ jsxRuntimeExports.jsx(Minimize2, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Maximize2, { className: "w-3.5 h-3.5" }),
+                isFull ? "Exit fullscreen" : "Fullscreen"
+              ]
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: isFull ? "relative flex-1 min-h-0" : "relative", children: list2.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "iframe",
+          {
+            ref: (el2) => {
+              frameRefs.current[v2.key] = el2;
+            },
+            src: srcs[v2.key],
+            title: list2.length > 1 ? `${title} (${v2.label})` : title,
+            className: `block w-full border-0 ${v2.key === active ? "" : "hidden"}`,
+            style: { height: isFull ? "100%" : Math.max(minHeight, heights[v2.key] ?? minHeight) },
+            sandbox: "allow-scripts allow-same-origin allow-forms",
+            allow: "fullscreen",
+            onLoad: sendViewport
+          },
+          v2.key
+        )) })
+      ]
+    }
+  );
+}
+function IframeGamePage({ layoutRef, name, title, description, variants }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-[#f4f1ea] dark:bg-slate-950 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-6xl mx-auto px-2 sm:px-4 pt-6 sm:pt-8 space-y-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "text-center px-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-bold text-slate-900 dark:text-slate-100", children: title }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mt-1 font-medium", children: description })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(GameAccessGate, { layoutRef, children: (ticket) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GameFrame, { name, title, ticket, variants }) }) })
+  ] }) });
+}
+async function loadGamePage(request) {
+  let portalContent = null;
+  try {
+    const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
+    portalContent = (data2 == null ? void 0 : data2.content) || null;
+  } catch {
+  }
+  return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
+}
+var loader$I = ({ request }) => loadGamePage(request);
 var meta$E = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 var VARIANTS = [
   { key: "easy", label: "Easy", params: { version: "easy" } },
@@ -53054,10 +53048,10 @@ function PrefecturePuzzleRoute() {
     }
   ) });
 }
-var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrefecturePuzzleRoute,
-  loader: loader$H,
+  loader: loader$I,
   meta: meta$E
 }, Symbol.toStringTag, { value: "Module" }));
 function shuffle$1(arr) {
@@ -53083,7 +53077,7 @@ var RINGS_DATA = STAGES.map((s2, i) => [
   ...RING_OK[i].map((j) => [...s2[j], true]),
   ...RING_BAD[i].map(([k2, r2]) => [k2, r2, false])
 ]);
-async function loader$G({ request }) {
+async function loader$H({ request }) {
   let portalContent = null;
   try {
     const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
@@ -53632,10 +53626,10 @@ function RollingCharacterArena() {
     ] })
   ] });
 }
-var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: RollingCharacterPage,
-  loader: loader$G,
+  loader: loader$H,
   meta: meta$D
 }, Symbol.toStringTag, { value: "Module" }));
 function renderGrammarText(text, modalKey) {
@@ -53945,7 +53939,7 @@ async function fetchTextTypesData(supabaseClient) {
     return null;
   }
 }
-async function loader$F({ request }) {
+async function loader$G({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -54339,13 +54333,13 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
 var meta$C = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
-  loader: loader$F,
+  loader: loader$G,
   meta: meta$C
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$E({ request }) {
+async function loader$F({ request }) {
   blockOnProduction(request);
   return null;
 }
@@ -54417,6 +54411,8 @@ function TestYamatoPage() {
   };
   const handleDebugLogout = async () => {
     await supabase.auth.signOut();
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {
+    });
     setDebugStatus("\u{1F512} \u30ED\u30B0\u30A2\u30A6\u30C8\u3057\u307E\u3057\u305F\u3002\u30DA\u30FC\u30B8\u3092\u66F4\u65B0\u3057\u307E\u3059...");
     setTimeout(() => {
       window.location.reload();
@@ -54742,10 +54738,10 @@ function TestYamatoPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { style: { textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\xA9 2026 JPTutor AI Yamato." }) })
   ] });
 }
-var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoPage,
-  loader: loader$E,
+  loader: loader$F,
   meta: meta$B
 }, Symbol.toStringTag, { value: "Module" }));
 var ENEMY_POOL = [
@@ -54782,7 +54778,7 @@ var SOUND_DIR = "/game-assets/ogre-star-sword";
 var SWORD_SOUND = `${SOUND_DIR}/sword-sound.mp3`;
 var COUNT_SOUNDS = Array.from({ length: 10 }, (_2, i) => `${SOUND_DIR}/count-${i + 1}.mp3`);
 var COUNT_FALLBACK_MS = 1500;
-async function loader$D({ request }) {
+async function loader$E({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55162,10 +55158,10 @@ function OgreStarSwordArena() {
     ] })
   ] });
 }
-var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OgreStarSwordPage,
-  loader: loader$D,
+  loader: loader$E,
   meta: meta$A
 }, Symbol.toStringTag, { value: "Module" }));
 var handleScrollToSection = (e, anchorId) => {
@@ -55178,7 +55174,7 @@ var handleScrollToSection = (e, anchorId) => {
 var getAnchorId = (text) => {
   return `cat-${text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 };
-async function loader$C({ request }) {
+async function loader$D({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   let grammarCategories = [];
@@ -55353,16 +55349,16 @@ function VceGrammarComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" })
   ] }) });
 }
-var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceGrammarComponent,
-  loader: loader$C,
+  loader: loader$D,
   meta: meta$z
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$B() {
+async function loader$C() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405 });
 }
-async function action$6({ request, context }) {
+async function action$7({ request, context }) {
   var _a;
   if (request.method !== "POST") {
     return dist$1.json({ error: "Method not allowed." }, { status: 405 });
@@ -55408,12 +55404,12 @@ async function action$6({ request, context }) {
   }
   return dist$1.json({ success: true, status: (current == null ? void 0 : current.is_teacher) ? "approved" : (current == null ? void 0 : current.teacher_status) ?? "pending" });
 }
-var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$6,
-  loader: loader$B
+  action: action$7,
+  loader: loader$C
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$A({ request, context }) {
+async function loader$B({ request, context }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -55487,13 +55483,13 @@ function ImageTestPage() {
 var meta$y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ImageTestPage,
-  loader: loader$A,
+  loader: loader$B,
   meta: meta$y
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$z({ request }) {
+async function loader$A({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -55852,12 +55848,59 @@ function TestAudioPage() {
     ] })
   ] }) }) });
 }
-var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestAudioPage,
-  loader: loader$z,
+  loader: loader$A,
   meta: meta$x
 }, Symbol.toStringTag, { value: "Module" }));
+function useGameSounds(files, volume = 0.8) {
+  const baseRef = reactExports.useRef(null);
+  const failedRef = reactExports.useRef(/* @__PURE__ */ new Set());
+  const filesRef = reactExports.useRef(files);
+  const [muted, setMuted] = reactExports.useState(false);
+  const mutedRef = reactExports.useRef(muted);
+  mutedRef.current = muted;
+  const load = reactExports.useCallback(() => {
+    if (baseRef.current || typeof Audio === "undefined")
+      return;
+    const base = {};
+    for (const name of Object.keys(filesRef.current)) {
+      const audio2 = new Audio(filesRef.current[name]);
+      audio2.preload = "auto";
+      audio2.addEventListener("error", () => failedRef.current.add(name), { once: true });
+      base[name] = audio2;
+    }
+    baseRef.current = base;
+  }, []);
+  const play = reactExports.useCallback(
+    (name) => {
+      var _a;
+      const source = (_a = baseRef.current) == null ? void 0 : _a[name];
+      if (!source || mutedRef.current || failedRef.current.has(name))
+        return;
+      const audio2 = source.cloneNode(true);
+      audio2.volume = volume;
+      audio2.play().catch(() => {
+      });
+    },
+    [volume]
+  );
+  return { load, play, muted, setMuted };
+}
+async function fetchAllPages(fetchPage, pageSize = 1e3, maxPages = 50) {
+  const rows = [];
+  for (let page = 0; page < maxPages; page++) {
+    const from = page * pageSize;
+    const { data: data2, error } = await fetchPage(from, from + pageSize - 1);
+    if (error)
+      throw new Error(error.message);
+    rows.push(...data2 ?? []);
+    if (!data2 || data2.length < pageSize)
+      break;
+  }
+  return rows;
+}
 var MAZE_GRID = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
@@ -55898,6 +55941,11 @@ var SNAKE_STEP_MS = 850;
 var SHIELD_MS = 2e3;
 var SNAKE_MIN_DISTANCE = 10;
 var POINTS_PER_CHAR = 200;
+var SOUND_FILES = {
+  correct: "/game-assets/character-maze/correct-answer.mp3",
+  incorrect: "/game-assets/character-maze/incorrect-answer.mp3",
+  snake: "/game-assets/character-maze/snake-sound.mp3"
+};
 var DIRECTIONS = [
   { x: 0, y: -1 },
   { x: 0, y: 1 },
@@ -55910,14 +55958,14 @@ var KANA_GROUP = {
   \u534A\u6FC1\u97F3: "dakuten",
   \u62D7\u97F3: "combo"
 };
-var KANA_SETS = [
+var KANA_SETS$1 = [
   { key: "basic", label: "Basic sounds", example: { hiragana: "\u3042 \u3044 \u3046", katakana: "\u30A2 \u30A4 \u30A6" } },
   { key: "dakuten", label: "Dakuten & handakuten", example: { hiragana: "\u304C \u3056 \u3071", katakana: "\u30AC \u30B6 \u30D1" } },
   { key: "combo", label: "Combinations", example: { hiragana: "\u304D\u3083 \u3057\u3085", katakana: "\u30AD\u30E3 \u30B7\u30E5" } },
   { key: "all", label: "All", example: { hiragana: "\u3042\u301C\u3074\u3087", katakana: "\u30A2\u301C\u30D4\u30E7" } }
 ];
 var clean$1 = (v2) => typeof v2 === "string" ? v2.trim() : "";
-async function loader$y({ request }) {
+async function loader$z({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55928,10 +55976,10 @@ async function loader$y({ request }) {
   const pools = { hiragana: [], katakana: [], kanji: [] };
   let loadError = null;
   try {
-    const { data: data2, error } = await supabase.from("kl_character").select("character, romaji, kun_romaji, on_romaji, char_type, category, sort_order").in("char_type", ["hiragana", "katakana", "kanji"]).order("sort_order", { ascending: true, nullsFirst: false }).limit(1e3);
-    if (error)
-      throw error;
-    for (const r2 of data2 ?? []) {
+    const data2 = await fetchAllPages(
+      (from, to) => supabase.from("kl_character").select("id, character, romaji, kun_romaji, on_romaji, char_type, category, sort_order").in("char_type", ["hiragana", "katakana", "kanji"]).order("sort_order", { ascending: true, nullsFirst: false }).order("id", { ascending: true }).range(from, to)
+    );
+    for (const r2 of data2) {
       const char = clean$1(r2.character);
       if (!char)
         continue;
@@ -56024,6 +56072,7 @@ function CharacterMazeArena({ pools }) {
   const [answering, setAnswering] = reactExports.useState(false);
   const [isGoalReached, setIsGoalReached] = reactExports.useState(false);
   const [isGameOver, setIsGameOver] = reactExports.useState(false);
+  const sounds = useGameSounds(SOUND_FILES);
   const active = playing && !activeQuizItem && !isGameOver && !isGoalReached;
   const activeRef = reactExports.useRef(active);
   activeRef.current = active;
@@ -56044,6 +56093,7 @@ function CharacterMazeArena({ pools }) {
   };
   reactExports.useEffect(() => clearTimers, []);
   const startGame = () => {
+    sounds.load();
     clearTimers();
     const chars = shuffle$1(selectedPool).slice(0, ITEM_COUNT);
     const cells = shuffle$1(FREE_CELLS);
@@ -56128,6 +56178,7 @@ function CharacterMazeArena({ pools }) {
       shieldUntilRef.current = Date.now() + SHIELD_MS;
       setShielded(true);
       later(() => setShielded(false), SHIELD_MS);
+      sounds.play("snake");
       setHp((h) => Math.max(0, h - 1));
       setPlayer(START);
       return;
@@ -56155,6 +56206,7 @@ function CharacterMazeArena({ pools }) {
       return;
     setAnswering(true);
     if (item.answers.includes(guess)) {
+      sounds.play("correct");
       setQuizFeedback({ ok: true, text: `Correct! ${item.char} = ${item.reading} (+${POINTS_PER_CHAR} pt)` });
       later(() => {
         setScore((s2) => s2 + POINTS_PER_CHAR);
@@ -56164,6 +56216,7 @@ function CharacterMazeArena({ pools }) {
         setAnswering(false);
       }, 900);
     } else {
+      sounds.play("incorrect");
       setQuizFeedback({ ok: false, text: `Not quite: ${item.char} is "${item.reading}". It ran away to another spot!` });
       later(() => {
         setItems((prev) => {
@@ -56229,7 +56282,7 @@ function CharacterMazeArena({ pools }) {
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-xs font-normal text-slate-500", children: "Either reading is correct: the kun reading (e.g. yama) or the on reading (e.g. san)." })
-      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "group", "aria-label": "Character set", className: "grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-xl mx-auto", children: KANA_SETS.map((s2) => {
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "group", "aria-label": "Character set", className: "grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-xl mx-auto", children: KANA_SETS$1.map((s2) => {
         const count = s2.key === "all" ? pools[script].length : pools[script].filter((k2) => k2.group === s2.key).length;
         return /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
@@ -56285,15 +56338,28 @@ function CharacterMazeArena({ pools }) {
         score,
         " pt"
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          type: "button",
-          onClick: backToSetup,
-          className: "text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700 transition cursor-pointer",
-          children: "Change characters"
-        }
-      )
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex gap-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => sounds.setMuted((m2) => !m2),
+            "aria-pressed": sounds.muted,
+            "aria-label": sounds.muted ? "Sound off" : "Sound on",
+            className: "text-xs bg-slate-200 hover:bg-slate-300 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 transition cursor-pointer",
+            children: sounds.muted ? "\u{1F507}" : "\u{1F50A}"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: backToSetup,
+            className: "text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700 transition cursor-pointer",
+            children: "Change characters"
+          }
+        )
+      ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 -mt-2", children: canGoal ? "All characters collected! Go to the castle \u{1F3F0} in the bottom-right corner." : "Collect every character, then go to the castle \u{1F3F0}. Move with the arrow keys, WASD, or the buttons." }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative bg-slate-50 border-2 border-slate-200 rounded-2xl p-2 sm:p-4 shadow-inner", children: [
@@ -56405,13 +56471,13 @@ function CharacterMazeArena({ pools }) {
     ] }) })
   ] });
 }
-var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CharacterMazePage,
-  loader: loader$y,
+  loader: loader$z,
   meta: meta$w
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$x({ request }) {
+async function loader$y({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -56517,10 +56583,10 @@ function TextTypesComponent() {
     }
   );
 }
-var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TextTypesComponent,
-  loader: loader$x,
+  loader: loader$y,
   meta: meta$v
 }, Symbol.toStringTag, { value: "Module" }));
 var CHAR_POOL = [
@@ -56540,7 +56606,7 @@ var CHAR_POOL = [
   { char: "\u305B", kana: "\u30BB", romaji: "se" },
   { char: "\u305D", kana: "\u30BD", romaji: "so" }
 ];
-async function loader$w({ request }) {
+async function loader$x({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -56743,10 +56809,10 @@ function GameArena() {
     )
   ] });
 }
-var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: StudentTunnelEscapePage,
-  loader: loader$w,
+  loader: loader$x,
   meta: meta$u
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$8 = "CONTENT_VCE_SPEAKING";
@@ -56809,7 +56875,7 @@ function useVceSpeakingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$v({ request }) {
+async function loader$w({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -56882,10 +56948,10 @@ function VceSpeakingIndex() {
 var meta$t = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingIndex,
-  loader: loader$v,
+  loader: loader$w,
   meta: meta$t
 }, Symbol.toStringTag, { value: "Module" }));
 function parseEnglishAnswers(rawEnglishText) {
@@ -56893,7 +56959,7 @@ function parseEnglishAnswers(rawEnglishText) {
     return [];
   return rawEnglishText.replace(/、/g, ",").split(",").map((s2) => s2.trim().toLowerCase()).filter(Boolean);
 }
-async function loader$u({ request, params, context }) {
+async function loader$v({ request, params, context }) {
   const { listId } = params;
   const { supabase: supabase2 } = createServerSupabaseClient(request, context);
   const { data: listMeta, error: metaError } = await supabase2.from("edu_vocab_lists").select("*").eq("id", listId).single();
@@ -56949,7 +57015,7 @@ async function loader$u({ request, params, context }) {
   const vocabularies = listItems.map((item) => item.kl_vocabulary).filter(Boolean);
   return dist$1.json({ listMeta, taskId: (taskData == null ? void 0 : taskData.id) || null, vocabularies });
 }
-async function action$5({ request, context }) {
+async function action$6({ request, context }) {
   const { supabase: supabase2 } = createServerSupabaseClient(request, context);
   const { data: { user }, error: userError } = await supabase2.auth.getUser();
   if (userError || !user) {
@@ -57244,13 +57310,13 @@ function DrillSessionPage() {
     ] })
   ] }) }) });
 }
-var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$5,
+  action: action$6,
   default: DrillSessionPage,
-  loader: loader$u
+  loader: loader$v
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$t = ({ request }) => loadGamePage(request);
+var loader$u = ({ request }) => loadGamePage(request);
 var meta$s = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function KanjiSudokuRoute() {
   const layoutRef = reactExports.useRef(null);
@@ -57264,10 +57330,10 @@ function KanjiSudokuRoute() {
     }
   ) });
 }
-var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiSudokuRoute,
-  loader: loader$t,
+  loader: loader$u,
   meta: meta$s
 }, Symbol.toStringTag, { value: "Module" }));
 var DEFAULT_CATEGORY = "Miscellaneous";
@@ -57628,7 +57694,9 @@ function buildPools(rows) {
         id: r2.id,
         front: ch2,
         back: romaji,
-        sortOrder: r2.sort_order
+        sortOrder: r2.sort_order,
+        // 清音 / 濁音 / 半濁音 / 拗音 (used for the character set choice, see KANA_SET_OF)
+        category: clean(r2.category) || void 0
       };
       if (r2.char_type === "hiragana")
         hiragana.push(item);
@@ -57673,7 +57741,7 @@ function buildPools(rows) {
   kanjiMeaning.sort(byCategoryThenSortOrder);
   return { hiragana, katakana, kanjiReading, kanjiMeaning };
 }
-async function loader$s({ request }) {
+async function loader$t({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -57690,10 +57758,9 @@ async function loader$s({ request }) {
   };
   let kanjiReadingAvailable = false;
   try {
-    const { data: data2, error } = await supabase.from("kl_character").select(KL_COLUMNS).order("sort_order", { ascending: true, nullsFirst: false }).order("character", { ascending: true }).limit(1e3);
-    if (error)
-      throw error;
-    const rows = data2 ?? [];
+    const rows = await fetchAllPages(
+      (from, to) => supabase.from("kl_character").select(KL_COLUMNS).order("sort_order", { ascending: true, nullsFirst: false }).order("character", { ascending: true }).order("id", { ascending: true }).range(from, to)
+    );
     const built = buildPools(rows);
     pools = {
       hiragana: built.hiragana,
@@ -57729,6 +57796,20 @@ var DIFFICULTIES = {
   medium: { label: "Medium", pairs: 12, cols: 6 },
   hard: { label: "Hard", pairs: 18, cols: 6 }
 };
+var KANA_SET_OF = {
+  \u6E05\u97F3: "basic",
+  \u6FC1\u97F3: "dakuten",
+  \u534A\u6FC1\u97F3: "dakuten",
+  \u62D7\u97F3: "combo"
+};
+var KANA_SETS = [
+  { key: "basic", label: "Basic", example: { hiragana: "\u3042 \u3044 \u3046", katakana: "\u30A2 \u30A4 \u30A6" } },
+  { key: "dakuten", label: "Dakuten", example: { hiragana: "\u304C \u3071", katakana: "\u30AC \u30D1" } },
+  { key: "combo", label: "Combinations", example: { hiragana: "\u304D\u3083", katakana: "\u30AD\u30E3" } },
+  { key: "all", label: "All", example: { hiragana: "", katakana: "" } }
+];
+var kanaSetOf = (p2) => KANA_SET_OF[(p2.category ?? "").trim()] ?? "basic";
+var STAR_MOVES_PER_PAIR = { 3: 1.75, 2: 2.5 };
 function uniqueByAnswer(items) {
   const seen = /* @__PURE__ */ new Set();
   const out = [];
@@ -57797,10 +57878,11 @@ function MemoryMatchGame({
   const [mode2, setMode] = reactExports.useState("hiragana");
   const [kanjiPair, setKanjiPair] = reactExports.useState("reading");
   const [difficulty, setDifficulty] = reactExports.useState("easy");
+  const [kanaSet, setKanaSet] = reactExports.useState("basic");
   const [showHelp, setShowHelp] = reactExports.useState(false);
   const [round, setRound] = reactExports.useState(0);
   const activeKanjiPair = kanjiPair === "reading" && !kanjiReadingAvailable ? "meaning" : kanjiPair;
-  const pool = mode2 === "kanji" ? activeKanjiPair === "reading" ? pools.kanji : pools.kanjiMeaning : pools[mode2];
+  const pool = mode2 === "kanji" ? activeKanjiPair === "reading" ? pools.kanji : pools.kanjiMeaning : kanaSet === "all" ? pools[mode2] : pools[mode2].filter((p2) => kanaSetOf(p2) === kanaSet);
   const pairTarget = Math.min(
     DIFFICULTIES[difficulty].pairs,
     uniqueByAnswer(pool).length
@@ -57819,7 +57901,13 @@ function MemoryMatchGame({
   );
   const won = pairTarget > 0 && matchedIds.size >= pairTarget;
   const accuracy = moves === 0 ? 100 : Math.round(matchedIds.size / moves * 100);
-  const stars = won ? accuracy >= 85 ? 3 : accuracy >= 65 ? 2 : 1 : 0;
+  const threeStarMoves = Math.floor(pairTarget * STAR_MOVES_PER_PAIR[3]);
+  const twoStarMoves = Math.floor(pairTarget * STAR_MOVES_PER_PAIR[2]);
+  const stars = won ? moves <= threeStarMoves ? 3 : moves <= twoStarMoves ? 2 : 1 : 0;
+  reactExports.useEffect(() => () => {
+    if (lockTimer.current)
+      clearTimeout(lockTimer.current);
+  }, []);
   const startGame = React.useCallback(() => {
     if (lockTimer.current)
       clearTimeout(lockTimer.current);
@@ -57850,6 +57938,8 @@ function MemoryMatchGame({
       setKanjiPair(next.kanjiPair);
     if (next == null ? void 0 : next.difficulty)
       setDifficulty(next.difficulty);
+    if (next == null ? void 0 : next.kanaSet)
+      setKanaSet(next.kanaSet);
     setRound((r2) => r2 + 1);
   };
   const flipCard = (card2) => {
@@ -57959,6 +58049,32 @@ function MemoryMatchGame({
             },
             d
           ))
+        }
+      ),
+      mode2 !== "kanji" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "flex flex-wrap items-center justify-center gap-1 rounded-2xl sm:rounded-full bg-slate-100 p-1 dark:bg-white/5",
+          role: "group",
+          "aria-label": "Character set",
+          children: KANA_SETS.map((s2) => {
+            const count = s2.key === "all" ? uniqueByAnswer(pools[mode2]).length : uniqueByAnswer(pools[mode2].filter((p2) => kanaSetOf(p2) === s2.key)).length;
+            return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                "aria-pressed": kanaSet === s2.key,
+                onClick: () => newGame({ kanaSet: s2.key }),
+                className: segBtn(kanaSet === s2.key),
+                title: `${count} characters`,
+                children: [
+                  s2.label,
+                  s2.example[mode2] && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "ml-1 font-normal opacity-70", children: s2.example[mode2] })
+                ]
+              },
+              s2.key
+            );
+          })
         }
       ),
       mode2 === "kanji" && /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -58110,6 +58226,13 @@ function MemoryMatchGame({
         accuracy,
         "% accuracy"
       ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-1 text-xs text-emerald-700/80 dark:text-emerald-300/80", children: [
+        "\u2605\u2605\u2605 in ",
+        threeStarMoves,
+        " moves or fewer \xB7 \u2605\u2605 in ",
+        twoStarMoves,
+        " or fewer"
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "button",
         {
@@ -58120,7 +58243,7 @@ function MemoryMatchGame({
         }
       )
     ] }),
-    pool.length > 0 && mode2 !== "kanji" && /* @__PURE__ */ jsxRuntimeExports.jsx(ReferenceChartKana, { pool, modeLabel }),
+    mode2 !== "kanji" && pools[mode2].length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(ReferenceChartKana, { pool: pools[mode2], modeLabel }),
     mode2 === "kanji" && /* @__PURE__ */ jsxRuntimeExports.jsx(
       ReferenceChartKanji,
       {
@@ -58146,6 +58269,7 @@ function MemoryMatchGame({
               /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-black text-slate-900 dark:text-white", children: "How to Play" }),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-300", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Pick a game: Hiragana, Katakana or Kanji." }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "For Hiragana and Katakana, choose a set: Basic (\u3042\u301C\u3093), Dakuten (\u304C, \u3071\u2026), Combinations (\u304D\u3083\u2026) or All." }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "For Kanji, choose whether the kanji match with their Reading or their Meaning." }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Click a card to flip it, then flip a second card." }),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
@@ -58153,7 +58277,14 @@ function MemoryMatchGame({
                   partnerLabel,
                   " are a pair. Pairs stay face up; other cards flip back over."
                 ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Find every pair in as few moves and as little time as you can." })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Find every pair in as few moves and as little time as you can." }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+                  "Stars are based on moves (one move = two cards flipped): \u2605\u2605\u2605 for up to ",
+                  STAR_MOVES_PER_PAIR[3],
+                  " moves per pair, \u2605\u2605 for up to ",
+                  STAR_MOVES_PER_PAIR[2],
+                  "."
+                ] })
               ] }),
               /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "button",
@@ -58184,10 +58315,10 @@ function MemoryMatchGame({
       ` })
   ] });
 }
-var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MemoryMatchPage,
-  loader: loader$s,
+  loader: loader$t,
   meta: meta$r
 }, Symbol.toStringTag, { value: "Module" }));
 var CATEGORY_ORDER = [
@@ -58217,7 +58348,7 @@ var CATEGORY_ORDER = [
   "Repeat sign",
   "Miscellaneous"
 ];
-async function loader$r({ request }) {
+async function loader$s({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -58381,10 +58512,10 @@ function Kanji200Component() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" })
   ] }) });
 }
-var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Kanji200Component,
-  loader: loader$r,
+  loader: loader$s,
   meta: meta$q
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$7 = "CONTENT_VCE_WRITING";
@@ -58447,7 +58578,7 @@ function useVceWritingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$q({ request }) {
+async function loader$r({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -58517,13 +58648,13 @@ function VceWritingIndex() {
 var meta$p = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceWritingIndex,
-  loader: loader$q,
+  loader: loader$r,
   meta: meta$p
 }, Symbol.toStringTag, { value: "Module" }));
-async function action$4({ request, context }) {
+async function action$5({ request, context }) {
   try {
     const body = await request.json().catch(() => ({}));
     const { accessToken, refreshToken } = body;
@@ -58543,9 +58674,9 @@ async function action$4({ request, context }) {
     return dist$1.json({ success: false, error: err.message || "Internal Error" }, { status: 500 });
   }
 }
-var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$4
+  action: action$5
 }, Symbol.toStringTag, { value: "Module" }));
 var __vite_import_meta_env__ = {};
 function enabledProviders() {
@@ -59276,7 +59407,7 @@ function memberSubtitle(schoolEmail, inviteLabel) {
     return schoolEmail;
   return inviteLabel ? `Invite code: ${inviteLabel}` : "Joined with an invite code";
 }
-async function loader$p({ request, context }) {
+async function loader$q({ request, context }) {
   const { user, profile, admin } = await getTeacherOrApplicant(request, context);
   const url = new URL(request.url);
   const tz = parseTz(url.searchParams.get("tz"));
@@ -59414,7 +59545,7 @@ async function loader$p({ request, context }) {
     retention
   });
 }
-async function action$3({ request, context }) {
+async function action$4({ request, context }) {
   const { user, admin } = await requireTeacher(request, context);
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
@@ -59707,11 +59838,11 @@ var meta$o = () => [
   { title: "Teacher Dashboard | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
-var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$3,
+  action: action$4,
   default: TeacherDashboardPage,
-  loader: loader$p,
+  loader: loader$q,
   meta: meta$o
 }, Symbol.toStringTag, { value: "Module" }));
 var TICKET_TTL_MS = 10 * 6e4;
@@ -60056,12 +60187,12 @@ var shogi = `<!doctype html>
         <div class="board-col">
           <div class="hand" id="handGote" aria-label="Opponent's pieces in hand"></div>
           <div class="board-frame">
-            <div class="files" aria-hidden="true">
+            <div class="files" id="fileLabels" aria-hidden="true">
               <span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
             </div>
             <div class="board-row">
               <div class="board" id="board" role="grid" aria-label="Shogi board"></div>
-              <div class="ranks" aria-hidden="true">
+              <div class="ranks" id="rankLabels" aria-hidden="true">
                 <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
               </div>
             </div>
@@ -60099,6 +60230,9 @@ var shogi = `<!doctype html>
         <div class="choices">
           <button class="btn primary" id="promoYes" type="button">Promote</button>
           <button class="btn" id="promoNo" type="button">Don't promote</button>
+        </div>
+        <div class="close-row" style="justify-content:center;">
+          <button class="btn" id="promoCancel" type="button">Cancel (choose another move)</button>
         </div>
       </div>
     </div>
@@ -60144,7 +60278,8 @@ var shogi = `<!doctype html>
           <li>You cannot make a move that leaves your own king in check. If your king is in check, you must get out of check.</li>
           <li>Nifu is illegal: you may not drop a pawn on a file where you already have an unpromoted pawn. A pawn or lance cannot be dropped on the farthest rank, and a knight cannot be dropped on the farthest two ranks, because it would have no move.</li>
           <li>Uchifuzume is also illegal: you may not drop a pawn to deliver checkmate.</li>
-          <li>You win by checkmating the opponent's king. If the same position occurs four times (sennichite), the game is a draw.</li>
+          <li>You win by checkmating the opponent's king. If the same position occurs four times (sennichite), the game is a draw \u2014 except that a player who gave check with every move during the repetition (perpetual check) loses.</li>
+          <li>If you play Gote (second), the board is turned around so your pieces are at the bottom.</li>
         </ul>
         <div class="close-row">
           <button class="btn primary" id="rulesClose" type="button">Close</button>
@@ -60152,7 +60287,7 @@ var shogi = `<!doctype html>
       </div>
     </div>
 
-    <script>
+    <script id="shogiEngine">
       "use strict";
       /* ================= Shogi engine ================= */
       // Board: idx = row*9+col, row 0 = rank 1 (Gote side), row 8 = rank 9 (Sente side)
@@ -60446,7 +60581,12 @@ var shogi = `<!doctype html>
         var alpha = -Infinity;
         for (var i = 0; i < moves.length; i++) {
           var ns = applyMove(st, moves[i]);
-          var sc = -negamax(ns, depth - 1, -Infinity, -alpha === -Infinity ? Infinity : -alpha, 1);
+          // With randomness (Beginner / Normal) every root move needs its exact score: a pruned search
+          // only returns a bound, and adding randomness to a bound could pick a real blunder.
+          // Strong has no randomness, so it keeps the faster alpha-beta window.
+          var sc = jitter
+            ? -negamax(ns, depth - 1, -Infinity, Infinity, 1)
+            : -negamax(ns, depth - 1, -Infinity, -alpha === -Infinity ? Infinity : -alpha, 1);
           if (jitter) sc += Math.random() * jitter * 2 - jitter;
           if (sc > best + 0.001) { best = sc; bestMoves = [moves[i]]; }
           else if (Math.abs(sc - best) <= 0.001) bestMoves.push(moves[i]);
@@ -60454,7 +60594,12 @@ var shogi = `<!doctype html>
         }
         return bestMoves[Math.floor(Math.random() * bestMoves.length)];
       }
+    <\/script>
 
+    <!-- The engine above (id="shogiEngine") also runs in a Web Worker, so the "Strong" computer can think
+         without freezing the page. Everything below is the page (board, buttons, game flow). -->
+    <script>
+      "use strict";
       /* ================= Move notation ================= */
       function pieceNameEn(p) {
         if (p.pr && NAMES_PR_EN[p.t]) return NAMES_PR_EN[p.t];
@@ -60500,12 +60645,18 @@ var shogi = `<!doctype html>
         var d = document.createElement("div");
         d.className = "cell";
         d.setAttribute("role", "gridcell");
-        (function (idx) { d.addEventListener("click", function () { onCellClick(idx); }); })(ci);
+        // ci is the square's position on screen; boardIdx() turns it into the board index (the board is turned round for Gote)
+        (function (pos) { d.addEventListener("click", function () { onCellClick(boardIdx(pos)); }); })(ci);
         boardEl.appendChild(d);
         cells.push(d);
       }
 
-      var game = null; // { state, playerColor, level, history:[{state,kifu}], kifuList:[], over, rep:{} }
+      var game = null; // { state, playerColor, level, history:[{state,lastTo}], kifuList:[], over, rep:{}, lastTo }
+
+      /* When you play Gote, the board is shown turned round so your pieces are at the bottom.
+         Screen position <-> board index (the same mapping both ways). */
+      function isFlipped() { return !!game && game.playerColor === 1; }
+      function boardIdx(pos) { return isFlipped() ? 80 - pos : pos; }
       var selected = null; // { kind:'board', idx } | { kind:'hand', type }
       var legalCache = []; // \u73FE\u5728\u306E\u624B\u756A\u306E\u5408\u6CD5\u624B
       var pendingPromo = null;
@@ -60536,6 +60687,9 @@ var shogi = `<!doctype html>
       });
 
       function startGame(playerColor, level) {
+        // A computer move still being worked out belongs to the old game: cancel it
+        cancelAi();
+        document.getElementById("promoOverlay").classList.remove("show");
         game = {
           state: initialState(),
           playerColor: playerColor,
@@ -60543,7 +60697,8 @@ var shogi = `<!doctype html>
           history: [],
           kifuList: [],
           over: false,
-          rep: {}
+          rep: {},
+          lastTo: -1
         };
         game.rep[stateKey(game.state)] = 1;
         selected = null;
@@ -60605,6 +60760,13 @@ var shogi = `<!doctype html>
 
       document.getElementById("promoYes").addEventListener("click", function () { resolvePromo(true); });
       document.getElementById("promoNo").addEventListener("click", function () { resolvePromo(false); });
+      document.getElementById("promoCancel").addEventListener("click", cancelPromo);
+      // Close the promotion question without moving (the piece stays selected, so another square can be chosen)
+      function cancelPromo() {
+        document.getElementById("promoOverlay").classList.remove("show");
+        pendingPromo = null;
+        render();
+      }
       function resolvePromo(promote) {
         document.getElementById("promoOverlay").classList.remove("show");
         if (!pendingPromo) return;
@@ -60620,25 +60782,111 @@ var shogi = `<!doctype html>
         if (!game.over) aiTurn();
       }
 
+      /* ---------- Computer move: worked out in a Web Worker, so the page never freezes ----------
+         The worker runs the engine script above (id="shogiEngine"). If workers are not available,
+         the move is worked out on the page instead (as before). */
+      var aiWorker = null, aiWorkerFailed = false, aiRequestId = 0, aiCallback = null;
+      function getAiWorker() {
+        if (aiWorker || aiWorkerFailed) return aiWorker;
+        try {
+          var src = document.getElementById("shogiEngine").textContent +
+            "\\nself.onmessage = function (e) { self.postMessage({ id: e.data.id, move: aiChooseMove(e.data.state, e.data.level) }); };";
+          var url = URL.createObjectURL(new Blob([src], { type: "text/javascript" }));
+          aiWorker = new Worker(url);
+          aiWorker.onmessage = function (e) {
+            var cb = aiCallback;
+            if (!cb || e.data.id !== aiRequestId) return; // an answer for a cancelled request
+            aiCallback = null;
+            cb(e.data.move);
+          };
+          aiWorker.onerror = function () {
+            // The worker could not run: work out this (and later) moves on the page instead
+            aiWorkerFailed = true;
+            aiWorker = null;
+            var cb = aiCallback;
+            aiCallback = null;
+            if (cb && game) cb(aiChooseMove(game.state, game.level));
+          };
+        } catch (e) {
+          aiWorkerFailed = true;
+          aiWorker = null;
+        }
+        return aiWorker;
+      }
+      function requestAiMove(state, level, cb) {
+        var id = ++aiRequestId;
+        var worker = getAiWorker();
+        if (worker) {
+          aiCallback = cb;
+          worker.postMessage({ id: id, state: state, level: level });
+        } else {
+          setTimeout(function () { if (id === aiRequestId) cb(aiChooseMove(state, level)); }, 30);
+        }
+      }
+      /** Forget the computer move being worked out (new game, resign). A busy worker is stopped. */
+      function cancelAi() {
+        aiRequestId++;
+        if (aiCallback && aiWorker) { aiWorker.terminate(); aiWorker = null; }
+        aiCallback = null;
+        thinkingEl.classList.remove("show");
+      }
+
       function aiTurn() {
         if (game.over) return;
+        var g = game, id, started = Date.now();
         thinkingEl.classList.add("show");
         render();
-        setTimeout(function () {
-          var mv = aiChooseMove(game.state, game.level);
-          thinkingEl.classList.remove("show");
-          if (!mv) { endGame(game.playerColor, "The computer has no legal moves left."); render(); return; }
-          pushMove(mv);
-          render();
-        }, 350);
+        requestAiMove(g.state, g.level, function (mv) {
+          // Wait at least 350 ms so the computer's reply doesn't appear instantly
+          setTimeout(function () {
+            if (g !== game || g.over || id !== aiRequestId) return; // the game was restarted or resigned meanwhile
+            thinkingEl.classList.remove("show");
+            if (!mv) { endGame(g.playerColor, "The computer has no legal moves left."); render(); return; }
+            pushMove(mv);
+            render();
+          }, Math.max(0, 350 - (Date.now() - started)));
+        });
+        id = aiRequestId;
+      }
+
+      /** Rebuild the repetition counts from the moves played (after Undo) */
+      function rebuildRepetition() {
+        game.rep = {};
+        game.history.forEach(function (h) { var k = stateKey(h.state); game.rep[k] = (game.rep[k] || 0) + 1; });
+        var cur = stateKey(game.state);
+        game.rep[cur] = (game.rep[cur] || 0) + 1;
+      }
+
+      /**
+       * Sennichite with perpetual check: if one side gave check with every one of its moves since the
+       * repeated position first appeared, that side loses. Returns that side (0 / 1), or null for a plain draw.
+       */
+      function perpetualChecker(key) {
+        var positions = game.history.map(function (h) { return h.state; }).concat([game.state]);
+        var first = -1;
+        for (var i = 0; i < positions.length; i++) {
+          if (stateKey(positions[i]) === key) { first = i; break; }
+        }
+        if (first < 0) return null;
+        var allCheck = [true, true], movesBy = [0, 0];
+        for (var j = first + 1; j < positions.length; j++) {
+          var pos = positions[j];
+          var mover = 1 - pos.turn;
+          movesBy[mover]++;
+          if (!inCheck(pos, pos.turn)) allCheck[mover] = false;
+        }
+        if (movesBy[0] > 0 && allCheck[0]) return 0;
+        if (movesBy[1] > 0 && allCheck[1]) return 1;
+        return null;
       }
 
       function pushMove(mv) {
         var st = game.state;
         var notation = moveNotation(st, mv, game.kifuList.length + 1);
-        game.history.push({ state: st, });
+        game.history.push({ state: st, lastTo: game.lastTo });
         game.kifuList.push(notation);
         game.state = applyMove(st, mv);
+        game.lastTo = mv.to;
         playKnock();
         // Sennichite (fourfold repetition) check
         var key = stateKey(game.state);
@@ -60646,7 +60894,15 @@ var shogi = `<!doctype html>
         refreshLegal();
         if (game.rep[key] >= 4) {
           game.over = true;
-          endGame(null, "The same position occurred four times (sennichite), so the game is drawn.");
+          var checker = perpetualChecker(key);
+          if (checker === null) {
+            endGame(null, "The same position occurred four times (sennichite), so the game is drawn.");
+          } else {
+            endGame(1 - checker,
+              (checker === game.playerColor ? "You" : "The computer") +
+              " gave check with every move while the position repeated (perpetual check), which is not allowed, so " +
+              (checker === game.playerColor ? "you lose." : "the computer loses."));
+          }
           return;
         }
         if (legalCache.length === 0) {
@@ -60678,16 +60934,15 @@ var shogi = `<!doctype html>
         while (game.history.length > 0 && steps < 2) {
           var h = game.history.pop();
           game.state = h.state;
+          game.lastTo = h.lastTo;
           game.kifuList.pop();
           steps++;
           if (game.state.turn === game.playerColor) break;
         }
         game.over = false;
         document.getElementById("resultOverlay").classList.remove("show");
-        // Rebuild the repetition counter
-        game.rep = {};
-        game.rep[stateKey(game.state)] = 1;
-        game.lastTo = -1;
+        // Rebuild the repetition counter from the moves still on the board (so sennichite still counts them)
+        rebuildRepetition();
         selected = null;
         refreshLegal();
         render();
@@ -60696,6 +60951,7 @@ var shogi = `<!doctype html>
 
       resignBtn.addEventListener("click", function () {
         if (!game || game.over) return;
+        cancelAi(); // the computer must not move after you resign
         game.over = true;
         refreshLegal();
         endGame(1 - game.playerColor, "You resigned.");
@@ -60732,8 +60988,17 @@ var shogi = `<!doctype html>
         // Use the stored last-move square (it cannot be derived from the move list)
         lastTo = game.lastTo != null ? game.lastTo : -1;
 
-        for (var i = 0; i < 81; i++) {
-          var cell = cells[i];
+        var flipped = isFlipped();
+        var viewer = game.playerColor;
+        // File / rank labels follow the board when it is turned round
+        var fileNums = [9, 8, 7, 6, 5, 4, 3, 2, 1], rankNums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        if (flipped) { fileNums.reverse(); rankNums.reverse(); }
+        document.getElementById("fileLabels").innerHTML = fileNums.map(function (n) { return "<span>" + n + "</span>"; }).join("");
+        document.getElementById("rankLabels").innerHTML = rankNums.map(function (n) { return "<span>" + n + "</span>"; }).join("");
+
+        for (var pos = 0; pos < 81; pos++) {
+          var cell = cells[pos];
+          var i = boardIdx(pos);
           var p = st.board[i];
           var cls = "cell";
           if (i === lastTo) cls += " last";
@@ -60748,16 +61013,19 @@ var shogi = `<!doctype html>
                 label === "\u91D1\u5C06" || label === "\u9280\u5C06" || label === "\u6842\u99AC" || label === "\u9999\u8ECA" || label === "\u6B69\u5175" ||
                 label === "\u7ADC\u738B" || label === "\u7ADC\u99AC" || label === "\u6210\u9280" || label === "\u6210\u6842" || label === "\u6210\u9999") sizeCls = "two";
             if (label === "\u3068\u91D1") sizeCls = "two";
-            html += '<div class="piece' + (p.o === 1 ? " gote" : "") + (p.pr ? " promo" : "") + " " + sizeCls + '">' + label + "</div>";
+            // The opponent's pieces point towards you (the "gote" class turns a piece upside down)
+            html += '<div class="piece' + (p.o !== viewer ? " gote" : "") + (p.pr ? " promo" : "") + " " + sizeCls + '">' + label + "</div>";
           }
           if (destSet[i]) html += p ? '<div class="ring"></div>' : '<div class="dot"></div>';
           cell.innerHTML = html;
         }
 
-        renderHand(handGoteEl, 1, "\u2616 Gote (" + (game.playerColor === 1 ? "you" : "computer") + ") in hand:");
-        renderHand(handSenteEl, 0, "\u2617 Sente (" + (game.playerColor === 0 ? "you" : "computer") + ") in hand:");
-        handSenteEl.classList.toggle("active", game.playerColor === 0);
-        handGoteEl.classList.toggle("active", game.playerColor === 1);
+        // The computer's pieces in hand are above the board and yours are below, whichever side you play
+        var sideName = function (o) { return o === 0 ? "\u2617 Sente" : "\u2616 Gote"; };
+        renderHand(handGoteEl, 1 - viewer, sideName(1 - viewer) + " (computer) in hand:");
+        renderHand(handSenteEl, viewer, sideName(viewer) + " (you) in hand:");
+        handSenteEl.classList.add("active");
+        handGoteEl.classList.remove("active");
 
         // Turn indicator
         var mine = st.turn === game.playerColor;
@@ -60801,7 +61069,7 @@ var shogi = `<!doctype html>
           if (!n) continue;
           any = true;
           var sel = selected && selected.kind === "hand" && selected.type === t && owner === game.playerColor;
-          html += '<button type="button" class="hand-piece' + (owner === 1 ? " gote" : "") + (sel ? " sel" : "") +
+          html += '<button type="button" class="hand-piece' + (owner !== game.playerColor ? " gote" : "") + (sel ? " sel" : "") +
             '" data-owner="' + owner + '" data-type="' + t + '"><span class="shape">' + NAMES[t] + "</span>" +
             (n > 1 ? '<span class="cnt">' + n + "</span>" : "") + "</button>";
         }
@@ -60821,17 +61089,15 @@ var shogi = `<!doctype html>
         return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       }
 
-      // Wrap pushMove to record the last move's destination square
-      var origPush = pushMove;
-      pushMove = function (mv) { game.lastTo = mv.to; origPush(mv); };
-
       /* ---------- Rules modal ---------- */
       var rulesOverlay = document.getElementById("rulesOverlay");
       document.getElementById("rulesBtn").addEventListener("click", function () { rulesOverlay.classList.add("show"); });
       document.getElementById("rulesClose").addEventListener("click", function () { rulesOverlay.classList.remove("show"); });
       rulesOverlay.addEventListener("click", function (e) { if (e.target === rulesOverlay) rulesOverlay.classList.remove("show"); });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") rulesOverlay.classList.remove("show");
+        if (e.key !== "Escape") return;
+        rulesOverlay.classList.remove("show");
+        if (pendingPromo) cancelPromo();
       });
 
       /* ---------- Init ---------- */
@@ -61010,6 +61276,15 @@ var go = `<!doctype html>
       }
       .terr.black { background: rgba(10, 10, 10, 0.75); }
       .terr.white { background: rgba(255, 255, 255, 0.85); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); }
+      /* Counting the score: stones marked as dead are faded and crossed out */
+      .stone.dead { opacity: 0.45; }
+      .stone .dead-x {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        color: var(--marker); font-weight: 700; font-size: 150%; line-height: 1;
+      }
+      .board.scoring .hit { cursor: pointer; }
+      .scoring-card { border-color: var(--accent); }
+      .scoring-card p { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; }
       @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
       .board.shake { animation: shake 0.18s ease-in-out 2; }
       /* ---------- Panel ---------- */
@@ -61257,6 +61532,12 @@ var go = `<!doctype html>
           </div>
         </section>
 
+        <section class="card scoring-card" id="scoringCard" hidden>
+          <h2>Count the Score</h2>
+          <p>Both players passed. Stones that look captured (dead) are marked with \xD7. Tap a group to mark it dead or alive, then press Confirm Score. Undo goes back to before the passes.</p>
+          <div class="btn-row"><button id="btnConfirmScore" type="button" class="primary">Confirm Score</button></div>
+        </section>
+
         <section class="card">
           <h2>Position Estimate</h2>
           <div class="score-rows">
@@ -61313,8 +61594,9 @@ var go = `<!doctype html>
             <li>Tap (or click) an intersection to place a stone. You can capture opponent stones by completely surrounding them.</li>
             <li>You cannot play a suicide move (a point where your own stones would be captured) or a move that violates the ko rule.</li>
             <li>If you have no good move, choose Pass. If both players pass in a row, the game ends and territory is counted.</li>
+            <li>Before counting, stones that look captured (dead) are marked with \xD7. Tap a group to change it, then press Confirm Score. Dead stones are removed before counting.</li>
             <li>Scoring uses Chinese rules: stones on the board plus surrounded empty points count as score. White receives 6.5 points of komi.</li>
-            <li>Undo takes the game back to your previous turn.</li>
+            <li>Undo takes the game back to your previous turn (also after both players passed).</li>
           </ul>
         </div>
         <div class="btn-row">
@@ -61475,23 +61757,119 @@ var go = `<!doctype html>
           var top = moves.slice(0, Math.min(5, moves.length));
           if (Math.random() < 0.35) best = top[Math.floor(Math.random() * top.length)];
         }
-        // pass when nothing meaningful remains
-        if (bestScore < 2.0 && moveCount > 34) return -1;
-        if (bestScore < -2) return -1;
+        // Nothing meaningful remains: fill a neutral point (dame) first, then pass.
+        // Under Chinese (area) scoring dame are worth nothing, but filling them settles the
+        // borders so the final count is clear.
+        if ((bestScore < 2.0 && moveCount > 34) || bestScore < -2) {
+          return findDame(bd, color, pastHashes);
+        }
         return best.i;
+      }
+
+      /** A safe neutral point to fill: in an empty area that touches both colours, legal, not ko,
+          and not leaving our own stones in atari. -1 if there is none. */
+      function findDame(bd, color, pastHashes) {
+        var seen = new Array(N).fill(false), cands = [];
+        for (var i = 0; i < N; i++) {
+          if (bd[i] !== EMPTY || seen[i]) continue;
+          var region = [], borders = {}, stack = [i];
+          seen[i] = true;
+          while (stack.length) {
+            var c = stack.pop(); region.push(c);
+            var ns = nbrs(c);
+            for (var k = 0; k < ns.length; k++) {
+              var n = ns[k];
+              if (bd[n] === EMPTY) { if (!seen[n]) { seen[n] = true; stack.push(n); } }
+              else borders[bd[n]] = true;
+            }
+          }
+          if (!(borders[BLACK] && borders[WHITE])) continue;
+          for (var r = 0; r < region.length; r++) {
+            var p = region[r], sim = simulate(bd, color, p);
+            if (!sim || pastHashes[hashOf(sim.board)]) continue;
+            if (groupInfo(sim.board, p).liberties < 2) continue;
+            cands.push(p);
+          }
+        }
+        return cands.length ? cands[Math.floor(Math.random() * cands.length)] : -1;
+      }
+
+      /* ---------------- Dead stones (counting the score) ----------------
+         After both players pass, guess which stones are dead with quick random playouts:
+         play the position out many times with random legal moves (never filling your own eye)
+         and see who usually ends up owning each stone's points. The player can then tap
+         groups to change the guess before confirming. */
+      function estimateDead(bd) {
+        var PLAYOUTS = 120, owner = new Array(N).fill(0);
+        for (var p = 0; p < PLAYOUTS; p++) {
+          var b = bd.slice(), color = BLACK, passes = 0, moves = 0;
+          while (passes < 2 && moves < 160) {
+            var empties = [];
+            for (var i = 0; i < N; i++) if (b[i] === EMPTY) empties.push(i);
+            var played = false;
+            while (empties.length) {
+              var k = Math.floor(Math.random() * empties.length);
+              var pt = empties[k];
+              empties[k] = empties[empties.length - 1]; empties.pop();
+              var ns = nbrs(pt), ownEye = true;
+              for (var q = 0; q < ns.length; q++) if (b[ns[q]] !== color) { ownEye = false; break; }
+              if (ownEye) continue;
+              var sim = simulate(b, color, pt);
+              if (!sim) continue;
+              b = sim.board; played = true; break;
+            }
+            passes = played ? 0 : passes + 1;
+            color = color === BLACK ? WHITE : BLACK;
+            moves++;
+          }
+          var sc = scoreBoard(b);
+          for (var j = 0; j < N; j++) {
+            var o = b[j] !== EMPTY ? b[j] : sc.terrMap[j];
+            if (o === BLACK) owner[j]++; else if (o === WHITE) owner[j]--;
+          }
+        }
+        // A group is dead if its points usually end up owned by the other colour
+        var dead = {}, done = {};
+        for (var s = 0; s < N; s++) {
+          if (bd[s] === EMPTY || done[s]) continue;
+          var g = groupInfo(bd, s), sum = 0;
+          g.stones.forEach(function (x) { done[x] = true; sum += owner[x]; });
+          var avg = sum / (g.stones.length * PLAYOUTS); // +1 = always Black, -1 = always White
+          var isDead = bd[s] === BLACK ? avg < -0.4 : avg > 0.4;
+          if (isDead) g.stones.forEach(function (x) { dead[x] = true; });
+        }
+        return dead;
+      }
+
+      /** The board with the dead stones taken off (for counting) */
+      function withoutDead(bd, dead) {
+        if (!dead) return bd;
+        return bd.map(function (v, i) { return dead[i] ? EMPTY : v; });
       }
 
       /* ---------------- Game state ---------------- */
       var playerColor = BLACK, aiLevel = 1;
       var gameLog = []; // snapshots: {board, toMove, capB, capW, lastMove, passes, hash}
+      // overReason: "" (playing) / "scoring" (both passed, marking dead stones) / "score" (counted) / "resign"
       var thinking = false, gameOver = false, overReason = "";
+      // Dead stones while counting: { index: true }
+      var deadStones = null;
+      // Changes on every new game / undo, so a computer move worked out for an older position is ignored
+      var aiGen = 0;
 
       function cur() { return gameLog[gameLog.length - 1]; }
       function emptyBoard() { return new Array(N).fill(0); }
 
+      function leaveScoring() {
+        deadStones = null;
+        el.scoringCard.hidden = true;
+      }
+
       function newGame() {
+        aiGen++;
         gameLog = [{ board: emptyBoard(), toMove: BLACK, capB: 0, capW: 0, lastMove: -2, passes: 0, hash: hashOf(emptyBoard()) }];
         gameOver = false; overReason = ""; thinking = false;
+        leaveScoring();
         hideResignConfirm();
         el.overlay.classList.remove("show");
         setMessage(playerColor === BLACK
@@ -61549,7 +61927,7 @@ var go = `<!doctype html>
        "btnPass","btnUndo","btnResign","resignConfirm","btnResignYes","btnResignNo","btnNew",
        "segColor","segLevel","segLayout","gameLayout","overlay","resultTitle","resultSub",
        "rBS","rWS","rBT","rWT","rBTotal","rWTotal","btnAgain","btnCloseResult","gridLines","gridLabels",
-       "btnRules","rulesOverlay","btnCloseRules"
+       "btnRules","rulesOverlay","btnCloseRules","scoringCard","btnConfirmScore","resultTable"
       ].forEach(function (id) { el[id] = document.getElementById(id); });
 
       // Grid lines + labels ship as static SVG markup above (no JS needed to
@@ -61624,17 +62002,19 @@ var go = `<!doctype html>
         var s = cur();
         // stones
         var html = "";
+        var counting = overReason === "scoring" || overReason === "score";
         for (var i = 0; i < N; i++) {
           if (s.board[i] === EMPTY) continue;
           var pos = pct(i);
-          html += '<div class="stone ' + (s.board[i] === BLACK ? "black" : "white") + '" style="left:' + pos[0] + '%;top:' + pos[1] + '%">'
-            + (s.lastMove === i ? '<span class="last-dot"></span>' : "") + "</div>";
+          var isDead = counting && deadStones && deadStones[i];
+          html += '<div class="stone ' + (s.board[i] === BLACK ? "black" : "white") + (isDead ? " dead" : "") + '" style="left:' + pos[0] + '%;top:' + pos[1] + '%">'
+            + (isDead ? '<span class="dead-x" aria-hidden="true">\xD7</span>' : (s.lastMove === i ? '<span class="last-dot"></span>' : "")) + "</div>";
         }
         el.stoneLayer.innerHTML = html;
-        // territory markers only when finished by double pass
+        // territory markers while counting (dead stones taken off) and after the count
         var thtml = "";
-        if (gameOver && overReason === "score") {
-          var sc = scoreBoard(s.board);
+        if (counting) {
+          var sc = scoreBoard(withoutDead(s.board, deadStones));
           for (var j = 0; j < N; j++) {
             if (sc.terrMap[j] !== 0) {
               var tp = pct(j);
@@ -61645,7 +62025,10 @@ var go = `<!doctype html>
         el.terrLayer.innerHTML = thtml;
         // status
         var mine = playerColor === BLACK ? "Black" : "White";
-        if (gameOver) {
+        if (overReason === "scoring") {
+          el.statusDot.className = "dot none";
+          el.statusText.textContent = "Counting the score";
+        } else if (gameOver) {
           el.statusDot.className = "dot none";
           el.statusText.textContent = "Game over";
         } else if (thinking) {
@@ -61662,7 +62045,7 @@ var go = `<!doctype html>
         el.capBlack.textContent = s.capB;
         el.capWhite.textContent = s.capW;
         // estimate
-        var est = scoreBoard(s.board, true);
+        var est = scoreBoard(withoutDead(s.board, counting ? deadStones : null), !counting);
         el.estBlack.textContent = est.black.toFixed(1);
         el.estWhite.textContent = est.white.toFixed(1);
         var total = est.black + est.white;
@@ -61676,12 +62059,25 @@ var go = `<!doctype html>
         var myTurn = !gameOver && !thinking && s.toMove === playerColor;
         el.btnPass.disabled = !myTurn;
         el.btnResign.disabled = gameOver;
-        el.btnUndo.disabled = thinking || gameOver || gameLog.length <= 1 || (playerColor === WHITE && gameLog.length <= 2);
-        el.board.classList.toggle("locked", !myTurn);
+        // Undo also works after both players passed (but not after a resignation)
+        el.btnUndo.disabled = thinking || overReason === "resign" || gameLog.length <= 1 || (playerColor === WHITE && gameLog.length <= 2);
+        el.board.classList.toggle("locked", !myTurn && overReason !== "scoring");
+        el.board.classList.toggle("scoring", overReason === "scoring");
       }
 
       /* ---------------- Flow ---------------- */
       function onPoint(i) {
+        // Counting the score: tapping a stone marks its whole group dead / alive
+        if (overReason === "scoring") {
+          var b = cur().board;
+          if (b[i] === EMPTY) return;
+          var g = groupInfo(b, i), makeDead = !deadStones[i];
+          g.stones.forEach(function (x) { if (makeDead) deadStones[x] = true; else delete deadStones[x]; });
+          setMessage((b[i] === BLACK ? "Black" : "White") + " group of " + g.stones.length + (g.stones.length > 1 ? " stones" : " stone") +
+            (makeDead ? " marked as dead." : " marked as alive."), false);
+          render();
+          return;
+        }
         if (gameOver || thinking) return;
         var s = cur();
         if (s.toMove !== playerColor) return;
@@ -61711,7 +62107,10 @@ var go = `<!doctype html>
         thinking = true; render();
         var aiColor = s.toMove;
         var delay = 380 + Math.random() * 420;
+        var gen = aiGen;
         setTimeout(function () {
+          // A new game was started (or a move undone) meanwhile: this move belongs to the old position
+          if (gen !== aiGen) return;
           thinking = false;
           if (gameOver) { render(); return; }
           // AI resigns when hopelessly behind late in the game
@@ -61741,32 +62140,58 @@ var go = `<!doctype html>
         }, delay);
       }
 
+      /* Both players passed: first mark the dead stones (a guess the player can change), then count */
       function finishByScore() {
-        gameOver = true; overReason = "score";
-        var sc = scoreBoard(cur().board);
-        var blackWin = sc.black > sc.white;
-        var diff = Math.abs(sc.black - sc.white).toFixed(1);
-        showResult(blackWin ? "Black wins" : "White wins",
-          (blackWin ? "Black" : "White") + " wins by " + diff + " points (both players passed).", sc);
+        gameOver = true; overReason = "scoring";
+        hideResignConfirm();
+        deadStones = estimateDead(cur().board);
+        el.scoringCard.hidden = false;
+        var n = Object.keys(deadStones).length;
+        setMessage(n
+          ? "Both players passed. " + n + (n > 1 ? " stones look" : " stone looks") + " dead (marked \xD7). Tap a group to change it, then press Confirm Score."
+          : "Both players passed. No stones look dead. Tap a group to mark it dead, or press Confirm Score.", false);
         render();
       }
 
+      function confirmScore() {
+        if (overReason !== "scoring") return;
+        overReason = "score";
+        el.scoringCard.hidden = true;
+        var removed = withoutDead(cur().board, deadStones);
+        var sc = scoreBoard(removed);
+        var n = Object.keys(deadStones || {}).length;
+        var blackWin = sc.black > sc.white;
+        var diff = Math.abs(sc.black - sc.white).toFixed(1);
+        showResult(blackWin ? "Black wins" : "White wins",
+          (blackWin ? "Black" : "White") + " wins by " + diff + " points" +
+          (n ? " (" + n + " dead " + (n > 1 ? "stones" : "stone") + " removed before counting)." : "."), sc);
+        setMessage("Final score: Black " + sc.black.toFixed(1) + ", White " + sc.white.toFixed(1) + ".", false);
+        render();
+      }
+      el.btnConfirmScore.addEventListener("click", confirmScore);
+
       function finishByResign(resigner) {
+        aiGen++;
+        thinking = false;
         gameOver = true; overReason = "resign";
+        leaveScoring();
         var winner = resigner === BLACK ? WHITE : BLACK;
-        var sc = scoreBoard(cur().board);
+        // No score table for a resignation: the board was never counted
         showResult((winner === BLACK ? "Black" : "White") + " wins",
-          (resigner === playerColor ? "You resigned" : "The computer resigned") + ", so " + (winner === BLACK ? "Black" : "White") + " wins.", sc);
+          (resigner === playerColor ? "You resigned" : "The computer resigned") + ", so " + (winner === BLACK ? "Black" : "White") + " wins.", null);
         render();
       }
 
       function showResult(title, sub, sc) {
         el.resultTitle.textContent = title;
         el.resultSub.textContent = sub;
-        el.rBS.textContent = sc.bS; el.rWS.textContent = sc.wS;
-        el.rBT.textContent = sc.bT; el.rWT.textContent = sc.wT;
-        el.rBTotal.textContent = sc.black.toFixed(1);
-        el.rWTotal.textContent = sc.white.toFixed(1);
+        el.resultTable.style.display = sc ? "" : "none";
+        if (sc) {
+          el.rBS.textContent = sc.bS; el.rWS.textContent = sc.wS;
+          el.rBT.textContent = sc.bT; el.rWT.textContent = sc.wT;
+          el.rBTotal.textContent = sc.black.toFixed(1);
+          el.rWTotal.textContent = sc.white.toFixed(1);
+        }
         el.overlay.classList.add("show");
       }
 
@@ -61783,7 +62208,12 @@ var go = `<!doctype html>
       });
 
       el.btnUndo.addEventListener("click", function () {
-        if (thinking || gameOver) return;
+        if (thinking || overReason === "resign") return;
+        // Undo after both players passed: leave the counting and go back to before the passes
+        aiGen++;
+        gameOver = false; overReason = "";
+        leaveScoring();
+        el.overlay.classList.remove("show");
         var popped = 0;
         while (gameLog.length > 1) {
           gameLog.pop(); popped++;
@@ -61796,6 +62226,7 @@ var go = `<!doctype html>
         hideResignConfirm();
         setMessage("Move undone. Your turn.", false);
         render();
+        maybeAiTurn(); // if we went back to the very start and the computer plays first
       });
 
       function hideResignConfirm() { el.resignConfirm.classList.remove("show"); }
@@ -61876,7 +62307,9 @@ var go = `<!doctype html>
         if (e.target === el.rulesOverlay) closeRules();
       });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && el.rulesOverlay.classList.contains("show")) closeRules();
+        if (e.key !== "Escape") return;
+        if (el.rulesOverlay.classList.contains("show")) closeRules();
+        el.overlay.classList.remove("show"); // the result box ("View Board")
       });
 
       /* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */
@@ -63888,684 +64321,6 @@ var kanjiSudoku = `<!doctype html>
   </body>
 </html>
 `;
-var hiraganaMemoryMatch = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:," />
-    <title>Hiragana Memory Match</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <style>
-      :root{
-        --bg:#f2ecdd;
-        --bg-2:#e9e0c9;
-        --surface:#fffdf6;
-        --surface-2:#f8f2e2;
-        --ink:#1c2436;
-        --ink-2:#4a5266;
-        --ink-3:#7c8496;
-        --line:#ddd2b8;
-        --line-strong:#c9b98f;
-        --indigo:#1e3a5f;
-        --indigo-2:#2a4d7a;
-        --indigo-soft:#e3eaf3;
-        --vermillion:#c2402a;
-        --vermillion-soft:#fbe9e4;
-        --gold:#b8892e;
-        --gold-soft:#f7ecd2;
-        --green:#237a4b;
-        --green-soft:#e2f2e6;
-        --card-back:#1e3a5f;
-        --shadow:0 10px 28px rgba(28,36,54,.12), 0 2px 6px rgba(28,36,54,.08);
-        --shadow-sm:0 3px 10px rgba(28,36,54,.10);
-        --radius:14px;
-        color-scheme:light;
-      }
-      @media (prefers-color-scheme: dark){
-        :root{
-          --bg:#0e1320;
-          --bg-2:#0a0e18;
-          --surface:#1a2233;
-          --surface-2:#141b2b;
-          --ink:#f0ead8;
-          --ink-2:#c3c9d6;
-          --ink-3:#8b94a8;
-          --line:#2c3850;
-          --line-strong:#3d4d6d;
-          --indigo:#7aa3d6;
-          --indigo-2:#93b6e0;
-          --indigo-soft:#223350;
-          --vermillion:#e87a63;
-          --vermillion-soft:#3d2622;
-          --gold:#d9ae5a;
-          --gold-soft:#332b18;
-          --green:#5cc98a;
-          --green-soft:#1d3325;
-          --card-back:#16283f;
-          --shadow:0 10px 28px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.35);
-          --shadow-sm:0 3px 10px rgba(0,0,0,.35);
-          color-scheme:dark;
-        }
-      }
-      *{box-sizing:border-box}
-      html{-webkit-text-size-adjust:100%}
-      body{
-        margin:0;
-        font-family:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-        background:
-          radial-gradient(1100px 480px at 85% -120px, rgba(30,58,95,.10), transparent 60%),
-          radial-gradient(800px 400px at -10% 30%, rgba(194,64,42,.06), transparent 55%),
-          linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
-        color:var(--ink);
-        min-height:100vh;
-      }
-      .jp{font-family:"Noto Sans JP", sans-serif}
-      .wrap{max-width:1020px;margin:0 auto;padding:18px 16px 56px}
-
-      /* ---------- Top bar ---------- */
-      .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
-      .title-block h1{
-        font-family:"Shippori Mincho", serif;
-        font-size:clamp(26px,4.4vw,38px);
-        line-height:1.08;margin:0;font-weight:800;letter-spacing:.01em;
-      }
-      .title-block h1 .accent{color:var(--vermillion)}
-      .title-block p{margin:7px 0 0;color:var(--ink-2);font-size:14.5px;line-height:1.5;max-width:56ch}
-      .title-block p strong{color:var(--ink)}
-      .btn{
-        appearance:none;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);
-        font:inherit;font-weight:600;font-size:14px;padding:9px 16px;border-radius:999px;cursor:pointer;
-        box-shadow:var(--shadow-sm);white-space:nowrap;transition:transform .12s ease, background .15s ease, border-color .15s ease;
-      }
-      .btn:hover{transform:translateY(-1px)}
-      .btn:active{transform:translateY(0)}
-      .btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-      .btn.primary{background:var(--indigo);border-color:var(--indigo);color:#fff}
-      @media (prefers-color-scheme: dark){ .btn.primary{color:#0e1320} }
-      .btn.primary:hover{background:var(--indigo-2)}
-      .btn.vermillion{background:var(--vermillion);border-color:var(--vermillion);color:#fff}
-      .btn.small{padding:7px 13px;font-size:13px}
-
-      /* ---------- Setup card ---------- */
-      .setup{
-        background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-        box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;
-      }
-      .setup .group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-      .setup .label{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
-      .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
-      .seg button{
-        appearance:none;border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:13.5px;font-weight:600;
-        padding:7px 14px;border-radius:999px;cursor:pointer;line-height:1.2;text-align:center;
-      }
-      .seg button small{display:block;font-size:11px;font-weight:500;color:var(--ink-3);margin-top:1px}
-      .seg button[aria-pressed="true"]{background:var(--indigo);color:#fff;box-shadow:var(--shadow-sm)}
-      .seg button[aria-pressed="true"] small{color:rgba(255,255,255,.75)}
-      @media (prefers-color-scheme: dark){ .seg button[aria-pressed="true"]{color:#0e1320} .seg button[aria-pressed="true"] small{color:rgba(14,19,32,.65)} }
-      .seg button:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
-      .setup .spacer{flex:1}
-      .setup .note{font-size:12.5px;color:var(--ink-3)}
-
-      /* ---------- Status strip ---------- */
-      .status{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 10px}
-      .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;box-shadow:var(--shadow-sm)}
-      .stat .k{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
-      .stat .v{font-size:24px;font-weight:800;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums}
-      .stat .v small{font-size:13px;font-weight:600;color:var(--ink-3)}
-      .progress{height:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:2px 0 14px}
-      .progress > div{height:100%;width:0%;background:linear-gradient(90deg, var(--gold), var(--vermillion));border-radius:999px;transition:width .45s ease}
-
-      .message{
-        min-height:26px;display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;margin:0 0 12px;color:var(--ink);
-      }
-      .message .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);flex:none}
-      .message.good{color:var(--green)} .message.good .dot{background:var(--green)}
-      .message.bad{color:var(--vermillion)} .message.bad .dot{background:var(--vermillion)}
-
-      /* ---------- Board ---------- */
-      .board-wrap{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:clamp(10px,2.4vw,20px)}
-      .board{display:grid;gap:clamp(7px,1.6vw,12px);grid-template-columns:repeat(var(--cols,4),1fr);container-type:inline-size;margin:0 auto}
-      .card{
-        appearance:none;border:0;background:transparent;padding:0;cursor:pointer;aspect-ratio:3/4;perspective:700px;
-        font:inherit;-webkit-tap-highlight-color:transparent;
-      }
-      .card:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:12px}
-      .card-inner{
-        display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
-        transition:transform .45s cubic-bezier(.3,.7,.3,1);
-      }
-      .card.flipped .card-inner,.card.matched .card-inner{transform:rotateY(180deg)}
-      .face{
-        position:absolute;inset:0;border-radius:clamp(8px,1.6vw,13px);backface-visibility:hidden;-webkit-backface-visibility:hidden;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;
-      }
-      .face.back{
-        background-color:var(--card-back);
-        background-image:
-          radial-gradient(circle at 50% 135%, transparent 58%, rgba(255,255,255,.16) 59%, rgba(255,255,255,.16) 66%, transparent 67%),
-          radial-gradient(circle at 0% 135%, transparent 58%, rgba(255,255,255,.16) 59%, rgba(255,255,255,.16) 66%, transparent 67%),
-          radial-gradient(circle at 100% 135%, transparent 58%, rgba(255,255,255,.16) 59%, rgba(255,255,255,.16) 66%, transparent 67%);
-        background-size:56px 28px;
-        border:1px solid rgba(255,255,255,.14);
-        box-shadow:inset 0 0 0 5px rgba(255,255,255,.05), var(--shadow-sm);
-      }
-      .face.back::after{
-        content:"\u3042";font-family:"Noto Sans JP",sans-serif;font-weight:900;color:rgba(255,255,255,.9);
-        font-size:clamp(13px,5.2cqw,26px);width:1.9em;height:1.9em;border:1.5px solid rgba(255,255,255,.55);border-radius:50%;
-        display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);line-height:1;
-      }
-      .card:not(.flipped):not(.matched):hover .card-inner{transform:rotateY(14deg)}
-      .face.front{
-        transform:rotateY(180deg);background:var(--surface);border:1.5px solid var(--line-strong);box-shadow:var(--shadow-sm);
-      }
-      .face.front .tag{font-size:clamp(8px,1.5vw,10px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
-      .face.front .glyph{font-weight:900;line-height:1.1;color:var(--ink)}
-      .face.front.kana .glyph{font-family:"Noto Sans JP",sans-serif;font-size:clamp(20px,9.5cqw,54px)}
-      .face.front.romaji{background:var(--indigo-soft)}
-      .face.front.romaji .glyph{font-size:clamp(15px,6.8cqw,38px);letter-spacing:.01em;text-transform:lowercase}
-      .card.matched{cursor:default}
-      .card.matched .face.front{border-color:var(--gold);background:var(--gold-soft);box-shadow:0 0 0 2px var(--gold-soft), var(--shadow-sm)}
-      .card.matched .face.front .glyph{color:var(--ink)}
-      .card.matched .face.front::after{
-        content:"\u2713";position:absolute;top:5px;right:8px;font-size:13px;font-weight:800;color:var(--gold);
-      }
-      .card.wrong .face.front{border-color:var(--vermillion);background:var(--vermillion-soft)}
-      @media (prefers-reduced-motion: reduce){
-        .card-inner{transition:none}
-        .card:not(.flipped):not(.matched):hover .card-inner{transform:none}
-        .progress > div{transition:none}
-      }
-
-      /* ---------- Win banner ---------- */
-      .win{
-        display:none;margin-top:14px;background:var(--surface);border:1.5px solid var(--gold);border-radius:var(--radius);
-        box-shadow:var(--shadow);padding:20px 22px;text-align:center;
-      }
-      .win.show{display:block}
-      .win .stars{font-size:27px;letter-spacing:.18em;color:var(--gold);line-height:1}
-      .win .stars .off{color:var(--line-strong)}
-      .win h2{font-family:"Shippori Mincho",serif;margin:9px 0 5px;font-size:25px}
-      .win p{margin:0 auto 15px;color:var(--ink-2);font-size:14.5px;line-height:1.55;max-width:52ch}
-      .win p strong{color:var(--ink)}
-
-      /* ---------- Chart ---------- */
-      .section{margin-top:34px}
-      .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
-      .section h2{font-family:"Shippori Mincho",serif;font-size:23px;margin:0}
-      .section .sub{color:var(--ink-2);font-size:14px;line-height:1.55;margin:0 0 14px;max-width:68ch}
-      .chart-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px;overflow:hidden}
-      .chart{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
-      .chart .cell{
-        border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:8px 4px 7px;text-align:center;min-height:64px;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
-      }
-      .chart .cell.empty{background:transparent;border-style:dashed;opacity:.45}
-      .chart .cell .k{font-family:"Noto Sans JP",sans-serif;font-weight:900;font-size:23px;line-height:1.15}
-      .chart .cell .r{font-size:12px;font-weight:600;color:var(--ink-2);letter-spacing:.03em}
-      .chart .cell.solo{grid-column:1 / -1;flex-direction:row;gap:10px;min-height:52px}
-      .chart .cell.solo .k{font-size:21px}
-      .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--ink-2)}
-      .legend span{display:inline-flex;align-items:center;gap:7px}
-      .swatch{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--line-strong);display:inline-block}
-      .swatch.kana{background:var(--surface)} .swatch.romaji{background:var(--indigo-soft)} .swatch.matched{background:var(--gold-soft);border-color:var(--gold)}
-
-      footer{margin-top:30px;color:var(--ink-3);font-size:12.5px;text-align:center;line-height:1.6}
-
-      /* ---------- Modal ---------- */
-      .modal-backdrop{
-        position:fixed;inset:0;background:rgba(10,14,24,.55);backdrop-filter:blur(3px);display:none;
-        align-items:center;justify-content:center;padding:18px;z-index:50;
-      }
-      .modal-backdrop.open{display:flex}
-      .modal{
-        background:var(--surface);color:var(--ink);border-radius:16px;box-shadow:var(--shadow);
-        max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:24px 26px 22px;border:1px solid var(--line);
-      }
-      .modal h2{font-family:"Shippori Mincho",serif;margin:0 0 12px;font-size:23px}
-      .modal h3{margin:18px 0 6px;font-size:15px}
-      .modal p,.modal li{font-size:14.5px;line-height:1.65;color:var(--ink-2)}
-      .modal p strong,.modal li strong{color:var(--ink)}
-      .modal ul{margin:6px 0;padding-left:20px}
-      .modal .example{
-        display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line);
-        border-radius:12px;padding:12px 16px;margin:12px 0;
-      }
-      .mini-card{
-        width:52px;height:68px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;
-        border:1.5px solid var(--line-strong);background:var(--surface);box-shadow:var(--shadow-sm);
-      }
-      .mini-card .g{font-weight:900;line-height:1.1}
-      .mini-card.kana .g{font-family:"Noto Sans JP",sans-serif;font-size:28px}
-      .mini-card.romaji{background:var(--indigo-soft)} .mini-card.romaji .g{font-size:20px}
-      .mini-card .t{font-size:7.5px;font-weight:700;letter-spacing:.13em;color:var(--ink-3);text-transform:uppercase}
-      .modal .actions{display:flex;justify-content:flex-end;margin-top:20px}
-
-      /* ---------- Compact fit on landscape laptop/desktop screens ----------
-         Tighten the chrome and let the board size itself to the viewport
-         height (see fitBoard in the script) so a whole game is playable
-         without scrolling. */
-      @media (min-width:641px) and (orientation:landscape){
-        .wrap{padding-top:10px;padding-bottom:24px}
-        .topbar{margin-bottom:9px}
-        .title-block h1{font-size:clamp(23px,3vw,30px)}
-        .title-block p{margin-top:4px;font-size:13px;line-height:1.4}
-        .setup{padding:9px 13px}
-        .status{gap:8px;margin:9px 0 7px}
-        .stat{padding:7px 12px}
-        .stat .v{font-size:19px}
-        .progress{margin-bottom:9px}
-        .message{min-height:22px;font-size:14px;margin-bottom:8px}
-        .board-wrap{padding:12px}
-        .board{gap:9px}
-      }
-
-      @media (max-width:640px){
-        .status{grid-template-columns:repeat(2,1fr)}
-        .topbar{flex-direction:column}
-        .topbar .btn{align-self:flex-start}
-        .setup{gap:10px}
-        .chart .cell .k{font-size:19px}
-        .chart .cell{min-height:56px}
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <div class="topbar">
-        <div class="title-block">
-          <h1>Hiragana <span class="accent">Memory Match</span></h1>
-          <p>Flip two cards at a time and pair each <strong>hiragana</strong> with its <strong>romaji</strong> reading \u2014 for example, <span class="jp"><strong>\u3042</strong></span> goes with <strong>a</strong>. Clear the whole board in as few moves as you can.</p>
-        </div>
-        <button class="btn" id="howToBtn" type="button">How to Play</button>
-      </div>
-
-      <div class="setup" aria-label="New game settings">
-        <div class="group">
-          <span class="label" id="diffLabel">Difficulty</span>
-          <div class="seg" role="group" aria-labelledby="diffLabel">
-            <button type="button" data-diff="easy" aria-pressed="true">Easy<small>8 pairs</small></button>
-            <button type="button" data-diff="medium" aria-pressed="false">Medium<small>12 pairs</small></button>
-            <button type="button" data-diff="hard" aria-pressed="false">Hard<small>18 pairs</small></button>
-          </div>
-        </div>
-        <div class="spacer"></div>
-        <span class="note">A fresh set of hiragana is drawn at random each game.</span>
-        <button class="btn primary" id="newGameBtn" type="button">Start New Game</button>
-      </div>
-
-      <div class="status" aria-label="Game status">
-        <div class="stat"><div class="k">Pairs Found</div><div class="v"><span id="statPairs">0</span> <small>/ <span id="statTotal">8</span></small></div></div>
-        <div class="stat"><div class="k">Moves</div><div class="v" id="statMoves">0</div></div>
-        <div class="stat"><div class="k">Time</div><div class="v" id="statTime">0:00</div></div>
-        <div class="stat"><div class="k">Accuracy</div><div class="v" id="statAcc">\u2014</div></div>
-      </div>
-      <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
-
-      <p class="message" id="message" role="status" aria-live="polite"><span class="dot"></span><span id="messageText">Pick any card to start.</span></p>
-
-      <div class="board-wrap">
-        <div class="board" id="board"></div>
-      </div>
-
-      <div class="win" id="winBanner">
-        <div class="stars" id="winStars" aria-hidden="true"></div>
-        <h2 id="winTitle">Board Cleared!</h2>
-        <p id="winText"></p>
-        <button class="btn vermillion" id="playAgainBtn" type="button">Play Again</button>
-      </div>
-
-      <div class="section">
-        <div class="section-head">
-          <h2>Hiragana Chart \u2014 The 46 Basic Sounds</h2>
-        </div>
-        <p class="sub">These are the <strong>seion</strong> \u2014 the plain, basic hiragana sounds. Every card in the game comes from this chart. Read each row left to right: a, i, u, e, o. Use it to study between games, or to check a sound you are unsure about.</p>
-        <div class="chart-wrap">
-          <div class="chart" id="chart"></div>
-          <div class="legend">
-            <span><i class="swatch kana"></i> Hiragana card</span>
-            <span><i class="swatch romaji"></i> Romaji card</span>
-            <span><i class="swatch matched"></i> Matched pair</span>
-          </div>
-        </div>
-      </div>
-
-      <footer>Hiragana Memory Match \xB7 Romaji follows the Hepburn system (shi, chi, tsu, fu).</footer>
-    </div>
-
-    <!-- How to Play modal -->
-    <div class="modal-backdrop" id="modalBackdrop">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <h2 id="modalTitle">How to Play</h2>
-        <p><strong>Goal:</strong> find all the matching pairs hidden on the board.</p>
-        <div class="example" aria-hidden="true">
-          <div class="mini-card kana"><span class="t">Hiragana</span><span class="g jp">\u3042</span></div>
-          <span style="font-weight:800;font-size:18px">+</span>
-          <div class="mini-card romaji"><span class="t">Romaji</span><span class="g">a</span></div>
-          <span style="font-size:14px;color:var(--ink-2)">= a pair! Each hiragana matches the card with its romaji reading.</span>
-        </div>
-        <h3>Playing a turn</h3>
-        <ul>
-          <li>Click or tap a face-down card to flip it over.</li>
-          <li>Flip a <strong>second card</strong>. That completes one move.</li>
-          <li>If the two cards are a hiragana and its romaji reading, they <strong>stay face up</strong> and turn gold.</li>
-          <li>If they do not match, remember where they are \u2014 they flip back over after a moment.</li>
-        </ul>
-        <h3>Winning</h3>
-        <ul>
-          <li>The game ends when <strong>every pair</strong> has been found.</li>
-          <li>Your score is based on <strong>moves</strong> and <strong>time</strong>: fewer moves earns more stars.</li>
-          <li>The timer starts on your first flip.</li>
-        </ul>
-        <h3>Difficulty</h3>
-        <ul>
-          <li><strong>Easy</strong> \u2014 8 pairs (16 cards). A gentle warm-up.</li>
-          <li><strong>Medium</strong> \u2014 12 pairs (24 cards).</li>
-          <li><strong>Hard</strong> \u2014 18 pairs (36 cards). A real memory workout.</li>
-          <li>The hiragana used are drawn at random from all 46 basic sounds each game, so no two games are the same.</li>
-        </ul>
-        <div class="actions">
-          <button class="btn primary" id="modalCloseBtn" type="button">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      // ---- The 46 seion (basic hiragana) with Hepburn romaji ----
-      var KANA = [
-        {k:'\u3042',r:'a'},  {k:'\u3044',r:'i'},  {k:'\u3046',r:'u'},  {k:'\u3048',r:'e'},  {k:'\u304A',r:'o'},
-        {k:'\u304B',r:'ka'}, {k:'\u304D',r:'ki'}, {k:'\u304F',r:'ku'}, {k:'\u3051',r:'ke'}, {k:'\u3053',r:'ko'},
-        {k:'\u3055',r:'sa'}, {k:'\u3057',r:'shi'},{k:'\u3059',r:'su'}, {k:'\u305B',r:'se'}, {k:'\u305D',r:'so'},
-        {k:'\u305F',r:'ta'}, {k:'\u3061',r:'chi'},{k:'\u3064',r:'tsu'},{k:'\u3066',r:'te'}, {k:'\u3068',r:'to'},
-        {k:'\u306A',r:'na'}, {k:'\u306B',r:'ni'}, {k:'\u306C',r:'nu'}, {k:'\u306D',r:'ne'}, {k:'\u306E',r:'no'},
-        {k:'\u306F',r:'ha'}, {k:'\u3072',r:'hi'}, {k:'\u3075',r:'fu'}, {k:'\u3078',r:'he'}, {k:'\u307B',r:'ho'},
-        {k:'\u307E',r:'ma'}, {k:'\u307F',r:'mi'}, {k:'\u3080',r:'mu'}, {k:'\u3081',r:'me'}, {k:'\u3082',r:'mo'},
-        {k:'\u3084',r:'ya'}, {k:'\u3086',r:'yu'}, {k:'\u3088',r:'yo'},
-        {k:'\u3089',r:'ra'}, {k:'\u308A',r:'ri'}, {k:'\u308B',r:'ru'}, {k:'\u308C',r:'re'}, {k:'\u308D',r:'ro'},
-        {k:'\u308F',r:'wa'}, {k:'\u3092',r:'wo'}, {k:'\u3093',r:'n'}
-      ];
-      // Chart layout: rows of 5 columns (a i u e o); null = no such sound
-      var CHART_ROWS = [
-        [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24],
-        [25,26,27,28,29], [30,31,32,33,34], [35,null,36,null,37], [38,39,40,41,42], [43,null,null,null,44]
-      ];
-      var DIFFS = {
-        easy:   { pairs: 8,  cols: 4 },
-        medium: { pairs: 12, cols: 6 },
-        hard:   { pairs: 18, cols: 6 }
-      };
-
-      var boardEl = document.getElementById('board');
-      var messageEl = document.getElementById('message');
-      var messageText = document.getElementById('messageText');
-      var statPairs = document.getElementById('statPairs');
-      var statTotal = document.getElementById('statTotal');
-      var statMoves = document.getElementById('statMoves');
-      var statTime = document.getElementById('statTime');
-      var statAcc = document.getElementById('statAcc');
-      var progressBar = document.getElementById('progressBar');
-      var winBanner = document.getElementById('winBanner');
-      var winStars = document.getElementById('winStars');
-      var winText = document.getElementById('winText');
-      var winTitle = document.getElementById('winTitle');
-
-      var difficulty = 'easy';
-      var deck = [];        // [{id, type:'kana'|'romaji', kana, romaji}]
-      var openCards = [];   // currently flipped, unresolved card elements+data
-      var matchedCount = 0;
-      var totalPairs = 8;
-      var moves = 0;
-      var lock = false;
-      var started = false;
-      var finished = false;
-      var timerId = null;
-      var elapsed = 0;      // seconds
-
-      function shuffle(arr){
-        for (var i = arr.length - 1; i > 0; i--){
-          var j = Math.floor(Math.random() * (i + 1));
-          var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
-        }
-        return arr;
-      }
-      function fmtTime(s){
-        var m = Math.floor(s / 60), ss = s % 60;
-        return m + ':' + (ss < 10 ? '0' : '') + ss;
-      }
-      function setMessage(text, kind){
-        messageText.textContent = text;
-        messageEl.className = 'message' + (kind ? ' ' + kind : '');
-      }
-      function startTimer(){
-        if (timerId) return;
-        timerId = setInterval(function(){
-          // The clock stops while the tab is hidden (you are not playing then).
-          if (document.hidden) return;
-          elapsed++;
-          statTime.textContent = fmtTime(elapsed);
-        }, 1000);
-      }
-      function stopTimer(){
-        if (timerId){ clearInterval(timerId); timerId = null; }
-      }
-      function updateStats(){
-        statPairs.textContent = matchedCount;
-        statTotal.textContent = totalPairs;
-        statMoves.textContent = moves;
-        statAcc.textContent = moves === 0 ? '\u2014' : Math.round(matchedCount / moves * 100) + '%';
-        progressBar.style.width = (totalPairs ? (matchedCount / totalPairs * 100) : 0) + '%';
-      }
-
-      function colsForViewport(cols){
-        var w = window.innerWidth;
-        if (w <= 640){
-          if (cols === 6) return difficulty === 'hard' ? 6 : 4;
-          return 4;
-        }
-        return cols;
-      }
-
-      // On wide landscape screens, shrink the board so the whole grid fits
-      // between its top edge and the bottom of the viewport \u2014 no scrolling
-      // needed while playing. On narrow/portrait screens the board simply
-      // takes the full width as before.
-      function fitBoard(){
-        // Inside the portal the iframe grows to fit this page, so its own height can't be used
-        // (the board would keep growing). Fit the board to the portal window's height instead.
-        var embedded = document.documentElement.classList.contains('yg-embedded');
-        var viewH = window.innerHeight;
-        if (embedded){ try { viewH = window.parent.innerHeight; } catch (e) {} }
-        var isLandscapeDesktop = window.innerWidth > 640 && window.innerWidth >= viewH;
-        if (!isLandscapeDesktop || !deck.length){
-          boardEl.style.maxWidth = '';
-          return;
-        }
-        var cols = colsForViewport(DIFFS[difficulty].cols);
-        var rows = Math.ceil(deck.length / cols);
-        var gap = 9; // matches the landscape .board gap
-        var availH = embedded
-          ? viewH - 120 // whole board visible in the portal window, with room for the toolbar
-          : window.innerHeight - boardEl.getBoundingClientRect().top - 26; // 26px breathing room below
-        if (availH < 200){ boardEl.style.maxWidth = ''; return; }
-        // Card height = card width * 4/3 (aspect-ratio 3/4).
-        // Solve board width W: rows * ((W - (cols-1)*gap)/cols) * 4/3 + (rows-1)*gap = availH
-        var w = ((availH - (rows - 1) * gap) * 3 / 4) * cols / rows + (cols - 1) * gap;
-        w = Math.min(w, 760); // don't let cards balloon on very tall screens
-        boardEl.style.maxWidth = Math.max(w, 300) + 'px';
-      }
-
-      function newGame(){
-        stopTimer();
-        elapsed = 0; moves = 0; matchedCount = 0;
-        openCards = []; lock = false; started = false; finished = false;
-        statTime.textContent = '0:00';
-        winBanner.classList.remove('show');
-
-        var cfg = DIFFS[difficulty];
-        totalPairs = cfg.pairs;
-        boardEl.style.setProperty('--cols', colsForViewport(cfg.cols));
-
-        var pool = shuffle(KANA.slice()).slice(0, totalPairs);
-        deck = [];
-        pool.forEach(function(item, idx){
-          deck.push({ id: idx, type: 'kana',   kana: item.k, romaji: item.r });
-          deck.push({ id: idx, type: 'romaji', kana: item.k, romaji: item.r });
-        });
-        shuffle(deck);
-
-        boardEl.innerHTML = '';
-        deck.forEach(function(card, pos){
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'card';
-          btn.setAttribute('aria-label', 'Face-down card ' + (pos + 1));
-          var label = card.type === 'kana' ? ('Hiragana ' + card.kana) : ('Romaji ' + card.romaji);
-          btn.innerHTML =
-            '<span class="card-inner">' +
-              '<span class="face back" aria-hidden="true"></span>' +
-              '<span class="face front ' + card.type + '">' +
-                '<span class="tag">' + (card.type === 'kana' ? 'Hiragana' : 'Romaji') + '</span>' +
-                '<span class="glyph">' + (card.type === 'kana' ? card.kana : card.romaji) + '</span>' +
-              '</span>' +
-            '</span>';
-          btn.addEventListener('click', function(){ flipCard(btn, card, label, pos); });
-          boardEl.appendChild(btn);
-        });
-
-        updateStats();
-        setMessage('Pick any card to start. The timer starts on your first flip.');
-        requestAnimationFrame(fitBoard);
-      }
-
-      function flipCard(btn, card, label, pos){
-        if (lock || finished) return;
-        if (btn.classList.contains('flipped') || btn.classList.contains('matched')) return;
-        if (!started){ started = true; startTimer(); }
-
-        btn.classList.add('flipped');
-        btn.setAttribute('aria-label', label);
-        openCards.push({ btn: btn, card: card, pos: pos });
-
-        if (openCards.length === 1){
-          setMessage(card.type === 'kana'
-            ? 'You found ' + card.kana + ' \u2014 now find its romaji, "' + card.romaji + '".'
-            : 'You found "' + card.romaji + '" \u2014 now find its hiragana, ' + card.kana + '.');
-          return;
-        }
-
-        // Second card: one move
-        moves++;
-        var a = openCards[0], b = openCards[1];
-        openCards = [];
-
-        if (a.card.id === b.card.id){
-          a.btn.classList.add('matched'); b.btn.classList.add('matched');
-          a.btn.setAttribute('aria-label', a.btn.getAttribute('aria-label') + ' \u2014 matched');
-          b.btn.setAttribute('aria-label', b.btn.getAttribute('aria-label') + ' \u2014 matched');
-          matchedCount++;
-          updateStats();
-          if (matchedCount === totalPairs){
-            finishGame();
-          } else {
-            setMessage('That\\u2019s a pair! ' + a.card.kana + ' = ' + a.card.romaji + '. ' +
-              (totalPairs - matchedCount) + (totalPairs - matchedCount === 1 ? ' pair' : ' pairs') + ' to go.', 'good');
-          }
-        } else {
-          lock = true;
-          a.btn.classList.add('wrong'); b.btn.classList.add('wrong');
-          setMessage('Not a pair \u2014 ' +
-            (a.card.type === 'kana' ? a.card.kana : '"' + a.card.romaji + '"') + ' and ' +
-            (b.card.type === 'kana' ? b.card.kana : '"' + b.card.romaji + '"') +
-            ' don\\u2019t match. Try to remember them!', 'bad');
-          updateStats();
-          setTimeout(function(){
-            a.btn.classList.remove('flipped', 'wrong');
-            b.btn.classList.remove('flipped', 'wrong');
-            a.btn.setAttribute('aria-label', 'Face-down card ' + (a.pos + 1));
-            b.btn.setAttribute('aria-label', 'Face-down card ' + (b.pos + 1));
-            lock = false;
-          }, 950);
-        }
-        updateStats();
-      }
-
-      function finishGame(){
-        finished = true;
-        stopTimer();
-        updateStats();
-        var ratio = moves / totalPairs;
-        var stars = ratio <= 1.4 ? 3 : (ratio <= 2 ? 2 : 1);
-        var starHtml = '';
-        for (var i = 0; i < 3; i++) starHtml += i < stars ? '\u2605' : '<span class="off">\u2605</span>';
-        winStars.innerHTML = starHtml;
-        var praise = stars === 3 ? 'Outstanding memory! ' : (stars === 2 ? 'Great job! ' : 'Well done! ');
-        winTitle.textContent = 'Board Cleared!';
-        winText.innerHTML = praise + 'You matched all <strong>' + totalPairs + ' pairs</strong> in <strong>' +
-          moves + ' moves</strong> and <strong>' + fmtTime(elapsed) + '</strong>.' +
-          (difficulty !== 'hard'
-            ? ' Ready for a bigger board? Try a harder difficulty, or play again \u2014 a new set of hiragana is drawn every game.'
-            : ' You cleared the hardest board. Play again for a fresh set of hiragana.');
-        setMessage('Board cleared in ' + moves + ' moves and ' + fmtTime(elapsed) + '. Congratulations!', 'good');
-        winBanner.classList.add('show');
-        winBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      // ---- Difficulty + controls ----
-      var segBtns = document.querySelectorAll('.seg button[data-diff]');
-      segBtns.forEach(function(btn){
-        btn.addEventListener('click', function(){
-          difficulty = btn.getAttribute('data-diff');
-          segBtns.forEach(function(b){ b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
-          newGame();
-        });
-      });
-      document.getElementById('newGameBtn').addEventListener('click', newGame);
-      document.getElementById('playAgainBtn').addEventListener('click', function(){
-        newGame();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      window.addEventListener('resize', function(){
-        boardEl.style.setProperty('--cols', colsForViewport(DIFFS[difficulty].cols));
-        fitBoard();
-      });
-
-      // ---- Reference chart ----
-      var chartEl = document.getElementById('chart');
-      CHART_ROWS.forEach(function(row){
-        row.forEach(function(idx){
-          var cell = document.createElement('div');
-          if (idx === null){
-            cell.className = 'cell empty';
-            cell.innerHTML = '<span class="r">\u2014</span>';
-          } else {
-            cell.className = 'cell';
-            cell.innerHTML = '<span class="k">' + KANA[idx].k + '</span><span class="r">' + KANA[idx].r + '</span>';
-          }
-          chartEl.appendChild(cell);
-        });
-      });
-      var nCell = document.createElement('div');
-      nCell.className = 'cell solo';
-      nCell.innerHTML = '<span class="k">' + KANA[45].k + '</span><span class="r">' + KANA[45].r + ' \u2014 the syllabic n, a sound all on its own</span>';
-      chartEl.appendChild(nCell);
-
-      // ---- Modal ----
-      var backdrop = document.getElementById('modalBackdrop');
-      function openModal(){ backdrop.classList.add('open'); document.getElementById('modalCloseBtn').focus(); }
-      function closeModal(){ backdrop.classList.remove('open'); document.getElementById('howToBtn').focus(); }
-      document.getElementById('howToBtn').addEventListener('click', openModal);
-      document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-      backdrop.addEventListener('click', function(e){ if (e.target === backdrop) closeModal(); });
-      document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && backdrop.classList.contains('open')) closeModal(); });
-
-      newGame();
-    <\/script>
-  </body>
-</html>
-`;
 var prefecturePuzzle = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65315,7 +65070,6 @@ var FRAMES = {
   go,
   hanafuda,
   "kanji-sudoku": kanjiSudoku,
-  "hiragana-memory-match": hiraganaMemoryMatch,
   "prefecture-puzzle": prefecturePuzzle
 };
 var FRAME_BRIDGE = `
@@ -65381,7 +65135,7 @@ function messagePage(message, status) {
 </head><body><p>${message}</p></body></html>`;
   return new Response(html, { status, headers: BASE_HEADERS });
 }
-async function loader$o({ request, context, params }) {
+async function loader$p({ request, context, params }) {
   const html = FRAMES[params.name ?? ""];
   if (!html)
     return messagePage("This game could not be found.", 404);
@@ -65396,9 +65150,9 @@ async function loader$o({ request, context, params }) {
     return messagePage("Games are locked by your teacher right now.", 403);
   return new Response(html.replace(/<head>/i, `<head>${FRAME_BRIDGE}`), { headers: BASE_HEADERS });
 }
-var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$o
+  loader: loader$p
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$6 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
@@ -65418,7 +65172,7 @@ async function fetchLegalContentData(supabaseClient) {
     return null;
   }
 }
-async function loader$n({ request }) {
+async function loader$o({ request }) {
   const url = new URL(request.url);
   const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
   return dist$1.json({
@@ -65524,10 +65278,10 @@ function Disclaimer() {
     }
   );
 }
-var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Disclaimer,
-  loader: loader$n,
+  loader: loader$o,
   meta: meta$n
 }, Symbol.toStringTag, { value: "Module" }));
 function useYamatoChat2Logic({
@@ -71851,7 +71605,7 @@ async function fetchLessonPageData(slug) {
   return data2;
 }
 var LESSON_SLUG = "family-1";
-async function loader$m({ request }) {
+async function loader$n({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -71872,10 +71626,10 @@ function LessonsFamily1Page() {
   const data2 = useLoaderData();
   return /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonPage, { lessonSlug: LESSON_SLUG, data: data2 });
 }
-var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsFamily1Page,
-  loader: loader$m,
+  loader: loader$n,
   meta: meta$m
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$5 = "CONTENT_REFERENCE";
@@ -71938,7 +71692,7 @@ function useReferenceContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$l({ request }) {
+async function loader$m({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -72080,11 +71834,28 @@ function ReferenceIndex() {
 var meta$l = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ReferenceIndex,
-  loader: loader$l,
+  loader: loader$m,
   meta: meta$l
+}, Symbol.toStringTag, { value: "Module" }));
+async function action$3({ request, context }) {
+  const { supabase: supabase2, headers } = createServerSupabaseClient(request, context);
+  try {
+    await supabase2.auth.signOut({ scope: "local" });
+  } catch {
+  }
+  appendClearAuthCookies(request, headers);
+  return dist$1.json({ success: true }, { headers });
+}
+async function loader$l() {
+  return dist$1.json({ error: "Method Not Allowed" }, { status: 405 });
+}
+var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  action: action$3,
+  loader: loader$l
 }, Symbol.toStringTag, { value: "Module" }));
 var NO_STORE = { "Cache-Control": "no-store" };
 async function loader$k() {
@@ -73084,13 +72855,13 @@ var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 }, Symbol.toStringTag, { value: "Module" }));
 var generatedRoutes = [
   "/about",
+  "/api.auth.logout",
   "/contact",
   "/culture._index",
   "/faq",
   "/games._index",
   "/games.character-maze",
   "/games.hanafuda",
-  "/games.hiragana-memory-match",
   "/games.igo",
   "/games.kanji-sudoku",
   "/games.memory-match",
@@ -73863,6 +73634,307 @@ var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   loader: loader$9,
   meta: meta$9
 }, Symbol.toStringTag, { value: "Module" }));
+var MARK_SRC = "/jptutoraiyamato.png";
+function sayMondaiDesu() {
+  try {
+    if (typeof window === "undefined" || !("speechSynthesis" in window))
+      return;
+    const u2 = new SpeechSynthesisUtterance("\u554F\u984C\u3067\u3059");
+    u2.lang = "ja-JP";
+    u2.rate = 0.9;
+    u2.pitch = 0.8;
+    const ja2 = window.speechSynthesis.getVoices().find((v2) => {
+      var _a;
+      return (_a = v2.lang) == null ? void 0 : _a.toLowerCase().startsWith("ja");
+    });
+    if (ja2)
+      u2.voice = ja2;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u2);
+  } catch {
+  }
+}
+function useServerNow(offset) {
+  const [now, setNow] = reactExports.useState(() => Date.now() + offset);
+  reactExports.useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now() + offset), 100);
+    return () => clearInterval(timer);
+  }, [offset]);
+  return now;
+}
+function DarkStage({ open, children }) {
+  const [visible, setVisible] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    const t2 = setTimeout(() => setVisible(true), 50);
+    return () => clearTimeout(t2);
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-[60] bg-slate-950 text-white overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-full flex flex-col items-center px-4 py-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "img",
+      {
+        src: MARK_SRC,
+        alt: "AI Yamato",
+        className: "transition-all ease-out",
+        style: {
+          transitionDuration: "1200ms",
+          opacity: visible ? 1 : 0,
+          width: open ? 56 : 160,
+          height: open ? 56 : 160,
+          marginTop: open ? 0 : "30vh",
+          filter: visible ? "drop-shadow(0 0 24px rgba(255,255,255,0.35))" : "none"
+        }
+      }
+    ),
+    children
+  ] }) });
+}
+function OptionGrid({
+  q: q2,
+  picked,
+  correctIndex,
+  disabled,
+  onPick,
+  large = false
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-3 w-full", children: q2.options.map((opt, i) => {
+    let tone = "border-white/20 bg-white/5 hover:bg-white/15 text-white";
+    if (correctIndex !== null) {
+      tone = i === correctIndex ? "border-emerald-400 bg-emerald-500/30 text-white" : i === picked ? "border-rose-400 bg-rose-500/20 text-white/70" : "border-white/10 bg-white/5 text-white/40";
+    } else if (picked === i) {
+      tone = "border-amber-300 bg-amber-400/20 text-white";
+    } else if (disabled) {
+      tone = "border-white/10 bg-white/5 text-white/40";
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        disabled: disabled || !onPick,
+        onClick: () => onPick == null ? void 0 : onPick(i),
+        className: `rounded-2xl border-2 px-3 py-3 font-bold transition cursor-pointer disabled:cursor-default ${tone} ${large ? "min-h-[88px] text-3xl" : `min-h-[64px] ${q2.optionsAreJapanese ? "text-2xl" : "text-lg"}`}`,
+        children: opt
+      },
+      i
+    );
+  }) });
+}
+function TopList({ top }) {
+  if (!top.length)
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-white/60 text-center", children: "No correct answers yet\u2026" });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("ol", { className: "w-full space-y-1", children: top.map((t2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex justify-between rounded-lg bg-white/5 px-3 py-1.5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "font-bold", children: [
+      i + 1,
+      ". ",
+      t2.name
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "font-black text-amber-300", children: [
+      "+",
+      t2.reward,
+      " \u{1FA99}"
+    ] })
+  ] }, i)) });
+}
+function StudentYamato({
+  round,
+  answered,
+  end,
+  offset,
+  onAnswer
+}) {
+  const now = useServerNow(offset);
+  const [picked, setPicked] = reactExports.useState(null);
+  const open = now >= round.opensAt;
+  const secondsLeft = Math.max(0, Math.ceil((round.deadline - now) / 1e3));
+  const q2 = round.question;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(DarkStage, { open, children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full max-w-xl space-y-5 mt-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-white/70 text-sm font-bold", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: q2.label }),
+      !end && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl font-black text-amber-300 tabular-nums", children: secondsLeft })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center font-black ${q2.promptIsJapanese ? "text-7xl" : "text-2xl sm:text-3xl leading-snug"}`, children: q2.prompt }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      OptionGrid,
+      {
+        q: q2,
+        picked,
+        correctIndex: end ? end.correctIndex : null,
+        disabled: picked !== null || round.answered || !!answered || !!end,
+        onPick: (i) => {
+          setPicked(i);
+          onAnswer(i);
+        }
+      }
+    ),
+    !end && answered && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center text-xl font-black ${answered.correct ? "text-emerald-300" : "text-white/70"}`, children: answered.correct ? answered.reward > 0 ? `Correct! You were #${answered.rank} \u2014 +${answered.reward} \u{1FA99}` : `Correct! (#${answered.rank} \u2014 only the top 10 get coins)` : "Answer received\u2026 wait for the result." }),
+    !end && !answered && round.answered && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-white/70", children: "Answer received\u2026 wait for the result." }),
+    end && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center font-bold text-white/80", children: "Fastest correct answers" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(TopList, { top: end.top })
+    ] })
+  ] }) });
+}
+function HostYamato({ round, offset, playerCount }) {
+  const now = useServerNow(offset);
+  const open = now >= round.opensAt;
+  const secondsLeft = Math.max(0, Math.ceil((round.deadline - now) / 1e3));
+  const q2 = round.question;
+  reactExports.useEffect(() => {
+    sayMondaiDesu();
+  }, [round.roundId]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(DarkStage, { open, children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full max-w-5xl grid gap-8 lg:grid-cols-[3fr_2fr] mt-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-white/70 font-bold", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: q2.label }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-amber-300 tabular-nums", children: round.ended ? "" : secondsLeft })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center font-black ${q2.promptIsJapanese ? "text-9xl" : "text-4xl leading-snug"}`, children: q2.prompt }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(OptionGrid, { q: q2, picked: null, correctIndex: round.correctIndex, disabled: true, large: !q2.optionsAreJapanese ? false : true }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-white/60", children: [
+        round.answeredCount,
+        " / ",
+        playerCount,
+        " answered"
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-white/80", children: "Fastest correct answers" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(TopList, { top: round.top })
+    ] })
+  ] }) });
+}
+var PIECE_OPTIONS = { 24: [6, 4], 48: [8, 6], 80: [10, 8] };
+function gridFor(pieceCount, width, height) {
+  const [a, b] = PIECE_OPTIONS[pieceCount] ?? PIECE_OPTIONS[24];
+  return width >= height ? { cols: a, rows: b } : { cols: b, rows: a };
+}
+var CUT_LONG_SIDE = 1e3;
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Could not load the image."));
+    img.src = url;
+  });
+}
+async function cutJigsaw(imageUrl, cols, rows) {
+  const img = await loadImage(imageUrl);
+  const scale = Math.min(1, CUT_LONG_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  const W2 = Math.round(img.naturalWidth * scale);
+  const H2 = Math.round(img.naturalHeight * scale);
+  const cw = W2 / cols;
+  const ch2 = H2 / rows;
+  const T2 = Math.min(cw, ch2) * 0.22;
+  const rand = () => Math.random() < 0.5 ? 1 : -1;
+  const hEdges = Array.from({ length: rows - 1 }, () => Array.from({ length: cols }, rand));
+  const vEdges = Array.from({ length: rows }, () => Array.from({ length: cols - 1 }, rand));
+  const edge = (ctx2, x0, y0, x1, y1, s2) => {
+    if (s2 === 0) {
+      ctx2.lineTo(x1, y1);
+      return;
+    }
+    const L2 = Math.hypot(x1 - x0, y1 - y0);
+    const ux = (x1 - x0) / L2;
+    const uy = (y1 - y0) / L2;
+    const nx = uy;
+    const ny = -ux;
+    const p2 = (a, b) => [x0 + ux * a * L2 + nx * b * T2 * s2, y0 + uy * a * L2 + ny * b * T2 * s2];
+    ctx2.lineTo(...p2(0.35, 0));
+    ctx2.bezierCurveTo(...p2(0.4, 0.3), ...p2(0.28, 1), ...p2(0.5, 1));
+    ctx2.bezierCurveTo(...p2(0.72, 1), ...p2(0.6, 0.3), ...p2(0.65, 0));
+    ctx2.lineTo(x1, y1);
+  };
+  const pieces = [];
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.ceil(cw + 2 * T2);
+  canvas.height = Math.ceil(ch2 + 2 * T2);
+  const ctx = canvas.getContext("2d");
+  if (!ctx)
+    throw new Error("This browser cannot cut the picture.");
+  for (let r2 = 0; r2 < rows; r2++) {
+    for (let c = 0; c < cols; c++) {
+      const x2 = c * cw;
+      const y2 = r2 * ch2;
+      const top = r2 === 0 ? 0 : -hEdges[r2 - 1][c];
+      const bottom = r2 === rows - 1 ? 0 : hEdges[r2][c];
+      const left = c === 0 ? 0 : -vEdges[r2][c - 1];
+      const right = c === cols - 1 ? 0 : vEdges[r2][c];
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.translate(T2 - x2, T2 - y2);
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      edge(ctx, x2, y2, x2 + cw, y2, top);
+      edge(ctx, x2 + cw, y2, x2 + cw, y2 + ch2, right);
+      edge(ctx, x2 + cw, y2 + ch2, x2, y2 + ch2, bottom);
+      edge(ctx, x2, y2 + ch2, x2, y2, left);
+      ctx.closePath();
+      ctx.save();
+      ctx.clip();
+      ctx.drawImage(img, 0, 0, W2, H2);
+      ctx.restore();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.stroke();
+      let data2 = canvas.toDataURL("image/webp", 0.85);
+      if (!data2.startsWith("data:image/webp"))
+        data2 = canvas.toDataURL("image/png");
+      pieces.push({ slot: r2 * cols + c, data: data2 });
+    }
+  }
+  return pieces;
+}
+function JigsawBoard({
+  board,
+  onPick,
+  highlight,
+  showGuide = false
+}) {
+  const placed = new Set(board.placed);
+  const cells = Array.from({ length: board.cols * board.rows }, (_2, i) => i);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative w-full overflow-hidden rounded-xl border-2 border-slate-300 bg-slate-800", style: { aspectRatio: `${board.width} / ${board.height}` }, children: [
+    showGuide && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: board.imageUrl, alt: "", className: "absolute inset-0 w-full h-full object-cover opacity-15" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 grid", style: { gridTemplateColumns: `repeat(${board.cols}, 1fr)`, gridTemplateRows: `repeat(${board.rows}, 1fr)` }, children: cells.map((slot) => {
+      const r2 = Math.floor(slot / board.cols);
+      const c = slot % board.cols;
+      if (placed.has(slot)) {
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            style: {
+              backgroundImage: `url(${board.imageUrl})`,
+              backgroundSize: `${board.cols * 100}% ${board.rows * 100}%`,
+              backgroundPosition: `${board.cols === 1 ? 0 : c / (board.cols - 1) * 100}% ${board.rows === 1 ? 0 : r2 / (board.rows - 1) * 100}%`
+            }
+          },
+          slot
+        );
+      }
+      return onPick ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => onPick(slot),
+          "aria-label": `Row ${r2 + 1}, column ${c + 1}`,
+          className: `border border-white/25 hover:bg-amber-300/40 transition cursor-pointer ${highlight === slot ? "bg-rose-500/50" : "bg-slate-700/60"}`
+        },
+        slot
+      ) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border border-white/15 bg-slate-700/60" }, slot);
+    }) })
+  ] });
+}
+function JigsawBoxPicture({ board }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("figure", { className: "space-y-1", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: board.imageUrl, alt: board.title, className: "w-full rounded-lg border border-slate-200" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("figcaption", { className: "text-[11px] text-slate-500 leading-snug", children: [
+      board.title,
+      board.credit ? ` \u2014 ${board.credit}` : ""
+    ] })
+  ] });
+}
+function progressPercent(board) {
+  return board.total ? Math.round(board.placed.length / board.total * 100) : 0;
+}
 function useLiveGameSocket(gameId, onMessage) {
   const [status, setStatus] = reactExports.useState("connecting");
   const [closedCode, setClosedCode] = reactExports.useState(null);
@@ -74003,6 +74075,9 @@ function HostView({ gameId, onNewGame }) {
   if (!state)
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Spinner, { text: "Opening the game room\u2026" });
   const named = state.players.filter((p2) => p2.name);
+  const isJigsaw = state.config.mode === "jigsaw";
+  const unit = isJigsaw ? PIECE_UNIT : COIN_UNIT;
+  const scored = isJigsaw ? state.players.map((p2) => ({ ...p2, coins: p2.contributions ?? 0 })) : state.players;
   const rename = (p2) => {
     const name = window.prompt(`New display name for ${p2.name ?? p2.label}:`, p2.name ?? "");
     if (name !== null)
@@ -74024,7 +74099,16 @@ function HostView({ gameId, onNewGame }) {
           state.config.durationSec / 60,
           " min \xB7",
           " ",
-          state.config.nameMode === "free" ? "Students choose their names" : "Names chosen by AI Yamato"
+          state.config.nameMode === "free" ? "Students choose their names" : "Names chosen by AI Yamato",
+          " \xB7",
+          " ",
+          state.config.janken ? "Janken battles on" : "Janken battles off",
+          " \xB7",
+          " ",
+          state.config.speed ? "Speed rounds on" : "Speed rounds off",
+          " \xB7",
+          " ",
+          state.config.yamato ? "Yamato's questions on" : "Yamato's questions off"
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
@@ -74083,6 +74167,7 @@ function HostView({ gameId, onNewGame }) {
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(PlayerGrid, { players: state.players, showLabels, onRename: rename, onKick: kick })
     ] }),
+    state.status === "running" && state.yamato && /* @__PURE__ */ jsxRuntimeExports.jsx(HostYamato, { round: state.yamato, offset, playerCount: named.length }),
     state.status === "running" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between bg-indigo-600 text-white rounded-2xl p-5", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-5xl font-black tabular-nums", children: formatClock(left) }),
@@ -74099,14 +74184,32 @@ function HostView({ gameId, onNewGame }) {
           }
         )
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Leaderboard, { players: state.players, showLabels, onRename: rename, onKick: kick })
+      state.jigsaw && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-black text-slate-900 dark:text-white", children: "\u{1F9E9} Class puzzle" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-indigo-600", children: [
+            progressPercent(state.jigsaw),
+            "%"
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(JigsawBoard, { board: state.jigsaw })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-4 lg:grid-cols-[2fr_1fr]", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Leaderboard, { players: scored, unit, showLabels, onRename: rename, onKick: kick }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(LiveFeed, { feed: state.feed ?? [] })
+      ] })
     ] }),
     state.status === "ended" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-2xl font-black text-center text-slate-900 dark:text-white mb-4", children: "\u{1F3C6} Final results" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Podium, { players: named.slice(0, 3) })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-2xl font-black text-center text-slate-900 dark:text-white mb-4", children: state.jigsaw ? progressPercent(state.jigsaw) === 100 ? "\u{1F389} The class finished the puzzle!" : `\u{1F9E9} The class finished ${progressPercent(state.jigsaw)}%` : "\u{1F3C6} Final results" }),
+        state.jigsaw && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-4 md:grid-cols-[3fr_1fr] mb-6 items-start", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(JigsawBoard, { board: state.jigsaw }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(JigsawBoxPicture, { board: state.jigsaw })
+        ] }),
+        state.jigsaw && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center font-bold text-slate-600 mb-3", children: "Top contributors" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Podium, { players: scored.filter((p2) => p2.name).slice(0, 3), unit })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Leaderboard, { players: state.players, showLabels }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Leaderboard, { players: scored, unit, showLabels }),
       state.classMissed && state.classMissed.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-slate-800 dark:text-white mb-1", children: "Characters the class missed most" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mb-3", children: "Number of wrong answers across the class" }),
@@ -74122,6 +74225,19 @@ function HostView({ gameId, onNewGame }) {
       showLabels && /* @__PURE__ */ jsxRuntimeExports.jsx(StudentMissedTable, { players: state.players }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onNewGame, className: primaryBtn, children: "New game" }) })
     ] })
+  ] });
+}
+function LiveFeed({ feed }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-slate-800 dark:text-white mb-3", children: "\u{1F4E3} Live" }),
+    feed.length ? /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: feed.map((f2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "li",
+      {
+        className: `text-sm rounded-xl px-3 py-2 ${i === 0 ? "bg-rose-50 text-rose-900 font-bold" : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300"}`,
+        children: f2.text
+      },
+      `${f2.at}-${i}`
+    )) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-400", children: "Janken battles and big wins will show up here." })
   ] });
 }
 function PlayerGrid({
@@ -74146,8 +74262,11 @@ function PlayerActions({ p: p2, onRename, onKick }) {
     /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => onKick(p2), title: "Remove from game", className: "p-1 text-slate-400 hover:text-rose-600 cursor-pointer", children: /* @__PURE__ */ jsxRuntimeExports.jsx(UserX, { className: "w-3.5 h-3.5" }) })
   ] });
 }
+var COIN_UNIT = { label: "Coins", icon: "\u{1FA99}" };
+var PIECE_UNIT = { label: "Pieces", icon: "\u{1F9E9}" };
 function Leaderboard({
   players,
+  unit = COIN_UNIT,
   showLabels,
   onRename,
   onKick
@@ -74156,7 +74275,7 @@ function Leaderboard({
     /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { className: "bg-slate-50 dark:bg-slate-800 text-slate-500 text-xs", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-left w-12", children: "#" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-left", children: "Name" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-right", children: "Coins" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-right", children: unit.label }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "px-3 py-2 text-right hidden sm:table-cell", children: "Correct" }),
       onRename && onKick && /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "w-16" })
     ] }) }),
@@ -74168,7 +74287,8 @@ function Leaderboard({
         showLabels && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-[11px] text-slate-500", children: p2.label })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "px-3 py-2 text-right font-black text-amber-600 tabular-nums", children: [
-        "\u{1FA99} ",
+        unit.icon,
+        " ",
         p2.coins
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "px-3 py-2 text-right text-slate-500 hidden sm:table-cell tabular-nums", children: [
@@ -74180,7 +74300,7 @@ function Leaderboard({
     ] }, p2.userId)) })
   ] }) });
 }
-function Podium({ players }) {
+function Podium({ players, unit = COIN_UNIT }) {
   const medals = ["\u{1F947}", "\u{1F948}", "\u{1F949}"];
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col sm:flex-row justify-center gap-3", children: players.map((p2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `flex-1 max-w-xs rounded-2xl border p-4 text-center ${i === 0 ? "border-amber-300 bg-amber-50" : "border-slate-200 bg-slate-50"}`, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-3xl", children: medals[i] }),
@@ -74190,7 +74310,8 @@ function Podium({ players }) {
       p2.name
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold text-amber-600", children: [
-      "\u{1FA99} ",
+      unit.icon,
+      " ",
       p2.coins
     ] })
   ] }, p2.userId)) });
@@ -74238,8 +74359,208 @@ function Spinner({ text }) {
     /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 font-medium", children: text })
   ] });
 }
+var HAND_EMOJI = { rock: "\u270A", scissors: "\u270C\uFE0F", paper: "\u270B" };
+var HAND_LABEL = { rock: "Guu", scissors: "Choki", paper: "Paa" };
+var HANDS = ["rock", "scissors", "paper"];
+var JANKEN_VOICE_LEAD_MS = 1200;
+function sayJankenPon() {
+  try {
+    if (typeof window === "undefined" || !("speechSynthesis" in window))
+      return;
+    const u2 = new SpeechSynthesisUtterance("\u3058\u3083\u3093\u3051\u3093\u307D\u3093\uFF01");
+    u2.lang = "ja-JP";
+    u2.rate = 1.15;
+    const ja2 = window.speechSynthesis.getVoices().find((v2) => {
+      var _a;
+      return (_a = v2.lang) == null ? void 0 : _a.toLowerCase().startsWith("ja");
+    });
+    if (ja2)
+      u2.voice = ja2;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u2);
+  } catch {
+  }
+}
+function JankenTargetPicker({
+  targets,
+  failed,
+  onChallenge,
+  onSkip,
+  onRefresh
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border-2 border-rose-300 rounded-2xl p-6 space-y-4 text-center", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl", children: "\u270A\u270C\uFE0F\u270B" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-slate-900 dark:text-white", children: "\u3058\u3083\u3093\u3051\u3093\u52DD\u8CA0\uFF01" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: [
+      "Choose someone to challenge. The loser gives ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "half of their coins" }),
+      " to the winner \u2014 that could be you, so choose carefully! A draw means nothing happens."
+    ] }),
+    failed && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-amber-600", children: "That person can't be challenged right now. Choose someone else." }),
+    targets.length ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-2", children: targets.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        onClick: () => onChallenge(t2.pid),
+        className: "rounded-xl border-2 border-slate-200 hover:border-rose-400 hover:bg-rose-50 px-3 py-3 cursor-pointer transition",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block font-bold text-slate-800 dark:text-white truncate", children: t2.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "block text-sm font-black text-amber-600", children: [
+            "\u{1FA99} ",
+            t2.coins
+          ] })
+        ]
+      },
+      t2.pid
+    )) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500", children: "No one can be challenged right now." }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-center gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onRefresh, className: "px-4 py-2 text-sm font-bold rounded-xl border border-slate-300 text-slate-600 cursor-pointer", children: "Refresh" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onSkip, className: "px-4 py-2 text-sm font-bold rounded-xl bg-slate-100 text-slate-600 cursor-pointer", children: "Skip" })
+    ] })
+  ] });
+}
+function JankenDuel({
+  duel,
+  result,
+  offset,
+  onHand
+}) {
+  const [mine, setMine] = reactExports.useState(null);
+  const [now, setNow] = reactExports.useState(() => Date.now() + offset);
+  reactExports.useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now() + offset), 100);
+    return () => clearInterval(timer);
+  }, [offset]);
+  const secondsLeft = Math.max(0, Math.ceil((duel.deadline - now) / 1e3));
+  const revealed = result !== null && now >= result.revealAt;
+  const chosen = mine !== null || duel.chosen;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border-2 border-rose-300 rounded-2xl p-6 space-y-5 text-center", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-rose-600", children: duel.role === "challenged" ? `${duel.opponentName} challenged you!` : `You challenged ${duel.opponentName}!` }),
+    !result && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl font-black text-slate-900 dark:text-white", children: "Choose your hand" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center gap-3", children: HANDS.map((h) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          disabled: chosen,
+          onClick: () => {
+            setMine(h);
+            onHand(h);
+          },
+          className: `w-24 h-24 rounded-2xl border-2 text-5xl transition cursor-pointer disabled:cursor-default ${mine === h ? "border-rose-500 bg-rose-50 scale-105" : chosen ? "border-slate-200 opacity-40" : "border-slate-200 hover:border-rose-400 hover:bg-rose-50"}`,
+          children: [
+            HAND_EMOJI[h],
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-xs font-bold text-slate-500", children: HAND_LABEL[h] })
+          ]
+        },
+        h
+      )) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500", children: chosen ? `Waiting for ${duel.opponentName}\u2026` : `${secondsLeft} s \u2014 if you don't choose, a hand is picked for you.` })
+    ] }),
+    result && !revealed && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl font-black text-rose-600 animate-pulse py-10", children: "\u3058\u3083\u3093\u3051\u3093\u2026" }),
+    result && revealed && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-3xl font-black text-rose-600", children: "\u307D\u3093\uFF01" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center gap-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-7xl", children: HAND_EMOJI[result.yourHand] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-600", children: "You" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xl font-black text-slate-400", children: "vs" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-7xl", children: HAND_EMOJI[result.opponentHand] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-600 truncate max-w-[8rem]", children: result.opponentName })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "p",
+        {
+          className: `text-2xl font-black ${result.outcome === "win" ? "text-emerald-600" : result.outcome === "lose" ? "text-rose-600" : "text-slate-600"}`,
+          children: result.outcome === "win" ? `You win! +${result.delta} \u{1FA99}` : result.outcome === "lose" ? `You lose\u2026 ${result.delta} \u{1FA99}` : "Draw! Nothing happens."
+        }
+      )
+    ] })
+  ] });
+}
+function SpeedPanel({
+  match,
+  result,
+  wrong,
+  offset,
+  onAnswer
+}) {
+  const [picked, setPicked] = reactExports.useState(null);
+  const [now, setNow] = reactExports.useState(() => Date.now() + offset);
+  reactExports.useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now() + offset), 100);
+    return () => clearInterval(timer);
+  }, [offset]);
+  const secondsLeft = Math.max(0, Math.ceil((match.deadline - now) / 1e3));
+  const q2 = match.question;
+  const locked = picked !== null || wrong || result !== null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border-2 border-amber-300 rounded-2xl p-6 space-y-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg font-black text-amber-600", children: "\u26A1 Speed round!" }),
+      !result && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black tabular-nums text-amber-600", children: secondsLeft })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-sm font-bold text-slate-600 dark:text-slate-300", children: [
+      "vs ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-900 dark:text-white", children: match.opponentName }),
+      " \u2014 first correct answer wins!"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm font-bold text-slate-500", children: q2.label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center font-black text-slate-900 dark:text-white ${q2.promptIsJapanese ? "text-7xl" : "text-5xl"}`, children: q2.prompt }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-3", children: q2.options.map((opt, i) => {
+      let tone = "border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-slate-800";
+      if (result) {
+        if (i === result.correctIndex)
+          tone = "border-emerald-400 bg-emerald-50 text-emerald-800";
+        else if (i === picked)
+          tone = "border-rose-400 bg-rose-50 text-rose-800";
+        else
+          tone = "border-slate-200 bg-slate-50 text-slate-400";
+      } else if (picked === i) {
+        tone = wrong ? "border-rose-400 bg-rose-50 text-rose-800" : "border-amber-400 bg-amber-50 text-amber-800";
+      } else if (locked) {
+        tone = "border-slate-200 bg-slate-50 text-slate-400";
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          disabled: locked,
+          onClick: () => {
+            setPicked(i);
+            onAnswer(i);
+          },
+          className: `min-h-[64px] rounded-2xl border-2 px-3 py-3 font-bold transition cursor-pointer disabled:cursor-default ${tone} ${q2.optionsAreJapanese ? "text-2xl" : "text-lg"}`,
+          children: opt
+        },
+        i
+      );
+    }) }),
+    !result && wrong && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center font-bold text-rose-600", children: [
+      "Not quite! Waiting for ",
+      match.opponentName,
+      "\u2026"
+    ] }),
+    result && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "p",
+      {
+        className: `text-center text-2xl font-black ${result.outcome === "win" ? "text-emerald-600" : result.outcome === "lose" ? "text-rose-600" : "text-slate-600"}`,
+        children: result.outcome === "win" ? `You were faster! +${result.delta} \u{1FA99}` : result.outcome === "lose" ? `${result.opponentName} was faster\u2026 ${result.delta} \u{1FA99}` : "Draw! Nothing happens."
+      }
+    )
+  ] });
+}
+function speedPanelKey(matchId, retry) {
+  return `${matchId}-${retry}`;
+}
 var RESULT_MS = 900;
 var CHEST_RESULT_MS = 2200;
+var DUEL_RESULT_MS = 3e3;
+var SPEED_RESULT_MS = 2500;
+var YAMATO_END_MS = 4e3;
+var NOTICE_MS = 3500;
 function StudentView({ gameId }) {
   const [state, setState] = reactExports.useState(null);
   const [offset, setOffset] = reactExports.useState(0);
@@ -74251,6 +74572,22 @@ function StudentView({ gameId }) {
   const [final, setFinal] = reactExports.useState(null);
   const [nameError, setNameError] = reactExports.useState(null);
   const [nameInput, setNameInput] = reactExports.useState("");
+  const [jankenTargets, setJankenTargets] = reactExports.useState(null);
+  const [targetsFailed, setTargetsFailed] = reactExports.useState(false);
+  const [duel, setDuel] = reactExports.useState(null);
+  const [duelResult, setDuelResult] = reactExports.useState(null);
+  const [speed, setSpeed] = reactExports.useState(null);
+  const [speedResult, setSpeedResult] = reactExports.useState(null);
+  const [speedWrong, setSpeedWrong] = reactExports.useState(false);
+  const [speedRetry, setSpeedRetry] = reactExports.useState(0);
+  const [notice, setNotice] = reactExports.useState(null);
+  const [yamato, setYamato] = reactExports.useState(null);
+  const [yamatoAnswered, setYamatoAnswered] = reactExports.useState(null);
+  const [yamatoEnd, setYamatoEnd] = reactExports.useState(null);
+  const [yamatoRetry, setYamatoRetry] = reactExports.useState(0);
+  const [held, setHeld] = reactExports.useState(null);
+  const [wrongSlot, setWrongSlot] = reactExports.useState(null);
+  const lastPickRef = reactExports.useRef(null);
   const timers = reactExports.useRef([]);
   const later = (fn, ms) => timers.current.push(setTimeout(fn, ms));
   reactExports.useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -74261,6 +74598,8 @@ function StudentView({ gameId }) {
         setState(msg);
         if (msg.chestPending)
           setChestOpen(true);
+        if (msg.jankenCard)
+          send({ t: "refreshTargets" });
         break;
       case "question":
         setQuestion(msg);
@@ -74273,6 +74612,12 @@ function StudentView({ gameId }) {
       case "result":
         setResult(msg);
         setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
+        if (msg.piece)
+          break;
+        if (msg.bagEmpty) {
+          setNotice("\u{1F9E9} All the pieces are in other hands right now \u2014 keep answering!");
+          later(() => setNotice(null), NOTICE_MS);
+        }
         later(() => {
           if (msg.chest) {
             setChestOpen(true);
@@ -74281,14 +74626,134 @@ function StudentView({ gameId }) {
           }
         }, RESULT_MS);
         break;
+      case "piece":
+        setOffset(msg.now - Date.now());
+        setWrongSlot(null);
+        setHeld({ pid: msg.pid, data: msg.data, expiresAt: msg.expiresAt });
+        break;
+      case "placeResult":
+        setHeld(null);
+        if (msg.correct) {
+          setState((s2) => s2 ? { ...s2, contributions: msg.contributions } : s2);
+          setNotice("\u{1F9E9} Perfect fit! +1 contribution");
+        } else {
+          setWrongSlot(lastPickRef.current);
+          setNotice("\u{1F9E9} That piece doesn't go there \u2014 it went back to the bag.");
+        }
+        later(() => setNotice(null), NOTICE_MS);
+        later(() => setWrongSlot(null), 1200);
+        send({ t: "next" });
+        break;
+      case "pieceGone":
+        setHeld(null);
+        setNotice(msg.reason === "TIMEOUT" ? "\u{1F9E9} Time ran out \u2014 the piece went back to the bag." : "\u{1F9E9} You passed. The piece went back to the bag.");
+        later(() => setNotice(null), NOTICE_MS);
+        send({ t: "next" });
+        break;
+      case "placed":
+        setState(
+          (s2) => s2 && s2.jigsaw && !s2.jigsaw.placed.includes(msg.slot) ? { ...s2, jigsaw: { ...s2.jigsaw, placed: [...s2.jigsaw.placed, msg.slot] } } : s2
+        );
+        break;
       case "chestResult":
         setChestResult(msg);
         setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
         later(() => {
           setChestResult(null);
           setChestOpen(false);
-          send({ t: "next" });
+          if (msg.targets) {
+            setTargetsFailed(false);
+            setJankenTargets(msg.targets);
+          } else {
+            send({ t: "next" });
+          }
         }, CHEST_RESULT_MS);
+        break;
+      case "jankenTargets":
+        setJankenTargets(msg.targets);
+        setTargetsFailed(Boolean(msg.failed));
+        break;
+      case "duelStart":
+        setOffset(msg.now - Date.now());
+        setJankenTargets(null);
+        setDuelResult(null);
+        setDuel(msg);
+        break;
+      case "duelResult": {
+        setOffset(msg.now - Date.now());
+        setDuelResult(msg);
+        const offsetNow = msg.now - Date.now();
+        const revealIn = msg.revealAt - (Date.now() + offsetNow);
+        later(sayJankenPon, Math.max(0, revealIn - JANKEN_VOICE_LEAD_MS));
+        later(() => setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2), Math.max(0, revealIn));
+        later(() => {
+          setDuel(null);
+          setDuelResult(null);
+          send({ t: "next" });
+        }, Math.max(0, revealIn) + DUEL_RESULT_MS);
+        break;
+      }
+      case "duelCancelled":
+        setDuel(null);
+        setDuelResult(null);
+        send({ t: "next" });
+        break;
+      case "speedStart":
+        setOffset(msg.now - Date.now());
+        setSpeedResult(null);
+        setSpeedWrong(Boolean(msg.wrong));
+        setSpeed(msg);
+        break;
+      case "speedTooFast":
+        setSpeedRetry((n2) => n2 + 1);
+        break;
+      case "speedWrong":
+        setSpeedWrong(true);
+        break;
+      case "speedResult":
+        setSpeedResult(msg);
+        setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
+        later(() => {
+          setSpeed(null);
+          setSpeedResult(null);
+          setSpeedWrong(false);
+          send({ t: "next" });
+        }, SPEED_RESULT_MS);
+        break;
+      case "speedCancelled":
+        setSpeed(null);
+        setSpeedResult(null);
+        setSpeedWrong(false);
+        send({ t: "next" });
+        break;
+      case "yamatoStart":
+        setOffset(msg.now - Date.now());
+        setYamatoAnswered(null);
+        setYamatoEnd(null);
+        setYamato(msg);
+        if (!msg.answered)
+          sayMondaiDesu();
+        break;
+      case "yamatoTooFast":
+        setYamatoRetry((n2) => n2 + 1);
+        break;
+      case "yamatoAnswered":
+        setYamatoAnswered(msg);
+        setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
+        break;
+      case "yamatoEnd":
+        setYamatoEnd(msg);
+        setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
+        later(() => {
+          setYamato((y2) => y2 && y2.roundId === msg.roundId ? null : y2);
+          setYamatoAnswered(null);
+          setYamatoEnd(null);
+        }, YAMATO_END_MS);
+        break;
+      case "speedBye":
+        setState((s2) => s2 ? { ...s2, coins: msg.coins } : s2);
+        setNotice(`\u26A1 Speed round! You sit this one out \u2014 +${msg.bonus} coins.`);
+        later(() => setNotice(null), NOTICE_MS);
         break;
       case "final":
         setFinal(msg);
@@ -74306,6 +74771,36 @@ function StudentView({ gameId }) {
   }
   if (!state)
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Spinner, { text: "Joining the game\u2026" });
+  if (final && final.mode === "jigsaw" && final.jigsaw) {
+    const pct = progressPercent(final.jigsaw);
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold tracking-widest text-indigo-500", children: pct === 100 ? "PUZZLE COMPLETE!" : "TIME UP" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl font-black text-indigo-600", children: pct === 100 ? "\u{1F389} 100%" : `${pct}% done` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg font-bold text-slate-800 dark:text-white", children: [
+          "You placed ",
+          final.contributions ?? 0,
+          " pieces"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("ol", { className: "text-left max-w-xs mx-auto space-y-1", children: final.top.map((t2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex justify-between text-sm", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "font-bold text-slate-700 dark:text-slate-200", children: [
+            ["\u{1F947}", "\u{1F948}", "\u{1F949}", "4.", "5."][i],
+            " ",
+            t2.name
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-600 font-bold", children: [
+            "\u{1F9E9} ",
+            t2.contributions ?? 0
+          ] })
+        ] }, i)) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(JigsawBoard, { board: final.jigsaw }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-center text-slate-500", children: [
+        final.jigsaw.title,
+        final.jigsaw.credit ? ` \u2014 ${final.jigsaw.credit}` : ""
+      ] })
+    ] });
+  }
   if (final) {
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(Box, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold tracking-widest text-indigo-500", children: "GAME OVER" }),
@@ -74370,7 +74865,8 @@ function StudentView({ gameId }) {
       nameError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: nameError })
     ] });
   }
-  const header = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3", children: [
+  const noticeBar = notice ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-xl mx-auto text-center text-sm font-bold bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-2", children: notice }) : null;
+  const headerBar = /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 truncate", children: [
         state.className,
@@ -74380,10 +74876,17 @@ function StudentView({ gameId }) {
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-800 dark:text-white truncate", children: state.name })
     ] }),
     state.status === "running" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black tabular-nums text-indigo-600", children: formatClock(left) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-amber-500 tabular-nums", children: [
+    state.mode === "jigsaw" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-indigo-600 tabular-nums", children: [
+      "\u{1F9E9} ",
+      state.contributions ?? 0
+    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-amber-500 tabular-nums", children: [
       "\u{1FA99} ",
       state.coins
     ] })
+  ] });
+  const header = /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    headerBar,
+    noticeBar
   ] });
   if (state.status === "lobby") {
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
@@ -74399,6 +74902,60 @@ function StudentView({ gameId }) {
       ] })
     ] });
   }
+  if (state.status === "running" && speed) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
+      header,
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        SpeedPanel,
+        {
+          match: speed,
+          result: speedResult,
+          wrong: speedWrong,
+          offset,
+          onAnswer: (choice) => send({ t: "speedAnswer", matchId: speed.matchId, choice })
+        },
+        speedPanelKey(speed.matchId, speedRetry)
+      )
+    ] });
+  }
+  if (state.status === "running" && duel) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
+      header,
+      /* @__PURE__ */ jsxRuntimeExports.jsx(JankenDuel, { duel, result: duelResult, offset, onHand: (hand) => send({ t: "hand", duelId: duel.duelId, hand }) }, duel.duelId)
+    ] });
+  }
+  if (state.status === "running" && yamato) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      StudentYamato,
+      {
+        round: yamato,
+        answered: yamatoAnswered,
+        end: yamatoEnd,
+        offset,
+        onAnswer: (choice) => send({ t: "yamatoAnswer", roundId: yamato.roundId, choice })
+      },
+      `${yamato.roundId}-${yamatoRetry}`
+    );
+  }
+  if (state.status === "running" && jankenTargets) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
+      header,
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        JankenTargetPicker,
+        {
+          targets: jankenTargets,
+          failed: targetsFailed,
+          onChallenge: (pid) => send({ t: "challenge", pid }),
+          onRefresh: () => send({ t: "refreshTargets" }),
+          onSkip: () => {
+            send({ t: "skipChallenge" });
+            setJankenTargets(null);
+            send({ t: "next" });
+          }
+        }
+      )
+    ] });
+  }
   if (chestOpen) {
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
       header,
@@ -74406,8 +74963,8 @@ function StudentView({ gameId }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500", children: "You found\u2026" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-3xl font-black text-slate-900 dark:text-white", children: chestResult.item.nameJa }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg font-bold text-indigo-600", children: chestResult.item.name }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700 dark:text-slate-300", children: chestResult.item.description }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-amber-500", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700 dark:text-slate-300", children: chestResult.noTargets ? "No one can be challenged right now \u2014 you get +3 coins instead!" : chestResult.item.description }),
+        chestResult.coins !== chestResult.before && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-2xl font-black text-amber-500", children: [
           "\u{1FA99} ",
           chestResult.before,
           " \u2192 ",
@@ -74426,6 +74983,46 @@ function StudentView({ gameId }) {
           box
         )) })
       ] }) })
+    ] });
+  }
+  if (state.status === "running" && state.jigsaw && held) {
+    const secondsLeft = Math.max(0, Math.ceil((held.expiresAt - (Date.now() + offset)) / 1e3));
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto space-y-4", children: [
+      header,
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border-2 border-indigo-300 rounded-2xl p-4 space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center font-black text-indigo-700", children: "\u{1F9E9} You got a piece! Tap where it goes." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-4 sm:grid-cols-[1fr_180px] items-start", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            JigsawBoard,
+            {
+              board: state.jigsaw,
+              highlight: wrongSlot,
+              onPick: (slot) => {
+                lastPickRef.current = slot;
+                send({ t: "place", pid: held.pid, slot });
+              }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-xl bg-slate-100 p-2 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: held.data, alt: "Your piece", className: "max-h-40 object-contain" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-center text-slate-500", children: [
+              "About ",
+              secondsLeft,
+              " s to place it"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => send({ t: "passPiece", pid: held.pid }),
+                className: "w-full px-4 py-2 text-sm font-bold rounded-xl bg-slate-100 text-slate-600 cursor-pointer",
+                children: "Pass"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(JigsawBoxPicture, { board: state.jigsaw })
+          ] })
+        ] })
+      ] })
     ] });
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto space-y-4", children: [
@@ -74460,9 +75057,165 @@ function StudentView({ gameId }) {
           i
         );
       }) }),
-      result && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center text-lg font-black ${result.correct ? "text-emerald-600" : "text-rose-600"}`, children: result.correct ? "+1 \u{1FA99} Correct!" : "Not quite!" })
+      result && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-center text-lg font-black ${result.correct ? "text-emerald-600" : "text-rose-600"}`, children: result.correct ? state.mode === "jigsaw" ? "Correct!" : "+1 \u{1FA99} Correct!" : "Not quite!" })
+    ] }),
+    state.mode === "jigsaw" && state.jigsaw && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-center text-slate-500", children: [
+        "Class puzzle: ",
+        progressPercent(state.jigsaw),
+        "% done"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(JigsawBoard, { board: state.jigsaw })
     ] }),
     socketStatus !== "open" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-xs text-amber-600", children: "Reconnecting\u2026" })
+  ] });
+}
+function readImageSize(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      reject(new Error("Could not read the image."));
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+}
+function JigsawSetup({
+  selected,
+  onSelect,
+  pieceCount,
+  onPieceCount
+}) {
+  const [images, setImages] = reactExports.useState(null);
+  const [loadError, setLoadError] = reactExports.useState(null);
+  const [showUpload, setShowUpload] = reactExports.useState(false);
+  const [file, setFile] = reactExports.useState(null);
+  const [title, setTitle] = reactExports.useState("");
+  const [credit, setCredit] = reactExports.useState("");
+  const [rights, setRights] = reactExports.useState(false);
+  const [uploading, setUploading] = reactExports.useState(false);
+  const [uploadError, setUploadError] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    (async () => {
+      try {
+        const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/jigsaw/images`);
+        const data2 = await res.json().catch(() => ({}));
+        if (!res.ok || !data2.images)
+          throw new Error(data2.error || `HTTP ${res.status}`);
+        setImages(data2.images);
+      } catch (err) {
+        setLoadError((err == null ? void 0 : err.message) || "Could not load the pictures.");
+      }
+    })();
+  }, []);
+  const upload = async () => {
+    if (!file || !title.trim() || !rights)
+      return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const { width, height } = await readImageSize(file);
+      const form = new FormData();
+      form.append("file", file);
+      form.append("title", title.trim());
+      form.append("credit", credit.trim());
+      form.append("rights", "yes");
+      form.append("width", String(width));
+      form.append("height", String(height));
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/jigsaw/images`, { method: "POST", body: form });
+      const data2 = await res.json().catch(() => ({}));
+      if (!res.ok || !data2.image)
+        throw new Error(data2.message || data2.error || `HTTP ${res.status}`);
+      setImages((prev) => [data2.image, ...prev ?? []]);
+      onSelect(data2.image);
+      setShowUpload(false);
+      setFile(null);
+      setTitle("");
+      setCredit("");
+      setRights(false);
+    } catch (err) {
+      setUploadError((err == null ? void 0 : err.message) || "Could not upload the picture.");
+    } finally {
+      setUploading(false);
+    }
+  };
+  const option = (active) => `px-4 py-2.5 rounded-xl border-2 text-sm font-bold transition cursor-pointer ${active ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-200 mb-2", children: "Picture" }),
+      loadError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: loadError }),
+      !images && !loadError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500", children: "Loading pictures\u2026" }),
+      images && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-3 gap-2", children: [
+        images.map((img) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: () => onSelect(img),
+            className: `text-left rounded-xl border-2 overflow-hidden cursor-pointer transition ${(selected == null ? void 0 : selected.id) === img.id ? "border-indigo-500 ring-2 ring-indigo-200" : "border-slate-200 hover:border-slate-300"}`,
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: img.url, alt: img.title, className: "w-full aspect-video object-cover", loading: "lazy" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block px-2 py-1 text-xs font-bold text-slate-700 truncate", children: img.title }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block px-2 pb-1 text-[10px] text-slate-400", children: img.mine ? "Your picture" : "AI Yamato library" })
+            ]
+          },
+          img.id
+        )),
+        !images.length && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 col-span-full", children: "No pictures yet. Upload one below." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setShowUpload((v2) => !v2), className: "mt-3 text-sm font-bold text-indigo-600 underline cursor-pointer", children: showUpload ? "Cancel upload" : "+ Upload your own picture" }),
+      showUpload && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-3 space-y-2 rounded-xl border border-slate-200 p-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "file", accept: "image/jpeg,image/png,image/webp", onChange: (e) => {
+          var _a;
+          return setFile(((_a = e.target.files) == null ? void 0 : _a[0]) ?? null);
+        }, className: "text-sm" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            value: title,
+            onChange: (e) => setTitle(e.target.value),
+            maxLength: 100,
+            placeholder: "Title (e.g. Mt Fuji in spring)",
+            className: "w-full px-3 py-2 border border-slate-300 rounded-xl text-sm text-slate-900"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            value: credit,
+            onChange: (e) => setCredit(e.target.value),
+            maxLength: 200,
+            placeholder: "Credit / source (optional, shown when the puzzle is finished)",
+            className: "w-full px-3 py-2 border border-slate-300 rounded-xl text-sm text-slate-900"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-start gap-2 text-xs text-slate-600", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", checked: rights, onChange: (e) => setRights(e.target.checked), className: "mt-0.5" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "I have the right to use this picture in class (for example, I took it myself or it is free to use), and it does not show students\u2019 faces or personal information." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-400", children: "JPEG, PNG or WebP, up to 5 MB. Only you can use pictures you upload." }),
+        uploadError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: uploadError }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            disabled: !file || !title.trim() || !rights || uploading,
+            onClick: upload,
+            className: "px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl disabled:opacity-40 cursor-pointer",
+            children: uploading ? "Uploading\u2026" : "Upload"
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-200 mb-2", children: "Pieces" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: Object.keys(PIECE_OPTIONS).map((n2) => /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => onPieceCount(Number(n2)), className: option(pieceCount === Number(n2)), children: n2 }, n2)) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: "Students get a piece for each correct answer and tap where it goes. A wrong spot or a pass sends the piece back to the bag. The game ends when the puzzle is complete or time runs out." })
+    ] })
   ] });
 }
 async function loader$8({ request }) {
@@ -74572,6 +75325,13 @@ function TeacherSetup({
   const [questionSet, setQuestionSet] = reactExports.useState("hiragana");
   const [durationMin, setDurationMin] = reactExports.useState(10);
   const [nameMode, setNameMode] = reactExports.useState("preset");
+  const [janken, setJanken] = reactExports.useState(true);
+  const [speed, setSpeed] = reactExports.useState(true);
+  const [yamatoQuiz, setYamatoQuiz] = reactExports.useState(true);
+  const [mode2, setMode] = reactExports.useState("coins");
+  const [jigsawImage, setJigsawImage] = reactExports.useState(null);
+  const [pieceCount, setPieceCount] = reactExports.useState(24);
+  const [busyText, setBusyText] = reactExports.useState("Creating\u2026");
   const [busy, setBusy] = reactExports.useState(false);
   const [error, setError] = reactExports.useState(null);
   if (!classes.length) {
@@ -74589,13 +75349,25 @@ function TeacherSetup({
   const create = async () => {
     if ((selected == null ? void 0 : selected.activeGameId) && !window.confirm("This class already has an open game. Close it and start a new one?"))
       return;
+    if (mode2 === "jigsaw" && !jigsawImage) {
+      setError("Choose a picture for the puzzle.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
+      let body = { classId, questionSet, durationMin, nameMode, janken, speed, yamato: yamatoQuiz };
+      if (mode2 === "jigsaw" && jigsawImage) {
+        setBusyText("Cutting the picture\u2026");
+        const { cols, rows } = gridFor(pieceCount, jigsawImage.width, jigsawImage.height);
+        const pieces = await cutJigsaw(jigsawImage.url, cols, rows);
+        body = { ...body, mode: "jigsaw", imageId: jigsawImage.id, pieceCount, cols, rows, pieces };
+      }
+      setBusyText("Creating\u2026");
       const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId, questionSet, durationMin, nameMode })
+        body: JSON.stringify(body)
       });
       const data2 = await res.json().catch(() => ({}));
       if (!res.ok || !data2.gameId)
@@ -74615,6 +75387,13 @@ function TeacherSetup({
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 mt-1", children: "Only students in the class you choose can join \u2014 there is no code to share. Scores are kept on the server, so they can't be changed from a student's device. This game works even when class games are locked." })
     ] }),
     classes.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(Field, { label: "Class", children: /* @__PURE__ */ jsxRuntimeExports.jsx("select", { value: classId, onChange: (e) => setClassId(e.target.value), className: "w-full px-3 py-2 border border-slate-300 rounded-xl text-slate-900", children: classes.map((c) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: c.id, children: c.name }, c.id)) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Field, { label: "Game", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setMode("coins"), className: option(mode2 === "coins"), children: "\u{1FA99} Coin battle" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setMode("jigsaw"), className: option(mode2 === "jigsaw"), children: "\u{1F9E9} Class jigsaw" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: mode2 === "coins" ? "Students compete for coins, with treasure chests, janken battles, speed rounds and Yamato\u2019s questions." : "The whole class builds one jigsaw puzzle together. Each correct answer earns a piece to place." })
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Field, { label: "Questions", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: ["hiragana", "katakana", "kanji"].map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setQuestionSet(s2), className: option(questionSet === s2), children: QUESTION_SET_LABELS[s2] }, s2)) }),
       questionSet === "kanji" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: "Readings and meanings are mixed." })
@@ -74637,6 +75416,30 @@ function TeacherSetup({
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: nameMode === "preset" ? "Each student gets a fun name like \u201COnigiri\u201D or \u201CTanuki\u201D." : "Students type a name (up to 12 characters). You can rename or remove anyone." })
     ] }),
+    mode2 === "jigsaw" && /* @__PURE__ */ jsxRuntimeExports.jsx(JigsawSetup, { selected: jigsawImage, onSelect: setJigsawImage, pieceCount, onPieceCount: setPieceCount }),
+    mode2 === "coins" && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Field, { label: "Janken battles", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setJanken(true), className: option(janken), children: "On" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setJanken(false), className: option(!janken), children: "Off" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: janken ? "Treasure chests can contain a janken card. The student challenges a classmate; the loser gives half of their coins to the winner. Students can\u2019t challenge the same person twice in a row, and someone who was just challenged is safe for 30 seconds." : "No janken cards. Students only collect coins for themselves." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Field, { label: "Speed rounds", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setSpeed(true), className: option(speed), children: "On" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setSpeed(false), className: option(!speed), children: "Off" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: speed ? "From 1:30 into the game and then every 3 minutes, everyone is paired up for one question. The first correct answer wins a quarter of the other student\u2019s coins. With an odd number of students, one sits out and gets +3 coins." : "No speed rounds." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Field, { label: "Yamato's questions", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setYamatoQuiz(true), className: option(yamatoQuiz), children: "On" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setYamatoQuiz(false), className: option(!yamatoQuiz), children: "Off" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-2", children: yamatoQuiz ? "From 3:00 into the game and then every 3 minutes, the screens go dark and Yamato\u2019s mark appears: one question for the whole class (15 seconds). The 10 fastest correct answers get 10, 9 \u2026 1 coins. Every other question is a culture question from the Daily Quiz, so students can win without Japanese knowledge." : "No Yamato's questions." })
+      ] })
+    ] }),
     error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: error }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2 justify-end", children: [
       (selected == null ? void 0 : selected.activeGameId) && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -74648,7 +75451,7 @@ function TeacherSetup({
           children: "Return to the open game"
         }
       ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", disabled: busy, onClick: create, className: `${primaryBtn} disabled:opacity-50`, children: busy ? "Creating\u2026" : "Create game room" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", disabled: busy, onClick: create, className: `${primaryBtn} disabled:opacity-50`, children: busy ? busyText : "Create game room" })
     ] })
   ] });
 }
@@ -79088,12 +79891,8 @@ async function action$1({ request, context }) {
     if (deleteError) {
       return dist$1.json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
     }
-    return dist$1.redirect("/", {
-      headers: {
-        ...Object.fromEntries(headers.entries()),
-        "Set-Cookie": "sb-access-token=; Max-Age=0; path=/"
-      }
-    });
+    appendClearAuthCookies(request, headers);
+    return dist$1.redirect("/", { headers });
   }
   if (intent === "join-class") {
     const code = normaliseJoinCode(formData.get("joinCode"));
@@ -81743,7 +82542,7 @@ var route59 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-BH2kbz6n.js", "imports": ["/assets/components-CqR4DhZ3.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-aK5CclxI.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-DYFVUSlu.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/ChatYamatoEoyOralDrill-CtV3d3DL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-B5XS2WXj.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-Da2bAZQ9.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/check-BlOMdqYi.js", "/assets/book-open-CnKQnBAu.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-U0sTbk9Z.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-Bmt-0M3e.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-DgwW0Xmv.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-C6ri_7mk.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-DiOERdRH.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/play-B6BXaov8.js", "/assets/trash-CHg5fFtN.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-BhOXpWO4.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/games.hiragana-memory-match": { "id": "routes/games.hiragana-memory-match", "parentId": "root", "path": "games/hiragana-memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-memory-match-B1Z3vIyF.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-BxGcY698.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/ChatYamatoEoyOralDrill-CtV3d3DL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-DiOERdRH.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-CbFI5tDf.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-CZp_KjiC.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-D38zOq--.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-Crw8qiMU.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-BOWoCzHF.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-CCINxj9G.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-Cro4d5I9.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-C0z1PuJ_.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-BThbuFOc.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dp1i0UsV.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-adWRnwLC.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-BbktqrYP.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-Cb9wA7kR.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-C_hr608X.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-BdAZHMQc.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-DJBwU_yp.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DxGBepWA.js", "imports": ["/assets/components-CqR4DhZ3.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-C_PD03fa.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-Cn09Y80v.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/shuffle-Direv13U.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-Bkpndivl.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dp1i0UsV.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BfobFk49.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CpOWhcjP.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/SchoolAccountLink-BMBGgChn.js", "/assets/users-BaM02D8E.js", "/assets/gamepad-2-G9i67rJa.js", "/assets/check-BlOMdqYi.js", "/assets/refresh-cw-KxcwuA6_.js", "/assets/pen-line-Da2bAZQ9.js", "/assets/trash-CHg5fFtN.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/game-frame.$name": { "id": "routes/game-frame.$name", "parentId": "root", "path": "game-frame/:name", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/game-frame._name-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-hBeMEvcK.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-BFR7id1t.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/EduLessonPage-Dm25aKFQ.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/GenkoyoshiModal-DdMaIZXb.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-CRSCQIzn.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-CUlNW6P8.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/api.game-access": { "id": "routes/api.game-access", "parentId": "root", "path": "api/game-access", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.game-access-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-JfZeqFiH.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-Cfnm0UmK.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BTkIZtS4.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-BdI96AQG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-COkEFUZL.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-C4ePavha.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/EduLessonPage-Dm25aKFQ.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/GenkoyoshiModal-DdMaIZXb.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-CPwhK-mE.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-mQxxldas.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-games-D3Hc0QLS.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/gamepad-2-G9i67rJa.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-D8TUJ4Bb.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-CBhKotib.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-CWOcaib8.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/class-game": { "id": "routes/class-game", "parentId": "root", "path": "class-game", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-game-QkrAN2Rq.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/users-BaM02D8E.js", "/assets/play-B6BXaov8.js", "/assets/log-in-Dx7ghKM_.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-Bb1WeAEU.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/SchoolAccountLink-BMBGgChn.js", "/assets/users-BaM02D8E.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CCeJRT32.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-DjqCkHLj.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/IframeGamePage-C4Rfch9Z.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-CN9-CqOd.js", "/assets/log-in-Dx7ghKM_.js", "/assets/refresh-cw-KxcwuA6_.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-DotxEi-U.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-_X5nva_l.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/flame-B9fPh486.js", "/assets/check-BlOMdqYi.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-05u6uTuQ.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-B9fPh486.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/check-BlOMdqYi.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-Bmt-0M3e.js", "/assets/book-open-CnKQnBAu.js", "/assets/gamepad-2-G9i67rJa.js", "/assets/content-games-D3Hc0QLS.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/content-reference-CUlNW6P8.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-DayO1UZG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/book-open-CnKQnBAu.js", "/assets/users-BaM02D8E.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-BycZ7FVD.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-e6uBygjI.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Dp1i0UsV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] } }, "url": "/assets/manifest-7db92725.js", "version": "7db92725" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-BH2kbz6n.js", "imports": ["/assets/components-CqR4DhZ3.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-Bwx--PM9.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-JH3l5wzJ.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/ChatYamatoEoyOralDrill-CtV3d3DL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-C4EhjF9e.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-CQkXaAH_.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/check-rVAhrNWv.js", "/assets/book-open-D0NgEr2H.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-C4QGoJXP.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/loader-circle-DzOaeBo1.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-BZ-NqtNG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-BJfJcntG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-DiOERdRH.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/play-6Y6qmvna.js", "/assets/trash-Dkwgl8FX.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-DJADYbJK.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-BgnO_9_i.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/ChatYamatoEoyOralDrill-CtV3d3DL.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralUserAnswersHooks-DiOERdRH.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-C792W74W.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-Bz7NQLRN.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-BOP5bOmT.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/OralExaminerAvatar-2C6aY9s6.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-BI6g_evR.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-4RL8EGFt.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/IframeGamePage-CqSC2tT-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-xtbjvzBe.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-CAPy_ZkU.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/GenkoyoshiModal-DdMaIZXb.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-BRpxyksd.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-Dp-UmHIO.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-DEj0Bw-A.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-DN3lWjvs.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-NYB0yjxX.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-BrKChV7T.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-BvaBA2ww.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-B8T2CBiG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-FtvtgKpG.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-Bv7sNVwD.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vocab-drill.$listId": { "id": "routes/vocab-drill.$listId", "parentId": "root", "path": "vocab-drill/:listId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-drill._listId-DxGBepWA.js", "imports": ["/assets/components-CqR4DhZ3.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-BXDxkyF0.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/IframeGamePage-CqSC2tT-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-D5Fjvlt4.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/shuffle-Direv13U.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-WOtcDHiV.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-DN3lWjvs.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-bWPwws7E.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-vy8wv8sN.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/SchoolAccountLink-Dlt4-K6c.js", "/assets/users-BMiEdxvV.js", "/assets/gamepad-2-tOB5EsUy.js", "/assets/check-rVAhrNWv.js", "/assets/refresh-cw-ByhpFyLT.js", "/assets/pen-line-CQkXaAH_.js", "/assets/trash-Dkwgl8FX.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/game-frame.$name": { "id": "routes/game-frame.$name", "parentId": "root", "path": "game-frame/:name", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/game-frame._name-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-DGWUZGML.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-BoKgXyo9.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/EduLessonPage-Ch1H_phU.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/GenkoyoshiModal-DdMaIZXb.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-DT2UAMKK.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-CUlNW6P8.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/api.auth.logout": { "id": "routes/api.auth.logout", "parentId": "root", "path": "api/auth/logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.logout-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.game-access": { "id": "routes/api.game-access", "parentId": "root", "path": "api/game-access", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.game-access-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-DppqbP_B.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-CxRdkiYN.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-By1lKHef.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/IframeGamePage-CqSC2tT-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-Ct86H2wW.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-DNYuDGix.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-CS3ItwS5.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/EduLessonPage-Ch1H_phU.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/culture-tasks-DDrOlc9h.js", "/assets/GenkoyoshiModal-DdMaIZXb.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vocab-creator": { "id": "routes/vocab-creator", "parentId": "root", "path": "vocab-creator", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vocab-creator-vkrhQKU4.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-Dt9t5N9w.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-games-DbU3B1F3.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/gamepad-2-tOB5EsUy.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-DDZiPm_Y.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-qZV1FZbq.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/IframeGamePage-CqSC2tT-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-DJYojJIU.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/class-game": { "id": "routes/class-game", "parentId": "root", "path": "class-game", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-game-DedmR-qR.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/users-BMiEdxvV.js", "/assets/play-6Y6qmvna.js", "/assets/log-in-pXDapEBj.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-CqcFGhL8.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/SchoolAccountLink-Dlt4-K6c.js", "/assets/users-BMiEdxvV.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-iDv3Q8WJ.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-CQDF7X3P.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/IframeGamePage-CqSC2tT-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/GameAccessGate-BrAy14It.js", "/assets/log-in-pXDapEBj.js", "/assets/refresh-cw-ByhpFyLT.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-DhTjEty_.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-B8ig8OKB.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/flame-CbbXOxGx.js", "/assets/check-rVAhrNWv.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-oshp39tE.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/yamatoApi-BRdsC2lr.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/flame-CbbXOxGx.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/check-rVAhrNWv.js", "/assets/yamato-configs-D6Qck4pg.js", "/assets/price-plans-DhQ9vAY3.js", "/assets/loader-circle-DzOaeBo1.js", "/assets/book-open-D0NgEr2H.js", "/assets/gamepad-2-tOB5EsUy.js", "/assets/content-games-DbU3B1F3.js", "/assets/content-vce-speaking-Dl-Q5cYa.js", "/assets/content-vce-writing-CTM-t23A.js", "/assets/content-reference-CUlNW6P8.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/nickname-DTTGz22i.js", "/assets/ScrollTopButton-DOLCdG2E.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-DpZ7VZ1_.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/book-open-D0NgEr2H.js", "/assets/users-BMiEdxvV.js", "/assets/DataErrorState-HRO2cGk2.js", "/assets/supabaseClient-Bs2SlnAD.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-apWVP5kj.js", "imports": ["/assets/components-CqR4DhZ3.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-D7KKUQTv.js", "/assets/ScrollTopButton-DOLCdG2E.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/supabaseClient-Bs2SlnAD.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-DN3lWjvs.js", "/assets/DataErrorState-HRO2cGk2.js"], "css": [] } }, "url": "/assets/manifest-795db1b7.js", "version": "795db1b7" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
@@ -81816,21 +82615,13 @@ var routes = {
     caseSensitive: void 0,
     module: route7
   },
-  "routes/games.hiragana-memory-match": {
-    id: "routes/games.hiragana-memory-match",
-    parentId: "root",
-    path: "games/hiragana-memory-match",
-    index: void 0,
-    caseSensitive: void 0,
-    module: route8
-  },
   "routes/vce.speaking.eoy-oral-drill": {
     id: "routes/vce.speaking.eoy-oral-drill",
     parentId: "root",
     path: "vce/speaking/eoy-oral-drill",
     index: void 0,
     caseSensitive: void 0,
-    module: route9
+    module: route8
   },
   "routes/developer.test-yamato-note": {
     id: "routes/developer.test-yamato-note",
@@ -81838,7 +82629,7 @@ var routes = {
     path: "developer/test-yamato-note",
     index: void 0,
     caseSensitive: void 0,
-    module: route10
+    module: route9
   },
   "routes/vce.speaking.eoy-oral-mock": {
     id: "routes/vce.speaking.eoy-oral-mock",
@@ -81846,7 +82637,7 @@ var routes = {
     path: "vce/speaking/eoy-oral-mock",
     index: void 0,
     caseSensitive: void 0,
-    module: route11
+    module: route10
   },
   "routes/reference.writing-styles": {
     id: "routes/reference.writing-styles",
@@ -81854,7 +82645,7 @@ var routes = {
     path: "reference/writing-styles",
     index: void 0,
     caseSensitive: void 0,
-    module: route12
+    module: route11
   },
   "routes/games.prefecture-puzzle": {
     id: "routes/games.prefecture-puzzle",
@@ -81862,7 +82653,7 @@ var routes = {
     path: "games/prefecture-puzzle",
     index: void 0,
     caseSensitive: void 0,
-    module: route13
+    module: route12
   },
   "routes/games.rolling-character": {
     id: "routes/games.rolling-character",
@@ -81870,7 +82661,7 @@ var routes = {
     path: "games/rolling-character",
     index: void 0,
     caseSensitive: void 0,
-    module: route14
+    module: route13
   },
   "routes/vce.writing.eoy-writing": {
     id: "routes/vce.writing.eoy-writing",
@@ -81878,7 +82669,7 @@ var routes = {
     path: "vce/writing/eoy-writing",
     index: void 0,
     caseSensitive: void 0,
-    module: route15
+    module: route14
   },
   "routes/developer.test-yamato": {
     id: "routes/developer.test-yamato",
@@ -81886,7 +82677,7 @@ var routes = {
     path: "developer/test-yamato",
     index: void 0,
     caseSensitive: void 0,
-    module: route16
+    module: route15
   },
   "routes/games.ogre-star-sword": {
     id: "routes/games.ogre-star-sword",
@@ -81894,7 +82685,7 @@ var routes = {
     path: "games/ogre-star-sword",
     index: void 0,
     caseSensitive: void 0,
-    module: route17
+    module: route16
   },
   "routes/reference.vce-grammar": {
     id: "routes/reference.vce-grammar",
@@ -81902,7 +82693,7 @@ var routes = {
     path: "reference/vce-grammar",
     index: void 0,
     caseSensitive: void 0,
-    module: route18
+    module: route17
   },
   "routes/api.teacher-register": {
     id: "routes/api.teacher-register",
@@ -81910,7 +82701,7 @@ var routes = {
     path: "api/teacher-register",
     index: void 0,
     caseSensitive: void 0,
-    module: route19
+    module: route18
   },
   "routes/developer.image-test": {
     id: "routes/developer.image-test",
@@ -81918,7 +82709,7 @@ var routes = {
     path: "developer/image-test",
     index: void 0,
     caseSensitive: void 0,
-    module: route20
+    module: route19
   },
   "routes/developer.test-audio": {
     id: "routes/developer.test-audio",
@@ -81926,7 +82717,7 @@ var routes = {
     path: "developer/test-audio",
     index: void 0,
     caseSensitive: void 0,
-    module: route21
+    module: route20
   },
   "routes/games.character-maze": {
     id: "routes/games.character-maze",
@@ -81934,7 +82725,7 @@ var routes = {
     path: "games/character-maze",
     index: void 0,
     caseSensitive: void 0,
-    module: route22
+    module: route21
   },
   "routes/reference.text-types": {
     id: "routes/reference.text-types",
@@ -81942,7 +82733,7 @@ var routes = {
     path: "reference/text-types",
     index: void 0,
     caseSensitive: void 0,
-    module: route23
+    module: route22
   },
   "routes/games.tunnel-escape": {
     id: "routes/games.tunnel-escape",
@@ -81950,7 +82741,7 @@ var routes = {
     path: "games/tunnel-escape",
     index: void 0,
     caseSensitive: void 0,
-    module: route24
+    module: route23
   },
   "routes/vce.speaking._index": {
     id: "routes/vce.speaking._index",
@@ -81958,7 +82749,7 @@ var routes = {
     path: "vce/speaking",
     index: true,
     caseSensitive: void 0,
-    module: route25
+    module: route24
   },
   "routes/vocab-drill.$listId": {
     id: "routes/vocab-drill.$listId",
@@ -81966,7 +82757,7 @@ var routes = {
     path: "vocab-drill/:listId",
     index: void 0,
     caseSensitive: void 0,
-    module: route26
+    module: route25
   },
   "routes/games.kanji-sudoku": {
     id: "routes/games.kanji-sudoku",
@@ -81974,7 +82765,7 @@ var routes = {
     path: "games/kanji-sudoku",
     index: void 0,
     caseSensitive: void 0,
-    module: route27
+    module: route26
   },
   "routes/games.memory-match": {
     id: "routes/games.memory-match",
@@ -81982,7 +82773,7 @@ var routes = {
     path: "games/memory-match",
     index: void 0,
     caseSensitive: void 0,
-    module: route28
+    module: route27
   },
   "routes/reference.200kanji": {
     id: "routes/reference.200kanji",
@@ -81990,7 +82781,7 @@ var routes = {
     path: "reference/200kanji",
     index: void 0,
     caseSensitive: void 0,
-    module: route29
+    module: route28
   },
   "routes/vce.writing._index": {
     id: "routes/vce.writing._index",
@@ -81998,7 +82789,7 @@ var routes = {
     path: "vce/writing",
     index: true,
     caseSensitive: void 0,
-    module: route30
+    module: route29
   },
   "routes/api.auth.callback": {
     id: "routes/api.auth.callback",
@@ -82006,7 +82797,7 @@ var routes = {
     path: "api/auth/callback",
     index: void 0,
     caseSensitive: void 0,
-    module: route31
+    module: route30
   },
   "routes/teacher-dashboard": {
     id: "routes/teacher-dashboard",
@@ -82014,7 +82805,7 @@ var routes = {
     path: "teacher-dashboard",
     index: void 0,
     caseSensitive: void 0,
-    module: route32
+    module: route31
   },
   "routes/game-frame.$name": {
     id: "routes/game-frame.$name",
@@ -82022,7 +82813,7 @@ var routes = {
     path: "game-frame/:name",
     index: void 0,
     caseSensitive: void 0,
-    module: route33
+    module: route32
   },
   "routes/legal.disclaimer": {
     id: "routes/legal.disclaimer",
@@ -82030,7 +82821,7 @@ var routes = {
     path: "legal/disclaimer",
     index: void 0,
     caseSensitive: void 0,
-    module: route34
+    module: route33
   },
   "routes/lessons.family-1": {
     id: "routes/lessons.family-1",
@@ -82038,13 +82829,21 @@ var routes = {
     path: "lessons/family-1",
     index: void 0,
     caseSensitive: void 0,
-    module: route35
+    module: route34
   },
   "routes/reference._index": {
     id: "routes/reference._index",
     parentId: "root",
     path: "reference",
     index: true,
+    caseSensitive: void 0,
+    module: route35
+  },
+  "routes/api.auth.logout": {
+    id: "routes/api.auth.logout",
+    parentId: "root",
+    path: "api/auth/logout",
+    index: void 0,
     caseSensitive: void 0,
     module: route36
   },

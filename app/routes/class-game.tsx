@@ -18,6 +18,8 @@ import { YAMATO_API_BASE, yamatoFetch } from '~/lib/yamatoApi';
 import { Box, HostView, Spinner, primaryBtn } from '~/components/class-game/HostView';
 import { StudentView } from '~/components/class-game/StudentView';
 import { QUESTION_SET_LABELS } from '~/components/class-game/useLiveGameSocket';
+import { JigsawSetup, type JigsawImage } from '~/components/class-game/JigsawSetup';
+import { cutJigsaw, gridFor } from '~/components/class-game/Jigsaw';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   return json({ portalContent: null, currentPath: new URL(request.url).pathname });
@@ -158,6 +160,14 @@ function TeacherSetup({
   const [questionSet, setQuestionSet] = useState<'hiragana' | 'katakana' | 'kanji'>('hiragana');
   const [durationMin, setDurationMin] = useState(10);
   const [nameMode, setNameMode] = useState<'free' | 'preset'>('preset');
+  const [janken, setJanken] = useState(true);
+  const [speed, setSpeed] = useState(true);
+  const [yamatoQuiz, setYamatoQuiz] = useState(true);
+  // 遊び方：金貨バトル／みんなでジグソー
+  const [mode, setMode] = useState<'coins' | 'jigsaw'>('coins');
+  const [jigsawImage, setJigsawImage] = useState<JigsawImage | null>(null);
+  const [pieceCount, setPieceCount] = useState(24);
+  const [busyText, setBusyText] = useState('Creating…');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -177,13 +187,26 @@ function TeacherSetup({
 
   const create = async () => {
     if (selected?.activeGameId && !window.confirm('This class already has an open game. Close it and start a new one?')) return;
+    if (mode === 'jigsaw' && !jigsawImage) {
+      setError('Choose a picture for the puzzle.');
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
+      let body: Record<string, unknown> = { classId, questionSet, durationMin, nameMode, janken, speed, yamato: yamatoQuiz };
+      if (mode === 'jigsaw' && jigsawImage) {
+        // このブラウザで写真をピースに切り分けて、部屋に渡す（どこに入るかはサーバーだけが持つ）
+        setBusyText('Cutting the picture…');
+        const { cols, rows } = gridFor(pieceCount, jigsawImage.width, jigsawImage.height);
+        const pieces = await cutJigsaw(jigsawImage.url, cols, rows);
+        body = { ...body, mode: 'jigsaw', imageId: jigsawImage.id, pieceCount, cols, rows, pieces };
+      }
+      setBusyText('Creating…');
       const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ classId, questionSet, durationMin, nameMode }),
+        body: JSON.stringify(body),
       });
       const data = (await res.json().catch(() => ({}))) as { gameId?: string; message?: string; error?: string };
       if (!res.ok || !data.gameId) throw new Error(data.message || data.error || `HTTP ${res.status}`);
@@ -220,6 +243,22 @@ function TeacherSetup({
           </select>
         </Field>
       )}
+
+      <Field label="Game">
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setMode('coins')} className={option(mode === 'coins')}>
+            🪙 Coin battle
+          </button>
+          <button type="button" onClick={() => setMode('jigsaw')} className={option(mode === 'jigsaw')}>
+            🧩 Class jigsaw
+          </button>
+        </div>
+        <p className="text-xs text-slate-500 mt-2">
+          {mode === 'coins'
+            ? 'Students compete for coins, with treasure chests, janken battles, speed rounds and Yamato’s questions.'
+            : 'The whole class builds one jigsaw puzzle together. Each correct answer earns a piece to place.'}
+        </p>
+      </Field>
 
       <Field label="Questions">
         <div className="flex flex-wrap gap-2">
@@ -259,6 +298,63 @@ function TeacherSetup({
         </p>
       </Field>
 
+      {mode === 'jigsaw' && (
+        <JigsawSetup selected={jigsawImage} onSelect={setJigsawImage} pieceCount={pieceCount} onPieceCount={setPieceCount} />
+      )}
+
+      {mode === 'coins' && (
+        <>
+      <Field label="Janken battles">
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setJanken(true)} className={option(janken)}>
+            On
+          </button>
+          <button type="button" onClick={() => setJanken(false)} className={option(!janken)}>
+            Off
+          </button>
+        </div>
+        <p className="text-xs text-slate-500 mt-2">
+          {janken
+            ? 'Treasure chests can contain a janken card. The student challenges a classmate; the loser gives half of their coins to the winner. Students can’t challenge the same person twice in a row, and someone who was just challenged is safe for 30 seconds.'
+            : 'No janken cards. Students only collect coins for themselves.'}
+        </p>
+      </Field>
+
+      <Field label="Speed rounds">
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setSpeed(true)} className={option(speed)}>
+            On
+          </button>
+          <button type="button" onClick={() => setSpeed(false)} className={option(!speed)}>
+            Off
+          </button>
+        </div>
+        <p className="text-xs text-slate-500 mt-2">
+          {speed
+            ? 'From 1:30 into the game and then every 3 minutes, everyone is paired up for one question. The first correct answer wins a quarter of the other student’s coins. With an odd number of students, one sits out and gets +3 coins.'
+            : 'No speed rounds.'}
+        </p>
+      </Field>
+
+      <Field label="Yamato's questions">
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setYamatoQuiz(true)} className={option(yamatoQuiz)}>
+            On
+          </button>
+          <button type="button" onClick={() => setYamatoQuiz(false)} className={option(!yamatoQuiz)}>
+            Off
+          </button>
+        </div>
+        <p className="text-xs text-slate-500 mt-2">
+          {yamatoQuiz
+            ? 'From 3:00 into the game and then every 3 minutes, the screens go dark and Yamato’s mark appears: one question for the whole class (15 seconds). The 10 fastest correct answers get 10, 9 … 1 coins. Every other question is a culture question from the Daily Quiz, so students can win without Japanese knowledge.'
+            : "No Yamato's questions."}
+        </p>
+      </Field>
+
+        </>
+      )}
+
       {error && <p className="text-sm text-rose-600">{error}</p>}
 
       <div className="flex flex-wrap gap-2 justify-end">
@@ -272,7 +368,7 @@ function TeacherSetup({
           </button>
         )}
         <button type="button" disabled={busy} onClick={create} className={`${primaryBtn} disabled:opacity-50`}>
-          {busy ? 'Creating…' : 'Create game room'}
+          {busy ? busyText : 'Create game room'}
         </button>
       </div>
     </div>

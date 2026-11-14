@@ -1,6 +1,6 @@
 /**
  * @file IframeGamePage.tsx
- * @description HTML ゲーム（将棋・囲碁・花札・数独・都道府県パズル・ひらがな神経衰弱）のページの中身
+ * @description HTML ゲーム（将棋・囲碁・花札・数独・都道府県パズル）のページの中身
  *  見出し → GameAccessGate（ログイン・先生のロック）→ GameFrame（iframe・高さ自動・全画面）
  */
 import React, { type RefObject } from 'react';

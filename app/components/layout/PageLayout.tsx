@@ -164,13 +164,20 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   }, []);
 
   const handleSignOut = async () => {
-    if (propOnSignOut) {
-      await propOnSignOut();
-    } else {
-      await supabase.auth.signOut();
+    try {
+      if (propOnSignOut) {
+        await propOnSignOut();
+      } else {
+        await supabase.auth.signOut();
+      }
+    } finally {
+      // 🔐 サーバー用のログイン Cookie も消す（残ると共有パソコンで次の人が前の人として扱われる）
+      await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+      setUser(null);
+      setNickname("");
+      // サーバーから読み込んだ情報（先生かどうか等）も消すため、ページを読み込み直す
+      window.location.reload();
     }
-    setUser(null);
-    setNickname("");
   };
 
   // 認証モーダル・パスキーのステート管理

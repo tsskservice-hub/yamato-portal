@@ -50,6 +50,19 @@ export function createServerSupabaseClient(request: Request, context?: any) {
 }
 
 /**
+ * 🔐 サーバー用のログイン Cookie（名前が "sb-" で始まるもの）をすべて消す Set-Cookie を headers に足す。
+ * ログアウト・アカウント削除のときに使う。Cookie が残ると、共有パソコンで次の人が前の人として扱われるおそれがある。
+ */
+export function appendClearAuthCookies(request: Request, headers: Headers) {
+  const cookies = parseCookieHeader(request.headers.get("Cookie") ?? "");
+  for (const { name } of cookies) {
+    if (name.startsWith("sb-")) {
+      headers.append("Set-Cookie", serializeCookieHeader(name, "", { path: "/", maxAge: 0 }));
+    }
+  }
+}
+
+/**
  * 署名（HMAC）用の秘密の文字列。管理者キーから用途（purpose）ごとに作る。
  * 新しい環境変数を増やさずに済み、管理者キーそのものはどこにも出さない（HMAC の鍵として使うだけ）。
  */

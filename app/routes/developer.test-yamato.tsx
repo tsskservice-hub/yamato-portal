@@ -106,6 +106,7 @@ export default function TestYamatoPage() {
   // 💡 ログアウト実行関数
   const handleDebugLogout = async () => {
     await supabase.auth.signOut();
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     setDebugStatus("🔒 ログアウトしました。ページを更新します...");
     setTimeout(() => {
       window.location.reload();

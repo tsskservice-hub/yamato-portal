@@ -7,6 +7,8 @@
  */
 import React, { useState } from 'react';
 import { Crown, Eye, EyeOff, Pencil, Play, Square, UserX, Users, Wifi, WifiOff } from 'lucide-react';
+import { HostYamato, type YamatoHostState } from './YamatoQuiz';
+import { JigsawBoard, JigsawBoxPicture, progressPercent, type JigsawBoardInfo } from './Jigsaw';
 import { CLOSED_MESSAGES, QUESTION_SET_LABELS, formatClock, useCountdown, useLiveGameSocket } from './useLiveGameSocket';
 
 type HostPlayer = {
@@ -14,6 +16,8 @@ type HostPlayer = {
   name: string | null;
   label: string;
   coins: number;
+  /** ジグソー：正しく置けたピースの数 */
+  contributions?: number;
   correct: number;
   answered: number;
   online: boolean;
@@ -24,9 +28,24 @@ type HostPlayer = {
 type HostState = {
   status: 'lobby' | 'running' | 'ended';
   endsAt: number;
-  config: { className: string; questionSet: string; durationSec: number; nameMode: 'free' | 'preset' };
+  config: {
+    className: string;
+    questionSet: string;
+    durationSec: number;
+    nameMode: 'free' | 'preset';
+    janken?: boolean;
+    speed?: boolean;
+    yamato?: boolean;
+    mode?: 'coins' | 'jigsaw';
+  };
+  /** みんなでジグソーの盤面 */
+  jigsaw?: JigsawBoardInfo | null;
+  /** ヤマトの問題が出ているあいだ（と、終わってしばらく） */
+  yamato?: YamatoHostState | null;
   players: HostPlayer[];
   classMissed?: { key: string; count: number }[];
+  /** 実況（新しい順）。じゃんけんの勝負や、打ち出の小づちなど */
+  feed?: { at: number; text: string }[];
 };
 
 export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () => void }) {
@@ -56,6 +75,10 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
   if (!state) return <Spinner text="Opening the game room…" />;
 
   const named = state.players.filter((p) => p.name);
+  // ジグソーでは、順位表の数字を「置けたピースの数」にする（並び順はサーバーが貢献度で付けている）
+  const isJigsaw = state.config.mode === 'jigsaw';
+  const unit = isJigsaw ? PIECE_UNIT : COIN_UNIT;
+  const scored = isJigsaw ? state.players.map((p) => ({ ...p, coins: p.contributions ?? 0 })) : state.players;
   const rename = (p: HostPlayer) => {
     const name = window.prompt(`New display name for ${p.name ?? p.label}:`, p.name ?? '');
     if (name !== null) send({ t: 'rename', userId: p.userId, name });
@@ -75,7 +98,10 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
           <h2 className="text-xl font-black text-slate-900 dark:text-white">{state.config.className}</h2>
           <p className="text-xs text-slate-500">
             {QUESTION_SET_LABELS[state.config.questionSet]} · {state.config.durationSec / 60} min ·{' '}
-            {state.config.nameMode === 'free' ? 'Students choose their names' : 'Names chosen by AI Yamato'}
+            {state.config.nameMode === 'free' ? 'Students choose their names' : 'Names chosen by AI Yamato'} ·{' '}
+            {state.config.janken ? 'Janken battles on' : 'Janken battles off'} ·{' '}
+            {state.config.speed ? 'Speed rounds on' : 'Speed rounds off'} ·{' '}
+            {state.config.yamato ? "Yamato's questions on" : "Yamato's questions off"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -128,6 +154,11 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
         </div>
       )}
 
+      {/* ヤマトの問題（プロジェクターの画面いっぱいに出す） */}
+      {state.status === 'running' && state.yamato && (
+        <HostYamato round={state.yamato} offset={offset} playerCount={named.length} />
+      )}
+
       {/* ゲーム中 */}
       {state.status === 'running' && (
         <div className="space-y-4">
@@ -141,7 +172,19 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
               <Square className="w-4 h-4" /> End now
             </button>
           </div>
-          <Leaderboard players={state.players} showLabels={showLabels} onRename={rename} onKick={kick} />
+          {state.jigsaw && (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-black text-slate-900 dark:text-white">🧩 Class puzzle</h3>
+                <p className="text-2xl font-black text-indigo-600">{progressPercent(state.jigsaw)}%</p>
+              </div>
+              <JigsawBoard board={state.jigsaw} />
+            </div>
+          )}
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <Leaderboard players={scored} unit={unit} showLabels={showLabels} onRename={rename} onKick={kick} />
+            <LiveFeed feed={state.feed ?? []} />
+          </div>
         </div>
       )}
 
@@ -149,10 +192,19 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
       {state.status === 'ended' && (
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
-            <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">🏆 Final results</h3>
-            <Podium players={named.slice(0, 3)} />
+            <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">
+              {state.jigsaw ? (progressPercent(state.jigsaw) === 100 ? '🎉 The class finished the puzzle!' : `🧩 The class finished ${progressPercent(state.jigsaw)}%`) : '🏆 Final results'}
+            </h3>
+            {state.jigsaw && (
+              <div className="grid gap-4 md:grid-cols-[3fr_1fr] mb-6 items-start">
+                <JigsawBoard board={state.jigsaw} />
+                <JigsawBoxPicture board={state.jigsaw} />
+              </div>
+            )}
+            {state.jigsaw && <p className="text-center font-bold text-slate-600 mb-3">Top contributors</p>}
+            <Podium players={scored.filter((p) => p.name).slice(0, 3)} unit={unit} />
           </div>
-          <Leaderboard players={state.players} showLabels={showLabels} />
+          <Leaderboard players={scored} unit={unit} showLabels={showLabels} />
           {state.classMissed && state.classMissed.length > 0 && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
               <h3 className="font-bold text-slate-800 dark:text-white mb-1">Characters the class missed most</h3>
@@ -171,6 +223,28 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
             <button type="button" onClick={onNewGame} className={primaryBtn}>New game</button>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function LiveFeed({ feed }: { feed: { at: number; text: string }[] }) {
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4">
+      <h3 className="font-bold text-slate-800 dark:text-white mb-3">📣 Live</h3>
+      {feed.length ? (
+        <ul className="space-y-2">
+          {feed.map((f, i) => (
+            <li
+              key={`${f.at}-${i}`}
+              className={`text-sm rounded-xl px-3 py-2 ${i === 0 ? 'bg-rose-50 text-rose-900 font-bold' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}`}
+            >
+              {f.text}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-slate-400">Janken battles and big wins will show up here.</p>
       )}
     </div>
   );
@@ -216,13 +290,20 @@ function PlayerActions({ p, onRename, onKick }: { p: HostPlayer; onRename: (p: H
   );
 }
 
+/** 順位表に出す数字の単位（金貨バトルは金貨、ジグソーは置けたピースの数） */
+type Unit = { label: string; icon: string };
+const COIN_UNIT: Unit = { label: 'Coins', icon: '🪙' };
+const PIECE_UNIT: Unit = { label: 'Pieces', icon: '🧩' };
+
 function Leaderboard({
   players,
+  unit = COIN_UNIT,
   showLabels,
   onRename,
   onKick,
 }: {
   players: HostPlayer[];
+  unit?: Unit;
   showLabels: boolean;
   onRename?: (p: HostPlayer) => void;
   onKick?: (p: HostPlayer) => void;
@@ -234,7 +315,7 @@ function Leaderboard({
           <tr>
             <th className="px-3 py-2 text-left w-12">#</th>
             <th className="px-3 py-2 text-left">Name</th>
-            <th className="px-3 py-2 text-right">Coins</th>
+            <th className="px-3 py-2 text-right">{unit.label}</th>
             <th className="px-3 py-2 text-right hidden sm:table-cell">Correct</th>
             {onRename && onKick && <th className="w-16" />}
           </tr>
@@ -248,7 +329,9 @@ function Leaderboard({
                 {!p.online && <span className="ml-2 text-[10px] text-slate-400">offline</span>}
                 {showLabels && <span className="block text-[11px] text-slate-500">{p.label}</span>}
               </td>
-              <td className="px-3 py-2 text-right font-black text-amber-600 tabular-nums">🪙 {p.coins}</td>
+              <td className="px-3 py-2 text-right font-black text-amber-600 tabular-nums">
+                {unit.icon} {p.coins}
+              </td>
               <td className="px-3 py-2 text-right text-slate-500 hidden sm:table-cell tabular-nums">
                 {p.correct}/{p.answered}
               </td>
@@ -265,7 +348,7 @@ function Leaderboard({
   );
 }
 
-function Podium({ players }: { players: HostPlayer[] }) {
+function Podium({ players, unit = COIN_UNIT }: { players: HostPlayer[]; unit?: Unit }) {
   const medals = ['🥇', '🥈', '🥉'];
   return (
     <div className="flex flex-col sm:flex-row justify-center gap-3">
@@ -275,7 +358,9 @@ function Podium({ players }: { players: HostPlayer[] }) {
           <p className="font-black text-lg text-slate-900 truncate flex items-center justify-center gap-1">
             {i === 0 && <Crown className="w-4 h-4 text-amber-500" />} {p.name}
           </p>
-          <p className="font-bold text-amber-600">🪙 {p.coins}</p>
+          <p className="font-bold text-amber-600">
+            {unit.icon} {p.coins}
+          </p>
         </div>
       ))}
     </div>

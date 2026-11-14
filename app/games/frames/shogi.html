@@ -259,12 +259,12 @@
         <div class="board-col">
           <div class="hand" id="handGote" aria-label="Opponent's pieces in hand"></div>
           <div class="board-frame">
-            <div class="files" aria-hidden="true">
+            <div class="files" id="fileLabels" aria-hidden="true">
               <span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
             </div>
             <div class="board-row">
               <div class="board" id="board" role="grid" aria-label="Shogi board"></div>
-              <div class="ranks" aria-hidden="true">
+              <div class="ranks" id="rankLabels" aria-hidden="true">
                 <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
               </div>
             </div>
@@ -302,6 +302,9 @@
         <div class="choices">
           <button class="btn primary" id="promoYes" type="button">Promote</button>
           <button class="btn" id="promoNo" type="button">Don't promote</button>
+        </div>
+        <div class="close-row" style="justify-content:center;">
+          <button class="btn" id="promoCancel" type="button">Cancel (choose another move)</button>
         </div>
       </div>
     </div>
@@ -347,7 +350,8 @@
           <li>You cannot make a move that leaves your own king in check. If your king is in check, you must get out of check.</li>
           <li>Nifu is illegal: you may not drop a pawn on a file where you already have an unpromoted pawn. A pawn or lance cannot be dropped on the farthest rank, and a knight cannot be dropped on the farthest two ranks, because it would have no move.</li>
           <li>Uchifuzume is also illegal: you may not drop a pawn to deliver checkmate.</li>
-          <li>You win by checkmating the opponent's king. If the same position occurs four times (sennichite), the game is a draw.</li>
+          <li>You win by checkmating the opponent's king. If the same position occurs four times (sennichite), the game is a draw — except that a player who gave check with every move during the repetition (perpetual check) loses.</li>
+          <li>If you play Gote (second), the board is turned around so your pieces are at the bottom.</li>
         </ul>
         <div class="close-row">
           <button class="btn primary" id="rulesClose" type="button">Close</button>
@@ -355,7 +359,7 @@
       </div>
     </div>
 
-    <script>
+    <script id="shogiEngine">
       "use strict";
       /* ================= Shogi engine ================= */
       // Board: idx = row*9+col, row 0 = rank 1 (Gote side), row 8 = rank 9 (Sente side)
@@ -649,7 +653,12 @@
         var alpha = -Infinity;
         for (var i = 0; i < moves.length; i++) {
           var ns = applyMove(st, moves[i]);
-          var sc = -negamax(ns, depth - 1, -Infinity, -alpha === -Infinity ? Infinity : -alpha, 1);
+          // With randomness (Beginner / Normal) every root move needs its exact score: a pruned search
+          // only returns a bound, and adding randomness to a bound could pick a real blunder.
+          // Strong has no randomness, so it keeps the faster alpha-beta window.
+          var sc = jitter
+            ? -negamax(ns, depth - 1, -Infinity, Infinity, 1)
+            : -negamax(ns, depth - 1, -Infinity, -alpha === -Infinity ? Infinity : -alpha, 1);
           if (jitter) sc += Math.random() * jitter * 2 - jitter;
           if (sc > best + 0.001) { best = sc; bestMoves = [moves[i]]; }
           else if (Math.abs(sc - best) <= 0.001) bestMoves.push(moves[i]);
@@ -657,7 +666,12 @@
         }
         return bestMoves[Math.floor(Math.random() * bestMoves.length)];
       }
+    </script>
 
+    <!-- The engine above (id="shogiEngine") also runs in a Web Worker, so the "Strong" computer can think
+         without freezing the page. Everything below is the page (board, buttons, game flow). -->
+    <script>
+      "use strict";
       /* ================= Move notation ================= */
       function pieceNameEn(p) {
         if (p.pr && NAMES_PR_EN[p.t]) return NAMES_PR_EN[p.t];
@@ -703,12 +717,18 @@
         var d = document.createElement("div");
         d.className = "cell";
         d.setAttribute("role", "gridcell");
-        (function (idx) { d.addEventListener("click", function () { onCellClick(idx); }); })(ci);
+        // ci is the square's position on screen; boardIdx() turns it into the board index (the board is turned round for Gote)
+        (function (pos) { d.addEventListener("click", function () { onCellClick(boardIdx(pos)); }); })(ci);
         boardEl.appendChild(d);
         cells.push(d);
       }
 
-      var game = null; // { state, playerColor, level, history:[{state,kifu}], kifuList:[], over, rep:{} }
+      var game = null; // { state, playerColor, level, history:[{state,lastTo}], kifuList:[], over, rep:{}, lastTo }
+
+      /* When you play Gote, the board is shown turned round so your pieces are at the bottom.
+         Screen position <-> board index (the same mapping both ways). */
+      function isFlipped() { return !!game && game.playerColor === 1; }
+      function boardIdx(pos) { return isFlipped() ? 80 - pos : pos; }
       var selected = null; // { kind:'board', idx } | { kind:'hand', type }
       var legalCache = []; // 現在の手番の合法手
       var pendingPromo = null;
@@ -739,6 +759,9 @@
       });
 
       function startGame(playerColor, level) {
+        // A computer move still being worked out belongs to the old game: cancel it
+        cancelAi();
+        document.getElementById("promoOverlay").classList.remove("show");
         game = {
           state: initialState(),
           playerColor: playerColor,
@@ -746,7 +769,8 @@
           history: [],
           kifuList: [],
           over: false,
-          rep: {}
+          rep: {},
+          lastTo: -1
         };
         game.rep[stateKey(game.state)] = 1;
         selected = null;
@@ -808,6 +832,13 @@
 
       document.getElementById("promoYes").addEventListener("click", function () { resolvePromo(true); });
       document.getElementById("promoNo").addEventListener("click", function () { resolvePromo(false); });
+      document.getElementById("promoCancel").addEventListener("click", cancelPromo);
+      // Close the promotion question without moving (the piece stays selected, so another square can be chosen)
+      function cancelPromo() {
+        document.getElementById("promoOverlay").classList.remove("show");
+        pendingPromo = null;
+        render();
+      }
       function resolvePromo(promote) {
         document.getElementById("promoOverlay").classList.remove("show");
         if (!pendingPromo) return;
@@ -823,25 +854,111 @@
         if (!game.over) aiTurn();
       }
 
+      /* ---------- Computer move: worked out in a Web Worker, so the page never freezes ----------
+         The worker runs the engine script above (id="shogiEngine"). If workers are not available,
+         the move is worked out on the page instead (as before). */
+      var aiWorker = null, aiWorkerFailed = false, aiRequestId = 0, aiCallback = null;
+      function getAiWorker() {
+        if (aiWorker || aiWorkerFailed) return aiWorker;
+        try {
+          var src = document.getElementById("shogiEngine").textContent +
+            "\nself.onmessage = function (e) { self.postMessage({ id: e.data.id, move: aiChooseMove(e.data.state, e.data.level) }); };";
+          var url = URL.createObjectURL(new Blob([src], { type: "text/javascript" }));
+          aiWorker = new Worker(url);
+          aiWorker.onmessage = function (e) {
+            var cb = aiCallback;
+            if (!cb || e.data.id !== aiRequestId) return; // an answer for a cancelled request
+            aiCallback = null;
+            cb(e.data.move);
+          };
+          aiWorker.onerror = function () {
+            // The worker could not run: work out this (and later) moves on the page instead
+            aiWorkerFailed = true;
+            aiWorker = null;
+            var cb = aiCallback;
+            aiCallback = null;
+            if (cb && game) cb(aiChooseMove(game.state, game.level));
+          };
+        } catch (e) {
+          aiWorkerFailed = true;
+          aiWorker = null;
+        }
+        return aiWorker;
+      }
+      function requestAiMove(state, level, cb) {
+        var id = ++aiRequestId;
+        var worker = getAiWorker();
+        if (worker) {
+          aiCallback = cb;
+          worker.postMessage({ id: id, state: state, level: level });
+        } else {
+          setTimeout(function () { if (id === aiRequestId) cb(aiChooseMove(state, level)); }, 30);
+        }
+      }
+      /** Forget the computer move being worked out (new game, resign). A busy worker is stopped. */
+      function cancelAi() {
+        aiRequestId++;
+        if (aiCallback && aiWorker) { aiWorker.terminate(); aiWorker = null; }
+        aiCallback = null;
+        thinkingEl.classList.remove("show");
+      }
+
       function aiTurn() {
         if (game.over) return;
+        var g = game, id, started = Date.now();
         thinkingEl.classList.add("show");
         render();
-        setTimeout(function () {
-          var mv = aiChooseMove(game.state, game.level);
-          thinkingEl.classList.remove("show");
-          if (!mv) { endGame(game.playerColor, "The computer has no legal moves left."); render(); return; }
-          pushMove(mv);
-          render();
-        }, 350);
+        requestAiMove(g.state, g.level, function (mv) {
+          // Wait at least 350 ms so the computer's reply doesn't appear instantly
+          setTimeout(function () {
+            if (g !== game || g.over || id !== aiRequestId) return; // the game was restarted or resigned meanwhile
+            thinkingEl.classList.remove("show");
+            if (!mv) { endGame(g.playerColor, "The computer has no legal moves left."); render(); return; }
+            pushMove(mv);
+            render();
+          }, Math.max(0, 350 - (Date.now() - started)));
+        });
+        id = aiRequestId;
+      }
+
+      /** Rebuild the repetition counts from the moves played (after Undo) */
+      function rebuildRepetition() {
+        game.rep = {};
+        game.history.forEach(function (h) { var k = stateKey(h.state); game.rep[k] = (game.rep[k] || 0) + 1; });
+        var cur = stateKey(game.state);
+        game.rep[cur] = (game.rep[cur] || 0) + 1;
+      }
+
+      /**
+       * Sennichite with perpetual check: if one side gave check with every one of its moves since the
+       * repeated position first appeared, that side loses. Returns that side (0 / 1), or null for a plain draw.
+       */
+      function perpetualChecker(key) {
+        var positions = game.history.map(function (h) { return h.state; }).concat([game.state]);
+        var first = -1;
+        for (var i = 0; i < positions.length; i++) {
+          if (stateKey(positions[i]) === key) { first = i; break; }
+        }
+        if (first < 0) return null;
+        var allCheck = [true, true], movesBy = [0, 0];
+        for (var j = first + 1; j < positions.length; j++) {
+          var pos = positions[j];
+          var mover = 1 - pos.turn;
+          movesBy[mover]++;
+          if (!inCheck(pos, pos.turn)) allCheck[mover] = false;
+        }
+        if (movesBy[0] > 0 && allCheck[0]) return 0;
+        if (movesBy[1] > 0 && allCheck[1]) return 1;
+        return null;
       }
 
       function pushMove(mv) {
         var st = game.state;
         var notation = moveNotation(st, mv, game.kifuList.length + 1);
-        game.history.push({ state: st, });
+        game.history.push({ state: st, lastTo: game.lastTo });
         game.kifuList.push(notation);
         game.state = applyMove(st, mv);
+        game.lastTo = mv.to;
         playKnock();
         // Sennichite (fourfold repetition) check
         var key = stateKey(game.state);
@@ -849,7 +966,15 @@
         refreshLegal();
         if (game.rep[key] >= 4) {
           game.over = true;
-          endGame(null, "The same position occurred four times (sennichite), so the game is drawn.");
+          var checker = perpetualChecker(key);
+          if (checker === null) {
+            endGame(null, "The same position occurred four times (sennichite), so the game is drawn.");
+          } else {
+            endGame(1 - checker,
+              (checker === game.playerColor ? "You" : "The computer") +
+              " gave check with every move while the position repeated (perpetual check), which is not allowed, so " +
+              (checker === game.playerColor ? "you lose." : "the computer loses."));
+          }
           return;
         }
         if (legalCache.length === 0) {
@@ -881,16 +1006,15 @@
         while (game.history.length > 0 && steps < 2) {
           var h = game.history.pop();
           game.state = h.state;
+          game.lastTo = h.lastTo;
           game.kifuList.pop();
           steps++;
           if (game.state.turn === game.playerColor) break;
         }
         game.over = false;
         document.getElementById("resultOverlay").classList.remove("show");
-        // Rebuild the repetition counter
-        game.rep = {};
-        game.rep[stateKey(game.state)] = 1;
-        game.lastTo = -1;
+        // Rebuild the repetition counter from the moves still on the board (so sennichite still counts them)
+        rebuildRepetition();
         selected = null;
         refreshLegal();
         render();
@@ -899,6 +1023,7 @@
 
       resignBtn.addEventListener("click", function () {
         if (!game || game.over) return;
+        cancelAi(); // the computer must not move after you resign
         game.over = true;
         refreshLegal();
         endGame(1 - game.playerColor, "You resigned.");
@@ -935,8 +1060,17 @@
         // Use the stored last-move square (it cannot be derived from the move list)
         lastTo = game.lastTo != null ? game.lastTo : -1;
 
-        for (var i = 0; i < 81; i++) {
-          var cell = cells[i];
+        var flipped = isFlipped();
+        var viewer = game.playerColor;
+        // File / rank labels follow the board when it is turned round
+        var fileNums = [9, 8, 7, 6, 5, 4, 3, 2, 1], rankNums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        if (flipped) { fileNums.reverse(); rankNums.reverse(); }
+        document.getElementById("fileLabels").innerHTML = fileNums.map(function (n) { return "<span>" + n + "</span>"; }).join("");
+        document.getElementById("rankLabels").innerHTML = rankNums.map(function (n) { return "<span>" + n + "</span>"; }).join("");
+
+        for (var pos = 0; pos < 81; pos++) {
+          var cell = cells[pos];
+          var i = boardIdx(pos);
           var p = st.board[i];
           var cls = "cell";
           if (i === lastTo) cls += " last";
@@ -951,16 +1085,19 @@
                 label === "金将" || label === "銀将" || label === "桂馬" || label === "香車" || label === "歩兵" ||
                 label === "竜王" || label === "竜馬" || label === "成銀" || label === "成桂" || label === "成香") sizeCls = "two";
             if (label === "と金") sizeCls = "two";
-            html += '<div class="piece' + (p.o === 1 ? " gote" : "") + (p.pr ? " promo" : "") + " " + sizeCls + '">' + label + "</div>";
+            // The opponent's pieces point towards you (the "gote" class turns a piece upside down)
+            html += '<div class="piece' + (p.o !== viewer ? " gote" : "") + (p.pr ? " promo" : "") + " " + sizeCls + '">' + label + "</div>";
           }
           if (destSet[i]) html += p ? '<div class="ring"></div>' : '<div class="dot"></div>';
           cell.innerHTML = html;
         }
 
-        renderHand(handGoteEl, 1, "☖ Gote (" + (game.playerColor === 1 ? "you" : "computer") + ") in hand:");
-        renderHand(handSenteEl, 0, "☗ Sente (" + (game.playerColor === 0 ? "you" : "computer") + ") in hand:");
-        handSenteEl.classList.toggle("active", game.playerColor === 0);
-        handGoteEl.classList.toggle("active", game.playerColor === 1);
+        // The computer's pieces in hand are above the board and yours are below, whichever side you play
+        var sideName = function (o) { return o === 0 ? "☗ Sente" : "☖ Gote"; };
+        renderHand(handGoteEl, 1 - viewer, sideName(1 - viewer) + " (computer) in hand:");
+        renderHand(handSenteEl, viewer, sideName(viewer) + " (you) in hand:");
+        handSenteEl.classList.add("active");
+        handGoteEl.classList.remove("active");
 
         // Turn indicator
         var mine = st.turn === game.playerColor;
@@ -1004,7 +1141,7 @@
           if (!n) continue;
           any = true;
           var sel = selected && selected.kind === "hand" && selected.type === t && owner === game.playerColor;
-          html += '<button type="button" class="hand-piece' + (owner === 1 ? " gote" : "") + (sel ? " sel" : "") +
+          html += '<button type="button" class="hand-piece' + (owner !== game.playerColor ? " gote" : "") + (sel ? " sel" : "") +
             '" data-owner="' + owner + '" data-type="' + t + '"><span class="shape">' + NAMES[t] + "</span>" +
             (n > 1 ? '<span class="cnt">' + n + "</span>" : "") + "</button>";
         }
@@ -1024,17 +1161,15 @@
         return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       }
 
-      // Wrap pushMove to record the last move's destination square
-      var origPush = pushMove;
-      pushMove = function (mv) { game.lastTo = mv.to; origPush(mv); };
-
       /* ---------- Rules modal ---------- */
       var rulesOverlay = document.getElementById("rulesOverlay");
       document.getElementById("rulesBtn").addEventListener("click", function () { rulesOverlay.classList.add("show"); });
       document.getElementById("rulesClose").addEventListener("click", function () { rulesOverlay.classList.remove("show"); });
       rulesOverlay.addEventListener("click", function (e) { if (e.target === rulesOverlay) rulesOverlay.classList.remove("show"); });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") rulesOverlay.classList.remove("show");
+        if (e.key !== "Escape") return;
+        rulesOverlay.classList.remove("show");
+        if (pendingPromo) cancelPromo();
       });
 
       /* ---------- Init ---------- */

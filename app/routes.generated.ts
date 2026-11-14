@@ -1,13 +1,13 @@
 // このファイルは自動生成されます。直接編集しないでください。
 export const generatedRoutes: string[] = [
   "/about",
+  "/api.auth.logout",
   "/contact",
   "/culture._index",
   "/faq",
   "/games._index",
   "/games.character-maze",
   "/games.hanafuda",
-  "/games.hiragana-memory-match",
   "/games.igo",
   "/games.kanji-sudoku",
   "/games.memory-match",

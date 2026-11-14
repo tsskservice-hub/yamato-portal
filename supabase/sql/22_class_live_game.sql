@@ -49,18 +49,19 @@ values (
   'LIVE_GAME_NAMES',
   jsonb_build_object('names', jsonb_build_array(
     'Sushi', 'Onigiri', 'Tempura', 'Ramen', 'Mochi', 'Dango', 'Takoyaki', 'Gyoza',
-    'Bento', 'Matcha', 'Dorayaki', 'Taiyaki', 'Edamame', 'Udon', 'Soba', 'Natto',
-    'Tanuki', 'Kitsune', 'Usagi', 'Neko', 'Inu', 'Tora', 'Panda', 'Kame',
-    'Tsuru', 'Koi', 'Saru', 'Kuma', 'Fukurou', 'Hiyoko', 'Tako', 'Iruka',
+    'Obento', 'Matcha', 'Dorayaki', 'Taiyaki', 'Edamame', 'Udon', 'Soba', 'Natto',
+    'Tanuki', 'Kitsune', 'Usagi', 'Neko', 'Inu', 'Tora', 'Kingyo', 'Kame',
+    'Tsuru', 'Koi', 'Saru', 'Kuma', 'Ushi', 'Hiyoko', 'Tako', 'Iruka',
     'Sakura', 'Fuji', 'Momiji', 'Hanabi', 'Kaminari', 'Niji', 'Hoshi', 'Tsuki',
-    'Daruma', 'Kokeshi', 'Origami', 'Furin', 'Chochin', 'Kendama', 'Uchiwa', 'Torii'
+    'Daruma', 'Kokeshi', 'Origami', 'Noren', 'Chochin', 'Kendama', 'Uchiwa', 'Torii',
+    'Jinja', 'Tera'
   )),
   now()
 )
 on conflict (key) do nothing;
 
 -- 確認用（SQL Editor は最後の SELECT しか表示しないので 1 つにまとめる）:
--- table の 2 行が true、names の行が 48 なら成功
+-- table の 2 行が true、names の行が 50 なら成功
 select 'table: ' || relname as item, relrowsecurity::text as result
 from pg_class
 where relname in ('edu_live_games', 'edu_live_game_results')

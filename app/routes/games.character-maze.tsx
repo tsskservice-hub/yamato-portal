@@ -14,9 +14,11 @@ import { useLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { GameAccessGate } from '~/components/games/GameAccessGate';
+import { useGameSounds } from '~/components/games/useGameSounds';
 import { DataErrorState } from '~/components/DataErrorState';
 import { generateModuleMeta } from '~/utils/seoMeta';
 import { shuffle } from '~/utils/shuffle';
+import { fetchAllPages } from '~/lib/fetchAllPages';
 import { supabase } from '~/lib/supabaseClient';
 
 // ------------------------------------------------------------------
@@ -68,6 +70,13 @@ const SHIELD_MS = 2000;
 const SNAKE_MIN_DISTANCE = 10;
 const POINTS_PER_CHAR = 200;
 
+/** Sound effects (public/game-assets/character-maze/) */
+const SOUND_FILES = {
+  correct: '/game-assets/character-maze/correct-answer.mp3',
+  incorrect: '/game-assets/character-maze/incorrect-answer.mp3',
+  snake: '/game-assets/character-maze/snake-sound.mp3',
+};
+
 const DIRECTIONS: Point[] = [
   { x: 0, y: -1 },
   { x: 0, y: 1 },
@@ -114,15 +123,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const pools: MazePools = { hiragana: [], katakana: [], kanji: [] };
   let loadError: string | null = null;
   try {
-    const { data, error } = await supabase
-      .from('kl_character')
-      .select('character, romaji, kun_romaji, on_romaji, char_type, category, sort_order')
-      .in('char_type', ['hiragana', 'katakana', 'kanji'])
-      .order('sort_order', { ascending: true, nullsFirst: false })
-      .limit(1000);
-    if (error) throw error;
+    // 全件を 1000 行ずつ読む（.limit(1000) だと文字が増えたときに黙って切り捨てられる）
+    const data = await fetchAllPages<any>((from, to) =>
+      supabase
+        .from('kl_character')
+        .select('id, character, romaji, kun_romaji, on_romaji, char_type, category, sort_order')
+        .in('char_type', ['hiragana', 'katakana', 'kanji'])
+        .order('sort_order', { ascending: true, nullsFirst: false })
+        .order('id', { ascending: true })
+        .range(from, to) as unknown as PromiseLike<{ data: any[] | null; error: { message: string } | null }>
+    );
 
-    for (const r of (data ?? []) as any[]) {
+    for (const r of data) {
       const char = clean(r.character);
       if (!char) continue;
       if (r.char_type === 'hiragana' || r.char_type === 'katakana') {
@@ -257,6 +269,7 @@ function CharacterMazeArena({ pools }: { pools: MazePools }) {
 
   const [isGoalReached, setIsGoalReached] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
+  const sounds = useGameSounds(SOUND_FILES);
 
   const active = playing && !activeQuizItem && !isGameOver && !isGoalReached;
   const activeRef = useRef(active);
@@ -280,6 +293,7 @@ function CharacterMazeArena({ pools }: { pools: MazePools }) {
   useEffect(() => clearTimers, []);
 
   const startGame = () => {
+    sounds.load(); // inside the click, so the browser allows the sounds
     clearTimers();
     const chars = shuffle(selectedPool).slice(0, ITEM_COUNT);
     const cells = shuffle(FREE_CELLS);
@@ -364,6 +378,7 @@ function CharacterMazeArena({ pools }: { pools: MazePools }) {
       shieldUntilRef.current = Date.now() + SHIELD_MS;
       setShielded(true);
       later(() => setShielded(false), SHIELD_MS);
+      sounds.play('snake');
       setHp((h) => Math.max(0, h - 1));
       setPlayer(START);
       return;
@@ -395,6 +410,7 @@ function CharacterMazeArena({ pools }: { pools: MazePools }) {
     setAnswering(true);
 
     if (item.answers.includes(guess)) {
+      sounds.play('correct');
       setQuizFeedback({ ok: true, text: `Correct! ${item.char} = ${item.reading} (+${POINTS_PER_CHAR} pt)` });
       later(() => {
         setScore((s) => s + POINTS_PER_CHAR);
@@ -404,6 +420,7 @@ function CharacterMazeArena({ pools }: { pools: MazePools }) {
         setAnswering(false);
       }, 900);
     } else {
+      sounds.play('incorrect');
       setQuizFeedback({ ok: false, text: `Not quite: ${item.char} is "${item.reading}". It ran away to another spot!` });
       later(() => {
         setItems((prev) => {
@@ -527,13 +544,24 @@ function CharacterMazeArena({ pools }: { pools: MazePools }) {
         <span className="text-red-500 font-bold" aria-label={`HP ${hp} of ${START_HP}`}>❤️ {'❤️'.repeat(hp)}{'🤍'.repeat(Math.max(0, START_HP - hp))}</span>
         <span className="text-indigo-600 font-bold">🎒 {collectedCount} / {totalItemsCount}</span>
         <span className="text-emerald-600 font-bold">Score: {score} pt</span>
-        <button
-          type="button"
-          onClick={backToSetup}
-          className="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700 transition cursor-pointer"
-        >
-          Change characters
-        </button>
+        <span className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => sounds.setMuted((m) => !m)}
+            aria-pressed={sounds.muted}
+            aria-label={sounds.muted ? 'Sound off' : 'Sound on'}
+            className="text-xs bg-slate-200 hover:bg-slate-300 px-2.5 py-1.5 rounded-lg font-bold text-slate-700 transition cursor-pointer"
+          >
+            {sounds.muted ? '🔇' : '🔊'}
+          </button>
+          <button
+            type="button"
+            onClick={backToSetup}
+            className="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700 transition cursor-pointer"
+          >
+            Change characters
+          </button>
+        </span>
       </div>
       <p className="text-xs text-slate-500 -mt-2">
         {canGoal ? 'All characters collected! Go to the castle 🏰 in the bottom-right corner.' : 'Collect every character, then go to the castle 🏰. Move with the arrow keys, WASD, or the buttons.'}

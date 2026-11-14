@@ -167,6 +167,15 @@
       }
       .terr.black { background: rgba(10, 10, 10, 0.75); }
       .terr.white { background: rgba(255, 255, 255, 0.85); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); }
+      /* Counting the score: stones marked as dead are faded and crossed out */
+      .stone.dead { opacity: 0.45; }
+      .stone .dead-x {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        color: var(--marker); font-weight: 700; font-size: 150%; line-height: 1;
+      }
+      .board.scoring .hit { cursor: pointer; }
+      .scoring-card { border-color: var(--accent); }
+      .scoring-card p { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; }
       @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
       .board.shake { animation: shake 0.18s ease-in-out 2; }
       /* ---------- Panel ---------- */
@@ -414,6 +423,12 @@
           </div>
         </section>
 
+        <section class="card scoring-card" id="scoringCard" hidden>
+          <h2>Count the Score</h2>
+          <p>Both players passed. Stones that look captured (dead) are marked with ×. Tap a group to mark it dead or alive, then press Confirm Score. Undo goes back to before the passes.</p>
+          <div class="btn-row"><button id="btnConfirmScore" type="button" class="primary">Confirm Score</button></div>
+        </section>
+
         <section class="card">
           <h2>Position Estimate</h2>
           <div class="score-rows">
@@ -470,8 +485,9 @@
             <li>Tap (or click) an intersection to place a stone. You can capture opponent stones by completely surrounding them.</li>
             <li>You cannot play a suicide move (a point where your own stones would be captured) or a move that violates the ko rule.</li>
             <li>If you have no good move, choose Pass. If both players pass in a row, the game ends and territory is counted.</li>
+            <li>Before counting, stones that look captured (dead) are marked with ×. Tap a group to change it, then press Confirm Score. Dead stones are removed before counting.</li>
             <li>Scoring uses Chinese rules: stones on the board plus surrounded empty points count as score. White receives 6.5 points of komi.</li>
-            <li>Undo takes the game back to your previous turn.</li>
+            <li>Undo takes the game back to your previous turn (also after both players passed).</li>
           </ul>
         </div>
         <div class="btn-row">
@@ -632,23 +648,119 @@
           var top = moves.slice(0, Math.min(5, moves.length));
           if (Math.random() < 0.35) best = top[Math.floor(Math.random() * top.length)];
         }
-        // pass when nothing meaningful remains
-        if (bestScore < 2.0 && moveCount > 34) return -1;
-        if (bestScore < -2) return -1;
+        // Nothing meaningful remains: fill a neutral point (dame) first, then pass.
+        // Under Chinese (area) scoring dame are worth nothing, but filling them settles the
+        // borders so the final count is clear.
+        if ((bestScore < 2.0 && moveCount > 34) || bestScore < -2) {
+          return findDame(bd, color, pastHashes);
+        }
         return best.i;
+      }
+
+      /** A safe neutral point to fill: in an empty area that touches both colours, legal, not ko,
+          and not leaving our own stones in atari. -1 if there is none. */
+      function findDame(bd, color, pastHashes) {
+        var seen = new Array(N).fill(false), cands = [];
+        for (var i = 0; i < N; i++) {
+          if (bd[i] !== EMPTY || seen[i]) continue;
+          var region = [], borders = {}, stack = [i];
+          seen[i] = true;
+          while (stack.length) {
+            var c = stack.pop(); region.push(c);
+            var ns = nbrs(c);
+            for (var k = 0; k < ns.length; k++) {
+              var n = ns[k];
+              if (bd[n] === EMPTY) { if (!seen[n]) { seen[n] = true; stack.push(n); } }
+              else borders[bd[n]] = true;
+            }
+          }
+          if (!(borders[BLACK] && borders[WHITE])) continue;
+          for (var r = 0; r < region.length; r++) {
+            var p = region[r], sim = simulate(bd, color, p);
+            if (!sim || pastHashes[hashOf(sim.board)]) continue;
+            if (groupInfo(sim.board, p).liberties < 2) continue;
+            cands.push(p);
+          }
+        }
+        return cands.length ? cands[Math.floor(Math.random() * cands.length)] : -1;
+      }
+
+      /* ---------------- Dead stones (counting the score) ----------------
+         After both players pass, guess which stones are dead with quick random playouts:
+         play the position out many times with random legal moves (never filling your own eye)
+         and see who usually ends up owning each stone's points. The player can then tap
+         groups to change the guess before confirming. */
+      function estimateDead(bd) {
+        var PLAYOUTS = 120, owner = new Array(N).fill(0);
+        for (var p = 0; p < PLAYOUTS; p++) {
+          var b = bd.slice(), color = BLACK, passes = 0, moves = 0;
+          while (passes < 2 && moves < 160) {
+            var empties = [];
+            for (var i = 0; i < N; i++) if (b[i] === EMPTY) empties.push(i);
+            var played = false;
+            while (empties.length) {
+              var k = Math.floor(Math.random() * empties.length);
+              var pt = empties[k];
+              empties[k] = empties[empties.length - 1]; empties.pop();
+              var ns = nbrs(pt), ownEye = true;
+              for (var q = 0; q < ns.length; q++) if (b[ns[q]] !== color) { ownEye = false; break; }
+              if (ownEye) continue;
+              var sim = simulate(b, color, pt);
+              if (!sim) continue;
+              b = sim.board; played = true; break;
+            }
+            passes = played ? 0 : passes + 1;
+            color = color === BLACK ? WHITE : BLACK;
+            moves++;
+          }
+          var sc = scoreBoard(b);
+          for (var j = 0; j < N; j++) {
+            var o = b[j] !== EMPTY ? b[j] : sc.terrMap[j];
+            if (o === BLACK) owner[j]++; else if (o === WHITE) owner[j]--;
+          }
+        }
+        // A group is dead if its points usually end up owned by the other colour
+        var dead = {}, done = {};
+        for (var s = 0; s < N; s++) {
+          if (bd[s] === EMPTY || done[s]) continue;
+          var g = groupInfo(bd, s), sum = 0;
+          g.stones.forEach(function (x) { done[x] = true; sum += owner[x]; });
+          var avg = sum / (g.stones.length * PLAYOUTS); // +1 = always Black, -1 = always White
+          var isDead = bd[s] === BLACK ? avg < -0.4 : avg > 0.4;
+          if (isDead) g.stones.forEach(function (x) { dead[x] = true; });
+        }
+        return dead;
+      }
+
+      /** The board with the dead stones taken off (for counting) */
+      function withoutDead(bd, dead) {
+        if (!dead) return bd;
+        return bd.map(function (v, i) { return dead[i] ? EMPTY : v; });
       }
 
       /* ---------------- Game state ---------------- */
       var playerColor = BLACK, aiLevel = 1;
       var gameLog = []; // snapshots: {board, toMove, capB, capW, lastMove, passes, hash}
+      // overReason: "" (playing) / "scoring" (both passed, marking dead stones) / "score" (counted) / "resign"
       var thinking = false, gameOver = false, overReason = "";
+      // Dead stones while counting: { index: true }
+      var deadStones = null;
+      // Changes on every new game / undo, so a computer move worked out for an older position is ignored
+      var aiGen = 0;
 
       function cur() { return gameLog[gameLog.length - 1]; }
       function emptyBoard() { return new Array(N).fill(0); }
 
+      function leaveScoring() {
+        deadStones = null;
+        el.scoringCard.hidden = true;
+      }
+
       function newGame() {
+        aiGen++;
         gameLog = [{ board: emptyBoard(), toMove: BLACK, capB: 0, capW: 0, lastMove: -2, passes: 0, hash: hashOf(emptyBoard()) }];
         gameOver = false; overReason = ""; thinking = false;
+        leaveScoring();
         hideResignConfirm();
         el.overlay.classList.remove("show");
         setMessage(playerColor === BLACK
@@ -706,7 +818,7 @@
        "btnPass","btnUndo","btnResign","resignConfirm","btnResignYes","btnResignNo","btnNew",
        "segColor","segLevel","segLayout","gameLayout","overlay","resultTitle","resultSub",
        "rBS","rWS","rBT","rWT","rBTotal","rWTotal","btnAgain","btnCloseResult","gridLines","gridLabels",
-       "btnRules","rulesOverlay","btnCloseRules"
+       "btnRules","rulesOverlay","btnCloseRules","scoringCard","btnConfirmScore","resultTable"
       ].forEach(function (id) { el[id] = document.getElementById(id); });
 
       // Grid lines + labels ship as static SVG markup above (no JS needed to
@@ -781,17 +893,19 @@
         var s = cur();
         // stones
         var html = "";
+        var counting = overReason === "scoring" || overReason === "score";
         for (var i = 0; i < N; i++) {
           if (s.board[i] === EMPTY) continue;
           var pos = pct(i);
-          html += '<div class="stone ' + (s.board[i] === BLACK ? "black" : "white") + '" style="left:' + pos[0] + '%;top:' + pos[1] + '%">'
-            + (s.lastMove === i ? '<span class="last-dot"></span>' : "") + "</div>";
+          var isDead = counting && deadStones && deadStones[i];
+          html += '<div class="stone ' + (s.board[i] === BLACK ? "black" : "white") + (isDead ? " dead" : "") + '" style="left:' + pos[0] + '%;top:' + pos[1] + '%">'
+            + (isDead ? '<span class="dead-x" aria-hidden="true">×</span>' : (s.lastMove === i ? '<span class="last-dot"></span>' : "")) + "</div>";
         }
         el.stoneLayer.innerHTML = html;
-        // territory markers only when finished by double pass
+        // territory markers while counting (dead stones taken off) and after the count
         var thtml = "";
-        if (gameOver && overReason === "score") {
-          var sc = scoreBoard(s.board);
+        if (counting) {
+          var sc = scoreBoard(withoutDead(s.board, deadStones));
           for (var j = 0; j < N; j++) {
             if (sc.terrMap[j] !== 0) {
               var tp = pct(j);
@@ -802,7 +916,10 @@
         el.terrLayer.innerHTML = thtml;
         // status
         var mine = playerColor === BLACK ? "Black" : "White";
-        if (gameOver) {
+        if (overReason === "scoring") {
+          el.statusDot.className = "dot none";
+          el.statusText.textContent = "Counting the score";
+        } else if (gameOver) {
           el.statusDot.className = "dot none";
           el.statusText.textContent = "Game over";
         } else if (thinking) {
@@ -819,7 +936,7 @@
         el.capBlack.textContent = s.capB;
         el.capWhite.textContent = s.capW;
         // estimate
-        var est = scoreBoard(s.board, true);
+        var est = scoreBoard(withoutDead(s.board, counting ? deadStones : null), !counting);
         el.estBlack.textContent = est.black.toFixed(1);
         el.estWhite.textContent = est.white.toFixed(1);
         var total = est.black + est.white;
@@ -833,12 +950,25 @@
         var myTurn = !gameOver && !thinking && s.toMove === playerColor;
         el.btnPass.disabled = !myTurn;
         el.btnResign.disabled = gameOver;
-        el.btnUndo.disabled = thinking || gameOver || gameLog.length <= 1 || (playerColor === WHITE && gameLog.length <= 2);
-        el.board.classList.toggle("locked", !myTurn);
+        // Undo also works after both players passed (but not after a resignation)
+        el.btnUndo.disabled = thinking || overReason === "resign" || gameLog.length <= 1 || (playerColor === WHITE && gameLog.length <= 2);
+        el.board.classList.toggle("locked", !myTurn && overReason !== "scoring");
+        el.board.classList.toggle("scoring", overReason === "scoring");
       }
 
       /* ---------------- Flow ---------------- */
       function onPoint(i) {
+        // Counting the score: tapping a stone marks its whole group dead / alive
+        if (overReason === "scoring") {
+          var b = cur().board;
+          if (b[i] === EMPTY) return;
+          var g = groupInfo(b, i), makeDead = !deadStones[i];
+          g.stones.forEach(function (x) { if (makeDead) deadStones[x] = true; else delete deadStones[x]; });
+          setMessage((b[i] === BLACK ? "Black" : "White") + " group of " + g.stones.length + (g.stones.length > 1 ? " stones" : " stone") +
+            (makeDead ? " marked as dead." : " marked as alive."), false);
+          render();
+          return;
+        }
         if (gameOver || thinking) return;
         var s = cur();
         if (s.toMove !== playerColor) return;
@@ -868,7 +998,10 @@
         thinking = true; render();
         var aiColor = s.toMove;
         var delay = 380 + Math.random() * 420;
+        var gen = aiGen;
         setTimeout(function () {
+          // A new game was started (or a move undone) meanwhile: this move belongs to the old position
+          if (gen !== aiGen) return;
           thinking = false;
           if (gameOver) { render(); return; }
           // AI resigns when hopelessly behind late in the game
@@ -898,32 +1031,58 @@
         }, delay);
       }
 
+      /* Both players passed: first mark the dead stones (a guess the player can change), then count */
       function finishByScore() {
-        gameOver = true; overReason = "score";
-        var sc = scoreBoard(cur().board);
-        var blackWin = sc.black > sc.white;
-        var diff = Math.abs(sc.black - sc.white).toFixed(1);
-        showResult(blackWin ? "Black wins" : "White wins",
-          (blackWin ? "Black" : "White") + " wins by " + diff + " points (both players passed).", sc);
+        gameOver = true; overReason = "scoring";
+        hideResignConfirm();
+        deadStones = estimateDead(cur().board);
+        el.scoringCard.hidden = false;
+        var n = Object.keys(deadStones).length;
+        setMessage(n
+          ? "Both players passed. " + n + (n > 1 ? " stones look" : " stone looks") + " dead (marked ×). Tap a group to change it, then press Confirm Score."
+          : "Both players passed. No stones look dead. Tap a group to mark it dead, or press Confirm Score.", false);
         render();
       }
 
+      function confirmScore() {
+        if (overReason !== "scoring") return;
+        overReason = "score";
+        el.scoringCard.hidden = true;
+        var removed = withoutDead(cur().board, deadStones);
+        var sc = scoreBoard(removed);
+        var n = Object.keys(deadStones || {}).length;
+        var blackWin = sc.black > sc.white;
+        var diff = Math.abs(sc.black - sc.white).toFixed(1);
+        showResult(blackWin ? "Black wins" : "White wins",
+          (blackWin ? "Black" : "White") + " wins by " + diff + " points" +
+          (n ? " (" + n + " dead " + (n > 1 ? "stones" : "stone") + " removed before counting)." : "."), sc);
+        setMessage("Final score: Black " + sc.black.toFixed(1) + ", White " + sc.white.toFixed(1) + ".", false);
+        render();
+      }
+      el.btnConfirmScore.addEventListener("click", confirmScore);
+
       function finishByResign(resigner) {
+        aiGen++;
+        thinking = false;
         gameOver = true; overReason = "resign";
+        leaveScoring();
         var winner = resigner === BLACK ? WHITE : BLACK;
-        var sc = scoreBoard(cur().board);
+        // No score table for a resignation: the board was never counted
         showResult((winner === BLACK ? "Black" : "White") + " wins",
-          (resigner === playerColor ? "You resigned" : "The computer resigned") + ", so " + (winner === BLACK ? "Black" : "White") + " wins.", sc);
+          (resigner === playerColor ? "You resigned" : "The computer resigned") + ", so " + (winner === BLACK ? "Black" : "White") + " wins.", null);
         render();
       }
 
       function showResult(title, sub, sc) {
         el.resultTitle.textContent = title;
         el.resultSub.textContent = sub;
-        el.rBS.textContent = sc.bS; el.rWS.textContent = sc.wS;
-        el.rBT.textContent = sc.bT; el.rWT.textContent = sc.wT;
-        el.rBTotal.textContent = sc.black.toFixed(1);
-        el.rWTotal.textContent = sc.white.toFixed(1);
+        el.resultTable.style.display = sc ? "" : "none";
+        if (sc) {
+          el.rBS.textContent = sc.bS; el.rWS.textContent = sc.wS;
+          el.rBT.textContent = sc.bT; el.rWT.textContent = sc.wT;
+          el.rBTotal.textContent = sc.black.toFixed(1);
+          el.rWTotal.textContent = sc.white.toFixed(1);
+        }
         el.overlay.classList.add("show");
       }
 
@@ -940,7 +1099,12 @@
       });
 
       el.btnUndo.addEventListener("click", function () {
-        if (thinking || gameOver) return;
+        if (thinking || overReason === "resign") return;
+        // Undo after both players passed: leave the counting and go back to before the passes
+        aiGen++;
+        gameOver = false; overReason = "";
+        leaveScoring();
+        el.overlay.classList.remove("show");
         var popped = 0;
         while (gameLog.length > 1) {
           gameLog.pop(); popped++;
@@ -953,6 +1117,7 @@
         hideResignConfirm();
         setMessage("Move undone. Your turn.", false);
         render();
+        maybeAiTurn(); // if we went back to the very start and the computer plays first
       });
 
       function hideResignConfirm() { el.resignConfirm.classList.remove("show"); }
@@ -1033,7 +1198,9 @@
         if (e.target === el.rulesOverlay) closeRules();
       });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && el.rulesOverlay.classList.contains("show")) closeRules();
+        if (e.key !== "Escape") return;
+        if (el.rulesOverlay.classList.contains("show")) closeRules();
+        el.overlay.classList.remove("show"); // the result box ("View Board")
       });
 
       /* Fullscreen is handled by the portal page around this game (GameFrame toolbar). */

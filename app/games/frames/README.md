@@ -1,6 +1,6 @@
 # iframe で表示する HTML ゲーム
 
-このフォルダの HTML ゲーム（将棋・囲碁・花札・数独・都道府県パズル・ひらがな神経衰弱）は、
+このフォルダの HTML ゲーム（将棋・囲碁・花札・数独・都道府県パズル）は、
 ポータルのゲームページの中に iframe で表示する。
 
 **`public/` には置かない。** `public/` に置くと URL を直接開くだけで遊べてしまい、
@@ -67,8 +67,7 @@ Supabase の `kl_app`（key: `CONTENT_GAMES`）の該当セクションにカー
       別のクラス名を使う場合は、`game-frame.$name.ts` の `FRAME_BRIDGE` の CSS にそのクラス名を足す。
 - [ ] **自分の画面の高さ（`100vh`・`window.innerHeight`）で大きさを決めない。**
       iframe はゲームの高さに合わせて伸びるので、拡大が止まらなくなる。
-      画面の高さが必要なら、`yg-embedded` のときは `window.parent.innerHeight` を使う
-      （例：`hiragana-memory-match.html` の `fitBoard`）。
+      画面の高さが必要なら、`yg-embedded` のときは `window.parent.innerHeight`（ポータルの画面の高さ）を使う。
       `body { min-height: 100vh }` はブリッジが打ち消すので書いてあってもよい。
 - [ ] **タイマーがあれば、タブを離れたら止める**（`document.hidden` / `visibilitychange`）。
 - [ ] **UI は英語**（日本語は学習する内容の文字だけ）。
