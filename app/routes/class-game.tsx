@@ -327,8 +327,6 @@ function TeacherSetup({
         <JigsawSetup selected={jigsawImage} onSelect={setJigsawImage} pieceCount={pieceCount} onPieceCount={setPieceCount} />
       )}
 
-      {mode === 'coins' && (
-        <>
       <Field label="Music">
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setBgm('')} className={option(bgm === '')}>
@@ -359,11 +357,13 @@ function TeacherSetup({
           ))}
         </div>
         <p className="text-xs text-slate-500 mt-2">
-          Music plays only on your screen (for the projector), not on students’ devices. It pauses during Yamato’s questions, and you can
+          Music plays only on your screen (for the projector), not on students’ devices. {mode === 'coins' ? 'It pauses during Yamato’s questions, and you' : 'You'} can
           change the volume or turn it off during the game.
         </p>
       </Field>
 
+      {mode === 'coins' && (
+        <>
       <Field label="Janken battles">
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setJanken(true)} className={option(janken)}>

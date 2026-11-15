@@ -518,6 +518,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const studentId = String(form.get('studentId') ?? '');
     await admin.from('edu_class_members').delete().eq('class_id', cls.id).eq('user_id', studentId).eq('role', 'student');
     await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+    // 生徒ごとの語彙ドリルの設定も消す（SQL 31 の前は表が無いが、エラーは無視してよい）
+    await admin.from('edu_class_student_settings').delete().eq('class_id', cls.id).eq('user_id', studentId);
     return backTo(cls.id);
   }
 
