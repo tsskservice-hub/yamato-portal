@@ -148,6 +148,10 @@ export function JigsawSetup({
                 faces or personal information.
               </span>
             </label>
+            <p className="text-[11px] text-slate-400">
+              Many free stock photo sites do not allow their photos to be made into jigsaw puzzles. Please check the site’s licence, or use your
+              own photos.
+            </p>
             <p className="text-[11px] text-slate-400">JPEG, PNG or WebP, up to 5 MB. Only you can use pictures you upload.</p>
             {uploadError && <p className="text-sm text-rose-600">{uploadError}</p>}
             <button

@@ -6,23 +6,13 @@
  * - 先生がクラスのゲームをロックしていれば、ロック中の案内を出す
  * - 遊べるときだけ children（ゲーム本体）を表示する
  *
- * 30 秒ごと（とタブに戻ったとき）にもう一度確認するので、先生がロック／ロック解除すると、
- * 開いたままのゲームもしばらくすると自動で閉じる／開く。
- * 判定はサーバー（/api/game-access）がブラウザのセッションのトークンで行う。
+ * 確認そのもの（30 秒ごとの再確認など）は useGameAccess が行う。
+ * 先生がロック／ロック解除すると、開いたままのゲームもしばらくすると自動で閉じる／開く。
  */
-import React, { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import React, { type ReactNode, type RefObject } from 'react';
 import { Lock, LogIn, RefreshCw } from 'lucide-react';
-import { supabase } from '~/lib/supabaseClient';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
-
-const POLL_MS = 30_000;
-
-type GateState =
-  | { status: 'checking' }
-  | { status: 'login' }
-  | { status: 'locked'; className: string }
-  | { status: 'allowed'; ticket: string }
-  | { status: 'error' };
+import { useGameAccess } from '~/components/games/useGameAccess';
 
 type Props = {
   layoutRef: RefObject<PageLayoutRef | null> | React.MutableRefObject<PageLayoutRef | null>;
@@ -31,64 +21,7 @@ type Props = {
 };
 
 export function GameAccessGate({ layoutRef, children }: Props) {
-  const [state, setState] = useState<GateState>({ status: 'checking' });
-  // 遊べる間は最初のチケットを使い続ける（変えると iframe が読み込み直されてゲームが最初からになる）
-  const ticketRef = useRef<string | null>(null);
-
-  const check = useCallback(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        ticketRef.current = null;
-        setState({ status: 'login' });
-        return;
-      }
-      const res = await fetch('/api/game-access', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (!res.ok) throw new Error(`game-access ${res.status}`);
-      const body = (await res.json()) as { status?: string; ticket?: unknown; className?: unknown };
-
-      if (body.status === 'allowed' && typeof body.ticket === 'string') {
-        if (!ticketRef.current) ticketRef.current = body.ticket;
-        const ticket = ticketRef.current;
-        setState((prev) => (prev.status === 'allowed' && prev.ticket === ticket ? prev : { status: 'allowed', ticket }));
-      } else if (body.status === 'locked') {
-        ticketRef.current = null;
-        const className = typeof body.className === 'string' ? body.className : '';
-        setState((prev) => (prev.status === 'locked' && prev.className === className ? prev : { status: 'locked', className }));
-      } else if (body.status === 'login') {
-        ticketRef.current = null;
-        setState({ status: 'login' });
-      } else {
-        throw new Error('Unexpected game-access response');
-      }
-    } catch (err) {
-      console.error('[GameAccessGate] check failed:', err);
-      // 一時的な通信エラーでは、遊んでいる途中のゲームを閉じない（最初の確認だけエラー表示にする）
-      setState((prev) => (prev.status === 'checking' ? { status: 'error' } : prev));
-    }
-  }, []);
-
-  useEffect(() => {
-    check();
-    const timer = setInterval(() => {
-      if (!document.hidden) check();
-    }, POLL_MS);
-    const onVisible = () => {
-      if (!document.hidden) check();
-    };
-    document.addEventListener('visibilitychange', onVisible);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') check();
-    });
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener('visibilitychange', onVisible);
-      subscription?.unsubscribe();
-    };
-  }, [check]);
+  const { state, retry } = useGameAccess();
 
   if (state.status === 'allowed') return <>{children(state.ticket)}</>;
 
@@ -154,10 +87,7 @@ export function GameAccessGate({ layoutRef, children }: Props) {
       <p className="text-sm text-slate-600 dark:text-slate-400">Please check your internet connection and try again.</p>
       <button
         type="button"
-        onClick={() => {
-          setState({ status: 'checking' });
-          check();
-        }}
+        onClick={retry}
         className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition cursor-pointer"
       >
         <RefreshCw className="w-4 h-4" /> Try again

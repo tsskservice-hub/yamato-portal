@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { Crown, Eye, EyeOff, Pencil, Play, Square, UserX, Users, Wifi, WifiOff } from 'lucide-react';
 import { HostYamato, type YamatoHostState } from './YamatoQuiz';
 import { preloadGameSounds } from './sounds';
+import { ChestPicturesLink, ChestPicturesModal } from './ChestPicturesModal';
 import { JigsawBoard, JigsawBoxPicture, progressPercent, type JigsawBoardInfo } from './Jigsaw';
 import { CLOSED_MESSAGES, QUESTION_SET_LABELS, formatClock, useCountdown, useLiveGameSocket } from './useLiveGameSocket';
 
@@ -56,6 +57,7 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
   useEffect(() => preloadGameSounds(), []);
   const [offset, setOffset] = useState(0);
   const [showLabels, setShowLabels] = useState(false);
+  const [showPictures, setShowPictures] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const { status: socketStatus, closedCode, send } = useLiveGameSocket(gameId, (msg) => {
@@ -208,7 +210,13 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
             )}
             {state.jigsaw && <p className="text-center font-bold text-slate-600 mb-3">Top contributors</p>}
             <Podium players={scored.filter((p) => p.name).slice(0, 3)} unit={unit} />
+            {!isJigsaw && (
+              <div className="text-center mt-4">
+                <ChestPicturesLink onClick={() => setShowPictures(true)} />
+              </div>
+            )}
           </div>
+          {showPictures && <ChestPicturesModal onClose={() => setShowPictures(false)} />}
           <Leaderboard players={scored} unit={unit} showLabels={showLabels} />
           {state.classMissed && state.classMissed.length > 0 && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">

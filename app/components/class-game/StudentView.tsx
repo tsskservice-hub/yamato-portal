@@ -20,6 +20,7 @@ import {
 } from './JankenPanels';
 import { SpeedPanel, speedPanelKey, type SpeedResult, type SpeedStart } from './SpeedPanel';
 import { preloadGameSounds } from './sounds';
+import { CHEST_PICTURES, ChestPicturesLink, ChestPicturesModal } from './ChestPicturesModal';
 import { StudentYamato, sayMondaiDesu, type YamatoAnswered, type YamatoEnd, type YamatoStart } from './YamatoQuiz';
 import { JigsawBoard, JigsawBoxPicture, progressPercent, type JigsawBoardInfo } from './Jigsaw';
 
@@ -79,14 +80,6 @@ const DUEL_RESULT_MS = 3000;
 /** 早押しタイムの結果を見せる時間 */
 const SPEED_RESULT_MS = 2500;
 /** 宝箱から出たものの写真（public/live-game/items）。ないものは絵文字 */
-const CHEST_PICTURES: Record<string, string> = {
-  kozuchi: '/live-game/items/uchidenokozuchi.webp',
-  urashima: '/live-game/items/urashima-turtle.webp',
-  manekineko: '/live-game/items/maneki-neko-shop.webp',
-  oni: '/live-game/items/oni-stealing-gold.webp',
-  tengu: '/live-game/items/tengu-stealing-gold.webp',
-  kitsune: '/live-game/items/fox-digested.webp',
-};
 const CHEST_EMOJI: Record<string, string> = { koban: '🪙', janken: '✊✌️✋' };
 
 /** ヤマトの問題が終わったあと、正解と上位を見せる時間 */
@@ -102,6 +95,7 @@ export function StudentView({ gameId }: { gameId: string }) {
   const [result, setResult] = useState<Result | null>(null);
   const [chestOpen, setChestOpen] = useState(false);
   const [chestResult, setChestResult] = useState<ChestResult | null>(null);
+  const [showPictures, setShowPictures] = useState(false);
   const [final, setFinal] = useState<Final | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState('');
@@ -364,6 +358,8 @@ export function StudentView({ gameId }: { gameId: string }) {
             </li>
           ))}
         </ol>
+        <ChestPicturesLink onClick={() => setShowPictures(true)} />
+        {showPictures && <ChestPicturesModal onClose={() => setShowPictures(false)} />}
       </Box>
     );
   }

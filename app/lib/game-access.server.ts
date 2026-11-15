@@ -72,6 +72,23 @@ export async function getGameAccessForUser(admin: SupabaseClient, userId: string
   return lockedBy ? { status: 'locked', className: lockedBy.name as string } : { status: 'allowed' };
 }
 
+/**
+ * 先生用：担任しているクラスの数と、そのうちゲームをロック中のクラスの数。
+ * ゲーム一覧に「クラスコントロール」の案内を出すために使う。担任クラスが無い人・読み込み失敗は null。
+ */
+export async function getTeacherLockSummary(
+  admin: SupabaseClient,
+  userId: string
+): Promise<{ classCount: number; lockedCount: number } | null> {
+  const { data, error } = await admin.from('edu_classes').select('id, games_locked').eq('teacher_id', userId);
+  if (error) {
+    console.error('[game-access] teacher classes query failed:', error.message);
+    return null;
+  }
+  if (!data?.length) return null;
+  return { classCount: data.length, lockedCount: data.filter((c: any) => c.games_locked === true).length };
+}
+
 // ---------- iframe 用のチケット（userId.期限.署名） ----------
 
 const encoder = new TextEncoder();
