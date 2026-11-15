@@ -2,7 +2,9 @@ import React, { useState } from "react";
 
 export interface MockExamConfig {
   studentName: string;
-  learningPace: "steady" | "normal" | "accelerated";
+  // 試験官の話す速さ（倍率。1.0 が普通、1.2 は速い、0.8 は遅い）。
+  // 生徒の learning pace（steady / normal / accelerated）と紛らわしくないよう数字にしている。この模擬試験だけに使う
+  examinerSpeed: number;
   examSection: "section1" | "section2" | "both";
   supportMaterialUrl?: string | null;
   supportMaterialFile?: File | null;
@@ -20,7 +22,8 @@ export const OralMockConfig: React.FC<OralMockConfigProps> = ({
   themeColor = "#ef4444",
 }) => {
   const [studentName, setStudentName] = useState(defaultStudentName);
-  const [learningPace, setLearningPace] = useState<"steady" | "normal" | "accelerated">("normal");
+  // 💡 試験官の話す速さ。生徒の learning pace とは関係させない（毎回、本番と同じ 1.0 から始まり、保存もしない）
+  const [examinerSpeed, setExaminerSpeed] = useState<number>(1.0);
   const [examSection, setExamSection] = useState<"section1" | "section2" | "both">("both");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -40,7 +43,7 @@ export const OralMockConfig: React.FC<OralMockConfigProps> = ({
   const handleStart = () => {
     onStartExam({
       studentName,
-      learningPace,
+      examinerSpeed,
       examSection,
       supportMaterialUrl: imagePreview,
       supportMaterialFile: selectedFile,
@@ -103,28 +106,28 @@ export const OralMockConfig: React.FC<OralMockConfigProps> = ({
         </div>
       </div>
 
-      {/* Difficulty / Learning Pace */}
+      {/* Examiner Speed（生徒の learning pace とは別の設定） */}
       <div className="space-y-2">
         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-          Examiner Speed & Pace (難易度)
+          Examiner Speed (試験官の話す速さ)
         </label>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { id: "steady", label: "Steady (ゆっくり)", desc: "Clear speed, basic grammar" },
-            { id: "normal", label: "Normal (標準)", desc: "Official VCE exam pace" },
-            { id: "accelerated", label: "Accelerated (実践)", desc: "Fast natural native speed" },
+            { id: 0.8, label: "0.8×", desc: "Slower than the real exam" },
+            { id: 1.0, label: "1.0×", desc: "Same speed as the real VCE exam" },
+            { id: 1.2, label: "1.2×", desc: "Faster than the real exam" },
           ].map((pace) => (
             <button
               key={pace.id}
               type="button"
-              onClick={() => setLearningPace(pace.id as any)}
+              onClick={() => setExaminerSpeed(pace.id)}
               className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                learningPace === pace.id
+                examinerSpeed === pace.id
                   ? "border-2 shadow-sm bg-slate-50 dark:bg-slate-800"
                   : "border-slate-200 dark:border-slate-800 opacity-60 hover:opacity-100"
               }`}
               style={{
-                borderColor: learningPace === pace.id ? themeColor : undefined,
+                borderColor: examinerSpeed === pace.id ? themeColor : undefined,
               }}
             >
               <span className="font-bold text-xs text-slate-800 dark:text-slate-200">

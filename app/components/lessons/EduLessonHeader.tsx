@@ -1,6 +1,7 @@
 /**
  * @file app/components/lessons/EduLessonHeader.tsx
  * @description レッスンヘッダーコンポーネント（タイトルサイズ調整・ふりがな対応・絵文字付き版）
+ *   学習意図・成功基準は、この下の専用セクション EduLessonGoals に表示する
  */
 
 import React from "react";
@@ -52,25 +53,6 @@ export const EduLessonHeader: React.FC<EduLessonHeaderProps> = ({ lesson, topic,
       <p className="text-sm sm:text-base font-bold text-orange-100 opacity-90">
         {lesson?.title_en || "Lesson"}
       </p>
-
-      {/* 学習意図 & サクセス・クライテリア（成功基準） */}
-      <div className="pt-2 border-t border-white/20 space-y-2 max-w-3xl">
-        {lesson?.learning_intention && (
-          <p className="text-orange-50 text-sm sm:text-base leading-relaxed">
-            <strong className="font-extrabold text-white">🎯 Learning Intention: </strong>
-            {lesson.learning_intention}
-          </p>
-        )}
-
-        {lesson?.success_criteria && (
-          <p className="text-orange-50 text-sm sm:text-base leading-relaxed">
-            <strong className="font-extrabold text-white">✨ Success Criteria: </strong>
-            {Array.isArray(lesson.success_criteria)
-              ? lesson.success_criteria.join(", ")
-              : lesson.success_criteria}
-          </p>
-        )}
-      </div>
     </div>
   );
 };

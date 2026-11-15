@@ -144,7 +144,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
               VCE Oral Exam Simulation
             </h4>
             <span className="text-[10px] text-slate-400">
-              Candidate: {config.studentName} ({config.learningPace.toUpperCase()})
+              Candidate: {config.studentName} (Examiner speed: {config.examinerSpeed.toFixed(1)}×)
             </span>
           </div>
         </div>

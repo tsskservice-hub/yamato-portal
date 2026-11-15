@@ -64,9 +64,9 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
         </div>
 
         <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center space-y-1">
-          <span className="text-xs font-semibold text-slate-400">Pace / Level</span>
+          <span className="text-xs font-semibold text-slate-400">Examiner Speed</span>
           <div className="text-base font-extrabold capitalize text-slate-800 dark:text-slate-100">
-            {config.learningPace}
+            {config.examinerSpeed.toFixed(1)}×
           </div>
         </div>
       </div>

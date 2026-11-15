@@ -590,7 +590,14 @@
         }
         if (!moves.length) return -1;
 
-        var best = null, bestScore = -Infinity;
+        // Who controls each point now (from the AI's side: +1 = the AI, -1 = the opponent).
+        // Used below to skip stones played into the opponent's area that cannot live.
+        var sign = color === BLACK ? 1 : -1;
+        var area = moveCount >= 8
+          ? playoutOwnership(bd, opp, 60).map(function (v) { return v * sign; })
+          : null;
+        var started = Date.now();
+
         for (var m = 0; m < moves.length; m++) {
           var mv = moves[m], p = mv.i, nb = mv.sim.board;
           var pt = xy(p), x = pt[0], y = pt[1];
@@ -637,17 +644,66 @@
             if ((x === 2 || x === 6) && (y === 2 || y === 6)) s += 1.2;
             if (x === 4 && y === 4) s += 0.7;
           } else if (line === 0) s -= 0.8;
+          // Filling our own safe area gains nothing.
+          if (area && area[p] > 0.85 && mv.sim.captured === 0 && !friendlyAtariSave) s -= 3;
           // jitter by level
           s += Math.random() * (level === 0 ? 5.5 : 1.1);
           mv.score = s;
-          if (s > bestScore) { bestScore = s; best = mv; }
         }
-        if (level === 0) {
-          // beginner: sometimes pick from the top handful
-          moves.sort(function (a, b) { return b.score - a.score; });
+
+        // Try the moves from best to worst. Beginner sometimes looks at its top few in random order.
+        moves.sort(function (a, b) { return b.score - a.score; });
+        if (level === 0 && Math.random() < 0.35) {
           var top = moves.slice(0, Math.min(5, moves.length));
-          if (Math.random() < 0.35) best = top[Math.floor(Math.random() * top.length)];
+          for (var t = top.length - 1; t > 0; t--) {
+            var r = Math.floor(Math.random() * (t + 1)), tmp = top[t]; top[t] = top[r]; top[r] = tmp;
+          }
+          moves = top.concat(moves.slice(top.length));
         }
+
+        // A stone in the opponent's area that captures nothing: before playing it, check whether
+        // it can live. Such a move only hands the opponent a free capture, so skip it and look at
+        // the next move. Only the moves about to be chosen are checked, so this stays quick.
+        function hopeless(cand) {
+          var p = cand.i;
+          if (cand.sim.captured > 0) return false;
+          // Putting an opponent group into atari is a real threat, not a wasted stone
+          var ns = nbrs(p);
+          for (var k = 0; k < ns.length; k++) {
+            if (bd[ns[k]] === opp && groupInfo(cand.sim.board, ns[k]).liberties === 1) return false;
+          }
+          // 1) A small empty area surrounded only by the opponent's stones (a sealed territory):
+          //    there is no room there to make two eyes.
+          var region = [], borders = {}, seen = {}, stack = [p];
+          seen[p] = true;
+          while (stack.length && region.length <= 15) {
+            var c = stack.pop(); region.push(c);
+            var cn = nbrs(c);
+            for (var q = 0; q < cn.length; q++) {
+              var n = cn[q];
+              if (bd[n] === EMPTY) { if (!seen[n]) { seen[n] = true; stack.push(n); } }
+              else borders[bd[n]] = true;
+            }
+          }
+          if (!stack.length && region.length <= 15 && borders[opp] && !borders[color]) return true;
+          // 2) Otherwise, in the opponent's area: play the position out many times (opponent to
+          //    move) and compare how often this stone survives with how often the point was ours
+          //    anyway. Random playouts sometimes "kill" a living group by accident, so a stone that
+          //    does no better than that gains nothing.
+          if (!area || area[p] >= -0.3) return false;
+          var before = (area[p] + 1) / 2; // 0..1, how often the point was the AI's without the move
+          if (Date.now() - started > 700) return area[p] < -0.7; // out of time: only clear cases
+          var after = (playoutOwnership(cand.sim.board, opp, 40)[p] * sign + 1) / 2;
+          return after - before < 0.15;
+        }
+        var best = null, bestScore = -Infinity;
+        for (var c = 0; c < moves.length; c++) {
+          var cand = moves[c];
+          if (hopeless(cand)) { cand.score -= 25; continue; }
+          best = cand; bestScore = cand.score;
+          break;
+        }
+        if (!best) return findDame(bd, color, pastHashes); // every move left is hopeless
         // Nothing meaningful remains: fill a neutral point (dame) first, then pass.
         // Under Chinese (area) scoring dame are worth nothing, but filling them settles the
         // borders so the final count is clear.
@@ -690,10 +746,13 @@
          play the position out many times with random legal moves (never filling your own eye)
          and see who usually ends up owning each stone's points. The player can then tap
          groups to change the guess before confirming. */
-      function estimateDead(bd) {
-        var PLAYOUTS = 120, owner = new Array(N).fill(0);
+      /** Play the position out many times with random legal moves (never filling your own eye),
+          starting with `firstColor`, and return who usually ends up owning each point:
+          +1 = always Black, -1 = always White. */
+      function playoutOwnership(bd, firstColor, PLAYOUTS) {
+        var owner = new Array(N).fill(0);
         for (var p = 0; p < PLAYOUTS; p++) {
-          var b = bd.slice(), color = BLACK, passes = 0, moves = 0;
+          var b = bd.slice(), color = firstColor, passes = 0, moves = 0;
           while (passes < 2 && moves < 160) {
             var empties = [];
             for (var i = 0; i < N; i++) if (b[i] === EMPTY) empties.push(i);
@@ -719,13 +778,18 @@
             if (o === BLACK) owner[j]++; else if (o === WHITE) owner[j]--;
           }
         }
+        return owner.map(function (v) { return v / PLAYOUTS; });
+      }
+
+      function estimateDead(bd) {
+        var owner = playoutOwnership(bd, BLACK, 120);
         // A group is dead if its points usually end up owned by the other colour
         var dead = {}, done = {};
         for (var s = 0; s < N; s++) {
           if (bd[s] === EMPTY || done[s]) continue;
           var g = groupInfo(bd, s), sum = 0;
           g.stones.forEach(function (x) { done[x] = true; sum += owner[x]; });
-          var avg = sum / (g.stones.length * PLAYOUTS); // +1 = always Black, -1 = always White
+          var avg = sum / g.stones.length; // +1 = always Black, -1 = always White
           var isDead = bd[s] === BLACK ? avg < -0.4 : avg > 0.4;
           if (isDead) g.stones.forEach(function (x) { dead[x] = true; });
         }

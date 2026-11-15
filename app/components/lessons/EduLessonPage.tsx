@@ -9,10 +9,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import ToolPageWrapper from "~/components/layout/ToolPageWrapper";
 import { type PageLayoutRef } from "~/components/layout/PageLayout";
-import { YamatoChatCommon2 } from "~/components/chat/YamatoChatCommon2";
 import { supabase } from "~/lib/supabaseClient";
 import { EduLessonHeader } from "~/components/lessons/EduLessonHeader";
 import { EduLessonDetailsCard } from "~/components/lessons/EduLessonDetailsCard";
+import { EduLessonGoals } from "~/components/lessons/EduLessonGoals";
 import { EduVocabularySidebar } from "~/components/lessons/EduVocabularySidebar";
 import { EduLessonTaskManager, type LessonTaskKey, type LessonTaskProgress } from "~/components/lessons/EduLessonTaskManager";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
@@ -42,13 +42,13 @@ export interface EduLessonPageProps {
   data: LessonPageData;
 }
 
-/** レッスンページ本体（全レッスン共通：ヘッダー・AI Yamato・語彙・6つのタスク） */
+/** レッスンページ本体（全レッスン共通：ヘッダー・語彙・6つのタスク） */
 export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPageProps) {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const themeColor = "#f97316";
 
   const [user, setUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+  // クレジットとニックネーム：右下に常駐させる AI Yamato チャットに渡す予定（今は未使用）
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
 
@@ -215,22 +215,17 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
           {/* 1. Header Card Module */}
           <EduLessonHeader lesson={lesson} topic={topic} textbookRefs={textbookRefs} />
 
-          {/* 2. Top: Persistent Yamato AI Tutor */}
-          <YamatoChatCommon2
-            characterName="Yamato Sensei"
-            appType={LESSON_SLUG}
-            themeColor={themeColor}
-            userId={user?.id}
-            userNickname={nickname}
-            credits={credits}
-            onOpenAuth={handleOpenAuth}
-            assignedQuestion={`${topic?.title_en ? `${topic.title_en} – ` : ""}Lesson ${lesson?.lesson_order || 1}: ${lesson?.title_en || ""}`}
-          />
+          {/* 1b. 学習意図（LI）と成功基準（SC）の専用セクション */}
+          <EduLessonGoals lesson={lesson} />
 
-          {/* 3. Main Content & Vocabulary Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+          {/* 2026-11-15：ページ上部の大きな AI Yamato チャット（YamatoChatCommon2）は外した。
+              学習の中心は生徒が進める6つのタスクにし、AI Yamato は右下に常駐させて、生徒がわからない時に質問する形にする予定。
+              YamatoChatCommon2 のファイルは、ほかの用途のために残してある。 */}
+
+          {/* 2. Main Content & Vocabulary Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
-              <EduLessonDetailsCard lesson={lesson} textbookRefs={textbookRefs} />
+              <EduLessonDetailsCard lesson={lesson} textbookRefs={textbookRefs} vocabulary={vocabulary} cultureTask={cultureTask} />
             </div>
             <div className="space-y-6">
               <EduVocabularySidebar 
