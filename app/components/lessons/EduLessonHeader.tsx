@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { formatTextbookRef, type TextbookRef } from "~/lib/lessonTextbooks";
+import { formatTextbookRef, TEXTBOOK_DISCLAIMER, type TextbookRef } from "~/lib/lessonTextbooks";
 
 interface EduLessonHeaderProps {
   lesson: any;
@@ -39,6 +39,7 @@ export const EduLessonHeader: React.FC<EduLessonHeaderProps> = ({ lesson, topic,
               📚 {formatTextbookRef(ref)}
             </span>
           ))}
+          <p className="basis-full text-[10px] sm:text-[11px] text-orange-50/80">{TEXTBOOK_DISCLAIMER}</p>
         </div>
       )}
 

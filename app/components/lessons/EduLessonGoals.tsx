@@ -43,7 +43,7 @@ export const EduLessonGoals: React.FC<EduLessonGoalsProps> = ({ lesson }) => {
               </span>
               <div>
                 <p className="text-lg sm:text-xl font-black text-sky-900 dark:text-sky-100 leading-tight">Learning Intention</p>
-                <p className="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">What we are learning</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">What I am learning</p>
               </div>
             </div>
             <p className="mt-5 text-base sm:text-lg font-semibold leading-relaxed text-slate-800 dark:text-slate-100">

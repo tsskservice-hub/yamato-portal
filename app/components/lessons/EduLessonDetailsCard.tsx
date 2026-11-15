@@ -6,17 +6,17 @@
  *     🛠️ Grammar         … 文法のポイント（edu_lessons.target_grammar）
  *     📝 Vocabulary      … 語彙（kl_vocabulary。全部の一覧と音声は右の語彙カード）
  *     🎎 Culture         … 文化タスクのテーマ（app/data/culture-tasks.ts）
- *   中身が無い項目は出さない。最後に対応する教科書を小さく添える。
+ *   中身が無い項目は出さない。対応する教科書はページ上部の見出し（EduLessonHeader）に出す。
  */
 
 import React from "react";
 import { EduFlexibleDataRenderer } from "./EduFlexibleDataRenderer";
-import { formatTextbookRef, TEXTBOOK_DISCLAIMER, type TextbookRef } from "~/lib/lessonTextbooks";
+import type { TextbookRef } from "~/lib/lessonTextbooks";
 import type { CultureTask } from "~/data/culture-tasks";
 
 interface EduLessonDetailsCardProps {
   lesson: any;
-  /** このレッスンが対応する教科書・ユニット（edu_lesson_textbook_units） */
+  /** 使わない（教科書はページ上部に表示）。呼び出し側との互換のために残している */
   textbookRefs?: TextbookRef[];
   /** このレッスンの語彙（kl_vocabulary） */
   vocabulary?: any[];
@@ -64,7 +64,6 @@ const SectionTitle: React.FC<{ id: string; emoji: string; title: string; subtitl
 
 export const EduLessonDetailsCard: React.FC<EduLessonDetailsCardProps> = ({
   lesson,
-  textbookRefs = [],
   vocabulary = [],
   cultureTask = null,
 }) => {
@@ -210,24 +209,6 @@ export const EduLessonDetailsCard: React.FC<EduLessonDetailsCardProps> = ({
         </>
       )}
 
-      {/* 対応する教科書・ユニット（目次の補足として小さく） */}
-      {lesson && textbookRefs.length > 0 && (
-        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Textbook:</span>
-            {textbookRefs.map((ref, i) => (
-              <span
-                key={i}
-                title={ref.note ?? undefined}
-                className="text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50 px-3 py-1 rounded-full border border-orange-200 dark:border-orange-900"
-              >
-                📚 {formatTextbookRef(ref)}
-              </span>
-            ))}
-          </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">{TEXTBOOK_DISCLAIMER}</p>
-        </div>
-      )}
     </div>
   );
 };

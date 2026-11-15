@@ -696,14 +696,40 @@
           var after = (playoutOwnership(cand.sim.board, opp, 40)[p] * sign + 1) / 2;
           return after - before < 0.15;
         }
+        // A stone inside our own sealed area (empty points surrounded only by our own stones):
+        // under Chinese scoring it gains nothing, it makes our territory look smaller, and it can
+        // even fill one of our own eyes. Late in the game, passing is better.
+        // Captures, saving our own group in atari and putting an opponent group in atari still count.
+        function insideOwnArea(cand) {
+          var p = cand.i;
+          if (cand.sim.captured > 0) return false;
+          var ns = nbrs(p);
+          for (var k = 0; k < ns.length; k++) {
+            var n = ns[k];
+            if (bd[n] === color && groupInfo(bd, n).liberties === 1) return false;
+            if (bd[n] === opp && groupInfo(cand.sim.board, n).liberties === 1) return false;
+          }
+          var size = 0, borders = {}, seen = {}, stack = [p];
+          seen[p] = true;
+          while (stack.length && size <= 30) {
+            var c = stack.pop(); size++;
+            var cn = nbrs(c);
+            for (var q = 0; q < cn.length; q++) {
+              var m = cn[q];
+              if (bd[m] === EMPTY) { if (!seen[m]) { seen[m] = true; stack.push(m); } }
+              else borders[bd[m]] = true;
+            }
+          }
+          return !stack.length && size <= 30 && borders[color] && !borders[opp];
+        }
         var best = null, bestScore = -Infinity;
         for (var c = 0; c < moves.length; c++) {
           var cand = moves[c];
-          if (hopeless(cand)) { cand.score -= 25; continue; }
+          if (insideOwnArea(cand) || hopeless(cand)) { cand.score -= 25; continue; }
           best = cand; bestScore = cand.score;
           break;
         }
-        if (!best) return findDame(bd, color, pastHashes); // every move left is hopeless
+        if (!best) return findDame(bd, color, pastHashes); // every move left is wasted: fill dame or pass
         // Nothing meaningful remains: fill a neutral point (dame) first, then pass.
         // Under Chinese (area) scoring dame are worth nothing, but filling them settles the
         // borders so the final count is clear.
