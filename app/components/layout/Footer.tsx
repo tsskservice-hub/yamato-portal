@@ -3,6 +3,7 @@
  * @description Application Footer with navigation links, bug reporting, and feedback buttons.
  */
 import { Link } from "@remix-run/react";
+import { User } from "lucide-react";
 
 // 1. 不具合報告ボタン用コンポーネント（1つ目のリンクを使用）
 type BugReportButtonProps = {
@@ -100,6 +101,14 @@ export default function Footer({}: FooterProps) {
             </div>
           </div>
 
+          {/* 一番右：My Account（ヘッダーから移動。見た目はヘッダーにあったときと同じ） */}
+          <Link
+            to="/my-account"
+            className="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center space-x-1 border-slate-200 hover:bg-slate-100 text-slate-700 whitespace-nowrap shrink-0"
+          >
+            <User className="w-3.5 h-3.5 text-slate-400" />
+            <span>My Account</span>
+          </Link>
         </div>
       </div>
     </footer>

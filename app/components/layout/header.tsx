@@ -153,7 +153,7 @@ export default function Header({
             </div>
           )}
 
-          {/* 3〜5. Pricing / FAQ / My Account（xl 以上。ログイン中の My Account はニックネームが兼ねる） */}
+          {/* 3〜4. Pricing / FAQ（xl 以上）。My Account ボタンはフッターの一番右に移動した */}
           <Link to="/prices" className={`hidden xl:flex ${pill}`}>
             <span>Pricing</span>
           </Link>
@@ -161,12 +161,6 @@ export default function Header({
             <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
             <span>FAQ</span>
           </Link>
-          {!user && (
-            <Link to="/my-account" className={`hidden xl:flex ${pill}`}>
-              <User className="w-3.5 h-3.5 text-slate-400" />
-              <span>My Account</span>
-            </Link>
-          )}
 
           {/* 6. Sign In / Sign Out */}
           {user ? (
@@ -236,10 +230,13 @@ export default function Header({
                   <GraduationCap className="w-4 h-4 text-slate-400" /> Teacher Panel (in review)
                 </Link>
               )}
-              <Link to="/my-account" onClick={closeMenu} className={menuRow}>
-                <User className="w-4 h-4 text-blue-500 shrink-0" />
-                <span className="truncate">My Account{user ? ` (${displayNickname})` : ''}</span>
-              </Link>
+              {/* ログイン中はニックネーム（広い画面のニックネームボタンと同じ。押すと My Account へ） */}
+              {user && (
+                <Link to="/my-account" onClick={closeMenu} className={`${menuRow} text-blue-700`}>
+                  <User className="w-4 h-4 text-blue-500 shrink-0" />
+                  <span className="truncate">{displayNickname}</span>
+                </Link>
+              )}
               <Link to="/prices" onClick={closeMenu} className={menuRow}>
                 <Coins className="w-4 h-4 text-amber-500" /> Pricing
               </Link>
