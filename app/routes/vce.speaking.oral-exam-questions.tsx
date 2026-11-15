@@ -174,10 +174,13 @@ export default function OralExamQuestions() {
             <div className="bg-white border-2 border-amber-300 rounded-2xl p-6 sm:p-8 shadow-xl mb-10 text-center relative overflow-hidden">
               <div className="absolute -right-1 -bottom-1 text-amber-100 text-9xl select-none pointer-events-none">🎙️</div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3">
-                VCE Oral Exam: Frequently Used Examiner Questions Audio Library
+                VCE Oral Exam: Practice Question Audio Library
               </h1>
               <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-                Listen to authentic examiner questions with exam-style speed and pronunciation. Switch between learning paces and sections to start improving your listening skills!
+                Practice questions commonly asked in the VCE Japanese oral exam, read at exam-style speed and pronunciation. Switch between learning paces and sections to start improving your listening skills!
+              </p>
+              <p className="text-slate-500 max-w-2xl mx-auto text-xs mt-3">
+                These questions were written for practice. They are not official VCAA material, and the questions in your exam may be different.
               </p>
             </div>
 

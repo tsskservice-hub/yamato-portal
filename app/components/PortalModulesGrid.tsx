@@ -148,7 +148,7 @@ export function PortalModulesGrid({
           <div id="section-references" className="space-y-4 pt-4 scroll-mt-20">
             <div className="flex items-center space-x-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
               <span>📚</span>
-              <h4>VCE Writing References & Guides</h4>
+              <h4>VCE References & Guides</h4>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {referenceModules.map((mod) => renderCard(mod, 'emerald'))}
