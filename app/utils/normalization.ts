@@ -187,3 +187,18 @@ export const toHiragana = (str: string): string => {
 
   return s;
 };
+/**
+ * 英語の答えの候補（english_text を「/」で区切ったもの。例："watch / look / see" → 3つ）。
+ * 区切らない全体も候補に入れる（"1 person" などは今までどおり）。全レッスン共通。
+ */
+export function englishAnswerOptions(englishText: string): string[] {
+  const full = normalizeEnglish(englishText || "");
+  const parts = (englishText || "").split("/").map((p) => normalizeEnglish(p)).filter(Boolean);
+  return [...new Set([full, ...parts])].filter(Boolean);
+}
+
+/** 英語の答えが合っているか（english_text の「/」区切りのどれかと一致すれば正解） */
+export function matchesEnglishAnswer(input: string, englishText: string): boolean {
+  const clean = normalizeEnglish(input || "");
+  return Boolean(clean) && englishAnswerOptions(englishText).includes(clean);
+}

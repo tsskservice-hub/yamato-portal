@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
-import { normalizeEnglish, matchesJapaneseAnswer, katakanaToHiragana } from "~/utils/normalization";
+import { normalizeEnglish, matchesJapaneseAnswer, matchesEnglishAnswer, katakanaToHiragana } from "~/utils/normalization";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
 interface EduVocabularyDrillModalProps {
@@ -167,8 +167,8 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     const cleanInput = normalizeAnswer(userInput);
 
     if (currentMode === "jp_to_en" || currentMode === "audio_to_en") {
-      const correctEn = normalizeAnswer(currentItem.english_text || "");
-      isCorrect = cleanInput === correctEn;
+      // english_text が「watch / look / see」のように「/」区切りなら、どれでも正解
+      isCorrect = matchesEnglishAnswer(userInput, currentItem.english_text || "");
     } else if (currentMode === "en_to_jp") {
       // 漢字表記・ひらがなの読み（jp_kana）・ローマ字のどれでも正解（全レッスン共通の判定）
       isCorrect = matchesJapaneseAnswer(userInput, currentItem);

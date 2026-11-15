@@ -6,7 +6,8 @@
  * ・点数はサーバーから届いたものを表示するだけ（この画面で計算しない）。
  */
 import React, { useEffect, useState } from 'react';
-import { Crown, Eye, EyeOff, Pencil, Play, Square, UserX, Users, Wifi, WifiOff } from 'lucide-react';
+import { Crown, Eye, EyeOff, Pencil, Play, Square, UserX, Users, Volume2, VolumeX, Wifi, WifiOff } from 'lucide-react';
+import { BGM_DEFAULT_VOLUME, bgmTrack, useBgm } from './bgm';
 import { HostYamato, type YamatoHostState } from './YamatoQuiz';
 import { preloadGameSounds } from './sounds';
 import { ChestPicturesLink, ChestPicturesModal } from './ChestPicturesModal';
@@ -39,6 +40,7 @@ type HostState = {
     janken?: boolean;
     speed?: boolean;
     yamato?: boolean;
+    bgm?: string | null;
     mode?: 'coins' | 'jigsaw';
   };
   /** みんなでジグソーの盤面 */
@@ -58,6 +60,8 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
   const [offset, setOffset] = useState(0);
   const [showLabels, setShowLabels] = useState(false);
   const [showPictures, setShowPictures] = useState(false);
+  const [musicOn, setMusicOn] = useState(true);
+  const [volume, setVolume] = useState(BGM_DEFAULT_VOLUME);
   const [notice, setNotice] = useState<string | null>(null);
 
   const { status: socketStatus, closedCode, send } = useLiveGameSocket(gameId, (msg) => {
@@ -69,6 +73,9 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
     }
   });
   const left = useCountdown(state?.status === 'running' ? state.endsAt : 0, offset);
+  // BGM：ゲーム中だけ流す。ヤマトの問題の最中は止めて、静かにする
+  const yamatoLive = Boolean(state?.yamato && !state.yamato.ended);
+  useBgm(state?.config.bgm, Boolean(state && state.status === 'running' && musicOn && !yamatoLive && socketStatus !== 'closed'), volume);
 
   if (socketStatus === 'closed') {
     return (
@@ -112,6 +119,31 @@ export function HostView({ gameId, onNewGame }: { gameId: string; onNewGame: () 
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {bgmTrack(state.config.bgm) && (
+            <span className="flex items-center gap-1 text-xs text-slate-500">
+              <button
+                type="button"
+                onClick={() => setMusicOn((v) => !v)}
+                className="p-2 rounded-xl border border-slate-300 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                aria-label={musicOn ? 'Turn music off' : 'Turn music on'}
+                title={`Music: ${bgmTrack(state.config.bgm)!.title}`}
+              >
+                {musicOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              </button>
+              {musicOn && (
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={volume}
+                  onChange={(e) => setVolume(Number(e.target.value))}
+                  aria-label="Music volume"
+                  className="w-20"
+                />
+              )}
+            </span>
+          )}
           <span className="text-xs text-slate-500 flex items-center gap-1">
             {socketStatus === 'open' ? <Wifi className="w-4 h-4 text-emerald-500" /> : <WifiOff className="w-4 h-4 text-amber-500" />}
             {socketStatus === 'open' ? 'Connected' : 'Reconnecting…'}

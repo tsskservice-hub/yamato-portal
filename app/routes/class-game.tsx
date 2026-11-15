@@ -21,6 +21,7 @@ import { QUESTION_SET_LABELS } from '~/components/class-game/useLiveGameSocket';
 import { CharacterPicker, MIN_CHARACTERS } from '~/components/class-game/CharacterPicker';
 import { JigsawSetup, type JigsawImage } from '~/components/class-game/JigsawSetup';
 import { cutJigsaw, gridFor } from '~/components/class-game/Jigsaw';
+import { BGM_TRACKS, previewBgm } from '~/components/class-game/bgm';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   return json({ portalContent: null, currentPath: new URL(request.url).pathname });
@@ -164,6 +165,10 @@ function TeacherSetup({
   const [janken, setJanken] = useState(true);
   const [speed, setSpeed] = useState(true);
   const [yamatoQuiz, setYamatoQuiz] = useState(true);
+  // BGM（金貨バトルだけ。先生の画面で流す）。'' は「音楽なし」
+  const [bgm, setBgm] = useState<string>('');
+  const [previewing, setPreviewing] = useState<string | null>(null);
+  useEffect(() => () => previewBgm(null, () => undefined), []);
   // 遊び方：金貨バトル／みんなでジグソー
   const [mode, setMode] = useState<'coins' | 'jigsaw'>('coins');
   const [jigsawImage, setJigsawImage] = useState<JigsawImage | null>(null);
@@ -202,7 +207,9 @@ function TeacherSetup({
     setBusy(true);
     setError(null);
     try {
-      let body: Record<string, unknown> = { classId, questionSet, durationMin, nameMode, janken, speed, yamato: yamatoQuiz };
+      let body: Record<string, unknown> = { classId, questionSet, durationMin, nameMode, janken, speed, yamato: yamatoQuiz, bgm: bgm || null };
+      previewBgm(null, () => undefined);
+      setPreviewing(null);
       if (chooseChars && chosenChars) body.characters = chosenChars;
       if (mode === 'jigsaw' && jigsawImage) {
         // このブラウザで写真をピースに切り分けて、部屋に渡す（どこに入るかはサーバーだけが持つ）
@@ -322,6 +329,41 @@ function TeacherSetup({
 
       {mode === 'coins' && (
         <>
+      <Field label="Music">
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setBgm('')} className={option(bgm === '')}>
+            🔇 No music
+          </button>
+          {BGM_TRACKS.map((t) => (
+            <span key={t.id} className="inline-flex items-center gap-1">
+              <button type="button" onClick={() => setBgm(t.id)} className={option(bgm === t.id)}>
+                🎵 {t.title}
+              </button>
+              <button
+                type="button"
+                aria-label={previewing === t.id ? `Stop ${t.title}` : `Listen to ${t.title}`}
+                onClick={() => {
+                  if (previewing === t.id) {
+                    previewBgm(null, () => undefined);
+                    setPreviewing(null);
+                  } else {
+                    setPreviewing(t.id);
+                    previewBgm(t, () => setPreviewing((p) => (p === t.id ? null : p)));
+                  }
+                }}
+                className="w-9 h-9 rounded-full border border-slate-300 text-slate-600 hover:bg-slate-50 text-sm cursor-pointer"
+              >
+                {previewing === t.id ? '■' : '▶'}
+              </button>
+            </span>
+          ))}
+        </div>
+        <p className="text-xs text-slate-500 mt-2">
+          Music plays only on your screen (for the projector), not on students’ devices. It pauses during Yamato’s questions, and you can
+          change the volume or turn it off during the game.
+        </p>
+      </Field>
+
       <Field label="Janken battles">
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setJanken(true)} className={option(janken)}>

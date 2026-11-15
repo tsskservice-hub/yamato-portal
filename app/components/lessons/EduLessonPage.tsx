@@ -23,6 +23,7 @@ import { EduSpeakingTaskModal } from "~/components/lessons/EduSpeakingTaskModal"
 import { EduWritingTaskModal } from "~/components/lessons/EduWritingTaskModal";
 import { EduCultureTaskModal } from "~/components/lessons/EduCultureTaskModal";
 import { findCultureTaskForLesson } from "~/data/culture-tasks";
+import { findListeningTaskForLesson } from "~/data/listening-tasks";
 import { LESSON_PAGE_EXTRAS } from "~/data/lesson-pages";
 import type { LessonPageData } from "~/lib/lessonPageData";
 
@@ -79,6 +80,8 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
   const cultureTask = findCultureTaskForLesson(LESSON_SLUG)?.task;
   // レッスンごとに違う部分（app/data/lesson-pages.ts）
   const extras = LESSON_PAGE_EXTRAS[LESSON_SLUG] ?? {};
+  // このレッスンのリスニング課題（app/data/listening-tasks.ts）
+  const listeningTask = findListeningTaskForLesson(LESSON_SLUG);
 
   // 7. 保存済みの完了状態（EduLessonTaskManager から受け取る）と、「完了済み」メッセージの表示
   //    完了済みのタスクはモーダルを開かずにメッセージを出す（ライティングはモーダル自身がサーバーの記録で判断する）
@@ -241,7 +244,7 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
             userId={user?.id}
             onProgressChange={setSavedProgress}
             onStartVocabularyDrill={hasVocabulary ? startVocabularyDrill : undefined}
-            onStartListeningDrill={extras.listening ? () => startTask("listening", () => setIsListeningTaskOpen(true)) : undefined}
+            onStartListeningDrill={listeningTask ? () => startTask("listening", () => setIsListeningTaskOpen(true)) : undefined}
             onStartReadingDrill={hasVocabulary ? () => startTask("reading", () => setIsReadingDrillOpen(true)) : undefined}
             onStartSpeakingDrill={hasSpeaking ? () => startTask("speaking", () => setIsSpeakingModalOpen(true)) : undefined}
             onStartWritingTask={lesson?.id ? () => setIsWritingTaskOpen(true) : undefined}
@@ -267,9 +270,10 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
         onCompleted={() => setVocabTaskCompleted(true)}
       />
 
-      {/* 6. Listening Task Modal（今は Family 1 の「何人家族ですか」だけ） */}
-      {extras.listening === "family-count" && (
+      {/* 6. Listening Task Modal（app/data/listening-tasks.ts にあるレッスンだけ） */}
+      {listeningTask && (
         <EduListeningTaskModal
+          task={listeningTask}
           isOpen={isListeningTaskOpen}
           onClose={() => setIsListeningTaskOpen(false)}
           onCompleted={() => setListeningTaskCompleted(true)}

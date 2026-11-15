@@ -43,6 +43,8 @@ export interface Model {
   /** AIが返答するときに再生する音声。無ければ音声合成で読み上げる */
   audioUrl?: string;
   accepted: string[];
+  /** この返答に入っている slots の値（Part 2 で生徒がタイピングした答えの判定に使う） */
+  slotValues: SlotValue[];
 }
 
 export type RoundMode = "speak" | "ask";
@@ -78,6 +80,36 @@ function norm(s: string): string {
 function normQuestion(s: string): string {
   return norm(s).replace(/[。、．.,？?！!\s]/g, "");
 }
+/** タイピングの答えの比較用：全角半角・大文字小文字・カタカナ→ひらがな・空白と句読点を取り除く */
+function looseAnswer(s: string): string {
+  return (s || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60))
+    .replace(/[\s。、.,!?！？「」"'’\-]/g, "");
+}
+/** Part 2：生徒がタイピングした答えが、AI の返答に入っていた値（例：3 / Australia / オーストラリア）と合うか */
+function typedAnswerMatches(typed: string, model: Model | null): boolean {
+  if (!model || model.slotValues.length === 0) return false;
+  const count = parseCount(typed);
+  const clean = looseAnswer(typed).replace(/^(from)/, "").replace(/(からきました|から来ました|から|です)$/, "");
+  if (!clean && !count) return false;
+  return model.slotValues.some((v) => {
+    const forms = [v.cue, v.en, v.text, v.reading, v.romaji, ...(v.alt ?? [])].filter((f): f is string => !!f);
+    if (count && forms.some((f) => parseCount(f) === count)) return true;
+    return forms.some((f) => looseAnswer(f) === clean);
+  });
+}
+/** Part 2 の答えが数字か（例：何人家族ですか → 3） */
+function isNumericAnswer(model: Model | null): boolean {
+  return !!model && model.slotValues.length > 0 && model.slotValues.every((v) => /^\d+$/.test((v.cue ?? "").normalize("NFKC")));
+}
+/** Part 2 でタイピングする時の指示 */
+function typingPromptFor(model: Model | null): string {
+  if (isNumericAnswer(model)) return "Type the number you heard (e.g. 3) and press Submit.";
+  return "Type the answer you heard, in English or Japanese, and press Submit.";
+}
+
 function parseCount(input: string): string | null {
   const s = input.normalize("NFKC").replace(/\s/g, "").replace(/人$/, "");
   if (!s) return null;
@@ -169,6 +201,7 @@ function buildModels(d: DialogueRow): Model[] {
       cueHint: slotValues.length ? slotValues.map((v) => v.en).filter(Boolean).join(" / ") || undefined : undefined,
       audioUrl,
       accepted: Array.from(accepted),
+      slotValues,
     };
   });
 }
@@ -375,7 +408,7 @@ export function useEduSpeakingDrill({
     setStatusMessage(`${prefix} Listen to AI Yamato's answer...`);
     playAI(replyText, round.target?.audioUrl ?? null, () => {
       isAIPlayingRef.current = false; setIsAIPlaying(false);
-      setStatusMessage("How many people are in the family? Type the number (e.g. 3) and press Submit.");
+      setStatusMessage(typingPromptFor(round.target));
     });
   }, [playAI]);
 
@@ -385,7 +418,7 @@ export function useEduSpeakingDrill({
     isAIPlayingRef.current = true; setIsAIPlaying(true);
     playAI(round.target.reading ?? round.target.text, round.target.audioUrl ?? null, () => {
       isAIPlayingRef.current = false; setIsAIPlaying(false);
-      setStatusMessage("How many people are in the family? Type the number (e.g. 3) and press Submit.");
+      setStatusMessage(typingPromptFor(round.target));
     });
   };
 
@@ -467,13 +500,14 @@ export function useEduSpeakingDrill({
     const round = currentRoundRef.current;
     if (!round || round.mode !== "ask" || !round.target) return;
 
-    const typed = parseCount(typedAnswer);
-    if (!typed) { setStatusMessage("Please type the number of people (e.g. 3)."); return; }
+    const typed = typedAnswer.trim();
+    if (!typed) return;
+    if (isNumericAnswer(round.target) && !parseCount(typed)) {
+      setStatusMessage("Please type a number (e.g. 3).");
+      return;
+    }
 
-    const cue = round.cue ?? "";
-    const expected = /^\d+$/.test(cue) ? String(Number(cue)) : cue;
-
-    if (typed === expected) {
+    if (typedAnswerMatches(typed, round.target)) {
       resultRef.current = "correct"; setResult("correct");
       setShownModel(round.target); setScore((prev) => prev + 1);
       setStatusMessage(`✅ Correct! (${typed}) Moving to next...`);
@@ -668,7 +702,17 @@ export function useEduSpeakingDrill({
     resetQuestionState();
   }, [isOpen, clearTimers, stopAllMedia, resetQuestionState]);
 
+  // Part 2 のタイピング欄の指示と例（数字の答えか、言葉の答えかで変える）
+  const typingNumeric = isNumericAnswer(currentRound?.target ?? null);
+  const typingPrompt = typingNumeric
+    ? "What number did AI Yamato say? Type the number."
+    : "What did AI Yamato say? Type the answer in English or Japanese.";
+  const typingPlaceholder = typingNumeric
+    ? "e.g. 3"
+    : `e.g. ${currentRound?.target?.slotValues[0]?.en ?? currentRound?.target?.slotValues[0]?.text ?? ""}`.trim();
+
   return {
+    typingNumeric, typingPrompt, typingPlaceholder,
     loadState, totalItems: dialogues.length, isStarted, sessionFinished, isFullscreen, setIsFullscreen,
     currentIndex, currentRound, askStep, typedAnswer, setTypedAnswer, requiredCount, isAIPlaying,
     isListening, spokenText, statusMessage, awaitingConfirm, confirmSpoken, attempts, result, shownModel, score, inputRef,

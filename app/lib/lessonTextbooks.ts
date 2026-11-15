@@ -1,7 +1,7 @@
 /**
  * @file app/lib/lessonTextbooks.ts
  * @description レッスンが対応する教科書・ユニット（edu_lesson_textbook_units）を読み込む
- *   レッスンページやトピックページで「Obento Deluxe (5th edition) · Unit 4: Family · P. 1-3」のように表示するために使う。
+ *   レッスンページやトピックページで「Obento Deluxe (5th edition) · Unit 4: Family」のように表示するために使う。
  *   後で iiTomo などの対応を足しても、データベースに行を足すだけでここはそのまま使える。
  */
 
@@ -52,13 +52,12 @@ export async function fetchTextbookRefs(lessonIds: string[]): Promise<Record<str
   return result;
 }
 
-/** 表示用の 1 行：Obento Deluxe (5th edition) · Unit 4: Family · P. 1-3 */
+/** 表示用の 1 行：Obento Deluxe (5th edition) · Unit 4: Family（ページ番号は出さない：2026-11-15 先生の指示） */
 export function formatTextbookRef(ref: TextbookRef): string {
   const book = ref.edition ? `${ref.textbook} (${ref.edition})` : ref.textbook;
-  const page = ref.pageRef ? ` · ${ref.pageRef.replace(/^Unit \d+,\s*/, "")}` : "";
   const partial = ref.coverage === "partial" ? " · partly" : "";
   const unit = ref.unitTitle ? `Unit ${ref.unit}: ${ref.unitTitle}` : `Unit ${ref.unit}`;
-  return `${book} · ${unit}${page}${partial}`;
+  return `${book} · ${unit}${partial}`;
 }
 
 /** 教科書の出版社と関係がないことを示す一文（教科書名を出す場所に添える） */

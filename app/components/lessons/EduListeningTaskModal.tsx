@@ -1,125 +1,30 @@
 /**
  * @file app/components/lessons/EduListeningTaskModal.tsx
- * @description 「何人家族ですか」「〜人家族です」の会話を聞き、人数をタイピングで答えるリスニング課題モーダル
- *              5問クリアで EduFinishedView を表示し、onCompleted を1回だけ呼ぶ
+ * @description リスニング課題モーダル（全レッスン共通）
+ *   会話（A が聞き、B が答える）を聞いて、答えをタイピングする。問題は app/data/listening-tasks.ts のレッスンごとのデータ。
+ *   音声は dialogue-audio バケットのファイルを再生し、無い・読み込めない時はブラウザの音声合成で読み上げる。
+ *   規定の問題数をクリアすると EduFinishedView を表示し、onCompleted を1回だけ呼ぶ
  */
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "~/lib/supabaseClient";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
+import { isListeningAnswerCorrect, type ListeningItem, type ListeningTask } from "~/data/listening-tasks";
 
 // ---------- 型・設定 ----------
-
-export interface ListeningQuestion {
-  id: string | number;
-  /** 任意：先に再生する質問音声のパス（例: 「なんにんかぞくですか。」） */
-  question_audio_path?: string;
-  /** dialogue-audio バケット内の答え音声のパス（例: "family/family_count_4.mp3"） */
-  audio_path: string;
-  /** 正解の人数 */
-  answer_count: number;
-  /** 任意：解答後に表示する会話スクリプト */
-  transcript?: string;
-}
 
 interface EduListeningTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCompleted: () => void;
-  /** 省略時は DEFAULT_FAMILY_QUESTIONS を使用 */
-  questions?: ListeningQuestion[];
+  /** このレッスンのリスニング課題（app/data/listening-tasks.ts） */
+  task: ListeningTask;
 }
 
 const AUDIO_BUCKET = "dialogue-audio";
-const QUESTIONS_PER_TASK = 5;
 const MAX_ATTEMPTS_BEFORE_REVEAL = 2; // この回数間違えると答えを表示
-const GAP_BETWEEN_AUDIO_MS = 400; // 質問音声と答え音声の間の間隔
-
-/** 「なんにんかぞくですか。」の質問音声 */
-const FAMILY_QUESTION_AUDIO_PATH = "family/dialogue_4fd15199-82d7-4897-a24f-79fe3cced9ed.mp3";
-/** family_count_1.mp3 〜 family_count_10.mp3 */
-const FAMILY_COUNT_MAX = 10;
-
-// ---------- 解答判定ユーティリティ ----------
-
-const KANJI_NUMBERS = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
-const ENGLISH_NUMBERS = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
-const HIRAGANA_READINGS: Record<number, string[]> = {
-  1: ["ひとり"],
-  2: ["ふたり"],
-  3: ["さんにん"],
-  4: ["よにん"],
-  5: ["ごにん"],
-  6: ["ろくにん"],
-  7: ["しちにん", "ななにん"],
-  8: ["はちにん"],
-  9: ["きゅうにん", "くにん"],
-  10: ["じゅうにん"],
-};
-const ROMAJI_READINGS: Record<number, string[]> = {
-  1: ["hitori"],
-  2: ["futari"],
-  3: ["sannin"],
-  4: ["yonin"],
-  5: ["gonin"],
-  6: ["rokunin"],
-  7: ["shichinin", "nananin"],
-  8: ["hachinin"],
-  9: ["kyuunin", "kyunin", "kunin"],
-  10: ["juunin", "junin"],
-};
-
-/**
- * Storage の family フォルダの音声から自動生成（family_count_N.mp3 = 「Nにんかぞくです。」）
- * この中からランダムに5問が出題される
- */
-export const DEFAULT_FAMILY_QUESTIONS: ListeningQuestion[] = Array.from(
-  { length: FAMILY_COUNT_MAX },
-  (_, i) => {
-    const n = i + 1;
-    return {
-      id: `family_count_${n}`,
-      question_audio_path: FAMILY_QUESTION_AUDIO_PATH,
-      audio_path: `family/family_count_${n}.mp3`,
-      answer_count: n,
-      transcript: `A: なんにんかぞくですか。\nB: ${HIRAGANA_READINGS[n][0]}かぞくです。`,
-    };
-  }
-);
-
-/** 入力を比較用に正規化（全角→半角、カタカナ→ひらがな、「人家族です」等の語尾除去） */
-function normalizeAnswer(raw: string): string {
-  return raw
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60))
-    .replace(/[\s。、.,!?！？「」"']/g, "")
-    .replace(/(です|だ)$/, "")
-    .replace(/(かぞく|家族|kazoku)$/, "")
-    .replace(/(people|persons|person)$/, "");
-}
-
-/** 人数 n に対して許容する解答の一覧 */
-function buildAcceptedAnswers(n: number): Set<string> {
-  const accepted = new Set<string>([`${n}`, `${n}人`, `${n}にん`, `${n}nin`]);
-  if (KANJI_NUMBERS[n]) {
-    accepted.add(KANJI_NUMBERS[n]);
-    accepted.add(`${KANJI_NUMBERS[n]}人`);
-  }
-  if (ENGLISH_NUMBERS[n]) accepted.add(ENGLISH_NUMBERS[n]);
-  (HIRAGANA_READINGS[n] || []).forEach((r) => accepted.add(r));
-  (ROMAJI_READINGS[n] || []).forEach((r) => accepted.add(r));
-  if (n === 1) accepted.add("一人");
-  if (n === 2) accepted.add("二人");
-  return accepted;
-}
-
-function isCorrectAnswer(input: string, answerCount: number): boolean {
-  const clean = normalizeAnswer(input);
-  if (!clean) return false;
-  return buildAcceptedAnswers(answerCount).has(clean);
-}
+const GAP_BETWEEN_AUDIO_MS = 400; // A の音声と B の音声の間の間隔
 
 /** Fisher-Yates シャッフル（元配列は変更しない） */
 function shuffleArray<T>(array: T[]): T[] {
@@ -274,9 +179,10 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
   isOpen,
   onClose,
   onCompleted,
-  questions = DEFAULT_FAMILY_QUESTIONS,
+  task,
 }) => {
-  const [taskQuestions, setTaskQuestions] = useState<ListeningQuestion[]>([]);
+  const questions = task.items;
+  const [taskQuestions, setTaskQuestions] = useState<ListeningItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState("");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
@@ -313,7 +219,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
 
   // questions の「中身」が変わった時だけ再初期化する
   const questionsKey = useMemo(
-    () => questions.map((q) => `${q.id}|${q.question_audio_path ?? ""}|${q.audio_path}|${q.answer_count}`).join("\u0001"),
+    () => questions.map((q) => `${q.id}|${q.lines.map((l) => `${l.speaker}:${l.text}:${l.audioPath ?? ""}`).join("/")}`).join("\u0001"),
     [questions]
   );
 
@@ -341,6 +247,9 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
       audioRef.current.onerror = null;
       audioRef.current = null;
     }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
     setIsPlaying(false);
     setActiveSpeaker(null);
   };
@@ -363,7 +272,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
 
     clearTimers();
     stopAudio();
-    setTaskQuestions(shuffleArray(source).slice(0, QUESTIONS_PER_TASK));
+    setTaskQuestions(shuffleArray(source).slice(0, task.questionsPerTask));
     setCurrentIndex(0);
     setAnsweredCount(0);
     setFirstTryCorrect(0);
@@ -397,54 +306,74 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
     }
   }, [isFinished]);
 
-  // 質問音声 → 答え音声 の順に再生する
+  // 会話の行（A → B）を順に再生する。音声ファイルが無い・失敗した行は音声合成で読み上げる
   const playDialogue = () => {
     if (!currentQuestion) return;
     stopAudio();
     setAudioError("");
 
-    const playlist = [currentQuestion.question_audio_path, currentQuestion.audio_path].filter(
-      (p): p is string => !!p
-    );
+    const lines = currentQuestion.lines;
     const playbackId = playbackIdRef.current;
     const isStale = () => playbackIdRef.current !== playbackId;
 
+    const finishLine = (index: number) => {
+      if (isStale()) return;
+      setActiveSpeaker(null);
+      gapTimerRef.current = setTimeout(() => {
+        gapTimerRef.current = null;
+        playAt(index + 1);
+      }, GAP_BETWEEN_AUDIO_MS);
+    };
+
+    const speakLine = (index: number) => {
+      if (isStale()) return;
+      if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+        setIsPlaying(false);
+        setActiveSpeaker(null);
+        setAudioError("Audio could not be played in this browser.");
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(lines[index].text);
+      utterance.lang = "ja-JP";
+      utterance.rate = 0.9;
+      utterance.onend = () => finishLine(index);
+      utterance.onerror = () => finishLine(index);
+      window.speechSynthesis.speak(utterance);
+    };
+
     const playAt = (index: number) => {
       if (isStale()) return;
-      if (index >= playlist.length) {
+      if (index >= lines.length) {
         audioRef.current = null;
         setIsPlaying(false);
         setActiveSpeaker(null);
         return;
       }
 
-      const path = playlist[index];
-      const audio = new Audio(getAudioUrl(path));
-      audioRef.current = audio;
-      // 質問音声は A（左の人）、答え音声は B（右の人）が話している表示にする
-      setActiveSpeaker(path === currentQuestion.question_audio_path ? "A" : "B");
+      const line = lines[index];
+      setActiveSpeaker(line.speaker);
+      if (!line.audioPath) {
+        speakLine(index);
+        return;
+      }
 
+      const audio = new Audio(getAudioUrl(line.audioPath));
+      audioRef.current = audio;
+      let fellBack = false;
+      const fallback = (err?: unknown) => {
+        if (fellBack || isStale()) return;
+        fellBack = true;
+        console.warn(`Listening audio could not be played, using speech synthesis instead: ${line.audioPath}`, err);
+        audioRef.current = null;
+        speakLine(index);
+      };
       audio.onended = () => {
         if (isStale()) return;
-        setActiveSpeaker(null);
-        gapTimerRef.current = setTimeout(() => {
-          gapTimerRef.current = null;
-          playAt(index + 1);
-        }, GAP_BETWEEN_AUDIO_MS);
+        audioRef.current = null;
+        finishLine(index);
       };
-      audio.onerror = () => {
-        if (isStale()) return;
-        setIsPlaying(false);
-        setActiveSpeaker(null);
-        setAudioError(`The audio file "${path}" could not be loaded.`);
-      };
-      audio.play().catch((err) => {
-        console.warn("Audio playback failed:", err);
-        if (!isStale()) {
-          setIsPlaying(false);
-          setActiveSpeaker(null);
-        }
-      });
+      audio.onerror = () => fallback(audio.error);
+      audio.play().catch(fallback);
     };
 
     isPlayingRef.current = true; // 次のキー入力までに再描画を待たず反映する
@@ -508,7 +437,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
     e.preventDefault();
     if (!currentQuestion || !userInput.trim() || feedback === "correct") return;
 
-    if (isCorrectAnswer(userInput, currentQuestion.answer_count)) {
+    if (isListeningAnswerCorrect(task, currentQuestion, userInput)) {
       setFeedback("correct");
       playSound(); // ✅ 正解音
       if (wrongAttempts === 0 && !isRevealed) setFirstTryCorrect((prev) => prev + 1);
@@ -536,10 +465,10 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span>🎧</span>
-              <span>Listening Task: How many people are in the family?</span>
+              <span>Listening Task: {task.title}</span>
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Listen to the conversation and type the number of people ({answeredCount} / {totalQuestions})
+              {task.instruction} ({answeredCount} / {totalQuestions})
             </p>
           </div>
           <button
@@ -593,7 +522,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 disabled={feedback === "correct"}
-                placeholder="e.g. 4 / 4人 / よにん"
+                placeholder={task.placeholder}
                 className={`w-full px-6 py-5 rounded-2xl border font-bold text-lg sm:text-xl transition shadow-sm ${
                   feedback === "correct"
                     ? "border-emerald-500 ring-2 ring-emerald-500 bg-emerald-50/20 text-emerald-900"
@@ -616,7 +545,7 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
 
               {feedback === "correct" && (
                 <p className="text-center text-sm font-bold text-emerald-600 dark:text-emerald-400 animate-pulse">
-                  ✨ Correct! {currentQuestion.answer_count}人家族です。 Moving to next...
+                  ✨ Correct! {(task.correctMessage ?? "{answer}").replace("{answer}", currentQuestion.answerLabel)} Moving to next...
                 </p>
               )}
               {feedback === "incorrect" && !isRevealed && (
@@ -628,13 +557,11 @@ export const EduListeningTaskModal: React.FC<EduListeningTaskModalProps> = ({
               {isRevealed && feedback !== "correct" && (
                 <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-center space-y-2">
                   <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
-                    Answer: {currentQuestion.answer_count}人家族 ({HIRAGANA_READINGS[currentQuestion.answer_count]?.[0] ?? currentQuestion.answer_count}かぞく)
+                    Answer: {currentQuestion.answerLabel}
                   </p>
-                  {currentQuestion.transcript && (
-                    <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
-                      {currentQuestion.transcript}
-                    </p>
-                  )}
+                  <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
+                    {currentQuestion.lines.map((l) => `${l.speaker}: ${l.text}`).join("\n")}
+                  </p>
                   <button
                     type="button"
                     onClick={goToNext}
