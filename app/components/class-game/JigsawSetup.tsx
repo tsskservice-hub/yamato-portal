@@ -34,7 +34,7 @@ export function JigsawSetup({
   onPieceCount,
 }: {
   selected: JigsawImage | null;
-  onSelect: (image: JigsawImage) => void;
+  onSelect: (image: JigsawImage | null) => void;
   pieceCount: number;
   onPieceCount: (n: number) => void;
 }) {
@@ -47,6 +47,8 @@ export function JigsawSetup({
   const [rights, setRights] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -91,6 +93,28 @@ export function JigsawSetup({
     }
   };
 
+  // 自分がアップロードした写真を消す（サイトの写真集の写真は消せない）
+  const remove = async (img: JigsawImage) => {
+    if (!window.confirm(`Delete "${img.title}"? This cannot be undone.`)) return;
+    setDeletingId(img.id);
+    setDeleteError(null);
+    try {
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/jigsaw/images/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: img.id }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+      setImages((prev) => (prev ?? []).filter((i) => i.id !== img.id));
+      if (selected?.id === img.id) onSelect(null);
+    } catch (err: any) {
+      setDeleteError(err?.message || 'Could not delete the picture.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const option = (active: boolean) =>
     `px-4 py-2.5 rounded-xl border-2 text-sm font-bold transition cursor-pointer ${
       active ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
@@ -105,22 +129,36 @@ export function JigsawSetup({
         {images && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {images.map((img) => (
-              <button
-                key={img.id}
-                type="button"
-                onClick={() => onSelect(img)}
-                className={`text-left rounded-xl border-2 overflow-hidden cursor-pointer transition ${
-                  selected?.id === img.id ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <img src={img.url} alt={img.title} className="w-full aspect-video object-cover" loading="lazy" />
-                <span className="block px-2 py-1 text-xs font-bold text-slate-700 truncate">{img.title}</span>
-                <span className="block px-2 pb-1 text-[10px] text-slate-400">{img.mine ? 'Your picture' : 'AI Yamato library'}</span>
-              </button>
+              <div key={img.id} className="relative">
+                <button
+                  type="button"
+                  onClick={() => onSelect(img)}
+                  className={`w-full text-left rounded-xl border-2 overflow-hidden cursor-pointer transition ${
+                    selected?.id === img.id ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <img src={img.url} alt={img.title} className="w-full aspect-video object-cover" loading="lazy" />
+                  <span className="block px-2 py-1 text-xs font-bold text-slate-700 truncate">{img.title}</span>
+                  <span className="block px-2 pb-1 text-[10px] text-slate-400">{img.mine ? 'Your picture' : 'AI Yamato library'}</span>
+                </button>
+                {img.mine && (
+                  <button
+                    type="button"
+                    onClick={() => remove(img)}
+                    disabled={deletingId === img.id}
+                    aria-label={`Delete ${img.title}`}
+                    title="Delete this picture"
+                    className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/90 border border-slate-300 text-rose-600 text-sm font-bold shadow cursor-pointer disabled:opacity-40"
+                  >
+                    {deletingId === img.id ? '…' : '✕'}
+                  </button>
+                )}
+              </div>
             ))}
             {!images.length && <p className="text-sm text-slate-500 col-span-full">No pictures yet. Upload one below.</p>}
           </div>
         )}
+        {deleteError && <p className="text-sm text-rose-600 mt-2">{deleteError}</p>}
         <button type="button" onClick={() => setShowUpload((v) => !v)} className="mt-3 text-sm font-bold text-indigo-600 underline cursor-pointer">
           {showUpload ? 'Cancel upload' : '+ Upload your own picture'}
         </button>
@@ -152,7 +190,9 @@ export function JigsawSetup({
               Many free stock photo sites do not allow their photos to be made into jigsaw puzzles. Please check the site’s licence, or use your
               own photos.
             </p>
-            <p className="text-[11px] text-slate-400">JPEG, PNG or WebP, up to 5 MB. Only you can use pictures you upload.</p>
+            <p className="text-[11px] text-slate-400">
+              JPEG, PNG or WebP, up to 5 MB. Only you can use pictures you upload, and you can delete them at any time.
+            </p>
             {uploadError && <p className="text-sm text-rose-600">{uploadError}</p>}
             <button
               type="button"

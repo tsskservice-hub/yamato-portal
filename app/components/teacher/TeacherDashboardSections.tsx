@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Form, Link, useNavigation } from '@remix-run/react';
 import {
   Users, KeyRound, RefreshCw, Trash2, ClipboardList, BarChart3, PenLine, Download, Image as ImageIcon, CheckCircle2, Circle,
-  UserPlus, Check, X, Ticket, Copy, Gamepad2, Lock, Unlock,
+  UserPlus, Check, X, Ticket, Copy, Gamepad2, Lock, Unlock, BookOpen,
 } from 'lucide-react';
 import { HANDWRITING_RETENTION_OPTIONS, INVITE_CODE_DAYS, LESSON_TASKS, formatInviteCode } from '~/lib/teacher-config';
 import { SchoolAccountLink } from '~/components/SchoolAccountLink';
@@ -43,7 +43,21 @@ export type DashboardData = {
     classification: string; createdAt: string; hasImage: boolean; imageDeleteAfter: string | null;
   }>;
   retention: string;
+  /**
+   * 語彙ドリルで 1 つのモードに出す語の数の上限（null = 制限なし）
+   * available: 31_class_vocab_limits.sql を実行済みか / classDefault: 全レッスン一括 / lessons: レッスンごと（一括より優先）
+   * students: 生徒ごと（いちばん優先。全レッスンに効く）
+   */
+  vocabLimits: {
+    available: boolean;
+    classDefault: number | null;
+    lessons: Array<{ lessonId: string; limit: number }>;
+    students: Array<{ userId: string; limit: number }>;
+  };
 };
+
+/** 語彙ドリルの語数の選択肢 */
+const VOCAB_LIMIT_OPTIONS = [3, 4, 5, 6, 8, 10, 12, 15, 20];
 
 const card = 'bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4';
 const h2 = 'text-base font-bold text-slate-800 flex items-center gap-2';
@@ -215,6 +229,152 @@ export function GamesCard({ data }: { data: DashboardData }) {
             })}
           </ul>
         </div>
+      )}
+    </section>
+  );
+}
+
+// ---------- レッスンのタスクの設定（語彙ドリルの語数） ----------
+
+export function LessonTaskSettingsCard({ data }: { data: DashboardData }) {
+  const cls = data.selectedClass!;
+  const nav = useNavigation();
+  const busy = nav.state !== 'idle';
+  const v = data.vocabLimits;
+  const lessonTitle = (id: string) => data.lessons.find((l) => l.id === id)?.title ?? 'Lesson';
+  const overridden = new Set(v.lessons.map((l) => l.lessonId));
+  const sortedOverrides = data.lessons.filter((l) => overridden.has(l.id)).map((l) => v.lessons.find((o) => o.lessonId === l.id)!);
+  const studentLimitOf = new Map(v.students.map((s) => [s.userId, s.limit]));
+  const studentsWithLimit = data.students.filter((s) => studentLimitOf.has(s.id));
+
+  return (
+    <section className={card} aria-label="Lesson task settings">
+      <div className="space-y-1">
+        <h2 className={h2}><BookOpen className="w-5 h-5 text-indigo-600" /> Vocabulary Drill Length</h2>
+        <p className="text-xs text-slate-500">
+          The vocabulary drill has four modes (Japanese → English, audio → English, English → Japanese and speaking). By default every
+          word in the lesson appears in each mode. You can limit how many words appear in each mode for this class – for all lessons,
+          for one lesson, or for one student. A student setting is used first (in every lesson), then a lesson setting, then the
+          setting for all lessons. Students not in a class always get every word.
+        </p>
+      </div>
+
+      {!v.available ? (
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+          This setting is not available yet. Please try again later.
+        </p>
+      ) : (
+        <>
+          <Form method="post" className="flex flex-col sm:flex-row sm:items-end gap-2">
+            <input type="hidden" name="intent" value="update-vocab-default" />
+            <input type="hidden" name="classId" value={cls.id} />
+            <label className="flex-1 space-y-1">
+              <span className="block text-sm font-semibold text-slate-700">All lessons</span>
+              <select name="limit" defaultValue={v.classDefault ?? ''} key={`default-${v.classDefault ?? 'all'}`} className={`${input} w-full`}>
+                <option value="">Every word (no limit)</option>
+                {VOCAB_LIMIT_OPTIONS.map((n) => <option key={n} value={n}>Up to {n} words per mode</option>)}
+              </select>
+            </label>
+            <button type="submit" disabled={busy} className={btn}>Save</button>
+          </Form>
+
+          <div className="border-t border-slate-100 pt-4 space-y-3">
+            <h3 className="text-sm font-bold text-slate-700">One lesson</h3>
+            <Form method="post" className="flex flex-col md:flex-row md:items-end gap-2">
+              <input type="hidden" name="intent" value="set-lesson-vocab" />
+              <input type="hidden" name="classId" value={cls.id} />
+              <label className="flex-1 min-w-0 space-y-1">
+                <span className="block text-xs font-semibold text-slate-600">Lesson</span>
+                <select name="lessonId" required defaultValue="" className={`${input} w-full`}>
+                  <option value="" disabled>Choose a lesson</option>
+                  {data.lessons.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1">
+                <span className="block text-xs font-semibold text-slate-600">Words per mode</span>
+                <select name="limit" required defaultValue="" className={`${input} w-full`}>
+                  <option value="" disabled>Choose</option>
+                  {VOCAB_LIMIT_OPTIONS.map((n) => <option key={n} value={n}>Up to {n}</option>)}
+                </select>
+              </label>
+              <button type="submit" disabled={busy} className={btn}>Set for this lesson</button>
+            </Form>
+
+            {sortedOverrides.length === 0 ? (
+              <p className="text-xs text-slate-500">No lesson settings yet. Every lesson uses the setting for all lessons.</p>
+            ) : (
+              <ul className="space-y-2">
+                {sortedOverrides.map((o) => (
+                  <li key={o.lessonId} className="flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{lessonTitle(o.lessonId)}</p>
+                      <p className="text-[11px] text-slate-500">Up to {o.limit} words per mode</p>
+                    </div>
+                    <Form method="post">
+                      <input type="hidden" name="intent" value="clear-lesson-vocab" />
+                      <input type="hidden" name="classId" value={cls.id} />
+                      <input type="hidden" name="lessonId" value={o.lessonId} />
+                      <button type="submit" disabled={busy} className={btnGhost} aria-label={`Remove the setting for ${lessonTitle(o.lessonId)}`}>
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </Form>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="border-t border-slate-100 pt-4 space-y-3">
+            <h3 className="text-sm font-bold text-slate-700">One student</h3>
+            <p className="text-xs text-slate-500">
+              For example, a student who needs fewer words. This is used in every lesson for this student, before any lesson or class setting.
+            </p>
+            {data.students.length === 0 ? (
+              <p className="text-xs text-slate-500">No students in this class yet.</p>
+            ) : (
+              <Form method="post" className="flex flex-col md:flex-row md:items-end gap-2">
+                <input type="hidden" name="intent" value="set-student-vocab" />
+                <input type="hidden" name="classId" value={cls.id} />
+                <label className="flex-1 min-w-0 space-y-1">
+                  <span className="block text-xs font-semibold text-slate-600">Student</span>
+                  <select name="studentId" required defaultValue="" className={`${input} w-full`}>
+                    <option value="" disabled>Choose a student</option>
+                    {data.students.map((s) => <option key={s.id} value={s.id}>{studentName(s)}</option>)}
+                  </select>
+                </label>
+                <label className="space-y-1">
+                  <span className="block text-xs font-semibold text-slate-600">Words per mode</span>
+                  <select name="limit" required defaultValue="" className={`${input} w-full`}>
+                    <option value="" disabled>Choose</option>
+                    {VOCAB_LIMIT_OPTIONS.map((n) => <option key={n} value={n}>Up to {n}</option>)}
+                  </select>
+                </label>
+                <button type="submit" disabled={busy} className={btn}>Set for this student</button>
+              </Form>
+            )}
+
+            {studentsWithLimit.length > 0 && (
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {studentsWithLimit.map((s) => (
+                  <li key={s.id} className="flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{studentName(s)}</p>
+                      <p className="text-[11px] text-slate-500">Up to {studentLimitOf.get(s.id)} words per mode in every lesson</p>
+                    </div>
+                    <Form method="post">
+                      <input type="hidden" name="intent" value="clear-student-vocab" />
+                      <input type="hidden" name="classId" value={cls.id} />
+                      <input type="hidden" name="studentId" value={s.id} />
+                      <button type="submit" disabled={busy} className={btnGhost} aria-label={`Remove the setting for ${studentName(s)}`}>
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </Form>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
       )}
     </section>
   );

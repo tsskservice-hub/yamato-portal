@@ -6,6 +6,7 @@
  *  - 宿題ごと・生徒ごとの進捗（edu_student_progress）と、期間内の宿題完了率（%）を見る
  *  - 生徒の手書きライティング（edu_writing_submissions と非公開バケットの画像）を見る
  *  - ゲームをクラス全体でロック／ロック解除、生徒 1 人ずつロック解除する（判定は lib/game-access.server.ts）
+ *  - 語彙ドリルで 1 つのモードに出す語の数を、全レッスン一括・レッスンごとに制限する（lib/lesson-settings.server.ts）
  *
  * edu_classes / edu_homework はブラウザから触れないため、すべてこのサーバー側で担任かどうかを確認してから管理者キーで読み書きする。
  */
@@ -33,9 +34,11 @@ import {
   isLessonTaskKey,
   isStudentDomainAllowed,
 } from '~/lib/teacher-config';
+import { parseVocabLimit } from '~/lib/lesson-settings.server';
 import {
   ClassBar,
   ClassSettingsCard,
+  LessonTaskSettingsCard,
   GamesCard,
   JoinRequestsCard,
   InviteCodesCard,
@@ -132,6 +135,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     joinRequests: [],
     invites: [],
     retention: 'none',
+    vocabLimits: { available: false, classDefault: null, lessons: [], students: [] },
   };
 
   if (!selected) return json(base);
@@ -267,6 +271,27 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       ? String(settings.image_retention_days)
       : 'none';
 
+  // 語彙ドリルの語数の制限（31_class_vocab_limits.sql）。SQL の前は読めないので「まだ使えない」と表示する
+  const [vocabDefaultRes, vocabLessonRes, vocabStudentRes] = await Promise.all([
+    admin.from('edu_classes').select('vocab_words_per_mode').eq('id', selected.id).maybeSingle(),
+    admin.from('edu_class_lesson_settings').select('lesson_id, vocab_words_per_mode').eq('class_id', selected.id),
+    admin.from('edu_class_student_settings').select('user_id, vocab_words_per_mode').eq('class_id', selected.id),
+  ]);
+  const vocabLimits: DashboardData['vocabLimits'] =
+    vocabDefaultRes.error || vocabLessonRes.error || vocabStudentRes.error
+      ? { available: false, classDefault: null, lessons: [], students: [] }
+      : {
+          available: true,
+          classDefault: parseVocabLimit((vocabDefaultRes.data as any)?.vocab_words_per_mode),
+          lessons: (vocabLessonRes.data ?? [])
+            .map((r: any) => ({ lessonId: String(r.lesson_id), limit: parseVocabLimit(r.vocab_words_per_mode) }))
+            .filter((r) => r.limit !== null) as Array<{ lessonId: string; limit: number }>,
+          // クラスを抜けた生徒の行は出さない
+          students: (vocabStudentRes.data ?? [])
+            .map((r: any) => ({ userId: String(r.user_id), limit: parseVocabLimit(r.vocab_words_per_mode) }))
+            .filter((r) => r.limit !== null && studentIds.includes(r.userId)) as Array<{ userId: string; limit: number }>,
+        };
+
   // ゲームのロック（クラス全体）と、ロック中に個別にロック解除した生徒（21_class_game_locks.sql）
   const { data: unlockRows } = selected.games_locked
     ? await admin.from('edu_class_game_unlocks').select('user_id').eq('class_id', selected.id)
@@ -291,6 +316,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     progress,
     handwriting,
     retention,
+    vocabLimits,
   } satisfies DashboardData);
 }
 
@@ -535,6 +561,85 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return backTo(cls.id);
   }
 
+  // 語彙ドリルの語数の制限：全レッスン一括（空 = 制限なし）
+  if (intent === 'update-vocab-default') {
+    const raw = String(form.get('limit') ?? '');
+    const limit = raw === '' ? null : parseVocabLimit(raw);
+    if (raw !== '' && limit === null) return fail('Choose a number of words between 1 and 50.');
+    const { error } = await admin.from('edu_classes').update({ vocab_words_per_mode: limit }).eq('id', cls.id);
+    if (error) {
+      console.error('[teacher-dashboard] vocab default failed:', error.message);
+      return fail('Could not save the vocabulary setting. Please try again.', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 語彙ドリルの語数の制限：レッスンごと（全レッスン一括の設定より優先）／レッスンごとの設定を消す
+  if (intent === 'set-lesson-vocab' || intent === 'clear-lesson-vocab') {
+    const lessonId = String(form.get('lessonId') ?? '');
+    const { data: lesson } = await admin.from('edu_lessons').select('id').eq('id', lessonId).maybeSingle();
+    if (!lesson) return fail('Lesson not found.');
+
+    if (intent === 'clear-lesson-vocab') {
+      await admin.from('edu_class_lesson_settings').delete().eq('class_id', cls.id).eq('lesson_id', String(lesson.id));
+      return backTo(cls.id);
+    }
+
+    const limit = parseVocabLimit(form.get('limit'));
+    if (limit === null) return fail('Choose a number of words between 1 and 50.');
+    const { error } = await admin.from('edu_class_lesson_settings').upsert(
+      {
+        class_id: cls.id,
+        lesson_id: String(lesson.id),
+        vocab_words_per_mode: limit,
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+      },
+      { onConflict: 'class_id,lesson_id' }
+    );
+    if (error) {
+      console.error('[teacher-dashboard] lesson vocab failed:', error.message);
+      return fail('Could not save the vocabulary setting. Please try again.', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 語彙ドリルの語数の制限：生徒ごと（いちばん優先。全レッスンに効く）／生徒ごとの設定を消す
+  if (intent === 'set-student-vocab' || intent === 'clear-student-vocab') {
+    const studentId = String(form.get('studentId') ?? '');
+    const { data: member } = await admin
+      .from('edu_class_members')
+      .select('user_id')
+      .eq('class_id', cls.id)
+      .eq('user_id', studentId)
+      .eq('role', 'student')
+      .maybeSingle();
+    if (!member) return fail('Student not found.', 404);
+
+    if (intent === 'clear-student-vocab') {
+      await admin.from('edu_class_student_settings').delete().eq('class_id', cls.id).eq('user_id', studentId);
+      return backTo(cls.id);
+    }
+
+    const limit = parseVocabLimit(form.get('limit'));
+    if (limit === null) return fail('Choose a number of words between 1 and 50.');
+    const { error } = await admin.from('edu_class_student_settings').upsert(
+      {
+        class_id: cls.id,
+        user_id: studentId,
+        vocab_words_per_mode: limit,
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+      },
+      { onConflict: 'class_id,user_id' }
+    );
+    if (error) {
+      console.error('[teacher-dashboard] student vocab failed:', error.message);
+      return fail('Could not save the vocabulary setting. Please try again.', 500);
+    }
+    return backTo(cls.id);
+  }
+
   if (intent === 'update-retention') {
     const value = String(form.get('retention') ?? '');
     if (!HANDWRITING_RETENTION_OPTIONS.some((o) => o.value === value)) return fail('Invalid option.');
@@ -670,6 +775,7 @@ export default function TeacherDashboardPage() {
             <GamesCard data={data} />
             <JoinRequestsCard data={data} />
             <ClassSettingsCard data={data} />
+            <LessonTaskSettingsCard data={data} />
             <InviteCodesCard data={data} />
             <HomeworkCard data={data} />
             <CompletionCard data={data} />

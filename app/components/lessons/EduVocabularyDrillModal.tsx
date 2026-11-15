@@ -13,6 +13,12 @@ interface EduVocabularyDrillModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCompleted: () => void;
+  /**
+   * 1つのモードで出す語の数の上限（無ければ全部の語）。
+   * 学校のクラスの先生が教師ダッシュボードで決める（全レッスン一括、またはレッスンごと）。初期値は制限なし。
+   * 上限がある時は、最初にランダムに選んだ同じ語を4つのモードで使う（順番はモードごとに入れかえる）
+   */
+  wordsPerMode?: number;
 }
 
 type DrillMode = "jp_to_en" | "audio_to_en" | "en_to_jp" | "en_to_voice";
@@ -23,8 +29,11 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
   isOpen,
   onClose,
   onCompleted,
+  wordsPerMode,
 }) => {
   const [shuffledVocab, setShuffledVocab] = useState<any[]>([]);
+  // このドリルで使う語（上限がある時はランダムに選んだ一部）
+  const drillWordsRef = useRef<any[]>([]);
   const [currentMode, setCurrentMode] = useState<DrillMode>("jp_to_en");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState("");
@@ -56,13 +65,18 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     onCompleted();
   };
 
-  // 目標スコア（vocabulary の数×2、または最低5問）
-  const targetScore = Math.max(vocabulary.length * 2, 5);
+  // 目標スコア：4つのモード（日→英、音声→英、英→日、発声練習）それぞれで、すべての語に1回ずつ正解する
+  // （語彙を1周するごとに次のモードへ進む。2026-11-15：以前は ×2 で、後半の2モードに進まずに終わっていた）
+  const DRILL_MODE_COUNT = 4;
+  const wordsInEachMode =
+    wordsPerMode && wordsPerMode > 0 ? Math.min(wordsPerMode, vocabulary.length) : vocabulary.length;
+  const targetScore = wordsInEachMode * DRILL_MODE_COUNT;
 
   // モーダルが開いた時、または vocabulary が変わった時にランダムにシャッフルする
   useEffect(() => {
     if (isOpen && vocabulary.length > 0) {
-      const shuffled = [...vocabulary].sort(() => Math.random() - 0.5);
+      const shuffled = [...vocabulary].sort(() => Math.random() - 0.5).slice(0, wordsInEachMode);
+      drillWordsRef.current = shuffled;
       setShuffledVocab(shuffled);
       setCurrentIndex(0);
       setScore(0);
@@ -84,7 +98,8 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
         window.speechSynthesis.cancel();
       }
     };
-  }, [isOpen, vocabulary]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, vocabulary, wordsInEachMode]);
 
   useEffect(() => {
     if (isOpen && currentMode === "audio_to_en" && shuffledVocab.length > 0) {
@@ -189,7 +204,7 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
           const nextIdx = currentIndex + 1;
           // リストの最後まで行ったら、再度シャッフルし直してランダム性を維持する
           if (nextIdx % shuffledVocab.length === 0) {
-            const reShuffled = [...vocabulary].sort(() => Math.random() - 0.5);
+            const reShuffled = [...drillWordsRef.current].sort(() => Math.random() - 0.5);
             setShuffledVocab(reShuffled);
             setCurrentIndex(0);
             const modes: DrillMode[] = ["jp_to_en", "audio_to_en", "en_to_jp", "en_to_voice"];

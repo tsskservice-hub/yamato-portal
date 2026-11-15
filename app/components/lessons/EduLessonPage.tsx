@@ -52,6 +52,8 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
   // クレジットとニックネーム：右下に常駐させる AI Yamato チャットに渡す予定（今は未使用）
   const [credits, setCredits] = useState<number>(10);
   const [nickname, setNickname] = useState<string>("VCE Student");
+  // 先生がクラスに設定した、語彙ドリルで1つのモードに出す語の数（null = 制限なし。/api/lesson-settings）
+  const [vocabWordsPerMode, setVocabWordsPerMode] = useState<number | null>(null);
 
   // 1. 語彙ドリルモーダルの開閉状態と達成状態の管理
   const [isDrillOpen, setIsDrillOpen] = useState(false);
@@ -154,6 +156,31 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
     }
   };
 
+  // 学校のクラスに入っている生徒：先生が決めたタスクの設定を読み込む（失敗したら制限なしのまま）
+  const lessonIdForSettings = lesson?.id ? String(lesson.id) : "";
+  useEffect(() => {
+    if (!user?.id || !lessonIdForSettings) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+        const res = await fetch(`/api/lesson-settings?lessonId=${encodeURIComponent(lessonIdForSettings)}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) return;
+        const body = (await res.json()) as { vocabWordsPerMode?: number | null };
+        if (!cancelled) setVocabWordsPerMode(typeof body.vocabWordsPerMode === "number" ? body.vocabWordsPerMode : null);
+      } catch (err) {
+        console.warn("[EduLessonPage] Could not load lesson settings:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, lessonIdForSettings]);
+
   if (isAuthLoading) {
     return (
       <ToolPageWrapper
@@ -216,7 +243,7 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
         <main className="max-w-5xl mx-auto space-y-8">
           
           {/* 1. Header Card Module */}
-          <EduLessonHeader lesson={lesson} topic={topic} textbookRefs={textbookRefs} />
+          <EduLessonHeader lesson={lesson} topic={topic} textbookRefs={textbookRefs} heroImage={extras.heroImage ?? null} />
 
           {/* 1b. 学習意図（LI）と成功基準（SC）の専用セクション */}
           <EduLessonGoals lesson={lesson} />
@@ -268,6 +295,7 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
         isOpen={isDrillOpen}
         onClose={() => setIsDrillOpen(false)}
         onCompleted={() => setVocabTaskCompleted(true)}
+        wordsPerMode={vocabWordsPerMode ?? undefined}
       />
 
       {/* 6. Listening Task Modal（app/data/listening-tasks.ts にあるレッスンだけ） */}
