@@ -22,7 +22,7 @@ import { SpeedPanel, speedPanelKey, type SpeedResult, type SpeedStart } from './
 import { preloadGameSounds } from './sounds';
 import { CHEST_PICTURES, ChestPicturesLink, ChestPicturesModal } from './ChestPicturesModal';
 import { StudentYamato, sayMondaiDesu, type YamatoAnswered, type YamatoEnd, type YamatoStart } from './YamatoQuiz';
-import { JigsawBoard, JigsawBoxPicture, progressPercent, type JigsawBoardInfo } from './Jigsaw';
+import { JigsawFinishedPicture, JigsawBoard, JigsawBoxPicture, progressPercent, type JigsawBoardInfo } from './Jigsaw';
 
 type StudentState = {
   status: 'lobby' | 'running' | 'ended';
@@ -325,11 +325,16 @@ export function StudentView({ gameId }: { gameId: string }) {
             ))}
           </ol>
         </Box>
-        <JigsawBoard board={final.jigsaw} />
-        <p className="text-xs text-center text-slate-500">
-          {final.jigsaw.title}
-          {final.jigsaw.credit ? ` — ${final.jigsaw.credit}` : ''}
-        </p>
+        {/* 使った絵の全体を、ページの幅いっぱいに。その下に、クラスで組み立てた盤面 */}
+        <div className="w-[calc(100vw-2rem)] max-w-6xl relative left-1/2 -translate-x-1/2">
+          <JigsawFinishedPicture board={final.jigsaw} />
+        </div>
+        {pct < 100 && (
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-center text-slate-600 dark:text-slate-300">What the class built</p>
+            <JigsawBoard board={final.jigsaw} />
+          </div>
+        )}
       </div>
     );
   }

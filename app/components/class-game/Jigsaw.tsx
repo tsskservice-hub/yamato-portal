@@ -185,6 +185,30 @@ export function JigsawBoxPicture({ board }: { board: JigsawBoardInfo }) {
   );
 }
 
+/**
+ * ゲームが終わったあとに見せる、使った絵の全体（ページの幅いっぱい）と注釈（作品名・出典）。
+ * 縦長の絵は、画面の高さに収まるようにする。
+ */
+export function JigsawFinishedPicture({ board }: { board: JigsawBoardInfo }) {
+  const portrait = board.height > board.width;
+  return (
+    <figure className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+      <p className="px-4 pt-3 text-xs font-bold tracking-widest text-indigo-500">THE PICTURE</p>
+      <div className="p-3">
+        <img
+          src={board.imageUrl}
+          alt={board.title}
+          className={`mx-auto rounded-lg ${portrait ? 'max-h-[85vh] w-auto' : 'w-full h-auto'}`}
+        />
+      </div>
+      <figcaption className="px-4 pb-4 space-y-1 text-center">
+        <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{board.title}</p>
+        {board.credit && <p className="text-sm text-slate-600 dark:text-slate-300">{board.credit}</p>}
+      </figcaption>
+    </figure>
+  );
+}
+
 export function progressPercent(board: JigsawBoardInfo) {
   return board.total ? Math.round((board.placed.length / board.total) * 100) : 0;
 }

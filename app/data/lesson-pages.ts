@@ -26,8 +26,10 @@ export interface LessonPageExtras {
 export const LESSON_PAGE_EXTRAS: Record<string, LessonPageExtras> = {
   "family-1": {
     speakingTitle: "Speaking Task: Practice Talking About Your Family Members",
+    heroImage: { src: "/images/lessons/family-1.webp", alt: "A family together" },
   },
   "countries-1": {
     speakingTitle: "Speaking Task: Where Are You From?",
+    heroImage: { src: "/images/lessons/country-1.webp", alt: "Kaminari-mon gate in Asakusa, Tokyo" },
   },
 };
