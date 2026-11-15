@@ -115,17 +115,22 @@ export const EduVocabularySidebar: React.FC<EduVocabularySidebarProps> = ({
                 >
                   🔊
                 </button>
+                {/* 右の列：日本語・ローマ字・英語を1行ずつ */}
                 <div className="min-w-0 flex-1">
-                  <span className="font-bold text-slate-900 dark:text-slate-100 block text-base sm:text-lg">
+                  <span className="font-bold text-slate-900 dark:text-slate-100 block text-base sm:text-lg break-words">
                     {vocab.jp_text}
                   </span>
-                  <span className="text-slate-600 dark:text-slate-300 font-medium italic text-xs block mt-0.5">
-                    {vocab.romaji}
-                  </span>
+                  {vocab.romaji && (
+                    <span className="text-slate-600 dark:text-slate-300 font-medium italic text-xs block mt-0.5 break-words">
+                      {vocab.romaji}
+                    </span>
+                  )}
+                  {vocab.english_text && (
+                    <span className="text-slate-700 dark:text-slate-300 font-semibold text-sm block mt-0.5 break-words">
+                      {vocab.english_text}
+                    </span>
+                  )}
                 </div>
-                <span className="text-slate-700 dark:text-slate-300 font-semibold text-right text-sm sm:text-base">
-                  {vocab.english_text}
-                </span>
               </div>
             );
           })}
