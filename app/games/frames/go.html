@@ -722,9 +722,43 @@
           }
           return !stack.length && size <= 30 && borders[color] && !borders[opp];
         }
+        // The game is settled when every empty area touches only one colour: all borders are
+        // closed and there is nothing left to fight over. Then only captures and atari moves
+        // (making one, or saving our own group from one) can still matter; otherwise pass.
+        function boardSettled() {
+          var seen = new Array(N).fill(false);
+          for (var i = 0; i < N; i++) {
+            if (bd[i] !== EMPTY || seen[i]) continue;
+            var borders = {}, stack = [i];
+            seen[i] = true;
+            while (stack.length) {
+              var c = stack.pop(), cn = nbrs(c);
+              for (var q = 0; q < cn.length; q++) {
+                var m = cn[q];
+                if (bd[m] === EMPTY) { if (!seen[m]) { seen[m] = true; stack.push(m); } }
+                else borders[bd[m]] = true;
+              }
+            }
+            if (borders[BLACK] && borders[WHITE]) return false;
+          }
+          return true;
+        }
+        function tactical(cand) {
+          if (cand.sim.captured > 0) return true;
+          var ns = nbrs(cand.i);
+          for (var k = 0; k < ns.length; k++) {
+            var n = ns[k];
+            if (bd[n] === color && groupInfo(bd, n).liberties === 1) return true;
+            if (bd[n] === opp && groupInfo(cand.sim.board, n).liberties === 1) return true;
+          }
+          return false;
+        }
+        var settled = moveCount > 30 && boardSettled();
+
         var best = null, bestScore = -Infinity;
         for (var c = 0; c < moves.length; c++) {
           var cand = moves[c];
+          if (settled && !tactical(cand)) { cand.score -= 25; continue; }
           if (insideOwnArea(cand) || hopeless(cand)) { cand.score -= 25; continue; }
           best = cand; bestScore = cand.score;
           break;

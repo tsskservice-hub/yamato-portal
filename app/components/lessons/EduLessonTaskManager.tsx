@@ -132,10 +132,10 @@ export function EduLessonTaskManager({
           <div>
             <h3 className="text-xl font-black text-emerald-100 flex items-center gap-2">
               <span>🏫</span>
-              <span>Lesson Tasks & Practice Drills (学習タスク管理)</span>
+              <span>Lesson Tasks & Practice Drills</span>
             </h3>
             <p className="text-xs sm:text-sm text-emerald-100/90 mt-1">
-              各ドリルへの挑戦、クイズの合格、および Yamato Sensei との添削完了時に自動で進捗が記録されます。
+              Complete all six tasks to finish this lesson. Your progress is saved automatically each time you complete a task.
             </p>
           </div>
           <div className="text-right flex items-center gap-3">
@@ -144,7 +144,7 @@ export function EduLessonTaskManager({
                 ? "bg-emerald-300 text-slate-950 border-emerald-200" 
                 : "bg-amber-400 text-slate-950 border-amber-300"
             }`}>
-              {allTasksCompleted ? "🎉 All Tasks Completed!" : "⏳ 学習進行中"}
+              {allTasksCompleted ? "🎉 All Tasks Completed!" : "⏳ In Progress"}
             </span>
           </div>
         </div>
@@ -159,14 +159,14 @@ export function EduLessonTaskManager({
                 Task 1
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.vocabulary ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.vocabulary ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.vocabulary ? '✅ Completed' : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              📖 Vocabulary Drill (語彙確認)
+              📖 Vocabulary Drill
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              4つのモード（日→英、音声→英、英→日、発声練習）の語彙ドリルをクリアすると自動で完了になります。
+              Clear all four modes (Japanese → English, Audio → English, English → Japanese, and Speaking practice) to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -177,7 +177,7 @@ export function EduLessonTaskManager({
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Vocab Drill (ドリル開始)</span>
+                  <span>Start Vocab Drill</span>
                 </button>
               )}
             </div>
@@ -190,14 +190,14 @@ export function EduLessonTaskManager({
                 Task 2
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.listening ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.listening ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.listening ? '✅ Completed' : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              🎧 Listening Task (リスニング確認)
+              🎧 Listening Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              「何人家族ですか」の会話を聞いて、人数をタイピングで答える問題を5問クリアすると完了になります。
+              Listen to short conversations and type your answers. Answer 5 questions correctly to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -208,7 +208,7 @@ export function EduLessonTaskManager({
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Listening Task (リスニング開始)</span>
+                  <span>Start Listening Task</span>
                 </button>
               )}
             </div>
@@ -221,14 +221,14 @@ export function EduLessonTaskManager({
                 Task 3
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.reading ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.reading ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.reading ? '✅ Completed' : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              📚 Reading Task (リーディング読解・発話確認)
+              📚 Reading Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              画面の日本語をマイクに向かって発声し、意味を英語でタイピング入力するデュアルチェックドリルをクリアすると完了になります。
+              Read the Japanese on the screen aloud into your microphone, then type its meaning in English. Clear the drill to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -239,7 +239,7 @@ export function EduLessonTaskManager({
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Reading Drill (リーディング開始)</span>
+                  <span>Start Reading Drill</span>
                 </button>
               )}
             </div>
@@ -252,14 +252,14 @@ export function EduLessonTaskManager({
                 Task 4
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.speaking ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.speaking ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.speaking ? '✅ Completed' : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              🎤 Speaking Task (AI音声会話)
+              🎤 Speaking Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              AI Yamato との一問一答音声会話セッション（モーダル）を完了すると自動で記録されます。
+              Have a question-and-answer voice conversation with AI Yamato. Finish the session to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -270,7 +270,7 @@ export function EduLessonTaskManager({
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Speaking Task (スピーキング開始)</span>
+                  <span>Start Speaking Task</span>
                 </button>
               )}
             </div>
@@ -283,14 +283,14 @@ export function EduLessonTaskManager({
                 Task 5
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.writing ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.writing ? '✅ Completed' : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              ✍️ Writing Task & AI Feedback (作文・添削)
+              ✍️ Writing Task & AI Feedback
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              相手に伝えるためのメッセージを日本語で手書き（紙＋写真、またはデジタル原稿用紙）して提出します。読み手からの返事とフィードバックを受け取ると達成になります。
+              Write a message in Japanese for a reader (on paper and upload a photo, or on the digital genkō yōshi) and submit it. You complete this task when you receive a reply and feedback.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -301,7 +301,7 @@ export function EduLessonTaskManager({
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Writing Task (ライティング開始)</span>
+                  <span>Start Writing Task</span>
                 </button>
               )}
             </div>
@@ -314,14 +314,14 @@ export function EduLessonTaskManager({
                 Task 6
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.culture ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.culture ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.culture ? '✅ Completed' : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              🎎 Culture Task (日本の文化)
+              🎎 Culture Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              ナレーションと字幕つきの紙芝居で日本の文化を学び、Quick Check（選択式クイズ）に全問正解すると完了になります。
+              Learn about Japanese culture through a picture story with narration and subtitles. Answer every Quick Check question correctly to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -332,7 +332,7 @@ export function EduLessonTaskManager({
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Culture Task (文化タスク開始)</span>
+                  <span>Start Culture Task</span>
                 </button>
               )}
             </div>
@@ -345,8 +345,8 @@ export function EduLessonTaskManager({
             <div className="flex items-center gap-3">
               <span className="text-2xl">🏆</span>
               <div>
-                <h5 className="font-black text-sm">おめでとうございます！ユニット修了バッジ獲得！</h5>
-                <p className="text-xs text-slate-900 font-medium">すべての学習タスクをシステム判定によりクリアしました。</p>
+                <h5 className="font-black text-sm">Congratulations! You have earned the lesson completion badge!</h5>
+                <p className="text-xs text-slate-900 font-medium">You have completed all the tasks in this lesson.</p>
               </div>
             </div>
           </div>
