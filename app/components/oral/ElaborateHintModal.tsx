@@ -180,17 +180,6 @@ export const ElaborateHintModal: React.FC<ElaborateHintModalProps> = ({
           </div>
         </div>
 
-        {/* Writing Rule Reminders */}
-        <div className="bg-slate-100 p-4 rounded-2xl text-xs text-slate-600 space-y-1">
-          <p className="font-bold text-slate-800 mb-1">📌 Writing Rule Guidelines</p>
-          <p>
-            ・Please write at least <strong className="text-slate-800">10 characters</strong> per sentence.
-          </p>
-          <p>
-            ・Single-word responses like "Yes" or "No" will not be counted.
-          </p>
-        </div>
-
         {/* Close Button */}
         <div className="mt-6 text-center">
           <button

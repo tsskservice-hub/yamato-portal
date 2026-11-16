@@ -26,6 +26,7 @@ import { findCultureTaskForLesson } from "~/data/culture-tasks";
 import { findListeningTaskForLesson } from "~/data/listening-tasks";
 import { LESSON_PAGE_EXTRAS } from "~/data/lesson-pages";
 import type { LessonPageData } from "~/lib/lessonPageData";
+import { requestAuthModal } from "~/utils/openAuthModal";
 
 /** 完了メッセージ「You have successfully mastered all ○○!」に入れるタスク名 */
 const COMPLETED_TASK_NAMES: Record<LessonTaskKey, string> = {
@@ -112,13 +113,8 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
   }));
 
   const handleOpenAuth = () => {
-    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
-    const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
-    if (authButton) {
-      authButton.click();
-    } else {
-      window.location.href = "/#auth";
-    }
+    // サインイン画面を開く（PageLayout が受け取って、その場で開く）
+    requestAuthModal("signin");
   };
 
   useEffect(() => {

@@ -16,4 +16,7 @@ export const CREDIT_COSTS = {
   mockSection1: 15,
   mockSection2: 15,
   mockFull: 25,
+  /** 漢字AI検索: 1 日 20 回まで無料、それを超えたら 1 回このクレジット数 */
+  kanjiLookup: 1,
+  kanjiLookupFreePerDay: 20,
 } as const;

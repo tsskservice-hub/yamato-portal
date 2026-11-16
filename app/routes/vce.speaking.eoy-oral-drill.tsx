@@ -14,6 +14,7 @@ import ChatYamatoEoyOralDrill from '~/components/chat/ChatYamatoEoyOralDrill';
 import { supabase } from '~/lib/supabaseClient';
 import { notifyCreditsUpdated } from '~/components/layout/PageLayout';
 import { CREDIT_COSTS } from '~/data/credit-costs';
+import { buildReadingDictFromOralData } from '~/utils/kanji-readings';
 
 // 💡 Modular Oral components & hooks
 import OralCenterChatPractice from '~/components/oral/OralCenterChatPractice';
@@ -26,6 +27,7 @@ import {
   fetchOralExamQuestionsData,
   OralExamQuestionsData,
 } from '~/data/oral-exam-questions';
+import { requestAuthModal } from "~/utils/openAuthModal";
 
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -72,13 +74,8 @@ export default function EoyOralDrillPage() {
 
   // 💡 確実に認証モーダルやログイン画面を開くための共通トリガー関数
   const handleOpenAuth = () => {
-    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
-    const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
-    if (authButton) {
-      authButton.click();
-    } else {
-      window.location.href = "/#auth";
-    }
+    // サインイン画面を開く（PageLayout が受け取って、その場で開く）
+    requestAuthModal("signin");
   };
 
   // 💡 Drillモードとして明示的に "drill" を指定してフックを呼び出す
@@ -188,18 +185,22 @@ export default function EoyOralDrillPage() {
   const MIN_CHARS_BY_DIFFICULTY = { steady: 7, normal: 10, accelerated: 15 } as const;
   const minChars = selectedSection === "custom" ? 10 : MIN_CHARS_BY_DIFFICULTY[selectedLevel];
   const handleClearAllTopics = () => setSelectedTopics([]);
+  // VCE 以外の漢字の読み（見本の答えのふりがなから作る）。答えの欄の下に出す
+  const readingDict = useMemo(() => buildReadingDictFromOralData(questionsData), [questionsData]);
 
   const currentQuestions: (QuestionItem & {
     questionOriginal: string;
     defaultAnswerOriginal?: string;
     minLength?: number;
     audio?: string;
+    defaultAnswerHtml?: string;
   })[] = useMemo(() => {
     const list: (QuestionItem & {
       questionOriginal: string;
       defaultAnswerOriginal?: string;
       minLength?: number;
       audio?: string;
+      defaultAnswerHtml?: string;
     })[] = [];
     const initialMap: { [key: string]: string } = {};
 
@@ -243,6 +244,7 @@ export default function EoyOralDrillPage() {
               category: categoryName,
               isCustom: false,
               audio: q.audio, // 質問の音声ファイル（/audio/Q001.mp3 など）
+              defaultAnswerHtml: q.defaultAnswer, // 見本の答え（ふりがな付き）。読みを出すときに使う
               defaultAnswerOriginal: plainAnswer,
               minLength: minChars,
             });
@@ -424,6 +426,59 @@ export default function EoyOralDrillPage() {
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
           </div>
 
+          {/* 練習の画面: タイトルのすぐ下（下の選択・答えと行き来しやすいように） */}
+          <div ref={chatContainerRef}>
+            {!user ? (
+              <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
+                <div className="w-14 h-14 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
+                  🔒
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
+                    Sign In Required for Oral Practice
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato
+                    and record your progress.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenAuth}
+                  className="py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
+                >
+                  Sign In / Sign Up Now
+                </button>
+              </div>
+            ) : engine.questionAudioError ? (
+              <DataErrorState
+                title="Question Audio Unavailable"
+                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
+                errorMessage={`[eoy-oral-drill] ${engine.questionAudioError}`}
+                onRetry={engine.clearQuestionAudioError}
+              />
+            ) : (
+              <OralCenterChatPractice
+                chatMessages={engine.chatMessages}
+                isPracticing={engine.isPracticing}
+                currentQuestionIndex={engine.currentQuestionIndex}
+                totalQuestions={engine.activeQuestions.length}
+                isAnalyzing={engine.isAnalyzing}
+                isRecording={engine.isRecording}
+                isWaitingForNext={engine.isWaitingForNext}
+                inputMessage={engine.inputMessage}
+                setInputMessage={engine.setInputMessage}
+                onStartRecording={engine.startRecording}
+                onStopRecording={engine.stopRecording}
+                onProceedNext={() => engine.proceedToNextQuestion(answers)}
+                onSendMessage={handleSendMessageWithCredit}
+                themeColor={themeColor}
+                onStartPractice={handleStartPractice}
+                creditCost={CREDIT_COSTS.oralDrill}
+              />
+            )}
+          </div>
+
           <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 rounded-3xl p-6 shadow-sm space-y-6">
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -497,58 +552,10 @@ export default function EoyOralDrillPage() {
             orderMode={orderMode}
             setOrderMode={setOrderMode}
             themeColor={themeColor}
+            speechSpeed={speechSpeed}
+            readingDict={readingDict}
           />
 
-          <div ref={chatContainerRef}>
-            {!user ? (
-              <div className="bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 rounded-3xl p-8 shadow-sm text-center space-y-4">
-                <div className="w-14 h-14 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black">
-                  🔒
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-black text-base text-slate-800 dark:text-slate-100">
-                    Sign In Required for Oral Practice
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Please sign in to start interactive EOY Oral Exam practice sessions with AI Yamato
-                    and record your progress.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleOpenAuth}
-                  className="py-3 px-6 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer inline-block"
-                >
-                  Sign In / Sign Up Now
-                </button>
-              </div>
-            ) : engine.questionAudioError ? (
-              <DataErrorState
-                title="Question Audio Unavailable"
-                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
-                errorMessage={`[eoy-oral-drill] ${engine.questionAudioError}`}
-                onRetry={engine.clearQuestionAudioError}
-              />
-            ) : (
-              <OralCenterChatPractice
-                chatMessages={engine.chatMessages}
-                isPracticing={engine.isPracticing}
-                currentQuestionIndex={engine.currentQuestionIndex}
-                totalQuestions={engine.activeQuestions.length}
-                isAnalyzing={engine.isAnalyzing}
-                isRecording={engine.isRecording}
-                isWaitingForNext={engine.isWaitingForNext}
-                inputMessage={engine.inputMessage}
-                setInputMessage={engine.setInputMessage}
-                onStartRecording={engine.startRecording}
-                onStopRecording={engine.stopRecording}
-                onProceedNext={() => engine.proceedToNextQuestion(answers)}
-                onSendMessage={handleSendMessageWithCredit}
-                themeColor={themeColor}
-                creditCost={CREDIT_COSTS.oralDrill}
-              />
-            )}
-          </div>
 
           <aside
             aria-label="Floating Controls"

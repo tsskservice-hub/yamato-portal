@@ -12,6 +12,7 @@ import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
 import ChatYamatoEoyOralDrill from '~/components/chat/ChatYamatoEoyOralDrill';
 import { supabase } from '~/lib/supabaseClient';
 import { useOralPracticeEngine, QuestionData } from '~/hooks/OralPracticeHooks';
+import { requestAuthModal } from "~/utils/openAuthModal";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -55,13 +56,8 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
   } = useOralPracticeEngine("normal", 1.0, user?.id, nickname, "ようこそ！練習モードを選択してスタートしてください。");
 
   const handleOpenAuth = () => {
-    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
-    const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
-    if (authButton) {
-      authButton.click();
-    } else {
-      window.location.href = "/#auth";
-    }
+    // サインイン画面を開く（PageLayout が受け取って、その場で開く）
+    requestAuthModal("signin");
   };
 
   useEffect(() => {

@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { useYamatoAccount, getSafeString } from "../hooks/useYamatoAccount";
 import { personaliseGreeting, resolveDisplayName } from "../utils/nickname";
 import { addAiGeneratedLabel } from "../utils/aiImageLabel";
+import { requestAuthModal } from "~/utils/openAuthModal";
 
 export type ChatOption = {
   label: string;
@@ -75,7 +76,7 @@ export function useYamatoChat2Logic({
     if (onOpenAuth) {
       onOpenAuth(mode);
     } else {
-      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode } }));
+      requestAuthModal(mode);
     }
   };
 

@@ -16,6 +16,7 @@ import ChatYamatoEoyOralElaborate from '~/components/chat/ChatYamatoEoyOralElabo
 import { supabase } from '~/lib/supabaseClient';
 import { notifyCreditsUpdated } from '~/components/layout/PageLayout';
 import { CREDIT_COSTS } from '~/data/credit-costs';
+import { buildReadingDictFromOralData } from '~/utils/kanji-readings';
 
 // Modular Oral components & hooks
 import OralCenterChatPractice from '~/components/oral/OralCenterChatPractice';
@@ -30,6 +31,9 @@ import {
 
 import { Download, Plus, Trash2, Lightbulb } from "lucide-react";
 import ElaborateHintModal from '~/components/oral/ElaborateHintModal';
+import QuestionAudioButton from '~/components/oral/QuestionAudioButton';
+import KanjiReadingsLine from '~/components/oral/KanjiReadingsLine';
+import { requestAuthModal } from "~/utils/openAuthModal";
 
 export interface QuestionItem {
   id: string;
@@ -89,13 +93,8 @@ export default function EoyOralElaboratePage() {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleOpenAuth = () => {
-    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
-    const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
-    if (authButton) {
-      authButton.click();
-    } else {
-      window.location.href = "/#auth";
-    }
+    // サインイン画面を開く（PageLayout が受け取って、その場で開く）
+    requestAuthModal("signin");
   };
 
   const {
@@ -208,18 +207,22 @@ export default function EoyOralElaboratePage() {
   const difficultyLabel =
     selectedSection === "custom" ? "custom" : { steady: "easy", normal: "medium", accelerated: "hard" }[selectedLevel];
   const handleClearAllTopics = () => setSelectedTopics([]);
+  // VCE 以外の漢字の読み（見本の答えのふりがなから作る）。答えの欄の下に出す
+  const readingDict = useMemo(() => buildReadingDictFromOralData(questionsData), [questionsData]);
 
   const currentQuestions: (QuestionItem & {
     questionOriginal: string;
     defaultAnswerOriginal?: string;
     minLength?: number;
     audio?: string;
+    defaultAnswerHtml?: string;
   })[] = useMemo(() => {
     const list: (QuestionItem & {
       questionOriginal: string;
       defaultAnswerOriginal?: string;
       minLength?: number;
       audio?: string;
+      defaultAnswerHtml?: string;
     })[] = [];
     const initialMap: { [key: string]: string } = {};
 
@@ -263,6 +266,7 @@ export default function EoyOralElaboratePage() {
               category: categoryName,
               isCustom: false,
               audio: q.audio, // 質問の音声ファイル（/audio/Q001.mp3 など）
+              defaultAnswerHtml: q.defaultAnswer, // 見本の答え（ふりがな付き）。読みを出すときに使う
               defaultAnswerOriginal: plainAnswer,
               minLength: 10,
             });
@@ -571,6 +575,37 @@ export default function EoyOralElaboratePage() {
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
           </div>
 
+          {/* 練習の画面: タイトルのすぐ下（下の選択・答えと行き来しやすいように） */}
+          <div ref={chatContainerRef}>
+            {engine.questionAudioError ? (
+              <DataErrorState
+                title="Question Audio Unavailable"
+                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
+                errorMessage={`[eoy-oral-elaborate] ${engine.questionAudioError}`}
+                onRetry={engine.clearQuestionAudioError}
+              />
+            ) : (
+            <OralCenterChatPractice
+              chatMessages={engine.chatMessages}
+              isPracticing={engine.isPracticing}
+              currentQuestionIndex={engine.currentQuestionIndex}
+              totalQuestions={engine.activeQuestions.length}
+              isAnalyzing={engine.isAnalyzing}
+              isRecording={engine.isRecording}
+              isWaitingForNext={engine.isWaitingForNext}
+              inputMessage={engine.inputMessage}
+              setInputMessage={engine.setInputMessage}
+              onStartRecording={engine.startRecording}
+              onStopRecording={engine.stopRecording}
+              onProceedNext={() => engine.proceedToNextQuestion(answers)}
+              onSendMessage={handleSendMessageWithCredit}
+              themeColor={themeColor}
+              onStartPractice={handleStartPractice}
+              creditCost={engine.isFollowUpActive ? 0 : CREDIT_COSTS.oralElaborate}
+            />
+            )}
+          </div>
+
           {/* Section Selection Area & Control Selector */}
           <div className="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 rounded-3xl p-6 shadow-sm space-y-6">
             {/* Stage Selection */}
@@ -702,6 +737,9 @@ export default function EoyOralElaboratePage() {
                     {/* Question Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
+                        {q.audio && (
+                          <QuestionAudioButton src={q.audio} playbackRate={speechSpeed} themeColor={themeColor} />
+                        )}
                         <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-md">
                           {q.category || `Q${qIdx + 1}`}
                         </span>
@@ -783,6 +821,9 @@ export default function EoyOralElaboratePage() {
                       ))}
                     </div>
 
+                    {/* VCE 以外の漢字の読み（答えの欄ではふりがなを付けられないので、ここに出す） */}
+                    <KanjiReadingsLine text={sentences.join("")} dict={readingDict} contextHtml={q.defaultAnswerHtml} />
+
                     {/* 条件を満たしているか（文の数・文字数の合計） */}
                     {(() => {
                       const st = getAnswerStatus(q.id);
@@ -812,7 +853,7 @@ export default function EoyOralElaboratePage() {
               <button
                 type="button"
                 onClick={handleStartPractice}
-                disabled={currentQuestions.length === 0 || engine.isPracticing}
+                disabled={currentQuestions.length === 0 || engine.isRecording || engine.isAnalyzing}
                 className="w-full sm:w-auto text-white font-black px-8 py-3.5 rounded-2xl shadow-lg transition cursor-pointer text-sm disabled:opacity-50"
                 style={{ backgroundColor: themeColor }}
               >
@@ -821,35 +862,6 @@ export default function EoyOralElaboratePage() {
             </div>
           </div>
 
-          {/* 2. Conversation Practice with AI Yamato 🎙️（drill と同じく、選択 → 答え → チャットの順） */}
-          <div ref={chatContainerRef}>
-            {engine.questionAudioError ? (
-              <DataErrorState
-                title="Question Audio Unavailable"
-                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
-                errorMessage={`[eoy-oral-elaborate] ${engine.questionAudioError}`}
-                onRetry={engine.clearQuestionAudioError}
-              />
-            ) : (
-            <OralCenterChatPractice
-              chatMessages={engine.chatMessages}
-              isPracticing={engine.isPracticing}
-              currentQuestionIndex={engine.currentQuestionIndex}
-              totalQuestions={engine.activeQuestions.length}
-              isAnalyzing={engine.isAnalyzing}
-              isRecording={engine.isRecording}
-              isWaitingForNext={engine.isWaitingForNext}
-              inputMessage={engine.inputMessage}
-              setInputMessage={engine.setInputMessage}
-              onStartRecording={engine.startRecording}
-              onStopRecording={engine.stopRecording}
-              onProceedNext={() => engine.proceedToNextQuestion(answers)}
-              onSendMessage={handleSendMessageWithCredit}
-              themeColor={themeColor}
-              creditCost={engine.isFollowUpActive ? 0 : CREDIT_COSTS.oralElaborate}
-            />
-            )}
-          </div>
 
           <aside
             aria-label="Floating Controls"

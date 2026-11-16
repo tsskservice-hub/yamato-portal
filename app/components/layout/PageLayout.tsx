@@ -26,6 +26,7 @@ import Footer from "./Footer";
 import { Breadcrumbs } from "./Breadcrumbs"; // 💡 切り出したパンくずモジュールのインポート
 import { supabase } from "../../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../../lib/passkey";
+import { OPEN_AUTH_EVENT, type OpenAuthDetail } from "~/utils/openAuthModal";
 
 /**
  * 💡 リアルタイムクレジット更新通知ヘルパー関数
@@ -214,6 +215,27 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       handleOpenAuthModal(mode);
     }
   }));
+
+  // 🔐 どの部品からでもサインイン画面を開けるようにする（utils/openAuthModal.ts の requestAuthModal）
+  //   ・"open-auth-modal" の合図を受け取ったら、その場でモーダルを開く（ページは移動しない）
+  //   ・URL が /#auth・/#auth-signup で開かれたときも、モーダルを開く（PageLayout が無いページからの移動先）
+  useEffect(() => {
+    const onOpenAuth = (e: Event) => {
+      const detail = (e as CustomEvent<OpenAuthDetail>).detail;
+      if (detail) detail.handled = true;
+      handleOpenAuthModal(detail?.mode === 'signup' ? 'signup' : 'signin');
+    };
+    window.addEventListener(OPEN_AUTH_EVENT, onOpenAuth);
+
+    const hash = window.location.hash;
+    if (hash === '#auth' || hash === '#auth-signup') {
+      handleOpenAuthModal(hash === '#auth-signup' ? 'signup' : 'signin');
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
+    return () => window.removeEventListener(OPEN_AUTH_EVENT, onOpenAuth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePasskeyAuth = async (e: React.FormEvent) => {
     e.preventDefault();

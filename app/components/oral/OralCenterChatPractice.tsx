@@ -27,6 +27,8 @@ export interface OralCenterChatPracticeProps {
   titleLabel?: string;
   headerRight?: React.ReactNode;
   creditCost?: number; // 💡 音声会話練習の消費クレジット数（デフォルト: 4）
+  /** 練習を始める（練習中なら、今の設定でやり直す）。あれば、この画面に Start / Restart ボタンを出す */
+  onStartPractice?: () => void;
 }
 
 export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
@@ -46,6 +48,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
   titleLabel = "Conversation Practice with AI Yamato",
   headerRight,
   creditCost = 4,
+  onStartPractice,
 }) => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const sendFormRef = useRef<HTMLFormElement | null>(null);
@@ -123,7 +126,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             </span>
           </div>
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span>2. {titleLabel}</span> 🎙️
+            <span>{titleLabel}</span> 🎙️
           </h2>
         </div>
 
@@ -231,6 +234,35 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             )}
           </div>
 
+          {/* 練習を始める / 今の設定（下で選んだセクション・難しさ・トピック）でやり直す */}
+          {onStartPractice && (
+            <div className="flex flex-col items-center sm:items-end gap-1 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    isPracticing &&
+                    !window.confirm("Restart the practice with the stage, difficulty and topics selected below?")
+                  ) {
+                    return;
+                  }
+                  onStartPractice();
+                }}
+                disabled={isRecording || isAnalyzing}
+                className={`w-full sm:w-auto font-black px-5 py-3 rounded-xl shadow-md transition cursor-pointer text-xs sm:text-sm disabled:opacity-40 ${
+                  isPracticing ? "bg-white dark:bg-slate-900 border-2" : "text-white"
+                }`}
+                style={isPracticing ? { borderColor: themeColor, color: themeColor } : { backgroundColor: themeColor }}
+              >
+                {isPracticing ? "🔄 Restart Practice" : "🚀 Speak to AI Yamato (Start Practice)"}
+              </button>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                {isPracticing
+                  ? "Speed changes apply from the next question. For a new stage, difficulty or topic, change it below and restart."
+                  : "Choose the stage, difficulty and topics below, then start."}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* 録音した答えの確認: 言い直す（Record Again）か、送る（Send）か。書き直す欄はない */}

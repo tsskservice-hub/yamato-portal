@@ -618,7 +618,7 @@ export function useOralPracticeEngine(
 
     const startMsg = modeType === "handsfree"
       ? `【ハンズフリー会話開始】<br><br>Yamato: 「${firstQ.question}」<br><br>（どうぞ、マイクに向かってお話しください...終了時は「終わり」と言ってください）`
-      : `<b>Drill session started</b><br><br>Yamato: 「${firstQ.question}」<br><br><span class="registered-answer">(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br></span>Press the Record button or the spacebar to answer. To hear the question again, say 「すみません。もういちどおねがいします。」`;
+      : `<b>Practice session started</b><br><br>Yamato: 「${firstQ.question}」<br><br><span class="registered-answer">(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br></span>Press the Record button or the spacebar to answer. To hear the question again, say 「すみません。もういちどおねがいします。」`;
 
     setChatMessages([
       {

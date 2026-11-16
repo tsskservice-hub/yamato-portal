@@ -12,10 +12,12 @@ import { addAiGeneratedLabel } from "~/utils/aiImageLabel";
 import { CreditCostFooter } from "../CreditCostFooter";
 import { useChatResize } from "../../hooks/useChatResize";
 import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
+import { useBroadcastChatColor } from "~/utils/chatThemeColor";
 import { personaliseGreeting, resolveDisplayName } from "../../utils/nickname"; // 💡 ニックネームモジュールのインポート
 
 export interface YamatoChatCommonMetaType {
   componentName: string;
+import { requestAuthModal } from "~/utils/openAuthModal";
   version: string;
   role: string;
   features: { featureName: string; description: string }[];
@@ -179,7 +181,7 @@ export function YamatoChatCommon({
     if (onOpenAuth) {
       onOpenAuth(mode);
     } else {
-      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode } }));
+      requestAuthModal(mode);
     }
   };
 
@@ -190,6 +192,8 @@ export function YamatoChatCommon({
   const activeImagePreview = selectedImagePreview || externalImagePreview || null;
 
   const isHexColor = themeColor.startsWith("#");
+  // このページのヤマトチャットの色を、🔍 Kanji ボタンなどに知らせる（同じ色にそろえるため）
+  useBroadcastChatColor(themeColor);
   const currentTheme =
     !isHexColor && themeStyles[themeColor as ThemeColorKey]
       ? themeStyles[themeColor as ThemeColorKey]

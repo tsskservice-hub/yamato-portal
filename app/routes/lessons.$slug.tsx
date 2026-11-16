@@ -19,6 +19,7 @@ import { newSlugFor, slugCandidates } from "~/data/lesson-slugs";
 import { fetchTextbookRefs, formatTextbookRef, TEXTBOOK_DISCLAIMER, type TextbookRef } from "~/lib/lessonTextbooks";
 import { fetchLessonPageData, type LessonPageData } from "~/lib/lessonPageData";
 import { EduLessonPage } from "~/components/lessons/EduLessonPage";
+import { requestAuthModal } from "~/utils/openAuthModal";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -131,13 +132,8 @@ function LessonTopicHubPage() {
   const { topic, lessons = [], vocabulary = [], textbookRefs = {} } = loaderData as any;
 
   const handleOpenAuth = () => {
-    window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));
-    const authButton = document.querySelector("[data-auth-trigger]") as HTMLElement;
-    if (authButton) {
-      authButton.click();
-    } else {
-      window.location.href = "/#auth";
-    }
+    // サインイン画面を開く（PageLayout が受け取って、その場で開く）
+    requestAuthModal("signin");
   };
 
   useEffect(() => {
