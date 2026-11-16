@@ -14,6 +14,8 @@ import { DataErrorState } from '~/components/DataErrorState';
 import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
 import ChatYamatoEoyOralElaborate from '~/components/chat/ChatYamatoEoyOralElaborate';
 import { supabase } from '~/lib/supabaseClient';
+import { notifyCreditsUpdated } from '~/components/layout/PageLayout';
+import { CREDIT_COSTS } from '~/data/credit-costs';
 
 // Modular Oral components & hooks
 import OralCenterChatPractice from '~/components/oral/OralCenterChatPractice';
@@ -26,7 +28,7 @@ import {
   OralExamQuestionsData,
 } from '~/data/oral-exam-questions';
 
-import { Download, Plus, Trash2, Play, Lightbulb } from "lucide-react";
+import { Download, Plus, Trash2, Lightbulb } from "lucide-react";
 import ElaborateHintModal from '~/components/oral/ElaborateHintModal';
 
 export interface QuestionItem {
@@ -40,18 +42,9 @@ export interface QuestionItem {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase
-      .from('portal_settings')
-      .select('content')
-      .eq('key', 'PORTAL_CONTENT')
-      .single();
-    portalContent = portalData?.content || null;
-  } catch (e) {}
-
+  // PORTAL_CONTENT はもう Supabase にないので問い合わせない（meta は generateModuleMeta の既定値を使う）
   return json({
-    portalContent,
+    portalContent: null,
     currentPath: url.pathname,
   });
 }
@@ -87,8 +80,8 @@ export default function EoyOralElaboratePage() {
   const [newAnswerText, setNewAnswerText] = useState("");
   const [newCategory, setNewCategory] = useState("");
 
-  // Modal State for Elaborate Hint
-  const [isHintModalOpen, setIsHintModalOpen] = useState<boolean>(false);
+  // Elaborate Hint: どの質問のヒントを開いているか（null なら閉じている）
+  const [hintTarget, setHintTarget] = useState<{ category: string; question: string } | null>(null);
 
   // Sentence map state for each question ID: { [qId: string]: ["Sentence 1", "Sentence 2", "Sentence 3", ...] }
   const [sentencesMap, setSentencesMap] = useState<{ [qId: string]: string[] }>({});
@@ -159,7 +152,11 @@ export default function EoyOralElaboratePage() {
         .single();
 
       if (data && !error) {
-        if (typeof data.credits === "number") setCredits(data.credits);
+        if (typeof data.credits === "number") {
+          setCredits(data.credits);
+          // ヘッダーのクレジット表示も同じ残高にそろえる（ヘッダーはこのイベントで更新される）
+          notifyCreditsUpdated(data.credits);
+        }
         if (data.nickname) setNickname(data.nickname);
       }
     } catch (err) {
@@ -200,6 +197,16 @@ export default function EoyOralElaboratePage() {
   };
 
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
+
+  // 答えの条件: 会話の難しさで変わる（文の数と、文字数の合計）。カスタムは medium と同じ
+  const REQUIREMENTS = {
+    steady: { sentences: 2, chars: 14 },
+    normal: { sentences: 3, chars: 30 },
+    accelerated: { sentences: 3, chars: 45 },
+  } as const;
+  const requirement = selectedSection === "custom" ? REQUIREMENTS.normal : REQUIREMENTS[selectedLevel];
+  const difficultyLabel =
+    selectedSection === "custom" ? "custom" : { steady: "easy", normal: "medium", accelerated: "hard" }[selectedLevel];
   const handleClearAllTopics = () => setSelectedTopics([]);
 
   const currentQuestions: (QuestionItem & {
@@ -269,11 +276,11 @@ export default function EoyOralElaboratePage() {
     return list;
   }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
 
-  // 安全に文章を結合するヘルパー関数 (二重句点「。。」を自動修正)
+  // 文の入力欄を 1 つの答えにまとめる。文末が「。」「？」「！」ならそのまま、なければ「。」を足す（「？」「！」を消さない）
   const combineSentencesList = (sentences: string[]): string => {
     const valid = sentences.map((s) => s.trim()).filter(Boolean);
     if (valid.length === 0) return "";
-    return valid.map((s) => s.replace(/[。！？]+$/, "")).join("。") + "。";
+    return valid.map((s) => (/[。．.！!？?]$/.test(s) ? s : `${s}。`)).join("");
   };
 
   // Sentence-based Input Management Logic
@@ -291,6 +298,17 @@ export default function EoyOralElaboratePage() {
       return [parts[0] || "", parts[1] || "", parts[2] || ""];
     }
     return ["", "", ""];
+  };
+
+  // 1 問の答えが条件を満たしているか（文の数・文字数の合計）
+  const getAnswerStatus = (qId: string) => {
+    const filled = getSentencesForQuestion(qId).map((t) => t.trim()).filter(Boolean);
+    const chars = filled.reduce((sum, t) => sum + t.length, 0);
+    return {
+      sentences: filled.length,
+      chars,
+      ok: filled.length >= requirement.sentences && chars >= requirement.chars,
+    };
   };
 
   const handleSentenceChange = (qId: string, index: number, value: string) => {
@@ -311,12 +329,14 @@ export default function EoyOralElaboratePage() {
   };
 
   // Import Drill answer into Sentence 1 for a specific question
+  // drill で保存した答えがなければ、drill の画面に最初から入っている見本の答えを使う
   const handleImportDrillForQuestion = async (qId: string) => {
     if (!fetchDrillAnswers) return;
     const drillMap = await fetchDrillAnswers();
-    const drillAns = drillMap[qId];
+    const sample = currentQuestions.find((q) => q.id === qId)?.defaultAnswerOriginal || "";
+    const drillAns = drillMap[qId] || sample;
     if (!drillAns) {
-      alert("No Drill answer found for this question.");
+      alert("No Drill answer or sample answer found for this question.");
       return;
     }
 
@@ -334,17 +354,24 @@ export default function EoyOralElaboratePage() {
   // Import Drill answers into Sentence 1 for all questions
   const handleImportAllFromDrill = async () => {
     if (!fetchDrillAnswers) return;
-    const drillMap = await fetchDrillAnswers();
-    if (Object.keys(drillMap).length === 0) {
-      alert("No importable Drill answers found.");
+    // 生徒が書き直した 1 文目も消えるので、先に確認する
+    if (
+      !window.confirm(
+        `This will replace Sentence 1 of all ${currentQuestions.length} questions shown with your Drill answers (or the sample answers). Continue?`
+      )
+    ) {
       return;
     }
+    const drillMap = await fetchDrillAnswers();
 
     const nextSentencesMap = { ...sentencesMap };
     let importedCount = 0;
+    let sampleCount = 0;
 
     currentQuestions.forEach((q) => {
-      const drillAns = drillMap[q.id];
+      // drill で保存した答えがなければ、見本の答えを使う
+      const drillAns = drillMap[q.id] || q.defaultAnswerOriginal || "";
+      if (!drillMap[q.id] && drillAns) sampleCount++;
       if (drillAns) {
         const current = getSentencesForQuestion(q.id);
         const updated = [...current];
@@ -359,7 +386,12 @@ export default function EoyOralElaboratePage() {
     });
 
     setSentencesMap(nextSentencesMap);
-    alert(`Imported Drill answers into Sentence 1 for ${importedCount} questions!`);
+    alert(
+      `Imported into Sentence 1 for ${importedCount} questions` +
+        (sampleCount > 0
+          ? ` (${sampleCount} of them are sample answers, because you have no saved Drill answer for them).`
+          : ".")
+    );
   };
 
   // Add 4th and subsequent sentence boxes
@@ -387,23 +419,24 @@ export default function EoyOralElaboratePage() {
       handleOpenAuth();
       return;
     }
-    if (credits < 4) {
-      alert("Insufficient credits (4 credits required for Elaborate practice). Please top up your credits.");
+    if (credits < CREDIT_COSTS.oralElaborate) {
+      alert(`You don't have enough credits. Each Elaborate answer uses ${CREDIT_COSTS.oralElaborate} credits. Please top up your credits.`);
       return;
     }
 
-    for (const q of currentQuestions) {
-      const sentences = getSentencesForQuestion(q.id);
-      const filledSentences = sentences.filter((s) => s.trim().length > 0);
-      if (filledSentences.length < 3) {
-        alert(
-          `Answer for question "${q.questionOriginal.slice(
-            0,
-            20
-          )}..." is incomplete. Please enter at least 3 sentences.`
-        );
-        return;
-      }
+    // 選んだトピックの質問（トピック未選択なら、このセクションの全部）が、難しさごとの条件を満たしているか
+    const notReady = currentQuestions.filter((q) => !getAnswerStatus(q.id).ok);
+    if (notReady.length > 0) {
+      const first = notReady[0];
+      const st = getAnswerStatus(first.id);
+      const topicTip =
+        selectedTopics.length === 0
+          ? "\n\nTip: select one topic (for example, Family) to practise just those questions."
+          : "";
+      alert(
+        `[Answer Check: ${difficultyLabel}]\nEach answer needs at least ${requirement.sentences} sentences and ${requirement.chars} characters in total.\n${notReady.length} of ${currentQuestions.length} questions are not ready yet.\nFirst one: "${first.questionOriginal.slice(0, 20)}..." (${st.sentences} sentences, ${st.chars} characters)${topicTip}`
+      );
+      return;
     }
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
@@ -432,8 +465,8 @@ export default function EoyOralElaboratePage() {
       alert("Please enter both the question and answer.");
       return;
     }
-    if (newAnswerText.trim().length < 10) {
-      alert("Please enter at least 10 characters for your response.");
+    if (newAnswerText.trim().length < REQUIREMENTS.normal.chars) {
+      alert(`Please enter at least ${REQUIREMENTS.normal.chars} characters for your response.`);
       return;
     }
     const success = await addCustomQuestion(newQuestionText, newAnswerText, newCategory);
@@ -446,8 +479,9 @@ export default function EoyOralElaboratePage() {
 
   const handleSendMessageWithCredit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (credits < 4) {
-      alert("Insufficient credits.");
+    // つっこみ質問への答えは無料なので、残高チェックをしない（サーバーが券を確かめる）
+    if (!engine.isFollowUpActive && credits < CREDIT_COSTS.oralElaborate) {
+      alert(`You don't have enough credits. Each Elaborate answer uses ${CREDIT_COSTS.oralElaborate} credits.`);
       return;
     }
     await engine.sendAnswerMessage(e, answers, "elaborate", selectedSection);
@@ -523,63 +557,18 @@ export default function EoyOralElaboratePage() {
                   All VCE Oral Exam Stages
                 </span>
                 <span className="text-xs text-slate-500">
-                  VCE Japanese Oral Exam Prep (Cost: 4 credits/session)
+                  VCE Japanese Oral Exam Prep (Cost: {CREDIT_COSTS.oralElaborate} credits/question)
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
                 EOY Oral Exam Elaborate Practice & Custom QA Bank
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Practice every stage of the VCE Japanese Oral Exam with detailed elaboration. Your custom answers are automatically saved. (Requirement: 3+ sentences | 4 credits per turn/response)
+                Practice every stage of the VCE Japanese Oral Exam with detailed elaboration. Your custom answers are automatically saved. (Answers: easy 2+ sentences &amp; 14+ characters, medium 3+ &amp; 30+, hard 3+ &amp; 45+ | {CREDIT_COSTS.oralElaborate} credits per question. Every 3rd question, the examiner asks a free follow-up question)
               </p>
             </div>
 
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
-          </div>
-
-          {/* 2. Conversation Practice with AI Yamato 🎙️ (単一のインタラクティブ・コンポーネント) */}
-          <div ref={chatContainerRef}>
-            {engine.questionAudioError ? (
-              <DataErrorState
-                title="Question Audio Unavailable"
-                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
-                errorMessage={`[eoy-oral-elaborate] ${engine.questionAudioError}`}
-                onRetry={engine.clearQuestionAudioError}
-              />
-            ) : (
-            <OralCenterChatPractice
-              chatMessages={engine.chatMessages}
-              isPracticing={engine.isPracticing}
-              currentQuestionIndex={engine.currentQuestionIndex}
-              totalQuestions={engine.activeQuestions.length}
-              isAnalyzing={engine.isAnalyzing}
-              isRecording={engine.isRecording}
-              isWaitingForNext={engine.isWaitingForNext}
-              inputMessage={engine.inputMessage}
-              setInputMessage={engine.setInputMessage}
-              onStartRecording={engine.startRecording}
-              onStopRecording={engine.stopRecording}
-              onRepeatQuestion={() => {
-                const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
-              }}
-              onProceedNext={() => engine.proceedToNextQuestion(answers)}
-              onSendMessage={handleSendMessageWithCredit}
-              themeColor={themeColor}
-              headerRight={
-                !engine.isPracticing && (
-                  <button
-                    type="button"
-                    onClick={handleStartPractice}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm cursor-pointer shrink-0"
-                  >
-                    <Play size={16} />
-                    <span>Speak to AI Yamato</span>
-                  </button>
-                )
-              }
-            />
-            )}
           </div>
 
           {/* Section Selection Area & Control Selector */}
@@ -654,7 +643,7 @@ export default function EoyOralElaboratePage() {
                   <span>📝 Review & Customize Your Answers</span>
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Please enter 3 or more sentences for each question. You can import your answer from Drill into Sentence 1.
+                  Each answer needs at least {requirement.sentences} sentences and {requirement.chars} characters in total ({difficultyLabel}). You can import your Drill answer (or the sample answer) into Sentence 1.
                 </p>
               </div>
 
@@ -756,7 +745,7 @@ export default function EoyOralElaboratePage() {
                               {(sIdx === 1 || sIdx === 2) && (
                                 <button
                                   type="button"
-                                  onClick={() => setIsHintModalOpen(true)}
+                                  onClick={() => setHintTarget({ category: q.category || "", question: q.question })}
                                   className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 rounded-lg transition cursor-pointer"
                                 >
                                   <Lightbulb size={12} />
@@ -794,6 +783,16 @@ export default function EoyOralElaboratePage() {
                       ))}
                     </div>
 
+                    {/* 条件を満たしているか（文の数・文字数の合計） */}
+                    {(() => {
+                      const st = getAnswerStatus(q.id);
+                      return (
+                        <p className={`text-[11px] font-bold ${st.ok ? "text-emerald-600" : "text-rose-600"}`}>
+                          {st.ok ? "✓" : "✗"} {st.sentences} / {requirement.sentences}+ sentences · {st.chars} / {requirement.chars}+ characters
+                        </p>
+                      );
+                    })()}
+
                     {/* Add Sentence Button */}
                     <button
                       type="button"
@@ -807,6 +806,49 @@ export default function EoyOralElaboratePage() {
                 );
               })}
             </div>
+
+            {/* 練習開始ボタン（drill と同じ表記） */}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <button
+                type="button"
+                onClick={handleStartPractice}
+                disabled={currentQuestions.length === 0 || engine.isPracticing}
+                className="w-full sm:w-auto text-white font-black px-8 py-3.5 rounded-2xl shadow-lg transition cursor-pointer text-sm disabled:opacity-50"
+                style={{ backgroundColor: themeColor }}
+              >
+                🚀 Speak to AI Yamato (Start Practice)
+              </button>
+            </div>
+          </div>
+
+          {/* 2. Conversation Practice with AI Yamato 🎙️（drill と同じく、選択 → 答え → チャットの順） */}
+          <div ref={chatContainerRef}>
+            {engine.questionAudioError ? (
+              <DataErrorState
+                title="Question Audio Unavailable"
+                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
+                errorMessage={`[eoy-oral-elaborate] ${engine.questionAudioError}`}
+                onRetry={engine.clearQuestionAudioError}
+              />
+            ) : (
+            <OralCenterChatPractice
+              chatMessages={engine.chatMessages}
+              isPracticing={engine.isPracticing}
+              currentQuestionIndex={engine.currentQuestionIndex}
+              totalQuestions={engine.activeQuestions.length}
+              isAnalyzing={engine.isAnalyzing}
+              isRecording={engine.isRecording}
+              isWaitingForNext={engine.isWaitingForNext}
+              inputMessage={engine.inputMessage}
+              setInputMessage={engine.setInputMessage}
+              onStartRecording={engine.startRecording}
+              onStopRecording={engine.stopRecording}
+              onProceedNext={() => engine.proceedToNextQuestion(answers)}
+              onSendMessage={handleSendMessageWithCredit}
+              themeColor={themeColor}
+              creditCost={engine.isFollowUpActive ? 0 : CREDIT_COSTS.oralElaborate}
+            />
+            )}
           </div>
 
           <aside
@@ -820,8 +862,10 @@ export default function EoyOralElaboratePage() {
 
       {/* Elaborate Hint モーダル */}
       <ElaborateHintModal
-        isOpen={isHintModalOpen}
-        onClose={() => setIsHintModalOpen(false)}
+        isOpen={hintTarget !== null}
+        onClose={() => setHintTarget(null)}
+        category={hintTarget?.category}
+        questionHtml={hintTarget?.question}
       />
     </ToolPageWrapper>
   );

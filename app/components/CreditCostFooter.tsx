@@ -27,7 +27,7 @@ export function CreditCostFooter({
     g.item.toLowerCase().includes("image attachment (1)")
   );
   const multiImageRow = CREDIT_CONSUMPTION_GUIDE.find((g) =>
-    g.item.toLowerCase().includes("image attachments (2)")
+    g.item.toLowerCase().includes("image attachments (2")
   );
 
   // 表示用テキストの整形（見つからない場合のフォールバック付き）

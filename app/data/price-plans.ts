@@ -4,6 +4,7 @@
  * Stores data in Supabase 'kl_app' table under key: 'PRICE_PLANS'.
  */
 
+import { CREDIT_COSTS } from './credit-costs';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { isProductionHost } from '../utils/developerOnly';
 
@@ -51,12 +52,15 @@ export interface PricePlansKnowledge {
 
 // 💡 他コンポーネント（CreditCostFooter.tsxなど）が直接インポートして参照するデフォルトのガイドデータ（ビルドエラー防止用）
 export const CREDIT_CONSUMPTION_GUIDE: CreditConsumptionGuideItem[] = [
-  { item: "Text Chat (Q&A / Vocabulary)", cost: "2 credits / turn" },
-  { item: "Image Attachment (1) / Image Gen", cost: "4 credits" },
-  { item: "Image Attachments (2) [Multi-image discount]", cost: "6 credits" },
-  { item: "Essay / Genkoyoshi Correctors", cost: "20-30 credits / session" },
-  { item: "Oral Exam / Voice Roleplay", cost: "15-25 credits / min" },
-  { item: "Mini Games & Drills", cost: "Free / 0.5 credits" },
+  // 公開している料金表（Credit Consumption Guide）と同じ。サーバーが実際に引く数は api/src/credit-rules.ts
+  { item: "Text Chat", cost: `${CREDIT_COSTS.textChat} credits / turn` },
+  { item: "Image Attachment (1)", cost: `${CREDIT_COSTS.imageAttachment} credits` },
+  { item: "Image Attachments (2 to 4)", cost: `${CREDIT_COSTS.multiImageAttachment} credits` },
+  { item: "Voice AI: EOY Oral Drill", cost: `${CREDIT_COSTS.oralDrill} credits / question` },
+  { item: "Voice AI: EOY Oral Elaborate", cost: `${CREDIT_COSTS.oralElaborate} credits / question` },
+  { item: "Voice AI: Mock Section 1 (approx. 7 min)", cost: `${CREDIT_COSTS.mockSection1} credits / mock` },
+  { item: "Voice AI: Mock Section 2 (approx. 8 min)", cost: `${CREDIT_COSTS.mockSection2} credits / mock` },
+  { item: "Voice AI: Full Mock (approx. 15 min)", cost: `${CREDIT_COSTS.mockFull} credits / mock` },
 ];
 
 export const CAMPAIGN_NOTICE: CampaignNotice = {

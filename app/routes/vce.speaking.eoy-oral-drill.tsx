@@ -13,6 +13,7 @@ import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
 import ChatYamatoEoyOralDrill from '~/components/chat/ChatYamatoEoyOralDrill';
 import { supabase } from '~/lib/supabaseClient';
 import { notifyCreditsUpdated } from '~/components/layout/PageLayout';
+import { CREDIT_COSTS } from '~/data/credit-costs';
 
 // 💡 Modular Oral components & hooks
 import OralCenterChatPractice from '~/components/oral/OralCenterChatPractice';
@@ -264,8 +265,8 @@ export default function EoyOralDrillPage() {
     }
 
     // 💡 事前検証（クレジット残高が3クレジット以上あるかチェック）
-    if (credits < 3) {
-      alert("You don't have enough credits. Each drill answer uses 3 credits. Please top up your credits.");
+    if (credits < CREDIT_COSTS.oralDrill) {
+      alert(`You don't have enough credits. Each drill answer uses ${CREDIT_COSTS.oralDrill} credits. Please top up your credits.`);
       return;
     }
 
@@ -328,8 +329,8 @@ export default function EoyOralDrillPage() {
   // 💡 チャットメッセージ送信時にバックエンド経由で3クレジットが減算される仕組みを連動
   const handleSendMessageWithCredit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (credits < 3) {
-      alert("You don't have enough credits. Each drill answer uses 3 credits.");
+    if (credits < CREDIT_COSTS.oralDrill) {
+      alert(`You don't have enough credits. Each drill answer uses ${CREDIT_COSTS.oralDrill} credits.`);
       return;
     }
 
@@ -409,7 +410,7 @@ export default function EoyOralDrillPage() {
                   All VCE Oral Exam Stages
                 </span>
                 <span className="text-xs text-slate-500">
-                  VCE Japanese Oral Exam Prep (Cost: 3 credits/session)
+                  VCE Japanese Oral Exam Prep (Cost: {CREDIT_COSTS.oralDrill} credits/question)
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
@@ -417,7 +418,7 @@ export default function EoyOralDrillPage() {
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 Practice every stage of the VCE Japanese Oral Exam. Your custom answers are
-                automatically saved. (Answer length: easy 7+, medium 10+, hard 15+ characters | 3 credits per answer)
+                automatically saved. (Answer length: easy 7+, medium 10+, hard 15+ characters | {CREDIT_COSTS.oralDrill} credits per question)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
@@ -544,7 +545,7 @@ export default function EoyOralDrillPage() {
                 onProceedNext={() => engine.proceedToNextQuestion(answers)}
                 onSendMessage={handleSendMessageWithCredit}
                 themeColor={themeColor}
-                creditCost={3}
+                creditCost={CREDIT_COSTS.oralDrill}
               />
             )}
           </div>

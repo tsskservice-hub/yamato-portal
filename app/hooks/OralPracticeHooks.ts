@@ -105,6 +105,13 @@ export function useOralPracticeEngine(
   const [isWaitingForNext, setIsWaitingForNext] = useState<boolean>(false);
   // 質問の音声ファイルが読めなかったときの内容（null ならエラーなし）。画面はこれがあると DataErrorState を出す
   const [questionAudioError, setQuestionAudioError] = useState<string | null>(null);
+  // elaborate の「つっこみ質問」: 試験官が今たずねているつっこみ（null ならなし）。token は 1 回だけ使える無料の券
+  const [followUp, setFollowUp] = useState<{ question: string; token: string } | null>(null);
+  const followUpRef = useRef<{ question: string; token: string } | null>(null);
+  const setFollowUpBoth = (value: { question: string; token: string } | null) => {
+    followUpRef.current = value;
+    setFollowUp(value);
+  };
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -291,6 +298,17 @@ export function useOralPracticeEngine(
 
   // 🔁 今の質問をもう一度読む（「すみません」と言われたとき。AI は呼ばないのでクレジットは使わない）
   const repeatCurrentQuestion = async (studentText: string) => {
+    // つっこみ質問の途中なら、つっこみ質問をもう一度読む
+    const activeFollowUp = followUpRef.current;
+    if (activeFollowUp) {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "user", content: studentText, isHtml: false },
+        { role: "assistant", content: `Yamato: 「${activeFollowUp.question}」`, isHtml: true },
+      ]);
+      await playTTS(activeFollowUp.question);
+      return;
+    }
     const { list, index } = latestQuestionRef.current;
     const q = list[index];
     if (!q) return;
@@ -313,7 +331,9 @@ export function useOralPracticeEngine(
       // 「ペットを飼ったことがあります」が「買った」になるような、同じ音の漢字の取り違えを減らす
       const { list, index } = latestQuestionRef.current;
       const currentQ = list[index];
-      if (currentQ) {
+      if (followUpRef.current) {
+        formData.append("prompt", followUpRef.current.question);
+      } else if (currentQ) {
         const hint = [currentQ.questionOriginal || currentQ.question, answersRef.current[currentQ.id] || ""]
           .filter(Boolean)
           .join(" ");
@@ -586,6 +606,7 @@ export function useOralPracticeEngine(
     }
 
     answersRef.current = answersMap;
+    setFollowUpBoth(null);
     setActiveQuestions(qList);
     setCurrentQuestionIndex(0);
     setIsPracticing(true);
@@ -620,6 +641,7 @@ export function useOralPracticeEngine(
   const stopPractice = () => {
     console.log("🛑 [DEBUG] stopPractice invoked.");
     setIsPracticing(false);
+    setFollowUpBoth(null);
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
     }
@@ -660,6 +682,11 @@ export function useOralPracticeEngine(
 
     const currentQ = activeQuestions[currentQuestionIndex];
     const registeredAnswer = answersMap[currentQ?.id] || "";
+    // つっこみ質問への答えか（無料の券を送る）。サーバーが券を確かめて、使えたときだけクレジットを引かない
+    const activeFollowUp = followUpRef.current;
+    // elaborate で 3 問に 1 回（3・6・9 問目…）、フィードバックと一緒につっこみ質問を作ってもらう
+    const requestFollowUp =
+      mode === "elaborate" && !activeFollowUp && (currentQuestionIndex + 1) % 3 === 0;
 
     try {
       const endpoint = "https://api.jptutoraiyamato.com/chat";
@@ -668,10 +695,13 @@ export function useOralPracticeEngine(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
-          // elaborate ページは elaborate 用の AI（eoy-oral-elaborate・4 クレジット）、それ以外は drill 用（3 クレジット）
+          // elaborate ページは elaborate 用の AI（eoy-oral-elaborate）、それ以外は drill 用。料金はサーバーが appType で決める
           appType: mode === "elaborate" ? "eoy-oral-elaborate" : "eoy-oral-drill",
-          expectedQuestion: currentQ?.questionOriginal || currentQ?.question,
-          registeredAnswer: registeredAnswer,
+          expectedQuestion: activeFollowUp ? activeFollowUp.question : currentQ?.questionOriginal || currentQ?.question,
+          registeredAnswer: activeFollowUp ? "" : registeredAnswer,
+          followUpToken: activeFollowUp?.token,
+          requestFollowUp,
+          difficulty: selectedLevel,
           mode,
           section,
           userId: userId,
@@ -679,11 +709,49 @@ export function useOralPracticeEngine(
         }),
       });
 
+      // つっこみの券が使えなかった（時間切れ・使用済み）ときは、つっこみをやめて次へ進めるようにする
+      if (res.status === 409 && activeFollowUp) {
+        setFollowUpBoth(null);
+        const nextIdx = currentQuestionIndex + 1;
+        setChatMessages([
+          ...newMessages,
+          {
+            role: "assistant",
+            content: "This follow-up question has expired. Please go on to the next question.",
+            isHtml: false,
+          },
+        ]);
+        if (nextIdx < activeQuestions.length) setIsWaitingForNext(true);
+        else setIsPracticing(false);
+        return;
+      }
+
       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
       const data = (await res.json()) as any;
       const aiFeedback = data.reply || "◎ よくできました。";
       const formattedHtml = formatOralFeedbackToHtml(aiFeedback);
+
+      // つっこみへの答えが終わったら、つっこみは終わり
+      if (activeFollowUp) setFollowUpBoth(null);
+
+      // 🎙️ つっこみ質問が返ってきたら、フィードバックのあとに試験官がつっこむ（この答えは無料）
+      if (!activeFollowUp && data.followUpQuestion && data.followUpToken) {
+        const fu = { question: String(data.followUpQuestion), token: String(data.followUpToken) };
+        setFollowUpBoth(fu);
+        setChatMessages([
+          ...newMessages,
+          { role: "assistant", content: formattedHtml, isHtml: true },
+          {
+            role: "assistant",
+            content: `<b>【Follow-up question】</b><br><br>Yamato: 「${fu.question}」<br><br>The examiner wants to hear more. Answer in Japanese — this answer is free (no credits).`,
+            isHtml: true,
+          },
+        ]);
+        setIsAnalyzing(false);
+        await playTTS(fu.question);
+        return;
+      }
 
       const nextIndex = currentQuestionIndex + 1;
 
@@ -717,6 +785,7 @@ export function useOralPracticeEngine(
   };
 
   const proceedToNextQuestion = (answersMap: { [key: string]: string }) => {
+    setFollowUpBoth(null);
     const nextIndex = currentQuestionIndex + 1;
     if (nextIndex < activeQuestions.length) {
       setCurrentQuestionIndex(nextIndex);
@@ -747,6 +816,8 @@ export function useOralPracticeEngine(
     isWaitingForNext,
     questionAudioError,
     clearQuestionAudioError: () => setQuestionAudioError(null),
+    /** つっこみ質問に答えている途中か（その答えは無料） */
+    isFollowUpActive: followUp !== null,
     startRecording,
     stopRecording,
     playTTS,

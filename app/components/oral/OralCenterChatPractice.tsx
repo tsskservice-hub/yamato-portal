@@ -119,7 +119,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
               Main Interactive Practice Screen
             </span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-              🪙 {creditCost} credits / turn
+              {creditCost === 0 ? "🎁 Free (follow-up question)" : `🪙 ${creditCost} credits / turn`}
             </span>
           </div>
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -259,7 +259,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
                 className="py-3 px-3 rounded-2xl border-2 bg-white dark:bg-slate-900 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95 hover:shadow-md"
                 style={{ borderColor: themeColor, color: themeColor }}
               >
-                <span>✅ Send ({creditCost} 🪙) (Enter)</span>
+                <span>✅ Send ({creditCost === 0 ? "Free" : `${creditCost} 🪙`}) (Enter)</span>
                 <span className="text-xs font-bold opacity-75">This is what I said</span>
               </button>
             </form>
