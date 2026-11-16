@@ -241,6 +241,9 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
                 Is this what you said? If not, press &apos;Record Again&apos; (Space). If yes, press &apos;Send&apos; (Enter).
               </p>
               <p className="text-base font-bold text-slate-800 dark:text-slate-100">「{inputMessage}」</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                If only the kanji is different for a word that sounds the same (e.g. 買った／飼った), you can still press &apos;Send&apos;. It won&apos;t count as a mistake.
+              </p>
             </div>
             <form ref={sendFormRef} onSubmit={onSendMessage} className="grid grid-cols-2 gap-3">
               <button

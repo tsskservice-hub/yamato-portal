@@ -122,6 +122,8 @@ export function useOralPracticeEngine(
   // 録音が終わった時点の「今の質問」を確実に読むための参照（録音開始時のクロージャは古いことがある）
   const latestQuestionRef = useRef<{ list: QuestionData[]; index: number }>({ list: [], index: 0 });
   latestQuestionRef.current = { list: activeQuestions, index: currentQuestionIndex };
+  // 練習を始めたときの「生徒が登録した答え」（文字起こしの手がかりに使う）
+  const answersRef = useRef<{ [key: string]: string }>({});
 
   // 🔊 TTS Voice Playback
   const playTTS = async (textToSpeak: string): Promise<void> => {
@@ -307,6 +309,16 @@ export function useOralPracticeEngine(
     try {
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
+      // 文字起こしの手がかり: 今の質問と、生徒が登録した答え。
+      // 「ペットを飼ったことがあります」が「買った」になるような、同じ音の漢字の取り違えを減らす
+      const { list, index } = latestQuestionRef.current;
+      const currentQ = list[index];
+      if (currentQ) {
+        const hint = [currentQ.questionOriginal || currentQ.question, answersRef.current[currentQ.id] || ""]
+          .filter(Boolean)
+          .join(" ");
+        if (hint) formData.append("prompt", hint);
+      }
       const res = await yamatoFetch("https://api.jptutoraiyamato.com/api/stt", {
         method: "POST",
         body: formData,
@@ -573,6 +585,7 @@ export function useOralPracticeEngine(
       }
     }
 
+    answersRef.current = answersMap;
     setActiveQuestions(qList);
     setCurrentQuestionIndex(0);
     setIsPracticing(true);
