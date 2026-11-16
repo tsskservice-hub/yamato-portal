@@ -38,7 +38,6 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
   isRecording,
   isWaitingForNext,
   inputMessage,
-  setInputMessage,
   onStartRecording,
   onStopRecording,
   onProceedNext,
@@ -49,6 +48,11 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
   creditCost = 4,
 }) => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const sendFormRef = useRef<HTMLFormElement | null>(null);
+  // 録音して文字になった答えが、送る前の確認待ちになっているか（family-1 の Speaking タスクと同じ流れ）
+  // ・違っていたら「Record Again」で言い直す（書き直しはしない）・合っていたら「Send」で AI に送る
+  const hasTranscript = inputMessage.trim().length > 0;
+  const awaitingConfirm = isPracticing && hasTranscript && !isRecording && !isAnalyzing && !isWaitingForNext;
   // 登録した答え（Your Answer: 〜）をチャットに表示するか。隠すと、見ながら読まずに答える練習になる
   const [showAnswers, setShowAnswers] = useState<boolean>(true);
 
@@ -58,8 +62,8 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
     }
   }, [chatMessages, isAnalyzing, isWaitingForNext]);
 
-  // ⌨️ スペースバーで録音の開始・停止（練習中だけ）
-  // 文字入力欄にいるときは普通にスペースを打てるようにする。
+  // ⌨️ スペースバーで録音の開始・停止（練習中だけ）。確認待ちのときのスペースは「言い直し」、Enter は「送る」
+  // 文字入力欄（ヤマトチャットなど）にいるときは普通にスペースを打てるようにする。
   // ボタンにフォーカスが残っているとスペースでそのボタン（Start Practice など）が押されてしまうので、ここで止める。
   useEffect(() => {
     if (!isPracticing) return;
@@ -72,7 +76,13 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== "Space" || isTypingTarget(e.target)) return;
+      if (isTypingTarget(e.target)) return;
+      if (e.key === "Enter" && awaitingConfirm) {
+        e.preventDefault();
+        sendFormRef.current?.requestSubmit();
+        return;
+      }
+      if (e.code !== "Space") return;
       e.preventDefault();
       if (e.repeat) return;
       if (isRecording) {
@@ -91,7 +101,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [isPracticing, isRecording, isAnalyzing, isWaitingForNext, onStartRecording, onStopRecording]);
+  }, [isPracticing, isRecording, isAnalyzing, isWaitingForNext, awaitingConfirm, onStartRecording, onStopRecording]);
 
   return (
     <div
@@ -186,7 +196,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            {!isRecording ? (
+            {awaitingConfirm ? null : !isRecording ? (
               <button
                 type="button"
                 onClick={onStartRecording}
@@ -223,32 +233,35 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
 
         </div>
 
-        <form onSubmit={onSendMessage} className="flex gap-2">
-          <input
-            type="text"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder={
-              isWaitingForNext
-                ? "Read the feedback, then click 'Next Question' to continue..."
-                : isPracticing
-                ? `Record audio or type your response here... (Cost: ${creditCost} credits)`
-                : "Click 'Speak to AI Yamato' above to start..."
-            }
-            disabled={!isPracticing || isAnalyzing || isWaitingForNext}
-            className="flex-grow p-3 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:outline-none disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={
-              !isPracticing || isAnalyzing || !inputMessage.trim() || isWaitingForNext
-            }
-            className="text-white font-bold px-6 py-3 rounded-xl transition text-xs sm:text-sm shrink-0 cursor-pointer disabled:opacity-50"
-            style={{ backgroundColor: themeColor }}
-          >
-            Send ({creditCost} 🪙)
-          </button>
-        </form>
+        {/* 録音した答えの確認: 言い直す（Record Again）か、送る（Send）か。書き直す欄はない */}
+        {awaitingConfirm && (
+          <div className="space-y-3">
+            <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40">
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                Is this what you said? If not, press &apos;Record Again&apos; (Space). If yes, press &apos;Send&apos; (Enter).
+              </p>
+              <p className="text-base font-bold text-slate-800 dark:text-slate-100">「{inputMessage}」</p>
+            </div>
+            <form ref={sendFormRef} onSubmit={onSendMessage} className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={onStartRecording}
+                className="py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95"
+              >
+                <span>🔁 Record Again (Space)</span>
+                <span className="text-xs font-bold opacity-75">Not what I said</span>
+              </button>
+              <button
+                type="submit"
+                className="py-3 px-3 rounded-2xl border-2 bg-white dark:bg-slate-900 font-black text-sm transition flex flex-col items-center justify-center cursor-pointer active:scale-95 hover:shadow-md"
+                style={{ borderColor: themeColor, color: themeColor }}
+              >
+                <span>✅ Send ({creditCost} 🪙) (Enter)</span>
+                <span className="text-xs font-bold opacity-75">This is what I said</span>
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

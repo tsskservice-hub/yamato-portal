@@ -244,6 +244,8 @@ export function useOralPracticeEngine(
   };
 
   const startRecording = async () => {
+    // 言い直し: 前に録音して文字になった答えは消してから録り直す
+    setInputMessage("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       persistentStreamRef.current = stream;
