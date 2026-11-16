@@ -39,14 +39,22 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
 
   const speedOptions = [0.8, 1.0, 1.2];
 
+  // 💡 「会話の難しさ」= どの質問セット（steady / normal / accelerated）を使うか、だけを決める。
+  // 生徒の learning pace（AI ヤマトとのチャットでの接し方）とは関係ない。値はデータのキーのまま、表示だけ easy / medium / hard にする
+  const difficultyLabels: Record<"steady" | "normal" | "accelerated", string> = {
+    steady: "easy",
+    normal: "medium",
+    accelerated: "hard",
+  };
+
   return (
     <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-      {/* 1段目: Learning Pace & Speech Speed (2カラムレイアウト & 統一スタイル) */}
+      {/* 1段目: Conversation Difficulty & Speech Speed (2カラムレイアウト & 統一スタイル) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Column 1: Learning Pace */}
+        {/* Column 1: Conversation Difficulty（生徒の learning pace とは別） */}
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            ⚡ Learning Pace
+            ⚡ Conversation Difficulty
           </h3>
           <div className="grid grid-cols-3 gap-2">
             {(["steady", "normal", "accelerated"] as const).map((m) => {
@@ -66,7 +74,7 @@ export const OralDrillQuestionSelector: React.FC<OralDrillQuestionSelectorProps>
                     borderColor: isSelected ? themeColor : undefined,
                   }}
                 >
-                  {m}
+                  {difficultyLabels[m]}
                 </button>
               );
             })}

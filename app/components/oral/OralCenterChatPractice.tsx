@@ -1,5 +1,5 @@
 import { safeHtml } from '~/utils/safeHtml';
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 export type ChatMessage = {
   role: "assistant" | "user";
@@ -19,7 +19,8 @@ export interface OralCenterChatPracticeProps {
   setInputMessage: (val: string) => void;
   onStartRecording: () => void;
   onStopRecording: () => void;
-  onRepeatQuestion: () => void;
+  /** 使っていない（質問の繰り返しは、生徒が「すみません」と言う方式に変えた）。呼び出し側の互換のために残している */
+  onRepeatQuestion?: () => void;
   onProceedNext: () => void;
   onSendMessage: (e: React.FormEvent) => void;
   themeColor?: string;
@@ -40,7 +41,6 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
   setInputMessage,
   onStartRecording,
   onStopRecording,
-  onRepeatQuestion,
   onProceedNext,
   onSendMessage,
   themeColor = "#eab308",
@@ -49,12 +49,49 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
   creditCost = 4,
 }) => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  // 登録した答え（Your Answer: 〜）をチャットに表示するか。隠すと、見ながら読まずに答える練習になる
+  const [showAnswers, setShowAnswers] = useState<boolean>(true);
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages, isAnalyzing]);
+
+  // ⌨️ スペースバーで録音の開始・停止（練習中だけ）
+  // 文字入力欄にいるときは普通にスペースを打てるようにする。
+  // ボタンにフォーカスが残っているとスペースでそのボタン（Start Practice など）が押されてしまうので、ここで止める。
+  useEffect(() => {
+    if (!isPracticing) return;
+
+    const isTypingTarget = (el: EventTarget | null) => {
+      const node = el as HTMLElement | null;
+      if (!node) return false;
+      const tag = node.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || node.isContentEditable;
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== "Space" || isTypingTarget(e.target)) return;
+      e.preventDefault();
+      if (e.repeat) return;
+      if (isRecording) {
+        onStopRecording();
+      } else if (!isAnalyzing && !isWaitingForNext) {
+        onStartRecording();
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Space" && !isTypingTarget(e.target)) e.preventDefault();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, [isPracticing, isRecording, isAnalyzing, isWaitingForNext, onStartRecording, onStopRecording]);
 
   return (
     <div
@@ -86,6 +123,15 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
               🟢 Active (Q{currentQuestionIndex + 1}/{totalQuestions})
             </span>
           )}
+          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showAnswers}
+              onChange={(e) => setShowAnswers(e.target.checked)}
+              className="cursor-pointer"
+            />
+            Show my answers
+          </label>
           {headerRight}
         </div>
       </div>
@@ -93,7 +139,9 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
       {/* Chat Messages Container */}
       <div
         ref={chatContainerRef}
-        className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 h-96 overflow-y-auto space-y-4"
+        className={`bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 h-96 overflow-y-auto space-y-4 ${
+          showAnswers ? "" : "[&_.registered-answer]:hidden"
+        }`}
       >
         {chatMessages.map((msg, idx) => (
           <div
@@ -154,14 +202,11 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             )}
 
             {isPracticing && (
-              <button
-                type="button"
-                onClick={onRepeatQuestion}
-                disabled={isAnalyzing}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-3 rounded-xl shadow-md transition text-xs shrink-0 flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>🔊</span> Repeat Q
-              </button>
+              <p className="text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+                🔁 To hear the question again, say
+                <br />
+                <span className="font-bold text-slate-700 dark:text-slate-200">「すみません。もういちどおねがいします。」</span>
+              </p>
             )}
           </div>
 

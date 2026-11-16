@@ -206,11 +206,13 @@ export default function EoyOralElaboratePage() {
     questionOriginal: string;
     defaultAnswerOriginal?: string;
     minLength?: number;
+    audio?: string;
   })[] = useMemo(() => {
     const list: (QuestionItem & {
       questionOriginal: string;
       defaultAnswerOriginal?: string;
       minLength?: number;
+      audio?: string;
     })[] = [];
     const initialMap: { [key: string]: string } = {};
 
@@ -253,6 +255,7 @@ export default function EoyOralElaboratePage() {
               questionOriginal: plainQuestion,
               category: categoryName,
               isCustom: false,
+              audio: q.audio, // 質問の音声ファイル（/audio/Q001.mp3 など）
               defaultAnswerOriginal: plainAnswer,
               minLength: 10,
             });
@@ -409,6 +412,7 @@ export default function EoyOralElaboratePage() {
       questionOriginal: q.questionOriginal,
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
+      audio: q.audio,
     }));
 
     engine.startPractice(targetQList, answers, orderMode);
@@ -535,6 +539,14 @@ export default function EoyOralElaboratePage() {
 
           {/* 2. Conversation Practice with AI Yamato 🎙️ (単一のインタラクティブ・コンポーネント) */}
           <div ref={chatContainerRef}>
+            {engine.questionAudioError ? (
+              <DataErrorState
+                title="Question Audio Unavailable"
+                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
+                errorMessage={`[eoy-oral-elaborate] ${engine.questionAudioError}`}
+                onRetry={engine.clearQuestionAudioError}
+              />
+            ) : (
             <OralCenterChatPractice
               chatMessages={engine.chatMessages}
               isPracticing={engine.isPracticing}
@@ -567,6 +579,7 @@ export default function EoyOralElaboratePage() {
                 )
               }
             />
+            )}
           </div>
 
           {/* Section Selection Area & Control Selector */}

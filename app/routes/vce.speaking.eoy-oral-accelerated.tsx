@@ -52,7 +52,7 @@ export default function VceSpeakingEoyOralAcceleratedPage() {
     isRecording, // ユーザーが話しているかどうか（VAD連動）
     startPractice,
     stopPractice,
-  } = useOralPracticeEngine("normal", 1.0, user?.id, nickname);
+  } = useOralPracticeEngine("normal", 1.0, user?.id, nickname, "ようこそ！練習モードを選択してスタートしてください。");
 
   const handleOpenAuth = () => {
     window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode: "signin" } }));

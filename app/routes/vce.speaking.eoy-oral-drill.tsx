@@ -28,18 +28,9 @@ import {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  let portalContent = null;
-  try {
-    const { data: portalData } = await supabase
-      .from('portal_settings')
-      .select('content')
-      .eq('key', 'PORTAL_CONTENT')
-      .single();
-    portalContent = portalData?.content || null;
-  } catch (e) {}
-
+  // PORTAL_CONTENT はもう Supabase にないので問い合わせない（meta は generateModuleMeta の既定値を使う）
   return json({
-    portalContent,
+    portalContent: null,
     currentPath: url.pathname,
   });
 }
@@ -192,11 +183,13 @@ export default function EoyOralDrillPage() {
     questionOriginal: string;
     defaultAnswerOriginal?: string;
     minLength?: number;
+    audio?: string;
   })[] = useMemo(() => {
     const list: (QuestionItem & {
       questionOriginal: string;
       defaultAnswerOriginal?: string;
       minLength?: number;
+      audio?: string;
     })[] = [];
     const initialMap: { [key: string]: string } = {};
 
@@ -239,6 +232,7 @@ export default function EoyOralDrillPage() {
               questionOriginal: plainQuestion,
               category: categoryName,
               isCustom: false,
+              audio: q.audio, // 質問の音声ファイル（/audio/Q001.mp3 など）
               defaultAnswerOriginal: plainAnswer,
               minLength: 10,
             });
@@ -255,31 +249,32 @@ export default function EoyOralDrillPage() {
   // 💡 バリデーションガード付きの練習開始ハンドラー（クレジット残高の事前検証も実施）
   const handleStartPractice = async () => {
     if (!user) {
-      alert("会話練習を行うには、サインインが必要です！");
+      alert("Please sign in to start conversation practice.");
       handleOpenAuth();
       return;
     }
 
     // 💡 事前検証（クレジット残高が3クレジット以上あるかチェック）
     if (credits < 3) {
-      alert("クレジットが不足しています（一問一答ドリルには3クレジット必要です）。チャージを行ってください。");
+      alert("You don't have enough credits. Each drill answer uses 3 credits. Please top up your credits.");
       return;
     }
 
-    // 各質問の現在の回答内容をチェック（10文字未満のものが無いか検証）
-    for (const q of currentQuestions) {
-      const currentAns = answers[q.id] || "";
-      if (currentAns.trim().length < 10) {
-        alert(
-          `[Character Count Check]\nThe answer for "${q.questionOriginal.slice(
-            0,
-            20
-          )}..." is too short.\nPlease enter at least 10 characters for your drill response. (Current: ${
-            currentAns.trim().length
-          } characters)`
-        );
-        return;
-      }
+    // 選んだトピックの質問（トピック未選択なら、このセクションの全部）に、10文字以上の答えがあるかを確認
+    // 例: Family だけを選べば、Family の質問の答えがそろった時点で練習できる
+    const notReady = currentQuestions.filter((q) => (answers[q.id] || "").trim().length < 10);
+    if (notReady.length > 0) {
+      const first = notReady[0];
+      const topicTip =
+        selectedTopics.length === 0
+          ? "\n\nTip: select one topic (for example, Family) to practise just those questions."
+          : "";
+      alert(
+        `[Answer Check]\n${notReady.length} of ${currentQuestions.length} questions still need an answer of at least 10 characters.\nFirst one: "${first.questionOriginal.slice(0, 20)}..." (Current: ${
+          (answers[first.id] || "").trim().length
+        } characters)${topicTip}`
+      );
+      return;
     }
 
     const targetQList: QuestionData[] = currentQuestions.map((q) => ({
@@ -288,6 +283,7 @@ export default function EoyOralDrillPage() {
       questionOriginal: q.questionOriginal,
       category: q.category,
       defaultAnswerOriginal: q.defaultAnswerOriginal,
+      audio: q.audio,
     }));
 
     engine.startPractice(targetQList, answers, orderMode);
@@ -299,7 +295,7 @@ export default function EoyOralDrillPage() {
   const handleAddCustom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert("カスタム質問を追加するにはサインインが必要です。");
+      alert("Please sign in to add custom questions.");
       handleOpenAuth();
       return;
     }
@@ -308,7 +304,7 @@ export default function EoyOralDrillPage() {
       return;
     }
     if (newAnswerText.trim().length < 10) {
-      alert("Drillの回答は10文字以上で入力してください。");
+      alert("Your answer must be at least 10 characters long.");
       return;
     }
 
@@ -324,7 +320,7 @@ export default function EoyOralDrillPage() {
   const handleSendMessageWithCredit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (credits < 3) {
-      alert("クレジットが不足しています。");
+      alert("You don't have enough credits. Each drill answer uses 3 credits.");
       return;
     }
 
@@ -516,6 +512,13 @@ export default function EoyOralDrillPage() {
                   Sign In / Sign Up Now
                 </button>
               </div>
+            ) : engine.questionAudioError ? (
+              <DataErrorState
+                title="Question Audio Unavailable"
+                message="We couldn't play the audio for this question, so the practice has been paused. You can send an error report to us with the button below, then try again."
+                errorMessage={`[eoy-oral-drill] ${engine.questionAudioError}`}
+                onRetry={engine.clearQuestionAudioError}
+              />
             ) : (
               <OralCenterChatPractice
                 chatMessages={engine.chatMessages}
@@ -529,13 +532,10 @@ export default function EoyOralDrillPage() {
                 setInputMessage={engine.setInputMessage}
                 onStartRecording={engine.startRecording}
                 onStopRecording={engine.stopRecording}
-                onRepeatQuestion={() => {
-                  const currentQ = engine.activeQuestions[engine.currentQuestionIndex];
-                  if (currentQ) engine.playTTS(currentQ.questionOriginal || currentQ.question);
-                }}
                 onProceedNext={() => engine.proceedToNextQuestion(answers)}
                 onSendMessage={handleSendMessageWithCredit}
                 themeColor={themeColor}
+                creditCost={3}
               />
             )}
           </div>
