@@ -13,11 +13,11 @@ import { CreditCostFooter } from "../CreditCostFooter";
 import { useChatResize } from "../../hooks/useChatResize";
 import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
 import { useBroadcastChatColor } from "~/utils/chatThemeColor";
+import { requestAuthModal } from "~/utils/openAuthModal";
 import { personaliseGreeting, resolveDisplayName } from "../../utils/nickname"; // 💡 ニックネームモジュールのインポート
 
 export interface YamatoChatCommonMetaType {
   componentName: string;
-import { requestAuthModal } from "~/utils/openAuthModal";
   version: string;
   role: string;
   features: { featureName: string; description: string }[];
