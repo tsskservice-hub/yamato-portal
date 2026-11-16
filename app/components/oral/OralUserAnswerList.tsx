@@ -6,6 +6,8 @@ export interface QuestionItem {
   category?: string;
   question: string;
   isCustom?: boolean;
+  /** 練習を始めるのに必要な答えの最低文字数（あれば、入力欄の下に「今の文字数 / 必要な文字数」を出す） */
+  minLength?: number;
 }
 
 export interface OralUserAnswerListProps {
@@ -99,6 +101,15 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
                   placeholder="Enter your response in Japanese..."
                   className="w-full text-sm sm:text-base p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:outline-none leading-relaxed"
                 />
+                {item.minLength ? (() => {
+                  const count = (answers[item.id] ?? "").trim().length;
+                  const ok = count >= item.minLength;
+                  return (
+                    <p className={`text-[11px] font-bold ${ok ? "text-emerald-600" : "text-rose-600"}`}>
+                      {ok ? "✓" : "✗"} {count} / {item.minLength}+ characters
+                    </p>
+                  );
+                })() : null}
               </div>
             </div>
           ))

@@ -671,26 +671,9 @@ export function useOralPracticeEngine(
       const formattedHtml = formatOralFeedbackToHtml(aiFeedback);
 
       const nextIndex = currentQuestionIndex + 1;
-      const isPerfect = aiFeedback.trim().startsWith("◎");
 
-      if (isPerfect && nextIndex < activeQuestions.length) {
-        setTimeout(() => {
-          setCurrentQuestionIndex(nextIndex);
-          const nextQ = activeQuestions[nextIndex];
-          const nextTargetAns = answersMap[nextQ.id] || "";
-          setChatMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: formattedHtml, isHtml: true },
-            {
-              role: "assistant",
-              content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br><span class="registered-answer">(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br></span>Your turn!`,
-              isHtml: true,
-            },
-          ]);
-          setIsWaitingForNext(false);
-          playQuestion(nextQ);
-        }, 500);
-      } else if (nextIndex < activeQuestions.length) {
+      // ◎ でもすぐには進まない。フィードバックを読んでから、生徒が「Next Question」を押して進む
+      if (nextIndex < activeQuestions.length) {
         setIsWaitingForNext(true);
         setChatMessages([
           ...newMessages,

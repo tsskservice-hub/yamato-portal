@@ -56,7 +56,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [chatMessages, isAnalyzing]);
+  }, [chatMessages, isAnalyzing, isWaitingForNext]);
 
   // ⌨️ スペースバーで録音の開始・停止（練習中だけ）
   // 文字入力欄にいるときは普通にスペースを打てるようにする。
@@ -161,6 +161,17 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             />
           </div>
         ))}
+        {isWaitingForNext && (
+          <div className="flex justify-start">
+            <button
+              type="button"
+              onClick={onProceedNext}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md transition cursor-pointer"
+            >
+              ➡️ Next Question
+            </button>
+          </div>
+        )}
         {isAnalyzing && (
           <div
             className="text-xs font-bold italic animate-pulse p-2"
@@ -210,15 +221,6 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             )}
           </div>
 
-          {isWaitingForNext && (
-            <button
-              type="button"
-              onClick={onProceedNext}
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md transition cursor-pointer"
-            >
-              ➡️ Next Question
-            </button>
-          )}
         </div>
 
         <form onSubmit={onSendMessage} className="flex gap-2">
@@ -228,7 +230,7 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder={
               isWaitingForNext
-                ? "Click 'Next Question' above to proceed..."
+                ? "Read the feedback, then click 'Next Question' to continue..."
                 : isPracticing
                 ? `Record audio or type your response here... (Cost: ${creditCost} credits)`
                 : "Click 'Speak to AI Yamato' above to start..."

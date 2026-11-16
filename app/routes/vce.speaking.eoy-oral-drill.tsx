@@ -12,6 +12,7 @@ import { DataErrorState } from '~/components/DataErrorState';
 import OralExaminerAvatar from '~/components/oral/OralExaminerAvatar';
 import ChatYamatoEoyOralDrill from '~/components/chat/ChatYamatoEoyOralDrill';
 import { supabase } from '~/lib/supabaseClient';
+import { notifyCreditsUpdated } from '~/components/layout/PageLayout';
 
 // 💡 Modular Oral components & hooks
 import OralCenterChatPractice from '~/components/oral/OralCenterChatPractice';
@@ -134,7 +135,11 @@ export default function EoyOralDrillPage() {
         .single();
 
       if (data && !error) {
-        if (typeof data.credits === "number") setCredits(data.credits);
+        if (typeof data.credits === "number") {
+          setCredits(data.credits);
+          // ヘッダーのクレジット表示も同じ残高にそろえる（ヘッダーはこのイベントで更新される）
+          notifyCreditsUpdated(data.credits);
+        }
         if (data.nickname) setNickname(data.nickname);
       }
     } catch (err) {
@@ -177,6 +182,10 @@ export default function EoyOralDrillPage() {
   };
 
   const handleSelectAllTopics = () => setSelectedTopics(availableTopics);
+
+  // 答えの最低文字数: 会話の難しさで変わる（easy 7 / medium 10 / hard 15）。カスタムは 10
+  const MIN_CHARS_BY_DIFFICULTY = { steady: 7, normal: 10, accelerated: 15 } as const;
+  const minChars = selectedSection === "custom" ? 10 : MIN_CHARS_BY_DIFFICULTY[selectedLevel];
   const handleClearAllTopics = () => setSelectedTopics([]);
 
   const currentQuestions: (QuestionItem & {
@@ -207,7 +216,7 @@ export default function EoyOralDrillPage() {
           category: categoryName,
           isCustom: true,
           defaultAnswerOriginal: effectiveAnswer,
-          minLength: 10,
+          minLength: minChars,
         });
         initialMap[qId] = effectiveAnswer;
       });
@@ -234,7 +243,7 @@ export default function EoyOralDrillPage() {
               isCustom: false,
               audio: q.audio, // 質問の音声ファイル（/audio/Q001.mp3 など）
               defaultAnswerOriginal: plainAnswer,
-              minLength: 10,
+              minLength: minChars,
             });
             initialMap[String(qId)] = plainAnswer;
           }
@@ -244,7 +253,7 @@ export default function EoyOralDrillPage() {
 
     loadSavedAnswers(initialMap);
     return list;
-  }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw]);
+  }, [selectedSection, selectedLevel, selectedTopics, questionsData, customQuestionsRaw, minChars]);
 
   // 💡 バリデーションガード付きの練習開始ハンドラー（クレジット残高の事前検証も実施）
   const handleStartPractice = async () => {
@@ -262,7 +271,7 @@ export default function EoyOralDrillPage() {
 
     // 選んだトピックの質問（トピック未選択なら、このセクションの全部）に、10文字以上の答えがあるかを確認
     // 例: Family だけを選べば、Family の質問の答えがそろった時点で練習できる
-    const notReady = currentQuestions.filter((q) => (answers[q.id] || "").trim().length < 10);
+    const notReady = currentQuestions.filter((q) => (answers[q.id] || "").trim().length < (q.minLength ?? minChars));
     if (notReady.length > 0) {
       const first = notReady[0];
       const topicTip =
@@ -270,7 +279,7 @@ export default function EoyOralDrillPage() {
           ? "\n\nTip: select one topic (for example, Family) to practise just those questions."
           : "";
       alert(
-        `[Answer Check]\n${notReady.length} of ${currentQuestions.length} questions still need an answer of at least 10 characters.\nFirst one: "${first.questionOriginal.slice(0, 20)}..." (Current: ${
+        `[Answer Check]\n${notReady.length} of ${currentQuestions.length} questions still need an answer of at least ${minChars} characters.\nFirst one: "${first.questionOriginal.slice(0, 20)}..." (Current: ${
           (answers[first.id] || "").trim().length
         } characters)${topicTip}`
       );
@@ -408,7 +417,7 @@ export default function EoyOralDrillPage() {
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 Practice every stage of the VCE Japanese Oral Exam. Your custom answers are
-                automatically saved. (Drill requirement: 10+ characters | 3 credits per turn/response)
+                automatically saved. (Answer length: easy 7+, medium 10+, hard 15+ characters | 3 credits per answer)
               </p>
             </div>
             <OralExaminerAvatar statusText="Ready for Practice" themeColor={themeColor} />
