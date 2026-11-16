@@ -52,7 +52,16 @@ const STAGE_LABEL: Record<MockStageId, string> = {
   after: "Leaving the room",
 };
 
-type Status = "speaking" | "listening" | "recording" | "transcribing" | "confirm" | "thinking" | "error" | "finished";
+type Status =
+  | "speaking"
+  | "listening"
+  | "recording"
+  | "transcribing"
+  | "sttFailed"
+  | "confirm"
+  | "thinking"
+  | "error"
+  | "finished";
 
 interface ScriptLine {
   text: string;
@@ -101,6 +110,58 @@ function pickIdeas(data: OralExamQuestionsData, section: "sec1" | "sec2", diffic
     .filter(Boolean);
 }
 
+/** 待つ時間に上限をつけた fetch（返事が来ないまま止まらないように） */
+async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await yamatoFetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** 1 回の録音の長さの上限（秒）。これを超えたら自動で止めて文字にする */
+const MAX_RECORDING_SECONDS = 120;
+
+/**
+ * Section 1 で、7 分の間に順に話すトピック（試験でよく出るもの）。
+ * 時間で区切って、次のトピックに移るときは試験官が「では、話題を変えましょう」と大きく話題を変える
+ */
+const SEC1_TOPICS: { label: string; categories: string[] }[] = [
+  { label: "家族 (family)", categories: ["Family"] },
+  { label: "学校 (school)", categories: ["School"] },
+  { label: "アルバイト (part-time job)", categories: ["Part time Job"] },
+  { label: "日本 (going to Japan, studying Japanese)", categories: ["Travel", "Japanese Study"] },
+  { label: "将来 (future plans)", categories: ["Future"] },
+];
+
+/** 毎回ちがう順にする（「将来」は話のまとめにしやすいので最後） */
+function planSec1Topics() {
+  const head = SEC1_TOPICS.slice(0, -1);
+  for (let i = head.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [head[i], head[j]] = [head[j], head[i]];
+  }
+  return [...head, SEC1_TOPICS[SEC1_TOPICS.length - 1]];
+}
+
+/** 問題集から、そのトピックの質問の例を選ぶ */
+function pickIdeasByCategory(data: OralExamQuestionsData, difficulty: string, categories: string[], count = 8): string[] {
+  const group = (data as any).sec1 || {};
+  const list: OralExamQuestionItem[] = (group[difficulty] || group.normal || []).filter((q: OralExamQuestionItem) =>
+    categories.includes(q.category)
+  );
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list
+    .slice(0, count)
+    .map((q) => (q.text_original || q.text || "").replace(/<[^>]+>/g, ""))
+    .filter(Boolean);
+}
+
 const formatTime = (secs: number) => {
   const s = Math.max(0, Math.floor(secs));
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
@@ -134,6 +195,10 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
     sec1: pickIdeas(questionsData, "sec1", config.difficulty),
     sec2: pickIdeas(questionsData, "sec2", config.difficulty),
   });
+
+  // Section 1 のトピックの順番と、いま話しているトピック（-1 = まだ）
+  const sec1TopicsRef = useRef(planSec1Topics());
+  const topicIdxRef = useRef(-1);
 
   const [stageIdx, setStageIdx] = useState(0);
   const stageIdxRef = useRef(0);
@@ -229,31 +294,54 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const pendingTurnRef = useRef<{ mode: "open" | "reply" | "close"; studentText?: string } | null>(null);
+  type TopicPlan = { topicIdx: number; switchTopic: boolean };
+  const pendingTurnRef = useRef<{ mode: "open" | "reply" | "close"; studentText?: string; plan?: TopicPlan } | null>(null);
+
+  /** Section 1 で、この返事のときに話すトピック（時間で決める）と、話題を大きく変えるか */
+  const planTopic = (mode: "open" | "reply" | "close"): TopicPlan | undefined => {
+    if (stages[stageIdxRef.current] !== "sec1" || mode === "close") return undefined;
+    const topics = sec1TopicsRef.current;
+    if (mode === "open") return { topicIdx: 0, switchTopic: false };
+    const elapsed = (Date.now() - stageStartRef.current) / 1000;
+    const byTime = Math.min(Math.floor(elapsed / (STAGE_LIMIT_SECONDS.sec1 / topics.length)), topics.length - 1);
+    const current = Math.max(topicIdxRef.current, 0);
+    return byTime > current ? { topicIdx: current + 1, switchTopic: true } : { topicIdx: current, switchTopic: false };
+  };
 
   /** AI の試験官に次のひとことを言ってもらう */
-  const examinerTurn = async (mode: "open" | "reply" | "close", studentText?: string) => {
+  const examinerTurn = async (mode: "open" | "reply" | "close", studentText?: string, presetPlan?: TopicPlan) => {
     const stage = stages[stageIdxRef.current] as "sec1" | "sec2";
     setStatus("thinking");
     setErrorMessage(null);
-    pendingTurnRef.current = { mode, studentText };
+    const plan = presetPlan ?? planTopic(mode);
+    pendingTurnRef.current = { mode, studentText, plan };
+    const topic = plan ? sec1TopicsRef.current[plan.topicIdx] : undefined;
     try {
       // このセクションの会話（いま送る生徒の答えは除く）
       const stageLog = logRef.current.filter((l) => l.stage === stage);
       const history = studentText ? stageLog.slice(0, -1) : stageLog;
-      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/oral-mock/turn`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          stage,
-          mode,
-          history,
-          studentText,
-          ideas: ideasRef.current[stage],
-          isLastStage: !stages.slice(stageIdxRef.current + 1).some((s) => s === "sec1" || s === "sec2"),
-        }),
-      });
+      const res = await fetchWithTimeout(
+        `${YAMATO_API_BASE}/api/oral-mock/turn`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            stage,
+            mode,
+            history,
+            studentText,
+            // Section 1 は、いまのトピックの質問の例。Section 2 は特別研究の質問の例
+            ideas: topic ? pickIdeasByCategory(questionsData, config.difficulty, topic.categories) : ideasRef.current[stage],
+            topic: topic?.label,
+            switchTopic: plan?.switchTopic ?? false,
+            isLastStage: !stages.slice(stageIdxRef.current + 1).some((s) => s === "sec1" || s === "sec2"),
+            // このセクションのあとに何もない（退室のやりとりもない）→ 締めのことばで模擬試験ぜんたいを終える
+            endsExam: stageIdxRef.current === stages.length - 1,
+          }),
+        },
+        25000
+      );
       const data = (await res.json().catch(() => ({}))) as any;
       if (unmountedRef.current || finishedRef.current) return;
       if (res.status === 409) {
@@ -264,6 +352,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
       }
       if (!res.ok || !data.text) throw new Error(data.message || `HTTP ${res.status}`);
       pendingTurnRef.current = null;
+      if (plan) topicIdxRef.current = plan.topicIdx;
       addLog({ stage, speaker: "examiner", text: data.text });
       await say(data.text, data.audioBase64 ? `data:audio/mpeg;base64,${data.audioBase64}` : undefined);
       if (unmountedRef.current || finishedRef.current) return;
@@ -355,6 +444,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
   const chunksRef = useRef<Blob[]>([]);
 
   const stopMic = () => {
+    if (recordTimerRef.current) clearTimeout(recordTimerRef.current);
     if (recorderRef.current && recorderRef.current.state === "recording") {
       recorderRef.current.onstop = null;
       recorderRef.current.stop();
@@ -363,15 +453,28 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
     streamRef.current = null;
   };
 
+  // 文字にできなかった録音（同じ録音で、もう一度文字にできるように取っておく）
+  const lastBlobRef = useRef<Blob | null>(null);
+
   const transcribe = async (blob: Blob) => {
     setStatus("transcribing");
+    lastBlobRef.current = blob;
     try {
       const form = new FormData();
       form.append("audio", blob, "recording.webm");
       // 文字起こしの手がかり: 試験官の最後のことば（同じ音の漢字の取り違えを減らす）
       if (lastSpokenRef.current?.text) form.append("prompt", lastSpokenRef.current.text);
-      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/stt`, { method: "POST", body: form });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // 45 秒待っても返事がなければやめる（止まったままにしない）
+      const res = await fetchWithTimeout(`${YAMATO_API_BASE}/api/stt`, { method: "POST", body: form }, 45000);
+      if (!res.ok) {
+        const errData = (await res.json().catch(() => ({}))) as any;
+        const detail = String(errData?.error || "");
+        throw new Error(
+          res.status === 429 || /quota|rate limit/i.test(detail)
+            ? `The speech-to-text service is busy or has reached its limit (error ${res.status}).`
+            : `The speech-to-text service returned an error (error ${res.status}).`
+        );
+      }
       const data = (await res.json()) as any;
       const text = String(data.userText || data.text || "").trim();
       if (unmountedRef.current || finishedRef.current) return;
@@ -391,18 +494,35 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
         }
         return;
       }
+      lastBlobRef.current = null;
       setTranscript(text);
       setStatus("confirm");
-    } catch {
-      if (unmountedRef.current) return;
-      setNotice("Sorry, we couldn't turn your recording into text. Please record again.");
-      setStatus("listening");
+    } catch (err: any) {
+      if (unmountedRef.current || finishedRef.current) return;
+      const reason =
+        err?.name === "AbortError"
+          ? "It took too long (no reply for 45 seconds)."
+          : err?.message?.startsWith("The speech")
+          ? err.message
+          : "Connection problem.";
+      setNotice(`We couldn't turn your answer into text. ${reason}`);
+      setStatus("sttFailed");
     }
   };
+
+  /** 同じ録音で、もう一度文字にする */
+  const retryTranscribe = () => {
+    if (lastBlobRef.current) transcribe(lastBlobRef.current);
+    else setStatus("listening");
+  };
+
+  const recordStartRef = useRef(0);
+  const recordTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startRecording = async () => {
     setNotice(null);
     setTranscript("");
+    lastBlobRef.current = null;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -416,12 +536,22 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
+        if (recordTimerRef.current) clearTimeout(recordTimerRef.current);
         // 録音が終わったらマイクを閉じる
         stream.getTracks().forEach((t) => t.stop());
         if (streamRef.current === stream) streamRef.current = null;
         transcribe(new Blob(chunksRef.current, { type: mimeType }));
       };
       recorder.start();
+      recordStartRef.current = Date.now();
+      // 長すぎる録音は自動で止める（2 分）
+      if (recordTimerRef.current) clearTimeout(recordTimerRef.current);
+      recordTimerRef.current = setTimeout(() => {
+        if (recorder.state === "recording") {
+          setNotice(`Recording stopped automatically after ${MAX_RECORDING_SECONDS / 60} minutes.`);
+          recorder.stop();
+        }
+      }, MAX_RECORDING_SECONDS * 1000);
       setStatus("recording");
     } catch {
       setNotice("Microphone access is blocked. Please allow the microphone in your browser settings.");
@@ -436,8 +566,8 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
   // ---- キーボード: Space で録音の開始・停止／言い直し、Enter で送る ----
   const statusRef = useRef(status);
   statusRef.current = status;
-  const handlersRef = useRef({ startRecording, stopRecording, sendAnswer });
-  handlersRef.current = { startRecording, stopRecording, sendAnswer };
+  const handlersRef = useRef({ startRecording, stopRecording, sendAnswer, retryTranscribe });
+  handlersRef.current = { startRecording, stopRecording, sendAnswer, retryTranscribe };
 
   useEffect(() => {
     const isTyping = (el: EventTarget | null) => {
@@ -452,11 +582,16 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
         handlersRef.current.sendAnswer();
         return;
       }
+      if (e.key === "Enter" && st === "sttFailed") {
+        e.preventDefault();
+        handlersRef.current.retryTranscribe();
+        return;
+      }
       if (e.code !== "Space") return;
       e.preventDefault();
       if (e.repeat) return;
       if (st === "recording") handlersRef.current.stopRecording();
-      else if (st === "listening" || st === "confirm") handlersRef.current.startRecording();
+      else if (st === "listening" || st === "confirm" || st === "sttFailed") handlersRef.current.startRecording();
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.code === "Space" && !isTyping(e.target)) e.preventDefault();
@@ -530,6 +665,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
     listening: "Your turn — press Space (or the Record button) to answer",
     recording: "Recording… press Space to stop",
     transcribing: "Turning your answer into text…",
+    sttFailed: "Your answer could not be turned into text",
     confirm: "Is this what you said?",
     thinking: "The examiner is listening…",
     error: "Something went wrong",
@@ -650,7 +786,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
                     type="button"
                     onClick={() => {
                       const p = pendingTurnRef.current;
-                      if (p) examinerTurn(p.mode, p.studentText);
+                      if (p) examinerTurn(p.mode, p.studentText, p.plan);
                     }}
                     className="px-4 py-2 rounded-xl text-white text-xs font-bold cursor-pointer"
                     style={{ backgroundColor: themeColor }}
@@ -679,7 +815,9 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
                   }`}
                   style={status === "recording" ? { backgroundColor: themeColor } : undefined}
                 >
-                  {status === "recording" ? "⏹ Stop" : "🎙️ Record"}
+                  {status === "recording"
+                    ? `⏹ Stop (${formatTime((now - recordStartRef.current) / 1000)})`
+                    : "🎙️ Record"}
                   <span className="text-[10px] bg-black/20 px-2 py-0.5 rounded-full">[Spacebar]</span>
                 </button>
                 <p className="text-[11px] leading-snug text-slate-500 dark:text-slate-400">
@@ -687,6 +825,28 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
                   <br />
                   <span className="font-bold text-slate-700 dark:text-slate-200">「すみません。もういちどおねがいします。」</span>
                 </p>
+              </div>
+            )}
+
+            {status === "sttFailed" && (
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={retryTranscribe}
+                  className="py-3 px-3 rounded-2xl border-2 bg-white dark:bg-slate-900 font-black text-sm flex flex-col items-center cursor-pointer active:scale-95"
+                  style={{ borderColor: themeColor, color: themeColor }}
+                >
+                  <span>🔄 Try again (Enter)</span>
+                  <span className="text-xs font-bold opacity-75">Use the same recording</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={startRecording}
+                  className="py-3 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-black text-sm flex flex-col items-center cursor-pointer active:scale-95"
+                >
+                  <span>🎙️ Record Again (Space)</span>
+                  <span className="text-xs font-bold opacity-75">Say it again</span>
+                </button>
               </div>
             )}
 
