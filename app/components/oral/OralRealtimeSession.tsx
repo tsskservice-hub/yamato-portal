@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import OralExaminerAvatar from "./OralExaminerAvatar";
 import { yamatoFetch, YAMATO_API_BASE } from "~/lib/yamatoApi";
 import { planSec1Topics, SEC2_ANGLES, TOPIC_SECONDS } from "~/data/oral-topics";
+import { isLikelyHallucination } from "~/utils/stt-guard";
 
 export type RealtimeFocus = "free" | "sec1" | "sec2";
 
@@ -104,7 +105,8 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
   const aiTextRef = useRef<Map<string, string>>(new Map());
   const responseActiveRef = useRef(false);
   const warnedRef = useRef(false);
-  const closingRef = useRef<"none" | "pending" | "sent">("none");
+  // 締め: none → due（残り 10 秒を切った。次の AI の番で締める）→ pending（今の返事が終わってから）→ sent
+  const closingRef = useRef<"none" | "due" | "pending" | "sent">("none");
   // 英語で止めたあとの「言い直し」の返事か（言い直しは 1 回だけ。言い直しはもう止めない＝AI が黙ってしまわないように）
   const pendingRedoRef = useRef(false);
 
@@ -244,6 +246,8 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
         break;
       case "input_audio_buffer.speech_stopped":
         setStudentSpeaking(false);
+        // 残り 10 秒を切ってから生徒が話し終えた → 次は AI の番なので、ここで締める
+        if (closingRef.current === "due") setTimeout(requestClosing, 400);
         if (segmentRef.current) segmentRef.current.stop = Date.now();
         lastActivityRef.current = Date.now();
         speechStoppedAtRef.current = Date.now();
@@ -267,16 +271,25 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
           aiStoppedAtRef.current = 0;
         }
         break;
-      case "conversation.item.input_audio_transcription.completed":
-        setLogBoth(
-          logRef.current.map((l) => (l.id === msg.item_id ? { ...l, text: String(msg.transcript || "").trim() } : l))
-        );
+      case "conversation.item.input_audio_transcription.completed": {
+        // 雑音から文字起こしの AI が作ってしまった文（「ご視聴ありがとうございました」など）は、生徒の発言として出さない
+        const heard = String(msg.transcript || "").trim();
+        const text = isLikelyHallucination(heard) ? "" : heard;
+        if (heard && !text) console.warn(`[realtime] ignored a transcript that the student probably did not say: "${heard}"`);
+        setLogBoth(logRef.current.map((l) => (l.id === msg.item_id ? { ...l, text } : l)));
         break;
+      }
       case "conversation.item.input_audio_transcription.failed":
         setLogBoth(logRef.current.map((l) => (l.id === msg.item_id ? { ...l, text: "" } : l)));
         break;
       case "response.created":
         responseActiveRef.current = true;
+        if (closingRef.current === "due") {
+          // 自動で始まった返事（ふつうの質問）は止めて、締めのあいさつにする
+          send({ type: "response.cancel" });
+          send({ type: "output_audio_buffer.clear" });
+          closingRef.current = "pending";
+        }
         responseCreatedAtRef.current = Date.now();
         audioStartedRef.current = false;
         speechStoppedAtRef.current = 0;
@@ -473,12 +486,29 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
     if (status !== "live" || !startedAtRef.current) return;
     if (remaining <= 60 && !warnedRef.current) {
       warnedRef.current = true;
-      systemNote("残り約1分です。新しい話題は始めずに、自然に会話をまとめていってください。");
+      systemNote(
+        "残り約1分です。新しい話題は始めずに、今の話題のまま会話を続けてください。終わりのあいさつ（「今日は楽しかったです」「ありがとうございました」など）は、「時間になりました」と知らせるまで、まだ言わないでください。"
+      );
     }
-    if (remaining <= 0) {
-      requestClosing();
-      return;
+    // 残り 10 秒を切ったら、次の AI の番を「締めの番」にする（数秒のびてもかまわない）
+    if (remaining <= 10 && closingRef.current === "none") {
+      closingRef.current = "due";
+      // AI が自分で次の返事を始めないようにする（締めの番はこちらから始める）
+      send({
+        type: "session.update",
+        session: {
+          type: "realtime",
+          audio: { input: { turn_detection: { type: "semantic_vad", eagerness: "low", create_response: false, interrupt_response: true } } },
+        },
+      });
+      // ちょうど生徒が話し終えて、AI の返事を待っているところなら、すぐに締める
+      if (!responseActiveRef.current && !aiSpeakingNowRef.current && !studentSpeaking && speechStoppedAtRef.current) {
+        requestClosing();
+      }
     }
+    // 生徒がずっと黙っていても、時間を 20 秒過ぎたら締める
+    if (closingRef.current === "due" && remaining <= -20) requestClosing();
+    if (closingRef.current !== "none") return;
 
     // 約 1 分ごとに話題（Section 2 は角度）を変える。残り 1 分を切ったら変えない
     const topics = topicsRef.current;

@@ -14,6 +14,7 @@ import OralExaminerAvatar from "./OralExaminerAvatar";
 import type { MockExamConfig } from "./OralMockConfig";
 import { yamatoFetch, YAMATO_API_BASE } from "~/lib/yamatoApi";
 import { isRepeatRequest } from "~/hooks/OralPracticeHooks";
+import { isLikelyHallucination } from "~/utils/stt-guard";
 import type { OralExamQuestionsData, OralExamQuestionItem } from "~/data/oral-exam-questions";
 import { planSec1Topics, SEC2_ANGLES, TOPIC_SECONDS, type OralTopic } from "~/data/oral-topics";
 
@@ -508,8 +509,10 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
       const data = (await res.json()) as any;
       const text = String(data.userText || data.text || "").trim();
       if (unmountedRef.current || finishedRef.current) return;
-      if (!text) {
-        setNotice("We couldn't hear anything. Please try again.");
+      // 何も聞こえなかった、または雑音から文字起こしの AI が文を作った・試験官の質問がそのまま返ってきた
+      if (!text || isLikelyHallucination(text, lastSpokenRef.current?.text)) {
+        if (text) console.warn(`[mock] ignored a transcript that the student probably did not say: "${text}"`);
+        setNotice("We couldn't hear you clearly. Please try again, a little closer to the microphone.");
         setStatus("listening");
         return;
       }

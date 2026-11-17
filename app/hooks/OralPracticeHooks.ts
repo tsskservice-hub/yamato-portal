@@ -4,6 +4,7 @@
  */
 import { yamatoFetch } from '~/lib/yamatoApi';
 import { useState, useEffect, useRef, useCallback } from "react";
+import { isLikelyHallucination } from "~/utils/stt-guard";
 
 export type ChatMessage = {
   role: "assistant" | "user";
@@ -346,6 +347,15 @@ export function useOralPracticeEngine(
       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
       const data = (await res.json()) as any;
       const transcript = (data.userText || data.text || "").trim();
+
+      // 雑音から文字起こしの AI が文を作った・質問がそのまま返ってきた → 生徒の答えとして使わない
+      const askedQuestion = followUpRef.current?.question || currentQ?.questionOriginal || currentQ?.question || "";
+      if (isLikelyHallucination(transcript, askedQuestion)) {
+        console.warn(`[oral] ignored a transcript that the student probably did not say: "${transcript}"`);
+        setInputMessage("");
+        alert("We couldn't hear you clearly. Please record again, a little closer to the microphone.");
+        return;
+      }
 
       if (isRepeatRequest(transcript)) {
         setInputMessage("");

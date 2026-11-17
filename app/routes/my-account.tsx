@@ -618,10 +618,11 @@ export default function AccountSettingsRoute() {
           createdAt={userCreatedAt}
         />
 
-        {/* 3. クレジット履歴セクション（モジュール化） */}
+        {/* 3. クレジット履歴セクション（モジュール化）。列が多いので、広い画面ではこのセクションだけ左右に広げる */}
         <CreditTransactionsSection
           transactions={transactions}
           isLoading={isLoadingTransactions}
+          className="lg:-mx-8 xl:-mx-24"
         />
 
         {/* 4. 危険なエリア（アカウント削除セクション ＆ モーダル・モジュール化） */}
