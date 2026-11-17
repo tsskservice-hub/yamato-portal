@@ -6,6 +6,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "~/lib/supabaseClient";
 
+/** 宿題で、学校時間中のためブロック中のタスク（until = ブロックが終わる時刻） */
+type TaskLocks = Partial<Record<LessonTaskKey, { locked: boolean; until: string | null }>>;
+
+function formatTime(iso: string | null) {
+  if (!iso) return "after school";
+  return `after ${new Date(iso).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}`;
+}
+
 // 全レッスン共通の6タスク（edu_student_progress.task_key と同じ値）。表示順もこの順
 const TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing", "culture"] as const;
 
@@ -56,6 +64,20 @@ export function EduLessonTaskManager({
     culture: false,
   });
 
+  // 💡 宿題の学校時間ブロック（サーバーが判定する。SQL 44 / api.lesson-progress.ts）
+  const [locks, setLocks] = useState<TaskLocks>({});
+  const isLocked = (k: LessonTaskKey) => Boolean(locks[k]?.locked) && !taskProgress[k];
+
+  useEffect(() => {
+    if (!userId || !lessonId) return;
+    let cancelled = false;
+    fetch(`/api/lesson-progress?lessonId=${encodeURIComponent(lessonId)}`, { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : { locks: {} }))
+      .then((d: any) => { if (!cancelled) setLocks(d?.locks ?? {}); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [lessonId, userId]);
+
   const onProgressChangeRef = useRef(onProgressChange);
   onProgressChangeRef.current = onProgressChange;
   const onAllCompletedChangeRef = useRef(onAllCompletedChange);
@@ -94,14 +116,33 @@ export function EduLessonTaskManager({
 
         // このページで新しく完了したタスクを保存する（次に開いたときに完了済みとして扱うため）
         // ライティングはサーバー（api）が保存するので、ここでは保存しない
+        //    完了の記録はサーバー（/api/lesson-progress）だけが行う。宿題で学校時間中のタスクは記録されない
         const newlyCompleted = TASK_KEYS.filter((k) => k !== "writing" && externalTaskStatus[k] && !saved[k]);
         if (newlyCompleted.length > 0) {
-          const now = new Date().toISOString();
-          const { error: upsertError } = await supabase.from("edu_student_progress").upsert(
-            newlyCompleted.map((k) => ({ user_id: userId, lesson_id: lessonId, task_key: k, is_completed: true, updated_at: now })),
-            { onConflict: "user_id,lesson_id,task_key" }
-          );
-          if (upsertError) console.error("Failed to save task completion:", upsertError);
+          try {
+            const res = await fetch("/api/lesson-progress", {
+              method: "POST",
+              credentials: "same-origin",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lessonId, taskKeys: newlyCompleted }),
+            });
+            const result: any = await res.json().catch(() => ({}));
+            const refused: Array<{ taskKey: string; until: string | null }> = Array.isArray(result?.locked) ? result.locked : [];
+            if (refused.length) {
+              // 記録されなかったタスクは「完了」にしない
+              refused.forEach((r) => { if (r.taskKey in merged) merged[r.taskKey as LessonTaskKey] = false; });
+              if (!cancelled) {
+                setLocks((prev) => {
+                  const next = { ...prev };
+                  refused.forEach((r) => { next[r.taskKey as LessonTaskKey] = { locked: true, until: r.until }; });
+                  return next;
+                });
+              }
+            }
+            if (!res.ok) console.error("Failed to save task completion:", result?.error);
+          } catch (saveErr) {
+            console.error("Failed to save task completion:", saveErr);
+          }
         }
 
         if (cancelled) return;
@@ -149,6 +190,14 @@ export function EduLessonTaskManager({
           </div>
         </div>
 
+        {/* 💡 宿題で、学校時間中はできないタスクがあるときの案内 */}
+        {TASK_KEYS.some((k) => isLocked(k)) && (
+          <div className="relative z-10 bg-amber-100 text-amber-900 border border-amber-300 rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold">
+            🔒 Some tasks here are homework. Homework can&apos;t be done during school hours. Please come back{" "}
+            {formatTime(TASK_KEYS.map((k) => locks[k]).find((l) => l?.locked)?.until ?? null)}.
+          </div>
+        )}
+
         {/* タスクカード群 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
           
@@ -159,7 +208,7 @@ export function EduLessonTaskManager({
                 Task 1
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.vocabulary ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.vocabulary ? '✅ Completed' : '🔒 Not completed'}
+                {taskProgress.vocabulary ? '✅ Completed' : isLocked('vocabulary') ? `🔒 Homework – ${formatTime(locks.vocabulary?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
@@ -170,7 +219,7 @@ export function EduLessonTaskManager({
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartVocabularyDrill && (
+              {onStartVocabularyDrill && !isLocked('vocabulary') && (
                 <button
                   type="button"
                   onClick={onStartVocabularyDrill}
@@ -190,7 +239,7 @@ export function EduLessonTaskManager({
                 Task 2
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.listening ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.listening ? '✅ Completed' : '🔒 Not completed'}
+                {taskProgress.listening ? '✅ Completed' : isLocked('listening') ? `🔒 Homework – ${formatTime(locks.listening?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
@@ -201,7 +250,7 @@ export function EduLessonTaskManager({
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartListeningDrill && (
+              {onStartListeningDrill && !isLocked('listening') && (
                 <button
                   type="button"
                   onClick={onStartListeningDrill}
@@ -221,7 +270,7 @@ export function EduLessonTaskManager({
                 Task 3
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.reading ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.reading ? '✅ Completed' : '🔒 Not completed'}
+                {taskProgress.reading ? '✅ Completed' : isLocked('reading') ? `🔒 Homework – ${formatTime(locks.reading?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
@@ -232,7 +281,7 @@ export function EduLessonTaskManager({
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartReadingDrill && (
+              {onStartReadingDrill && !isLocked('reading') && (
                 <button
                   type="button"
                   onClick={onStartReadingDrill}
@@ -252,7 +301,7 @@ export function EduLessonTaskManager({
                 Task 4
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.speaking ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.speaking ? '✅ Completed' : '🔒 Not completed'}
+                {taskProgress.speaking ? '✅ Completed' : isLocked('speaking') ? `🔒 Homework – ${formatTime(locks.speaking?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
@@ -263,7 +312,7 @@ export function EduLessonTaskManager({
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartSpeakingDrill && (
+              {onStartSpeakingDrill && !isLocked('speaking') && (
                 <button
                   type="button"
                   onClick={onStartSpeakingDrill}
@@ -283,7 +332,7 @@ export function EduLessonTaskManager({
                 Task 5
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.writing ? '✅ Completed' : '🔒 Not completed'}
+                {taskProgress.writing ? '✅ Completed' : isLocked('writing') ? `🔒 Homework – ${formatTime(locks.writing?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
@@ -294,7 +343,7 @@ export function EduLessonTaskManager({
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartWritingTask && (
+              {onStartWritingTask && !isLocked('writing') && (
                 <button
                   type="button"
                   onClick={onStartWritingTask}
@@ -314,7 +363,7 @@ export function EduLessonTaskManager({
                 Task 6
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.culture ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.culture ? '✅ Completed' : '🔒 Not completed'}
+                {taskProgress.culture ? '✅ Completed' : isLocked('culture') ? `🔒 Homework – ${formatTime(locks.culture?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
@@ -325,7 +374,7 @@ export function EduLessonTaskManager({
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartCultureTask && (
+              {onStartCultureTask && !isLocked('culture') && (
                 <button
                   type="button"
                   onClick={onStartCultureTask}

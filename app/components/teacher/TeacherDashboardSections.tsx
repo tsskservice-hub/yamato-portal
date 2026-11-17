@@ -44,6 +44,8 @@ export type DashboardData = {
     id: string; title: string; kind: 'homework' | 'classwork'; itemType: 'lesson' | 'vocab_quiz';
     lessonId: string | null; taskKeys: string[]; quizId: string | null;
     assignTo: 'class' | 'students'; studentIds: string[]; dueAt: string; inPeriod: boolean;
+    /** 宿題を学校時間中にもしてよいか（課題は常に true） */
+    allowDuringSchool: boolean;
   }>;
   progress: Array<{ userId: string; lessonId: string; taskKey: string; completedAt: string | null }>;
   handwriting: Array<{
@@ -64,6 +66,15 @@ export type DashboardData = {
   };
   /** SQL 42 を実行済みか（課題・語彙クイズ・選んだ生徒への配布が使えるか） */
   assignmentsAvailable: boolean;
+  /**
+   * 宿題の学校時間ブロック（SQL 44）。available: 実行済みか / today: クラスの時間での今日 "YYYY-MM-DD"
+   * offToday: 今日はクラス全体でブロックしない / days: ISO の曜日（1 = 月）
+   */
+  schoolHours: {
+    available: boolean; timezone: string; start: string; end: string; days: number[]; offToday: boolean; today: string;
+  };
+  /** 学校時間でも宿題をしてよい生徒（休んだ生徒など）と、いつまでか（クラスの時間の日付） */
+  homeworkUnlocks: Array<{ userId: string; untilDate: string }>;
   /** 先生が作った語彙クイズ */
   quizzes: Array<{ id: string; title: string; wordCount: number; createdAt: string }>;
   /** 語彙クイズの結果（宿題 × 生徒）: 最高点・回数・最後にやった日 */

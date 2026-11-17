@@ -19,6 +19,7 @@ import { CreditTransactionsSection } from '~/components/CreditTransactionsSectio
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
 import { StudentClassSection, type StudentHomeworkItem } from '~/components/StudentClassSection';
 import { loadQuizStats, loadStudentAssignments } from '~/lib/assignments.server';
+import { getClassLockUntil } from '~/lib/homework-lock.server';
 import { getStudentClass, getVerifiedSchoolEmails, normaliseJoinCode, type VerifiedSchoolEmail } from '~/lib/teacher.server';
 import { INVITE_CODE_LENGTH, TEACHER_LIMITS, allowedStudentDomains, isStudentDomainAllowed } from '~/lib/teacher-config';
 
@@ -335,6 +336,11 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
 
   const lessonIds = [...new Set(rows.map((r) => r.lessonId).filter((id): id is string => Boolean(id)))];
   const quizIds = [...new Set(rows.map((r) => r.quizId).filter((id): id is string => Boolean(id)))];
+  // 今、学校時間のブロック中か（宿題で「授業中もしてよい」でないものに効く。SQL 44）
+  const lockedUntil = await getClassLockUntil(admin, classId, userId);
+  const lockOf = (r: { kind: string; allowDuringSchool: boolean }) =>
+    r.kind === "homework" && !r.allowDuringSchool ? lockedUntil : null;
+
   const [{ data: lessons }, { data: progress }, { data: quizzes }, quizStats] = await Promise.all([
     lessonIds.length ? admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds) : { data: [] },
     lessonIds.length
@@ -364,6 +370,7 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
         lessonUrl: `/class-quiz/${r.id}`,
         tasks: [],
         quiz: st ? { best: st.best, total: st.total, attempts: st.attempts } : { best: null, total: null, attempts: 0 },
+        lockedUntil: lockOf(r),
       };
     }
     const lesson: any = lessonMap.get(String(r.lessonId));
@@ -377,6 +384,7 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
       lessonUrl: lesson?.slug ? `/lessons/${lesson.slug}` : "/lessons",
       tasks: r.taskKeys.map((key) => ({ key, done: done.has(`${r.lessonId}:${key}`) })),
       quiz: null,
+      lockedUntil: lockOf(r),
     };
   });
 }

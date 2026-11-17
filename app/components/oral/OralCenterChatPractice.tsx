@@ -298,6 +298,11 @@ export const OralCenterChatPractice: React.FC<OralCenterChatPracticeProps> = ({
           </div>
         )}
       </div>
+
+      {/* AI が評価できること・できないこと */}
+      <p className="text-[11px] text-slate-400 dark:text-slate-500">
+        ℹ️ Feedback is based on the text of what you said (speech-to-text). Pronunciation, intonation, rhythm and tempo are not assessed.
+      </p>
     </div>
   );
 };

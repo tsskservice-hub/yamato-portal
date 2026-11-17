@@ -22,6 +22,8 @@ export type StudentHomeworkItem = {
   lessonUrl: string;
   tasks: Array<{ key: string; done: boolean }>;
   quiz: { best: number | null; total: number | null; attempts: number } | null;
+  /** 宿題で、今は学校時間のためできないとき、できるようになる時刻（ISO） */
+  lockedUntil?: string | null;
 };
 
 type Props = {
@@ -38,7 +40,8 @@ type ActionResult = { intent?: string; success?: boolean; error?: string; messag
 const taskLabel = (key: string) => LESSON_TASKS.find((t) => t.key === key)?.label ?? key;
 
 function formatDue(iso: string) {
-  return new Date(iso).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+  const d = new Date(iso);
+  return `${d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}, ${d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}`;
 }
 
 export function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joinRequest }: Props) {
@@ -228,6 +231,12 @@ function AssignmentList({ title, icon, items }: { title: string; icon: React.Rea
                     {isQuiz ? `Vocabulary quiz: ${hw.lessonTitle}` : hw.lessonTitle} · Due {formatDue(hw.dueAt)}
                     {overdue && <span className="ml-1 font-semibold text-red-600">(overdue)</span>}
                   </p>
+                  {hw.lockedUntil && !allDone && (
+                    <p className="text-[11px] font-semibold text-amber-700 mt-1" suppressHydrationWarning>
+                      🔒 Homework can&apos;t be done during school hours. Available after{" "}
+                      {new Date(hw.lockedUntil).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}.
+                    </p>
+                  )}
                   {isQuiz ? (
                     <p className="text-[11px] text-gray-600 mt-1.5">
                       {hw.quiz && hw.quiz.attempts > 0 && hw.quiz.best !== null && hw.quiz.total !== null

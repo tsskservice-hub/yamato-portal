@@ -58,7 +58,8 @@ import {
   StudentsCard,
   VocabQuizCard,
 } from '~/components/teacher/AssignmentSections';
-import { DashboardJumpNav } from '~/components/teacher/DashboardJumpNav';
+import { BackToTopButton, DashboardJumpNav } from '~/components/teacher/DashboardJumpNav';
+import { SchoolHoursCard } from '~/components/teacher/SchoolHoursSections';
 
 const DAY_MS = 86_400_000;
 
@@ -68,6 +69,33 @@ function localDayStart(date: string, tzOffsetMinutes: number): Date | null {
   const utcMidnight = Date.parse(`${date}T00:00:00Z`);
   if (Number.isNaN(utcMidnight)) return null;
   return new Date(utcMidnight + tzOffsetMinutes * 60_000);
+}
+
+// 宿題の学校時間ブロックの初期値（edu_classes の列の初期値と同じ。SQL 44）
+const DEFAULT_SCHOOL_HOURS = { timezone: 'Australia/Melbourne', start: '08:45', end: '15:15', days: [1, 2, 3, 4, 5] };
+
+/** そのタイムゾーンでの今日 "YYYY-MM-DD" */
+function localDateIn(timeZone: string, date = new Date()) {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+  } catch {
+    return date.toISOString().slice(0, 10);
+  }
+}
+
+function isValidTimeZone(tz: string) {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: tz });
+    return tz.length > 0 && tz.length <= 64;
+  } catch {
+    return false;
+  }
+}
+
+/** クラスのタイムゾーン（SQL 44 の前は初期値） */
+async function classTimeZone(admin: any, classId: string) {
+  const { data } = await admin.from('edu_classes').select('school_timezone').eq('id', classId).maybeSingle();
+  return String(data?.school_timezone || DEFAULT_SCHOOL_HOURS.timezone);
 }
 
 function parseTz(raw: unknown) {
@@ -151,6 +179,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     assignmentsAvailable: false,
     quizzes: [],
     quizStats: [],
+    schoolHours: { ...DEFAULT_SCHOOL_HOURS, available: false, offToday: false, today: localDateIn(DEFAULT_SCHOOL_HOURS.timezone) },
+    homeworkUnlocks: [],
   };
 
   if (!selected) return json(base);
@@ -223,6 +253,36 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   // 宿題・課題（新しい締切順）。SQL 42 の前は新しい列が無いので、今までの形で読む（新しい機能は「まだ使えない」と表示）
   const assignments = await loadClassAssignments(admin, selected.id, user.id);
+  // 宿題の学校時間ブロック（SQL 44）：クラスの学校時間と、生徒ごとの解除
+  let schoolHours = base.schoolHours;
+  let homeworkUnlocks: DashboardData['homeworkUnlocks'] = [];
+  if (assignments.schoolHoursAvailable) {
+    const { data: hours } = await admin
+      .from('edu_classes')
+      .select('school_timezone, school_start, school_end, school_days, homework_lock_off_date')
+      .eq('id', selected.id)
+      .maybeSingle();
+    if (hours) {
+      const timezone = String(hours.school_timezone || DEFAULT_SCHOOL_HOURS.timezone);
+      const today = localDateIn(timezone);
+      schoolHours = {
+        available: true,
+        timezone,
+        start: String(hours.school_start).slice(0, 5),
+        end: String(hours.school_end).slice(0, 5),
+        days: (hours.school_days as number[] | null) ?? DEFAULT_SCHOOL_HOURS.days,
+        offToday: hours.homework_lock_off_date === today,
+        today,
+      };
+      const { data: unlockRows } = await admin
+        .from('edu_class_homework_unlocks')
+        .select('user_id, until_date')
+        .eq('class_id', selected.id)
+        .gte('until_date', today);
+      homeworkUnlocks = (unlockRows ?? []).map((u: any) => ({ userId: String(u.user_id), untilDate: String(u.until_date) }));
+    }
+  }
+
   const homework = assignments.items.map((h) => ({
     ...h,
     inPeriod: new Date(h.dueAt) >= periodStart && new Date(h.dueAt) <= periodEnd,
@@ -326,6 +386,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     assignmentsAvailable: assignments.available,
     quizzes: assignments.quizzes,
     quizStats: assignments.quizStats,
+    schoolHours,
+    homeworkUnlocks,
   } satisfies DashboardData);
 }
 
@@ -533,6 +595,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { data: classHw } = await admin.from('edu_homework').select('id').eq('class_id', cls.id);
     const hwIds = (classHw ?? []).map((h: any) => h.id);
     if (hwIds.length) await admin.from('edu_homework_students').delete().eq('user_id', studentId).in('homework_id', hwIds);
+    await admin.from('edu_class_homework_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
     return backTo(cls.id);
   }
 
@@ -738,13 +801,24 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     row.title = (title || `${defaultTitle} ${assignmentKindLabel(kind).toLowerCase()}`).slice(0, 100);
-    // 締切日の終わり（先生の時間で 23:59:59）
-    row.due_at = new Date(due.getTime() + DAY_MS - 1000).toISOString();
+    // 締切の日時（先生の時間）。時刻がなければ、その日の終わり（23:59:59）
+    const timeMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(form.get('dueTime') ?? ''));
+    row.due_at = timeMatch
+      ? new Date(due.getTime() + Number(timeMatch[1]) * 3_600_000 + Number(timeMatch[2]) * 60_000).toISOString()
+      : new Date(due.getTime() + DAY_MS - 1000).toISOString();
     row.kind = kind;
     row.item_type = itemType;
     row.assign_to = assignTo;
+    // 宿題を学校時間中にもしてよいか（初期値: してはいけない）。課題は授業中にやるもの
+    const allowDuringSchool = kind === 'homework' && form.get('allowDuringSchool') === 'on';
+    if (allowDuringSchool) row.allow_during_school = true;
 
     let { data: created, error } = await admin.from('edu_homework').insert(row).select('id').single();
+    if (error && /allow_during_school/.test(error.message)) {
+      // SQL 44 の前：学校時間のブロックはまだ無いので、その列を外して出す
+      delete row.allow_during_school;
+      ({ data: created, error } = await admin.from('edu_homework').insert(row).select('id').single());
+    }
     if (error && !isNewShape && /kind|item_type|assign_to/.test(error.message)) {
       // SQL 42 の前：今までの列だけで出す
       delete row.kind; delete row.item_type; delete row.assign_to;
@@ -801,6 +875,72 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
     const { error } = await admin.from('edu_homework').update({ assign_to: assignTo }).eq('id', hw.id);
     if (error) return fail('Could not save the students. Please try again.', 500);
+    return backTo(cls.id);
+  }
+
+  // 宿題の学校時間（クラスごと）: タイムゾーン・始まり・終わり・曜日
+  if (intent === 'update-school-hours') {
+    const timezone = String(form.get('timezone') ?? '');
+    const start = String(form.get('start') ?? '');
+    const end = String(form.get('end') ?? '');
+    const days = [...new Set(form.getAll('days').map(Number))].filter((d) => Number.isInteger(d) && d >= 1 && d <= 7).sort();
+    const timeOk = (t: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t);
+    if (!isValidTimeZone(timezone)) return fail('Choose a time zone.');
+    if (!timeOk(start) || !timeOk(end) || start >= end) return fail('School hours must start before they end.');
+    const { error } = await admin
+      .from('edu_classes')
+      .update({ school_timezone: timezone, school_start: start, school_end: end, school_days: days })
+      .eq('id', cls.id);
+    if (error) {
+      console.error('[teacher-dashboard] school hours failed:', error.message);
+      return fail('Could not save school hours. This needs a database update (SQL 44).', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // クラス全体で「今日はブロックしない」（研修日・遠足など）／元に戻す
+  if (intent === 'school-day-off-today' || intent === 'school-day-on') {
+    const today = localDateIn(await classTimeZone(admin, cls.id));
+    const { error } = await admin
+      .from('edu_classes')
+      .update({ homework_lock_off_date: intent === 'school-day-off-today' ? today : null })
+      .eq('id', cls.id);
+    if (error) return fail('Could not change this. This needs a database update (SQL 44).', 500);
+    return backTo(cls.id);
+  }
+
+  // 生徒ごとに、学校時間でも宿題をしてよくする（休んだ生徒など）。「今日だけ」または「〇日まで」／元に戻す
+  if (intent === 'unlock-student-homework' || intent === 'relock-student-homework') {
+    const studentId = String(form.get('studentId') ?? '');
+    const { data: member } = await admin
+      .from('edu_class_members')
+      .select('user_id')
+      .eq('class_id', cls.id)
+      .eq('user_id', studentId)
+      .eq('role', 'student')
+      .maybeSingle();
+    if (!member) return fail('Student not found.', 404);
+
+    if (intent === 'relock-student-homework') {
+      await admin.from('edu_class_homework_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+      return backTo(cls.id);
+    }
+
+    const today = localDateIn(await classTimeZone(admin, cls.id));
+    const raw = String(form.get('until') ?? '');
+    const until = raw === 'today' || raw === '' ? today : raw;
+    const maxDate = localDateIn('UTC', new Date(Date.now() + 90 * DAY_MS));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(until) || until < today || until > maxDate) {
+      return fail('Choose a date from today up to 90 days ahead.');
+    }
+    const { error } = await admin.from('edu_class_homework_unlocks').upsert(
+      { class_id: cls.id, user_id: studentId, until_date: until, created_at: new Date().toISOString(), created_by: user.id },
+      { onConflict: 'class_id,user_id' }
+    );
+    if (error) {
+      console.error('[teacher-dashboard] unlock homework failed:', error.message);
+      return fail('Could not change this. This needs a database update (SQL 44).', 500);
+    }
     return backTo(cls.id);
   }
 
@@ -966,15 +1106,20 @@ export default function TeacherDashboardPage() {
 
             {/* ---------- たまに使う設定 ---------- */}
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 pt-4 border-t border-slate-200">Class settings</h2>
-            <div id="td-games" className="scroll-mt-20"><GamesCard data={data} /></div>
+            {/* Class Code は 1 列（全幅）。その下に 2 列：左 Personal Invite Codes、右 Games */}
             <div id="td-class-code" className="scroll-mt-20"><ClassSettingsCard data={data} /></div>
-            <div id="td-invites" className="scroll-mt-20"><InviteCodesCard data={data} /></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div id="td-invites" className="scroll-mt-20 min-w-0"><InviteCodesCard data={data} /></div>
+              <div id="td-games" className="scroll-mt-20 min-w-0"><GamesCard data={data} /></div>
+            </div>
+            <div id="td-school-hours" className="scroll-mt-20"><SchoolHoursCard data={data} /></div>
             <div id="td-vocab-length" className="scroll-mt-20"><LessonTaskSettingsCard data={data} /></div>
 
             {/* 生徒の名前を押すと開く、その生徒の宿題・課題すべての進捗（?student=ID） */}
             <StudentProgressDialog data={data} />
           </>
         )}
+        <BackToTopButton />
       </div>
     </PageLayout>
   );

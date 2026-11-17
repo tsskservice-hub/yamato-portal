@@ -16,6 +16,7 @@ import { LESSON_TASKS, VOCAB_QUIZ_LIMITS, assignmentKindLabel } from '~/lib/teac
 import {
   btn, btnGhost, card, formatDate, h2, input, studentName, taskLabel, useDoneSet, useTzOffset, type DashboardData,
 } from '~/components/teacher/TeacherDashboardSections';
+import { DayOffToggle, HomeworkUnlockControl, schoolHoursSummary } from '~/components/teacher/SchoolHoursSections';
 
 type Assignment = DashboardData['homework'][number];
 type Kind = Assignment['kind'];
@@ -40,6 +41,12 @@ function useAssignmentHelpers(data: DashboardData) {
 }
 
 const pct = (score: number, total: number) => (total > 0 ? Math.round((score / total) * 100) : 0);
+
+/** 締切の日時（例: 17 Nov 2026, 3:15 pm） */
+function formatDueDateTime(iso: string) {
+  const d = new Date(iso);
+  return `${formatDate(iso)}, ${d.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' })}`;
+}
 
 /** 今日の日付（先生のブラウザの時間）"YYYY-MM-DD" */
 function todayInput() {
@@ -141,6 +148,12 @@ export function StudentsCard({ data }: { data: DashboardData }) {
         <span className="text-xs font-normal text-slate-500">({data.students.length}/{data.limits.maxStudentsPerClass})</span>
       </h2>
       <p className="text-xs text-slate-500">Click a name to see all of that student&apos;s homework and classwork.</p>
+      {data.schoolHours.available && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+          <span>Homework is locked in school hours ({schoolHoursSummary(data.schoolHours)}).</span>
+          <DayOffToggle data={data} />
+        </div>
+      )}
       {data.students.length === 0 ? (
         <p className="text-xs text-slate-500">No students yet. Share the class code (below) or personal invite codes.</p>
       ) : (
@@ -157,6 +170,7 @@ export function StudentsCard({ data }: { data: DashboardData }) {
                     Homework {hwSum.done}/{hwSum.total}
                     {(data.assignmentsAvailable || cwSum.total > 0) && <> · Classwork {cwSum.done}/{cwSum.total}</>}
                   </p>
+                  <div className="mt-1"><HomeworkUnlockControl data={data} studentId={s.id} compact /></div>
                 </div>
                 <Form method="post" onSubmit={(e) => { if (!window.confirm(`Remove ${studentName(s)} from this class?`)) e.preventDefault(); }}>
                   <input type="hidden" name="intent" value="remove-student" />
@@ -236,7 +250,7 @@ export function StudentProgressDialog({ data }: { data: DashboardData }) {
                         </p>
                       </td>
                       <td className="py-1.5 px-2 whitespace-nowrap text-slate-700" suppressHydrationWarning>
-                        {formatDate(hw.dueAt)}
+                        {formatDueDateTime(hw.dueAt)}
                         {overdue && <span className="block font-semibold text-red-600">Overdue</span>}
                       </td>
                       <td className="py-1.5 px-2">
@@ -289,6 +303,7 @@ export function StudentProgressDialog({ data }: { data: DashboardData }) {
               <UserRound className="w-5 h-5 text-indigo-600" /> {studentName(student)}
             </h2>
             {student.nickname && <p className="text-xs text-slate-500 truncate">{student.email}</p>}
+            <div className="mt-2"><HomeworkUnlockControl data={data} studentId={student.id} /></div>
           </div>
           <button type="button" onClick={close} className="p-1.5 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer" aria-label="Close">
             <X className="w-4 h-4" />
@@ -310,11 +325,15 @@ export function AssignCard({ data }: { data: DashboardData }) {
   const [kind, setKind] = useState<Kind>('homework');
   const [itemType, setItemType] = useState<'lesson' | 'vocab_quiz'>('lesson');
   const [dueDate, setDueDate] = useState('');
+  // 締切の時刻。宿題は 23:59、課題（授業内）は 15:15 が初期値（先生が変えたら、種類を切り替えてもそのまま）
+  const [dueTime, setDueTime] = useState('23:59');
+  const [timeTouched, setTimeTouched] = useState(false);
 
   // 課題（授業内）は締切の初期値を「今日」にする
   useEffect(() => {
     if (kind === 'classwork' && !dueDate) setDueDate(todayInput());
-  }, [kind, dueDate]);
+    if (!timeTouched) setDueTime(kind === 'classwork' ? '15:15' : '23:59');
+  }, [kind, dueDate, timeTouched]);
 
   return (
     <section className={card} aria-label="Set homework or classwork">
@@ -396,10 +415,34 @@ export function AssignCard({ data }: { data: DashboardData }) {
 
         <TargetPicker students={data.students} disabled={!available} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* 宿題は学校時間中にはできない（初期設定）。先生が許せば授業中もしてよい */}
+        {kind === 'homework' && data.schoolHours.available && (
+          <label className="flex items-start gap-2 text-sm text-slate-700">
+            <input type="checkbox" name="allowDuringSchool" className="mt-1" />
+            <span>
+              Students may also do this homework during school hours
+              <span className="block text-xs text-slate-500">
+                If unticked, students can&apos;t do it during school hours ({schoolHoursSummary(data.schoolHours)}). Change the hours in Class settings.
+              </span>
+            </span>
+          </label>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <label className="text-xs font-semibold text-slate-600 space-y-1">
             <span className="block">Due date</span>
             <input type="date" name="dueDate" required value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={`${input} w-full`} />
+          </label>
+          <label className="text-xs font-semibold text-slate-600 space-y-1">
+            <span className="block">Due time</span>
+            <input
+              type="time"
+              name="dueTime"
+              required
+              value={dueTime}
+              onChange={(e) => { setDueTime(e.target.value); setTimeTouched(true); }}
+              className={`${input} w-full`}
+            />
           </label>
           <label className="text-xs font-semibold text-slate-600 space-y-1 sm:col-span-2">
             <span className="block">Title (optional)</span>
@@ -465,11 +508,16 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
                       {hw.itemType === 'lesson'
                         ? <>{h.lessonTitle(hw.lessonId)} · {hw.taskKeys.map(taskLabel).join(', ')}</>
                         : <><Languages className="w-3 h-3 inline -mt-0.5" /> Vocabulary quiz: {h.quizTitle(hw.quizId)}</>}
-                      {' · '}Due {formatDate(hw.dueAt)}
+                      {' · '}Due {formatDueDateTime(hw.dueAt)}
                     </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-1">
+                    <p className="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-1 flex-wrap">
                       <Users className="w-3 h-3" />
                       {hw.assignTo === 'class' ? 'Whole class' : `${targets.length} selected student${targets.length === 1 ? '' : 's'}`}
+                      {hw.kind === 'homework' && data.schoolHours.available && (
+                        <span className={`ml-1 px-1.5 rounded-full border ${hw.allowDuringSchool ? 'border-emerald-200 text-emerald-700 bg-emerald-50' : 'border-slate-200 text-slate-500 bg-slate-50'}`}>
+                          {hw.allowDuringSchool ? 'Allowed in school hours' : 'Not in school hours'}
+                        </span>
+                      )}
                     </p>
                   </button>
                   <div className="flex items-center gap-3 shrink-0">

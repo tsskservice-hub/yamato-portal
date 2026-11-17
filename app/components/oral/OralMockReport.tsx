@@ -201,6 +201,15 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
         </div>
       )}
 
+      {/* AI が評価できること・できないこと（AI の答えにかかわらず、いつも出す） */}
+      {!reviewing && (
+        <p className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+          ℹ️ This feedback is based on the text of what you said (speech-to-text): how well your answers fit the
+          questions, how much you elaborated, how you kept the conversation going, and your vocabulary and grammar.
+          Pronunciation, intonation, rhythm and tempo are not assessed.
+        </p>
+      )}
+
       {/* フィードバック */}
       <div className="space-y-2">
         {loading && (

@@ -15,6 +15,7 @@ import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
 import { createAdminSupabaseClient } from '~/lib/supabase.server';
 import { getSessionUser } from '~/lib/teacher.server';
 import { getStudentQuizAssignment, loadQuizStats } from '~/lib/assignments.server';
+import { getItemLock } from '~/lib/homework-lock.server';
 import { assignmentKindLabel } from '~/lib/teacher-config';
 import { useSoundEffect } from '~/hooks/useSoundEffect';
 
@@ -36,6 +37,10 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const admin = createAdminSupabaseClient(context);
   const found = await getStudentQuizAssignment(admin, String(params.homeworkId ?? ''), user.id);
   if (!found || found.items.length < 2) return json({ status: 'notfound' as const }, { headers });
+
+  // 宿題は学校時間中にはできない（先生が「授業中もしてよい」にしたもの・課題は除く。SQL 44）
+  const lock = await getItemLock(admin, user.id, found.homework.id);
+  if (lock.locked) return json({ status: 'locked' as const, title: found.homework.title, until: lock.until }, { headers });
 
   // 選択肢: 正解 + ほかの単語の意味から 3 つ（重ならないように）。どれが正解かは送らない
   const meanings = found.items.map((i) => i.english);
@@ -63,6 +68,10 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
   const admin = createAdminSupabaseClient(context);
   const found = await getStudentQuizAssignment(admin, String(params.homeworkId ?? ''), user.id);
   if (!found) return json({ ok: false as const, error: 'This quiz is no longer available.' }, { status: 404 });
+  const lock = await getItemLock(admin, user.id, found.homework.id);
+  if (lock.locked) {
+    return json({ ok: false as const, error: "This is homework, so it can't be done during school hours. Please try again after school." }, { status: 423 });
+  }
 
   let answers: Record<string, unknown> = {};
   try {
@@ -131,6 +140,14 @@ export default function ClassQuizPage() {
             <button type="button" onClick={() => layoutRef.current?.openAuthModal?.('signin')} className="text-blue-700 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
               Sign in
             </button>
+          </Notice>
+        ) : data.status === 'locked' ? (
+          <Notice title={`🔒 ${data.title}`}>
+            This is homework, so it can&apos;t be done during school hours. Please come back
+            {data.until
+              ? <> after <strong suppressHydrationWarning>{new Date(data.until).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' })}</strong>.</>
+              : ' after school.'}{' '}
+            <Link to="/my-account" className="text-blue-700 font-semibold hover:underline">Back to My Account</Link>
           </Notice>
         ) : data.status === 'notfound' ? (
           <Notice title="Quiz not found">
@@ -207,7 +224,8 @@ function QuizRunner({ data }: { data: OkData }) {
       </p>
       <h1 className="text-xl font-bold text-slate-800">{data.homework.title}</h1>
       <p className="text-xs text-slate-500" suppressHydrationWarning>
-        Due {new Date(data.homework.dueAt).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}
+        Due {new Date(data.homework.dueAt).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })},{' '}
+        {new Date(data.homework.dueAt).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' })}
         {record && <> · Your best score: <strong>{record.best}/{record.total}</strong> ({record.attempts} {record.attempts === 1 ? 'try' : 'tries'})</>}
       </p>
     </div>

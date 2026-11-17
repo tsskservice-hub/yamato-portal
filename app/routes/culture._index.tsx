@@ -134,22 +134,27 @@ export default function CultureHubPage() {
     const targets = task.lessons.filter((l) => lessonIds[l.slug]);
     if (targets.length === 0) return;
     try {
-      const now = new Date().toISOString();
-      const { error } = await supabase.from("edu_student_progress").upsert(
-        targets.map((l) => ({
-          user_id: userId,
-          lesson_id: lessonIds[l.slug],
-          task_key: "culture",
-          is_completed: true,
-          updated_at: now,
-        })),
-        { onConflict: "user_id,lesson_id,task_key" }
-      );
-      if (error) throw error;
-      setSavedNotice((prev) => ({
-        ...prev,
-        [taskId]: `Counted as the culture task in ${targets.map((l) => l.label.split(":")[0]).join(", ")}.`,
-      }));
+      // 完了の記録はサーバー（/api/lesson-progress）だけが行う。宿題で学校時間中のものは記録されない（SQL 44）
+      const res = await fetch("/api/lesson-progress", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: targets.map((l) => ({ lessonId: lessonIds[l.slug], taskKeys: ["culture"] })) }),
+      });
+      const result: any = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(result?.error || `HTTP ${res.status}`);
+      const savedIds = new Set((result?.saved ?? []).map((s: any) => String(s.lessonId)));
+      const counted = targets.filter((l) => savedIds.has(lessonIds[l.slug]));
+      const refused: Array<{ until: string | null }> = Array.isArray(result?.locked) ? result.locked : [];
+      const parts: string[] = [];
+      if (counted.length) parts.push(`Counted as the culture task in ${counted.map((l) => l.label.split(":")[0]).join(", ")}.`);
+      if (refused.length) {
+        const until = refused[0].until
+          ? new Date(refused[0].until).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })
+          : null;
+        parts.push(`This is homework, so it can't be counted during school hours.${until ? ` Please do it again after ${until}.` : ""}`);
+      }
+      if (parts.length) setSavedNotice((prev) => ({ ...prev, [taskId]: parts.join(" ") }));
     } catch (err) {
       console.error("[Culture] Failed to save lesson progress:", err);
     }

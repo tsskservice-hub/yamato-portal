@@ -211,10 +211,11 @@ export default function VceSpeakingEoyOralSuperbPage() {
 
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 space-y-1">
               <p className="font-bold text-slate-800 dark:text-slate-100">How it works</p>
-              <p>・Yamato-sensei speaks only Japanese, at natural speed (about JLPT N4–N3 level).</p>
+              <p>・Yamato-sensei speaks only Japanese, at the natural speed of a native Japanese speaker.</p>
               <p>・No buttons: just talk. You can even jump in while Yamato is speaking.</p>
               <p>・Use headphones so Yamato doesn&apos;t hear its own voice.</p>
               <p>・No corrections during the talk — you get one feedback report at the end.</p>
+              <p>・Feedback is based on the text of what you said (speech-to-text). Pronunciation, intonation, rhythm and tempo are not assessed.</p>
               <p>・Credits are used once, when the conversation starts.</p>
             </div>
 

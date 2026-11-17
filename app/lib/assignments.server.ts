@@ -20,7 +20,30 @@ export type AssignmentItem = {
   /** assignTo = 'students' のときの対象の生徒 */
   studentIds: string[];
   dueAt: string;
+  /** 宿題を学校時間中にもしてよいか（SQL 44。課題は常に true 扱い） */
+  allowDuringSchool: boolean;
 };
+
+// 読む列（新しい SQL ほど列が多い）。古いデータベースでも読めるよう、順に試す
+const COLUMN_SETS = [
+  'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school', // SQL 44 の後
+  'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at', // SQL 42 の後
+  'id, title, lesson_id, task_keys, due_at', // それより前
+];
+
+/** edu_homework を、使える列で読む。level: 0 = SQL 44 まで、1 = SQL 42 まで、2 = それより前 */
+async function selectHomework(admin: SupabaseClient, classId: string, limit: number) {
+  for (let level = 0; level < COLUMN_SETS.length; level++) {
+    const { data, error } = await admin
+      .from('edu_homework')
+      .select(COLUMN_SETS[level])
+      .eq('class_id', classId)
+      .order('due_at', { ascending: false })
+      .limit(limit);
+    if (!error) return { rows: (data ?? []) as any[], level };
+  }
+  return { rows: [] as any[], level: 2 };
+}
 
 export type QuizSummary = { id: string; title: string; wordCount: number; createdAt: string };
 
@@ -39,6 +62,7 @@ function toItem(h: any, studentIds: string[]): AssignmentItem {
     assignTo: h.assign_to === 'students' ? 'students' : 'class',
     studentIds,
     dueAt: String(h.due_at),
+    allowDuringSchool: h.kind === 'classwork' || h.allow_during_school === true,
   };
 }
 
@@ -97,30 +121,20 @@ export async function loadQuizStats(admin: SupabaseClient, homeworkIds: string[]
 
 /** 先生のダッシュボード用：クラスの宿題・課題、先生のクイズ一覧、クイズの結果 */
 export async function loadClassAssignments(admin: SupabaseClient, classId: string, teacherId: string) {
-  const { data: rows, error } = await admin
-    .from('edu_homework')
-    .select('id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at')
-    .eq('class_id', classId)
-    .order('due_at', { ascending: false })
-    .limit(200);
+  const { rows, level } = await selectHomework(admin, classId, 200);
 
-  if (error) {
-    // SQL 42 の前：今までの列だけで読む
-    const { data: legacy } = await admin
-      .from('edu_homework')
-      .select('id, title, lesson_id, task_keys, due_at')
-      .eq('class_id', classId)
-      .order('due_at', { ascending: false })
-      .limit(200);
+  if (level === 2) {
+    // SQL 42 の前：今までの列だけ
     return {
       available: false,
-      items: (legacy ?? []).map((h: any) => toItem(h, [])),
+      schoolHoursAvailable: false,
+      items: rows.map((h: any) => toItem(h, [])),
       quizzes: [] as QuizSummary[],
       quizStats: [] as QuizStat[],
     };
   }
 
-  const list = rows ?? [];
+  const list = rows;
   const targets = await loadTargets(admin, list.filter((h: any) => h.assign_to === 'students').map((h: any) => String(h.id)));
   const items = list.map((h: any) => toItem(h, targets.get(String(h.id)) ?? []));
 
@@ -128,7 +142,7 @@ export async function loadClassAssignments(admin: SupabaseClient, classId: strin
     loadTeacherQuizzes(admin, teacherId),
     loadQuizStats(admin, items.filter((i) => i.itemType === 'vocab_quiz').map((i) => i.id)),
   ]);
-  return { available: true, items, quizzes, quizStats };
+  return { available: true, schoolHoursAvailable: level === 0, items, quizzes, quizStats };
 }
 
 export async function loadTeacherQuizzes(admin: SupabaseClient, teacherId: string): Promise<QuizSummary[]> {
@@ -156,24 +170,13 @@ export async function loadTeacherQuizzes(admin: SupabaseClient, teacherId: strin
 
 /** 生徒に出されている宿題・課題（クラスのうち、自分が対象のものだけ） */
 export async function loadStudentAssignments(admin: SupabaseClient, classId: string, userId: string) {
-  const { data: rows, error } = await admin
-    .from('edu_homework')
-    .select('id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at')
-    .eq('class_id', classId)
-    .order('due_at', { ascending: false })
-    .limit(60);
+  const { rows, level } = await selectHomework(admin, classId, 60);
 
   let items: AssignmentItem[];
-  if (error) {
-    const { data: legacy } = await admin
-      .from('edu_homework')
-      .select('id, title, lesson_id, task_keys, due_at')
-      .eq('class_id', classId)
-      .order('due_at', { ascending: false })
-      .limit(60);
-    items = (legacy ?? []).map((h: any) => toItem(h, []));
+  if (level === 2) {
+    items = rows.map((h: any) => toItem(h, []));
   } else {
-    const list = rows ?? [];
+    const list = rows;
     // 自分が対象かどうかだけ分かればよい（ほかの生徒の名前は読まない）
     const studentOnly = list.filter((h: any) => h.assign_to === 'students').map((h: any) => String(h.id));
     const mine = new Set<string>();
