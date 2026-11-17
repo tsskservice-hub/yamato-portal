@@ -3,6 +3,8 @@ export const generatedRoutes: string[] = [
   "/about",
   "/api.auth.logout",
   "/api.lesson-settings",
+  "/api.teacher-vocab",
+  "/class-quiz.$homeworkId",
   "/contact",
   "/culture._index",
   "/faq",

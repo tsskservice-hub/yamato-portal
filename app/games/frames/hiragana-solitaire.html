@@ -88,6 +88,8 @@
   #app.colored .card.row-8{background:#ffcdd2}
   #app.colored .card.row-9{background:#e3e3e3}
   #app.colored .card .toproma{color:#857654}
+  /* While the last cards fly up by themselves, clicks are ignored. */
+  #app.finishing{pointer-events:none}
   .card.face-down{
     background:repeating-linear-gradient(45deg,#2f6b4f 0 10px,#2a5f47 10px 20px);
     border-color:#245540;color:#fff;justify-content:center;
@@ -186,6 +188,7 @@
       <li><b>Stock:</b> click the stock to draw one card to the waste. When the stock is empty, click it again to recycle the waste.</li>
       <li><b>Shortcuts:</b> double-click (or double-tap) a card to try its finish pile. <b>Hint</b> shows a move. <b>Auto Collect</b> moves every card it can to the finish piles (one Undo takes it all back). <b>Undo</b> takes back your last move.</li>
       <li>Face-down cards turn over when the card above them is moved away.</li>
+      <li><b>Automatic finish:</b> once no face-down card is left in the columns, the remaining cards go up to the finish piles by themselves, one by one.</li>
       <li><b>Every game can be finished.</b> Each new deal is checked before you play it. If you get stuck, the game tells you and offers to go back to the last position you can still win from.</li>
       <li>The clock stops while you are away from this tab.</li>
       <li><b>Card Colors:</b> switch between colored cards (one light color per row) and plain white cards.</li>
@@ -245,6 +248,8 @@ function cardById(id){ return CARDS[id]; }
 var state=null, history=[], sel=null, timer=null, seconds=0, started=false, won=false;
 var soundOn=true;
 var winnable=true; // can the current position still be finished? (checked after each move)
+var finishing=false; // the automatic finish is moving the last cards up
+var finishGen=0;     // bumped by New Game, so an old finish stops
 
 function freshState(deck){
   return {
@@ -372,12 +377,15 @@ function newGame(){
   do { s=deal(); tries++; } while((!hasOpeningMove(s) || !solvable(s)) && tries<60);
   winnable=true;
   closeStuck();
+  // Stop an automatic finish that may still be running for the old game
+  finishGen++; finishing=false; document.getElementById("app").classList.remove("finishing");
   state=s; history=[]; sel=null; seconds=0; started=false; won=false;
   stopTimer(); render(); setMessage("New game dealt. Good luck!");
 }
 function snapshot(){ return JSON.parse(JSON.stringify(state)); }
 function pushHistory(){ history.push({state:snapshot(), started:started, won:won}); if(history.length>500) history.shift(); }
 function undo(){
+  if(finishing) return;
   if(!history.length){ setMessage("Nothing to undo yet."); return; }
   var h=history.pop();
   // The clock is not rewound or stopped: Undo takes back the move, not the time spent.
@@ -475,7 +483,7 @@ function moveWasteToTableau(toCol){
   return true;
 }
 function drawStock(){
-  if(won) return;
+  if(won || finishing) return;
   sel=null;
   // Nothing to draw or recycle: do nothing (no history entry, and the clock does not start).
   if(!state.stock.length && !state.waste.length){
@@ -500,6 +508,7 @@ function drawStock(){
   checkProgress();
 }
 function autoCollect(){
+  if(finishing) return;
   // Every card that can go up is moved in one go, as ONE step: a single Undo takes it all back.
   var moved=0, guard=0, recorded=false;
   while(guard++<200){
@@ -616,8 +625,59 @@ function stepsBackToWinnable(){
   return 0;
 }
 var stuckBack=0;
+/* ================= Automatic finish =================
+   When no face-down card is left in the columns, every remaining card can simply go up to its
+   finish pile one by one (in a row, the card a card is waiting for is always on top of a column,
+   in the stock, or in the waste). Then the game does it for you, one card at a time.
+   It is one step: a single Undo takes the whole finish back. */
+var FINISH_STEP_MS=110;
+function canAutoFinish(){
+  if(won || finishing || collected()===TOTAL) return false;
+  return state.tableau.every(function(col){ return col.every(function(e){ return e.faceUp; }); });
+}
+/* The next card that can go up: the top of a column, or any stock / waste card. */
+function nextFinishCard(){
+  for(var col=0;col<7;col++){
+    var t=state.tableau[col], top=t[t.length-1];
+    if(top && canFoundation(top.id)) return {from:"tableau", col:col, id:top.id};
+  }
+  var piles=["waste","stock"];
+  for(var p=0;p<piles.length;p++){
+    var pile=state[piles[p]];
+    for(var i=0;i<pile.length;i++) if(canFoundation(pile[i])) return {from:piles[p], index:i, id:pile[i]};
+  }
+  return null;
+}
+function startAutoFinish(){
+  finishing=true; sel=null;
+  pushHistory(); markStarted();
+  document.getElementById("app").classList.add("finishing");
+  setMessage("Every card is face up — the rest go up to the finish piles by themselves.", true);
+  var gen=finishGen;
+  (function step(){
+    if(gen!==finishGen) return; // a new game was started meanwhile
+    var next=nextFinishCard();
+    if(!next){ // should not happen; stop safely
+      finishing=false; document.getElementById("app").classList.remove("finishing");
+      render(); return;
+    }
+    if(next.from==="tableau") state.tableau[next.col].pop();
+    else state[next.from].splice(next.index,1);
+    state.foundations[cardById(next.id).row].push(next.id);
+    state.moves++;
+    if(collected()===TOTAL){
+      finishing=false; document.getElementById("app").classList.remove("finishing");
+      afterMove(next.id); // shows the win
+      return;
+    }
+    render(); playTone(600+collected()*6,0.05);
+    setTimeout(step, FINISH_STEP_MS);
+  })();
+}
+
 function checkProgress(){
-  if(won) return;
+  if(won || finishing) return;
+  if(canAutoFinish()){ startAutoFinish(); return; }
   var wasWinnable=winnable;
   winnable=solvable(state);
   if(!hasAnyMove()){
@@ -904,7 +964,7 @@ function onFoundationClick(row){
 }
 
 /* ================= Buttons ================= */
-document.getElementById("btnNew").addEventListener("click", function(){ newGame(); });
+document.getElementById("btnNew").addEventListener("click", function(){ if(!finishing) newGame(); });
 document.getElementById("btnUndo").addEventListener("click", undo);
 document.getElementById("btnHint").addEventListener("click", function(){
   var h=findHint();

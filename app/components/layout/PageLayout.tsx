@@ -431,9 +431,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                         We have a <strong>free teacher account</strong> (limited features) with its own Teacher Dashboard:
                       </p>
                       <ul className="text-[11px] text-slate-700 space-y-1 list-disc pl-4">
-                        <li>Set lesson tasks on AI Yamato as homework for your class</li>
-                        <li>Track each student&apos;s progress on every task</li>
-                        <li>See what percentage of homework each student completed over any period</li>
+                        <li>Set lesson tasks or your own vocabulary quizzes as homework or classwork, for the whole class or selected students</li>
+                        <li>Track each student&apos;s progress on every task and their quiz scores</li>
+                        <li>See what percentage of homework and classwork each student completed over any period</li>
                         <li>View your students&apos; handwritten writing submissions</li>
                       </ul>
                       <p className="text-[10px] text-slate-500">

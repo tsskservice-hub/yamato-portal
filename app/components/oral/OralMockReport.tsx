@@ -11,6 +11,16 @@ export interface OralMockReportProps {
   result: ExamResultData;
   onRetry: () => void;
   themeColor?: string;
+  /** フィードバックを作る api（省略すると mock 用。accelerated は /api/oral-accelerated/feedback） */
+  feedbackEndpoint?: string;
+  /** 見出しの下の説明（省略すると「Section 1 + 2 · medium」など） */
+  subtitle?: string;
+  /** 会話の記録で、相手の名前（省略すると Examiner） */
+  partnerName?: string;
+  /** 会話の記録で、セクションの見出しを出さない（accelerated の自由会話） */
+  hideStageHeadings?: boolean;
+  /** もう一度のボタンの文字 */
+  retryLabel?: string;
 }
 
 const STAGE_LABEL: Record<MockStageId, string> = {
@@ -44,7 +54,16 @@ function formatFeedback(raw: string, color: string): string {
     .join("");
 }
 
-export const OralMockReport: React.FC<OralMockReportProps> = ({ result, onRetry, themeColor = "#ef4444" }) => {
+export const OralMockReport: React.FC<OralMockReportProps> = ({
+  result,
+  onRetry,
+  themeColor = "#ef4444",
+  feedbackEndpoint = `${YAMATO_API_BASE}/api/oral-mock/feedback`,
+  subtitle,
+  partnerName = "Examiner",
+  hideStageHeadings = false,
+  retryLabel = "🔄 Take another mock exam",
+}) => {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,7 +73,7 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({ result, onRetry,
     setLoading(true);
     setError(null);
     try {
-      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/oral-mock/feedback`, {
+      const res = await yamatoFetch(feedbackEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -88,17 +107,23 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({ result, onRetry,
     <div className="max-w-3xl mx-auto p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6">
       <div className="text-center space-y-2 border-b border-slate-100 dark:border-slate-800 pb-5">
         <span className="text-4xl">🏁</span>
-        <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100">Mock Exam Feedback</h1>
+        <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100">
+          {subtitle ? "Conversation Feedback" : "Mock Exam Feedback"}
+        </h1>
         <p className="text-xs text-slate-500">
-          {result.config.examSection === "both" ? "Section 1 + 2" : result.config.examSection === "section1" ? "Section 1" : "Section 2"} ·{" "}
-          {{ steady: "easy", normal: "medium", accelerated: "hard" }[result.config.difficulty]}
+          {subtitle ?? (
+            <>
+              {result.config.examSection === "both" ? "Section 1 + 2" : result.config.examSection === "section1" ? "Section 1" : "Section 2"} ·{" "}
+              {{ steady: "easy", normal: "medium", accelerated: "hard" }[result.config.difficulty]}
+            </>
+          )}
         </p>
       </div>
 
       {/* 数字 */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Exam time", value: `${Math.floor(total / 60)} min ${total % 60} s` },
+          { label: subtitle ? "Talk time" : "Exam time", value: `${Math.floor(total / 60)} min ${total % 60} s` },
           { label: "Your answers", value: `${answers.length}` },
           { label: "Average answer", value: `${avgLength} characters` },
         ].map((m) => (
@@ -148,9 +173,9 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({ result, onRetry,
             const newStage = i === 0 || result.transcript[i - 1].stage !== t.stage;
             return (
               <React.Fragment key={i}>
-                {newStage && <p className="mt-3 text-xs font-bold text-slate-400 uppercase">{STAGE_LABEL[t.stage]}</p>}
+                {newStage && !hideStageHeadings && <p className="mt-3 text-xs font-bold text-slate-400 uppercase">{STAGE_LABEL[t.stage]}</p>}
                 <p className={t.speaker === "student" ? "font-bold text-slate-800 dark:text-slate-100" : "text-slate-500 dark:text-slate-400"}>
-                  {t.speaker === "student" ? "You: " : "Examiner: "}
+                  {t.speaker === "student" ? "You: " : `${partnerName}: `}
                   {t.text}
                 </p>
               </React.Fragment>
@@ -166,7 +191,7 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({ result, onRetry,
           className="px-6 py-2.5 rounded-xl font-bold text-white text-sm shadow-md hover:opacity-90 cursor-pointer"
           style={{ backgroundColor: themeColor }}
         >
-          🔄 Take another mock exam
+          {retryLabel}
         </button>
       </div>
     </div>

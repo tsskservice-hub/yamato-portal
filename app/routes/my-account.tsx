@@ -18,6 +18,7 @@ import { RegistrationDetails } from '~/components/RegistrationDetails';
 import { CreditTransactionsSection } from '~/components/CreditTransactionsSection';
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
 import { StudentClassSection, type StudentHomeworkItem } from '~/components/StudentClassSection';
+import { loadQuizStats, loadStudentAssignments } from '~/lib/assignments.server';
 import { getStudentClass, getVerifiedSchoolEmails, normaliseJoinCode, type VerifiedSchoolEmail } from '~/lib/teacher.server';
 import { INVITE_CODE_LENGTH, TEACHER_LIMITS, allowedStudentDomains, isStudentDomainAllowed } from '~/lib/teacher-config';
 
@@ -324,40 +325,58 @@ async function removeJoinRequest(admin: any, userId: string) {
   }
 }
 
-/** 生徒の宿題一覧（新しい締切順）と、それぞれのタスクが終わったかどうか */
+/**
+ * 生徒の宿題・課題一覧（新しい締切順）。自分が対象のものだけ（クラス全員 または 選ばれた生徒）。
+ * レッスンはタスクごとに終わったか、語彙クイズは最高点と回数（SQL 42）
+ */
 async function loadStudentHomework(admin: any, classId: string, userId: string): Promise<StudentHomeworkItem[]> {
-  const { data: rows } = await admin
-    .from("edu_homework")
-    .select("id, title, lesson_id, task_keys, due_at")
-    .eq("class_id", classId)
-    .order("due_at", { ascending: false })
-    .limit(30);
-  if (!rows || rows.length === 0) return [];
+  const rows = await loadStudentAssignments(admin, classId, userId);
+  if (rows.length === 0) return [];
 
-  const lessonIds = [...new Set(rows.map((r: any) => String(r.lesson_id)))];
-  const [{ data: lessons }, { data: progress }] = await Promise.all([
-    admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds),
-    admin
-      .from("edu_student_progress")
-      .select("lesson_id, task_key, is_completed")
-      .eq("user_id", userId)
-      .in("lesson_id", lessonIds),
+  const lessonIds = [...new Set(rows.map((r) => r.lessonId).filter((id): id is string => Boolean(id)))];
+  const quizIds = [...new Set(rows.map((r) => r.quizId).filter((id): id is string => Boolean(id)))];
+  const [{ data: lessons }, { data: progress }, { data: quizzes }, quizStats] = await Promise.all([
+    lessonIds.length ? admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds) : { data: [] },
+    lessonIds.length
+      ? admin.from("edu_student_progress").select("lesson_id, task_key, is_completed").eq("user_id", userId).in("lesson_id", lessonIds)
+      : { data: [] },
+    quizIds.length ? admin.from("edu_teacher_quizzes").select("id, title").in("id", quizIds) : { data: [] },
+    loadQuizStats(admin, rows.filter((r) => r.itemType === "vocab_quiz").map((r) => r.id), [userId]),
   ]);
 
   const lessonMap = new Map((lessons ?? []).map((l: any) => [String(l.id), l]));
+  const quizMap = new Map((quizzes ?? []).map((q: any) => [String(q.id), String(q.title)]));
+  const statMap = new Map(quizStats.map((st) => [st.homeworkId, st]));
   const done = new Set(
     (progress ?? []).filter((p: any) => p.is_completed).map((p: any) => `${p.lesson_id}:${p.task_key}`)
   );
 
-  return rows.map((r: any) => {
-    const lesson: any = lessonMap.get(String(r.lesson_id));
+  return rows.map((r) => {
+    if (r.itemType === "vocab_quiz") {
+      const st = statMap.get(r.id);
+      return {
+        id: r.id,
+        title: r.title,
+        kind: r.kind,
+        dueAt: r.dueAt,
+        itemType: "vocab_quiz" as const,
+        lessonTitle: quizMap.get(r.quizId ?? "") ?? "Vocabulary quiz",
+        lessonUrl: `/class-quiz/${r.id}`,
+        tasks: [],
+        quiz: st ? { best: st.best, total: st.total, attempts: st.attempts } : { best: null, total: null, attempts: 0 },
+      };
+    }
+    const lesson: any = lessonMap.get(String(r.lessonId));
     return {
       id: r.id,
       title: r.title,
-      dueAt: r.due_at,
+      kind: r.kind,
+      dueAt: r.dueAt,
+      itemType: "lesson" as const,
       lessonTitle: lesson?.title_en ?? "Lesson",
       lessonUrl: lesson?.slug ? `/lessons/${lesson.slug}` : "/lessons",
-      tasks: (r.task_keys as string[]).map((key) => ({ key, done: done.has(`${r.lesson_id}:${key}`) })),
+      tasks: r.taskKeys.map((key) => ({ key, done: done.has(`${r.lessonId}:${key}`) })),
+      quiz: null,
     };
   });
 }

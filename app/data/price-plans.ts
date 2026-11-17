@@ -61,6 +61,7 @@ export const CREDIT_CONSUMPTION_GUIDE: CreditConsumptionGuideItem[] = [
   { item: "Voice AI: Mock Section 1 (approx. 7 min)", cost: `${CREDIT_COSTS.mockSection1} credits / mock` },
   { item: "Voice AI: Mock Section 2 (approx. 8 min)", cost: `${CREDIT_COSTS.mockSection2} credits / mock` },
   { item: "Voice AI: Full Mock (approx. 15 min)", cost: `${CREDIT_COSTS.mockFull} credits / mock` },
+  { item: "Voice AI: EOY Oral Accelerated (free conversation)", cost: `${CREDIT_COSTS.realtime5} credits / 5 min, ${CREDIT_COSTS.realtime10} credits / 10 min` },
   { item: "Kanji AI Lookup (🔍 Kanji button)", cost: `Free ${CREDIT_COSTS.kanjiLookupFreePerDay} / day, then ${CREDIT_COSTS.kanjiLookup} credit / lookup` },
 ];
 
