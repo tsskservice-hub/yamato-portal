@@ -8,9 +8,9 @@
  *  - 語彙クイズの進捗: 完了（1 回以上やった）・最高点・回数・最後にやった日
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Form, useFetcher } from '@remix-run/react';
+import { Form, useFetcher, useSearchParams } from '@remix-run/react';
 import {
-  ClipboardList, BarChart3, Download, Trash2, CheckCircle2, Circle, School, Users, Plus, X, Languages, PencilLine,
+  ClipboardList, BarChart3, Download, Trash2, CheckCircle2, Circle, School, Users, Plus, X, Languages, PencilLine, UserRound,
 } from 'lucide-react';
 import { LESSON_TASKS, VOCAB_QUIZ_LIMITS, assignmentKindLabel } from '~/lib/teacher-config';
 import {
@@ -96,6 +96,208 @@ function TargetPicker({
         )
       )}
     </fieldset>
+  );
+}
+
+// ---------- 生徒ごとの進捗（URL の ?student=ID で開く。ブラウザの「戻る」で閉じられる） ----------
+
+const STUDENT_PARAM = 'student';
+
+/** 生徒の名前。押すとその生徒の宿題・課題の進捗が開く */
+export function StudentLink({ student }: { student: DashboardData['students'][number] }) {
+  const [params, setParams] = useSearchParams();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        const next = new URLSearchParams(params);
+        next.set(STUDENT_PARAM, student.id);
+        setParams(next, { preventScrollReset: true });
+      }}
+      className="text-left text-indigo-700 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
+      title="See this student's homework and classwork"
+    >
+      {studentName(student)}
+    </button>
+  );
+}
+
+/** 生徒の一覧（名前を押すと進捗が開く）。クラスから外す操作もここ */
+export function StudentsCard({ data }: { data: DashboardData }) {
+  const cls = data.selectedClass!;
+  const h = useAssignmentHelpers(data);
+
+  // 一覧に出す簡単なまとめ：宿題・課題をそれぞれ何件終えたか（期間に関係なく、その生徒に出した全部）
+  const summary = (studentId: string, kind: Kind) => {
+    const mine = data.homework.filter((hw) => hw.kind === kind && isTarget(hw, studentId));
+    const done = mine.filter((hw) => h.doneUnits(hw, studentId) === unitsOf(hw)).length;
+    return { done, total: mine.length };
+  };
+
+  return (
+    <section className={card} aria-label="Students">
+      <h2 className={h2}>
+        <Users className="w-5 h-5 text-indigo-600" /> Students
+        <span className="text-xs font-normal text-slate-500">({data.students.length}/{data.limits.maxStudentsPerClass})</span>
+      </h2>
+      <p className="text-xs text-slate-500">Click a name to see all of that student&apos;s homework and classwork.</p>
+      {data.students.length === 0 ? (
+        <p className="text-xs text-slate-500">No students yet. Share the class code (below) or personal invite codes.</p>
+      ) : (
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {data.students.map((s) => {
+            const hwSum = summary(s.id, 'homework');
+            const cwSum = summary(s.id, 'classwork');
+            return (
+              <li key={s.id} className="flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2">
+                <div className="min-w-0">
+                  <p className="text-sm truncate"><StudentLink student={s} /></p>
+                  {s.nickname && <p className="text-[11px] text-slate-500 truncate">{s.email}</p>}
+                  <p className="text-[11px] text-slate-500">
+                    Homework {hwSum.done}/{hwSum.total}
+                    {(data.assignmentsAvailable || cwSum.total > 0) && <> · Classwork {cwSum.done}/{cwSum.total}</>}
+                  </p>
+                </div>
+                <Form method="post" onSubmit={(e) => { if (!window.confirm(`Remove ${studentName(s)} from this class?`)) e.preventDefault(); }}>
+                  <input type="hidden" name="intent" value="remove-student" />
+                  <input type="hidden" name="classId" value={cls.id} />
+                  <input type="hidden" name="studentId" value={s.id} />
+                  <button type="submit" className="text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1" aria-label={`Remove ${studentName(s)}`}>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </Form>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+/** 1 人の生徒の、宿題と課題すべての進捗（期間に関係なく、その生徒に出したもの全部） */
+export function StudentProgressDialog({ data }: { data: DashboardData }) {
+  const [params, setParams] = useSearchParams();
+  const h = useAssignmentHelpers(data);
+  const studentId = params.get(STUDENT_PARAM);
+  const student = data.students.find((s) => s.id === studentId) ?? null;
+
+  const close = () => {
+    const next = new URLSearchParams(params);
+    next.delete(STUDENT_PARAM);
+    setParams(next, { preventScrollReset: true });
+  };
+
+  useEffect(() => {
+    if (!student) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student?.id]);
+
+  if (!student) return null;
+
+  const now = Date.now();
+  const section = (kind: Kind) => {
+    const items = data.homework.filter((hw) => hw.kind === kind && isTarget(hw, student.id));
+    const fullDone = items.filter((hw) => h.doneUnits(hw, student.id) === unitsOf(hw)).length;
+    const label = assignmentKindLabel(kind);
+    return (
+      <div className="space-y-2">
+        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+          {kind === 'classwork' ? <PencilLine className="w-4 h-4 text-teal-600" /> : <School className="w-4 h-4 text-indigo-600" />}
+          {label} <span className="text-xs font-normal text-slate-500">({fullDone}/{items.length} fully done)</span>
+        </h3>
+        {items.length === 0 ? (
+          <p className="text-xs text-slate-500">No {label.toLowerCase()} for this student.</p>
+        ) : (
+          <div className="overflow-x-auto border border-slate-100 rounded-lg">
+            <table className="min-w-full text-xs">
+              <thead>
+                <tr className="text-slate-500 bg-slate-50">
+                  <th className="text-left font-semibold py-1.5 px-2">Title</th>
+                  <th className="text-left font-semibold py-1.5 px-2">Due</th>
+                  <th className="text-left font-semibold py-1.5 px-2">Progress</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((hw) => {
+                  const doneUnits = h.doneUnits(hw, student.id);
+                  const finished = doneUnits === unitsOf(hw);
+                  const overdue = !finished && new Date(hw.dueAt).getTime() < now;
+                  const stat = h.statOf(hw, student.id);
+                  return (
+                    <tr key={hw.id} className="border-t border-slate-100 align-top">
+                      <td className="py-1.5 px-2">
+                        <p className="font-semibold text-slate-800">{hw.title}</p>
+                        <p className="text-slate-500">
+                          {hw.itemType === 'lesson' ? h.lessonTitle(hw.lessonId) : <>Vocabulary quiz: {h.quizTitle(hw.quizId)}</>}
+                        </p>
+                      </td>
+                      <td className="py-1.5 px-2 whitespace-nowrap text-slate-700" suppressHydrationWarning>
+                        {formatDate(hw.dueAt)}
+                        {overdue && <span className="block font-semibold text-red-600">Overdue</span>}
+                      </td>
+                      <td className="py-1.5 px-2">
+                        {hw.itemType === 'lesson' ? (
+                          <div className="flex flex-wrap gap-1">
+                            {hw.taskKeys.map((k) => {
+                              const done = h.taskDone(hw, student.id, k);
+                              return (
+                                <span key={k} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${
+                                  done ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-500'
+                                }`}>
+                                  {done ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />} {taskLabel(k)}
+                                </span>
+                              );
+                            })}
+                            <span className={`font-bold ml-1 ${finished ? 'text-emerald-700' : 'text-slate-600'}`}>{doneUnits}/{unitsOf(hw)}</span>
+                          </div>
+                        ) : stat ? (
+                          <span className="text-slate-700" suppressHydrationWarning>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline -mt-0.5" /> Best <strong>{stat.best}/{stat.total}</strong> ({pct(stat.best, stat.total)}%)
+                            {' · '}{stat.attempts} {stat.attempts === 1 ? 'try' : 'tries'} · Last {formatDate(stat.lastAt)}
+                          </span>
+                        ) : (
+                          <span className="text-slate-500"><Circle className="w-3.5 h-3.5 inline -mt-0.5" /> Not started</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/40 flex items-start justify-center p-4 overflow-y-auto" onClick={close}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${studentName(student)}: homework and classwork`}
+        className="bg-white rounded-xl shadow-2xl w-full max-w-4xl my-8 p-5 space-y-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <UserRound className="w-5 h-5 text-indigo-600" /> {studentName(student)}
+            </h2>
+            {student.nickname && <p className="text-xs text-slate-500 truncate">{student.email}</p>}
+          </div>
+          <button type="button" onClick={close} className="p-1.5 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer" aria-label="Close">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        {section('homework')}
+        {(data.assignmentsAvailable || data.homework.some((hw) => hw.kind === 'classwork')) && section('classwork')}
+      </div>
+    </div>
   );
 }
 
@@ -313,7 +515,7 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
                               const stat = h.statOf(hw, s.id);
                               return (
                                 <tr key={s.id} className="border-t border-slate-100">
-                                  <td className="py-1 pr-3 text-slate-800 whitespace-nowrap">{studentName(s)}</td>
+                                  <td className="py-1 pr-3 text-slate-800 whitespace-nowrap"><StudentLink student={s} /></td>
                                   {hw.itemType === 'lesson' ? (
                                     <>
                                       {hw.taskKeys.map((k) => (
@@ -487,7 +689,7 @@ export function CompletionCard({ data }: { data: DashboardData }) {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.student.id} className="border-b border-slate-100">
-                  <td className="py-2 pr-3 text-slate-800 whitespace-nowrap">{studentName(r.student)}</td>
+                  <td className="py-2 pr-3 text-slate-800 whitespace-nowrap"><StudentLink student={r.student} /></td>
                   <td className="py-2 px-2">
                     {r.percent === null ? (
                       <span className="text-xs text-slate-400">Nothing assigned in this period</span>

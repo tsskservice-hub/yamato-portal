@@ -5,13 +5,13 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { yamatoFetch, YAMATO_API_BASE } from "~/lib/yamatoApi";
-import type { ExamResultData, MockStageId } from "./OralMockSession";
+import type { ExamResultData, MockLogItem, MockStageId } from "./OralMockSession";
 
 export interface OralMockReportProps {
   result: ExamResultData;
   onRetry: () => void;
   themeColor?: string;
-  /** フィードバックを作る api（省略すると mock 用。accelerated は /api/oral-accelerated/feedback） */
+  /** フィードバックを作る api（省略すると mock 用。superb は /api/oral-superb/feedback） */
   feedbackEndpoint?: string;
   /** 見出しの下の説明（省略すると「Section 1 + 2 · medium」など） */
   subtitle?: string;
@@ -21,6 +21,11 @@ export interface OralMockReportProps {
   hideStageHeadings?: boolean;
   /** もう一度のボタンの文字 */
   retryLabel?: string;
+  /**
+   * フィードバックの前に、生徒が自分の言ったこと（文字起こし）を確かめて直せるようにする。
+   * 聞き取りがまちがっていたのに、それをもとにフィードバックされないように（accelerated で使う）
+   */
+  reviewBeforeFeedback?: boolean;
 }
 
 const STAGE_LABEL: Record<MockStageId, string> = {
@@ -63,13 +68,17 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
   partnerName = "Examiner",
   hideStageHeadings = false,
   retryLabel = "🔄 Take another mock exam",
+  reviewBeforeFeedback = false,
 }) => {
+  // フィードバックに使う会話（生徒が直したあとのもの）
+  const [transcript, setTranscript] = useState<MockLogItem[]>(result.transcript);
+  const [reviewing, setReviewing] = useState(reviewBeforeFeedback);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const requestedRef = useRef(false);
 
-  const loadFeedback = async () => {
+  const loadFeedback = async (lines: MockLogItem[] = transcript) => {
     setLoading(true);
     setError(null);
     try {
@@ -78,7 +87,7 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: result.sessionId,
-          transcript: result.transcript,
+          transcript: lines,
           durations: result.durations,
         }),
       });
@@ -93,14 +102,29 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
   };
 
   useEffect(() => {
-    if (requestedRef.current) return;
+    if (requestedRef.current || reviewBeforeFeedback) return;
     requestedRef.current = true;
     loadFeedback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const total = result.totalDurationSeconds;
-  const answers = result.transcript.filter((t) => t.speaker === "student");
+  const answers = transcript.filter((t) => t.speaker === "student" && t.text.trim());
+
+  /** 生徒の行を直す（空にすると、その行はフィードバックに使わない） */
+  const editLine = (index: number, text: string) => {
+    setTranscript((prev) =>
+      prev.map((t, i) => (i === index ? { ...t, text, edited: text.trim() !== (result.transcript[i]?.text || "").trim() } : t))
+    );
+  };
+
+  const confirmAndGetFeedback = () => {
+    const lines = transcript.filter((t) => t.text.trim());
+    setTranscript(lines);
+    setReviewing(false);
+    requestedRef.current = true;
+    loadFeedback(lines);
+  };
   const avgLength = answers.length ? Math.round(answers.reduce((s, a) => s + a.text.length, 0) / answers.length) : 0;
 
   return (
@@ -134,6 +158,49 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
         ))}
       </div>
 
+      {/* フィードバックの前に、自分の言ったことを確かめる（聞き取りのまちがいを直す） */}
+      {reviewing && (
+        <div className="space-y-3">
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-sm text-slate-700 dark:text-slate-200 space-y-1">
+            <p className="font-bold">✏️ Check what you said</p>
+            <p className="text-xs">
+              Your voice was turned into text automatically, and sometimes it is heard wrongly. If a line is not what you
+              said, fix it so your feedback is based on what you really said. Leave a line empty to skip it. Please fix
+              only mistakes in hearing — don&apos;t improve your Japanese here.
+            </p>
+          </div>
+          <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
+            {transcript.map((t, i) =>
+              t.speaker === "student" ? (
+                <div key={i} className="space-y-1">
+                  <textarea
+                    value={t.text}
+                    onChange={(e) => editLine(i, e.target.value)}
+                    rows={2}
+                    className={`w-full p-3 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 ${
+                      t.edited ? "border-amber-400" : "border-slate-200 dark:border-slate-700"
+                    }`}
+                  />
+                  {t.edited && <p className="text-[11px] font-bold text-amber-700 dark:text-amber-400">Changed</p>}
+                </div>
+              ) : (
+                <p key={i} className="text-xs text-slate-500 dark:text-slate-400 pl-1">
+                  {partnerName}: {t.text}
+                </p>
+              )
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={confirmAndGetFeedback}
+            className="w-full py-3 rounded-2xl font-bold text-white text-sm shadow-md cursor-pointer"
+            style={{ backgroundColor: themeColor }}
+          >
+            ✅ This is what I said — get my feedback
+          </button>
+        </div>
+      )}
+
       {/* フィードバック */}
       <div className="space-y-2">
         {loading && (
@@ -149,7 +216,7 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
             <p className="text-sm text-rose-800 dark:text-rose-200">{error}</p>
             <button
               type="button"
-              onClick={loadFeedback}
+              onClick={() => loadFeedback()}
               className="px-4 py-2 rounded-xl text-white text-xs font-bold cursor-pointer"
               style={{ backgroundColor: themeColor }}
             >
@@ -169,8 +236,8 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
       <details className="rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
         <summary className="text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer">📜 Read the whole conversation</summary>
         <div className="mt-3 space-y-1.5 text-sm">
-          {result.transcript.map((t, i) => {
-            const newStage = i === 0 || result.transcript[i - 1].stage !== t.stage;
+          {transcript.map((t, i) => {
+            const newStage = i === 0 || transcript[i - 1].stage !== t.stage;
             return (
               <React.Fragment key={i}>
                 {newStage && !hideStageHeadings && <p className="mt-3 text-xs font-bold text-slate-400 uppercase">{STAGE_LABEL[t.stage]}</p>}

@@ -13,7 +13,7 @@
  */
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useRef } from 'react';
-import { useActionData, useLoaderData } from '@remix-run/react';
+import { useActionData, useLoaderData, type ShouldRevalidateFunction } from '@remix-run/react';
 import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
 import {
   generateInviteCode,
@@ -50,7 +50,15 @@ import {
   HandwritingCard,
   type DashboardData,
 } from '~/components/teacher/TeacherDashboardSections';
-import { AssignCard, AssignmentListCard, CompletionCard, VocabQuizCard } from '~/components/teacher/AssignmentSections';
+import {
+  AssignCard,
+  AssignmentListCard,
+  CompletionCard,
+  StudentProgressDialog,
+  StudentsCard,
+  VocabQuizCard,
+} from '~/components/teacher/AssignmentSections';
+import { DashboardJumpNav } from '~/components/teacher/DashboardJumpNav';
 
 const DAY_MS = 86_400_000;
 
@@ -939,23 +947,51 @@ export default function TeacherDashboardPage() {
 
         {data.selectedClass && (
           <>
-            <GamesCard data={data} />
+            {/* 💡 ページ内のジャンプボタン。よく使うもの（上）と、たまに使う設定（下）に分けて並べる */}
+            <DashboardJumpNav data={data} />
+
+            {/* 参加申請は、来ているときだけ一番上に出す（承認しないと生徒が使えないため） */}
             <JoinRequestsCard data={data} />
-            <ClassSettingsCard data={data} />
-            <LessonTaskSettingsCard data={data} />
-            <InviteCodesCard data={data} />
-            <AssignCard data={data} />
-            <AssignmentListCard data={data} kind="homework" />
-            <AssignmentListCard data={data} kind="classwork" />
-            <VocabQuizCard data={data} />
-            <CompletionCard data={data} />
-            <HandwritingCard data={data} />
+
+            {/* ---------- 日々よく使うもの ---------- */}
+            <div id="td-assign" className="scroll-mt-20"><AssignCard data={data} /></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div id="td-homework" className="scroll-mt-20 min-w-0"><AssignmentListCard data={data} kind="homework" /></div>
+              <div id="td-classwork" className="scroll-mt-20 min-w-0"><AssignmentListCard data={data} kind="classwork" /></div>
+            </div>
+            <div id="td-completion" className="scroll-mt-20"><CompletionCard data={data} /></div>
+            <div id="td-quizzes" className="scroll-mt-20"><VocabQuizCard data={data} /></div>
+            <div id="td-handwriting" className="scroll-mt-20"><HandwritingCard data={data} /></div>
+            <div id="td-students" className="scroll-mt-20"><StudentsCard data={data} /></div>
+
+            {/* ---------- たまに使う設定 ---------- */}
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 pt-4 border-t border-slate-200">Class settings</h2>
+            <div id="td-games" className="scroll-mt-20"><GamesCard data={data} /></div>
+            <div id="td-class-code" className="scroll-mt-20"><ClassSettingsCard data={data} /></div>
+            <div id="td-invites" className="scroll-mt-20"><InviteCodesCard data={data} /></div>
+            <div id="td-vocab-length" className="scroll-mt-20"><LessonTaskSettingsCard data={data} /></div>
+
+            {/* 生徒の名前を押すと開く、その生徒の宿題・課題すべての進捗（?student=ID） */}
+            <StudentProgressDialog data={data} />
           </>
         )}
       </div>
     </PageLayout>
   );
 }
+
+/** 生徒の進捗を開く・閉じる（?student= だけが変わる）ときは、データを読み直さない（表示だけ切り替える） */
+export const shouldRevalidate: ShouldRevalidateFunction = ({ currentUrl, nextUrl, formMethod, defaultShouldRevalidate }) => {
+  if (formMethod && formMethod.toUpperCase() !== 'GET') return defaultShouldRevalidate;
+  if (currentUrl.pathname !== nextUrl.pathname) return defaultShouldRevalidate;
+  const strip = (u: URL) => {
+    const p = new URLSearchParams(u.search);
+    p.delete('student');
+    p.sort();
+    return p.toString();
+  };
+  return strip(currentUrl) === strip(nextUrl) ? false : defaultShouldRevalidate;
+};
 
 export const meta: MetaFunction = () => [
   { title: 'Teacher Dashboard | AI Yamato Japanese Hub' },

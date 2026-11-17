@@ -15,10 +15,13 @@ import type { MockExamConfig } from "./OralMockConfig";
 import { yamatoFetch, YAMATO_API_BASE } from "~/lib/yamatoApi";
 import { isRepeatRequest } from "~/hooks/OralPracticeHooks";
 import type { OralExamQuestionsData, OralExamQuestionItem } from "~/data/oral-exam-questions";
+import { planSec1Topics, SEC2_ANGLES, TOPIC_SECONDS, type OralTopic } from "~/data/oral-topics";
 
 export type MockStageId = "before" | "sec1" | "sec2" | "after";
 
 export interface MockLogItem {
+  /** 文字起こしがまちがっていて、生徒が会話のあとに直した行 */
+  edited?: boolean;
   stage: MockStageId;
   speaker: "examiner" | "student";
   text: string;
@@ -139,31 +142,15 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Pro
 /** 1 回の録音の長さの上限（秒）。これを超えたら自動で止めて文字にする */
 const MAX_RECORDING_SECONDS = 120;
 
-/**
- * Section 1 で、7 分の間に順に話すトピック（試験でよく出るもの）。
- * 時間で区切って、次のトピックに移るときは試験官が「では、話題を変えましょう」と大きく話題を変える
- */
-const SEC1_TOPICS: { label: string; categories: string[] }[] = [
-  { label: "家族 (family)", categories: ["Family"] },
-  { label: "学校 (school)", categories: ["School"] },
-  { label: "アルバイト (part-time job)", categories: ["Part time Job"] },
-  { label: "日本 (going to Japan, studying Japanese)", categories: ["Travel", "Japanese Study"] },
-  { label: "将来 (future plans)", categories: ["Future"] },
-];
-
-/** 毎回ちがう順にする（「将来」は話のまとめにしやすいので最後） */
-function planSec1Topics() {
-  const head = SEC1_TOPICS.slice(0, -1);
-  for (let i = head.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [head[i], head[j]] = [head[j], head[i]];
-  }
-  return [...head, SEC1_TOPICS[SEC1_TOPICS.length - 1]];
-}
-
-/** 問題集から、そのトピックの質問の例を選ぶ */
-function pickIdeasByCategory(data: OralExamQuestionsData, difficulty: string, categories: string[], count = 8): string[] {
-  const group = (data as any).sec1 || {};
+/** 問題集から、その話題（Section 2 は角度）の質問の例を選ぶ */
+function pickIdeasByCategory(
+  data: OralExamQuestionsData,
+  section: "sec1" | "sec2",
+  difficulty: string,
+  categories: string[],
+  count = 8
+): string[] {
+  const group = (data as any)[section] || {};
   const list: OralExamQuestionItem[] = (group[difficulty] || group.normal || []).filter((q: OralExamQuestionItem) =>
     categories.includes(q.category)
   );
@@ -212,8 +199,12 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
   });
 
   // Section 1 のトピックの順番と、いま話しているトピック（-1 = まだ）
-  const sec1TopicsRef = useRef(planSec1Topics());
-  const topicIdxRef = useRef(-1);
+  // 約 1 分ごとに切りかえる話題（Section 2 は特別研究を話す角度）の順番と、いま話している番号（-1 = まだ）
+  const topicsRef = useRef<Record<"sec1" | "sec2", OralTopic[]>>({
+    sec1: planSec1Topics(Math.round(STAGE_LIMIT_SECONDS.sec1 / TOPIC_SECONDS)),
+    sec2: SEC2_ANGLES,
+  });
+  const topicIdxRef = useRef<Record<"sec1" | "sec2", number>>({ sec1: -1, sec2: -1 });
 
   const [stageIdx, setStageIdx] = useState(0);
   const stageIdxRef = useRef(0);
@@ -314,12 +305,14 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
 
   /** Section 1 で、この返事のときに話すトピック（時間で決める）と、話題を大きく変えるか */
   const planTopic = (mode: "open" | "reply" | "close"): TopicPlan | undefined => {
-    if (stages[stageIdxRef.current] !== "sec1" || mode === "close") return undefined;
-    const topics = sec1TopicsRef.current;
+    const stage = stages[stageIdxRef.current];
+    if ((stage !== "sec1" && stage !== "sec2") || mode === "close") return undefined;
+    const topics = topicsRef.current[stage];
     if (mode === "open") return { topicIdx: 0, switchTopic: false };
+    // 約 1 分ごとに次の話題へ（時間で決める）
     const elapsed = (Date.now() - stageStartRef.current) / 1000;
-    const byTime = Math.min(Math.floor(elapsed / (STAGE_LIMIT_SECONDS.sec1 / topics.length)), topics.length - 1);
-    const current = Math.max(topicIdxRef.current, 0);
+    const byTime = Math.min(Math.floor(elapsed / TOPIC_SECONDS), topics.length - 1);
+    const current = Math.max(topicIdxRef.current[stage], 0);
     return byTime > current ? { topicIdx: current + 1, switchTopic: true } : { topicIdx: current, switchTopic: false };
   };
 
@@ -330,7 +323,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
     setErrorMessage(null);
     const plan = presetPlan ?? planTopic(mode);
     pendingTurnRef.current = { mode, studentText, plan };
-    const topic = plan ? sec1TopicsRef.current[plan.topicIdx] : undefined;
+    const topic = plan ? topicsRef.current[stage][plan.topicIdx] : undefined;
     try {
       // このセクションの会話（いま送る生徒の答えは除く）
       const stageLog = logRef.current.filter((l) => l.stage === stage);
@@ -346,8 +339,8 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
             mode,
             history,
             studentText,
-            // Section 1 は、いまのトピックの質問の例。Section 2 は特別研究の質問の例
-            ideas: topic ? pickIdeasByCategory(questionsData, config.difficulty, topic.categories) : ideasRef.current[stage],
+            // いまの話題（Section 2 は角度）の質問の例
+            ideas: topic ? pickIdeasByCategory(questionsData, stage, config.difficulty, topic.categories) : ideasRef.current[stage],
             topic: topic?.label,
             switchTopic: plan?.switchTopic ?? false,
             isLastStage: !stages.slice(stageIdxRef.current + 1).some((s) => s === "sec1" || s === "sec2"),
@@ -367,7 +360,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
       }
       if (!res.ok || !data.text) throw new Error(data.message || `HTTP ${res.status}`);
       pendingTurnRef.current = null;
-      if (plan) topicIdxRef.current = plan.topicIdx;
+      if (plan) topicIdxRef.current[stage] = plan.topicIdx;
       addLog({ stage, speaker: "examiner", text: data.text });
       await say(data.text, data.audioBase64 ? `data:audio/mpeg;base64,${data.audioBase64}` : undefined);
       if (unmountedRef.current || finishedRef.current) return;

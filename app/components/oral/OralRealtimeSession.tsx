@@ -1,8 +1,8 @@
 /**
  * @file OralRealtimeSession.tsx
- * @description EOY Oral Accelerated の会話の画面（OpenAI Realtime を WebRTC でつなぐ。ボタンを押さずに、そのまま話せる）
+ * @description EOY Oral Superb の会話の画面（OpenAI Realtime を WebRTC でつなぐ。ボタンを押さずに、そのまま話せる）
  *
- * ・つなぎ方: ブラウザが WebRTC の申し込み（SDP）を作る → api（/api/oral-accelerated/start）がクレジットを引いて OpenAI につなぐ
+ * ・つなぎ方: ブラウザが WebRTC の申し込み（SDP）を作る → api（/api/oral-superb/start）がクレジットを引いて OpenAI につなぐ
  *   → 答えの SDP を受け取ってつながる。API キーはブラウザに出ない。時間を過ぎた会話は api がサーバー側から切る
  * ・英語を見張る: AI が話している言葉（文字）に英字が出たら、すぐにその返事を止めて消し、「日本語で言い直して」と伝える。
  *   英語が出た回数は api に送って記録する（「指示だけで日本語を守れるか」を判断するため）
@@ -12,6 +12,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import OralExaminerAvatar from "./OralExaminerAvatar";
 import { yamatoFetch, YAMATO_API_BASE } from "~/lib/yamatoApi";
+import { planSec1Topics, SEC2_ANGLES, TOPIC_SECONDS } from "~/data/oral-topics";
 
 export type RealtimeFocus = "free" | "sec1" | "sec2";
 
@@ -44,9 +45,33 @@ interface Props {
   themeColor?: string;
 }
 
-/** 英語が出たかどうか（「VCE」など、決まった言葉は除く） */
+/** 英語の文によく出る言葉（これが入っていれば、英単語の並びは「名前」ではなく英語の文） */
+const ENGLISH_FUNCTION_WORDS = new Set(
+  ("the a an is are was were be you i we he she it they this that what how why when where who " +
+    "do does did can could will would should so and but or of to in on for with about my your " +
+    "okay ok yes yeah no sure great good nice really let's let me think").split(" ")
+);
+
+/**
+ * 英語で話したかどうか。
+ * AI の声を文字にしたものなので、日本語の発音で言った「ユーチューブ」が「YouTube」と英字で書かれることがある。
+ * そのため、名前のような英字の言葉があるだけでは英語とみなさない。次のどちらかのときだけ英語とみなす:
+ *   ・英単語が 3 つ以上つづき、その中に is / the / you / so などの英語のふつうの言葉がある（例: "That is a great idea"）
+ *     （"Netflix Disney Plus" のような名前の並びは英語とみなさない）
+ *   ・20 文字以上のうち、英字が 12 文字以上で日本語の 2 倍より多く、英語のふつうの言葉も入っている（ほとんど英語の返事）
+ */
 function hasEnglish(text: string): boolean {
-  return /[A-Za-z]{2,}/.test(text.replace(/VCE|JLPT|SNS|AI/g, ""));
+  const runs = text.match(/[A-Za-z']+(?:[\s,.!?]+[A-Za-z']+){2,}/g) || [];
+  for (const run of runs) {
+    const words = run.toLowerCase().split(/[\s,.!?]+/).filter(Boolean);
+    if (words.some((w) => ENGLISH_FUNCTION_WORDS.has(w))) return true;
+  }
+  const latin = (text.match(/[A-Za-z]/g) || []).length;
+  const japanese = (text.match(/[぀-ヿ一-鿿]/g) || []).length;
+  if (text.length < 20 || latin < 12 || latin <= japanese * 2) return false;
+  // 英字がとても多くても、英語のふつうの言葉がなければ名前の並び（例: Taylor Swift Eras Tour）
+  const words = text.toLowerCase().match(/[a-z']+/g) || [];
+  return words.some((w) => ENGLISH_FUNCTION_WORDS.has(w));
 }
 
 const fmt = (secs: number) => {
@@ -76,6 +101,26 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
   const responseActiveRef = useRef(false);
   const warnedRef = useRef(false);
   const closingRef = useRef<"none" | "pending" | "sent">("none");
+  // 英語で止めたあとの「言い直し」の返事か（言い直しは 1 回だけ。言い直しはもう止めない＝AI が黙ってしまわないように）
+  const pendingRedoRef = useRef(false);
+
+  // 約 1 分ごとに話題を変える（Section 2 は特別研究を話す角度を変える）
+  const topicsRef = useRef(
+    config.focus === "sec2" ? SEC2_ANGLES : planSec1Topics(Math.min(9, Math.round((config.minutes * 60) / TOPIC_SECONDS)))
+  );
+  const topicIdxRef = useRef(0);
+
+  // 止まったままにしないための見張り（いつ何があったか）
+  const lastActivityRef = useRef(Date.now());
+  const speechStoppedAtRef = useRef(0);
+  const responseCreatedAtRef = useRef(0);
+  const audioStartedRef = useRef(false);
+  const lastNudgeAtRef = useRef(0);
+
+  // マイクの音の大きさ（0〜1）。マイクがちゃんと声をひろっているか、生徒が見て分かるように
+  const [micLevel, setMicLevel] = useState(0);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const isRedoResponseRef = useRef(false);
 
   const setLogBoth = (next: RealtimeLogItem[]) => {
     logRef.current = next;
@@ -92,6 +137,8 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
     send({ type: "conversation.item.create", item: { type: "message", role: "system", content: [{ type: "input_text", text }] } });
 
   const cleanup = () => {
+    audioCtxRef.current?.close().catch(() => {});
+    audioCtxRef.current = null;
     try {
       dcRef.current?.close();
     } catch {
@@ -116,7 +163,7 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
     const sessionId = sessionIdRef.current;
     if (sessionId) {
       // 会話を切って、英語が出た回数を記録する（失敗しても、サーバーの定期処理が切る）
-      yamatoFetch(`${YAMATO_API_BASE}/api/oral-accelerated/end`, {
+      yamatoFetch(`${YAMATO_API_BASE}/api/oral-superb/end`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, englishLeaks: englishLeaksRef.current }),
@@ -136,19 +183,24 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
   };
 
   /** 英語が出たとき: その返事を止めて消し、日本語で言い直させる */
-  const handleEnglish = (itemId: string) => {
+  const handleEnglish = (itemId: string, text: string) => {
     if (leakedItemsRef.current.has(itemId)) return;
     leakedItemsRef.current.add(itemId);
     englishLeaksRef.current += 1;
-    console.warn(`🔤 English detected in AI reply (${englishLeaksRef.current})`);
+    // 調べやすいように、英語と判断した文をコンソールに出す
+    console.warn(`🔤 English detected in AI reply (${englishLeaksRef.current}): "${text}"`);
+    if (isRedoResponseRef.current) {
+      // 言い直しの返事にまた英語が出た: 止めずに最後まで話させる（AI が黙ってしまわないように）。回数だけ数える
+      return;
+    }
     send({ type: "response.cancel" });
     send({ type: "output_audio_buffer.clear" });
     send({ type: "conversation.item.delete", item_id: itemId });
-    // 何度も続くときは、言い直しを頼むのをやめる（同じことのくり返しにしない）
-    if (englishLeaksRef.current <= 5) {
-      systemNote("直前のあなたの返事に英語が入っていたので、止めました。英語は一言も使わずに、同じ内容を日本語だけで、もう一度言ってください。");
-      setTimeout(() => send({ type: "response.create" }), 150);
-    }
+    systemNote(
+      "直前のあなたの返事に英語の文が入っていたので、止めました。英語の文は使わずに、同じ内容を日本語だけで、もう一度言ってください。外国の名前や言葉は、カタカナで言ってください。"
+    );
+    pendingRedoRef.current = true;
+    setTimeout(() => send({ type: "response.create" }), 150);
   };
 
   /** 時間になった: お礼を言って終えてもらう */
@@ -172,9 +224,13 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
     switch (msg.type) {
       case "input_audio_buffer.speech_started":
         setStudentSpeaking(true);
+        lastActivityRef.current = Date.now();
+        speechStoppedAtRef.current = 0;
         break;
       case "input_audio_buffer.speech_stopped":
         setStudentSpeaking(false);
+        lastActivityRef.current = Date.now();
+        speechStoppedAtRef.current = Date.now();
         break;
       case "input_audio_buffer.committed":
         // 生徒が話した場所に、文字になる前の「…」を置いておく（順番を正しくするため）
@@ -190,13 +246,20 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
         break;
       case "response.created":
         responseActiveRef.current = true;
+        responseCreatedAtRef.current = Date.now();
+        audioStartedRef.current = false;
+        speechStoppedAtRef.current = 0;
+        lastActivityRef.current = Date.now();
+        // この返事が、英語で止めたあとの言い直しか
+        isRedoResponseRef.current = pendingRedoRef.current;
+        pendingRedoRef.current = false;
         break;
       case "response.output_audio_transcript.delta": {
         const id = msg.item_id as string;
         if (!id || leakedItemsRef.current.has(id)) break;
         const text = (aiTextRef.current.get(id) || "") + (msg.delta || "");
         aiTextRef.current.set(id, text);
-        if (hasEnglish(text)) handleEnglish(id);
+        if (hasEnglish(text)) handleEnglish(id, text);
         break;
       }
       case "response.output_audio_transcript.done": {
@@ -204,22 +267,27 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
         const text = String(msg.transcript || aiTextRef.current.get(id) || "").trim();
         if (!id || leakedItemsRef.current.has(id)) break;
         if (hasEnglish(text)) {
-          handleEnglish(id);
-          break;
+          handleEnglish(id, text);
+          // 言い直しの返事は止めないので、記録には残す
+          if (!isRedoResponseRef.current) break;
         }
         if (text) setLogBoth([...logRef.current, { id, speaker: "examiner", text }]);
         break;
       }
       case "response.done":
         responseActiveRef.current = false;
+        lastActivityRef.current = Date.now();
         if (closingRef.current === "pending") requestClosing();
         break;
       case "output_audio_buffer.started":
         setAiSpeaking(true);
+        audioStartedRef.current = true;
+        lastActivityRef.current = Date.now();
         break;
       case "output_audio_buffer.stopped":
       case "output_audio_buffer.cleared":
         setAiSpeaking(false);
+        lastActivityRef.current = Date.now();
         // 締めのあいさつを言い終わったら終了
         if (closingRef.current === "sent" && msg.type === "output_audio_buffer.stopped") setTimeout(finish, 800);
         break;
@@ -241,6 +309,34 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
         });
         if (cancelled) return stream.getTracks().forEach((t) => t.stop());
         streamRef.current = stream;
+
+        // マイクの音の大きさを測る（画面のメーター用。音は送らない）
+        try {
+          const ctx = new AudioContext();
+          audioCtxRef.current = ctx;
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 512;
+          ctx.createMediaStreamSource(stream).connect(analyser);
+          const buf = new Uint8Array(analyser.fftSize);
+          let last = 0;
+          const tick = (t: number) => {
+            if (!audioCtxRef.current) return;
+            if (t - last > 120) {
+              last = t;
+              analyser.getByteTimeDomainData(buf);
+              let sum = 0;
+              for (let i = 0; i < buf.length; i++) {
+                const v = (buf[i] - 128) / 128;
+                sum += v * v;
+              }
+              setMicLevel(Math.min(1, Math.sqrt(sum / buf.length) * 4));
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        } catch {
+          /* メーターが使えなくても会話はできる */
+        }
 
         const pc = new RTCPeerConnection();
         pcRef.current = pc;
@@ -266,14 +362,17 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
         dc.onopen = () => {
           startedAtRef.current = Date.now();
           setStatus("live");
-          // やまと先生から話し始める（あいさつと 1 つ目の質問）
+          // やまと先生から話し始める（あいさつと 1 つ目の質問）。最初の話題を伝えておく
+          const first = topicsRef.current[0];
+          if (first && config.focus !== "sec2") systemNote(`最初の話題は「${first.label}」です。`);
+          lastActivityRef.current = Date.now();
           send({ type: "response.create" });
         };
 
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
-        const res = await yamatoFetch(`${YAMATO_API_BASE}/api/oral-accelerated/start`, {
+        const res = await yamatoFetch(`${YAMATO_API_BASE}/api/oral-superb/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -321,7 +420,7 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
         cleanup();
         const sessionId = sessionIdRef.current;
         if (sessionId) {
-          yamatoFetch(`${YAMATO_API_BASE}/api/oral-accelerated/end`, {
+          yamatoFetch(`${YAMATO_API_BASE}/api/oral-superb/end`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sessionId, englishLeaks: englishLeaksRef.current }),
@@ -342,7 +441,57 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
       warnedRef.current = true;
       systemNote("残り約1分です。新しい話題は始めずに、自然に会話をまとめていってください。");
     }
-    if (remaining <= 0) requestClosing();
+    if (remaining <= 0) {
+      requestClosing();
+      return;
+    }
+
+    // 約 1 分ごとに話題（Section 2 は角度）を変える。残り 1 分を切ったら変えない
+    const topics = topicsRef.current;
+    const byTime = Math.min(Math.floor(elapsed / TOPIC_SECONDS), topics.length - 1);
+    if (remaining > 60 && byTime > topicIdxRef.current) {
+      topicIdxRef.current = byTime;
+      const next = topics[byTime];
+      systemNote(
+        config.focus === "sec2"
+          ? `そろそろ、サブトピックを別の角度から話しましょう。生徒の今の話に短く反応したら、「では、別の点について聞きます。」のように言って、次は「${next.label}」の点から質問してください。`
+          : `そろそろ話題を変えてください。生徒の今の話に短く反応したら、「では、話題を変えましょう。」のように言って、次は「${next.label}」について質問してください。`
+      );
+    }
+
+    // ---- 止まったままにしない見張り ----
+    const t = Date.now();
+    if (closingRef.current !== "none") return;
+    // (1) 生徒が話し終わったのに 6 秒たっても返事が始まらない → 返事をうながす
+    if (speechStoppedAtRef.current && !responseActiveRef.current && t - speechStoppedAtRef.current > 6000) {
+      speechStoppedAtRef.current = 0;
+      console.warn("[realtime] no reply after the student spoke — asking for a reply");
+      send({ type: "response.create" });
+      return;
+    }
+    // (2) 返事が始まったのに 12 秒たっても声が出ない → その返事を止めて、もう一度
+    if (responseActiveRef.current && !audioStartedRef.current && t - responseCreatedAtRef.current > 12000) {
+      console.warn("[realtime] reply started but no voice — retrying");
+      responseCreatedAtRef.current = t;
+      send({ type: "response.cancel" });
+      setTimeout(() => send({ type: "response.create" }), 300);
+      return;
+    }
+    // (3) だれも話さないまま 20 秒 → やまと先生からやさしく声をかける（30 秒に 1 回まで）
+    if (
+      !responseActiveRef.current &&
+      !aiSpeaking &&
+      !studentSpeaking &&
+      t - lastActivityRef.current > 20000 &&
+      t - lastNudgeAtRef.current > 30000
+    ) {
+      lastNudgeAtRef.current = t;
+      lastActivityRef.current = t;
+      systemNote(
+        "生徒がしばらく話していません。マイクの声が届いていないのかもしれません。やさしく声をかけて（例：「聞こえていますか。ゆっくりで大丈夫ですよ。」）、今の質問をもっとかんたんに言いかえてください。"
+      );
+      send({ type: "response.create" });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [now, status]);
 
@@ -411,6 +560,19 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
           <p className="text-xs font-bold text-center" style={{ color: themeColor }}>
             {statusLabel}
           </p>
+          {/* マイクの音の大きさ（声をひろえているか確かめる） */}
+          <div className="w-full max-w-[200px] space-y-1">
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500">
+              <span>🎙️ Your mic</span>
+              <span>{micLevel > 0.08 ? "hearing you" : "quiet"}</span>
+            </div>
+            <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-[width] duration-100"
+                style={{ width: `${Math.round(micLevel * 100)}%`, backgroundColor: micLevel > 0.08 ? "#10b981" : "#94a3b8" }}
+              />
+            </div>
+          </div>
           <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
             <input type="checkbox" checked={showAiText} onChange={(e) => setShowAiText(e.target.checked)} className="cursor-pointer" />
             Show Yamato&apos;s words

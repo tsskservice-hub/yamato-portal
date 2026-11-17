@@ -39,7 +39,8 @@ function getRoutes(dir: string, base = ""): string[] {
         name === "teacher-dashboard" ||
         name === "teacher-handwriting.$submissionId" ||
         name === "print-report" ||
-        name === "class-game"
+        name === "class-game" ||
+        name === "vce.speaking.eoy-oral-accelerated"
       ) {
         continue;
       }

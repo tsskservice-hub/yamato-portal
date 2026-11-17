@@ -95,7 +95,7 @@ export default function VceHubIndex() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {speakingModules.map((module: any) => {
-                    const isAccelerated = module.id === 'eoy-oral-accelerated';
+                    const isAccelerated = module.id === 'eoy-oral-superb' || module.id === 'eoy-oral-accelerated';
                     return (
                       <div 
                         key={module.id} 

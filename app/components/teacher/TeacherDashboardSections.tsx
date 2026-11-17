@@ -576,33 +576,7 @@ export function ClassSettingsCard({ data }: { data: DashboardData }) {
         </div>
       </div>
 
-      <div className="border-t border-slate-100 pt-4 space-y-2">
-        <h3 className="text-sm font-bold text-slate-700">
-          Students ({data.students.length}/{data.limits.maxStudentsPerClass})
-        </h3>
-        {data.students.length === 0 ? (
-          <p className="text-xs text-slate-500">No students yet. Share the class code above.</p>
-        ) : (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {data.students.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{studentName(s)}</p>
-                  {s.nickname && <p className="text-[11px] text-slate-500 truncate">{s.email}</p>}
-                </div>
-                <Form method="post" onSubmit={(e) => { if (!window.confirm(`Remove ${studentName(s)} from this class?`)) e.preventDefault(); }}>
-                  <input type="hidden" name="intent" value="remove-student" />
-                  <input type="hidden" name="classId" value={cls.id} />
-                  <input type="hidden" name="studentId" value={s.id} />
-                  <button type="submit" className="text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1" aria-label={`Remove ${studentName(s)}`}>
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </Form>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {/* 生徒の一覧は StudentsCard（AssignmentSections.tsx）。名前を押すとその生徒の宿題・課題の進捗が開く */}
 
       <details className="border-t border-slate-100 pt-3">
         <summary className="text-xs font-semibold text-red-600 cursor-pointer">Delete this class</summary>
