@@ -166,13 +166,13 @@
       <div class="pile" id="wastePile" aria-label="Waste pile"><span class="empty">Waste</span></div>
       <div class="pile-label">Waste</div>
     </div>
-    <div id="wasteHint">Tip: a card goes on the card that comes <b>just before it</b> in gojūon order. <b>い</b> goes on <b>あ</b>, <b>き</b> on <b>か</b>, <b>か</b> on <b>お</b>. An empty column takes any card.</div>
+    <div id="wasteHint">Tip: a card goes on the card that comes <b>just before it in the same row</b>. <b>い</b> goes on <b>あ</b>, <b>き</b> on <b>か</b>.</div>
   </div>
 
   <h2 class="sec">Tableau — build up in gojūon order</h2>
   <div id="tableau"></div>
 
-  <footer>46 cards · 10 rows · 7 columns. Face-down cards turn over when uncovered. Unlimited Undo, unlimited stock recycling, and Auto Collect are always available.</footer>
+  <footer>46 cards · 10 rows · 7 columns. Face-down cards turn over when uncovered. Unlimited Undo, unlimited stock recycling, and Auto Collect are always available. Every deal can be finished.</footer>
 </div>
 
 <div class="overlay" id="rulesOverlay" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
@@ -181,15 +181,28 @@
     <p><b>Goal:</b> move all 46 hiragana to the 10 finish piles at the top — one pile for each row.</p>
     <ul>
       <li><b>Finish piles:</b> build each row in reverse order, o → e → u → i → a, so the a-kana ends on top. The A pile takes お → え → う → い → あ. The KA pile takes こ → け → く → き → か. The YA pile takes よ → ゆ → や, and the WA pile takes ん → を → わ.</li>
-      <li><b>Tableau (7 columns):</b> place a card on the card that comes <b>just before it</b> in gojūon order. い goes on あ, う goes on い, か goes on お, き goes on か. You can move a whole face-up stack together.</li>
+      <li><b>Tableau (7 columns):</b> place a card on the card that comes <b>just before it in the same row</b>. い goes on あ, う goes on い, き goes on か. A row never continues into the next one: nothing goes on お, こ, そ … (the last card of each row). You can move a whole face-up stack together.</li>
       <li><b>Empty column:</b> any card (or stack) can start a new column.</li>
       <li><b>Stock:</b> click the stock to draw one card to the waste. When the stock is empty, click it again to recycle the waste.</li>
       <li><b>Shortcuts:</b> double-click (or double-tap) a card to try its finish pile. <b>Hint</b> shows a move. <b>Auto Collect</b> moves every card it can to the finish piles (one Undo takes it all back). <b>Undo</b> takes back your last move.</li>
       <li>Face-down cards turn over when the card above them is moved away.</li>
+      <li><b>Every game can be finished.</b> Each new deal is checked before you play it. If you get stuck, the game tells you and offers to go back to the last position you can still win from.</li>
       <li>The clock stops while you are away from this tab.</li>
       <li><b>Card Colors:</b> switch between colored cards (one light color per row) and plain white cards.</li>
     </ul>
     <div class="actions"><button id="btnCloseRules" type="button" class="primary">Got it</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="stuckOverlay" role="dialog" aria-modal="true" aria-labelledby="stuckTitle">
+  <div class="modal">
+    <h2 id="stuckTitle">No more moves</h2>
+    <p id="stuckText">No card can move any more, so this game cannot be finished from here.</p>
+    <div class="actions">
+      <button id="btnStuckClose" type="button">Look at the board</button>
+      <button id="btnStuckNew" type="button">New Game</button>
+      <button id="btnStuckBack" type="button" class="primary">Go back</button>
+    </div>
   </div>
 </div>
 
@@ -231,6 +244,7 @@ function cardById(id){ return CARDS[id]; }
 /* ================= State ================= */
 var state=null, history=[], sel=null, timer=null, seconds=0, started=false, won=false;
 var soundOn=true;
+var winnable=true; // can the current position still be finished? (checked after each move)
 
 function freshState(deck){
   return {
@@ -273,9 +287,91 @@ function hasOpeningMove(s){
   }
   return false;
 }
+/* ================= Solver =================
+   Can this position still be finished? The stock and waste can be recycled without limit, so
+   every card in them can always be reached: the solver treats them as cards that can be played
+   at any time. It is used (1) to deal only games that can be finished, and (2) after each move,
+   to notice when a move has made the game impossible and to find the last position that was
+   still winnable. It knows the face-down cards, which is fine: it only answers yes / no. */
+var SOLVER_LIMIT=20000;
+function solvable(s){
+  var nodes=0, seen={};
+  var rowLen=ROWS.map(function(r){ return r.kana.length; });
+  function fits(id, f){ var c=cardById(id); return f[c.row]===rowLen[c.row]-1-c.pos; }
+  function settle(st){ // always-safe steps: cards to their finish pile, turning cards over
+    var changed=true;
+    while(changed){
+      changed=false;
+      for(var ci=0;ci<st.cols.length;ci++){
+        var c=st.cols[ci];
+        if(!c.u.length && c.d.length){ c.u.push(c.d.pop()); changed=true; }
+        var top=c.u[c.u.length-1];
+        if(top!=null && fits(top, st.f)){ c.u.pop(); st.f[cardById(top).row]++; changed=true; }
+      }
+      for(var i=0;i<st.r.length;i++){
+        var id=st.r[i];
+        if(fits(id, st.f)){ st.r.splice(i,1); st.f[cardById(id).row]++; changed=true; i--; }
+      }
+    }
+  }
+  function copy(st){ return {cols:st.cols.map(function(c){ return {d:c.d.slice(), u:c.u.slice()}; }), r:st.r.slice(), f:st.f.slice()}; }
+  function keyOf(st){
+    return st.cols.map(function(c){ return c.d.length+":"+c.u.join(","); }).sort().join("|")+"#"+
+           st.r.slice().sort(function(a,b){ return a-b; }).join(",");
+  }
+  function dfs(st){
+    settle(st);
+    var done=true;
+    for(var r=0;r<rowLen.length;r++) if(st.f[r]!==rowLen[r]) { done=false; break; }
+    if(done) return true;
+    if(++nodes>SOLVER_LIMIT) return false;
+    var k=keyOf(st);
+    if(seen[k]) return false;
+    seen[k]=true;
+    var moves=[];
+    st.cols.forEach(function(c,ci){
+      if(!c.u.length) return;
+      var base=c.u[0];
+      st.cols.forEach(function(t,ti){
+        if(ti===ci) return;
+        var tt=t.u[t.u.length-1];
+        if(tt!=null){ if(follows(base, tt)) moves.push({p:c.d.length?0:1, from:ci, to:ti}); }
+        else if(!t.d.length && c.d.length) moves.push({p:0, from:ci, to:ti});
+      });
+    });
+    var empty=-1;
+    st.cols.forEach(function(c,ci){ if(empty<0 && !c.u.length && !c.d.length) empty=ci; });
+    st.r.forEach(function(id){
+      st.cols.forEach(function(t,ti){ var tt=t.u[t.u.length-1]; if(tt!=null && follows(id, tt)) moves.push({p:1, card:id, to:ti}); });
+      if(empty>=0) moves.push({p:2, card:id, to:empty});
+    });
+    moves.sort(function(a,b){ return a.p-b.p; });
+    for(var m=0;m<moves.length;m++){
+      var mv=moves[m], n=copy(st);
+      if(mv.card==null){ n.cols[mv.to].u=n.cols[mv.to].u.concat(n.cols[mv.from].u); n.cols[mv.from].u=[]; }
+      else { n.r.splice(n.r.indexOf(mv.card),1); n.cols[mv.to].u.push(mv.card); }
+      if(dfs(n)) return true;
+      if(nodes>SOLVER_LIMIT) return false;
+    }
+    return false;
+  }
+  var start={
+    cols:s.tableau.map(function(col){
+      return {d:col.filter(function(e){ return !e.faceUp; }).map(function(e){ return e.id; }),
+              u:col.filter(function(e){ return e.faceUp; }).map(function(e){ return e.id; })};
+    }),
+    r:s.stock.concat(s.waste),
+    f:s.foundations.map(function(p){ return p.length; })
+  };
+  return dfs(start);
+}
+
 function newGame(){
   var s, tries=0;
-  do { s=deal(); tries++; } while(!hasOpeningMove(s) && tries<60);
+  // Deal until the game can be finished (about 9 deals in 10 can; checking takes a few ms).
+  do { s=deal(); tries++; } while((!hasOpeningMove(s) || !solvable(s)) && tries<60);
+  winnable=true;
+  closeStuck();
   state=s; history=[]; sel=null; seconds=0; started=false; won=false;
   stopTimer(); render(); setMessage("New game dealt. Good luck!");
 }
@@ -287,7 +383,9 @@ function undo(){
   // The clock is not rewound or stopped: Undo takes back the move, not the time spent.
   state=h.state; won=h.won; sel=null;
   if(started && !won && !timer) startTimer();
-  render(); setMessage("Undone.");
+  closeStuck();
+  winnable=solvable(state);
+  render(); setMessage(winnable ? "Undone." : "Undone. From here the game still cannot be finished — undo more to try another way.");
 }
 
 /* ================= Rules ================= */
@@ -298,9 +396,15 @@ function canFoundation(cardId, s){
   // Foundations build o -> e -> u -> i -> a, so the a-kana ends on top.
   return pile.length===(ROWS[c.row].kana.length-1-c.pos);
 }
+/* A card goes on the card just before it IN THE SAME ROW (い on あ, き on か).
+   A row never continues into the next one: nothing goes on お, こ, そ … */
+function follows(cardId, targetId){
+  var c=cardById(cardId), t=cardById(targetId);
+  return c.row===t.row && c.pos===t.pos+1;
+}
 function canTableau(cardId, targetId){
   if(targetId==null) return true; // empty column takes any card
-  return cardById(targetId).order===cardById(cardId).order-1;
+  return follows(cardId, targetId);
 }
 function collected(){ return state.foundations.reduce(function(n,p){return n+p.length;},0); }
 function flipExposed(){
@@ -343,7 +447,7 @@ function moveTableauToTableau(fromCol, fromIndex, toCol){
   if(!moving.length||!moving[0].faceUp) return false;
   // Stack must already be in correct ascending order (each next card follows the one below it).
   for(var i=0;i<moving.length-1;i++){
-    if(cardById(moving[i+1].id).order!==cardById(moving[i].id).order+1) return false;
+    if(!follows(moving[i+1].id, moving[i].id)) return false;
   }
   var dst=state.tableau[toCol];
   var targetId=dst.length?dst[dst.length-1].id:null;
@@ -393,6 +497,7 @@ function drawStock(){
     setMessage("Stock recycled. Draw again.");
   }
   render(); playTone(520,0.05);
+  checkProgress();
 }
 function autoCollect(){
   // Every card that can go up is moved in one go, as ONE step: a single Undo takes it all back.
@@ -479,8 +584,63 @@ function afterMove(cardId){
     setMessage("You finished all 46! 🎉", true);
   }else{
     playTone(600,0.06);
+    checkProgress();
   }
 }
+
+/* ================= Getting stuck =================
+   After each move: if no card can move any more, say so and offer to go back to the last
+   position that can still be finished (or a new game). If a move has made the game impossible
+   but some moves are still left, give a short warning. */
+function hasAnyMove(){
+  // Board moves (the same ones Hint can suggest)
+  if(findHint().cardId!=null) return true;
+  // Any stock or waste card that could be played somewhere (it can always be reached by drawing)
+  var reserve=state.stock.concat(state.waste);
+  var empty=state.tableau.some(function(c){ return !c.length; });
+  for(var i=0;i<reserve.length;i++){
+    var id=reserve[i];
+    if(canFoundation(id) || empty) return true;
+    for(var col=0;col<7;col++){
+      var t=state.tableau[col], top=t[t.length-1];
+      if(top && top.faceUp && follows(id, top.id)) return true;
+    }
+  }
+  return false;
+}
+/* How many Undo steps back to the most recent position that can still be finished (0 = none found). */
+function stepsBackToWinnable(){
+  for(var i=history.length-1;i>=0;i--){
+    if(solvable(history[i].state)) return history.length-i;
+  }
+  return 0;
+}
+var stuckBack=0;
+function checkProgress(){
+  if(won) return;
+  var wasWinnable=winnable;
+  winnable=solvable(state);
+  if(!hasAnyMove()){
+    stuckBack=stepsBackToWinnable();
+    var btn=document.getElementById("btnStuckBack");
+    if(stuckBack>0){
+      document.getElementById("stuckText").textContent="No card can move any more, so this game cannot be finished from here. "+
+        "Go back "+stuckBack+" move"+(stuckBack>1?"s":"")+" to the last position you can still win from, and try another way.";
+      btn.hidden=false;
+      btn.textContent="Go back "+stuckBack+" move"+(stuckBack>1?"s":"");
+    }else{
+      document.getElementById("stuckText").textContent="No card can move any more, so this game cannot be finished. Start a new game.";
+      btn.hidden=true;
+    }
+    document.getElementById("stuckOverlay").classList.add("show");
+    setMessage("No more moves. Go back a few moves, or start a new game.");
+    return;
+  }
+  if(wasWinnable && !winnable){
+    setMessage("Careful: after that move, this game can no longer be finished. Press Undo to try another way.");
+  }
+}
+function closeStuck(){ document.getElementById("stuckOverlay").classList.remove("show"); }
 
 /* ================= Sound (tiny WebAudio beeps) ================= */
 var audioCtx=null;
@@ -670,7 +830,7 @@ function render(){
       var ok=false;
       if(data && data.type==="tableau") ok=moveTableauToTableau(data.col, data.index, ci);
       else if(data && data.type==="waste") ok=moveWasteToTableau(ci);
-      if(!ok) setMessage("That card cannot go there. It needs the card just before it in gojūon order.");
+      if(!ok) setMessage("That card cannot go there. It needs the card just before it in the same row.");
       sel=null; render();
     });
     el.tableau.appendChild(colEl);
@@ -686,12 +846,12 @@ function onTableauCardClick(col, index){
   if(sel){
     if(sel.type==="tableau"){
       if(moveTableauToTableau(sel.col, sel.index, col)) { sel=null; return; }
-      setMessage("That card cannot go there. It needs the card just before it in gojūon order.");
+      setMessage("That card cannot go there. It needs the card just before it in the same row.");
       sel={type:"tableau",col:col,index:index}; render(); return;
     }
     if(sel.type==="waste"){
       if(moveWasteToTableau(col)) { sel=null; return; }
-      setMessage("That card cannot go there. It needs the card just before it in gojūon order.");
+      setMessage("That card cannot go there. It needs the card just before it in the same row.");
       sel=null; render(); return;
     }
   }
@@ -704,11 +864,11 @@ function onColumnClick(col){
   if(sel.type==="tableau"){
     if(sel.col===col){ clearSel(); return; }
     if(!moveTableauToTableau(sel.col, sel.index, col))
-      setMessage("That stack cannot go there. An empty column takes any card; otherwise it needs the card just before it.");
+      setMessage("That stack cannot go there. An empty column takes any card; otherwise it needs the card just before it in the same row.");
     sel=null; render();
   }else if(sel.type==="waste"){
     if(!moveWasteToTableau(col))
-      setMessage("That card cannot go there. It needs the card just before it in gojūon order.");
+      setMessage("That card cannot go there. It needs the card just before it in the same row.");
     sel=null; render();
   }
 }
@@ -779,7 +939,7 @@ el.stockPile.addEventListener("keydown", function(e){
 // (Without this, some browsers try to open dropped text as a web address.)
 document.addEventListener("dragover", function(e){ e.preventDefault(); });
 document.addEventListener("drop", function(e){ e.preventDefault(); });
-document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ sel=null; render(); closeRules(); } });
+document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ sel=null; render(); closeRules(); closeStuck(); } });
 document.addEventListener("click", function(e){
   if(sel && !e.target.closest(".card") && !e.target.closest(".col") && !e.target.closest(".found") && !e.target.closest("#wastePile")) { sel=null; render(); }
 });
@@ -790,6 +950,21 @@ function closeRules(){ document.getElementById("rulesOverlay").classList.remove(
 document.getElementById("btnRules").addEventListener("click", openRules);
 document.getElementById("btnCloseRules").addEventListener("click", closeRules);
 document.getElementById("rulesOverlay").addEventListener("click", function(e){ if(e.target===this) closeRules(); });
+document.getElementById("btnStuckBack").addEventListener("click", function(){
+  var n=stuckBack;
+  closeStuck();
+  for(var i=0;i<n && history.length;i++){
+    var h=history.pop();
+    state=h.state; won=h.won;
+  }
+  sel=null; winnable=true;
+  if(started && !won && !timer) startTimer();
+  render();
+  setMessage("Went back "+n+" move"+(n>1?"s":"")+". From here the game can still be finished — try another way.", true);
+});
+document.getElementById("btnStuckNew").addEventListener("click", function(){ closeStuck(); newGame(); });
+document.getElementById("btnStuckClose").addEventListener("click", closeStuck);
+document.getElementById("stuckOverlay").addEventListener("click", function(e){ if(e.target===this) closeStuck(); });
 document.getElementById("btnAgain").addEventListener("click", function(){
   document.getElementById("winOverlay").classList.remove("show");
   newGame();

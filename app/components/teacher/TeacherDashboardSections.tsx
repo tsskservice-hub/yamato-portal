@@ -36,7 +36,15 @@ export type DashboardData = {
   invites: Array<{
     id: string; code: string; label: string | null; expiresAt: string; status: 'unused' | 'used' | 'expired'; usedByName: string | null;
   }>;
-  homework: Array<{ id: string; title: string; lessonId: string; taskKeys: string[]; dueAt: string; inPeriod: boolean }>;
+  /**
+   * 宿題・課題（SQL 42）。kind: homework（宿題）/ classwork（授業内の課題）
+   * itemType: lesson（lessonId + taskKeys）/ vocab_quiz（quizId）。assignTo: class（全員）/ students（studentIds の生徒だけ）
+   */
+  homework: Array<{
+    id: string; title: string; kind: 'homework' | 'classwork'; itemType: 'lesson' | 'vocab_quiz';
+    lessonId: string | null; taskKeys: string[]; quizId: string | null;
+    assignTo: 'class' | 'students'; studentIds: string[]; dueAt: string; inPeriod: boolean;
+  }>;
   progress: Array<{ userId: string; lessonId: string; taskKey: string; completedAt: string | null }>;
   handwriting: Array<{
     id: string; userId: string; lessonId: string; attemptNo: number | null; transcription: string;
@@ -54,33 +62,39 @@ export type DashboardData = {
     lessons: Array<{ lessonId: string; limit: number }>;
     students: Array<{ userId: string; limit: number }>;
   };
+  /** SQL 42 を実行済みか（課題・語彙クイズ・選んだ生徒への配布が使えるか） */
+  assignmentsAvailable: boolean;
+  /** 先生が作った語彙クイズ */
+  quizzes: Array<{ id: string; title: string; wordCount: number; createdAt: string }>;
+  /** 語彙クイズの結果（宿題 × 生徒）: 最高点・回数・最後にやった日 */
+  quizStats: Array<{ homeworkId: string; userId: string; best: number; total: number; attempts: number; lastAt: string }>;
 };
 
 /** 語彙ドリルの語数の選択肢 */
 const VOCAB_LIMIT_OPTIONS = [3, 4, 5, 6, 8, 10, 12, 15, 20];
 
-const card = 'bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4';
-const h2 = 'text-base font-bold text-slate-800 flex items-center gap-2';
-const input = 'px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none';
-const btn = 'px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition cursor-pointer disabled:opacity-50';
-const btnGhost = 'text-xs font-semibold text-slate-600 border border-slate-300 rounded-md px-3 py-1.5 bg-white hover:bg-slate-50 cursor-pointer inline-flex items-center gap-1';
+export const card = 'bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4';
+export const h2 = 'text-base font-bold text-slate-800 flex items-center gap-2';
+export const input = 'px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none';
+export const btn = 'px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition cursor-pointer disabled:opacity-50';
+export const btnGhost = 'text-xs font-semibold text-slate-600 border border-slate-300 rounded-md px-3 py-1.5 bg-white hover:bg-slate-50 cursor-pointer inline-flex items-center gap-1';
 
-const taskLabel = (key: string) => LESSON_TASKS.find((t) => t.key === key)?.label ?? key;
-const studentName = (s: { nickname: string | null; email: string }) => s.nickname || s.email || 'Student';
+export const taskLabel = (key: string) => LESSON_TASKS.find((t) => t.key === key)?.label ?? key;
+export const studentName = (s: { nickname: string | null; email: string }) => s.nickname || s.email || 'Student';
 
-function formatDate(iso: string) {
+export function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 /** ブラウザの時差（分）。日付の区切りを先生の時間に合わせるためにサーバーへ送る */
-function useTzOffset() {
+export function useTzOffset() {
   const [tz, setTz] = useState(0);
   useEffect(() => setTz(new Date().getTimezoneOffset()), []);
   return tz;
 }
 
 /** 「完了済み」を引けるようにまとめる */
-function useDoneSet(progress: DashboardData['progress']) {
+export function useDoneSet(progress: DashboardData['progress']) {
   return useMemo(() => new Set(progress.map((p) => `${p.userId}:${p.lessonId}:${p.taskKey}`)), [progress]);
 }
 
@@ -611,236 +625,7 @@ export function ClassSettingsCard({ data }: { data: DashboardData }) {
   );
 }
 
-// ---------- 宿題を出す・宿題ごとの進捗 ----------
-
-export function HomeworkCard({ data }: { data: DashboardData }) {
-  const cls = data.selectedClass!;
-  const tz = useTzOffset();
-  const done = useDoneSet(data.progress);
-  const [openId, setOpenId] = useState<string | null>(null);
-  const lessonTitle = (id: string) => data.lessons.find((l) => l.id === id)?.title ?? 'Lesson';
-
-  return (
-    <section className={card} aria-label="Homework">
-      <h2 className={h2}><ClipboardList className="w-5 h-5 text-indigo-600" /> Homework</h2>
-
-      <Form method="post" className="space-y-3 bg-slate-50 border border-slate-200 rounded-lg p-4">
-        <input type="hidden" name="intent" value="assign-homework" />
-        <input type="hidden" name="classId" value={cls.id} />
-        <input type="hidden" name="tz" value={tz} />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <label className="text-xs font-semibold text-slate-600 space-y-1 md:col-span-2">
-            <span>Lesson</span>
-            <select name="lessonId" required className={`${input} w-full`} defaultValue="">
-              <option value="" disabled>Choose a lesson…</option>
-              {data.lessons.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
-            </select>
-          </label>
-          <label className="text-xs font-semibold text-slate-600 space-y-1">
-            <span>Due date</span>
-            <input type="date" name="dueDate" required className={`${input} w-full`} />
-          </label>
-        </div>
-        <fieldset>
-          <legend className="text-xs font-semibold text-slate-600 mb-1">Tasks</legend>
-          <div className="flex flex-wrap gap-3">
-            {LESSON_TASKS.map((t) => (
-              <label key={t.key} className="inline-flex items-center gap-1.5 text-sm text-slate-700">
-                <input type="checkbox" name="taskKeys" value={t.key} defaultChecked /> {t.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input name="title" maxLength={100} placeholder="Title (optional, e.g. Week 3 homework)" className={`${input} flex-1`} />
-          <button type="submit" className={btn}>Set Homework</button>
-        </div>
-      </Form>
-
-      {data.homework.length === 0 ? (
-        <p className="text-xs text-slate-500">No homework yet.</p>
-      ) : (
-        <ul className="divide-y divide-slate-100 border border-slate-100 rounded-lg">
-          {data.homework.map((hw) => {
-            const total = hw.taskKeys.length;
-            const finished = data.students.filter((s) => hw.taskKeys.every((k) => done.has(`${s.id}:${hw.lessonId}:${k}`))).length;
-            const isOpen = openId === hw.id;
-            return (
-              <li key={hw.id} className="p-3 space-y-2">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setOpenId(isOpen ? null : hw.id)}
-                    className="text-left bg-transparent border-none p-0 cursor-pointer min-w-0"
-                    aria-expanded={isOpen}
-                  >
-                    <p className="text-sm font-semibold text-slate-800">{hw.title}</p>
-                    <p className="text-xs text-slate-500" suppressHydrationWarning>
-                      {lessonTitle(hw.lessonId)} · {hw.taskKeys.map(taskLabel).join(', ')} · Due {formatDate(hw.dueAt)}
-                    </p>
-                  </button>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs font-bold text-slate-700">{finished}/{data.students.length} students finished</span>
-                    <Form method="post" onSubmit={(e) => { if (!window.confirm('Delete this homework?')) e.preventDefault(); }}>
-                      <input type="hidden" name="intent" value="delete-homework" />
-                      <input type="hidden" name="classId" value={cls.id} />
-                      <input type="hidden" name="homeworkId" value={hw.id} />
-                      <button type="submit" className="text-slate-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1" aria-label="Delete homework">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </Form>
-                  </div>
-                </div>
-
-                {isOpen && (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-xs">
-                      <thead>
-                        <tr className="text-slate-500">
-                          <th className="text-left font-semibold py-1 pr-3">Student</th>
-                          {hw.taskKeys.map((k) => <th key={k} className="font-semibold px-2 py-1">{taskLabel(k)}</th>)}
-                          <th className="font-semibold px-2 py-1">Done</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.students.map((s) => {
-                          const n = hw.taskKeys.filter((k) => done.has(`${s.id}:${hw.lessonId}:${k}`)).length;
-                          return (
-                            <tr key={s.id} className="border-t border-slate-100">
-                              <td className="py-1 pr-3 text-slate-800 whitespace-nowrap">{studentName(s)}</td>
-                              {hw.taskKeys.map((k) => (
-                                <td key={k} className="px-2 py-1 text-center">
-                                  {done.has(`${s.id}:${hw.lessonId}:${k}`)
-                                    ? <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" aria-label="done" />
-                                    : <Circle className="w-4 h-4 text-slate-300 inline" aria-label="not done" />}
-                                </td>
-                              ))}
-                              <td className="px-2 py-1 text-center font-semibold text-slate-700">{n}/{total}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </section>
-  );
-}
-
-// ---------- 期間内の宿題完了率（%） ----------
-
-export function CompletionCard({ data }: { data: DashboardData }) {
-  const cls = data.selectedClass!;
-  const tz = useTzOffset();
-  const done = useDoneSet(data.progress);
-  const inPeriod = data.homework.filter((h) => h.inPeriod);
-  const totalTasks = inPeriod.reduce((sum, h) => sum + h.taskKeys.length, 0);
-
-  const rows = data.students.map((s) => {
-    const doneTasks = inPeriod.reduce(
-      (sum, h) => sum + h.taskKeys.filter((k) => done.has(`${s.id}:${h.lessonId}:${k}`)).length,
-      0
-    );
-    const fullHomework = inPeriod.filter((h) => h.taskKeys.every((k) => done.has(`${s.id}:${h.lessonId}:${k}`))).length;
-    const percent = totalTasks === 0 ? null : Math.round((doneTasks / totalTasks) * 100);
-    return { student: s, doneTasks, fullHomework, percent };
-  });
-  const scored = rows.filter((r) => r.percent !== null);
-  const average = scored.length ? Math.round(scored.reduce((a, r) => a + (r.percent ?? 0), 0) / scored.length) : null;
-
-  const downloadCsv = () => {
-    const header = ['Student', 'Email', 'Completion %', 'Tasks done', 'Tasks set', 'Homework fully done', 'Homework set'];
-    const lines = rows.map((r) => [
-      r.student.nickname ?? '', r.student.email, r.percent ?? '', r.doneTasks, totalTasks, r.fullHomework, inPeriod.length,
-    ]);
-    const csv = [header, ...lines]
-      .map((line) => line.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
-      .join('\r\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${cls.name}-homework-${data.period.from}-to-${data.period.to}.csv`.replace(/[^\w.-]+/g, '_');
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
-
-  return (
-    <section className={card} aria-label="Homework completion">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <h2 className={h2}><BarChart3 className="w-5 h-5 text-indigo-600" /> Homework Completion</h2>
-        <button type="button" onClick={downloadCsv} className={btnGhost} disabled={rows.length === 0}>
-          <Download className="w-3.5 h-3.5" /> Download CSV
-        </button>
-      </div>
-
-      <Form method="get" className="flex flex-col sm:flex-row sm:items-end gap-2">
-        <input type="hidden" name="class" value={cls.id} />
-        <input type="hidden" name="tz" value={tz} />
-        <label className="text-xs font-semibold text-slate-600 space-y-1">
-          <span className="block">From</span>
-          <input type="date" name="from" defaultValue={data.period.from} key={`f-${data.period.from}`} className={input} />
-        </label>
-        <label className="text-xs font-semibold text-slate-600 space-y-1">
-          <span className="block">To</span>
-          <input type="date" name="to" defaultValue={data.period.to} key={`t-${data.period.to}`} className={input} />
-        </label>
-        <button type="submit" className={btn}>Show</button>
-      </Form>
-
-      <p className="text-xs text-slate-500">
-        Counts homework due between these dates ({inPeriod.length} homework, {totalTasks} tasks).
-        A task counts as done when the student has completed it on AI Yamato.
-        {average !== null && <> Class average: <strong className="text-slate-800">{average}%</strong>.</>}
-      </p>
-
-      {data.students.length === 0 ? (
-        <p className="text-xs text-slate-500">No students yet.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-xs text-slate-500 border-b border-slate-200">
-                <th className="text-left font-semibold py-2 pr-3">Student</th>
-                <th className="text-left font-semibold py-2 px-2 w-1/2">Completion</th>
-                <th className="font-semibold py-2 px-2">Tasks</th>
-                <th className="font-semibold py-2 px-2">Homework done</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.student.id} className="border-b border-slate-100">
-                  <td className="py-2 pr-3 text-slate-800 whitespace-nowrap">{studentName(r.student)}</td>
-                  <td className="py-2 px-2">
-                    {r.percent === null ? (
-                      <span className="text-xs text-slate-400">No homework in this period</span>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden min-w-[80px]">
-                          <div
-                            className={`h-full rounded-full ${r.percent >= 80 ? 'bg-emerald-500' : r.percent >= 50 ? 'bg-amber-400' : 'bg-red-400'}`}
-                            style={{ width: `${r.percent}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-bold text-slate-800 w-10 text-right">{r.percent}%</span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-2 px-2 text-center text-xs text-slate-700">{r.doneTasks}/{totalTasks}</td>
-                  <td className="py-2 px-2 text-center text-xs text-slate-700">{r.fullHomework}/{inPeriod.length}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
+// 宿題・課題（HomeworkCard / CompletionCard / VocabQuizCard）は AssignmentSections.tsx
 
 // ---------- 手書きライティング ----------
 
