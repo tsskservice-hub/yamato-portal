@@ -26,6 +26,8 @@ export interface OralMockReportProps {
    * 聞き取りがまちがっていたのに、それをもとにフィードバックされないように（accelerated で使う）
    */
   reviewBeforeFeedback?: boolean;
+  /** フィードバックを日本語でもらう選択肢を出す（superb。確認の画面で選ぶ） */
+  allowJapaneseFeedback?: boolean;
 }
 
 const STAGE_LABEL: Record<MockStageId, string> = {
@@ -69,7 +71,9 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
   hideStageHeadings = false,
   retryLabel = "🔄 Take another mock exam",
   reviewBeforeFeedback = false,
+  allowJapaneseFeedback = false,
 }) => {
+  const [feedbackLanguage, setFeedbackLanguage] = useState<"en" | "ja">("en");
   // フィードバックに使う会話（生徒が直したあとのもの）
   const [transcript, setTranscript] = useState<MockLogItem[]>(result.transcript);
   const [reviewing, setReviewing] = useState(reviewBeforeFeedback);
@@ -89,6 +93,7 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
           sessionId: result.sessionId,
           transcript: lines,
           durations: result.durations,
+          feedbackLanguage,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as any;
@@ -126,6 +131,10 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
     loadFeedback(lines);
   };
   const avgLength = answers.length ? Math.round(answers.reduce((s, a) => s + a.text.length, 0) / answers.length) : 0;
+  // 画面が測った時間（あれば）: 答え始めるまでの平均秒数・答えの長さの平均秒数
+  const latencies = answers.map((a) => a.latency).filter((x): x is number => typeof x === "number");
+  const lengths = answers.map((a) => a.duration).filter((x): x is number => typeof x === "number");
+  const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
 
   return (
     <div className="max-w-3xl mx-auto p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6">
@@ -145,11 +154,13 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
       </div>
 
       {/* 数字 */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
           { label: subtitle ? "Talk time" : "Exam time", value: `${Math.floor(total / 60)} min ${total % 60} s` },
           { label: "Your answers", value: `${answers.length}` },
           { label: "Average answer", value: `${avgLength} characters` },
+          ...(latencies.length >= 2 ? [{ label: "Time to start answering", value: `${mean(latencies).toFixed(1)} s on average` }] : []),
+          ...(lengths.length >= 2 ? [{ label: "Answer length", value: `${mean(lengths).toFixed(1)} s on average` }] : []),
         ].map((m) => (
           <div key={m.label} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
             <span className="text-[11px] font-semibold text-slate-400">{m.label}</span>
@@ -190,6 +201,17 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
               )
             )}
           </div>
+          {allowJapaneseFeedback && (
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={feedbackLanguage === "ja"}
+                onChange={(e) => setFeedbackLanguage(e.target.checked ? "ja" : "en")}
+                className="cursor-pointer"
+              />
+              日本語でフィードバックをもらう (Get my feedback in Japanese)
+            </label>
+          )}
           <button
             type="button"
             onClick={confirmAndGetFeedback}
@@ -206,7 +228,9 @@ export const OralMockReport: React.FC<OralMockReportProps> = ({
         <p className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
           ℹ️ This feedback is based on the text of what you said (speech-to-text): how well your answers fit the
           questions, how much you elaborated, how you kept the conversation going, and your vocabulary and grammar.
-          Pronunciation, intonation, rhythm and tempo are not assessed.
+          When available, it also uses timing measured by the app (how quickly you started answering and how long
+          you spoke). Pronunciation, intonation and rhythm are not assessed, and tempo only partly, from those
+          timing numbers.
         </p>
       )}
 

@@ -14,9 +14,12 @@ import {
 } from 'lucide-react';
 import { LESSON_TASKS, VOCAB_QUIZ_LIMITS, assignmentKindLabel } from '~/lib/teacher-config';
 import {
-  btn, btnGhost, card, formatDate, h2, input, studentName, taskLabel, useDoneSet, useTzOffset, type DashboardData,
+  btn, btnGhost, card, formatDate, h2, input, studentName, taskLabel, useTzOffset, type DashboardData,
 } from '~/components/teacher/TeacherDashboardSections';
 import { DayOffToggle, HomeworkUnlockControl, schoolHoursSummary } from '~/components/teacher/SchoolHoursSections';
+import {
+  CATCHUP_OPTIONS, DEFAULT_CATCHUP_DAYS, STATUS_LABEL, STATUS_STYLE, closesAt, countsAsDone, homeworkStatus, type HomeworkStatus,
+} from '~/lib/homework-status';
 
 type Assignment = DashboardData['homework'][number];
 type Kind = Assignment['kind'];
@@ -28,16 +31,54 @@ const isTarget = (hw: Assignment, studentId: string) => hw.assignTo === 'class' 
 const unitsOf = (hw: Assignment) => (hw.itemType === 'lesson' ? hw.taskKeys.length : 1);
 
 function useAssignmentHelpers(data: DashboardData) {
-  const done = useDoneSet(data.progress);
+  // タスクを最初に完了した時刻（生徒 × レッスン × タスク）
+  const completedAt = useMemo(
+    () => new Map(data.progress.map((p) => [`${p.userId}:${p.lessonId}:${p.taskKey}`, p.completedAt ?? '1970-01-01T00:00:00Z'])),
+    [data.progress]
+  );
   const stats = useMemo(() => new Map(data.quizStats.map((s) => [`${s.homeworkId}:${s.userId}`, s])), [data.quizStats]);
   const statOf = (hw: Assignment, studentId: string) => stats.get(`${hw.id}:${studentId}`) ?? null;
-  const taskDone = (hw: Assignment, studentId: string, key: string) => done.has(`${studentId}:${hw.lessonId}:${key}`);
+  const taskAt = (hw: Assignment, studentId: string, key: string) => completedAt.get(`${studentId}:${hw.lessonId}:${key}`) ?? null;
+  /** 宿題として数えるか（閉じる時刻までに終えたか） */
+  const taskDone = (hw: Assignment, studentId: string, key: string) => countsAsDone(hw, taskAt(hw, studentId, key));
   const doneUnits = (hw: Assignment, studentId: string) =>
-    hw.itemType === 'lesson' ? hw.taskKeys.filter((k) => taskDone(hw, studentId, k)).length : statOf(hw, studentId) ? 1 : 0;
+    hw.itemType === 'lesson'
+      ? hw.taskKeys.filter((k) => taskDone(hw, studentId, k)).length
+      : countsAsDone(hw, statOf(hw, studentId)?.firstAt ?? null) ? 1 : 0;
+  /** 全部終えた時刻（レッスンはいちばん遅いタスク、クイズは最初の挑戦）。終えていなければ null */
+  const finishedAt = (hw: Assignment, studentId: string): string | null => {
+    if (hw.itemType === 'vocab_quiz') return statOf(hw, studentId)?.firstAt ?? null;
+    const times = hw.taskKeys.map((k) => taskAt(hw, studentId, k));
+    if (times.some((t) => !t)) return null;
+    return times.reduce((a, b) => (a! > b! ? a : b)) ?? null;
+  };
+  const statusOf = (hw: Assignment, studentId: string): HomeworkStatus => homeworkStatus(hw, finishedAt(hw, studentId));
   const targets = (hw: Assignment) => data.students.filter((s) => isTarget(hw, s.id));
   const lessonTitle = (id: string | null) => data.lessons.find((l) => l.id === id)?.title ?? 'Lesson';
   const quizTitle = (id: string | null) => data.quizzes.find((q) => q.id === id)?.title ?? 'Vocabulary quiz';
-  return { statOf, taskDone, doneUnits, targets, lessonTitle, quizTitle };
+  return { statOf, taskDone, doneUnits, finishedAt, statusOf, targets, lessonTitle, quizTitle };
+}
+
+/** 状態のバッジ（期限内に完了・遅れて完了・追加期間中・未完了で終了 など） */
+function StatusBadge({ status }: { status: HomeworkStatus }) {
+  return (
+    <span className={`inline-block whitespace-nowrap text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_STYLE[status]}`}>
+      {STATUS_LABEL[status]}
+    </span>
+  );
+}
+
+/** 「Due 17 Nov, 3:15 pm · Catch-up until 24 Nov, 3:15 pm」や「Closed」 */
+function DeadlineText({ hw }: { hw: Assignment }) {
+  const now = Date.now();
+  const closed = new Date(closesAt(hw)).getTime() < now;
+  return (
+    <span suppressHydrationWarning>
+      Due {formatDueDateTime(hw.dueAt)}
+      {hw.catchupUntil && <> · Catch-up until {formatDueDateTime(hw.catchupUntil)}</>}
+      {closed && <span className="ml-1 font-semibold text-slate-700">· Closed</span>}
+    </span>
+  );
 }
 
 const pct = (score: number, total: number) => (total > 0 ? Math.round((score / total) * 100) : 0);
@@ -232,6 +273,7 @@ export function StudentProgressDialog({ data }: { data: DashboardData }) {
                 <tr className="text-slate-500 bg-slate-50">
                   <th className="text-left font-semibold py-1.5 px-2">Title</th>
                   <th className="text-left font-semibold py-1.5 px-2">Due</th>
+                  <th className="text-left font-semibold py-1.5 px-2">Status</th>
                   <th className="text-left font-semibold py-1.5 px-2">Progress</th>
                 </tr>
               </thead>
@@ -239,7 +281,7 @@ export function StudentProgressDialog({ data }: { data: DashboardData }) {
                 {items.map((hw) => {
                   const doneUnits = h.doneUnits(hw, student.id);
                   const finished = doneUnits === unitsOf(hw);
-                  const overdue = !finished && new Date(hw.dueAt).getTime() < now;
+                  const status = h.statusOf(hw, student.id);
                   const stat = h.statOf(hw, student.id);
                   return (
                     <tr key={hw.id} className="border-t border-slate-100 align-top">
@@ -249,10 +291,11 @@ export function StudentProgressDialog({ data }: { data: DashboardData }) {
                           {hw.itemType === 'lesson' ? h.lessonTitle(hw.lessonId) : <>Vocabulary quiz: {h.quizTitle(hw.quizId)}</>}
                         </p>
                       </td>
-                      <td className="py-1.5 px-2 whitespace-nowrap text-slate-700" suppressHydrationWarning>
+                      <td className="py-1.5 px-2 text-slate-700" suppressHydrationWarning>
                         {formatDueDateTime(hw.dueAt)}
-                        {overdue && <span className="block font-semibold text-red-600">Overdue</span>}
+                        {hw.catchupUntil && <span className="block text-slate-500">Catch-up until {formatDueDateTime(hw.catchupUntil)}</span>}
                       </td>
+                      <td className="py-1.5 px-2"><StatusBadge status={status} /></td>
                       <td className="py-1.5 px-2">
                         {hw.itemType === 'lesson' ? (
                           <div className="flex flex-wrap gap-1">
@@ -312,6 +355,55 @@ export function StudentProgressDialog({ data }: { data: DashboardData }) {
         {section('homework')}
         {(data.assignmentsAvailable || data.homework.some((hw) => hw.kind === 'classwork')) && section('classwork')}
       </div>
+    </div>
+  );
+}
+
+/** 追加期間を変える・延ばす・なくす */
+function CatchupEditor({ data, hw }: { data: DashboardData; hw: Assignment }) {
+  const cls = data.selectedClass!;
+  const tz = useTzOffset();
+  const [open, setOpen] = useState(false);
+  const toInputs = (iso: string) => {
+    const d = new Date(iso);
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString();
+    return { date: local.slice(0, 10), time: local.slice(11, 16) };
+  };
+  const base = toInputs(hw.catchupUntil ?? new Date(new Date(hw.dueAt).getTime() + DEFAULT_CATCHUP_DAYS * 86_400_000).toISOString());
+  const [date, setDate] = useState(base.date);
+  const [time, setTime] = useState(base.time);
+
+  if (!open) {
+    return (
+      <button type="button" className={btnGhost} onClick={() => setOpen(true)}>
+        {hw.catchupUntil ? 'Change catch-up period' : 'Add a catch-up period'}
+      </button>
+    );
+  }
+  return (
+    <div className="flex flex-wrap items-end gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
+      <Form method="post" className="flex flex-wrap items-end gap-2" onSubmit={() => setOpen(false)}>
+        <input type="hidden" name="intent" value="update-catchup" />
+        <input type="hidden" name="classId" value={cls.id} />
+        <input type="hidden" name="homeworkId" value={hw.id} />
+        <input type="hidden" name="tz" value={tz} />
+        <label className="text-xs font-semibold text-slate-600 space-y-1">
+          <span className="block">Catch-up until</span>
+          <input type="date" name="catchupDate" value={date} onChange={(e) => setDate(e.target.value)} required className={input} />
+        </label>
+        <input type="time" name="catchupTime" value={time} onChange={(e) => setTime(e.target.value)} required className={input} />
+        <button type="submit" className={btn}>Save</button>
+      </Form>
+      {hw.catchupUntil && (
+        <Form method="post" onSubmit={() => setOpen(false)}>
+          <input type="hidden" name="intent" value="update-catchup" />
+          <input type="hidden" name="classId" value={cls.id} />
+          <input type="hidden" name="homeworkId" value={hw.id} />
+          <input type="hidden" name="none" value="on" />
+          <button type="submit" className={btnGhost}>No catch-up (close at due time)</button>
+        </Form>
+      )}
+      <button type="button" className="text-xs text-slate-500 underline bg-transparent border-none p-0 cursor-pointer" onClick={() => setOpen(false)}>Cancel</button>
     </div>
   );
 }
@@ -415,6 +507,20 @@ export function AssignCard({ data }: { data: DashboardData }) {
 
         <TargetPicker students={data.students} disabled={!available} />
 
+        {/* 締切の後の追加期間（終えていない生徒だけが、遅れて終えられる） */}
+        {data.catchupAvailable && (
+          <label className="text-xs font-semibold text-slate-600 space-y-1 block">
+            <span className="block">Catch-up period for students who haven&apos;t finished</span>
+            <select name="catchupDays" defaultValue={DEFAULT_CATCHUP_DAYS} className={`${input} w-full sm:w-auto`}>
+              {CATCHUP_OPTIONS.map((o) => <option key={o.days} value={o.days}>{o.label}</option>)}
+            </select>
+            <span className="block font-normal text-slate-500">
+              Whether each student finished by the due time is recorded. Students who finish in the catch-up period are marked &quot;late&quot;.
+              After that it closes.
+            </span>
+          </label>
+        )}
+
         {/* 宿題は学校時間中にはできない（初期設定）。先生が許せば授業中もしてよい */}
         {kind === 'homework' && data.schoolHours.available && (
           <label className="flex items-start gap-2 text-sm text-slate-700">
@@ -492,7 +598,10 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
           {list.map((hw) => {
             const targets = h.targets(hw);
             const units = unitsOf(hw);
-            const finished = targets.filter((s) => h.doneUnits(hw, s.id) === units).length;
+            const statuses = targets.map((s) => h.statusOf(hw, s.id));
+            const onTime = statuses.filter((st) => st === 'ontime').length;
+            const late = statuses.filter((st) => st === 'late').length;
+            const notDone = statuses.length - onTime - late;
             const isOpen = openId === hw.id;
             return (
               <li key={hw.id} className="p-3 space-y-2">
@@ -508,8 +617,8 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
                       {hw.itemType === 'lesson'
                         ? <>{h.lessonTitle(hw.lessonId)} · {hw.taskKeys.map(taskLabel).join(', ')}</>
                         : <><Languages className="w-3 h-3 inline -mt-0.5" /> Vocabulary quiz: {h.quizTitle(hw.quizId)}</>}
-                      {' · '}Due {formatDueDateTime(hw.dueAt)}
                     </p>
+                    <p className="text-xs text-slate-500"><DeadlineText hw={hw} /></p>
                     <p className="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-1 flex-wrap">
                       <Users className="w-3 h-3" />
                       {hw.assignTo === 'class' ? 'Whole class' : `${targets.length} selected student${targets.length === 1 ? '' : 's'}`}
@@ -521,7 +630,11 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
                     </p>
                   </button>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs font-bold text-slate-700">{finished}/{targets.length} finished</span>
+                    <span className="text-xs font-bold text-slate-700 text-right">
+                      <span className="text-emerald-700">{onTime} on time</span>
+                      {late > 0 && <span className="text-amber-700"> · {late} late</span>}
+                      <span className="text-slate-500"> · {notDone} not done</span>
+                    </span>
                     <Form method="post" onSubmit={(e) => { if (!window.confirm(`Delete this ${label.toLowerCase()}?`)) e.preventDefault(); }}>
                       <input type="hidden" name="intent" value="delete-homework" />
                       <input type="hidden" name="classId" value={cls.id} />
@@ -543,6 +656,7 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
                           <thead>
                             <tr className="text-slate-500">
                               <th className="text-left font-semibold py-1 pr-3">Student</th>
+                              <th className="text-left font-semibold px-2 py-1">Status</th>
                               {hw.itemType === 'lesson' ? (
                                 <>
                                   {hw.taskKeys.map((k) => <th key={k} className="font-semibold px-2 py-1">{taskLabel(k)}</th>)}
@@ -564,6 +678,7 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
                               return (
                                 <tr key={s.id} className="border-t border-slate-100">
                                   <td className="py-1 pr-3 text-slate-800 whitespace-nowrap"><StudentLink student={s} /></td>
+                                  <td className="px-2 py-1"><StatusBadge status={h.statusOf(hw, s.id)} /></td>
                                   {hw.itemType === 'lesson' ? (
                                     <>
                                       {hw.taskKeys.map((k) => (
@@ -598,6 +713,9 @@ export function AssignmentListCard({ data, kind }: { data: DashboardData; kind: 
                         </table>
                       </div>
                     )}
+
+                    {/* 締切の後の追加期間を変える・延ばす */}
+                    {data.catchupAvailable && <CatchupEditor data={data} hw={hw} />}
 
                     {/* 対象の生徒をあとから変える */}
                     {data.assignmentsAvailable && (
@@ -645,6 +763,7 @@ export function CompletionCard({ data }: { data: DashboardData }) {
     const unitsSet = mine.reduce((sum, hw) => sum + unitsOf(hw), 0);
     const unitsDone = mine.reduce((sum, hw) => sum + h.doneUnits(hw, s.id), 0);
     const fullDone = mine.filter((hw) => h.doneUnits(hw, s.id) === unitsOf(hw)).length;
+    const onTime = mine.filter((hw) => h.statusOf(hw, s.id) === 'ontime').length;
     const quizScores = mine
       .filter((hw) => hw.itemType === 'vocab_quiz')
       .map((hw) => h.statOf(hw, s.id))
@@ -652,15 +771,18 @@ export function CompletionCard({ data }: { data: DashboardData }) {
       .map((st) => pct(st.best, st.total));
     const quizAverage = quizScores.length ? Math.round(quizScores.reduce((a, b) => a + b, 0) / quizScores.length) : null;
     const percent = unitsSet === 0 ? null : Math.round((unitsDone / unitsSet) * 100);
-    return { student: s, unitsSet, unitsDone, fullDone, assigned: mine.length, quizAverage, percent };
+    return { student: s, unitsSet, unitsDone, fullDone, onTime, assigned: mine.length, quizAverage, percent };
   });
   const scored = rows.filter((r) => r.percent !== null);
   const average = scored.length ? Math.round(scored.reduce((a, r) => a + (r.percent ?? 0), 0) / scored.length) : null;
 
   const downloadCsv = () => {
-    const header = ['Student', 'Email', 'Completion %', 'Tasks done', 'Tasks set', `${label} fully done`, `${label} set`, 'Quiz best score average %'];
+    const header = [
+      'Student', 'Email', 'Completion %', 'Tasks done', 'Tasks set', `${label} done on time`, `${label} done (incl. late)`, `${label} set`,
+      'Quiz best score average %',
+    ];
     const lines = rows.map((r) => [
-      r.student.nickname ?? '', r.student.email, r.percent ?? '', r.unitsDone, r.unitsSet, r.fullDone, r.assigned, r.quizAverage ?? '',
+      r.student.nickname ?? '', r.student.email, r.percent ?? '', r.unitsDone, r.unitsSet, r.onTime, r.fullDone, r.assigned, r.quizAverage ?? '',
     ]);
     const csv = [header, ...lines]
       .map((line) => line.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
@@ -716,7 +838,8 @@ export function CompletionCard({ data }: { data: DashboardData }) {
 
       <p className="text-xs text-slate-500">
         Counts {label.toLowerCase()} due between these dates ({inPeriod.length} set). Each student is counted only for what was assigned to them.
-        A lesson task counts as done when the student has completed it on AI Yamato; a vocabulary quiz counts as done after one try.
+        A lesson task counts as done when the student completed it on AI Yamato by the due time or within the catch-up period;
+        a vocabulary quiz counts as done after one try in that time. Work finished after it closed is not counted.
         {average !== null && <> Class average: <strong className="text-slate-800">{average}%</strong>.</>}
       </p>
 
@@ -730,6 +853,7 @@ export function CompletionCard({ data }: { data: DashboardData }) {
                 <th className="text-left font-semibold py-2 pr-3">Student</th>
                 <th className="text-left font-semibold py-2 px-2 w-1/2">Completion</th>
                 <th className="font-semibold py-2 px-2">Tasks</th>
+                <th className="font-semibold py-2 px-2">On time</th>
                 <th className="font-semibold py-2 px-2">{label} done</th>
                 <th className="font-semibold py-2 px-2">Quiz best (avg)</th>
               </tr>
@@ -754,6 +878,7 @@ export function CompletionCard({ data }: { data: DashboardData }) {
                     )}
                   </td>
                   <td className="py-2 px-2 text-center text-xs text-slate-700">{r.unitsDone}/{r.unitsSet}</td>
+                  <td className="py-2 px-2 text-center text-xs text-emerald-700 font-semibold">{r.onTime}/{r.assigned}</td>
                   <td className="py-2 px-2 text-center text-xs text-slate-700">{r.fullDone}/{r.assigned}</td>
                   <td className="py-2 px-2 text-center text-xs text-slate-700">{r.quizAverage === null ? '–' : `${r.quizAverage}%`}</td>
                 </tr>

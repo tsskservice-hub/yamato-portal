@@ -7,6 +7,7 @@ import { useFetcher } from "@remix-run/react";
 import { Users, ClipboardList, CheckCircle2, Circle, PencilLine, Languages } from "lucide-react";
 import { INVITE_CODE_LENGTH, LESSON_TASKS } from "~/lib/teacher-config";
 import { SchoolAccountLink } from "~/components/SchoolAccountLink";
+import { STATUS_STYLE, type HomeworkStatus } from "~/lib/homework-status";
 
 /**
  * 宿題・課題 1 件。kind: homework（宿題）/ classwork（授業内の課題）
@@ -24,7 +25,22 @@ export type StudentHomeworkItem = {
   quiz: { best: number | null; total: number | null; attempts: number } | null;
   /** 宿題で、今は学校時間のためできないとき、できるようになる時刻（ISO） */
   lockedUntil?: string | null;
+  /** 締切の後、終えていない生徒が終えられる期限（null = 締切で閉じる） */
+  catchupUntil?: string | null;
+  /** 期限内に完了・遅れて完了・まだ・追加期間中・未完了で終了 */
+  status?: HomeworkStatus;
 };
+
+/** 生徒に見せる状態の言葉 */
+function studentStatusText(hw: StudentHomeworkItem) {
+  switch (hw.status) {
+    case "ontime": return "Done on time";
+    case "late": return "Done late";
+    case "catchup": return hw.catchupUntil ? `Overdue – please finish by ${formatDue(hw.catchupUntil)}` : "Overdue";
+    case "missed": return "Closed – not finished";
+    default: return null;
+  }
+}
 
 type Props = {
   studentClass: { id: string; name: string; teacherName: string | null; schoolName: string | null } | null;
@@ -219,7 +235,8 @@ function AssignmentList({ title, icon, items }: { title: string; icon: React.Rea
             const doneCount = isQuiz ? (hw.quiz && hw.quiz.attempts > 0 ? 1 : 0) : hw.tasks.filter((t) => t.done).length;
             const totalCount = isQuiz ? 1 : hw.tasks.length;
             const allDone = doneCount === totalCount;
-            const overdue = !allDone && new Date(hw.dueAt).getTime() < Date.now();
+            const statusText = studentStatusText(hw);
+            const closed = hw.status === "missed";
             return (
               <li key={hw.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="min-w-0">
@@ -229,9 +246,13 @@ function AssignmentList({ title, icon, items }: { title: string; icon: React.Rea
                   <p className="text-xs text-gray-500" suppressHydrationWarning>
                     {isQuiz && <Languages className="w-3 h-3 inline -mt-0.5 mr-0.5" />}
                     {isQuiz ? `Vocabulary quiz: ${hw.lessonTitle}` : hw.lessonTitle} · Due {formatDue(hw.dueAt)}
-                    {overdue && <span className="ml-1 font-semibold text-red-600">(overdue)</span>}
                   </p>
-                  {hw.lockedUntil && !allDone && (
+                  {statusText && hw.status && (
+                    <span className={`inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_STYLE[hw.status]}`} suppressHydrationWarning>
+                      {statusText}
+                    </span>
+                  )}
+                  {hw.lockedUntil && !allDone && !closed && (
                     <p className="text-[11px] font-semibold text-amber-700 mt-1" suppressHydrationWarning>
                       🔒 Homework can&apos;t be done during school hours. Available after{" "}
                       {new Date(hw.lockedUntil).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}.
@@ -241,7 +262,9 @@ function AssignmentList({ title, icon, items }: { title: string; icon: React.Rea
                     <p className="text-[11px] text-gray-600 mt-1.5">
                       {hw.quiz && hw.quiz.attempts > 0 && hw.quiz.best !== null && hw.quiz.total !== null
                         ? <>Best score: <strong>{hw.quiz.best}/{hw.quiz.total}</strong> · Tried {hw.quiz.attempts} time{hw.quiz.attempts === 1 ? "" : "s"} · You can try again</>
-                        : <a href={hw.lessonUrl} className="text-blue-700 font-semibold hover:underline">Start the quiz →</a>}
+                        : closed
+                          ? <span className="text-gray-500">This quiz is closed.</span>
+                          : <a href={hw.lessonUrl} className="text-blue-700 font-semibold hover:underline">Start the quiz →</a>}
                     </p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5 mt-1.5">

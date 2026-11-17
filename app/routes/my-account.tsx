@@ -20,6 +20,7 @@ import { DeleteAccountModal } from '~/components/DeleteAccountModal';
 import { StudentClassSection, type StudentHomeworkItem } from '~/components/StudentClassSection';
 import { loadQuizStats, loadStudentAssignments } from '~/lib/assignments.server';
 import { getClassLockUntil } from '~/lib/homework-lock.server';
+import { countsAsDone, homeworkStatus } from '~/lib/homework-status';
 import { getStudentClass, getVerifiedSchoolEmails, normaliseJoinCode, type VerifiedSchoolEmail } from '~/lib/teacher.server';
 import { INVITE_CODE_LENGTH, TEACHER_LIMITS, allowedStudentDomains, isStudentDomainAllowed } from '~/lib/teacher-config';
 
@@ -341,11 +342,18 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
   const lockOf = (r: { kind: string; allowDuringSchool: boolean }) =>
     r.kind === "homework" && !r.allowDuringSchool ? lockedUntil : null;
 
+  // いつ終えたか（completed_at, SQL 45。その前は updated_at）
+  const readProgress = (columns: string) =>
+    admin.from("edu_student_progress").select(columns).eq("user_id", userId).in("lesson_id", lessonIds);
+  const loadProgress = async () => {
+    if (!lessonIds.length) return { data: [] };
+    const withCompletedAt = await readProgress("lesson_id, task_key, is_completed, updated_at, completed_at");
+    return withCompletedAt.error ? readProgress("lesson_id, task_key, is_completed, updated_at") : withCompletedAt;
+  };
+
   const [{ data: lessons }, { data: progress }, { data: quizzes }, quizStats] = await Promise.all([
     lessonIds.length ? admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds) : { data: [] },
-    lessonIds.length
-      ? admin.from("edu_student_progress").select("lesson_id, task_key, is_completed").eq("user_id", userId).in("lesson_id", lessonIds)
-      : { data: [] },
+    loadProgress(),
     quizIds.length ? admin.from("edu_teacher_quizzes").select("id, title").in("id", quizIds) : { data: [] },
     loadQuizStats(admin, rows.filter((r) => r.itemType === "vocab_quiz").map((r) => r.id), [userId]),
   ]);
@@ -353,8 +361,10 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
   const lessonMap = new Map((lessons ?? []).map((l: any) => [String(l.id), l]));
   const quizMap = new Map((quizzes ?? []).map((q: any) => [String(q.id), String(q.title)]));
   const statMap = new Map(quizStats.map((st) => [st.homeworkId, st]));
-  const done = new Set(
-    (progress ?? []).filter((p: any) => p.is_completed).map((p: any) => `${p.lesson_id}:${p.task_key}`)
+  const completedAt = new Map<string, string>(
+    (progress ?? [])
+      .filter((p: any) => p.is_completed)
+      .map((p: any) => [`${p.lesson_id}:${p.task_key}`, String(p.completed_at ?? p.updated_at ?? "1970-01-01T00:00:00Z")])
   );
 
   return rows.map((r) => {
@@ -365,6 +375,8 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
         title: r.title,
         kind: r.kind,
         dueAt: r.dueAt,
+        catchupUntil: r.catchupUntil,
+        status: homeworkStatus(r, st?.firstAt ?? null),
         itemType: "vocab_quiz" as const,
         lessonTitle: quizMap.get(r.quizId ?? "") ?? "Vocabulary quiz",
         lessonUrl: `/class-quiz/${r.id}`,
@@ -374,15 +386,20 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
       };
     }
     const lesson: any = lessonMap.get(String(r.lessonId));
+    const times = r.taskKeys.map((key) => completedAt.get(`${r.lessonId}:${key}`) ?? null);
+    const finishedAt = times.some((t) => !t) ? null : times.reduce((a, b) => (a! > b! ? a : b), times[0]);
     return {
       id: r.id,
       title: r.title,
       kind: r.kind,
       dueAt: r.dueAt,
+      catchupUntil: r.catchupUntil,
+      status: homeworkStatus(r, finishedAt),
       itemType: "lesson" as const,
       lessonTitle: lesson?.title_en ?? "Lesson",
       lessonUrl: lesson?.slug ? `/lessons/${lesson.slug}` : "/lessons",
-      tasks: r.taskKeys.map((key) => ({ key, done: done.has(`${r.lessonId}:${key}`) })),
+      // 宿題として数えるのは、閉じるまでに終えたタスクだけ
+      tasks: r.taskKeys.map((key) => ({ key, done: countsAsDone(r, completedAt.get(`${r.lessonId}:${key}`) ?? null) })),
       quiz: null,
       lockedUntil: lockOf(r),
     };

@@ -213,7 +213,7 @@ export const OralMockConfig: React.FC<OralMockConfigProps> = ({
           can change it in My Account.
         </p>
         <p>・Credits are used once, when the exam starts.</p>
-        <p>・Feedback is based on the text of what you said (speech-to-text). Pronunciation, intonation, rhythm and tempo are not assessed.</p>
+        <p>・Feedback is based on the text of what you said (speech-to-text) and on simple timing the app measures from your recordings (how quickly you start answering and how long you speak). Pronunciation, intonation and rhythm are not assessed, and tempo only partly.</p>
       </div>
 
       {/* Start Button */}

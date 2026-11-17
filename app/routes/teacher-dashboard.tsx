@@ -179,6 +179,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     assignmentsAvailable: false,
     quizzes: [],
     quizStats: [],
+    catchupAvailable: false,
     schoolHours: { ...DEFAULT_SCHOOL_HOURS, available: false, offToday: false, today: localDateIn(DEFAULT_SCHOOL_HOURS.timezone) },
     homeworkUnlocks: [],
   };
@@ -290,19 +291,21 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   // 進捗（このクラスの生徒 × 宿題に出したレッスン）
   const lessonIds = [...new Set(homework.map((h) => h.lessonId).filter((id): id is string => Boolean(id)))];
-  const { data: progressRows } = studentIds.length && lessonIds.length
-    ? await admin
-        .from('edu_student_progress')
-        .select('user_id, lesson_id, task_key, is_completed, updated_at')
-        .in('user_id', studentIds)
-        .in('lesson_id', lessonIds)
-        .eq('is_completed', true)
-    : { data: [] as any[] };
-  const progress = (progressRows ?? []).map((p: any) => ({
+  // 最初に完了した時刻（completed_at, SQL 45）。その前は updated_at を使う
+  const readProgress = async (columns: string) =>
+    admin.from('edu_student_progress').select(columns).in('user_id', studentIds).in('lesson_id', lessonIds).eq('is_completed', true);
+  let progressRows: any[] = [];
+  if (studentIds.length && lessonIds.length) {
+    const withCompletedAt = await readProgress('user_id, lesson_id, task_key, updated_at, completed_at');
+    progressRows = withCompletedAt.error
+      ? ((await readProgress('user_id, lesson_id, task_key, updated_at')).data ?? [])
+      : (withCompletedAt.data ?? []);
+  }
+  const progress = progressRows.map((p: any) => ({
     userId: p.user_id as string,
     lessonId: String(p.lesson_id),
     taskKey: p.task_key as string,
-    completedAt: (p.updated_at as string | null) ?? null,
+    completedAt: (p.completed_at as string | null) ?? (p.updated_at as string | null) ?? null,
   }));
 
   // 手書きライティング（最新 50 件）
@@ -386,6 +389,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     assignmentsAvailable: assignments.available,
     quizzes: assignments.quizzes,
     quizStats: assignments.quizStats,
+    catchupAvailable: assignments.catchupAvailable,
     schoolHours,
     homeworkUnlocks,
   } satisfies DashboardData);
@@ -812,8 +816,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
     // 宿題を学校時間中にもしてよいか（初期値: してはいけない）。課題は授業中にやるもの
     const allowDuringSchool = kind === 'homework' && form.get('allowDuringSchool') === 'on';
     if (allowDuringSchool) row.allow_during_school = true;
+    // 締切の後の追加期間（終えていない生徒が終えられる）。0 = なし
+    const catchupDays = Number(form.get('catchupDays') ?? 0);
+    if ([3, 7, 14].includes(catchupDays)) {
+      row.catchup_until = new Date(new Date(String(row.due_at)).getTime() + catchupDays * DAY_MS).toISOString();
+    }
 
     let { data: created, error } = await admin.from('edu_homework').insert(row).select('id').single();
+    if (error && /catchup_until/.test(error.message)) {
+      // SQL 45 の前：追加期間はまだ無いので、その列を外して出す
+      delete row.catchup_until;
+      ({ data: created, error } = await admin.from('edu_homework').insert(row).select('id').single());
+    }
     if (error && /allow_during_school/.test(error.message)) {
       // SQL 44 の前：学校時間のブロックはまだ無いので、その列を外して出す
       delete row.allow_during_school;
@@ -940,6 +954,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
     if (error) {
       console.error('[teacher-dashboard] unlock homework failed:', error.message);
       return fail('Could not change this. This needs a database update (SQL 44).', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 追加期間を変える・延ばす・なくす（終えていない生徒が終えられる期限）
+  if (intent === 'update-catchup') {
+    const { data: hw } = await admin
+      .from('edu_homework')
+      .select('id, due_at')
+      .eq('id', String(form.get('homeworkId') ?? ''))
+      .eq('class_id', cls.id)
+      .maybeSingle();
+    if (!hw) return fail('Not found.', 404);
+
+    let catchupUntil: string | null = null;
+    if (form.get('none') !== 'on') {
+      const day = localDayStart(String(form.get('catchupDate') ?? ''), parseTz(form.get('tz')));
+      const timeMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(form.get('catchupTime') ?? ''));
+      if (!day || !timeMatch) return fail('Choose a date and time for the catch-up period.');
+      const at = new Date(day.getTime() + Number(timeMatch[1]) * 3_600_000 + Number(timeMatch[2]) * 60_000);
+      if (at.getTime() <= new Date(hw.due_at).getTime()) return fail('The catch-up period must end after the due time.');
+      catchupUntil = at.toISOString();
+    }
+    const { error } = await admin.from('edu_homework').update({ catchup_until: catchupUntil }).eq('id', hw.id);
+    if (error) {
+      console.error('[teacher-dashboard] update-catchup failed:', error.message);
+      return fail('Could not save this. The catch-up period needs a database update (SQL 45).', 500);
     }
     return backTo(cls.id);
   }

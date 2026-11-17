@@ -22,16 +22,19 @@ export type AssignmentItem = {
   dueAt: string;
   /** 宿題を学校時間中にもしてよいか（SQL 44。課題は常に true 扱い） */
   allowDuringSchool: boolean;
+  /** 締切の後、終えていない生徒が終えられる期限（SQL 45。null = 締切で閉じる） */
+  catchupUntil: string | null;
 };
 
 // 読む列（新しい SQL ほど列が多い）。古いデータベースでも読めるよう、順に試す
 const COLUMN_SETS = [
+  'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school, catchup_until', // SQL 45 の後
   'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school', // SQL 44 の後
   'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at', // SQL 42 の後
   'id, title, lesson_id, task_keys, due_at', // それより前
 ];
 
-/** edu_homework を、使える列で読む。level: 0 = SQL 44 まで、1 = SQL 42 まで、2 = それより前 */
+/** edu_homework を、使える列で読む。level: 0 = SQL 45 まで、1 = SQL 44 まで、2 = SQL 42 まで、3 = それより前 */
 async function selectHomework(admin: SupabaseClient, classId: string, limit: number) {
   for (let level = 0; level < COLUMN_SETS.length; level++) {
     const { data, error } = await admin
@@ -42,13 +45,17 @@ async function selectHomework(admin: SupabaseClient, classId: string, limit: num
       .limit(limit);
     if (!error) return { rows: (data ?? []) as any[], level };
   }
-  return { rows: [] as any[], level: 2 };
+  return { rows: [] as any[], level: 3 };
 }
 
 export type QuizSummary = { id: string; title: string; wordCount: number; createdAt: string };
 
 /** 語彙クイズの結果（宿題 × 生徒ごと）: 最高点・回数・最後にやった日 */
-export type QuizStat = { homeworkId: string; userId: string; best: number; total: number; attempts: number; lastAt: string };
+export type QuizStat = {
+  homeworkId: string; userId: string; best: number; total: number; attempts: number; lastAt: string;
+  /** 最初にやった時刻（期限内に終えたかの判定に使う） */
+  firstAt: string;
+};
 
 function toItem(h: any, studentIds: string[]): AssignmentItem {
   return {
@@ -63,6 +70,7 @@ function toItem(h: any, studentIds: string[]): AssignmentItem {
     studentIds,
     dueAt: String(h.due_at),
     allowDuringSchool: h.kind === 'classwork' || h.allow_during_school === true,
+    catchupUntil: h.catchup_until ? String(h.catchup_until) : null,
   };
 }
 
@@ -106,6 +114,7 @@ export async function loadQuizStats(admin: SupabaseClient, homeworkIds: string[]
         total: Number(a.total),
         attempts: 1,
         lastAt: String(a.created_at),
+        firstAt: String(a.created_at),
       });
     } else {
       s.attempts += 1;
@@ -114,6 +123,7 @@ export async function loadQuizStats(admin: SupabaseClient, homeworkIds: string[]
         s.total = Number(a.total);
       }
       if (String(a.created_at) > s.lastAt) s.lastAt = String(a.created_at);
+      if (String(a.created_at) < s.firstAt) s.firstAt = String(a.created_at);
     }
   }
   return [...stats.values()];
@@ -123,11 +133,12 @@ export async function loadQuizStats(admin: SupabaseClient, homeworkIds: string[]
 export async function loadClassAssignments(admin: SupabaseClient, classId: string, teacherId: string) {
   const { rows, level } = await selectHomework(admin, classId, 200);
 
-  if (level === 2) {
+  if (level === 3) {
     // SQL 42 の前：今までの列だけ
     return {
       available: false,
       schoolHoursAvailable: false,
+      catchupAvailable: false,
       items: rows.map((h: any) => toItem(h, [])),
       quizzes: [] as QuizSummary[],
       quizStats: [] as QuizStat[],
@@ -142,7 +153,7 @@ export async function loadClassAssignments(admin: SupabaseClient, classId: strin
     loadTeacherQuizzes(admin, teacherId),
     loadQuizStats(admin, items.filter((i) => i.itemType === 'vocab_quiz').map((i) => i.id)),
   ]);
-  return { available: true, schoolHoursAvailable: level === 0, items, quizzes, quizStats };
+  return { available: true, schoolHoursAvailable: level <= 1, catchupAvailable: level === 0, items, quizzes, quizStats };
 }
 
 export async function loadTeacherQuizzes(admin: SupabaseClient, teacherId: string): Promise<QuizSummary[]> {
@@ -173,7 +184,7 @@ export async function loadStudentAssignments(admin: SupabaseClient, classId: str
   const { rows, level } = await selectHomework(admin, classId, 60);
 
   let items: AssignmentItem[];
-  if (level === 2) {
+  if (level === 3) {
     items = rows.map((h: any) => toItem(h, []));
   } else {
     const list = rows;
@@ -203,7 +214,7 @@ export async function getStudentQuizAssignment(admin: SupabaseClient, homeworkId
   if (!/^[0-9a-f-]{36}$/i.test(homeworkId)) return null;
   const { data: hw } = await admin
     .from('edu_homework')
-    .select('id, class_id, title, kind, item_type, quiz_id, assign_to, due_at')
+    .select('*')
     .eq('id', homeworkId)
     .maybeSingle();
   if (!hw || hw.item_type !== 'vocab_quiz' || !hw.quiz_id) return null;
@@ -239,6 +250,7 @@ export async function getStudentQuizAssignment(admin: SupabaseClient, homeworkId
       title: String(hw.title),
       kind: (isAssignmentKind(hw.kind) ? hw.kind : 'homework') as AssignmentKind,
       dueAt: String(hw.due_at),
+      catchupUntil: hw.catchup_until ? String(hw.catchup_until) : null,
     },
     items: (items ?? []).map((it: any) => ({
       id: String(it.id),

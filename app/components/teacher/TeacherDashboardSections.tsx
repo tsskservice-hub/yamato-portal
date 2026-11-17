@@ -46,6 +46,8 @@ export type DashboardData = {
     assignTo: 'class' | 'students'; studentIds: string[]; dueAt: string; inPeriod: boolean;
     /** 宿題を学校時間中にもしてよいか（課題は常に true） */
     allowDuringSchool: boolean;
+    /** 締切の後、終えていない生徒が終えられる期限（null = 締切で閉じる。SQL 45） */
+    catchupUntil: string | null;
   }>;
   progress: Array<{ userId: string; lessonId: string; taskKey: string; completedAt: string | null }>;
   handwriting: Array<{
@@ -78,7 +80,9 @@ export type DashboardData = {
   /** 先生が作った語彙クイズ */
   quizzes: Array<{ id: string; title: string; wordCount: number; createdAt: string }>;
   /** 語彙クイズの結果（宿題 × 生徒）: 最高点・回数・最後にやった日 */
-  quizStats: Array<{ homeworkId: string; userId: string; best: number; total: number; attempts: number; lastAt: string }>;
+  quizStats: Array<{ homeworkId: string; userId: string; best: number; total: number; attempts: number; lastAt: string; firstAt: string }>;
+  /** SQL 45 を実行済みか（締切の後の追加期間・期限内の記録） */
+  catchupAvailable: boolean;
 };
 
 /** 語彙ドリルの語数の選択肢 */

@@ -118,7 +118,13 @@ export default function VceSpeakingEoyOralSuperbPage() {
       ? {
           config: { examSection: "section1", difficulty: "accelerated" } as any,
           sessionId: result.sessionId,
-          transcript: result.transcript.map((t) => ({ stage: "sec1", speaker: t.speaker, text: t.text })),
+          transcript: result.transcript.map((t) => ({
+            stage: "sec1",
+            speaker: t.speaker,
+            text: t.text,
+            latency: t.latency,
+            duration: t.duration,
+          })),
           durations: {},
           totalDurationSeconds: result.totalSeconds,
         }
@@ -215,7 +221,7 @@ export default function VceSpeakingEoyOralSuperbPage() {
               <p>・No buttons: just talk. You can even jump in while Yamato is speaking.</p>
               <p>・Use headphones so Yamato doesn&apos;t hear its own voice.</p>
               <p>・No corrections during the talk — you get one feedback report at the end.</p>
-              <p>・Feedback is based on the text of what you said (speech-to-text). Pronunciation, intonation, rhythm and tempo are not assessed.</p>
+              <p>・Feedback is based on the text of what you said (speech-to-text) and on simple timing the app measures from your recordings (how quickly you start answering and how long you speak). Pronunciation, intonation and rhythm are not assessed, and tempo only partly.</p>
               <p>・Credits are used once, when the conversation starts.</p>
             </div>
 
@@ -260,6 +266,7 @@ export default function VceSpeakingEoyOralSuperbPage() {
             hideStageHeadings
             retryLabel="🔄 Talk again"
             reviewBeforeFeedback
+            allowJapaneseFeedback
           />
         )}
 

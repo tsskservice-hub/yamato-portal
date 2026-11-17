@@ -16,6 +16,7 @@ import { createAdminSupabaseClient } from '~/lib/supabase.server';
 import { getSessionUser } from '~/lib/teacher.server';
 import { getStudentQuizAssignment, loadQuizStats } from '~/lib/assignments.server';
 import { getItemLock } from '~/lib/homework-lock.server';
+import { closesAt } from '~/lib/homework-status';
 import { assignmentKindLabel } from '~/lib/teacher-config';
 import { useSoundEffect } from '~/hooks/useSoundEffect';
 
@@ -37,6 +38,11 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const admin = createAdminSupabaseClient(context);
   const found = await getStudentQuizAssignment(admin, String(params.homeworkId ?? ''), user.id);
   if (!found || found.items.length < 2) return json({ status: 'notfound' as const }, { headers });
+
+  // 締切（追加期間があればその終わり）を過ぎたら閉じる（SQL 45）
+  if (Date.now() > new Date(closesAt(found.homework)).getTime()) {
+    return json({ status: 'closed' as const, title: found.homework.title }, { headers });
+  }
 
   // 宿題は学校時間中にはできない（先生が「授業中もしてよい」にしたもの・課題は除く。SQL 44）
   const lock = await getItemLock(admin, user.id, found.homework.id);
@@ -68,6 +74,9 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
   const admin = createAdminSupabaseClient(context);
   const found = await getStudentQuizAssignment(admin, String(params.homeworkId ?? ''), user.id);
   if (!found) return json({ ok: false as const, error: 'This quiz is no longer available.' }, { status: 404 });
+  if (Date.now() > new Date(closesAt(found.homework)).getTime()) {
+    return json({ ok: false as const, error: 'This quiz has closed, so your answers could not be saved.' }, { status: 410 });
+  }
   const lock = await getItemLock(admin, user.id, found.homework.id);
   if (lock.locked) {
     return json({ ok: false as const, error: "This is homework, so it can't be done during school hours. Please try again after school." }, { status: 423 });
@@ -140,6 +149,11 @@ export default function ClassQuizPage() {
             <button type="button" onClick={() => layoutRef.current?.openAuthModal?.('signin')} className="text-blue-700 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
               Sign in
             </button>
+          </Notice>
+        ) : data.status === 'closed' ? (
+          <Notice title={`🔒 ${data.title}`}>
+            This quiz has closed (the due time and any catch-up period have passed). Your teacher can see your record.{' '}
+            <Link to="/my-account" className="text-blue-700 font-semibold hover:underline">Back to My Account</Link>
           </Notice>
         ) : data.status === 'locked' ? (
           <Notice title={`🔒 ${data.title}`}>

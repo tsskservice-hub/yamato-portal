@@ -27,6 +27,10 @@ export interface RealtimeLogItem {
   id: string;
   speaker: "examiner" | "student";
   text: string;
+  /** 答え始めるまでの秒数（やまと先生が話し終えてから、生徒が話し始めるまで。割りこんだときは 0） */
+  latency?: number;
+  /** 話した秒数 */
+  duration?: number;
 }
 
 export interface RealtimeResult {
@@ -120,6 +124,11 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
   // マイクの音の大きさ（0〜1）。マイクがちゃんと声をひろっているか、生徒が見て分かるように
   const [micLevel, setMicLevel] = useState(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // 時間を測る: やまと先生が話し終えた時刻、生徒が話し始めた・話し終えた時刻
+  const aiStoppedAtRef = useRef(0);
+  const aiSpeakingNowRef = useRef(false);
+  const segmentRef = useRef<{ start: number; stop: number; latency?: number } | null>(null);
   const isRedoResponseRef = useRef(false);
 
   const setLogBoth = (next: RealtimeLogItem[]) => {
@@ -224,17 +233,39 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
     switch (msg.type) {
       case "input_audio_buffer.speech_started":
         setStudentSpeaking(true);
+        {
+          const t = Date.now();
+          // やまと先生が話している途中なら割りこみ（0 秒）。話し終えた後なら、その時からの秒数
+          const latency = aiSpeakingNowRef.current ? 0 : aiStoppedAtRef.current ? (t - aiStoppedAtRef.current) / 1000 : undefined;
+          segmentRef.current = { start: t, stop: 0, latency };
+        }
         lastActivityRef.current = Date.now();
         speechStoppedAtRef.current = 0;
         break;
       case "input_audio_buffer.speech_stopped":
         setStudentSpeaking(false);
+        if (segmentRef.current) segmentRef.current.stop = Date.now();
         lastActivityRef.current = Date.now();
         speechStoppedAtRef.current = Date.now();
         break;
       case "input_audio_buffer.committed":
         // 生徒が話した場所に、文字になる前の「…」を置いておく（順番を正しくするため）
-        if (msg.item_id) setLogBoth([...logRef.current, { id: msg.item_id, speaker: "student", text: "…" }]);
+        if (msg.item_id) {
+          const seg = segmentRef.current;
+          segmentRef.current = null;
+          setLogBoth([
+            ...logRef.current,
+            {
+              id: msg.item_id,
+              speaker: "student",
+              text: "…",
+              latency: seg?.latency,
+              duration: seg && seg.stop > seg.start ? (seg.stop - seg.start) / 1000 : undefined,
+            },
+          ]);
+          // 次の答えは、また先生が話し終えてから測る
+          aiStoppedAtRef.current = 0;
+        }
         break;
       case "conversation.item.input_audio_transcription.completed":
         setLogBoth(
@@ -281,12 +312,15 @@ export const OralRealtimeSession: React.FC<Props> = ({ config, onStarted, onFini
         break;
       case "output_audio_buffer.started":
         setAiSpeaking(true);
+        aiSpeakingNowRef.current = true;
         audioStartedRef.current = true;
         lastActivityRef.current = Date.now();
         break;
       case "output_audio_buffer.stopped":
       case "output_audio_buffer.cleared":
         setAiSpeaking(false);
+        aiSpeakingNowRef.current = false;
+        aiStoppedAtRef.current = Date.now();
         lastActivityRef.current = Date.now();
         // 締めのあいさつを言い終わったら終了
         if (closingRef.current === "sent" && msg.type === "output_audio_buffer.stopped") setTimeout(finish, 800);

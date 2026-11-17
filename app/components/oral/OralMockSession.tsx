@@ -20,6 +20,10 @@ import { planSec1Topics, SEC2_ANGLES, TOPIC_SECONDS, type OralTopic } from "~/da
 export type MockStageId = "before" | "sec1" | "sec2" | "after";
 
 export interface MockLogItem {
+  /** 答え始めるまでの秒数（試験官が話し終えてから、録音を始めるまで）。画面が測る */
+  latency?: number;
+  /** 答えを話した秒数（送った録音の長さ）。画面が測る */
+  duration?: number;
   /** 文字起こしがまちがっていて、生徒が会話のあとに直した行 */
   edited?: boolean;
   stage: MockStageId;
@@ -254,9 +258,20 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
       window.speechSynthesis.speak(u);
     });
 
+  // 時間を測る: 試験官が話し終えた時刻と、その後はじめて録音を始めた時刻・最後の録音の長さ
+  const examinerDoneAtRef = useRef(0);
+  const firstRecordStartRef = useRef<number | null>(null);
+  const lastRecordingSecondsRef = useRef<number | undefined>(undefined);
+
   /** 試験官のことばを流す（終わるまで待つ） */
   const say = (text: string, src?: string) =>
-    new Promise<void>((resolve) => {
+    new Promise<void>((done) => {
+      const resolve = () => {
+        // 生徒の番が始まった（ここから、答え始めるまでの時間を測る）
+        examinerDoneAtRef.current = Date.now();
+        firstRecordStartRef.current = null;
+        done();
+      };
       if (unmountedRef.current) return resolve();
       lastSpokenRef.current = { text, src };
       stopAudio();
@@ -428,7 +443,14 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
     if (!text) return;
     setTranscript("");
     const stage = stages[stageIdxRef.current];
-    addLog({ stage, speaker: "student", text });
+    // 答え始めるまでの秒数（最初に録音を始めたとき）と、話した秒数（送った録音の長さ）
+    const latency =
+      examinerDoneAtRef.current && firstRecordStartRef.current
+        ? Math.max(0, (firstRecordStartRef.current - examinerDoneAtRef.current) / 1000)
+        : undefined;
+    addLog({ stage, speaker: "student", text, latency, duration: lastRecordingSecondsRef.current });
+    firstRecordStartRef.current = null;
+    lastRecordingSecondsRef.current = undefined;
     if (stage === "before" || stage === "after") {
       playScriptFrom(scriptPosRef.current);
       return;
@@ -544,6 +566,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
+        lastRecordingSecondsRef.current = (Date.now() - recordStartRef.current) / 1000;
         if (recordTimerRef.current) clearTimeout(recordTimerRef.current);
         // 録音が終わったらマイクを閉じる
         stream.getTracks().forEach((t) => t.stop());
@@ -552,6 +575,7 @@ export const OralMockSession: React.FC<OralMockSessionProps> = ({
       };
       recorder.start();
       recordStartRef.current = Date.now();
+      if (firstRecordStartRef.current === null) firstRecordStartRef.current = recordStartRef.current;
       // 長すぎる録音は自動で止める（2 分）
       if (recordTimerRef.current) clearTimeout(recordTimerRef.current);
       recordTimerRef.current = setTimeout(() => {

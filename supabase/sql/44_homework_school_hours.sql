@@ -99,21 +99,23 @@ begin
    where user_id = p_user_id and role = 'student' limit 1;
   if v_class is null then return json_build_object('locked', false); end if;
 
-  -- 同じタスクが課題（授業内）にも出ていれば止めない
+  -- 同じタスクが、まだ締切前の課題（授業内）にも出ていれば止めない
   if exists (
     select 1 from public.edu_homework h
      where h.class_id = v_class and h.kind = 'classwork' and h.item_type = 'lesson'
+       and h.due_at >= now()
        and h.lesson_id = p_lesson_id and p_task = any (h.task_keys)
        and (h.assign_to = 'class' or exists (select 1 from public.edu_homework_students s where s.homework_id = h.id and s.user_id = p_user_id))
   ) then
     return json_build_object('locked', false);
   end if;
 
-  -- 「授業中はしてはいけない」宿題に入っているタスクか
+  -- 「授業中はしてはいけない」宿題で、まだ締切前のものに入っているタスクか（締切を過ぎた宿題ではロックしない。45 で追加期間も見る）
   if not exists (
     select 1 from public.edu_homework h
      where h.class_id = v_class and h.kind = 'homework' and h.item_type = 'lesson'
        and not h.allow_during_school
+       and h.due_at >= now()
        and h.lesson_id = p_lesson_id and p_task = any (h.task_keys)
        and (h.assign_to = 'class' or exists (select 1 from public.edu_homework_students s where s.homework_id = h.id and s.user_id = p_user_id))
   ) then
