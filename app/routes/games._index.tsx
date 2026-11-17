@@ -19,7 +19,7 @@ import { generateModuleMeta } from '~/utils/seoMeta';
 import { fetchGamesContentData } from '~/data/content-games';
 import { useGameAccess } from '~/components/games/useGameAccess';
 import { supabase } from '~/lib/supabaseClient';
-import { Brain, Gamepad2, Compass, Target, Swords, Sparkles, Grid, Lock, LockOpen, ShieldCheck } from 'lucide-react';
+import { Brain, Gamepad2, Compass, Target, Swords, Sparkles, Grid, Map as MapIcon, CircleDot, Layers, Lock, LockOpen, ShieldCheck } from 'lucide-react';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -62,6 +62,12 @@ function renderGameIcon(iconName?: string) {
       return <Sparkles className="w-5 h-5 text-indigo-600" />;
     case 'Grid':
       return <Grid className="w-5 h-5 text-indigo-600" />;
+    case 'Map':
+      return <MapIcon className="w-5 h-5 text-indigo-600" />;
+    case 'CircleDot':
+      return <CircleDot className="w-5 h-5 text-indigo-600" />;
+    case 'Layers':
+      return <Layers className="w-5 h-5 text-indigo-600" />;
     default:
       return <Gamepad2 className="w-5 h-5 text-indigo-600" />;
   }

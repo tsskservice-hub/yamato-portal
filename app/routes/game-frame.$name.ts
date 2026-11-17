@@ -1,6 +1,6 @@
 /**
  * @file game-frame.$name.ts
- * @description iframe で表示する HTML ゲーム（将棋・囲碁・花札・数独・都道府県パズル）を配信する
+ * @description iframe で表示する HTML ゲーム（将棋・囲碁・花札・数独・都道府県パズル・ひらがなソリティア）を配信する
  *
  * 以前は public/games/*.html に置いていたため、URL を直接開けば先生のロックを回避できた。
  * 今は app/games/frames/ に置き、このルートが次を確認してから返す:
@@ -18,6 +18,7 @@ import go from '~/games/frames/go.html?raw';
 import hanafuda from '~/games/frames/hanafuda.html?raw';
 import kanjiSudoku from '~/games/frames/kanji-sudoku.html?raw';
 import prefecturePuzzle from '~/games/frames/prefecture-puzzle.html?raw';
+import hiraganaSolitaire from '~/games/frames/hiragana-solitaire.html?raw';
 
 const FRAMES: Record<string, string> = {
   shogi,
@@ -25,6 +26,7 @@ const FRAMES: Record<string, string> = {
   hanafuda,
   'kanji-sudoku': kanjiSudoku,
   'prefecture-puzzle': prefecturePuzzle,
+  'hiragana-solitaire': hiraganaSolitaire,
 };
 
 /**

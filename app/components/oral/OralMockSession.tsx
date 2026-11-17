@@ -69,12 +69,12 @@ interface ScriptLine {
   needsAnswer: boolean;
 }
 
-/** 入室・退室のことばのうち、生徒が答えるもの（質問・あいさつ） */
-function lineNeedsAnswer(text: string, isLast: boolean): boolean {
-  if (isLast) return true;
-  return /か[。？?]?$|教えて|伺って|^こんにちは|お疲れ様でした。?$/.test(text.trim());
-}
-
+/**
+ * 入室・退室のことば。問題集（beforeSec1 / afterSec2）の録音から、最低限のものだけを選ぶ
+ *
+ *   入室: 「こんにちは。」（答える）→ 名前・受験番号（答える）→「では、始めましょう」（答えずに、そのまま試験へ）
+ *   退室: 「これで試験は終わりです。」→「さようなら。」（答えずに、そのままフィードバックへ）
+ */
 function buildScript(
   data: OralExamQuestionsData,
   key: "beforeSec1" | "afterSec2",
@@ -83,17 +83,32 @@ function buildScript(
 ): ScriptLine[] {
   const group = (data as any)[key] || {};
   const list: OralExamQuestionItem[] = group[difficulty] || group.normal || group.steady || [];
-  const filtered = list.filter((q) => {
-    const t = q.text_original || q.text || "";
-    // Section 2 だけのときは「一般会話から始めましょう」などを入れない。Section 1 だけのときは「特別研究を終わります」などを入れない
-    if (examSection === "section2" && /一般|セクション[1１]|会話から始め/.test(t)) return false;
-    if (examSection === "section1" && /特別研究|ディスカッション/.test(t)) return false;
-    return Boolean(t);
-  });
-  return filtered.map((q, i) => {
-    const text = (q.text_original || q.text || "").replace(/<[^>]+>/g, "");
-    return { text, audio: q.audio, needsAnswer: lineNeedsAnswer(text, i === filtered.length - 1) };
-  });
+  const lines = list
+    .map((q) => ({ text: (q.text_original || q.text || "").replace(/<[^>]+>/g, "").trim(), audio: q.audio }))
+    .filter((l) => {
+      if (!l.text) return false;
+      // Section 2 だけのときは「一般会話から始めましょう」などを使わない。Section 1 だけのときは「特別研究を終わります」などを使わない
+      if (examSection === "section2" && /一般|セクション[1１]|会話から始め/.test(l.text)) return false;
+      if (examSection === "section1" && /特別研究|ディスカッション/.test(l.text)) return false;
+      return true;
+    });
+  const find = (re: RegExp, fromEnd = false) => (fromEnd ? [...lines].reverse() : lines).find((l) => re.test(l.text));
+  const out: ScriptLine[] = [];
+  const add = (line: { text: string; audio?: string } | undefined, needsAnswer: boolean) => {
+    if (line && !out.some((o) => o.text === line.text)) out.push({ ...line, needsAnswer });
+  };
+
+  if (key === "beforeSec1") {
+    add(find(/^こんにちは/), true);
+    // 名前と受験番号（1 つの質問のこともあれば、2 つに分かれていることもある）
+    lines.filter((l) => /名前|受験番号/.test(l.text)).forEach((l) => add(l, true));
+    // 「では、始めましょう」: いちばん最後の「始め／開始」の文。答えずにそのまま試験に入る
+    add(find(/始め|開始|進めて/, true), false);
+  } else {
+    add(find(/以上をもちまして/) || find(/試験.*(終わり|終了)/) || find(/これで.*(終わり|終了)/), false);
+    add(find(/さようなら|お帰りください/), false);
+  }
+  return out;
 }
 
 /** 問題集から、試験官に渡す「質問の例」をばらばらに選ぶ */
