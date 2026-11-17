@@ -554,6 +554,18 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
+  // 💡 生徒のクラス・宿題・課題のセクション。クラスに入っている生徒は一番上、まだの生徒は今まで通りの位置に出す
+  const showStudentClass = !initialData.isTeacher && initialData.teacherStatus !== "pending" && Boolean(user?.id);
+  const inClass = Boolean(initialData.studentClass);
+  const studentClassSection = (
+    <StudentClassSection
+      studentClass={initialData.studentClass}
+      homework={initialData.homework}
+      verifiedSchoolEmails={initialData.verifiedSchoolEmails}
+      joinRequest={initialData.joinRequest}
+    />
+  );
+
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       <div className="max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]">
@@ -563,6 +575,9 @@ export default function AccountSettingsRoute() {
             Manage your AI tutor preferences, registration details, subscription plan, and credit history.
           </p>
         </div>
+
+        {/* 0. クラスに入っている生徒（学校の生徒）は、宿題・課題がいちばん大事なので一番上に出す */}
+        {showStudentClass && inClass && studentClassSection}
 
         {/* 1. AIチューター設定・プロフィールセクション（モジュール化） */}
         <TutorPreferencesSection
@@ -592,15 +607,8 @@ export default function AccountSettingsRoute() {
           </div>
         )}
 
-        {/* 1b. クラス参加・宿題（生徒のみ） */}
-        {!initialData.isTeacher && initialData.teacherStatus !== "pending" && user?.id && (
-          <StudentClassSection
-            studentClass={initialData.studentClass}
-            homework={initialData.homework}
-            verifiedSchoolEmails={initialData.verifiedSchoolEmails}
-            joinRequest={initialData.joinRequest}
-          />
-        )}
+        {/* 1b. クラス参加・宿題（クラスにまだ入っていない生徒は、ここ＝今まで通りの位置） */}
+        {showStudentClass && !inClass && studentClassSection}
 
         {/* 2. 総合的なアカウント情報セクション（モジュール化） */}
         <RegistrationDetails

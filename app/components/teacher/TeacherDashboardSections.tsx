@@ -564,7 +564,7 @@ export function ClassSettingsCard({ data }: { data: DashboardData }) {
           <p className="text-3xl font-black tracking-[0.3em] text-indigo-700 font-mono">{cls.joinCode}</p>
           <p className="text-xs text-slate-500">
             Students sign up for free, open <strong>My Account</strong>, verify their school account and enter this code under
-            &quot;My Class &amp; Homework&quot;. Only school accounts ending in{' '}
+            &quot;My Class, Homework &amp; Classwork&quot;. Only school accounts ending in{' '}
             <strong>{cls.allowedDomains.map((d) => `@${d}`).join(' or ')}</strong> can ask to join, and you approve each request.
             Students without a school Google account can use a personal invite code (below).
           </p>
