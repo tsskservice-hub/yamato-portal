@@ -1,6 +1,6 @@
 /**
  * @file billing-plans.ts
- * @description サブスク・シーズンプラン・AI 体験の一覧（料金ページ・支払い画面を開く処理・Webhook が共通で使う）
+ * @description サブスク・パス（3 か月・半年。旧称シーズンプラン）・AI 体験の一覧（料金ページ・支払い画面を開く処理・Webhook が共通で使う）
  *
  * Stripe の価格は Lookup key（このファイルのキー）で探す。テスト用と本番で同じキーにしてあるので、価格 ID は持たない。
  * クレジット数と期限は、データベース（51_subscriptions.sql）と合わせること。決まりはメモ subscription-plan。
@@ -28,8 +28,8 @@ export const PLAN_OFFERS: Record<PlanKey, PlanOffer> = {
   basic_yearly: { kind: 'subscription', plan: 'basic', interval: 'year', priceCents: 5100, credits: 200, name: 'Basic (yearly)' },
   plus_monthly: { kind: 'subscription', plan: 'plus', interval: 'month', priceCents: 1000, credits: 700, name: 'Plus (monthly)' },
   plus_yearly: { kind: 'subscription', plan: 'plus', interval: 'year', priceCents: 10200, credits: 700, name: 'Plus (yearly)' },
-  season_3m: { kind: 'season', months: 3, priceCents: 1500, credits: 700, name: 'VCE Exam Season – 3 months' },
-  season_6m: { kind: 'season', months: 6, priceCents: 3000, credits: 1500, name: 'VCE Exam Season – 6 months' },
+  season_3m: { kind: 'season', months: 3, priceCents: 1500, credits: 700, name: '3-Month Pass' },
+  season_6m: { kind: 'season', months: 6, priceCents: 3000, credits: 1500, name: '6-Month Pass' },
 };
 
 export const isPlanKey = (v: unknown): v is PlanKey => typeof v === 'string' && v in PLAN_OFFERS;

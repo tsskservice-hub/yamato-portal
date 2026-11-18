@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '~/data/price-plans';
 import { PlanUsageComparison } from '~/components/PlanUsageComparison';
-import { SubscriptionPlans } from '~/components/billing/SubscriptionPlans';
+import { SubscriptionPlans, SectionHeading } from '~/components/billing/SubscriptionPlans';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -138,7 +138,7 @@ export default function Prices() {
                 Plans & Credit Packs
               </h1>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Start for free with daily credits, or top up with prepaid charge packs for intensive study.
+                Start for free, choose a subscription or a pass for full access, and top up if you need more AI credits.
               </p>
 
               {/* クレジット消費ガイド */}
@@ -161,10 +161,18 @@ export default function Prices() {
             </section>
 
             {/* サブスク・シーズンプラン・AI 体験（SQL 51・Stripe の Lookup key） */}
-            <SubscriptionPlans signedIn={Boolean(user)} onSignIn={() => layoutRef.current?.openAuthModal('signin')} />
+            <SubscriptionPlans
+              signedIn={Boolean(user)}
+              onSignIn={() => layoutRef.current?.openAuthModal('signin')}
+              freePlan={pricePlans.free}
+            />
 
-            {/* キャンペーンバナー & 価格カード */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+            {/* 3. 追加クレジット（プランを使っている人だけが買える。サーバーも確かめる） */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-6">
+              <SectionHeading
+                title="Top-up credits"
+                subtitle="For heavy users who need more AI credits than their plan includes. Available to members with a subscription or a pass. Credits can be used for 1 year."
+              />
               {priceData.campaignNotice && (
                 <div className="text-center space-y-4 max-w-3xl mx-auto mb-12">
                   <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
@@ -174,39 +182,13 @@ export default function Prices() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
-                {/* Free Plan */}
-                {pricePlans.free && (
-                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                    <div className="space-y-4">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{pricePlans.free.name}</span>
-                      <div>
-                        <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.free.price}</span>
-                        <span className="text-xs text-slate-500 ml-1">{pricePlans.free.period}</span>
-                      </div>
-                      {pricePlans.free.badge && (
-                        <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                          {pricePlans.free.badge}
-                        </div>
-                      )}
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.free.description}</p>
-                    </div>
-                    <div className="mt-6 space-y-3">
-                      <Link
-                        to={pricePlans.free.ctaLink || "/"}
-                        className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all block"
-                      >
-                        {pricePlans.free.ctaText || "Get Started Free"}
-                      </Link>
-                    </div>
-                  </div>
-                )}
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left items-stretch">
                 {/* Starter Pack */}
                 {pricePlans.starter && (
                   <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
                     <div className="space-y-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{pricePlans.starter.name}</span>
+                      <p className="text-xs text-slate-500" lang="ja">ちょっと = a little</p>
                       <div>
                         <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.starter.price}</span>
                         <span className="text-xs text-slate-500 ml-1">{pricePlans.starter.period}</span>
@@ -225,10 +207,10 @@ export default function Prices() {
                         disabled={loadingPriceId === pricePlans.starter.id}
                         className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        <span>{loadingPriceId === pricePlans.starter.id ? 'Processing...' : (pricePlans.starter.ctaText || 'Buy Starter Pack')}</span>
+                        <span>{loadingPriceId === pricePlans.starter.id ? 'Processing...' : (pricePlans.starter.ctaText || 'Buy Top Up Chotto')}</span>
                       </button>
                       <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                        By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        By purchasing, you agree to our <Link to="/legal/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/legal/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                       </p>
                     </div>
                   </div>
@@ -238,10 +220,11 @@ export default function Prices() {
                 {pricePlans.standard && (
                   <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 flex flex-col justify-between shadow-xl relative">
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm">
-                      Most Popular
+                      Good balance
                     </div>
                     <div className="space-y-4 pt-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{pricePlans.standard.name}</span>
+                      <p className="text-xs text-slate-500" lang="ja">いっぱい = lots</p>
                       <div>
                         <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.standard.price}</span>
                         <span className="text-xs text-slate-500 ml-1">{pricePlans.standard.period}</span>
@@ -260,10 +243,10 @@ export default function Prices() {
                         disabled={loadingPriceId === pricePlans.standard.id}
                         className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        <span>{loadingPriceId === pricePlans.standard.id ? 'Processing...' : (pricePlans.standard.ctaText || 'Buy Standard Pack')}</span>
+                        <span>{loadingPriceId === pricePlans.standard.id ? 'Processing...' : (pricePlans.standard.ctaText || 'Buy Top Up Ippai')}</span>
                       </button>
                       <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                        By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        By purchasing, you agree to our <Link to="/legal/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/legal/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                       </p>
                     </div>
                   </div>
@@ -274,6 +257,7 @@ export default function Prices() {
                   <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
                     <div className="space-y-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{pricePlans.pro.name}</span>
+                      <p className="text-xs text-slate-500" lang="ja">めっちゃ = super (casual)</p>
                       <div>
                         <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.pro.price}</span>
                         <span className="text-xs text-slate-500 ml-1">{pricePlans.pro.period}</span>
@@ -292,10 +276,10 @@ export default function Prices() {
                         disabled={loadingPriceId === pricePlans.pro.id}
                         className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        <span>{loadingPriceId === pricePlans.pro.id ? 'Processing...' : (pricePlans.pro.ctaText || 'Buy Pro Pack')}</span>
+                        <span>{loadingPriceId === pricePlans.pro.id ? 'Processing...' : (pricePlans.pro.ctaText || 'Buy Top Up Meccha')}</span>
                       </button>
                       <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                        By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        By purchasing, you agree to our <Link to="/legal/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/legal/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                       </p>
                     </div>
                   </div>

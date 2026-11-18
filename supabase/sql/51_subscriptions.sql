@@ -256,7 +256,7 @@ begin
   update public.profiles set ai_unlocked_at = coalesce(ai_unlocked_at, now()) where id = p_user_id;
   perform public._expire_user_credit_lots(p_user_id);
   v_balance := public._add_credit_lot(p_user_id, 'season', v_credits, v_ends,
-                                      'season_pass', 'VCE Exam Season (' || p_months || ' months)', p_session_id);
+                                      'season_pass', p_months || '-Month Pass', p_session_id);
   return json_build_object('granted', true, 'credits', v_balance, 'ends_at', v_ends);
 end;
 $$;

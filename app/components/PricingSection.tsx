@@ -1,11 +1,17 @@
 /**
  * @file PricingSection.tsx
- * @description 料金プランおよびクレジットパック、消費ガイドのセクションコンポーネント（動的データ対応版）
+ * @description トップページの料金の紹介（Free・Basic・Plus の 3 枚と「See all plans」）。詳しくは料金ページ（/prices）
+ *
+ * ・Free のカードは kl_app の PRICE_PLANS.free、Basic・Plus の値段とクレジットは app/data/billing-plans.ts
+ * ・クレジットパック（Top Up）はプランの人だけが買えるので、ここには出さない（料金ページの 3 つ目のセクション）
+ * ・クレジットの消費ガイドは、今までどおりここにも出す
+ * ・props は前のまま受け取る（_index.tsx を変えないため）。買うのは料金ページなので onCheckout は使わない
  */
 import React, { useState, useEffect } from 'react';
 import { Link } from '@remix-run/react';
 import { Flame, Coins, Loader2 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
+import { PLAN_OFFERS } from '../data/billing-plans';
 import { supabase } from '../lib/supabaseClient';
 
 interface PricingSectionProps {
@@ -15,29 +21,20 @@ interface PricingSectionProps {
   onOpenAuthModal: (mode: 'signin' | 'signup') => void;
 }
 
-export function PricingSection({
-  isDarkMode,
-  checkoutLoadingPriceId,
-  onCheckout,
-  onOpenAuthModal,
-}: PricingSectionProps) {
+const dollars = (cents: number) => `A$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
+
+export function PricingSection({ isDarkMode }: PricingSectionProps) {
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
         const data = await fetchPricePlansData(supabase);
-        if (data && data.pricePlans) {
-          setPriceData(data);
-        } else {
-          setError(true);
-        }
+        if (data && data.pricePlans) setPriceData(data);
       } catch (err) {
-        console.error("Failed to load price plans:", err);
-        setError(true);
+        console.error('Failed to load price plans:', err);
       } finally {
         setLoading(false);
       }
@@ -54,20 +51,46 @@ export function PricingSection({
     );
   }
 
-  if (error || !priceData || !priceData.pricePlans) {
-    return null;
-  }
+  const free = priceData?.pricePlans?.free;
+  const creditConsumptionGuide = priceData?.creditConsumptionGuide;
+  const campaignNotice = priceData?.campaignNotice;
+  const card = `p-6 rounded-3xl border flex flex-col justify-between ${
+    isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+  } shadow-sm`;
+  const muted = isDarkMode ? 'text-slate-400' : 'text-slate-600';
 
-  const { pricePlans, creditConsumptionGuide, campaignNotice } = priceData;
+  const paidCard = (tier: 'basic' | 'plus') => {
+    const offer = PLAN_OFFERS[tier === 'basic' ? 'basic_monthly' : 'plus_monthly'];
+    const yearly = PLAN_OFFERS[tier === 'basic' ? 'basic_yearly' : 'plus_yearly'];
+    const featured = tier === 'plus';
+    return (
+      <div className={`${card} ${featured ? 'border-2 border-indigo-500' : ''}`}>
+        <div className="space-y-3">
+          <span className={`text-xs font-bold uppercase tracking-wider ${featured ? 'text-indigo-600' : 'text-slate-500'}`}>
+            {tier === 'basic' ? 'Basic' : 'Plus'}
+          </span>
+          <div>
+            <span className="text-4xl font-black">{dollars(offer.priceCents)}</span>
+            <span className="text-xs text-slate-500 ml-1">/ month</span>
+          </div>
+          <p className={`text-xs font-bold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>
+            or {dollars(yearly.priceCents)} / year (15% off)
+          </p>
+          <p className={`text-sm ${muted}`}>
+            All lessons and VCE tools + <b>{offer.credits} AI credits every month</b>.
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <section className="space-y-12 text-center" id="pricing">
+    <section className="space-y-10 text-center" id="pricing">
       <div className="space-y-4 max-w-3xl mx-auto">
-        <h2 className="text-3xl font-extrabold tracking-tight">Choose Your Plan & Credit Packs</h2>
-        <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-          Start for free with daily credits, or top up with prepaid charge packs for intensive study.
+        <h2 className="text-3xl font-extrabold tracking-tight">Plans</h2>
+        <p className={`text-sm ${muted}`}>
+          Start for free. Choose a plan for full access to all lessons and VCE tools, with AI credits every month.
         </p>
-           
         {campaignNotice && (
           <div className="p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
             <Flame className="w-4 h-4 text-red-600 shrink-0 animate-bounce" />
@@ -76,130 +99,33 @@ export function PricingSection({
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-        {/* Free Plan */}
-        {pricePlans.free && (
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{pricePlans.free.name}</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto">
+        {free && (
+          <div className={card}>
+            <div className="space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{free.name}</span>
               <div>
-                <span className="text-4xl font-black">{pricePlans.free.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{pricePlans.free.period}</span>
+                <span className="text-4xl font-black">{free.price}</span>
+                <span className="text-xs text-slate-500 ml-1">{free.period}</span>
               </div>
-              {pricePlans.free.badge && (
-                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                  {pricePlans.free.badge}
-                </div>
-              )}
-              <p className="text-xs text-slate-500">{pricePlans.free.description}</p>
+              <p className={`text-sm ${muted}`}>{free.description}</p>
             </div>
-            <button 
-              onClick={() => onOpenAuthModal('signup')}
-              className="mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              {pricePlans.free.ctaText || "Get Started Free"}
-            </button>
           </div>
         )}
+        {paidCard('basic')}
+        {paidCard('plus')}
+      </div>
 
-        {/* Starter Pack */}
-        {pricePlans.starter && (
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{pricePlans.starter.name}</span>
-              <div>
-                <span className="text-4xl font-black">{pricePlans.starter.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{pricePlans.starter.period}</span>
-              </div>
-              {pricePlans.starter.badge && (
-                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                  {pricePlans.starter.badge}
-                </div>
-              )}
-              <p className="text-xs text-slate-500">{pricePlans.starter.description}</p>
-            </div>
-            <div className="mt-6 space-y-3">
-              <button 
-                onClick={() => onCheckout(pricePlans.starter!.id)} 
-                disabled={checkoutLoadingPriceId === pricePlans.starter.id}
-                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-              >
-                {checkoutLoadingPriceId === pricePlans.starter.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>{pricePlans.starter.ctaText || "Buy Starter Pack"}</span>
-              </button>
-              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Standard Pack */}
-        {pricePlans.standard && (
-          <div className={`p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? 'bg-slate-900' : 'bg-white'} shadow-xl`}>
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full">
-              Most Popular
-            </div>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{pricePlans.standard.name}</span>
-              <div>
-                <span className="text-4xl font-black">{pricePlans.standard.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{pricePlans.standard.period}</span>
-              </div>
-              {pricePlans.standard.badge && (
-                <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal">
-                  {pricePlans.standard.badge}
-                </div>
-              )}
-              <p className="text-xs text-slate-500">{pricePlans.standard.description}</p>
-            </div>
-            <div className="mt-6 space-y-3">
-              <button 
-                onClick={() => onCheckout(pricePlans.standard!.id)} 
-                disabled={checkoutLoadingPriceId === pricePlans.standard.id}
-                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-              >
-                {checkoutLoadingPriceId === pricePlans.standard.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>{pricePlans.standard.ctaText || "Buy Standard Pack"}</span>
-              </button>
-              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Pro Intensivist */}
-        {pricePlans.pro && (
-          <div className={`p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} shadow-sm`}>
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{pricePlans.pro.name}</span>
-              <div>
-                <span className="text-4xl font-black">{pricePlans.pro.price}</span>
-                <span className="text-xs text-slate-500 ml-1">{pricePlans.pro.period}</span>
-              </div>
-              {pricePlans.pro.badge && (
-                <div className="inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal">
-                  {pricePlans.pro.badge}
-                </div>
-              )}
-              <p className="text-xs text-slate-500">{pricePlans.pro.description}</p>
-            </div>
-            <div className="mt-6 space-y-3">
-              <button 
-                onClick={() => onCheckout(pricePlans.pro!.id)} 
-                disabled={checkoutLoadingPriceId === pricePlans.pro.id}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-              >
-                {checkoutLoadingPriceId === pricePlans.pro.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>{pricePlans.pro.ctaText || "Buy Pro Pack"}</span>
-              </button>
-              <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
-              </p>
-            </div>
-          </div>
-        )}
+      <div className="space-y-2">
+        <Link
+          to="/prices"
+          className="inline-block px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-colors"
+        >
+          See all plans
+        </Link>
+        <p className={`text-xs ${muted}`}>
+          Also available: a {dollars(PLAN_OFFERS.ai_trial.priceCents)} AI Trial, and 3-month or 6-month passes that don’t renew.
+        </p>
       </div>
 
       {creditConsumptionGuide && creditConsumptionGuide.length > 0 && (

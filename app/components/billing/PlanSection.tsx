@@ -77,7 +77,7 @@ export function PlanSection({ userId }: { userId?: string }) {
         </div>
       ) : plan?.season_ends_at ? (
         <div className="space-y-1 text-sm text-slate-700 dark:text-slate-300">
-          <p className="text-base font-bold text-slate-900 dark:text-white">VCE Exam Season</p>
+          <p className="text-base font-bold text-slate-900 dark:text-white">Pass (one-off)</p>
           <p>
             Active until <b>{formatDate(plan.season_ends_at)}</b>. It does not renew automatically.
           </p>
