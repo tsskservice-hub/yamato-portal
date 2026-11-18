@@ -10,6 +10,10 @@ import { fetchMyPlan, formatDate, openBillingPortal } from './billing-client';
 
 const PLAN_LABEL: Record<string, string> = { basic: 'Basic', plus: 'Plus' };
 
+/** 例: [6] → 「6-Month Pass」、延長したとき [3, 6] → 「3-Month Pass + 6-Month Pass」（54 より前は「Pass」） */
+const passLabel = (months?: number[] | null) =>
+  months && months.length ? months.map((m) => `${m}-Month Pass`).join(' + ') : 'Pass';
+
 export function PlanSection({ userId }: { userId?: string }) {
   const [plan, setPlan] = useState<MyPlan | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -77,7 +81,7 @@ export function PlanSection({ userId }: { userId?: string }) {
         </div>
       ) : plan?.season_ends_at ? (
         <div className="space-y-1 text-sm text-slate-700 dark:text-slate-300">
-          <p className="text-base font-bold text-slate-900 dark:text-white">Pass (one-off)</p>
+          <p className="text-base font-bold text-slate-900 dark:text-white">{passLabel(plan.season_months)}</p>
           <p>
             Active until <b>{formatDate(plan.season_ends_at)}</b>. It does not renew automatically.
           </p>

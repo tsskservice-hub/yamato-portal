@@ -46,6 +46,8 @@ export type MyPlan = {
   period_end: string | null;
   cancel_at_period_end: boolean;
   season_ends_at: string | null;
+  /** 今有効なパスの月数（買った順。SQL 54 より前は無い） */
+  season_months?: number[] | null;
   trial_done: boolean;
   ai_unlocked: boolean;
   has_customer: boolean;

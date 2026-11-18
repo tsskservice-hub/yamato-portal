@@ -99,6 +99,35 @@ export const onRequestPost = async (context: any) => {
         if (trial) return json({ error: 'You have already used the AI Trial.' }, 400);
         if (paidAccess) return json({ error: 'Your plan already includes AI credits, so you don’t need the AI Trial.' }, 400);
       }
+      // パスとサブスクは同時に持てない（二重払いを防ぐ。2026-11-18 に決定）
+      //  ・サブスク中（解約の予約中も期間の終わりまで）はパスを買えない
+      //  ・パスの期間中はサブスクに入れない（パスが終わってから入る）。パスの延長（パスを続けて買う）はできる
+      if (offer.kind === 'season') {
+        const { data: activeSub } = await admin
+          .from('subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+          .in('status', ['active', 'trialing', 'past_due'])
+          .limit(1);
+        if (activeSub && activeSub.length) {
+          return json({
+            error: 'Your subscription already gives you full access. If you need more AI credits, please choose a top-up instead.',
+          }, 400);
+        }
+      }
+      if (offer.kind === 'subscription') {
+        const { data: pass } = await admin
+          .from('season_passes')
+          .select('ends_at')
+          .eq('user_id', user.id)
+          .gt('ends_at', new Date().toISOString())
+          .order('ends_at', { ascending: false })
+          .limit(1);
+        if (pass && pass.length) {
+          const until = new Date(pass[0].ends_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+          return json({ error: `Your pass is active until ${until}. You can start a subscription after it ends.` }, 400);
+        }
+      }
       if (offer.kind === 'subscription') {
         const { data: active } = await admin
           .from('subscriptions')

@@ -77,6 +77,8 @@ export function SubscriptionPlans({
 
   const discount = myPlan?.first_plan_coupon === 'FIRST_SUB_TRIAL' ? 2 : myPlan?.first_plan_coupon === 'FIRST_SUB' ? 1 : myPlan ? 0 : 1;
   const hasSubscription = Boolean(myPlan?.plan);
+  // パスとサブスクは同時に持てない（サーバーも確かめる）
+  const hasPass = Boolean(myPlan?.season_ends_at);
   const yearly = interval === 'year';
 
   const planCard = (tier: 'basic' | 'plus') => {
@@ -108,10 +110,16 @@ export function SubscriptionPlans({
         <button
           type="button"
           onClick={() => buy(key)}
-          disabled={busy !== null || hasSubscription}
+          disabled={busy !== null || hasSubscription || hasPass}
           className={`${btn} mt-6 bg-indigo-600 hover:bg-indigo-700 text-white`}
         >
-          {busy === key ? 'Opening…' : hasSubscription ? 'You have a plan' : `Choose ${tier === 'basic' ? 'Basic' : 'Plus'}`}
+          {busy === key
+            ? 'Opening…'
+            : hasSubscription
+              ? 'You have a plan'
+              : hasPass
+                ? 'Available after your pass ends'
+                : `Choose ${tier === 'basic' ? 'Basic' : 'Plus'}`}
         </button>
         <AgreeNote />
       </div>
@@ -135,6 +143,11 @@ export function SubscriptionPlans({
           {myPlan?.plan && (
             <p className="text-sm font-bold text-indigo-600">
               You’re on the {myPlan.plan === 'basic' ? 'Basic' : 'Plus'} plan. Manage it from My Account.
+            </p>
+          )}
+          {hasPass && (
+            <p className="text-sm font-bold text-indigo-600">
+              Your pass is active until {formatDate(myPlan!.season_ends_at)}. You can start a subscription after it ends.
             </p>
           )}
         </div>
@@ -206,7 +219,14 @@ export function SubscriptionPlans({
           subtitle="Pay once — these never renew. Try the AI features, or get full access for a few months of focused study, for example before an exam."
         />
         {myPlan?.season_ends_at && (
-          <p className="text-center text-sm font-bold text-indigo-600">Your pass is active until {formatDate(myPlan.season_ends_at)}.</p>
+          <p className="text-center text-sm font-bold text-indigo-600">
+            Your pass is active until {formatDate(myPlan.season_ends_at)}. Buying another pass adds its months after that date.
+          </p>
+        )}
+        {hasSubscription && (
+          <p className="text-center text-sm font-bold text-indigo-600">
+            Your subscription already gives you full access. For more AI credits, see Top-up credits below.
+          </p>
         )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {/* AI 体験 */}
@@ -255,10 +275,10 @@ export function SubscriptionPlans({
                 <button
                   type="button"
                   onClick={() => buy(key)}
-                  disabled={busy !== null}
+                  disabled={busy !== null || hasSubscription}
                   className={`${btn} mt-6 bg-amber-500 hover:bg-amber-600 text-white`}
                 >
-                  {busy === key ? 'Opening…' : `Choose ${o.name}`}
+                  {busy === key ? 'Opening…' : hasSubscription ? 'Included in your subscription' : hasPass ? `Extend with ${o.name}` : `Choose ${o.name}`}
                 </button>
                 <AgreeNote />
               </div>
