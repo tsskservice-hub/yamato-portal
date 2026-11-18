@@ -20,21 +20,21 @@ export type AssignmentItem = {
   /** assignTo = 'students' のときの対象の生徒 */
   studentIds: string[];
   dueAt: string;
-  /** 宿題を学校時間中にもしてよいか（SQL 44。課題は常に true 扱い） */
+  /** 宿題を学校時間中にもしてよいか（SQL 47。課題は常に true 扱い） */
   allowDuringSchool: boolean;
-  /** 締切の後、終えていない生徒が終えられる期限（SQL 45。null = 締切で閉じる） */
+  /** 締切の後、終えていない生徒が終えられる期限（SQL 48。null = 締切で閉じる） */
   catchupUntil: string | null;
 };
 
 // 読む列（新しい SQL ほど列が多い）。古いデータベースでも読めるよう、順に試す
 const COLUMN_SETS = [
-  'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school, catchup_until', // SQL 45 の後
-  'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school', // SQL 44 の後
+  'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school, catchup_until', // SQL 48 の後
+  'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school', // SQL 47 の後
   'id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at', // SQL 42 の後
   'id, title, lesson_id, task_keys, due_at', // それより前
 ];
 
-/** edu_homework を、使える列で読む。level: 0 = SQL 45 まで、1 = SQL 44 まで、2 = SQL 42 まで、3 = それより前 */
+/** edu_homework を、使える列で読む。level: 0 = SQL 48 まで、1 = SQL 47 まで、2 = SQL 42 まで、3 = それより前 */
 async function selectHomework(admin: SupabaseClient, classId: string, limit: number) {
   for (let level = 0; level < COLUMN_SETS.length; level++) {
     const { data, error } = await admin

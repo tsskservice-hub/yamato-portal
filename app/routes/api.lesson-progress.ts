@@ -5,8 +5,8 @@
  *   GET  /api/lesson-progress?lessonId=...   → 今ブロック中のタスク（宿題で学校時間中のもの）
  *   POST /api/lesson-progress  { lessonId, taskKeys: [...] }  → 完了を記録する（ブロック中のタスクは記録しない）
  *
- * SQL 44 から、ブラウザは edu_student_progress に書けない。ここでログイン中の本人か・学校時間のブロック中でないかを
- * 確かめてから、管理者キーで書く。ブロックの判定は SQL 44 の関数（homework_task_lock）。
+ * SQL 47 から、ブラウザは edu_student_progress に書けない。ここでログイン中の本人か・学校時間のブロック中でないかを
+ * 確かめてから、管理者キーで書く。ブロックの判定は SQL 47 の関数（homework_task_lock）。
  */
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { createAdminSupabaseClient } from '~/lib/supabase.server';

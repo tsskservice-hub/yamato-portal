@@ -1,6 +1,6 @@
 /**
  * @file homework-status.ts
- * @description 宿題・課題の締切と追加期間（catch-up）から、生徒ごとの状態を決める（ブラウザ・サーバー共通。SQL 45）
+ * @description 宿題・課題の締切と追加期間（catch-up）から、生徒ごとの状態を決める（ブラウザ・サーバー共通。SQL 48）
  *
  *   ontime  … 締切までに終えた
  *   late    … 締切は過ぎたが、追加期間中に終えた

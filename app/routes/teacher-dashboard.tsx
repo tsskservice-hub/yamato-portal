@@ -71,7 +71,7 @@ function localDayStart(date: string, tzOffsetMinutes: number): Date | null {
   return new Date(utcMidnight + tzOffsetMinutes * 60_000);
 }
 
-// 宿題の学校時間ブロックの初期値（edu_classes の列の初期値と同じ。SQL 44）
+// 宿題の学校時間ブロックの初期値（edu_classes の列の初期値と同じ。SQL 47）
 const DEFAULT_SCHOOL_HOURS = { timezone: 'Australia/Melbourne', start: '08:45', end: '15:15', days: [1, 2, 3, 4, 5] };
 
 /** そのタイムゾーンでの今日 "YYYY-MM-DD" */
@@ -92,7 +92,7 @@ function isValidTimeZone(tz: string) {
   }
 }
 
-/** クラスのタイムゾーン（SQL 44 の前は初期値） */
+/** クラスのタイムゾーン（SQL 47 の前は初期値） */
 async function classTimeZone(admin: any, classId: string) {
   const { data } = await admin.from('edu_classes').select('school_timezone').eq('id', classId).maybeSingle();
   return String(data?.school_timezone || DEFAULT_SCHOOL_HOURS.timezone);
@@ -254,7 +254,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   // 宿題・課題（新しい締切順）。SQL 42 の前は新しい列が無いので、今までの形で読む（新しい機能は「まだ使えない」と表示）
   const assignments = await loadClassAssignments(admin, selected.id, user.id);
-  // 宿題の学校時間ブロック（SQL 44）：クラスの学校時間と、生徒ごとの解除
+  // 宿題の学校時間ブロック（SQL 47）：クラスの学校時間と、生徒ごとの解除
   let schoolHours = base.schoolHours;
   let homeworkUnlocks: DashboardData['homeworkUnlocks'] = [];
   if (assignments.schoolHoursAvailable) {
@@ -291,7 +291,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   // 進捗（このクラスの生徒 × 宿題に出したレッスン）
   const lessonIds = [...new Set(homework.map((h) => h.lessonId).filter((id): id is string => Boolean(id)))];
-  // 最初に完了した時刻（completed_at, SQL 45）。その前は updated_at を使う
+  // 最初に完了した時刻（completed_at, SQL 48）。その前は updated_at を使う
   const readProgress = async (columns: string) =>
     admin.from('edu_student_progress').select(columns).in('user_id', studentIds).in('lesson_id', lessonIds).eq('is_completed', true);
   let progressRows: any[] = [];
@@ -824,12 +824,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     let { data: created, error } = await admin.from('edu_homework').insert(row).select('id').single();
     if (error && /catchup_until/.test(error.message)) {
-      // SQL 45 の前：追加期間はまだ無いので、その列を外して出す
+      // SQL 48 の前：追加期間はまだ無いので、その列を外して出す
       delete row.catchup_until;
       ({ data: created, error } = await admin.from('edu_homework').insert(row).select('id').single());
     }
     if (error && /allow_during_school/.test(error.message)) {
-      // SQL 44 の前：学校時間のブロックはまだ無いので、その列を外して出す
+      // SQL 47 の前：学校時間のブロックはまだ無いので、その列を外して出す
       delete row.allow_during_school;
       ({ data: created, error } = await admin.from('edu_homework').insert(row).select('id').single());
     }
@@ -907,7 +907,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .eq('id', cls.id);
     if (error) {
       console.error('[teacher-dashboard] school hours failed:', error.message);
-      return fail('Could not save school hours. This needs a database update (SQL 44).', 500);
+      return fail('Could not save school hours. This needs a database update (SQL 47).', 500);
     }
     return backTo(cls.id);
   }
@@ -919,7 +919,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .from('edu_classes')
       .update({ homework_lock_off_date: intent === 'school-day-off-today' ? today : null })
       .eq('id', cls.id);
-    if (error) return fail('Could not change this. This needs a database update (SQL 44).', 500);
+    if (error) return fail('Could not change this. This needs a database update (SQL 47).', 500);
     return backTo(cls.id);
   }
 
@@ -953,7 +953,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
     if (error) {
       console.error('[teacher-dashboard] unlock homework failed:', error.message);
-      return fail('Could not change this. This needs a database update (SQL 44).', 500);
+      return fail('Could not change this. This needs a database update (SQL 47).', 500);
     }
     return backTo(cls.id);
   }
@@ -980,7 +980,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { error } = await admin.from('edu_homework').update({ catchup_until: catchupUntil }).eq('id', hw.id);
     if (error) {
       console.error('[teacher-dashboard] update-catchup failed:', error.message);
-      return fail('Could not save this. The catch-up period needs a database update (SQL 45).', 500);
+      return fail('Could not save this. The catch-up period needs a database update (SQL 48).', 500);
     }
     return backTo(cls.id);
   }

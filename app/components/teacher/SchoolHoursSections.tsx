@@ -1,6 +1,6 @@
 /**
  * @file SchoolHoursSections.tsx
- * @description 宿題の学校時間ブロック（SQL 44）の先生用の画面
+ * @description 宿題の学校時間ブロック（SQL 47）の先生用の画面
  *   - SchoolHoursCard: クラスの学校時間（タイムゾーン・始まり・終わり・曜日）と、クラス全体の「今日はブロックしない」
  *   - HomeworkUnlockControl: 生徒ごとの「学校時間でも宿題をしてよい」（今日だけ／〇日まで）
  */
@@ -132,7 +132,7 @@ export function SchoolHoursCard({ data }: { data: DashboardData }) {
       <h2 className={h2}><Clock className="w-5 h-5 text-indigo-600" /> School Hours (Homework Lock)</h2>
       {!hours.available ? (
         <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-          Locking homework during school hours will be available after a database update (SQL 44).
+          Locking homework during school hours will be available after a database update (SQL 47).
         </p>
       ) : (
         <>

@@ -337,12 +337,12 @@ async function loadStudentHomework(admin: any, classId: string, userId: string):
 
   const lessonIds = [...new Set(rows.map((r) => r.lessonId).filter((id): id is string => Boolean(id)))];
   const quizIds = [...new Set(rows.map((r) => r.quizId).filter((id): id is string => Boolean(id)))];
-  // 今、学校時間のブロック中か（宿題で「授業中もしてよい」でないものに効く。SQL 44）
+  // 今、学校時間のブロック中か（宿題で「授業中もしてよい」でないものに効く。SQL 47）
   const lockedUntil = await getClassLockUntil(admin, classId, userId);
   const lockOf = (r: { kind: string; allowDuringSchool: boolean }) =>
     r.kind === "homework" && !r.allowDuringSchool ? lockedUntil : null;
 
-  // いつ終えたか（completed_at, SQL 45。その前は updated_at）
+  // いつ終えたか（completed_at, SQL 48。その前は updated_at）
   const readProgress = (columns: string) =>
     admin.from("edu_student_progress").select(columns).eq("user_id", userId).in("lesson_id", lessonIds);
   const loadProgress = async () => {

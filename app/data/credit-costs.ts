@@ -22,4 +22,6 @@ export const CREDIT_COSTS = {
   /** 漢字AI検索: 1 日 20 回まで無料、それを超えたら 1 回このクレジット数 */
   kanjiLookup: 1,
   kanjiLookupFreePerDay: 20,
+  /** デイリークイズの正解でもらえるクレジット（SQL の claim_daily_quiz_reward と同じ +2） */
+  dailyQuizReward: 2,
 } as const;

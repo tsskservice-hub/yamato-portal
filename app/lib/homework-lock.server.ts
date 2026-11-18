@@ -1,7 +1,7 @@
 /**
  * @file homework-lock.server.ts
- * @description 宿題の「学校時間中はできない」の判定（サーバー専用）。判定そのものは SQL 44 の関数 1 か所にある。
- *   SQL 44 の前（関数が無い）は「ブロックしない」として扱う。
+ * @description 宿題の「学校時間中はできない」の判定（サーバー専用）。判定そのものは SQL 47 の関数 1 か所にある。
+ *   SQL 47 の前（関数が無い）は「ブロックしない」として扱う。
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 

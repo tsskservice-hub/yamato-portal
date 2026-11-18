@@ -64,7 +64,7 @@ export function EduLessonTaskManager({
     culture: false,
   });
 
-  // 💡 宿題の学校時間ブロック（サーバーが判定する。SQL 44 / api.lesson-progress.ts）
+  // 💡 宿題の学校時間ブロック（サーバーが判定する。SQL 47 / api.lesson-progress.ts）
   const [locks, setLocks] = useState<TaskLocks>({});
   const isLocked = (k: LessonTaskKey) => Boolean(locks[k]?.locked) && !taskProgress[k];
 

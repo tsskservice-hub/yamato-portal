@@ -20,6 +20,7 @@ import {
   SlidersHorizontal 
 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '~/data/price-plans';
+import { PlanUsageComparison } from '~/components/PlanUsageComparison';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -47,7 +48,6 @@ export default function Prices() {
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
-  const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
   const layoutRef = useRef<PageLayoutRef>(null);
 
@@ -186,14 +186,6 @@ export default function Prices() {
                         </div>
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.free.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.free.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                     <div className="mt-6 space-y-3">
                       <Link
@@ -221,14 +213,6 @@ export default function Prices() {
                         </div>
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.starter.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.starter.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                     <div className="mt-6 space-y-3">
                       <button
@@ -264,14 +248,6 @@ export default function Prices() {
                         </div>
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.standard.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.standard.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                     <div className="mt-6 space-y-3">
                       <button
@@ -304,14 +280,6 @@ export default function Prices() {
                         </div>
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.pro.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.pro.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                     <div className="mt-6 space-y-3">
                       <button
@@ -330,91 +298,9 @@ export default function Prices() {
                 )}
               </div>
 
-              {/* 詳細スペック表のトグル */}
-              <div className="mt-10">
-                <button
-                  type="button"
-                  onClick={() => setIsSpecsOpen(!isSpecsOpen)}
-                  className="w-full py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer"
-                >
-                  <div className="flex items-center space-x-2">
-                    <SlidersHorizontal className="w-4 h-4 text-blue-600" />
-                    <span>View Detailed Plan Specs & Study Volume Estimates</span>
-                  </div>
-                  {isSpecsOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-                </button>
-
-                {isSpecsOpen && (
-                  <div className="mt-4 space-y-4 animate-fadeIn">
-                    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
-                      <h3 className="font-bold text-slate-900 dark:text-white text-base">Plan Specifications & Learning Volume Breakdown</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
-                      {/* Free Plan Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div>
-                          <div className="font-bold text-slate-700 dark:text-slate-300 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Free Plan</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Daily Earnings:</strong> 4 Credits (Promo until Oct 29, normally 2)</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost per Credit:</strong> Free</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~0.2 sessions / day</li>
-                            <li><strong className="text-slate-900 dark:text-white">Credit Expiry:</strong> 7 days</li>
-                            <li><strong className="text-slate-900 dark:text-white">Feature Access:</strong> Full AI Chat & Tools</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* Starter Pack Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div>
-                          <div className="font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Starter Pack ($10)</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 2,000</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> Standard</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~6–8 sessions</li>
-                            <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~40–50 mins</li>
-                            <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* Standard Pack Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 shadow-xl space-y-4 flex flex-col justify-between relative">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm">
-                          Popular Specs
-                        </div>
-                        <div>
-                          <div className="font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800 pt-1">Standard ($25)</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 5,600 (+120% value)</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> High Value</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~18–22 sessions</li>
-                            <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~110–140 mins</li>
-                            <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* Pro Intensivist Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div>
-                          <div className="font-bold text-purple-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Pro Intensivist ($50)</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 12,000 (Maximum)</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> Best Value</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~40–50 sessions</li>
-                            <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~240–300 mins</li>
-                            <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              {/* それぞれのパックで、何をどのぐらい使えるかの比較（使い方の型を選べる） */}
+              <div className="mt-12">
+                <PlanUsageComparison plans={pricePlans} />
               </div>
             </section>
           </main>

@@ -39,12 +39,12 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   const found = await getStudentQuizAssignment(admin, String(params.homeworkId ?? ''), user.id);
   if (!found || found.items.length < 2) return json({ status: 'notfound' as const }, { headers });
 
-  // 締切（追加期間があればその終わり）を過ぎたら閉じる（SQL 45）
+  // 締切（追加期間があればその終わり）を過ぎたら閉じる（SQL 48）
   if (Date.now() > new Date(closesAt(found.homework)).getTime()) {
     return json({ status: 'closed' as const, title: found.homework.title }, { headers });
   }
 
-  // 宿題は学校時間中にはできない（先生が「授業中もしてよい」にしたもの・課題は除く。SQL 44）
+  // 宿題は学校時間中にはできない（先生が「授業中もしてよい」にしたもの・課題は除く。SQL 47）
   const lock = await getItemLock(admin, user.id, found.homework.id);
   if (lock.locked) return json({ status: 'locked' as const, title: found.homework.title, until: lock.until }, { headers });
 

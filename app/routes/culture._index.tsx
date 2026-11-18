@@ -134,7 +134,7 @@ export default function CultureHubPage() {
     const targets = task.lessons.filter((l) => lessonIds[l.slug]);
     if (targets.length === 0) return;
     try {
-      // 完了の記録はサーバー（/api/lesson-progress）だけが行う。宿題で学校時間中のものは記録されない（SQL 44）
+      // 完了の記録はサーバー（/api/lesson-progress）だけが行う。宿題で学校時間中のものは記録されない（SQL 47）
       const res = await fetch("/api/lesson-progress", {
         method: "POST",
         credentials: "same-origin",

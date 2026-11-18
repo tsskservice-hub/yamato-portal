@@ -1,7 +1,8 @@
 -- =====================================================================
--- 45: 宿題・課題の締切と追加期間（catch-up）。期限内に終えたかの記録を残す
+-- 48: 宿題・課題の締切と追加期間（catch-up）。期限内に終えたかの記録を残す
+-- （以前の名前: 45_homework_deadline_catchup.sql。口頭 Superb の 45 と番号が重なったため 48 に変更）
 -- 実行先: 本番 ybquwzoreecxxbewjpdn（SQL Editor）。何度実行しても安全。
--- 実行の順番: 42 → 43 → （ポータル・api を公開）→ 44 → 45。45 は 44 の後ならいつでもよい
+-- 実行の順番: 42 → 43 → （ポータル・api を公開）→ 47 → 48。48 は 47 の後ならいつでもよい
 --
 -- これまで: 締切を過ぎても宿題は閉じず、いつ終えても「完了」。期限内かどうかは分からなかった。
 -- これから:
@@ -50,7 +51,7 @@ create trigger edu_student_progress_keep_completed_at
   before insert or update on public.edu_student_progress
   for each row execute function public.edu_student_progress_keep_completed_at();
 
--- 3. 学校時間のブロック（44）を、追加期間中の宿題にも効くようにする（閉じた宿題には効かない）
+-- 3. 学校時間のブロック（47）を、追加期間中の宿題にも効くようにする（閉じた宿題には効かない）
 create or replace function public.homework_task_lock(p_user_id uuid, p_lesson_id uuid, p_task text)
 returns json
 language plpgsql

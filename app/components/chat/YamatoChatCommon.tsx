@@ -705,7 +705,7 @@ export function YamatoChatCommon({
                   <div className="text-3xl">🔒</div>
                   <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Please sign up or log in to chat with {characterName} and receive welcome credits!
+                    Please sign up or log in to chat with {characterName}.
                   </p>
                   <button
                     type="button"

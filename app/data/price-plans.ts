@@ -65,11 +65,6 @@ export const CREDIT_CONSUMPTION_GUIDE: CreditConsumptionGuideItem[] = [
   { item: "Kanji AI Lookup (🔍 Kanji button)", cost: `Free ${CREDIT_COSTS.kanjiLookupFreePerDay} / day, then ${CREDIT_COSTS.kanjiLookup} credit / lookup` },
 ];
 
-export const CAMPAIGN_NOTICE: CampaignNotice = {
-  title: "Limited-Time Campaign (Until October 29)",
-  description: "Paid packs include bonus credits valid until October 29! Standard base credits do not expire.",
-  rawText: "Limited-Time Campaign (Until October 29): Paid packs include bonus credits valid until October 29! (Bonus credits expire on Oct 29; standard base credits are unexpired.)"
-};
 
 // Supabase kl_app のキー名
 // 本番（jptutoraiyamato.com）は公開用の Price ID、プレビュー（*.pages.dev）・localhost は Stripe sandbox 用の Price ID を使う

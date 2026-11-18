@@ -46,7 +46,7 @@ export type DashboardData = {
     assignTo: 'class' | 'students'; studentIds: string[]; dueAt: string; inPeriod: boolean;
     /** 宿題を学校時間中にもしてよいか（課題は常に true） */
     allowDuringSchool: boolean;
-    /** 締切の後、終えていない生徒が終えられる期限（null = 締切で閉じる。SQL 45） */
+    /** 締切の後、終えていない生徒が終えられる期限（null = 締切で閉じる。SQL 48） */
     catchupUntil: string | null;
   }>;
   progress: Array<{ userId: string; lessonId: string; taskKey: string; completedAt: string | null }>;
@@ -69,7 +69,7 @@ export type DashboardData = {
   /** SQL 42 を実行済みか（課題・語彙クイズ・選んだ生徒への配布が使えるか） */
   assignmentsAvailable: boolean;
   /**
-   * 宿題の学校時間ブロック（SQL 44）。available: 実行済みか / today: クラスの時間での今日 "YYYY-MM-DD"
+   * 宿題の学校時間ブロック（SQL 47）。available: 実行済みか / today: クラスの時間での今日 "YYYY-MM-DD"
    * offToday: 今日はクラス全体でブロックしない / days: ISO の曜日（1 = 月）
    */
   schoolHours: {
@@ -81,7 +81,7 @@ export type DashboardData = {
   quizzes: Array<{ id: string; title: string; wordCount: number; createdAt: string }>;
   /** 語彙クイズの結果（宿題 × 生徒）: 最高点・回数・最後にやった日 */
   quizStats: Array<{ homeworkId: string; userId: string; best: number; total: number; attempts: number; lastAt: string; firstAt: string }>;
-  /** SQL 45 を実行済みか（締切の後の追加期間・期限内の記録） */
+  /** SQL 48 を実行済みか（締切の後の追加期間・期限内の記録） */
   catchupAvailable: boolean;
 };
 

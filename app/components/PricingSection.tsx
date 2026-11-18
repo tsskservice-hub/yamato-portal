@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { Link } from '@remix-run/react';
-import { Flame, Check, Coins, Loader2 } from 'lucide-react';
+import { Flame, Coins, Loader2 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
 import { supabase } from '../lib/supabaseClient';
 
@@ -92,11 +92,6 @@ export function PricingSection({
                 </div>
               )}
               <p className="text-xs text-slate-500">{pricePlans.free.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {pricePlans.free.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
             </div>
             <button 
               onClick={() => onOpenAuthModal('signup')}
@@ -122,11 +117,6 @@ export function PricingSection({
                 </div>
               )}
               <p className="text-xs text-slate-500">{pricePlans.starter.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {pricePlans.starter.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
             </div>
             <div className="mt-6 space-y-3">
               <button 
@@ -162,11 +152,6 @@ export function PricingSection({
                 </div>
               )}
               <p className="text-xs text-slate-500">{pricePlans.standard.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {pricePlans.standard.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-blue-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
             </div>
             <div className="mt-6 space-y-3">
               <button 
@@ -199,11 +184,6 @@ export function PricingSection({
                 </div>
               )}
               <p className="text-xs text-slate-500">{pricePlans.pro.description}</p>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                {pricePlans.pro.features.map((feat: string, idx: number) => (
-                  <li key={idx} className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-purple-600" /><span>{feat}</span></li>
-                ))}
-              </ul>
             </div>
             <div className="mt-6 space-y-3">
               <button 
