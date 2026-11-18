@@ -7,12 +7,12 @@
  * ・クレジットの消費ガイドは、今までどおりここにも出す
  * ・props は前のまま受け取る（_index.tsx を変えないため）。買うのは料金ページなので onCheckout は使わない
  */
-import React, { useState, useEffect } from 'react';
-import { Link } from '@remix-run/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigationType } from '@remix-run/react';
 import { Flame, Coins, Loader2 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
 import { PLAN_OFFERS } from '../data/billing-plans';
-import { FreePlanFeatures } from './billing/FreePlanFeatures';
+import { FreePlanFeatures, LP_RETURN_KEY } from './billing/FreePlanFeatures';
 import { supabase } from '../lib/supabaseClient';
 
 interface PricingSectionProps {
@@ -27,6 +27,8 @@ const dollars = (cents: number) => `A$${(cents / 100).toFixed(cents % 100 ? 2 : 
 export function PricingSection({ isDarkMode }: PricingSectionProps) {
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const navigationType = useNavigationType();
+  const freeCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -42,6 +44,23 @@ export function PricingSection({ isDarkMode }: PricingSectionProps) {
     }
     loadData();
   }, []);
+
+  // Free のカードの一覧のリンクから別のページへ行き、「戻る」で帰ってきたら、Free のカードの位置に戻す。
+  // 料金の欄は読み込みのあとで高さが変わるので、ブラウザの「元の位置に戻す」だけでは下の欄にずれてしまう
+  useEffect(() => {
+    if (loading) return;
+    let mark: string | null = null;
+    try {
+      mark = window.sessionStorage.getItem(LP_RETURN_KEY);
+      window.sessionStorage.removeItem(LP_RETURN_KEY);
+    } catch {
+      return;
+    }
+    // 「戻る」で帰ってきたときだけ（30 分以内）。ほかの行き方でトップページを開いたときは何もしない
+    if (!mark || navigationType !== 'POP' || Date.now() - Number(mark) > 30 * 60 * 1000) return;
+    const timer = setTimeout(() => freeCardRef.current?.scrollIntoView({ block: 'center' }), 50);
+    return () => clearTimeout(timer);
+  }, [loading, navigationType]);
 
   if (loading) {
     return (
@@ -101,7 +120,7 @@ export function PricingSection({ isDarkMode }: PricingSectionProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto">
         {free && (
-          <div className={card}>
+          <div className={card} ref={freeCardRef}>
             <div className="space-y-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{free.name}</span>
               <div>
