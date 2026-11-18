@@ -131,7 +131,13 @@ export const onRequestPost = async (context: any) => {
 
       // AI 体験はカード払いだけにする。カードの指紋で「カード 1 枚につき 1 回」を守るため
       // （Link など、カード以外の支払い方法では指紋が取れない。2026-11-18 の staging のテストで "(no card)" になった）
-      if (offer.kind === 'trial') params.append('payment_method_types[0]', 'card');
+      // 今の Stripe の API では payment_method_types は使えない（支払い方法は管理画面で決める）ので、
+      // カード以外を「除く」指定にする。Apple Pay・Google Pay はカード払いの一種なので残る
+      if (offer.kind === 'trial') {
+        ['link', 'klarna', 'zip', 'afterpay_clearpay', 'paypal'].forEach((type, i) =>
+          params.append(`excluded_payment_method_types[${i}]`, type)
+        );
+      }
 
       if (offer.kind === 'subscription') {
         params.append('mode', 'subscription');
@@ -178,12 +184,15 @@ export const onRequestPost = async (context: any) => {
 
     const created = await stripeRequest(env, 'POST', 'checkout/sessions', params);
     if (!created.ok || !created.data?.url) {
-      console.error('Stripe checkout session error:', created.data?.error?.message || 'Unknown Stripe error');
-      return json({ error: 'Could not start checkout. Please try again.' }, 400);
+      const detail = created.data?.error?.message || 'Unknown Stripe error';
+      console.error('Stripe checkout session error:', detail);
+      // テスト環境（sandbox）では、原因を画面にも出す（本番では出さない）
+      return json({ error: keyIsLive ? 'Could not start checkout. Please try again.' : `Could not start checkout (test mode): ${detail}` }, 400);
     }
     return json({ url: created.data.url }, 200);
   } catch (err: any) {
     console.error('create-checkout-session error:', err?.message);
-    return json({ error: 'Could not start checkout. Please try again.' }, 500);
+    const live = String(context?.env?.STRIPE_SECRET_KEY || '').includes('_live_');
+    return json({ error: live ? 'Could not start checkout. Please try again.' : `Could not start checkout (test mode): ${err?.message}` }, 500);
   }
 };
