@@ -129,15 +129,9 @@ export const onRequestPost = async (context: any) => {
       params.append('success_url', `${origin}/my-account?checkout=success`);
       params.append('cancel_url', `${origin}/prices?checkout=canceled`);
 
-      // AI 体験はカード払いだけにする。カードの指紋で「カード 1 枚につき 1 回」を守るため
-      // （Link など、カード以外の支払い方法では指紋が取れない。2026-11-18 の staging のテストで "(no card)" になった）
-      // 今の Stripe の API では payment_method_types は使えない（支払い方法は管理画面で決める）ので、
-      // カード以外を「除く」指定にする。Apple Pay・Google Pay はカード払いの一種なので残る
-      if (offer.kind === 'trial') {
-        ['link', 'klarna', 'zip', 'afterpay_clearpay', 'paypal'].forEach((type, i) =>
-          params.append(`excluded_payment_method_types[${i}]`, type)
-        );
-      }
+      // AI 体験も、ほかと同じくすべての支払い方法を使える（2026-11-18 に決定）。
+      // 「1 アカウント 1 回」は上で確かめる。カード番号で払われたときは、Webhook がカードの指紋でも 2 回目を止める
+      // （Link などでは指紋が取れないが、体験をくり返されても A$1 で 100 クレジットなので損はしない）
 
       if (offer.kind === 'subscription') {
         params.append('mode', 'subscription');
