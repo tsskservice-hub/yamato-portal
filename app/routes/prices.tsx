@@ -87,7 +87,9 @@ export default function Prices() {
   }, [loadData]);
 
   const handleCheckout = async (priceId: string) => {
-    if (!user) {
+    // サーバーのクッキーが切れていても、ブラウザがログインしていれば買える（支払いの処理はブラウザの情報を使う）
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       layoutRef.current?.openAuthModal('signin');
       return;
     }
@@ -218,11 +220,8 @@ export default function Prices() {
 
                 {/* Standard Pack */}
                 {pricePlans.standard && (
-                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 flex flex-col justify-between shadow-xl relative">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm">
-                      Good balance
-                    </div>
-                    <div className="space-y-4 pt-2">
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
+                    <div className="space-y-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{pricePlans.standard.name}</span>
                       <p className="text-xs text-slate-500" lang="ja">いっぱい = lots</p>
                       <div>

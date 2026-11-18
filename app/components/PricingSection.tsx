@@ -62,11 +62,10 @@ export function PricingSection({ isDarkMode }: PricingSectionProps) {
   const paidCard = (tier: 'basic' | 'plus') => {
     const offer = PLAN_OFFERS[tier === 'basic' ? 'basic_monthly' : 'plus_monthly'];
     const yearly = PLAN_OFFERS[tier === 'basic' ? 'basic_yearly' : 'plus_yearly'];
-    const featured = tier === 'plus';
     return (
-      <div className={`${card} ${featured ? 'border-2 border-indigo-500' : ''}`}>
+      <div className={card}>
         <div className="space-y-3">
-          <span className={`text-xs font-bold uppercase tracking-wider ${featured ? 'text-indigo-600' : 'text-slate-500'}`}>
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
             {tier === 'basic' ? 'Basic' : 'Plus'}
           </span>
           <div>

@@ -13,10 +13,28 @@ import { Link } from '@remix-run/react';
 import { PLAN_OFFERS, type MyPlan, type PlanKey } from '~/data/billing-plans';
 import type { PlanConfig } from '~/data/price-plans';
 import { fetchMyPlan, formatDate, startPlanCheckout } from './billing-client';
+import { supabase } from '~/lib/supabaseClient';
 
 const dollars = (cents: number) => `A$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 
 const card = 'bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm';
+/** 購入ボタンの下に出す同意の文（クレジットパックのカードと同じ） */
+function AgreeNote() {
+  return (
+    <p className="text-[10px] text-center text-slate-400 dark:text-slate-500 mt-2">
+      By purchasing, you agree to our{' '}
+      <Link to="/legal/terms" className="underline hover:text-slate-600">
+        Terms
+      </Link>{' '}
+      &{' '}
+      <Link to="/legal/disclaimer" className="underline hover:text-slate-600">
+        Disclaimer
+      </Link>
+      .
+    </p>
+  );
+}
+
 const btn = 'w-full py-3 px-4 rounded-xl font-bold text-sm text-center transition-all cursor-pointer disabled:opacity-50 block';
 
 export function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) {
@@ -43,19 +61,21 @@ export function SubscriptionPlans({
   const [busy, setBusy] = useState<PlanKey | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // ログインの判定は、サーバーのクッキー（signedIn）だけでなく、ブラウザのログイン情報も見る
+  // （クッキーの期限が切れていても、ブラウザがログインしていれば買えるようにする。支払いの処理もブラウザの情報を使う）
   useEffect(() => {
-    if (!signedIn) return setMyPlan(null);
     fetchMyPlan().then(setMyPlan);
   }, [signedIn]);
 
   const buy = async (key: PlanKey) => {
-    if (!signedIn) return onSignIn();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return onSignIn();
     setBusy(key);
     setError(await startPlanCheckout(key));
     setBusy(null);
   };
 
-  const discount = myPlan?.first_plan_coupon === 'FIRST_SUB_TRIAL' ? 2 : myPlan?.first_plan_coupon === 'FIRST_SUB' ? 1 : signedIn ? 0 : 1;
+  const discount = myPlan?.first_plan_coupon === 'FIRST_SUB_TRIAL' ? 2 : myPlan?.first_plan_coupon === 'FIRST_SUB' ? 1 : myPlan ? 0 : 1;
   const hasSubscription = Boolean(myPlan?.plan);
   const yearly = interval === 'year';
 
@@ -65,9 +85,9 @@ export function SubscriptionPlans({
     const offer = PLAN_OFFERS[key];
     const featured = tier === 'plus';
     return (
-      <div className={`${card} ${featured ? 'ring-2 ring-indigo-500' : ''}`}>
+      <div className={card}>
         <div className="space-y-3">
-          <span className={`text-xs font-bold uppercase tracking-wider ${featured ? 'text-indigo-600' : 'text-slate-500'}`}>
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
             {tier === 'basic' ? 'Basic' : 'Plus'}
           </span>
           <div>
@@ -93,6 +113,7 @@ export function SubscriptionPlans({
         >
           {busy === key ? 'Opening…' : hasSubscription ? 'You have a plan' : `Choose ${tier === 'basic' ? 'Basic' : 'Plus'}`}
         </button>
+        <AgreeNote />
       </div>
     );
   };
@@ -168,8 +189,8 @@ export function SubscriptionPlans({
             email reminder before each renewal.
           </p>
           <p>
-            <b>Cancel any time:</b> go to My Account → “Manage plan, card and receipts”. Your plan stays active until the end of the
-            period you have paid for.
+            <b>Cancel any time:</b> once you have subscribed, a “Manage plan, card and receipts” button appears in My Account (under
+            “Your plan”). Press it to cancel on the secure Stripe page. Your plan stays active until the end of the period you have paid for.
           </p>
           <p>
             <b>Monthly credits:</b> the credits you receive each month (yearly members also receive them every month) can be used until
@@ -210,6 +231,7 @@ export function SubscriptionPlans({
             >
               {myPlan?.trial_done ? 'Trial used' : myPlan?.paid_access ? 'Included in your plan' : busy === 'ai_trial' ? 'Opening…' : 'Try AI for A$1'}
             </button>
+            <AgreeNote />
           </div>
 
           {/* 3-Month Pass / 6-Month Pass */}
@@ -238,6 +260,7 @@ export function SubscriptionPlans({
                 >
                   {busy === key ? 'Opening…' : `Choose ${o.name}`}
                 </button>
+                <AgreeNote />
               </div>
             );
           })}
