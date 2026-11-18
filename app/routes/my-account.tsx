@@ -14,6 +14,7 @@ import { supabase } from '~/lib/supabaseClient';
 // モジュール化したコンポーネントのインポート
 import { TutorPreferencesSection } from '~/components/TutorPreferencesSection';
 import { TimezoneSection } from '~/components/TimezoneSection';
+import { PlanSection } from '~/components/billing/PlanSection';
 import { RegistrationDetails } from '~/components/RegistrationDetails';
 import { CreditTransactionsSection } from '~/components/CreditTransactionsSection';
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
@@ -57,7 +58,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       .maybeSingle();
 
     if (profile) {
-      initialCredits = (profile as any).credits ?? 10;
+      initialCredits = (profile as any).credits ?? 0;
       initialNickname = (profile as any).nickname ?? "";
       initialPace = (profile as any).learning_pace ?? "normal";
       initialState = (profile as any).state ?? null;
@@ -591,6 +592,7 @@ export default function AccountSettingsRoute() {
         />
 
         {/* 1-2. タイムゾーン（デイリークイズの切り替わり。変更は 30 日に 1 回まで） */}
+        <PlanSection userId={user?.id} />
         <TimezoneSection userId={user?.id} />
 
         {/* 1a. 先生アカウントの審査中のお知らせ */}

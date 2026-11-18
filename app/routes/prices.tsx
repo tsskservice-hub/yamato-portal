@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '~/data/price-plans';
 import { PlanUsageComparison } from '~/components/PlanUsageComparison';
+import { SubscriptionPlans } from '~/components/billing/SubscriptionPlans';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -59,7 +60,7 @@ export default function Prices() {
   } | undefined;
 
   const user = rootData?.user ?? null;
-  const credits = rootData?.credits ?? 10;
+  const credits = rootData?.credits ?? 0;
   const nickname = rootData?.nickname ?? "";
 
   // Supabase より PRICE_PLANS データをフェッチ
@@ -158,6 +159,9 @@ export default function Prices() {
                 </div>
               )}
             </section>
+
+            {/* サブスク・シーズンプラン・AI 体験（SQL 51・Stripe の Lookup key） */}
+            <SubscriptionPlans signedIn={Boolean(user)} onSignIn={() => layoutRef.current?.openAuthModal('signin')} />
 
             {/* キャンペーンバナー & 価格カード */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
