@@ -13,6 +13,7 @@ import { Link } from '@remix-run/react';
 import { PLAN_OFFERS, type MyPlan, type PlanKey } from '~/data/billing-plans';
 import type { PlanConfig } from '~/data/price-plans';
 import { fetchMyPlan, formatDate, startPlanCheckout } from './billing-client';
+import { FreePlanFeatures } from './FreePlanFeatures';
 import { supabase } from '~/lib/supabaseClient';
 
 const dollars = (cents: number) => `A$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
@@ -183,6 +184,7 @@ export function SubscriptionPlans({
                   <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">{freePlan.badge}</div>
                 )}
                 <p className="text-sm text-slate-600 dark:text-slate-300">{freePlan.description}</p>
+                <FreePlanFeatures />
               </div>
               <Link
                 to={freePlan.ctaLink || '/'}

@@ -12,6 +12,7 @@ import { Link } from '@remix-run/react';
 import { Flame, Coins, Loader2 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '../data/price-plans';
 import { PLAN_OFFERS } from '../data/billing-plans';
+import { FreePlanFeatures } from './billing/FreePlanFeatures';
 import { supabase } from '../lib/supabaseClient';
 
 interface PricingSectionProps {
@@ -108,6 +109,7 @@ export function PricingSection({ isDarkMode }: PricingSectionProps) {
                 <span className="text-xs text-slate-500 ml-1">{free.period}</span>
               </div>
               <p className={`text-sm ${muted}`}>{free.description}</p>
+              <FreePlanFeatures dark={isDarkMode} />
             </div>
           </div>
         )}
