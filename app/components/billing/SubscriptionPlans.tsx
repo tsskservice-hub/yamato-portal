@@ -105,7 +105,7 @@ export function SubscriptionPlans({
             All lessons and VCE tools + <b>{offer.credits} AI credits every month</b>
             {featured ? '. For students who practise with AI a lot.' : '.'}
           </p>
-          <p className="text-xs text-slate-500">Each month’s credits can be used until the end of the following month.</p>
+          <p className="text-xs text-slate-500">Each month’s credits expire 2 months after you receive them.</p>
         </div>
         <button
           type="button"
@@ -205,10 +205,6 @@ export function SubscriptionPlans({
             <b>Cancel any time:</b> once you have subscribed, a “Manage plan, card and receipts” button appears in My Account (under
             “Your plan”). Press it to cancel on the secure Stripe page. Your plan stays active until the end of the period you have paid for.
           </p>
-          <p>
-            <b>Monthly credits:</b> the credits you receive each month (yearly members also receive them every month) can be used until
-            the <b>end of the following month</b>. After that, any unused credits from that month expire — they do not keep carrying over.
-          </p>
         </div>
       </section>
 
@@ -289,6 +285,38 @@ export function SubscriptionPlans({
         <p className="max-w-3xl mx-auto text-xs text-slate-500 dark:text-slate-400 text-center">
           Prices are in Australian dollars. Payments are processed securely by Stripe.
         </p>
+      </section>
+
+      {/* ---------- クレジットの有効期限（買った日から数える。種類ごとに長さが違う） ---------- */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-3 text-sm text-slate-700 dark:text-slate-300">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">How long do credits last?</h3>
+          <p>
+            Credits expire a set time <b>after the day you buy</b> — not at the end of a calendar month. How long they last depends on what
+            you buy:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5">
+            <li>
+              <b>Basic and Plus (monthly or yearly):</b> each month’s credits last <b>2 months</b> from the day you receive them. You
+              receive them on the same date each month. <i>Example: subscribe on 28 January → the credits you get that day expire on
+              28 March, and the credits you get on 28 February expire on 28 April.</i>
+            </li>
+            <li>
+              <b>3-Month and 6-Month Pass:</b> credits last until the pass ends. <i>Example: buy a 6-Month Pass on 5 May → your credits
+              expire on 5 November.</i>
+            </li>
+            <li>
+              <b>AI Trial and top-ups:</b> credits last <b>1 year</b>. <i>Example: buy a top-up on 10 March 2027 → those credits expire on
+              10 March 2028.</i>
+            </li>
+            <li>
+              <b>Daily quiz credits:</b> last <b>7 days</b>.
+            </li>
+          </ul>
+          <p className="text-xs text-slate-500">
+            When you use AI, the credits that expire soonest are used first. You can see your credit history in My Account.
+          </p>
+        </div>
       </section>
     </>
   );

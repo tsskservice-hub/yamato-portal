@@ -14,6 +14,7 @@ import { useChatResize } from "../../hooks/useChatResize";
 import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
 import { useBroadcastChatColor } from "~/utils/chatThemeColor";
 import { requestAuthModal } from "~/utils/openAuthModal";
+import { creditErrorChatHtml } from '~/lib/credit-errors';
 import { personaliseGreeting, resolveDisplayName } from "../../utils/nickname"; // 💡 ニックネームモジュールのインポート
 
 export interface YamatoChatCommonMetaType {
@@ -330,7 +331,7 @@ export function YamatoChatCommon({
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`,
+          content: creditErrorChatHtml(),
         },
       ]);
       setTutorInput("");
@@ -426,12 +427,17 @@ export function YamatoChatCommon({
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
+          if (errorCode === "AI_TRIAL_REQUIRED") {
+            setTutorMessages([...newMessages, { role: "assistant", content: creditErrorChatHtml(errorCode) }]);
+            await refreshUserCredits();
+            return;
+          }
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
               {
                 role: "assistant",
-                content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! Please top up your credits to continue!`,
+                content: creditErrorChatHtml(errorCode),
               },
             ]);
             await refreshUserCredits();

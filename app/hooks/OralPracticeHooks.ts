@@ -5,6 +5,7 @@
 import { yamatoFetch } from '~/lib/yamatoApi';
 import { useState, useEffect, useRef, useCallback } from "react";
 import { isLikelyHallucination } from "~/utils/stt-guard";
+import { CreditError, creditErrorFromResponse } from '~/lib/credit-errors';
 
 export type ChatMessage = {
   role: "assistant" | "user";
@@ -406,6 +407,8 @@ export function useOralPracticeEngine(
           body: JSON.stringify(requestPayload),
         });
 
+        const creditError = await creditErrorFromResponse(res);
+        if (creditError) throw creditError;
         if (!res.ok) {
           const errBody = await res.text();
           console.error(`❌ [DEBUG] Backend HTTP Error ${res.status}:`, errBody);
@@ -482,6 +485,11 @@ export function useOralPracticeEngine(
       } catch (err) {
         console.error("❌ [DEBUG] Auto send error:", err);
         setIsAnalyzing(false);
+        if (err instanceof CreditError) {
+          // クレジットが使えない（AI 体験・プランの前、または残高不足）→ 案内を出して、録音は再開しない
+          setChatMessages((prev) => [...prev, { role: "assistant", content: err.message, isHtml: false }]);
+          return;
+        }
         setChatMessages((prev) => [
           ...prev,
           { role: "assistant", content: "通信エラーが発生しました。もう一度お話しください。", isHtml: false },
@@ -736,6 +744,8 @@ export function useOralPracticeEngine(
         return;
       }
 
+      const creditError = await creditErrorFromResponse(res);
+      if (creditError) throw creditError;
       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
       const data = (await res.json()) as any;
@@ -787,7 +797,11 @@ export function useOralPracticeEngine(
       console.error("Send answer error:", err);
       setChatMessages([
         ...newMessages,
-        { role: "assistant", content: "Sorry, something went wrong. Please send your answer again.", isHtml: false },
+        {
+          role: "assistant",
+          content: err instanceof CreditError ? err.message : "Sorry, something went wrong. Please send your answer again.",
+          isHtml: false,
+        },
       ]);
     } finally {
       setIsAnalyzing(false);

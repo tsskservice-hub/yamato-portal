@@ -312,9 +312,9 @@ export default function KanjiLookup() {
                     Sign in / Sign up
                   </button>
                 )}
-                {error.code === "NO_CREDITS" && (
+                {(error.code === "NO_CREDITS" || error.code === "AI_TRIAL_REQUIRED") && (
                   <a href="/prices" className="inline-block px-3 py-1.5 rounded-lg text-white font-bold" style={{ backgroundColor: color }}>
-                    Top up credits
+                    See plans
                   </a>
                 )}
               </div>
