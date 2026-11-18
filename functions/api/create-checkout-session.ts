@@ -129,6 +129,10 @@ export const onRequestPost = async (context: any) => {
       params.append('success_url', `${origin}/my-account?checkout=success`);
       params.append('cancel_url', `${origin}/prices?checkout=canceled`);
 
+      // AI 体験はカード払いだけにする。カードの指紋で「カード 1 枚につき 1 回」を守るため
+      // （Link など、カード以外の支払い方法では指紋が取れない。2026-11-18 の staging のテストで "(no card)" になった）
+      if (offer.kind === 'trial') params.append('payment_method_types[0]', 'card');
+
       if (offer.kind === 'subscription') {
         params.append('mode', 'subscription');
         params.append('subscription_data[metadata][supabase_user_id]', user.id);

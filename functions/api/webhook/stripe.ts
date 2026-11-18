@@ -138,9 +138,22 @@ async function handleCheckout(session: Stripe.Checkout.Session, stripe: Stripe, 
     const piId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
     let fingerprint: string | null = null;
     if (piId) {
-      const pi = await stripe.paymentIntents.retrieve(piId, { expand: ["latest_charge"] });
+      // カードの指紋は、支払い（charge）と支払い方法（payment_method）の両方を見る
+      // （2026-11-18 の staging のテストで、charge 側からは取れず "(no card)" になったため）
+      const pi = await stripe.paymentIntents.retrieve(piId, { expand: ["latest_charge", "payment_method"] });
       const charge = pi.latest_charge as Stripe.Charge | null;
-      fingerprint = charge?.payment_method_details?.card?.fingerprint ?? null;
+      const method = pi.payment_method as Stripe.PaymentMethod | null;
+      fingerprint =
+        charge?.payment_method_details?.card?.fingerprint ??
+        (typeof method === "object" ? method?.card?.fingerprint : null) ??
+        null;
+      if (!fingerprint && typeof pi.payment_method === "string") {
+        const pm = await stripe.paymentMethods.retrieve(pi.payment_method);
+        fingerprint = pm.card?.fingerprint ?? null;
+      }
+    }
+    if (!fingerprint) {
+      console.warn(`Stripe webhook: trial ${session.id} — card fingerprint not found (payment_intent=${piId ?? "none"}).`);
     }
     const { data, error } = await admin.rpc("grant_ai_trial", {
       p_user_id: userId,
