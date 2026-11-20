@@ -1,7 +1,7 @@
 /**
  * @file app/routes/world._index.tsx
  * @description Yamato Town の入り口 — ほかの学習者と交流する場所だけ（2026-11-21〜）
- *   AI のキャラクターと話す練習は Speaking Tasks（/speaking）へ分けた。
+ *   各場所に AI の話し手もいる。ほかの人が見えない練習用の入口は Speaking Tasks（/speaking）。
  *   場所の一覧は app/data/world/places.ts
  */
 import React from 'react';
@@ -9,10 +9,11 @@ import { Link } from '@remix-run/react';
 import type { MetaFunction } from '@remix-run/cloudflare';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import { WORLD_PLACES, WORLD_PLACES_COMING_SOON } from '~/data/world/places';
+import { CREDIT_COSTS } from '~/data/credit-costs';
 
 const TITLE = 'Yamato Town';
 const DESCRIPTION =
-  'Walk around a little Japanese town and meet other Japanese learners. Greet each other with set Japanese phrases and stamps.';
+  'Walk around a little Japanese town, meet other Japanese learners and greet each other with set Japanese phrases and stamps. In every place there is an AI character you can talk to.';
 
 export const meta: MetaFunction = () => [
   { title: `${TITLE} | AI Yamato Portal` },
@@ -42,13 +43,9 @@ export default function WorldIndexPage() {
               </p>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
-              <p className="font-bold text-slate-900 dark:text-white">🎤 Want to talk with AI characters?</p>
+              <p className="font-bold text-slate-900 dark:text-white">🎤 An AI character in every place</p>
               <p className="text-slate-600 dark:text-slate-300">
-                Ordering food, shopping and more are in{' '}
-                <Link to="/speaking" className="text-indigo-600 font-bold underline">
-                  Speaking Tasks
-                </Link>
-                . School accounts can use them too.
+                Talk to the burger shop clerk, a person at the bus stop, station staff and more, with your voice ({CREDIT_COSTS.worldTalk3} credits for 3 minutes).
               </p>
             </div>
           </div>
@@ -64,7 +61,7 @@ export default function WorldIndexPage() {
                 <p className="mt-2 text-lg font-black text-slate-900 dark:text-white">
                   {p.title} <span lang="ja" className="text-sm text-slate-500">{p.titleJa}</span>
                 </p>
-                <p className="text-sm text-slate-600 dark:text-slate-300">Meet other learners here.</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300">Meet other learners · talk to the {p.npc.name.toLowerCase()} {p.npc.icon}</p>
               </Link>
             ))}
             {WORLD_PLACES_COMING_SOON.map((p) => (

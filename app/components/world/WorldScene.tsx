@@ -213,7 +213,7 @@ export function WorldScene({
             >
               {b && <Bubble bubble={b} />}
               {o.talking && !b && (
-                <span className="mb-1 text-[10px] font-bold bg-white/90 text-slate-600 rounded-full px-2 py-0.5 shadow">💬 talking to the clerk</span>
+                <span className="mb-1 text-[10px] font-bold bg-white/90 text-slate-600 rounded-full px-2 py-0.5 shadow">💬 talking to the {place.npc.name.toLowerCase()}</span>
               )}
               <span className="text-3xl sm:text-4xl leading-none drop-shadow opacity-90">{AVATARS[o.avatar] ?? AVATARS[0]}</span>
               <span lang="ja" className="text-[10px] sm:text-xs font-bold bg-white/90 text-slate-700 rounded-full px-2 mt-0.5 shadow max-w-[8rem] truncate">

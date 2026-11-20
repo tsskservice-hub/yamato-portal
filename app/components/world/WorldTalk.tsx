@@ -538,7 +538,7 @@ export function WorldTalk({
                 <p className="text-xs text-slate-500">
                   {mic === 'recording' && '🔴 Recording… press Stop when you finish.'}
                   {mic === 'transcribing' && 'Turning your voice into text…'}
-                  {mic === 'idle' && (yourTurn ? 'Speak, then check the text before you send it.' : 'Please wait for the clerk.')}
+                  {mic === 'idle' && (yourTurn ? 'Speak, then check the text before you send it.' : `Please wait for the ${place.npc.name.toLowerCase()}.`)}
                 </p>
               </div>
             )}
@@ -605,7 +605,7 @@ export function WorldTalk({
       {/* メニューと、話し方のヒント */}
       <div className="space-y-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4">
-          <p className="font-bold text-slate-900 dark:text-white mb-2">📋 メニュー Menu</p>
+          <p className="font-bold text-slate-900 dark:text-white mb-2">{place.infoTitle}</p>
           <div className="space-y-2 text-sm">
             {place.menu.map((m) => (
               <div key={m.section}>

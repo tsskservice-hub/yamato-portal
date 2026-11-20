@@ -23,8 +23,8 @@ export const PLAZA_CLOSED_MESSAGES: Record<string, string> = {
   SCHOOL_ACCOUNT:
     'Together mode is only for personal accounts. Teacher accounts and students in a school class can use the Speaking Tasks instead.',
   SUSPENDED: 'You cannot use Together mode at the moment because of reports from other users.',
-  ROOM_FULL: 'The shop is full right now. Please try again in a few minutes.',
-  FULL: 'The shop is full right now. Please try again in a few minutes.',
+  ROOM_FULL: 'This place is full right now. Please try again in a few minutes.',
+  FULL: 'This place is full right now. Please try again in a few minutes.',
   OPENED_ELSEWHERE: 'You opened Together mode in another tab or device, so this one was closed.',
   IDLE: 'You were away for a while, so you left Together mode.',
   AUTH_TIMEOUT: 'The connection timed out. Please try again.',

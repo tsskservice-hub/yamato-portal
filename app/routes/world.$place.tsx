@@ -1,27 +1,31 @@
 /**
  * @file app/routes/world.$place.tsx
- * @description Yamato Town の 1 つの場所（例: /world/burger-shop）— ほかの学習者との交流だけ
+ * @description Yamato Town の 1 つの場所（例: /world/burger-shop）— ほかの学習者との交流 ＋ その場所の AI の話し手
  *
- * ・2026-11-21: AI の店員と話す練習は Speaking Tasks（/speaking/<id>、routes/speaking.$task.tsx）に分けた。
- *   ここは「みんなで（Together）」だけ: ほかの利用者が見え、決まった文とスタンプであいさつする
- * ・個人のアカウントだけ（学校のアカウントは入れない）。usePlaza.ts・SQL 58
- * ・場所の絵は app/data/world/places.ts（画面は components/world を共通で使う）
+ * ・2026-11-21: 入口を 2 つに分けた（SNS を心配する保護者・学校への対策）
+ *     Yamato Town（ここ）… ほかの利用者が見える（決まった文とスタンプだけ。個人のアカウントだけ。usePlaza.ts・SQL 58）
+ *                          各場所に AI の話し手が 1 人いて、個人の利用者も声で話せる
+ *     Speaking Tasks（/speaking/<id>、routes/speaking.$task.tsx）… ほかの人は見えない。AI と話す課題だけ（学校のアカウントも）
+ * ・場所のデータは app/data/world/places.ts（画面は components/world を共通で使う）
+ * ・会話は 1 回 3 分・クレジットは CREDIT_COSTS.worldTalk3（サーバーが引く。api/src/handlers/world-handler.ts）
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from '@remix-run/react';
 import type { MetaFunction } from '@remix-run/cloudflare';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import { WorldScene } from '~/components/world/WorldScene';
+import { WorldTalk } from '~/components/world/WorldTalk';
 import { PLAZA_CLOSED_MESSAGES, usePlaza, type PlazaPlayer } from '~/components/world/usePlaza';
 import { PlazaChatBar, PlazaPlayerMenu, PlazaRulesModal } from '~/components/world/PlazaControls';
 import { findWorldPlace } from '~/data/world/places';
+import { CREDIT_COSTS } from '~/data/credit-costs';
 import { supabase } from '~/lib/supabaseClient';
 import { requestAuthModal } from '~/utils/openAuthModal';
 
 export const meta: MetaFunction = ({ params }) => {
   const place = findWorldPlace(params.place);
   const title = place ? `${place.title} – Yamato Town` : 'Yamato Town';
-  const description = 'Meet other Japanese learners and greet them with set Japanese phrases and stamps.';
+  const description = 'Meet other Japanese learners, greet them with set Japanese phrases and stamps, and talk to an AI character in Japanese.';
   return [
     { title: `${title} | AI Yamato Portal` },
     { name: 'description', content: description },
@@ -35,6 +39,8 @@ export default function WorldPlacePage() {
   const navigate = useNavigate();
   const place = findWorldPlace(placeId);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [talking, setTalking] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [picked, setPicked] = useState<PlazaPlayer | null>(null);
   const sceneState = useRef({ x: place?.start.x ?? 50, y: place?.start.y ?? 84, avatar: 0 });
 
@@ -50,6 +56,12 @@ export default function WorldPlacePage() {
       setSignedIn(Boolean(session));
     })();
   }, []);
+
+  // AI と話している間は、ほかの人に「話し中」と見せる
+  useEffect(() => {
+    if (plaza.phase === 'live') plaza.setTalking(talking);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [talking, plaza.phase]);
 
   // お知らせ（ブロック・報告しました）は少しで消す
   useEffect(() => {
@@ -72,8 +84,17 @@ export default function WorldPlacePage() {
     );
   }
 
+  const askToTalk = () => {
+    if (!signedIn) {
+      requestAuthModal('signin');
+      return;
+    }
+    setConfirming(true);
+  };
+
   const live = plaza.phase === 'live';
   const others = live ? Object.values(plaza.others) : [];
+  const npcName = place.npc.name.toLowerCase();
 
   return (
     <ToolPageWrapper breadcrumbTitle={place.title}>
@@ -88,29 +109,29 @@ export default function WorldPlacePage() {
                 {place.emoji} {place.title} <span lang="ja" className="text-lg text-slate-500">{place.titleJa}</span>{' '}
                 <span className="text-xs font-bold text-indigo-600 align-middle">BETA</span>
               </h1>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Meet other learners here and greet them in Japanese.</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Meet other learners here, and talk to the {npcName} in Japanese.</p>
             </div>
             <div className="text-xs text-slate-500 text-right">
-              👥 Set phrases and stamps only
+              👥 Other learners: set phrases and stamps only
               <br />
-              No free chat · no voice · personal accounts only
+              🎤 {place.npc.icon} {place.npc.name}: {place.minutes} min · {CREDIT_COSTS.worldTalk3} credits · voice only
             </div>
           </div>
 
           {signedIn === false && (
             <div className="rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-sm p-4 flex flex-wrap items-center justify-between gap-3">
-              <p>Sign in to see and greet other learners.</p>
+              <p>Sign in to see and greet other learners, or to talk to the {npcName}.</p>
               <button type="button" onClick={() => requestAuthModal('signin')} className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold cursor-pointer">
                 Sign in
               </button>
             </div>
           )}
 
-          {signedIn && (plaza.phase === 'checking' || plaza.phase === 'connecting') && (
+          {!talking && signedIn && (plaza.phase === 'checking' || plaza.phase === 'connecting') && (
             <p className="text-xs text-slate-500">Joining…</p>
           )}
 
-          {plaza.phase === 'closed' && (
+          {!talking && plaza.phase === 'closed' && (
             <div className="rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm p-4 flex flex-wrap items-center justify-between gap-3">
               <p>{PLAZA_CLOSED_MESSAGES[plaza.closedCode ?? ''] ?? PLAZA_CLOSED_MESSAGES.SERVER_ERROR}</p>
               <div className="flex gap-2">
@@ -119,9 +140,11 @@ export default function WorldPlacePage() {
                     Try again
                   </button>
                 )}
-                <Link to={`/speaking/${place.id}`} className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">
-                  Speaking task instead
-                </Link>
+                {plaza.closedCode === 'SCHOOL_ACCOUNT' && (
+                  <Link to={`/speaking/${place.id}`} className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">
+                    Go to Speaking Tasks
+                  </Link>
+                )}
               </div>
             </div>
           )}
@@ -130,38 +153,85 @@ export default function WorldPlacePage() {
             <div className="rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm p-3">{plaza.notice}</div>
           )}
 
-          <WorldScene
-            place={place}
-            nickname={live ? plaza.me?.name ?? '' : ''}
-            disabled={Boolean(picked)}
-            stateRef={sceneState}
-            onMove={live ? plaza.sendMove : undefined}
-            onAvatarChange={live ? plaza.setAvatar : undefined}
-            others={others}
-            bubbles={live ? plaza.bubbles : undefined}
-            myPid={live ? plaza.me?.pid : undefined}
-            onPickOther={setPicked}
-          />
-          {live && (
-            <PlazaChatBar phrases={plaza.phrases} stamps={plaza.stamps} onSay={plaza.say} onStamp={plaza.stamp} othersCount={others.length} />
+          {!talking ? (
+            <>
+              <WorldScene
+                place={place}
+                nickname={live ? plaza.me?.name ?? '' : ''}
+                disabled={confirming || Boolean(picked)}
+                onTalk={askToTalk}
+                stateRef={sceneState}
+                onMove={live ? plaza.sendMove : undefined}
+                onAvatarChange={live ? plaza.setAvatar : undefined}
+                others={others}
+                bubbles={live ? plaza.bubbles : undefined}
+                myPid={live ? plaza.me?.pid : undefined}
+                onPickOther={setPicked}
+              />
+              {live && (
+                <PlazaChatBar phrases={plaza.phrases} stamps={plaza.stamps} onSay={plaza.say} onStamp={plaza.stamp} othersCount={others.length} />
+              )}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm">
+                  <p className="font-bold text-slate-900 dark:text-white mb-1">
+                    🎯 Talking to the {npcName}
+                  </p>
+                  <ul className="list-disc pl-5 space-y-0.5 text-slate-600 dark:text-slate-300">
+                    {place.goals.map((g) => (
+                      <li key={g}>{g}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm text-slate-600 dark:text-slate-300">
+                  <p className="font-bold text-slate-900 dark:text-white mb-1">🕹️ How it works</p>
+                  <p>
+                    Walk with the arrow keys (or W A S D), or tap the floor. Greet other learners with a set phrase or a stamp. Tap another learner
+                    to block or report them. To talk to the {npcName}, go to the green circle and press “Talk” (or E).
+                  </p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <WorldTalk place={place} onClose={() => setTalking(false)} />
           )}
-
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm text-slate-600 dark:text-slate-300">
-            <p className="font-bold text-slate-900 dark:text-white mb-1">🕹️ How it works</p>
-            <p>
-              Walk with the arrow keys (or W A S D), or tap the floor. Choose a set phrase or a stamp to greet the people around you. Tap
-              another learner to block or report them.
-            </p>
-            <p className="mt-2">
-              Want to talk with the {place.npc.name.toLowerCase()} in Japanese?{' '}
-              <Link to={`/speaking/${place.id}`} className="text-indigo-600 font-bold underline">
-                Try the speaking task
-              </Link>
-              .
-            </p>
-          </div>
         </main>
       </div>
+
+      {/* 始める前の確認（クレジットとマイク） */}
+      {confirming && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" role="dialog" aria-modal="true" onClick={() => setConfirming(false)}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full space-y-4" onClick={(e) => e.stopPropagation()}>
+            <p className="text-lg font-black text-slate-900 dark:text-white">
+              {place.npc.icon} Talk to the {npcName}?
+            </p>
+            <ul className="text-sm text-slate-600 dark:text-slate-300 list-disc pl-5 space-y-1">
+              <li>
+                The conversation lasts up to <b>{place.minutes} minutes</b> and uses <b>{CREDIT_COSTS.worldTalk3} credits</b>.
+              </li>
+              <li>Your browser will ask to use the microphone. No camera is used.</li>
+              <li>Record what you want to say in Japanese, check the text, then send it. What you say is shown on screen but not saved.</li>
+              <li>The {npcName}&apos;s words are hidden at first so you can practise listening. You can show them any time.</li>
+              <li>When the conversation ends, you get feedback that matches your learning pace (no extra credits).</li>
+              {live && <li>Other learners cannot hear you or the {npcName}. They only see that you are talking.</li>}
+            </ul>
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setConfirming(false)} className="px-4 py-2 rounded-xl border border-slate-300 font-bold cursor-pointer">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirming(false);
+                  setTalking(true);
+                }}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer"
+              >
+                🎤 Start talking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 「みんなで」の決まり（はじめてのとき） */}
       {plaza.phase === 'needs-agree' && <PlazaRulesModal onAgree={plaza.agree} onCancel={() => navigate('/world')} />}

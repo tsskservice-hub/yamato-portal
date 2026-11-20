@@ -162,7 +162,7 @@ export function PortalModulesGrid({
         <div id="section-junior" className="space-y-4 pt-4 scroll-mt-20">
           <div className="flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400">
             <span>🍱</span>
-            <h4>Junior Lessons and Tasks</h4>
+            <h4>Lessons & Tasks</h4>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {renderCard(
@@ -266,7 +266,7 @@ export function PortalModulesGrid({
             {
               id: 'yamato-town',
               name: 'Yamato Town',
-              description: 'Walk around a little Japanese town and meet other Japanese learners. Greet each other with set Japanese phrases and stamps. Personal accounts only.',
+              description: 'Meet other Japanese learners in a little Japanese town and greet them with set phrases and stamps. Talk to an AI character in every place. Personal accounts only.',
               path: '/world',
               category: 'Meet Learners · BETA',
               iconName: 'MessagesSquare',

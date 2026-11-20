@@ -117,7 +117,7 @@ export default function SpeakingTaskPage() {
                   <p>
                     Walk with the arrow keys (or W A S D), or tap the floor. Go to the green circle in front of the {place.npc.name.toLowerCase()} and
                     press “Talk” (or E). On your turn, press “Record” (Space), speak in Japanese and press “Stop”. Check the text, then send it
-                    (Enter) or record again. The menu and useful phrases will be on screen.
+                    (Enter) or record again. The information (menu, timetable and so on) and useful phrases will be on screen.
                   </p>
                 </div>
               </div>
