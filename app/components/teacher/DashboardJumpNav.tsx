@@ -5,6 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
+import { Link } from '@remix-run/react';
 import type { DashboardData } from '~/components/teacher/TeacherDashboardSections';
 
 type Jump = { id: string; label: string; show?: boolean };
@@ -44,6 +45,19 @@ export function DashboardJumpNav({ data }: { data: DashboardData }) {
 
   return (
     <nav aria-label="Jump to a section" className="bg-white border border-slate-200 rounded-xl shadow-sm p-3 space-y-2">
+      {/* テストのページ（形成的・総括的評価に使える）へのリンク */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 sm:w-20 shrink-0">Tests</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/test"
+            className="text-xs font-bold px-3 py-1.5 rounded-full border bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 transition-colors"
+          >
+            📝 Tests: typing, kana, kanji, vocabulary, sentences →
+          </Link>
+          <span className="text-[11px] text-slate-400">For formative or summative assessment in class</span>
+        </div>
+      </div>
       {row('Daily', daily, 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100')}
       {row('Settings', settings, 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')}
     </nav>
