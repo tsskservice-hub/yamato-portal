@@ -524,10 +524,13 @@ export function YamatoChatCommon({
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
             style={floatingInlineStyle}
-            className={`${finalFloatingButtonClass} border-4 font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
+            aria-label={`Open ${characterName}`}
+            title={characterName}
+            className={`${finalFloatingButtonClass} border-4 font-bold px-3 sm:px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
           >
-            <span>🤖</span>
-            <span>{characterName}</span>
+            <span className="text-lg sm:text-sm leading-none">🤖</span>
+            {/* スマホ（sm 未満）ではロボットのアイコンだけにする（名前まで出すと幅をとりすぎる） */}
+            <span className="hidden sm:inline">{characterName}</span>
             {activeImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}

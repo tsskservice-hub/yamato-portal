@@ -21,8 +21,8 @@ import { requestAuthModal } from "~/utils/openAuthModal";
 const DEFAULT_COLOR = "#dc2626"; // ヤマトチャットが無いページの色（LP のヤマトと同じ赤）
 const KANJI_RE = /[㐀-䶿一-鿿豈-﫿々]/;
 const MAX_QUERY = 30;
-/** このボタンを出さないページ（印刷用など） */
-const HIDDEN_PATHS = ["/print-report"];
+/** このボタンを出さないページ（印刷用・料金ページ・FAQ） */
+const HIDDEN_PATHS = ["/print-report", "/prices", "/faq"];
 
 interface LookupWord {
   word: string;

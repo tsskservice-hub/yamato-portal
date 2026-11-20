@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '~/data/price-plans';
 import { PlanUsageComparison } from '~/components/PlanUsageComparison';
+import ScrollTopButton from '~/components/layout/ScrollTopButton';
 import { SubscriptionPlans, SectionHeading } from '~/components/billing/SubscriptionPlans';
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -291,6 +292,8 @@ export default function Prices() {
               </div>
             </section>
           </main>
+          {/* 右下の「上へ戻る」ボタン（FAQ と同じ） */}
+          <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" />
         </div>
       )}
     </ToolPageWrapper>
