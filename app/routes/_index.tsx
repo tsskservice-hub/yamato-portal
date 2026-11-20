@@ -15,6 +15,7 @@ import { supabase } from '~/lib/supabaseClient';
 
 // コンポーネントおよびフックのインポート
 import { HeroDemoChat } from '~/components/layout/HeroDemoChat';
+import { YamatoFeature } from '~/components/layout/YamatoFeature';
 import { DailyQuizModal } from '~/components/DailyQuizModal';
 import { ChatYamatoConcierge } from '~/components/chat/ChatYamatoConcierge';
 import { PricingSection } from '~/components/PricingSection';
@@ -377,7 +378,10 @@ export default function Home() {
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-950'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-          
+
+          {/* 0. マスコットのヤマトの自己紹介（LP の一番上） */}
+          <YamatoFeature isDarkMode={isDarkMode} />
+
           {/* 1. Hero Section ＆ Auto Demo Chat (CONTENT_OTHER の設定を渡す) */}
           <HeroDemoChat
             isDarkMode={isDarkMode}

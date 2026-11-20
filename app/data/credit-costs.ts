@@ -19,6 +19,8 @@ export const CREDIT_COSTS = {
   /** EOY Oral Superb（Realtime の自由会話）5 分 / 10 分 */
   realtime5: 25,
   realtime10: 50,
+  /** Yamato Town（お店の店員などと声で話す）3 分 */
+  worldTalk3: 15,
   /** 漢字AI検索: 1 日 20 回まで無料、それを超えたら 1 回このクレジット数 */
   kanjiLookup: 1,
   kanjiLookupFreePerDay: 20,

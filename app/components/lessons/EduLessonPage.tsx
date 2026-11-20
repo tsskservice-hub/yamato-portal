@@ -304,7 +304,7 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
       {/* 6. Listening Task Modal（app/data/listening-tasks.ts にあるレッスンだけ） */}
       {listeningTask && (
         <EduListeningTaskModal
-          task={listeningTask}
+          parts={listeningTask}
           isOpen={isListeningTaskOpen}
           onClose={() => setIsListeningTaskOpen(false)}
           onCompleted={() => setListeningTaskCompleted(true)}

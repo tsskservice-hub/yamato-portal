@@ -8,9 +8,15 @@
  *   - 答えは answers のどれかと一致すれば正解（全角半角・大文字小文字・カタカナ／ひらがな・空白のゆれは吸収）。
  *     stripPatterns で「〜からきました」「〜人家族です」などの言い足しを取り除いてから比べる
  *
- * 新しいレッスンにリスニング課題を足すときは、LISTENING_TASKS にレッスンの slug をキーにして追加する。
+ * 1つのレッスンのリスニング課題は、いくつかの「パート」でできている（語彙ドリルのモードと同じく、画面上部のタブでどれからでも始められる。
+ * 全部のパートを終えるとタスク完了）。パートは2種類：
+ *   - ListeningTask（会話を聞いて答えを1つタイピングする問題を、規定の数だけランダムに出す）
+ *   - ListeningTablePart（少し長い音声を聞いて、英語で表を埋める）
+ * 新しいレッスンにリスニング課題を足すときは、LISTENING_TASKS にレッスンの slug をキーにして、パートの配列を追加する。
  * 音声を作るときは、lines の text と audioPath を一覧にして generate_audio_ondoku.py で作る。
  */
+
+import { normalizeEnglish } from "~/utils/normalization";
 
 export interface ListeningLine {
   speaker: "A" | "B";
@@ -30,6 +36,11 @@ export interface ListeningItem {
 }
 
 export interface ListeningTask {
+  kind?: "dialogue";
+  /** パートの ID（レッスンの中で重ならない名前） */
+  id: string;
+  /** 画面上部のタブに出す短い名前 */
+  tabLabel: string;
   /** 見出し（例："How many people are in the family?"） */
   title: string;
   /** 生徒への指示（例："Listen and type where B is from."） */
@@ -43,6 +54,41 @@ export interface ListeningTask {
   /** 1回の課題で出す問題数（items からランダムに選ぶ） */
   questionsPerTask: number;
   items: ListeningItem[];
+}
+
+/** 表の1マス：決まっている文字（text）か、生徒が英語で埋める空欄（answers のどれかで正解） */
+export type ListeningTableCell = { text: string } | { answers: string[]; placeholder?: string };
+
+/** 少し長い音声を聞いて、英語で表を埋めるパート */
+export interface ListeningTablePart {
+  kind: "table";
+  id: string;
+  tabLabel: string;
+  title: string;
+  instruction: string;
+  /** 音声（Storage のバケットとパス）。無い・読み込めない時はブラウザの音声合成で text を読み上げる */
+  audio: { bucket: string; path: string; text: string };
+  /** 1列目（2行目の見出し。例："how many people"） */
+  rowLabel: string;
+  /** 2列目から右の列：header = 1行目（人の名前）、value = 2行目（人数） */
+  columns: { header: ListeningTableCell; value: ListeningTableCell }[];
+}
+
+export type ListeningPart = ListeningTask | ListeningTablePart;
+
+/** 表の空欄の答えの比較用：大文字小文字・空白・数詞（six → 6）・「people」「san」などの言い足しをそろえる */
+function normalizeTableAnswer(raw: string): string {
+  return normalizeEnglish(raw || "")
+    .replace(/\s*(people|persons|person)$/, "")
+    .replace(/[\s-]*(san|kun|chan)$/, "")
+    .replace(/\s+/g, "");
+}
+
+/** 表の空欄の答えが正解か */
+export function isTableAnswerCorrect(cell: ListeningTableCell, input: string): boolean {
+  if (!("answers" in cell)) return true;
+  const clean = normalizeTableAnswer(input);
+  return !!clean && cell.answers.some((a) => normalizeTableAnswer(a) === clean);
 }
 
 /** 比べるための正規化：全角半角・大文字小文字・カタカナ→ひらがな・空白と句読点を取り除く */
@@ -86,6 +132,8 @@ function familyAnswers(n: number): string[] {
 }
 
 const FAMILY_COUNT: ListeningTask = {
+  id: "family-count",
+  tabLabel: "Q&A: How many?",
   title: "How many people are in the family?",
   instruction: "Listen to the conversation and type the number of people.",
   placeholder: "e.g. 4 / 4人 / よにん",
@@ -106,6 +154,50 @@ const FAMILY_COUNT: ListeningTask = {
   }),
 };
 
+/** 「わたしのかぞくは〜かぞくです。」（dialogue-audio/family-my-how-many/my_family_N.mp3。N = 2〜10） */
+const FAMILY_MY_HOW_MANY: ListeningTask = {
+  id: "family-my-how-many",
+  tabLabel: "My family",
+  title: "How many people are in my family?",
+  instruction: "Listen to the person talking about their family and type the number of people.",
+  placeholder: "e.g. 4 / 4人 / よにん",
+  correctMessage: "{answer}",
+  stripPatterns: [/(です|だ)$/, /(かぞく|家族|kazoku)$/, /(people|persons|person)$/],
+  questionsPerTask: 6,
+  items: Array.from({ length: 9 }, (_, i) => {
+    const n = i + 2;
+    return {
+      id: `my_family_${n}`,
+      lines: [
+        { speaker: "B" as const, text: `わたしのかぞくは${FAMILY_HIRAGANA[n][0]}かぞくです。`, audioPath: `family-my-how-many/my_family_${n}.mp3` },
+      ],
+      answers: familyAnswers(n),
+      answerLabel: `${n}人家族 (${FAMILY_HIRAGANA[n][0]}かぞく)`,
+    };
+  }),
+};
+
+/** 少し長い音声を聞いて表を埋める（listening-comprehension/family-1-lc.mp3） */
+const FAMILY_LISTENING_COMPREHENSION: ListeningTablePart = {
+  kind: "table",
+  id: "family-1-lc",
+  tabLabel: "Fill in the table",
+  title: "Whose family is it?",
+  instruction: "Listen to the talk and fill in every empty box in English (names and numbers).",
+  audio: {
+    bucket: "listening-comprehension",
+    path: "family-1-lc.mp3",
+    text: "わたしのかぞくは五人家族です。たけしのかぞくは三人家族です。まゆみのかぞくは八人家族です。リサのかぞくは六人家族です。ジョージのかぞくは四人家族です。",
+  },
+  rowLabel: "how many people",
+  columns: [
+    { header: { answers: ["Mayumi"], placeholder: "name" }, value: { text: "8" } },
+    { header: { text: "Lisa" }, value: { answers: ["6", "six"], placeholder: "number" } },
+    { header: { answers: ["Takeshi"], placeholder: "name" }, value: { text: "3" } },
+    { header: { text: "George" }, value: { answers: ["4", "four"], placeholder: "number" } },
+  ],
+};
+
 // ======================================================================
 // countries-1：どこから きましたか（音声：dialogue-audio/countries/）
 // ======================================================================
@@ -121,6 +213,8 @@ const COUNTRIES: { id: string; jp: string; en: string; answers: string[] }[] = [
 ];
 
 const COUNTRIES_WHERE_FROM: ListeningTask = {
+  id: "where-from",
+  tabLabel: "Where from?",
   title: "Where are they from?",
   instruction: "Listen to the conversation and type the country B comes from (in English or Japanese).",
   placeholder: "e.g. Australia / オーストラリア",
@@ -139,12 +233,13 @@ const COUNTRIES_WHERE_FROM: ListeningTask = {
   })),
 };
 
-/** レッスン（edu_lessons.slug）→ リスニング課題 */
-export const LISTENING_TASKS: Record<string, ListeningTask> = {
-  "family-1": FAMILY_COUNT,
-  "countries-1": COUNTRIES_WHERE_FROM,
+/** レッスン（edu_lessons.slug）→ リスニング課題のパート（タブの順） */
+export const LISTENING_TASKS: Record<string, ListeningPart[]> = {
+  "family-1": [FAMILY_COUNT, FAMILY_MY_HOW_MANY, FAMILY_LISTENING_COMPREHENSION],
+  "countries-1": [COUNTRIES_WHERE_FROM],
 };
 
-export function findListeningTaskForLesson(lessonSlug: string): ListeningTask | null {
-  return LISTENING_TASKS[lessonSlug] ?? null;
+export function findListeningTaskForLesson(lessonSlug: string): ListeningPart[] | null {
+  const parts = LISTENING_TASKS[lessonSlug];
+  return parts && parts.length > 0 ? parts : null;
 }
