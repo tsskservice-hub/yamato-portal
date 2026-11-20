@@ -239,7 +239,14 @@ export function EduLessonPage({ lessonSlug: LESSON_SLUG, data }: EduLessonPagePr
         <main className="max-w-5xl mx-auto space-y-8">
           
           {/* 1. Header Card Module */}
-          <EduLessonHeader lesson={lesson} topic={topic} textbookRefs={textbookRefs} heroImage={extras.heroImage ?? null} />
+          <EduLessonHeader lesson={lesson} topic={topic} textbookRefs={textbookRefs} heroImage={
+              extras.heroImage ?? {
+                // 書いていないレッスンも、public/images/lessons/<slug>.webp があれば出す（無ければ EduLessonHeader が隠す）
+                src: `/images/lessons/${LESSON_SLUG}.webp`,
+                alt: `Illustration for this lesson: ${lesson?.title_en || LESSON_SLUG}`,
+              }
+            }
+          />
 
           {/* 1b. 学習意図（LI）と成功基準（SC）の専用セクション */}
           <EduLessonGoals lesson={lesson} />

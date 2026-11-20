@@ -4,7 +4,8 @@
  *   ここに書いていないレッスンも、共通の部分（語彙・リーディング・ライティング・AI Yamato）は表示される。
  *   - speakingTitle … スピーキング課題の見出し（無ければレッスンの英語名から作る）
  *   - heroImage     … タイトル部分の右側（スマホではタイトルの下）に出す絵・写真。
- *                     ファイルは public/images/lessons/ に置き、src は "/images/lessons/ファイル名" と書く
+ *                     書かなくても、public/images/lessons/<レッスンの slug>.webp（例：family-2.webp）があれば自動で出る
+ *                     （説明文はレッスンの英語名から作る）。ここに書くのは、説明文を決めたい時・別のファイル名を使う時だけ
  *   リスニングは app/data/listening-tasks.ts、文化タスクは app/data/culture-tasks.ts の lessons、
  *   スピーキングの会話は edu_lesson_dialogues（＋ kl_dialogues）で決まる。
  */
@@ -30,6 +31,6 @@ export const LESSON_PAGE_EXTRAS: Record<string, LessonPageExtras> = {
   },
   "countries-1": {
     speakingTitle: "Speaking Task: Where Are You From?",
-    heroImage: { src: "/images/lessons/country-1.webp", alt: "Kaminari-mon gate in Asakusa, Tokyo" },
+    heroImage: { src: "/images/lessons/countries-1.webp", alt: "Kaminari-mon gate in Asakusa, Tokyo" },
   },
 };

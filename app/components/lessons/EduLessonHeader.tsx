@@ -5,7 +5,7 @@
  *   レッスンの絵・写真（app/data/lesson-pages.ts の heroImage）があれば、横長の画面では右側に、スマホではタイトルの下に出す
  */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { formatTextbookRef, TEXTBOOK_DISCLAIMER, type TextbookRef } from "~/lib/lessonTextbooks";
 import type { LessonHeroImage } from "~/data/lesson-pages";
 
@@ -18,7 +18,12 @@ interface EduLessonHeaderProps {
   heroImage?: LessonHeroImage | null;
 }
 
-export const EduLessonHeader: React.FC<EduLessonHeaderProps> = ({ lesson, topic, textbookRefs = [], heroImage = null }) => {
+export const EduLessonHeader: React.FC<EduLessonHeaderProps> = ({ lesson, topic, textbookRefs = [], heroImage: heroImageProp = null }) => {
+  // 画像ファイルが無い・読み込めない時は、画像の枠ごと出さない（タイトルだけの表示に戻す）
+  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => setImageFailed(false), [heroImageProp?.src]);
+  const heroImage = heroImageProp && !imageFailed ? heroImageProp : null;
+
   return (
     <div className="bg-white dark:bg-slate-900 border-2 border-orange-400 dark:border-orange-500/70 rounded-3xl p-6 sm:p-8 md:p-10 shadow-sm font-sans">
       <div className={heroImage ? "flex flex-col md:flex-row md:items-center gap-6 md:gap-8" : ""}>
@@ -69,6 +74,7 @@ export const EduLessonHeader: React.FC<EduLessonHeaderProps> = ({ lesson, topic,
               src={heroImage.src}
               alt={heroImage.alt}
               loading="eager"
+              onError={() => setImageFailed(true)}
               className="w-full aspect-[4/3] object-cover rounded-2xl border border-orange-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
             />
             {heroImage.credit && (

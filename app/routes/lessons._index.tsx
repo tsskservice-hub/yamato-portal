@@ -101,15 +101,15 @@ export default function LessonsHubIndex() {
           {/* 文化ページへの案内（日本語の力に関係なく学べる） */}
           <Link
             to="/culture"
-            className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md hover:shadow-lg transition"
+            className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-orange-400 dark:border-orange-500/70 shadow-sm hover:shadow-md transition"
           >
             <div>
-              <p className="text-lg sm:text-xl font-black">🎎 Japanese Culture</p>
-              <p className="text-sm text-rose-50">
+              <p className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-50">🎎 Japanese Culture</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Picture stories about life in Japan, with narration and English subtitles. No Japanese needed.
               </p>
             </div>
-            <span className="shrink-0 font-black text-sm bg-white/20 px-4 py-2 rounded-xl">Explore culture →</span>
+            <span className="shrink-0 font-black text-sm text-white bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl transition">Explore culture →</span>
           </Link>
 
           {errorMessage && (

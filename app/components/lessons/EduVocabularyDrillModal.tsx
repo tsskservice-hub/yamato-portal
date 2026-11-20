@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
-import { normalizeEnglish, matchesJapaneseAnswer, matchesEnglishAnswer, katakanaToHiragana } from "~/utils/normalization";
+import { normalizeEnglish, matchesJapaneseAnswer, matchesEnglishAnswer, katakanaToHiragana, unifyJapaneseNumbers, sameJapaneseNumber } from "~/utils/normalization";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
 interface EduVocabularyDrillModalProps {
@@ -276,14 +276,18 @@ export const EduVocabularyDrillModal: React.FC<EduVocabularyDrillModalProps> = (
     setPendingSpoken(null);
     // 漢字表記に加えて、読み（jp_kana をひらがなにしたもの）でも正解にする
     // （音声認識が 二人 を「ふたり」と書き出すことがあるため）
+    // 数字の書き方の違い（十人 ＝ 10人）は同じとみなす（unifyJapaneseNumbers）
     const targets = [currentItem.jp_text, katakanaToHiragana(currentItem.jp_kana || "")]
-      .map((t) => (t || "").trim())
+      .map((t) => unifyJapaneseNumbers((t || "").trim()))
       .filter(Boolean);
-    const spokenHira = katakanaToHiragana(speechResult);
+    const spoken = unifyJapaneseNumbers(speechResult.trim());
+    const spokenHira = katakanaToHiragana(spoken);
 
     if (
       matchesJapaneseAnswer(speechResult, currentItem) ||
-      targets.some((t) => speechResult.includes(t) || spokenHira.includes(t) || t.includes(speechResult))
+      sameJapaneseNumber(speechResult, currentItem.jp_text || "") ||
+      sameJapaneseNumber(speechResult, currentItem.jp_kana || "") ||
+      targets.some((t) => spoken.includes(t) || spokenHira.includes(t) || t.includes(spoken))
     ) {
       setFeedback("correct");
       playSound(); // ✅ 正解音
