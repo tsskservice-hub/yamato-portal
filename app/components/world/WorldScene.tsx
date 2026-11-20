@@ -4,15 +4,19 @@
  *
  * ・動かし方: 矢印キー / WASD、または床をタップ（クリック）すると、そこへ歩く
  * ・近づくと「Talk」のボタンが出る（Enter / E キーでも話しかけられる）
- * ・カメラは使わない（アバターと声だけ）。ほかの利用者は出てこない（今は 1 人で練習する場所）
+ * ・カメラは使わない（アバターと声だけ）
+ * ・「みんなで（Together）」モードでは、ほかの利用者のアバター・決まった文の吹き出し・スタンプも出す（usePlaza.ts）。
+ *   ほかの人のアバターを押すと、ブロック・報告のメニュー（onPickOther）
  * ・座標は場面の幅・高さに対する %
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { WorldPlace } from '~/data/world/places';
+import type { PlazaBubble, PlazaPlayer } from './usePlaza';
 
 const SPEED = 0.6; // 1 フレームに動く %（約 60 フレーム／秒）
 const TALK_DISTANCE = 12;
-const AVATARS = ['🧑‍🎓', '👩‍🎓', '👨‍🎓', '🐱', '🐶', '🦊'];
+/** アバター（api の PLAZA_AVATARS と同じ順。「みんなで」モードでは番号で送る） */
+export const AVATARS = ['🧑‍🎓', '👩‍🎓', '👨‍🎓', '🐱', '🐶', '🦊'];
 
 type Point = { x: number; y: number };
 
@@ -26,15 +30,42 @@ export function WorldScene({
   nickname,
   disabled,
   onTalk,
+  stateRef,
+  onMove,
+  onAvatarChange,
+  others,
+  bubbles,
+  myPid,
+  onPickOther,
 }: {
   place: WorldPlace;
+  /** 自分のアバターの下に出す名前（「みんなで」モードでは町の名前） */
   nickname: string;
   /** 会話中は動けない */
   disabled: boolean;
   onTalk: () => void;
+  /** 今の位置とアバター（ページが読む。「みんなで」につなぐときに使う） */
+  stateRef?: React.MutableRefObject<{ x: number; y: number; avatar: number }>;
+  onMove?: (p: Point) => void;
+  onAvatarChange?: (index: number) => void;
+  /** 「みんなで」モードのほかの人 */
+  others?: PlazaPlayer[];
+  /** pid → 吹き出し（自分の分は myPid で探す） */
+  bubbles?: Record<string, PlazaBubble>;
+  myPid?: string;
+  onPickOther?: (player: PlazaPlayer) => void;
 }) {
-  const [pos, setPos] = useState<Point>(place.start);
-  const [avatar, setAvatar] = useState(AVATARS[0]);
+  const [pos, setPos] = useState<Point>(() => (stateRef?.current ? { x: stateRef.current.x, y: stateRef.current.y } : place.start));
+  const [avatarIndex, setAvatarIndex] = useState(() => stateRef?.current?.avatar ?? 0);
+  const avatar = AVATARS[avatarIndex] ?? AVATARS[0];
+  const onMoveRef = useRef(onMove);
+  onMoveRef.current = onMove;
+  useEffect(() => {
+    if (stateRef) stateRef.current = { x: pos.x, y: pos.y, avatar: avatarIndex };
+  }, [pos, avatarIndex, stateRef]);
+  useEffect(() => {
+    onMoveRef.current?.(pos);
+  }, [pos]);
   const keys = useRef(new Set<string>());
   const target = useRef<Point | null>(null);
   const posRef = useRef(pos);
@@ -165,12 +196,39 @@ export function WorldScene({
           </span>
         </div>
 
+        {/* ほかの人（「みんなで」モード）。押すとブロック・報告のメニュー */}
+        {(others ?? []).map((o) => {
+          const b = bubbles?.[o.pid];
+          return (
+            <button
+              key={o.pid}
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onPickOther?.(o)}
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer transition-[left,top] duration-200 ease-linear"
+              style={{ left: `${o.x}%`, top: `${o.y}%` }}
+              aria-label={`${o.name}. Options`}
+              title={`${o.name} — block or report`}
+            >
+              {b && <Bubble bubble={b} />}
+              {o.talking && !b && (
+                <span className="mb-1 text-[10px] font-bold bg-white/90 text-slate-600 rounded-full px-2 py-0.5 shadow">💬 talking to the clerk</span>
+              )}
+              <span className="text-3xl sm:text-4xl leading-none drop-shadow opacity-90">{AVATARS[o.avatar] ?? AVATARS[0]}</span>
+              <span lang="ja" className="text-[10px] sm:text-xs font-bold bg-white/90 text-slate-700 rounded-full px-2 mt-0.5 shadow max-w-[8rem] truncate">
+                {o.name}
+              </span>
+            </button>
+          );
+        })}
+
         {/* 自分のアバター */}
         <div
           className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
           style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
         >
-          {near && !disabled && (
+          {myPid && bubbles?.[myPid] && <Bubble bubble={bubbles[myPid]} />}
+          {near && !disabled && !(myPid && bubbles?.[myPid]) && (
             <span className="mb-1 text-[10px] sm:text-xs font-bold bg-emerald-600 text-white rounded-full px-2 py-0.5 shadow animate-bounce">
               Talk! (E)
             </span>
@@ -184,12 +242,16 @@ export function WorldScene({
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1" aria-label="Choose your avatar">
-          {AVATARS.map((a) => (
+          {AVATARS.map((a, i) => (
             <button
               key={a}
               type="button"
-              onClick={() => setAvatar(a)}
-              className={`text-2xl w-10 h-10 rounded-xl cursor-pointer ${avatar === a ? 'bg-indigo-100 ring-2 ring-indigo-400' : 'hover:bg-slate-100'}`}
+              onClick={() => {
+                if (i === avatarIndex) return;
+                setAvatarIndex(i);
+                onAvatarChange?.(i);
+              }}
+              className={`text-2xl w-10 h-10 rounded-xl cursor-pointer ${avatarIndex === i ? 'bg-indigo-100 ring-2 ring-indigo-400' : 'hover:bg-slate-100'}`}
               aria-label={`Avatar ${a}`}
             >
               {a}
@@ -206,5 +268,16 @@ export function WorldScene({
         </button>
       </div>
     </div>
+  );
+}
+
+/** 決まった文の吹き出し・スタンプ */
+function Bubble({ bubble }: { bubble: PlazaBubble }) {
+  return bubble.stamp ? (
+    <span className="mb-1 text-3xl leading-none animate-bounce">{bubble.text}</span>
+  ) : (
+    <span lang="ja" className="mb-1 text-xs sm:text-sm font-bold bg-white text-slate-800 border border-slate-300 rounded-2xl px-2.5 py-1 shadow max-w-[11rem] text-center">
+      {bubble.text}
+    </span>
   );
 }

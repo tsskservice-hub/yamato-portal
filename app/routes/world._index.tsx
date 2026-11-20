@@ -38,6 +38,22 @@ export default function WorldIndexPage() {
             <p className="max-w-2xl text-white/90">{DESCRIPTION}</p>
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-2 text-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+              <p className="font-bold text-slate-900 dark:text-white">🧍 Practise alone</p>
+              <p className="text-slate-600 dark:text-slate-300">Just you and the AI characters. Available for every account, including school accounts.</p>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+              <p className="font-bold text-slate-900 dark:text-white">
+                👥 Together <span className="text-[10px] font-bold text-indigo-600">BETA</span>
+              </p>
+              <p className="text-slate-600 dark:text-slate-300">
+                See other learners in the same place and greet them with set Japanese phrases and stamps. No free chat, no voice between users,
+                and no real names. Personal accounts only.
+              </p>
+            </div>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {WORLD_PLACES.map((p) => (
               <Link

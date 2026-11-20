@@ -12,12 +12,15 @@
  *   聞き間違いのまま店員が返事をして、会話がかみ合わなくなるのを防ぐ
  * ・AI の役割と使う言葉はサーバーが決める（ブラウザは場所の ID だけを送る）
  * ・会話の文字は画面に出すだけで、保存しない。時間が来たら自動で終わる（サーバーも切る）
+ * ・店員の言葉は、はじめは隠す（聞き取りの練習）。生徒が押すと、その行だけ見られる。「Show all」で全部（2026-11-21）
+ * ・会話が終わったら、毎回フィードバックを出す（/api/world/feedback。生徒の learning pace に合わせる。追加のクレジットなし）
  * ・店員の言葉に英語が出た回数を数えて、終わるときにサーバーに知らせる（言葉の絞り方がうまくいっているかを見るため）
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { YAMATO_API_BASE, yamatoFetch } from '~/lib/yamatoApi';
 import { isLikelyHallucination } from '~/utils/stt-guard';
+import { formatFeedback } from '~/components/oral/OralMockReport';
 import type { WorldPlace } from '~/data/world/places';
 
 type Line = { id: string; speaker: 'you' | 'npc'; text: string };
@@ -32,6 +35,13 @@ const MAX_SAY_LENGTH = 120;
 const MIN_RECORD_MS = 500;
 /** 録音の長さの上限（止め忘れ）。ミリ秒 */
 const MAX_RECORD_MS = 20000;
+const PACE_LABEL: Record<string, string> = { steady: 'Steady', normal: 'Normal', accelerated: 'Accelerated' };
+type FeedbackState = {
+  state: 'idle' | 'loading' | 'done' | 'error' | 'none';
+  text?: string;
+  pace?: string;
+  message?: string;
+};
 
 export function WorldTalk({
   place,
@@ -52,6 +62,12 @@ export function WorldTalk({
   const [mic, setMic] = useState<Mic>('idle');
   const [heard, setHeard] = useState('');
   const [micNote, setMicNote] = useState<string | null>(null);
+  /** 見せている店員の行（はじめは隠す） */
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+  const [showAll, setShowAll] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackState>({ state: 'idle' });
+  const linesRef = useRef<Line[]>([]);
+  linesRef.current = lines;
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
@@ -228,6 +244,39 @@ export function WorldTalk({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ---- 会話のあとのフィードバック（毎回。learning pace に合わせてサーバーが作る） ----
+  const loadFeedback = async () => {
+    const sessionId = sessionIdRef.current;
+    const transcript = linesRef.current.map((l) => ({ speaker: l.speaker === 'you' ? 'student' : 'clerk', text: l.text }));
+    if (!sessionId || !transcript.some((t) => t.speaker === 'student')) {
+      setFeedback({ state: 'none', message: "You didn't say anything, so there is no feedback this time." });
+      return;
+    }
+    setFeedback({ state: 'loading' });
+    try {
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/world/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, transcript }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { feedback?: string; pace?: string; message?: string; error?: string };
+      if (!res.ok || !data.feedback) {
+        const final = data.error === 'NO_ANSWERS' || data.error === 'SESSION_ENDED';
+        setFeedback({ state: final ? 'none' : 'error', message: data.message || 'Sorry, we could not create your feedback.' });
+        return;
+      }
+      setFeedback({ state: 'done', text: data.feedback, pace: data.pace });
+    } catch {
+      setFeedback({ state: 'error', message: 'Sorry, we could not create your feedback. Please check your internet.' });
+    }
+  };
+
+  // 会話が終わったら、自動でフィードバックを頼む
+  useEffect(() => {
+    if (status === 'ended' && feedback.state === 'idle') loadFeedback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
   // ---- 生徒の番: 録音 → 文字にする → 確かめる → 送る ----
 
   const transcribe = async (blob: Blob) => {
@@ -398,22 +447,45 @@ export function WorldTalk({
           </div>
         )}
 
+        {/* 店員の言葉は、はじめは隠す（聞き取りの練習） */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+          <span>
+            🎧 Listen first. The {place.npc.name.toLowerCase()}&apos;s words are hidden — tap “Show” if you need to read them.
+          </span>
+          <label className="flex items-center gap-1 cursor-pointer font-bold">
+            <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+            Show all
+          </label>
+        </div>
         <div className="h-64 overflow-y-auto space-y-2 rounded-xl bg-slate-50 dark:bg-slate-950 p-3" aria-live="polite">
           {!lines.length && status !== 'error' && <p className="text-sm text-slate-400">The conversation will appear here.</p>}
-          {lines.map((l) => (
-            <div key={l.id} className={`flex ${l.speaker === 'you' ? 'justify-end' : 'justify-start'}`}>
-              <p
-                lang="ja"
-                className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                  l.speaker === 'you'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                {l.text}
-              </p>
-            </div>
-          ))}
+          {lines.map((l) => {
+            const hidden = l.speaker === 'npc' && !showAll && !revealed.has(l.id);
+            return (
+              <div key={l.id} className={`flex ${l.speaker === 'you' ? 'justify-end' : 'justify-start'}`}>
+                {hidden ? (
+                  <button
+                    type="button"
+                    onClick={() => setRevealed((prev) => new Set(prev).add(l.id))}
+                    className="max-w-[85%] rounded-2xl px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 cursor-pointer hover:border-amber-400"
+                  >
+                    🔊 The {place.npc.name.toLowerCase()} said something · <span className="font-bold underline">Show</span>
+                  </button>
+                ) : (
+                  <p
+                    lang="ja"
+                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+                      l.speaker === 'you'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    {l.text}
+                  </p>
+                )}
+              </div>
+            );
+          })}
           <div ref={logEndRef} />
         </div>
 
@@ -471,6 +543,41 @@ export function WorldTalk({
               </div>
             )}
             {micNote && <p className="text-sm text-rose-600">{micNote}</p>}
+          </div>
+        )}
+
+        {/* 会話のあとのフィードバック */}
+        {status === 'ended' && (
+          <div className="rounded-xl border-2 border-amber-200 bg-amber-50/60 dark:bg-slate-950 dark:border-amber-900 p-4 space-y-2" aria-live="polite">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-black text-slate-900 dark:text-white">📝 Feedback</p>
+              {feedback.pace && (
+                <span className="text-xs text-slate-500">
+                  For your learning pace: <b>{PACE_LABEL[feedback.pace] ?? feedback.pace}</b> (you can change it in{' '}
+                  <Link to="/my-account" className="underline">
+                    My Account
+                  </Link>
+                  )
+                </span>
+              )}
+            </div>
+            {feedback.state === 'loading' && <p className="text-sm text-slate-500 animate-pulse">AI Yamato is writing your feedback…</p>}
+            {feedback.state === 'done' && feedback.text && (
+              <div className="text-sm text-slate-800 dark:text-slate-100" dangerouslySetInnerHTML={{ __html: formatFeedback(feedback.text, '#d97706') }} />
+            )}
+            {feedback.state === 'none' && <p className="text-sm text-slate-600 dark:text-slate-300">{feedback.message}</p>}
+            {feedback.state === 'error' && (
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm text-rose-600">{feedback.message}</p>
+                <button
+                  type="button"
+                  onClick={loadFeedback}
+                  className="px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 font-bold text-sm cursor-pointer"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
           </div>
         )}
 

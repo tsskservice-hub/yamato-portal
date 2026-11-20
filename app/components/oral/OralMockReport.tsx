@@ -40,8 +40,8 @@ const STAGE_LABEL: Record<MockStageId, string> = {
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** AI のフィードバック（見出しは「絵文字 [見出し]」の行）を、読みやすい HTML にする */
-function formatFeedback(raw: string, color: string): string {
+/** AI のフィードバック（見出しは「絵文字 [見出し]」の行）を、読みやすい HTML にする（ヤマトタウンの WorldTalk でも使う） */
+export function formatFeedback(raw: string, color: string): string {
   return raw
     .replace(/\*\*/g, "")
     .replace(/^#{1,6}\s+/gm, "")
