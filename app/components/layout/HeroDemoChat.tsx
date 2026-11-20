@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowRight, ArrowDown, Send } from 'lucide-react';
 import { NextQuizCountdown } from '~/components/NextQuizCountdown';
+import { YamatoIntroButton } from '~/components/layout/YamatoFeature';
 
 export interface HeroDemoChatProps {
   isDarkMode: boolean;
@@ -133,6 +134,8 @@ export function HeroDemoChat({
         <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-red-600 bg-clip-text text-transparent">
           {hero?.title}
         </span>
+        {/* タイトルのすぐ後ろの小さなボタン → ヤマトの自己紹介モーダル */}
+        {hero?.title && <YamatoIntroButton isDarkMode={isDarkMode} />}
         <span className="block text-2xl sm:text-3xl font-bold mt-3 text-slate-700 dark:text-slate-300">
           {hero?.subtitle}
         </span>
