@@ -2,21 +2,36 @@
  * @file WorldTalk.tsx
  * @description 会話練習の空間（Yamato Town）で、AI のキャラクター（店員など）と声で話す画面
  *
- * ・つなぎ方は EOY Oral Superb（components/oral/OralRealtimeSession.tsx）と同じ:
+ * ・店員の声: EOY Oral Superb（components/oral/OralRealtimeSession.tsx）と同じつなぎ方（WebRTC・OpenAI Realtime）
  *   ブラウザが WebRTC の申し込み（SDP）を作る → api（/api/world/start）がクレジットを引いて OpenAI につなぐ → 答えを受け取る
+ *   ブラウザは声を「受け取るだけ」（recvonly）。マイクの音は OpenAI に流さない
+ * ・生徒の発言（2026-11-21 に変更）: レッスンのスピーキングタスク・Oral Drill と同じ「録音 → 文字にする → 確かめる」
+ *     1. 🎤 Record（Space）で録音 → もう一度押して止める
+ *     2. 文字起こし（/api/stt。クレジットは使わない）の結果を画面に出す
+ *     3. 合っていれば ✅ Send（Enter）で店員に送る。違っていれば 🔁 Record again（Space）で録り直す
+ *   聞き間違いのまま店員が返事をして、会話がかみ合わなくなるのを防ぐ
  * ・AI の役割と使う言葉はサーバーが決める（ブラウザは場所の ID だけを送る）
  * ・会話の文字は画面に出すだけで、保存しない。時間が来たら自動で終わる（サーバーも切る）
- * ・英語の言葉が出た回数を数えて、終わるときにサーバーに知らせる（言葉の絞り方がうまくいっているかを見るため）
+ * ・店員の言葉に英語が出た回数を数えて、終わるときにサーバーに知らせる（言葉の絞り方がうまくいっているかを見るため）
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { YAMATO_API_BASE, yamatoFetch } from '~/lib/yamatoApi';
+import { isLikelyHallucination } from '~/utils/stt-guard';
 import type { WorldPlace } from '~/data/world/places';
 
 type Line = { id: string; speaker: 'you' | 'npc'; text: string };
+/** 生徒の番の状態: 待つ → 録音中 → 文字にしている → 確かめる */
+type Mic = 'idle' | 'recording' | 'transcribing' | 'confirm';
 
 /** 英語の言葉（ローマ字 2 文字以上）が入っているか。S・M・L のサイズは数えない */
 const hasEnglishWord = (text: string) => /[A-Za-z]{2,}/.test(text);
+/** 店員に送る 1 回の発言の長さの上限（文字） */
+const MAX_SAY_LENGTH = 120;
+/** これより短い録音は、押しまちがいとみなす（ミリ秒） */
+const MIN_RECORD_MS = 500;
+/** 録音の長さの上限（止め忘れ）。ミリ秒 */
+const MAX_RECORD_MS = 20000;
 
 export function WorldTalk({
   place,
@@ -32,24 +47,53 @@ export function WorldTalk({
   const [endsAt, setEndsAt] = useState<number>(0);
   const [now, setNow] = useState(Date.now());
   const [npcSpeaking, setNpcSpeaking] = useState(false);
+  /** 店員が返事を作っている（送ってから、声が終わるまで） */
+  const [npcBusy, setNpcBusy] = useState(true);
+  const [mic, setMic] = useState<Mic>('idle');
+  const [heard, setHeard] = useState('');
+  const [micNote, setMicNote] = useState<string | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const dcRef = useRef<RTCDataChannel | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sessionIdRef = useRef<string | null>(null);
   const finishedRef = useRef(false);
   const englishRef = useRef(0);
+  const speakingRef = useRef(false);
   const logEndRef = useRef<HTMLDivElement>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recStreamRef = useRef<MediaStream | null>(null);
+  const recStartedRef = useRef(0);
+  const recTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 文字起こしの手がかり（メニューの言葉）。同じ音の言葉の取り違えを減らす */
+  const sttHint = place.menu.flatMap((m) => m.items.map((i) => i.ja)).join('、');
+
+  const stopRecorderStream = () => {
+    if (recTimerRef.current) clearTimeout(recTimerRef.current);
+    recTimerRef.current = null;
+    recStreamRef.current?.getTracks().forEach((t) => t.stop());
+    recStreamRef.current = null;
+  };
 
   const cleanup = () => {
+    try {
+      const recorder = recorderRef.current;
+      if (recorder && recorder.state === 'recording') {
+        recorder.onstop = null; // 終わったあとに文字起こしをしない
+        recorder.stop();
+      }
+    } catch {
+      /* もう止まっている */
+    }
+    recorderRef.current = null;
+    stopRecorderStream();
     try {
       pcRef.current?.close();
     } catch {
       /* もう閉じている */
     }
     pcRef.current = null;
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
+    dcRef.current = null;
     if (audioRef.current) {
       audioRef.current.srcObject = null;
       audioRef.current.remove();
@@ -74,16 +118,15 @@ export function WorldTalk({
     cleanup();
     tellServerEnded();
     setNpcSpeaking(false);
+    setMic('idle');
     setStatus('ended');
   };
 
   const onEvent = (msg: any) => {
     switch (msg.type) {
-      case 'conversation.item.input_audio_transcription.completed': {
-        const text = String(msg.transcript || '').trim();
-        if (text) setLines((prev) => [...prev, { id: String(msg.item_id), speaker: 'you', text }]);
+      case 'response.created':
+        setNpcBusy(true);
         break;
-      }
       case 'response.output_audio_transcript.done': {
         const text = String(msg.transcript || '').trim();
         if (!text) break;
@@ -92,26 +135,27 @@ export function WorldTalk({
         break;
       }
       case 'output_audio_buffer.started':
+        speakingRef.current = true;
         setNpcSpeaking(true);
         break;
       case 'output_audio_buffer.stopped':
       case 'output_audio_buffer.cleared':
+        speakingRef.current = false;
         setNpcSpeaking(false);
+        setNpcBusy(false);
+        break;
+      case 'response.done':
+        // 声が出なかった返事（失敗など）でも、生徒の番に戻す（声が出ているときは、声が終わってから）
+        if (!speakingRef.current) setNpcBusy(false);
         break;
     }
   };
 
-  // つなぐ
+  // つなぐ（店員の声を受け取るだけ。マイクはここでは使わない）
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        });
-        if (cancelled) return stream.getTracks().forEach((t) => t.stop());
-        streamRef.current = stream;
-
         const pc = new RTCPeerConnection();
         pcRef.current = pc;
         const audio = document.createElement('audio');
@@ -122,9 +166,10 @@ export function WorldTalk({
           audio.srcObject = e.streams[0];
           audio.play().catch(() => {});
         };
-        stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+        pc.addTransceiver('audio', { direction: 'recvonly' });
 
         const dc = pc.createDataChannel('oai-events');
+        dcRef.current = dc;
         dc.onmessage = (e) => {
           try {
             onEvent(JSON.parse(e.data));
@@ -135,6 +180,7 @@ export function WorldTalk({
         dc.onopen = () => {
           setStatus('live');
           // 店員から話し始める（「いらっしゃいませ」）
+          setNpcBusy(true);
           dc.send(JSON.stringify({ type: 'response.create' }));
         };
 
@@ -160,17 +206,11 @@ export function WorldTalk({
         sessionIdRef.current = data.sessionId;
         setEndsAt(Date.now() + (data.minutes ?? place.minutes) * 60 * 1000);
         await pc.setRemoteDescription({ type: 'answer', sdp: data.answerSdp });
-      } catch (err: any) {
+      } catch {
         if (cancelled) return;
         cleanup();
         finishedRef.current = true;
-        setError({
-          text:
-            err?.name === 'NotAllowedError'
-              ? 'Microphone access is blocked. Please allow the microphone in your browser settings.'
-              : 'We could not connect. Please check your internet and try again.',
-          plans: false,
-        });
+        setError({ text: 'We could not connect. Please check your internet and try again.', plans: false });
         setStatus('error');
       }
     })();
@@ -188,6 +228,121 @@ export function WorldTalk({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ---- 生徒の番: 録音 → 文字にする → 確かめる → 送る ----
+
+  const transcribe = async (blob: Blob) => {
+    setMic('transcribing');
+    try {
+      const form = new FormData();
+      form.append('audio', blob, 'recording.webm');
+      form.append('prompt', sttHint);
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/stt`, { method: 'POST', body: form });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json().catch(() => ({}))) as any;
+      const text = String(data.userText || data.text || '').trim().slice(0, MAX_SAY_LENGTH);
+      if (finishedRef.current) return;
+      if (!text || isLikelyHallucination(text, sttHint)) {
+        setMic('idle');
+        setMicNote("We couldn't hear you clearly. Please record again, a little closer to the microphone.");
+        return;
+      }
+      setHeard(text);
+      setMic('confirm');
+    } catch {
+      if (finishedRef.current) return;
+      setMic('idle');
+      setMicNote('Sorry, we could not turn your recording into text. Please try again.');
+    }
+  };
+
+  const startRecording = async () => {
+    if (status !== 'live' || npcBusy || mic === 'recording' || mic === 'transcribing') return;
+    setMicNote(null);
+    setHeard('');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      if (finishedRef.current) return stream.getTracks().forEach((t) => t.stop());
+      recStreamRef.current = stream;
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+      else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+      recorder.onstop = () => {
+        stopRecorderStream();
+        recorderRef.current = null;
+        if (Date.now() - recStartedRef.current < MIN_RECORD_MS) {
+          setMic('idle');
+          setMicNote('That was too short. Press Record, speak, then press Stop.');
+          return;
+        }
+        transcribe(new Blob(chunks, { type: mimeType }));
+      };
+      recorderRef.current = recorder;
+      recStartedRef.current = Date.now();
+      recorder.start();
+      setMic('recording');
+      // 止め忘れたら、自動で止める
+      recTimerRef.current = setTimeout(() => stopRecording(), MAX_RECORD_MS);
+    } catch (err: any) {
+      stopRecorderStream();
+      setMic('idle');
+      setMicNote(
+        err?.name === 'NotAllowedError'
+          ? 'Microphone access is blocked. Please allow the microphone in your browser settings.'
+          : 'Could not start recording. Please check your microphone.'
+      );
+    }
+  };
+
+  const stopRecording = () => {
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state === 'recording') recorder.stop();
+  };
+
+  /** ✅ 確かめた文字を店員に送り、返事を頼む */
+  const send = () => {
+    const dc = dcRef.current;
+    const text = heard.trim();
+    if (mic !== 'confirm' || !text || !dc || dc.readyState !== 'open') return;
+    dc.send(
+      JSON.stringify({
+        type: 'conversation.item.create',
+        item: { type: 'message', role: 'user', content: [{ type: 'input_text', text }] },
+      })
+    );
+    dc.send(JSON.stringify({ type: 'response.create' }));
+    setLines((prev) => [...prev, { id: `you-${Date.now()}`, speaker: 'you', text }]);
+    setNpcBusy(true);
+    setHeard('');
+    setMic('idle');
+  };
+
+  // キー: Space = 録音 / 止める / 録り直す、Enter = 送る
+  useEffect(() => {
+    if (status !== 'live') return;
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.repeat) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (mic === 'recording') stopRecording();
+        else if (mic === 'idle' || mic === 'confirm') startRecording();
+      } else if (e.key === 'Enter' && mic === 'confirm') {
+        e.preventDefault();
+        send();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, mic, npcBusy, heard]);
+
   // 時間が来たら終わる
   const left = endsAt ? Math.max(0, Math.ceil((endsAt - now) / 1000)) : place.minutes * 60;
   useEffect(() => {
@@ -200,6 +355,20 @@ export function WorldTalk({
   }, [lines.length]);
 
   const clock = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+  const yourTurn = status === 'live' && !npcBusy;
+
+  const statusText =
+    status === 'connecting'
+      ? 'Connecting…'
+      : status === 'ended'
+        ? 'Conversation ended'
+        : status === 'error'
+          ? 'Could not start'
+          : npcSpeaking
+            ? 'Speaking…'
+            : npcBusy
+              ? 'Thinking…'
+              : 'Your turn — press Record and speak in Japanese';
 
   return (
     <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
@@ -209,13 +378,10 @@ export function WorldTalk({
           <div className="flex items-center gap-2">
             <span className={`text-4xl ${npcSpeaking ? 'animate-bounce' : ''}`}>{place.npc.icon}</span>
             <div>
-              <p className="font-bold text-slate-900 dark:text-white">{place.npc.nameJa}（{place.npc.name}）</p>
-              <p className="text-xs text-slate-500">
-                {status === 'connecting' && 'Connecting…'}
-                {status === 'live' && (npcSpeaking ? 'Speaking…' : 'Listening — speak in Japanese')}
-                {status === 'ended' && 'Conversation ended'}
-                {status === 'error' && 'Could not start'}
+              <p className="font-bold text-slate-900 dark:text-white">
+                {place.npc.nameJa}（{place.npc.name}）
               </p>
+              <p className="text-xs text-slate-500">{statusText}</p>
             </div>
           </div>
           {status === 'live' && <span className="text-2xl font-black tabular-nums text-amber-600">{clock}</span>}
@@ -232,14 +398,16 @@ export function WorldTalk({
           </div>
         )}
 
-        <div className="h-72 overflow-y-auto space-y-2 rounded-xl bg-slate-50 dark:bg-slate-950 p-3" aria-live="polite">
+        <div className="h-64 overflow-y-auto space-y-2 rounded-xl bg-slate-50 dark:bg-slate-950 p-3" aria-live="polite">
           {!lines.length && status !== 'error' && <p className="text-sm text-slate-400">The conversation will appear here.</p>}
           {lines.map((l) => (
             <div key={l.id} className={`flex ${l.speaker === 'you' ? 'justify-end' : 'justify-start'}`}>
               <p
                 lang="ja"
                 className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                  l.speaker === 'you' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
+                  l.speaker === 'you'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
                 }`}
               >
                 {l.text}
@@ -248,6 +416,63 @@ export function WorldTalk({
           ))}
           <div ref={logEndRef} />
         </div>
+
+        {/* 生徒の番: 録音 → 確かめる → 送る */}
+        {status === 'live' && (
+          <div className="rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-3 space-y-2">
+            {mic === 'confirm' ? (
+              <>
+                <p className="text-xs font-bold text-slate-500">Is this what you said?</p>
+                <p lang="ja" className="text-lg font-bold text-slate-900 dark:text-white bg-indigo-50 dark:bg-slate-800 rounded-lg px-3 py-2">
+                  {heard}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={send}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer"
+                  >
+                    ✅ Yes, send (Enter)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={startRecording}
+                    className="px-4 py-2 rounded-xl border-2 border-slate-300 text-slate-700 dark:text-slate-200 font-bold cursor-pointer"
+                  >
+                    🔁 Record again (Space)
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-wrap items-center gap-3">
+                {mic === 'recording' ? (
+                  <button
+                    type="button"
+                    onClick={stopRecording}
+                    className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer animate-pulse"
+                  >
+                    ⏹ Stop (Space)
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startRecording}
+                    disabled={!yourTurn || mic === 'transcribing'}
+                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    🎤 Record (Space)
+                  </button>
+                )}
+                <p className="text-xs text-slate-500">
+                  {mic === 'recording' && '🔴 Recording… press Stop when you finish.'}
+                  {mic === 'transcribing' && 'Turning your voice into text…'}
+                  {mic === 'idle' && (yourTurn ? 'Speak, then check the text before you send it.' : 'Please wait for the clerk.')}
+                </p>
+              </div>
+            )}
+            {micNote && <p className="text-sm text-rose-600">{micNote}</p>}
+          </div>
+        )}
 
         <div className="flex justify-end gap-2">
           {status === 'live' || status === 'connecting' ? (

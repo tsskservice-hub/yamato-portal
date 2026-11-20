@@ -340,7 +340,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       ? String(settings.image_retention_days)
       : 'none';
 
-  // 語彙ドリルの語数の制限（31_class_vocab_limits.sql）。SQL の前は読めないので「まだ使えない」と表示する
+  // 語彙ドリルの語数の制限（56_class_vocab_limits.sql）。SQL の前は読めないので「まだ使えない」と表示する
   const [vocabDefaultRes, vocabLessonRes, vocabStudentRes] = await Promise.all([
     admin.from('edu_classes').select('vocab_words_per_mode').eq('id', selected.id).maybeSingle(),
     admin.from('edu_class_lesson_settings').select('lesson_id, vocab_words_per_mode').eq('class_id', selected.id),
@@ -593,7 +593,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const studentId = String(form.get('studentId') ?? '');
     await admin.from('edu_class_members').delete().eq('class_id', cls.id).eq('user_id', studentId).eq('role', 'student');
     await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
-    // 生徒ごとの語彙ドリルの設定も消す（SQL 31 の前は表が無いが、エラーは無視してよい）
+    // 生徒ごとの語彙ドリルの設定も消す（SQL 56 の前は表が無いが、エラーは無視してよい）
     await admin.from('edu_class_student_settings').delete().eq('class_id', cls.id).eq('user_id', studentId);
     // このクラスで「選んだ生徒」に出していた宿題・課題の対象からも外す（SQL 42 の前は表が無いが、エラーは無視してよい）
     const { data: classHw } = await admin.from('edu_homework').select('id').eq('class_id', cls.id);

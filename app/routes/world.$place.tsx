@@ -105,7 +105,7 @@ export default function WorldPlacePage() {
                 </div>
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm text-slate-600 dark:text-slate-300">
                   <p className="font-bold text-slate-900 dark:text-white mb-1">🕹️ How to play</p>
-                  <p>Walk with the arrow keys (or W A S D), or tap the floor. Go to the green circle in front of the {place.npc.name.toLowerCase()} and press “Talk” (or E). Speak in Japanese — the menu and useful phrases will be on screen.</p>
+                  <p>Walk with the arrow keys (or W A S D), or tap the floor. Go to the green circle in front of the {place.npc.name.toLowerCase()} and press “Talk” (or E). On your turn, press “Record” (Space), speak in Japanese and press “Stop”. Check the text, then send it (Enter) or record again. The menu and useful phrases will be on screen.</p>
                 </div>
               </div>
             </>
@@ -127,7 +127,7 @@ export default function WorldPlacePage() {
                 The conversation lasts up to <b>{place.minutes} minutes</b> and uses <b>{CREDIT_COSTS.worldTalk3} credits</b>.
               </li>
               <li>Your browser will ask to use the microphone. No camera is used.</li>
-              <li>Speak in Japanese. What you say is shown on screen but not saved.</li>
+              <li>Record what you want to say in Japanese, check the text, then send it. What you say is shown on screen but not saved.</li>
             </ul>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setConfirming(false)} className="px-4 py-2 rounded-xl border border-slate-300 font-bold cursor-pointer">

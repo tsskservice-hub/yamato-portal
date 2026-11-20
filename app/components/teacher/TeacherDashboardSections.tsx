@@ -57,7 +57,7 @@ export type DashboardData = {
   retention: string;
   /**
    * 語彙ドリルで 1 つのモードに出す語の数の上限（null = 制限なし）
-   * available: 31_class_vocab_limits.sql を実行済みか / classDefault: 全レッスン一括 / lessons: レッスンごと（一括より優先）
+   * available: 56_class_vocab_limits.sql を実行済みか / classDefault: 全レッスン一括 / lessons: レッスンごと（一括より優先）
    * students: 生徒ごと（いちばん優先。全レッスンに効く）
    */
   vocabLimits: {

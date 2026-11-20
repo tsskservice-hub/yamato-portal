@@ -13,7 +13,7 @@ set data = data || $json$[
     "id": "faq_036",
     "category": "About Our Learning Content",
     "question": "Are the pictures and illustrations on the portal made by AI?",
-    "answer": "Some of them are. The portal uses a mix of photos we took ourselves, stock photos used under their licence terms, public-domain artworks such as ukiyo-e prints, and illustrations created with AI tools (for example, some of the pictures in the class live game). Every picture is chosen and checked by a teacher before it is used.<br><br>AI-made illustrations are used to make learning more fun. They are not historical records, so details such as clothing, buildings or objects may not be exactly accurate. Pictures that teachers upload themselves (for example, for a class jigsaw) are the responsibility of the teacher who uploads them."
+    "answer": "Some of them are. The portal uses a mix of photos we took ourselves, stock photos used under their licence terms, public-domain artworks such as ukiyo-e prints, and illustrations created with AI tools (for example, some of the pictures in the class live game). Every picture is chosen and checked by a teacher before it is used.<br><br>AI-made illustrations are used to make learning more fun. They are not historical records, so details such as clothing, buildings or objects may not be exactly accurate."
   }
 ]$json$::jsonb,
     updated_at = now()

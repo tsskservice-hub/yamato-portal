@@ -1,6 +1,6 @@
 /**
  * @file lesson-settings.server.ts
- * @description 先生がクラスに設定したレッスンのタスクの設定（サーバー専用。31_class_vocab_limits.sql）
+ * @description 先生がクラスに設定したレッスンのタスクの設定（サーバー専用。56_class_vocab_limits.sql）
  *
  * 今あるもの：語彙ドリルで 1 つのモードに出す語の数の上限（vocabWordsPerMode）
  *  - 初期値は制限なし（null＝そのレッスンの語を全部出す）
@@ -8,7 +8,7 @@
  *            ＞ クラスの全レッスン一括の設定（edu_classes.vocab_words_per_mode）＞ 制限なし
  *  - 生徒が複数のクラスに入っている場合は、いちばん小さい上限を使う
  *  - クラスに入っていない人（個人の学習者・先生）は制限なし
- * DB の読み込みに失敗したとき・SQL 31 を実行する前は、制限なしにする（学習が止まらないように）
+ * DB の読み込みに失敗したとき・SQL 56 を実行する前は、制限なしにする（学習が止まらないように）
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -55,7 +55,7 @@ export async function getLessonTaskSettingsForUser(
       .eq('user_id', userId),
   ]);
   if (classRes.error || lessonRes.error || studentRes.error) {
-    // SQL 31 の前は列・表が無いのでここに来る
+    // SQL 56 の前は列・表が無いのでここに来る
     console.warn(
       '[lesson-settings] settings query failed:',
       classRes.error?.message ?? lessonRes.error?.message ?? studentRes.error?.message
