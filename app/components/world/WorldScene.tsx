@@ -43,7 +43,8 @@ export function WorldScene({
   nickname: string;
   /** 会話中は動けない */
   disabled: boolean;
-  onTalk: () => void;
+  /** AI のキャラクターに話しかける。無いとき（Yamato Town の交流だけの画面）は話しかける目印・ボタンを出さない */
+  onTalk?: () => void;
   /** 今の位置とアバター（ページが読む。「みんなで」につなぐときに使う） */
   stateRef?: React.MutableRefObject<{ x: number; y: number; avatar: number }>;
   onMove?: (p: Point) => void;
@@ -72,7 +73,7 @@ export function WorldScene({
   posRef.current = pos;
   const sceneRef = useRef<HTMLDivElement>(null);
 
-  const near = Math.hypot(pos.x - place.npc.talkX, pos.y - place.npc.talkY) < TALK_DISTANCE;
+  const near = Boolean(onTalk) && Math.hypot(pos.x - place.npc.talkX, pos.y - place.npc.talkY) < TALK_DISTANCE;
 
   // 動かす（キーと、タップした場所へ歩く）
   useEffect(() => {
@@ -121,7 +122,7 @@ export function WorldScene({
         keys.current.add(k);
         e.preventDefault();
       }
-      if ((k === 'enter' || k === 'e') && !disabled) {
+      if ((k === 'enter' || k === 'e') && !disabled && onTalk) {
         const p = posRef.current;
         if (Math.hypot(p.x - place.npc.talkX, p.y - place.npc.talkY) < TALK_DISTANCE) onTalk();
       }
@@ -178,12 +179,12 @@ export function WorldScene({
         ))}
 
         {/* 話しかける場所の目印 */}
-        <div
+        {onTalk && <div
           className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed pointer-events-none transition ${
             near ? 'border-emerald-500 bg-emerald-300/30' : 'border-amber-600/40'
           }`}
           style={{ left: `${place.npc.talkX}%`, top: `${place.npc.talkY}%`, width: '9%', aspectRatio: '1' }}
-        />
+        />}
 
         {/* AI のキャラクター */}
         <div
@@ -258,14 +259,14 @@ export function WorldScene({
             </button>
           ))}
         </div>
-        <button
+        {onTalk && <button
           type="button"
           onClick={onTalk}
           disabled={!near || disabled}
           className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold disabled:opacity-40 cursor-pointer"
         >
           {near ? `🎤 Talk to the ${place.npc.name.toLowerCase()}` : `Walk to the ${place.npc.name.toLowerCase()} to talk`}
-        </button>
+        </button>}
       </div>
     </div>
   );

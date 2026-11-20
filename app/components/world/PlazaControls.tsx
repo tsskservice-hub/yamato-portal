@@ -123,7 +123,7 @@ export function PlazaRulesModal({ onAgree, onCancel }: { onAgree: () => Promise<
         {error && <p className="text-sm text-rose-600">{error}</p>}
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onCancel} className="px-4 py-2 rounded-xl border border-slate-300 font-bold cursor-pointer">
-            Practise alone
+            Not now
           </button>
           <button
             type="button"

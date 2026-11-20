@@ -21,7 +21,7 @@ export type PlazaBubble = { id: number; text: string; stamp: boolean };
 export const PLAZA_CLOSED_MESSAGES: Record<string, string> = {
   LOGIN_REQUIRED: 'Please log in to use Together mode.',
   SCHOOL_ACCOUNT:
-    'Together mode is only for personal accounts. Teacher accounts and students in a school class can practise alone instead.',
+    'Together mode is only for personal accounts. Teacher accounts and students in a school class can use the Speaking Tasks instead.',
   SUSPENDED: 'You cannot use Together mode at the moment because of reports from other users.',
   ROOM_FULL: 'The shop is full right now. Please try again in a few minutes.',
   FULL: 'The shop is full right now. Please try again in a few minutes.',

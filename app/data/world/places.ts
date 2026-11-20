@@ -120,4 +120,12 @@ export const WORLD_PLACES: WorldPlace[] = [
   },
 ];
 
+/** これから作る場所（一覧に「Coming soon」で出す。Speaking Tasks と Yamato Town の両方で使う） */
+export const WORLD_PLACES_COMING_SOON = [
+  { emoji: '🏪', title: 'Convenience store', titleJa: 'コンビニ' },
+  { emoji: '🚏', title: 'Bus stop', titleJa: 'バスてい' },
+  { emoji: '🏫', title: 'School', titleJa: 'がっこう' },
+  { emoji: '☕', title: 'Café', titleJa: 'カフェ' },
+];
+
 export const findWorldPlace = (id: string | undefined) => WORLD_PLACES.find((p) => p.id === id) ?? null;
