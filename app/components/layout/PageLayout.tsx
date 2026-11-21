@@ -285,8 +285,14 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
 
   const resolvedNickname = nickname && nickname.trim() !== "" ? nickname : "My friend";
 
-  const publicPaths = ["/", "/privacy", "/terms", "/disclaimer", "/prices", "/faq", "/contact"];
-  const isPublicPage = publicPaths.includes(location.pathname);
+  // ログインしなくても開けるページ。法律のページ（規約・プライバシー・免責・その一覧）と About Us は、
+  // 登録や支払いの前に読めないといけない（2026-11-22）
+  const publicPaths = [
+    "/", "/privacy", "/terms", "/disclaimer", "/prices", "/faq", "/contact", "/about",
+    "/legal", "/legal/terms", "/legal/privacy", "/legal/disclaimer",
+  ];
+  const normalizedPath = location.pathname.length > 1 ? location.pathname.replace(/\/+$/, "") : location.pathname;
+  const isPublicPage = publicPaths.includes(normalizedPath);
 
   const shouldRequireAuth = requireAuth !== undefined 
     ? requireAuth 
